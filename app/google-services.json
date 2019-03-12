@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "122431658736",
+    "firebase_url": "https://pro-demo-229414.firebaseio.com",
+    "project_id": "pro-demo-229414",
+    "storage_bucket": "pro-demo-229414.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122431658736:android:9701feb58d0de92f",
+        "android_client_info": {
+          "package_name": "com.inscripts.cometchatpulse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122431658736-850hjj22tfu85s0kskhvgbaej5ajoi0k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.inscripts.cometchatpulse",
+            "certificate_hash": "b7ac951dadc69f508d5964100060ac97e6dfd595"
+          }
+        },
+        {
+          "client_id": "122431658736-ab8npvt0hi9kb3fphce4v3546j5eq8m5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZQBGyUgawKhekPGvys_KQzKBDpcJE3BE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122431658736-ab8npvt0hi9kb3fphce4v3546j5eq8m5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

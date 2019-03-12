@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Activities.CallActivity">
+
+
+    <data>
+
+        <variable
+            name="image"
+            type="String"/>
+
+        <variable
+            name="name"
+            type="String"/>
+
+    </data>
+    <RelativeLayout
+        android:id="@+id/main_call_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
+    <ImageView
+        android:id="@+id/user_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.inscripts.cometchatpulse.CustomView.CircleImageView
+            android:layout_width="100dp"
+            android:id="@+id/circular_userPic"
+            android:layout_marginTop="48dp"
+            setUserImage="@{image}"
+            tools:src="@tools:sample/avatars"
+            android:layout_centerHorizontal="true"
+            android:layout_height="100dp" />
+
+
+        <TextView
+            android:layout_below="@id/circular_userPic"
+            android:id="@+id/tvUserName"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:text="@{name}"
+            tools:text="@tools:sample/full_names"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvCallText"
+            android:layout_below="@id/tvUserName"
+            android:layout_marginTop="16dp"
+            tools:text="Incoming Call"
+            android:textSize="@dimen/title_size"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/hangUp"
+            android:layout_width="wrap_content"
+            app:fabSize="normal"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/tvUserName"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="-56dp"
+            android:layout_marginBottom="56dp"
+            android:backgroundTint="@color/red_600"
+            android:src="@drawable/ic_call_end_24dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/acceptCall"
+            android:layout_width="wrap_content"
+            app:fabSize="normal"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/tvUserName"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="-56dp"
+            android:layout_marginBottom="56dp"
+            android:backgroundTint="@color/green_600"
+            android:src="@drawable/ic_call_24dp" />
+
+    </RelativeLayout>
+
+    </RelativeLayout>
+
+</layout>
