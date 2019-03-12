@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="message"
+            type="com.cometchat.pro.models.MediaMessage" />
+
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+
+        <View
+            android:id="@+id/fileContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/cc_custom_right_bubble"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/rightGuideline"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/rightGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.4" />
+
+
+        <com.inscripts.cometchatpulse.CustomView.CircleImageView
+            android:id="@+id/messageStatus"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            setDeliveryStatus="@{1}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/timeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/small_text"
+            setTimeStamp="@{message.sentAt}"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/fileContainer"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="10:00 AM" />
+
+
+        <TextView
+            android:id="@+id/fileType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/small_text"
+            app:layout_constraintBottom_toBottomOf="@id/fileContainer"
+            app:layout_constraintEnd_toEndOf="@id/fileContainer"
+            app:layout_constraintTop_toBottomOf="@id/fileName"
+            tools:text="PDF" />
+
+        <TextView
+            android:id="@+id/fileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:drawableStart="@drawable/ic_insert_drive_file_24dp"
+            android:drawablePadding="5dp"
+            android:ellipsize="end"
+            android:maxWidth="120dp"
+            android:maxLines="1"
+            android:minWidth="50dp"
+            android:textColor="@color/secondaryTextColor"
+            android:textSize="@dimen/title_size"
+            app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+            app:layout_constraintEnd_toEndOf="@+id/fileContainer"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="@+id/fileContainer"
+            tools:text="PDF" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

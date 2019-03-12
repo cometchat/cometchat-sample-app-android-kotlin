@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">CometChat Pro</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="type_your_message">Type your message</string>
+
+
+    <string-array name="group_type">
+        <item>Select Group Type</item>
+        <item>public</item>
+        <item>private</item>
+        <item>password</item>
+    </string-array>
+
+
+    <string name="today_last_seen">Last seen today at </string>
+    <string name="slide_to_cancel">Slide to cancel</string>
+    <string name="password">password</string>
+    <string name="group">group</string>
+    <string name="image">image</string>
+    <string name="type_video">video</string>
+    <string name="type_image">image</string>
+    <string name="yesterday_last_seen">Last seen yesterday at </string>
+    <string name="popup_gallary">Gallary</string>
+    <string name="popup_camera">Camera</string>
+    <string name="video">Video</string>
+    <string name="popup_audio">Audio</string>
+    <string name="popup_document">Document</string>
+    <string name="user">user</string>
+    <string name="joining">Joining</string>
+    <string name="group_password">Group Password</string>
+    <string name="cancel">Cancel</string>
+    <string name="accept">Ok</string>
+    <string name="enter">Enter</string>
+    <string name="warning">Can Not Join Group No Internet</string>
+    <string name="incorrect_password">Incorrect Password</string>
+    <string name="members">Members</string>
+    <string name="ban_members">Ban Members</string>
+    <string name="title_activity_location">Map</string>
+    <string name="group_member">Group Members</string>
+    <string name="group_detail">Group Details</string>
+
+</resources>
