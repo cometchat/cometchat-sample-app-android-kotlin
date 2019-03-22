@@ -33,7 +33,7 @@ class ContactListAdapter(val context: Context?) : RecyclerView.Adapter<ContactVi
 
     override fun onBindViewHolder(contactViewHolder: ContactViewHolder, p1: Int) {
 
-        val user=userList.values.toMutableList().get(p1)
+        val user= userList.values.toMutableList()[p1]
 
         contactViewHolder.binding.user=user
         contactViewHolder.binding.childClick=context as ChildClickListener

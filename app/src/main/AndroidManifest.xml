@@ -66,12 +66,10 @@
             </intent-filter>
         </service>
 
-        <activity
-            android:name=".Activities.LocationActivity"
-            android:launchMode="singleTop"
-            android:label="@string/title_activity_location"></activity>
         <activity android:name=".Activities.LoginActivity"
-            >
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateVisible|adjustResize"
+            android:label="@string/title_activity_location">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

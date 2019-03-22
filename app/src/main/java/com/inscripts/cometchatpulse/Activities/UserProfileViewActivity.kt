@@ -86,7 +86,7 @@ class UserProfileViewActivity : AppCompatActivity(), View.OnClickListener {
             binding.voiceCall.visibility = View.GONE
             binding.videoCall.visibility = View.GONE
             binding.cardViewCallContainer.visibility = View.GONE
-            binding.status="online"
+            binding.status=getString(R.string.online)
 
         }
          CommonUtil.setStatusBarColor(this)
@@ -132,7 +132,7 @@ class UserProfileViewActivity : AppCompatActivity(), View.OnClickListener {
                 uid?.let { oneToOneViewModel.initCall(this, it, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_AUDIO) }
 
             } else {
-                Toast.makeText(this, "Voice call will behave inappropriately ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.voice_call_warning), Toast.LENGTH_SHORT).show()
             }
             StringContract.RequestCode.VIDEO_CALL -> if (grantResults.size > 0 && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
@@ -140,7 +140,7 @@ class UserProfileViewActivity : AppCompatActivity(), View.OnClickListener {
                 uid?.let { oneToOneViewModel.initCall(this, it, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_VIDEO) }
             } else {
 
-                Toast.makeText(this, "Video call will behave inappropriately ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.video_call_warning), Toast.LENGTH_SHORT).show()
             }
         }
     }

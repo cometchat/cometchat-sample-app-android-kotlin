@@ -18,12 +18,16 @@ import android.text.SpannableString
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.Toast
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.google.firebase.messaging.FirebaseMessaging
+import com.inscripts.cometchatpulse.Adapter.AutoCompleteAdapter
+import com.inscripts.cometchatpulse.Fcm.FirebaseService
+import com.inscripts.cometchatpulse.Pojo.GroupOption
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -64,6 +68,21 @@ public class LoginActivity : AppCompatActivity() {
             binding.btLogin.typeface=StringContract.Font.status
             val drawableUid=(binding.btLogin.background)
 
+            var autoAdapter=AutoCompleteAdapter(this,R.layout.sample_user_item,getSampleUserList())
+            binding.sampleList.adapter=autoAdapter
+
+//            binding.editTextUid.onItemClickListener =
+//                    AdapterView.OnItemClickListener { parent, view, position, id ->
+//                        binding.editTextUid.setText(getSampleUserList()[position].id?.trim())
+//                    }
+
+            binding.sampleList.setOnItemClickListener{
+                parent, view, position, id ->
+                binding.editTextUid.setText(getSampleUserList()[position].id)
+                getSampleUserList()[position].id?.trim()?.let { onLoginClick(it) }
+            }
+
+
             drawableUid.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
           for (drawable:Drawable? in binding.editTextUid.compoundDrawables) {
               if (drawable != null) {
@@ -77,42 +96,40 @@ public class LoginActivity : AppCompatActivity() {
 
     }
 
+     fun getSampleUserList():MutableList<GroupOption>{
+         val sampleList:MutableList<GroupOption> = arrayListOf()
+
+         sampleList.add(GroupOption("Iron Man",getDrawable(R.drawable.ironman),"superhero1"))
+         sampleList.add(GroupOption("Captain America",getDrawable(R.drawable.captainamerica),"superhero2"))
+         sampleList.add(GroupOption("SpiderMan",getDrawable(R.drawable.spiderman),"superhero3"))
+         sampleList.add(GroupOption("Wolverine",getDrawable(R.drawable.wolverine),"superhero4"))
+
+         return sampleList
+     }
+
     fun onLoginClick(uid:String){
 
         Log.d("Login", uid)
         binding.progressHorizontal.visibility=View.VISIBLE
         kotlin.run {
-            Toast.makeText(this@LoginActivity,"Please Wait",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@LoginActivity,getString(R.string.please_wait),Toast.LENGTH_SHORT).show()
             CometChat.login(uid.trim(), StringContract.AppDetails.API_KEY, object : CometChat.CallbackListener<User>() {
                 override fun onSuccess(p0: User?) {
                     startActivity()
+                     FirebaseService.subscribeToUser(p0?.uid)
+                    Log.d(TAG,"login: ${StringContract.AppDetails.APP_ID}_user_${p0?.uid}")
 
-                    FirebaseMessaging.getInstance().subscribeToTopic("user_${p0?.uid}")
                 }
 
                 override fun onError(p0: CometChatException?) {
                     Toast.makeText(context, p0?.message, Toast.LENGTH_SHORT).show()
                      binding.progressHorizontal.visibility=View.GONE
-                    Log.d(TAG,"onError:Login "+p0?.message)
-
+                     Log.d(TAG,"onError:Login "+p0?.message)
 
                 }
 
             })
 
-//            CometChat.login("superhero11_3b34bb32bfc7f3a930c829b75d6ffeb579efbd0e",object :CometChat.CallbackListener<User>(){
-//                override fun onSuccess(p0: User?) {
-//                   Log.d(TAG,"onSuccess: "+p0.toString())
-//                    binding.progressHorizontal.visibility=View.GONE
-//                    startActivity()
-//                }
-//
-//                override fun onError(p0: CometChatException?) {
-//                   Log.d(TAG,"onError: "+p0?.message)
-//                    binding.progressHorizontal.visibility=View.GONE
-//                }
-//
-//            })
         }
 
 

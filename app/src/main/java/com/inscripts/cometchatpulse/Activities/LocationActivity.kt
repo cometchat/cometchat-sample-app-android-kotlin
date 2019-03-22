@@ -209,7 +209,7 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
 
                 } else {
 
-                    Toast.makeText(this, "Location permission denied, can't fetch location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.location_permission), Toast.LENGTH_SHORT).show()
                 }
 
 

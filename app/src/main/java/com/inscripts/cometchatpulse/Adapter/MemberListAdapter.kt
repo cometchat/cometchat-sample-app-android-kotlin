@@ -1,6 +1,7 @@
 package com.inscripts.cometchatpulse.Adapter
 
 
+import android.content.Context
 import android.databinding.DataBindingUtil
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
@@ -17,9 +18,10 @@ import com.inscripts.cometchatpulse.ViewHolder.GroupMemberHolder
 import com.inscripts.cometchatpulse.databinding.ContactItemBinding
 import com.inscripts.cometchatpulse.databinding.GroupMemberItemBinding
 
-class MemberListAdapter(val ownerId:String, val resId:Int,val listener: OnClickEvent): RecyclerView.Adapter<GroupMemberHolder>() {
+class MemberListAdapter(val context: Context?,val ownerId:String,
+                        val resId:Int,val listener: OnClickEvent): RecyclerView.Adapter<GroupMemberHolder>() {
 
-    private var groupMemberList:MutableList<GroupMember> = mutableListOf()
+    private var groupMemberList:MutableMap<String,GroupMember> = mutableMapOf()
 
     private  var onClickevent:OnClickEvent = listener
 
@@ -36,29 +38,29 @@ class MemberListAdapter(val ownerId:String, val resId:Int,val listener: OnClickE
 
     override fun onBindViewHolder(p0: GroupMemberHolder, p1: Int) {
 
-       val groupMember:GroupMember=groupMemberList.get(p1)
+       val groupMember:GroupMember=groupMemberList.values.toMutableList()[p1]
 
-        p0.binding.memeber=groupMember
+        p0.binding.member=groupMember
 
         p0.binding.textviewUserName.typeface=StringContract.Font.name
 
         p0.binding.textviewUserStatus.typeface=StringContract.Font.status
 
-        p0.binding.root.setTag(R.string.user,groupMember.user)
+        p0.binding.root.setTag(R.string.user,groupMember)
 
         p0.binding.executePendingBindings()
 
         if (groupMember.uid.equals(ownerId))
-            p0.binding.textviewUserName.text="You"
+            p0.binding.textviewUserName.text=context?.getString(R.string.you)
 
 
         p0.itemView.setOnClickListener {
-            onClickevent.onClickRl(p0.itemView,groupMember.user)
+            onClickevent.onClickRl(p0.itemView,groupMember)
         }
 
     }
 
-    internal fun setMemberList(memberlist: MutableList<GroupMember>) {
+    internal fun setMemberList(memberlist: MutableMap<String,GroupMember>) {
        this.groupMemberList=memberlist
         notifyDataSetChanged()
 

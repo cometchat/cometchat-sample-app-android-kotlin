@@ -31,7 +31,7 @@ fun setTimeStamp(timeView: TextView, timeLong: Long) {
 
     val dt = java.util.Date(timeLong * 1000)
     val time = Timestamp(dt.getTime())
-    Logger.debug("timestamp", time.toString() + "rime" + dt.getDate() + " inside")
+
     val str = DateUtil.getMessageTime(time.toString(), "hh:mm a")
     timeView.setText(str)
 }

@@ -81,8 +81,7 @@ dependencies {
 
 
     //cometchat sdk
-    implementation 'com.cometchat:pro-android-chat-sdk:1.2.0'
-
+    implementation 'com.cometchat:pro-android-chat-sdk:1.3.0'
 
     implementation 'com.google.firebase:firebase-core:16.+'
 

@@ -160,23 +160,14 @@ class FileUtil {
             val audioDir = File( Environment.getExternalStorageDirectory().toString() + "/" +
                     context?.resources?.getString(R.string.app_name) + "/" + type + "/")
 
-            if (audioDir.isDirectory) {
-                return true
-            }
-
-            return false
+            return audioDir.isDirectory
         }
 
         fun checkFileExistence(path: String): Boolean {
 
             val filepath = File(path)
 
-            if (filepath.exists()) {
-
-                return true
-            }
-
-            return false
+            return filepath.exists()
         }
 
         fun getPath(context: Context, folder: String): String {

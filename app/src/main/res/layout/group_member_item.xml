@@ -8,7 +8,7 @@
     <data>
 
         <variable
-            name="memeber"
+            name="member"
             type="com.cometchat.pro.models.GroupMember"/>
 
     </data>
@@ -27,7 +27,7 @@
         android:id="@+id/imageViewUserAvatar"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        setUserImage="@{memeber.user.avatar}"
+        setUserImage="@{member.avatar}"
         android:layout_marginStart="16dp"
         android:layout_centerVertical="true"
         tools:src="@tools:sample/avatars" />
@@ -41,7 +41,7 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif"
         android:maxLines="1"
-        android:text="@{memeber.user.name}"
+        android:text="@{member.name}"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
@@ -65,7 +65,7 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif"
         android:singleLine="true"
-        android:text="@{memeber.scope}"
+        android:text="@{member.scope}"
         android:textColor="@color/primaryTextColor"
         android:textSize="12sp" />
 

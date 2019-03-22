@@ -16,6 +16,7 @@ import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.CallActivity
 import com.inscripts.cometchatpulse.Activities.LocationActivity
 import com.inscripts.cometchatpulse.CometChatPro
+import com.inscripts.cometchatpulse.Fragment.OneToOneFragment
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 
 class MessageRepository {
@@ -71,7 +72,7 @@ class MessageRepository {
                 })
 
             } else {
-                messageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
+                messageRequest?.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
                     override fun onError(p0: CometChatException?) {
 
                     }
@@ -86,6 +87,7 @@ class MessageRepository {
                     }
 
                 })
+
             }
         } catch (e: NullPointerException) {
             e.printStackTrace()
@@ -118,7 +120,6 @@ class MessageRepository {
                 override fun onSuccess(p0: List<BaseMessage>?) {
                     p0?.let { mutableGroupMessageList.addAll(0, it) }
                     groupMessageList.value = mutableGroupMessageList
-
                 }
 
                 override fun onError(p0: CometChatException?) {
@@ -155,7 +156,7 @@ class MessageRepository {
             }
 
             override fun onError(p0: CometChatException?) {
-                Toast.makeText(CometChatPro.applicationContext(), p0?.details, Toast.LENGTH_SHORT).show()
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
 
             }
 
@@ -211,17 +212,24 @@ class MessageRepository {
             override fun onTextMessageReceived(p0: TextMessage?) {
                 if (p0 != null) {
 
-//                    if (!ownerId.equals(p0.sender.uid)) {
+
+                    Log.d(TAG, "onTextMessageReceived:   ${p0}")
 
                     if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-                        mutableOneToOneMessageList.add(p0)
-                        onetoOneMessageList.value = mutableOneToOneMessageList
+                        try {
+                            if (OneToOneFragment.currentId!!.equals(p0.sender.uid)) {
 
+                                mutableOneToOneMessageList.add(p0)
+                                onetoOneMessageList.value = mutableOneToOneMessageList
+                            }
+                        } catch (e: NullPointerException) {
+                            e.printStackTrace()
+                        }
                     } else {
                         mutableGroupMessageList.add(p0)
                         groupMessageList.value = mutableGroupMessageList
+
                     }
-//                    }
 
 
                 }
@@ -230,17 +238,15 @@ class MessageRepository {
             override fun onMediaMessageReceived(p0: MediaMessage?) {
                 if (p0 != null) {
 
-                    if (!ownerId.equals(p0.sender.uid)) {
+                    Log.d(TAG, "onMediaMessageReceived: ${p0}")
+                    if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
 
-                        if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                        mutableOneToOneMessageList.add(p0)
+                        onetoOneMessageList.value = mutableOneToOneMessageList
 
-                            mutableOneToOneMessageList.add(p0)
-                            onetoOneMessageList.value = mutableOneToOneMessageList
-
-                        } else {
-                            mutableGroupMessageList.add(p0)
-                            groupMessageList.value = mutableGroupMessageList
-                        }
+                    } else {
+                        mutableGroupMessageList.add(p0)
+                        groupMessageList.value = mutableGroupMessageList
                     }
                 }
             }
@@ -272,6 +278,8 @@ class MessageRepository {
             }
 
         })
+
+
     }
 
 

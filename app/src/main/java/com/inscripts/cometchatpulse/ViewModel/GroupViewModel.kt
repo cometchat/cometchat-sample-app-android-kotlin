@@ -27,7 +27,7 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
 
     val groupList:MutableLiveData<MutableList<Group>>
 
-    val groupMemberList:MutableLiveData<MutableList<GroupMember>>
+    val groupMemberList:MutableLiveData<MutableMap<String,GroupMember>>
 
 
 
@@ -36,7 +36,6 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
         messageRepository= MessageRepository()
         groupList=groupRepository.groupList
         groupMemberList=groupRepository.groupMemberLiveData
-
     }
 
     fun fetchGroups(LIMIT:Int,shimmerFrameLayout: ShimmerFrameLayout?){

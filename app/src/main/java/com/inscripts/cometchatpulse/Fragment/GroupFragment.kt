@@ -104,6 +104,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
     private var mode: ActionMode? = null
 
+    private var userScope:String?=null
+
     companion object {
 
         var isReply: Boolean = false
@@ -124,6 +126,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         groupName = arguments?.getString(StringContract.IntentString.GROUP_NAME).toString()
 
         binding.name = arguments?.getString(StringContract.IntentString.GROUP_NAME)
+
+        userScope=arguments?.getString(StringContract.IntentString.USER_SCOPE)
 
         binding.icon = arguments?.getString(StringContract.IntentString.GROUP_ICON)
 
@@ -541,7 +545,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
                         arguments?.getString(StringContract.IntentString.GROUP_ICON))
                 groupDetailIntent.putExtra(StringContract.IntentString.GROUP_OWNER,
                         arguments?.getString(StringContract.IntentString.GROUP_OWNER))
-
+                groupDetailIntent.putExtra(StringContract.IntentString.USER_SCOPE,userScope)
                 groupDetailIntent.putExtra(StringContract.IntentString.GROUP_DESCRIPTION
                         , groupDescription)
 
@@ -634,6 +638,14 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
             } else {
                 showToast()
+            }
+
+            StringContract.RequestCode.FILE_WRITE -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                FileUtil.makeDirectory(context,CometChatConstants.MESSAGE_TYPE_AUDIO)
+            }
+            else{
+               showToast()
             }
 
         }
@@ -777,12 +789,12 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
     }
 
 
-    private fun setGroupMemberList(list: MutableList<GroupMember>, subtitle: TextView) {
+    private fun setGroupMemberList(list: MutableMap<String,GroupMember>, subtitle: TextView) {
         val builder = StringBuilder()
 
-        for (member in list) {
+        for (member in list.values) {
 
-            builder.append(member.user.name)
+            builder.append(member.name)
             builder.append(",")
 
         }
@@ -791,14 +803,12 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         subtitle.text = memeberList
     }
 
-
     override fun onResume() {
         super.onResume()
         Log.d(TAG,"onResume: ")
         groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
         groupChatViewModel.addGroupMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, CometChat.getLoggedInUser().uid)
     }
-
 
     override fun onPause() {
         super.onPause()

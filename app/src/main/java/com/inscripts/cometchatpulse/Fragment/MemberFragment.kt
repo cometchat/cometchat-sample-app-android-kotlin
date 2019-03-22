@@ -32,6 +32,7 @@ import android.graphics.PorterDuff
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.PopupMenu
 import com.cometchat.pro.constants.CometChatConstants
+import com.cometchat.pro.models.GroupMember
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Extensions.setTitleTypeface
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -61,6 +62,8 @@ class MemberFragment : Fragment() {
 
     private lateinit var member: User
 
+    private  var userScope:String?=null
+
     private lateinit var myView: View
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -72,6 +75,13 @@ class MemberFragment : Fragment() {
         guid = arguments?.getString(StringContract.IntentString.GROUP_ID).toString()
 
         ownerId = arguments?.getString(StringContract.IntentString.USER_ID).toString()
+
+        try {
+            userScope= arguments?.getString(StringContract.IntentString.USER_SCOPE)!!
+        }catch (e:NullPointerException){
+            e.printStackTrace()
+        }
+
 
         (activity as AppCompatActivity).setSupportActionBar(myView.member_toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -98,16 +108,20 @@ class MemberFragment : Fragment() {
         myView.rv_member.layoutManager = linearLayoutManager
         try {
 
-            memberListAdapter = MemberListAdapter(ownerId,R.layout.group_member_item, object : OnClickEvent {
+            memberListAdapter = MemberListAdapter(context,ownerId,R.layout.group_member_item, object : OnClickEvent {
                 override fun onClickRl(item: View, user: Any) {
 
-                    if (user is User) {
+                    if (user is GroupMember) {
                         member = user
-                        if (ownerId != user.getUid()) {
+                        if (ownerId != user.uid) {
 
                             val popup = context?.let { PopupMenu(it, item) }
                             //Inflating the Popup using xml file
-                            popup?.menuInflater?.inflate(R.menu.member_menu, popup.getMenu())
+
+                             if(userScope == CometChatConstants.SCOPE_ADMIN ||
+                                     userScope == CometChatConstants.SCOPE_MODERATOR) {
+                                 popup?.menuInflater?.inflate(R.menu.member_menu, popup.menu)
+
 
                             popup?.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
                                 override fun onMenuItemClick(p0: MenuItem?): Boolean {
@@ -141,6 +155,8 @@ class MemberFragment : Fragment() {
                             })
 
                             popup?.show()
+
+                             }
 //
                         }
                     }

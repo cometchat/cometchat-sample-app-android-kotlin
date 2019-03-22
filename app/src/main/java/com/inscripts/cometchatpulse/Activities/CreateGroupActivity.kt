@@ -51,7 +51,7 @@ class CreateGroupActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         setSupportActionBar(binding.createGroupToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        supportActionBar?.title="Create Group"
+        supportActionBar?.title=getString(R.string.create_group)
 
         CommonUtil.setStatusBarColor(this)
 
@@ -144,17 +144,17 @@ class CreateGroupActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             groupName = binding.editTextName.text?.toString()?.trim()
 
             if (guid.isNullOrEmpty()) {
-                binding.editTextGuid.setError("GUID can't be empty")
+                binding.editTextGuid.error = getString(R.string.guid_empty_warning)
 
             }
             else if (groupType?.equals(CometChatConstants.GROUP_TYPE_PASSWORD, ignoreCase = true)!!
                     && groupPassword.isNullOrEmpty()) {
-                binding.editTextPassword.setError("Password is mandatory")
+                binding.editTextPassword.error = getString(R.string.password_is_mandatory)
 
             }
-            else if (groupType?.equals("Select Group Type",ignoreCase = true)!!)
+            else if (groupType?.equals(getString(R.string.select_group_type),ignoreCase = true)!!)
             {
-                Toast.makeText(this,"Please select group type",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,getString(R.string.please_select_group_type),Toast.LENGTH_SHORT).show()
             }
 
             else if (guid != null && groupType != null && groupName != null) {

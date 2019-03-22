@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.inscripts.cometchatpulse.Adapter.GroupOptionAdapter
 import com.inscripts.cometchatpulse.Extensions.setTitleTypeface
@@ -39,12 +40,13 @@ class GroupDetailActivity : AppCompatActivity() {
 
     private lateinit var groupViewModel: GroupViewModel
 
+    private var userScope:String?=null
+
     private  var groupOwner:String?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_group_detail)
 
@@ -53,6 +55,8 @@ class GroupDetailActivity : AppCompatActivity() {
         groupOwner = intent?.getStringExtra(StringContract.IntentString.GROUP_OWNER)
 
         binding.groupName = intent?.getStringExtra(StringContract.IntentString.GROUP_NAME)
+
+        userScope=intent?.getStringExtra(StringContract.IntentString.USER_SCOPE)
 
         binding.groupIcon = intent?.getStringExtra(StringContract.IntentString.GROUP_ICON)
 
@@ -64,8 +68,6 @@ class GroupDetailActivity : AppCompatActivity() {
 
         binding.tvDescription.typeface=StringContract.Font.name
         binding.tvName.typeface=StringContract.Font.name
-
-
 
         groupViewModel = ViewModelProviders.of(this).get(GroupViewModel::class.java)
 
@@ -82,6 +84,7 @@ class GroupDetailActivity : AppCompatActivity() {
                             arguments = Bundle().apply {
                                 putString(StringContract.IntentString.GROUP_ID, groupId)
                                 putString(StringContract.IntentString.USER_ID, ownerUid)
+                                putString(StringContract.IntentString.USER_SCOPE,userScope)
                             }
                         }
                         supportFragmentManager.beginTransaction()
@@ -93,19 +96,19 @@ class GroupDetailActivity : AppCompatActivity() {
                             arguments = Bundle().apply {
                                 putString(StringContract.IntentString.GROUP_ID, groupId)
                                 putString(StringContract.IntentString.USER_ID, ownerUid)
+                                putString(StringContract.IntentString.USER_SCOPE,userScope)
                             }
                         }
                         supportFragmentManager.beginTransaction()
                                 .replace(R.id.group_frame, banMemberListFragment).addToBackStack(null).commit()
                     }
                     2 -> {
-                        showDialog("Are you sure want to leave ? "+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
-                                "Leave Group",position)
+                        showDialog(getString(R.string.leave_group_waring)+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
+                                getString(R.string.leave_group),position)
                     }
-
                     3 -> {
-                        showDialog("Are you sure want to delete ? "+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
-                                "Delete Group",position)
+                        showDialog(getString(R.string.delete_group_warning)+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
+                                getString(R.string.delete_group),position)
                     }
 
                 }
@@ -116,10 +119,9 @@ class GroupDetailActivity : AppCompatActivity() {
 
 
         setSupportActionBar(binding.toolbar)
-        supportActionBar!!.title="Group Details"
+        supportActionBar!!.title=getString(R.string.group_details)
         supportActionBar!!.elevation = 10f
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
 
         binding.toolbar.setTitleTypeface(StringContract.Font.title)
         binding.toolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
@@ -135,18 +137,16 @@ class GroupDetailActivity : AppCompatActivity() {
 
     }
 
-
     private fun GroupOptionItemList(): MutableList<GroupOption> {
 
-        groupOptionList.add(GroupOption("View Members", ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
-        groupOptionList.add(GroupOption("Unban Members", ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
-        groupOptionList.add(GroupOption("Leave Group", ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
-         if (ownerUid.equals(groupOwner)) {
-             groupOptionList.add(GroupOption("Delete Group", ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
+        groupOptionList.add(GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
+        groupOptionList.add(GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
+        groupOptionList.add(GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
+         if (userScope==CometChatConstants.SCOPE_ADMIN) {
+             groupOptionList.add(GroupOption(getString(R.string.delete_group), ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
          }
         return groupOptionList
     }
-
 
     fun showDialog(message: String, title: String, position: Int) {
         val builder = android.support.v7.app.AlertDialog.Builder(this)
@@ -154,9 +154,9 @@ class GroupDetailActivity : AppCompatActivity() {
 
                 .setMessage(message)
                 .setCancelable(true)
-                .setNegativeButton(CommonUtil.setTitle("Cancel", this)) {
-                    dialogInterface, i -> dialogInterface.dismiss() }
-                .setPositiveButton(CommonUtil.setTitle("Yes", this)) {
+                .setNegativeButton(CommonUtil.setTitle(getString(R.string.cancel), this)) {
+                 dialogInterface, i -> dialogInterface.dismiss() }
+                .setPositiveButton(CommonUtil.setTitle(getString(R.string.yes), this)) {
                     dialogInterface, i ->  when(position){
 
                     2->{
@@ -170,9 +170,6 @@ class GroupDetailActivity : AppCompatActivity() {
                 }.show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        return super.onCreateOptionsMenu(menu)
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 

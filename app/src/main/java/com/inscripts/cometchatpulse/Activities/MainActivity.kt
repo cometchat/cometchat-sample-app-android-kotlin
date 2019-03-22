@@ -29,6 +29,7 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
+import com.inscripts.cometchatpulse.Fcm.FirebaseService
 import com.inscripts.cometchatpulse.Fragment.ContactListFragment
 import com.inscripts.cometchatpulse.Fragment.GroupFragment
 import com.inscripts.cometchatpulse.Fragment.GroupListFragment
@@ -82,6 +83,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         groupChatViewModel = ViewModelProviders.of(this).get(GroupChatViewModel::class.java)
         oneToOneChatViewModel = ViewModelProviders.of(this).get(OnetoOneViewModel::class.java)
 
+        FirebaseService.clearMessageList()
 
         setSupportActionBar(toolbar)
         supportActionBar?.title = ""
@@ -105,7 +107,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         } else {
             toolbar_title.setTextColor(StringContract.Color.white)
         }
-        toolbar_title?.setText("Contact")
+        toolbar_title?.text = getString(R.string.contacts)
 
         if (frame_container_detail != null) {
 
@@ -222,7 +224,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         }
     }
 
-
     override fun OnChildClick(t: Any) {
 
 
@@ -259,6 +260,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 putString(StringContract.IntentString.GROUP_ICON, t.icon)
                 putString(StringContract.IntentString.GROUP_OWNER, t.owner)
                 putString(StringContract.IntentString.GROUP_DESCRIPTION, t.description)
+                putString(StringContract.IntentString.USER_SCOPE,t.scope)
             }
         }
         supportFragmentManager.beginTransaction()
@@ -391,6 +393,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     override fun onResume() {
         super.onResume()
         Log.d(TAG,"onResume: ")
+        FirebaseService.clearMessageList()
         groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
         oneToOneChatViewModel.addCallListener(this, TAG, null)
     }
@@ -415,7 +418,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
             R.id.menu_contacts -> {
                 fragment = ContactListFragment()
-                toolbar_title?.setText("Contacts")
+                toolbar_title?.text = getString(R.string.contacts)
                 position = R.id.menu_contacts
 
             }
@@ -423,7 +426,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             R.id.menu_group -> {
 
                 fragment = GroupListFragment()
-                toolbar_title?.setText("Groups")
+                toolbar_title?.text = getString(R.string.groups)
                 position = R.id.menu_group
 
             }

@@ -236,7 +236,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
             } catch (e: Exception) {
 
             }
-
         }
 
         if (baseMessage is Call) {
@@ -310,14 +309,12 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
             StringContract.ViewType.RIGHT_FILE_MESSAGE -> {
                 try {
-
                     val rightFileViewHolder = p0 as RightFileViewHolder
                     rightFileViewHolder.binding.message = baseMessage as MediaMessage
                     rightFileViewHolder.binding.fileContainer.background.setColorFilter(StringContract.Color.rightMessageColor,
                             PorterDuff.Mode.SRC_ATOP)
-                    val t = mediaFile?.substring(mediaFile.lastIndexOf("/"))?.split("_".toRegex())?.dropLastWhile({ it.isEmpty() })?.toTypedArray()
-                    rightFileViewHolder.binding.fileName.setText(t?.get(2))
-                    rightFileViewHolder.binding.fileType.setText(mediaFile?.substring(mediaFile.lastIndexOf(".") + 1))
+                    rightFileViewHolder.binding.fileName.text = baseMessage.attachment.fileName
+                    rightFileViewHolder.binding.fileType.text = baseMessage.attachment.fileExtension
                     rightFileViewHolder.binding.fileName.typeface = StringContract.Font.name
                     rightFileViewHolder.binding.fileType.typeface = StringContract.Font.name
                     rightFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
@@ -366,7 +363,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     if (baseMessage.metadata.has("senderUid")
                             && baseMessage.metadata.getString("senderUid").equals(ownerId)) {
 
-                        rightReplyMessageHolder.binding.tvNameReply.text = "You"
+                        rightReplyMessageHolder.binding.tvNameReply.text = context.getString(R.string.you)
 
                     } else {
                         rightReplyMessageHolder.binding.tvNameReply.text = baseMessage.metadata.getString("senderName");
@@ -388,22 +385,22 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                     .into(rightReplyMessageHolder.binding.ivReplyImage)
 
                             if (baseMessage.metadata.getString("type") == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                                rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Photo"
+                                rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.photo)
                             } else  {
-                                rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Video"
+                                rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.video)
                             }
 
                         }
                         baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_AUDIO) -> {
 
-                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Audio Message"
+                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.audio_message)
 
                             rightReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
 
                         }
                         baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_FILE) -> {
 
-                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = "File Message"
+                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.file_message)
 
                             rightReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
                         }
@@ -550,7 +547,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     if (baseMessage.metadata.has("senderUid")
                             && baseMessage.metadata.getString("senderUid").equals(ownerId)) {
 
-                        rightReplyMessageHolder.binding.tvNameReply.text = "You"
+                        rightReplyMessageHolder.binding.tvNameReply.text = context.getString(R.string.you)
                     } else {
                         rightReplyMessageHolder.binding.tvNameReply.text = baseMessage.metadata.getString("senderName");
                     }
@@ -570,20 +567,20 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 .into(rightReplyMessageHolder.binding.ivReplyImage)
 
                         if (baseMessage.metadata.getString("type") == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Photo"
+                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.photo)
                         } else  {
-                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Video"
+                            rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.video)
                         }
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
-                        rightReplyMessageHolder.binding.tvReplyTextMessage.text = "Audio Message"
+                        rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.audio_message)
 
                         rightReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
 
-                        rightReplyMessageHolder.binding.tvReplyTextMessage.text = "File Message"
+                        rightReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.file_message)
 
                         rightReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
 
@@ -611,7 +608,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     if (baseMessage.metadata.has("senderUid")
                             && baseMessage.metadata.getString("senderUid").equals(ownerId)) {
 
-                        leftReplyMessageHolder.binding.tvNameReply.text = "You"
+                        leftReplyMessageHolder.binding.tvNameReply.text = context.getString(R.string.you)
                     } else {
                         leftReplyMessageHolder.binding.tvNameReply.text = baseMessage.metadata.getString("senderName");
                     }
@@ -634,20 +631,20 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                         leftReplyMessageHolder.binding.tvReplyTextMessage.visibility=View.VISIBLE
 
                         if (baseMessage.metadata.getString("type") == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            leftReplyMessageHolder.binding.tvReplyTextMessage.text = "Photo"
+                            leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.photo)
                         } else  {
-                            leftReplyMessageHolder.binding.tvReplyTextMessage.text = "Video"
+                            leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.video)
                         }
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
-                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = "Audio Message"
+                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.audio_message)
 
                         leftReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
 
-                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = "File Message"
+                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.file_message)
 
                         leftReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
                     }
@@ -791,7 +788,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     if (baseMessage.metadata.has("senderUid")
                             && baseMessage.metadata.getString("senderUid").equals(ownerId)) {
 
-                        leftReplyMessageHolder.binding.tvNameReply.text = "You"
+                        leftReplyMessageHolder.binding.tvNameReply.text = context.getString(R.string.you)
                     } else {
                         leftReplyMessageHolder.binding.tvNameReply.text = baseMessage.metadata.getString("senderName");
                     }
@@ -810,20 +807,20 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 .into(leftReplyMessageHolder.binding.ivReplyImage)
 
                         if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_VIDEO)){
-                            leftReplyMessageHolder.binding.tvReplyTextMessage.text="Video"
+                            leftReplyMessageHolder.binding.tvReplyTextMessage.text=context.getString(R.string.video)
                         }
                         else{
-                            leftReplyMessageHolder.binding.tvReplyTextMessage.text="Photo"
+                            leftReplyMessageHolder.binding.tvReplyTextMessage.text=context.getString(R.string.photo)
                         }
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
-                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = "Audio Message"
+                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.audio_message)
                         leftReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
 
                     } else if (baseMessage.metadata.getString("type").equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
 
-                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = "File Message"
+                        leftReplyMessageHolder.binding.tvReplyTextMessage.text = context.getString(R.string.file_message)
                         leftReplyMessageHolder.binding.ivReplyImage.visibility = View.GONE
                     }
                 }
@@ -837,9 +834,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     val leftFileViewHolder = p0 as LeftFileViewHolder
                     leftFileViewHolder.binding.message = baseMessage as MediaMessage
                     leftFileViewHolder.binding.fileContainer.background.setColorFilter(StringContract.Color.leftMessageColor, PorterDuff.Mode.SRC_ATOP)
-                    val t = mediaFile?.substring(mediaFile.lastIndexOf("/"))?.split("_".toRegex())?.dropLastWhile({ it.isEmpty() })?.toTypedArray()
-                    leftFileViewHolder.binding.fileName.setText(t?.get(2))
-                    leftFileViewHolder.binding.fileType.setText(mediaFile?.substring(mediaFile.lastIndexOf(".") + 1))
+                    leftFileViewHolder.binding.fileName.text = FileUtil.getFileName(mediaFile)
+                    leftFileViewHolder.binding.fileType.text = FileUtil.getFileExtension(mediaFile)
                     val finalMediaFile = mediaFile
                     leftFileViewHolder.binding.fileName.typeface = StringContract.Font.name
                     leftFileViewHolder.binding.fileType.typeface = StringContract.Font.name
@@ -1023,6 +1019,32 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     leftAudioMessageHolder.binding.progress.visibility = View.GONE
                     leftAudioMessageHolder.binding.download.visibility = View.GONE
                     leftAudioMessageHolder.binding.playButton.visibility = View.VISIBLE
+
+                    try {
+
+                        if (GroupChatAdapter.audioDurations.get(timeStampLong) == null) {
+                            player?.reset()
+                            try {
+                                player?.setDataSource(audioPath)
+                                player?.prepare()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                            val duration = player?.duration
+                            GroupChatAdapter.audioDurations.put(timeStampLong, duration)
+                            leftAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
+                            { DateUtil.convertTimeStampToDurationTime(it) })
+
+                        } else {
+                            val duration = GroupChatAdapter.audioDurations.get(timeStampLong)
+                            leftAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
+                            { DateUtil.convertTimeStampToDurationTime(it) })
+
+                        }
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
 
                 } else {
 

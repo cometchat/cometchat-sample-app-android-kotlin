@@ -41,7 +41,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
-            android:text="Guid*"
+            android:text="@string/guid"
             android:textSize="@dimen/title_size"
             android:textStyle="bold" />
 
@@ -64,7 +64,7 @@
                 android:background="@null"
                 android:drawableStart="@drawable/ic_info_outline_24dp"
                 android:drawablePadding="16dp"
-                android:hint="GUID"
+                android:hint="@string/guid"
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLines="1"
@@ -80,7 +80,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Group Name*"
+            android:text="@string/group_name"
             android:textSize="@dimen/title_size"
             android:textStyle="bold" />
 
@@ -103,7 +103,7 @@
                 android:background="@null"
                 android:drawableStart="@drawable/ic_people_outline_black_24dp"
                 android:drawablePadding="16dp"
-                android:hint="Group Name*"
+                android:hint="@string/group_name"
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLines="1"
@@ -119,7 +119,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Group Description"
+            android:text="@string/group_description"
             android:textSize="@dimen/title_size"
             android:textStyle="bold" />
 
@@ -141,7 +141,7 @@
                 android:background="@null"
                 android:drawableStart="@drawable/ic_description_black_24dp"
                 android:drawablePadding="16dp"
-                android:hint="Group Description*"
+                android:hint="@string/group_description"
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLines="1"
@@ -165,7 +165,7 @@
                 android:layout_marginStart="30dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="Group Password*"
+                android:text="@string/group_password"
                 android:textSize="@dimen/title_size"
                 android:textStyle="bold" />
 
@@ -188,7 +188,7 @@
                     android:background="@null"
                     android:drawableStart="@drawable/ic_lock_outline_grey_24dp"
                     android:drawablePadding="16dp"
-                    android:hint="Group Password"
+                    android:hint="@string/group_password"
                     android:imeOptions="actionDone"
                     android:inputType="textWebPassword"
                     android:maxLines="1"
@@ -206,7 +206,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Group Type*"
+            android:text="@string/group_type"
             android:textSize="@dimen/title_size"
             android:textStyle="bold" />
 

@@ -24,9 +24,9 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
 
     val messageList: MutableLiveData<MutableList<BaseMessage>>
 
-    val groupMemberList: MutableLiveData<MutableList<GroupMember>>
+    val groupMemberList: MutableLiveData<MutableMap<String,GroupMember>>
 
-    val banMemberList: MutableLiveData<MutableList<GroupMember>>
+    val banMemberList: MutableLiveData<MutableMap<String,GroupMember>>
 
 
     init {

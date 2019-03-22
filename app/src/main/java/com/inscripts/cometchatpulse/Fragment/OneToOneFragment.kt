@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.Application
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -64,6 +65,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         private val TAG = "OneToOneFragment"
         var isReply: Boolean = false
         var metaData: JSONObject? = JSONObject()
+        public  var currentId:String?=null
 
     }
 
@@ -147,6 +149,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         binding.lastActive = arguments?.getLong(StringContract.IntentString.LAST_ACTIVE)
 
         userId = arguments?.getString(StringContract.IntentString.USER_ID)!!
+
+        OneToOneFragment.currentId=userId
 
         onetoOneViewModel = OnetoOneViewModel(CometChatPro.applicationContext() as Application)
 
@@ -807,16 +811,34 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     override fun onStart() {
         super.onStart()
-
+        OneToOneFragment.currentId=userId
     }
 
 
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume: ")
+        OneToOneFragment.currentId=userId
         onetoOneViewModel.receiveMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, ownerId)
         onetoOneViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        OneToOneFragment.currentId=null
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        OneToOneFragment.currentId=null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        OneToOneFragment.currentId=null
+    }
+
+
 
     override fun onPause() {
         super.onPause()
@@ -825,7 +847,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         onetoOneViewModel.removeMessageListener(StringContract.ListenerName.MESSAGE_LISTENER)
         onetoOneViewModel.removePresenceListener(StringContract.ListenerName.USER_LISTENER)
         stopRecording(false)
-        oneToOneAdapter.stopPlayer()
+        oneToOneAdapter?.stopPlayer()
+        OneToOneFragment.currentId=null
     }
 
 }

@@ -1,55 +1,51 @@
 package com.inscripts.cometchatpulse.Repository
 
 
-import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.support.annotation.WorkerThread
 import android.util.Log
 import android.view.View
-import android.widget.RelativeLayout
 import android.widget.Toast
 import com.cometchat.pro.constants.CometChatConstants
-import com.cometchat.pro.core.*
+import com.cometchat.pro.core.Call
+import com.cometchat.pro.core.CometChat
+import com.cometchat.pro.core.UsersRequest
 import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.models.*
-import com.facebook.shimmer.Shimmer
+import com.cometchat.pro.models.User
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 
 
+class UserRepository {
 
-class UserRepository() {
-
-    var usersList = MutableLiveData<MutableMap<String,User>>()
+    var usersList = MutableLiveData<MutableMap<String, User>>()
 
     var user = MutableLiveData<User>()
 
-    var mutableUserList = mutableMapOf<String,User>()
+    var mutableUserList = mutableMapOf<String, User>()
 
     var userRequest: UsersRequest? = null
-
-
 
 
     @WorkerThread
     fun getUser(uid: String) {
 
-            CometChat.getUser(uid, object : CometChat.CallbackListener<User>() {
-                override fun onError(p0: CometChatException?) {
+        CometChat.getUser(uid, object : CometChat.CallbackListener<User>() {
+            override fun onError(p0: CometChatException?) {
 
-                }
+            }
 
-                override fun onSuccess(p0: User?) {
-                    user.value = p0
-                }
+            override fun onSuccess(p0: User?) {
+                user.value = p0
+            }
 
-            })
+        })
     }
 
     @WorkerThread
-    fun fetchUsers(LIMIT: Int,shimmer: ShimmerFrameLayout?) {
+    fun fetchUsers(LIMIT: Int, shimmer: ShimmerFrameLayout?) {
 
         if (userRequest == null) {
 
@@ -58,19 +54,19 @@ class UserRepository() {
             userRequest?.fetchNext(object : CometChat.CallbackListener<List<User>>() {
 
                 override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(),p0?.message,Toast.LENGTH_SHORT).show()
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                     shimmer?.stopShimmer()
-                    shimmer?.visibility=View.GONE
+                    shimmer?.visibility = View.GONE
                 }
 
                 override fun onSuccess(p0: List<User>?) {
                     if (p0 != null) {
                         Log.d("UsersRequest", " " + p0.size)
-                        for (user:User in p0){
-                            mutableUserList.put(user.uid,user)
+                        for (user: User in p0) {
+                            mutableUserList.put(user.uid, user)
                         }
                         shimmer?.stopShimmer()
-                        shimmer?.visibility= View.GONE
+                        shimmer?.visibility = View.GONE
                         usersList.value = mutableUserList
                     }
                 }
@@ -84,18 +80,18 @@ class UserRepository() {
             userRequest?.fetchNext(object : CometChat.CallbackListener<List<User>>() {
 
                 override fun onSuccess(p0: List<User>?) {
-                        Log.d("UsersRequest", " " + p0?.size)
-                     if (p0!=null) {
-                         for (user: User in p0) {
-                             mutableUserList.put(user.uid, user)
-                         }
-                         usersList.value = mutableUserList
-                     }
+                    Log.d("UsersRequest", " " + p0?.size)
+                    if (p0 != null) {
+                        for (user: User in p0) {
+                            mutableUserList.put(user.uid, user)
+                        }
+                        usersList.value = mutableUserList
+                    }
 
                 }
 
                 override fun onError(p0: CometChatException?) {
-                   Log.d("fetchNext","UsersRequest onError: ${p0?.message}")
+                    Log.d("fetchNext", "UsersRequest onError: ${p0?.message}")
                 }
 
             })
@@ -108,23 +104,23 @@ class UserRepository() {
     @WorkerThread
     fun addPresenceListener(listener: String) {
 
-            CometChat.addUserListener(listener, object : CometChat.UserListener() {
-                override fun onUserOnline(p0: com.cometchat.pro.models.User?) {
+        CometChat.addUserListener(listener, object : CometChat.UserListener() {
+            override fun onUserOnline(p0: com.cometchat.pro.models.User?) {
 
-                    if (p0 != null) {
-                         mutableUserList.put(p0.uid,p0)
-                        usersList.value=mutableUserList
-                    }
+                if (p0 != null) {
+                    mutableUserList.put(p0.uid, p0)
+                    usersList.value = mutableUserList
                 }
+            }
 
-                override fun onUserOffline(p0: com.cometchat.pro.models.User?) {
-                    if (p0 != null) {
-                        mutableUserList.put(p0.uid,p0)
-                        usersList.value=mutableUserList
-                    }
+            override fun onUserOffline(p0: com.cometchat.pro.models.User?) {
+                if (p0 != null) {
+                    mutableUserList.put(p0.uid, p0)
+                    usersList.value = mutableUserList
                 }
+            }
 
-            })
+        })
 
     }
 
@@ -138,15 +134,15 @@ class UserRepository() {
 
     }
 
-    fun initCall(context:Context,call: Call) {
-        CometChat.initiateCall(call,object :CometChat.CallbackListener<Call>(){
+    fun initCall(context: Context, call: Call) {
+        CometChat.initiateCall(call, object : CometChat.CallbackListener<Call>() {
             override fun onSuccess(p0: Call?) {
 
-                CommonUtil.startCallIntent(CometChatConstants.RECEIVER_TYPE_USER,context, p0?.callReceiver as User, p0.type, true, p0.sessionId)
+                CommonUtil.startCallIntent(CometChatConstants.RECEIVER_TYPE_USER, context, p0?.callReceiver as User, p0.type, true, p0.sessionId)
             }
 
             override fun onError(p0: CometChatException?) {
-
+                Log.d("initiateCall", "onError: ${p0?.message}")
             }
 
         })

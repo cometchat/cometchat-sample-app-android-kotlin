@@ -13,6 +13,8 @@
     </data>
 
 
+
+
     <RelativeLayout
         android:id="@+id/rl_back"
         android:layout_width="match_parent"
@@ -20,6 +22,7 @@
 
 
         <ImageView
+            android:id="@+id/logo"
             android:layout_marginTop="56dp"
             android:layout_centerHorizontal="true"
             android:layout_width="100dp"
@@ -29,9 +32,10 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_height="match_parent"
         app:cardCornerRadius="16dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@id/logo"
         app:cardUseCompatPadding="true"
         android:layout_marginBottom="-32dp"
         app:cardElevation="8dp">
@@ -96,6 +100,23 @@
                 android:onClick="@{()->login.onLoginClick(editTextUid.getText().toString())}"
                 android:textColor="@color/primaryColor"
                 android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="@color/primaryTextColor"
+                android:text="@string/haven_t_created_a_user_yet_select_one_of_our_default_users_for_testing"
+                android:layout_height="wrap_content" />
+
+            <GridView
+                android:id="@+id/sample_list"
+                android:layout_width="match_parent"
+                android:numColumns="2"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 

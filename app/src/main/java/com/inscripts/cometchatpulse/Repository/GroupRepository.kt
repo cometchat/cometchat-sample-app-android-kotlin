@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.core.*
@@ -21,7 +20,9 @@ import com.inscripts.cometchatpulse.Activities.CreateGroupActivity
 import com.inscripts.cometchatpulse.Activities.GroupDetailActivity
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.CometChatPro
+import com.inscripts.cometchatpulse.Fcm.FirebaseService
 import com.inscripts.cometchatpulse.Fragment.MemberFragment
+import java.lang.Exception
 
 
 class GroupRepository {
@@ -32,13 +33,13 @@ class GroupRepository {
 
     var groupListMutable = mutableListOf<Group>()
 
-    var groupMemberList = mutableListOf<GroupMember>()
+    var groupMemberList = mutableMapOf<String,GroupMember>()
 
-    var banGroupMemberList= mutableListOf<GroupMember>()
+    var banGroupMemberList= mutableMapOf<String,GroupMember>()
 
-    var groupMemberLiveData:MutableLiveData<MutableList<GroupMember>> = MutableLiveData()
+    var groupMemberLiveData:MutableLiveData<MutableMap<String,GroupMember>> = MutableLiveData()
 
-    var banMemberLiveData:MutableLiveData<MutableList<GroupMember>> = MutableLiveData()
+    var banMemberLiveData:MutableLiveData<MutableMap<String,GroupMember>> = MutableLiveData()
 
     var groupRequest: GroupsRequest? = null
 
@@ -60,11 +61,11 @@ class GroupRepository {
                     override fun onSuccess(p0: List<Group>?) {
                         p0?.let { groupListMutable.addAll(it) }
                         groupList.value = groupListMutable
-
                         shimmerFrameLayout?.stopShimmer()
                         shimmerFrameLayout?.visibility=View.GONE
-                    }
+                        p0?.let { FirebaseService.subscribeToGroup(it) }
 
+                    }
 
                     override fun onError(p0: CometChatException?) {
                         Toast.makeText(CometChatPro.applicationContext(),p0?.message,Toast.LENGTH_SHORT).show()
@@ -78,6 +79,7 @@ class GroupRepository {
                     override fun onSuccess(p0: List<Group>?) {
                         p0?.let { groupListMutable.addAll(it) }
                         groupList.value = groupListMutable
+                        p0?.let { FirebaseService.subscribeToGroup(it) }
                     }
 
                     override fun onError(p0: CometChatException?) {
@@ -87,6 +89,8 @@ class GroupRepository {
                 })
             }
     }
+
+
 
     @WorkerThread
     fun getGroup(guid: String) {
@@ -108,8 +112,9 @@ class GroupRepository {
 
         CometChat.unbanGroupMember(uid,guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
-
                 showToast("Successfully unbanned Member")
+                banGroupMemberList.remove(uid)
+                banMemberLiveData.value=banGroupMemberList
             }
 
             override fun onError(p0: CometChatException?) {
@@ -129,8 +134,14 @@ class GroupRepository {
             groupBanMemberRequest?.fetchNext(object :CometChat.CallbackListener<List<GroupMember>>(){
                 override fun onSuccess(p0: List<GroupMember>?) {
 
-                    p0?.let { banGroupMemberList.addAll(it) }
-                    banMemberLiveData.value=banGroupMemberList
+                     if (p0!=null){
+                         for (groupMember in p0){
+                             banGroupMemberList.put(groupMember.uid,groupMember)
+                         }
+
+                         banMemberLiveData.value=banGroupMemberList
+                     }
+
 
                 }
 
@@ -143,8 +154,12 @@ class GroupRepository {
         else{
             groupBanMemberRequest?.fetchNext(object :CometChat.CallbackListener<List<GroupMember>>(){
                 override fun onSuccess(p0: List<GroupMember>?) {
-                    p0?.let { banGroupMemberList.addAll(it) }
-                    banMemberLiveData.value=banGroupMemberList
+                    if (p0!=null){
+                        for (groupMember in p0){
+                            banGroupMemberList.put(groupMember.uid,groupMember)
+                        }
+                        banMemberLiveData.value=banGroupMemberList
+                    }
                 }
 
                 override fun onError(p0: CometChatException?) {
@@ -164,9 +179,16 @@ class GroupRepository {
             groupMemberRequest?.fetchNext(object : CometChat.CallbackListener<List<GroupMember>>() {
                 override fun onSuccess(p0: List<GroupMember>?) {
 
-                    p0?.let { groupMemberList.addAll(it) }
+                       if (p0!=null) {
 
-                    groupMemberLiveData.value=groupMemberList
+                           for (groupMember in p0) {
+                              groupMemberList.put(groupMember.uid,groupMember)
+                           }
+
+                           groupMemberLiveData.value=groupMemberList
+                       }
+
+
                 }
 
                 override fun onError(p0: CometChatException?) {
@@ -179,8 +201,12 @@ class GroupRepository {
             groupMemberRequest?.fetchNext(object : CometChat.CallbackListener<List<GroupMember>>() {
                 override fun onSuccess(p0: List<GroupMember>?) {
 
-                    p0?.let { groupMemberList.addAll(it) }
-                    groupMemberLiveData.value=groupMemberList
+                    if (p0!=null) {
+                        for (groupMember in p0) {
+                            groupMemberList.put(groupMember.uid,groupMember)
+                        }
+                        groupMemberLiveData.value=groupMemberList
+                    }
                 }
 
                 override fun onError(p0: CometChatException?) {
@@ -203,11 +229,10 @@ class GroupRepository {
 
         groupJoin=context as onGroupJoin
 
-            CometChat.joinGroup(group.guid,group.groupType,group.password,object :CometChat.CallbackListener<String>(){
-                override fun onSuccess(p0: String?) {
+            CometChat.joinGroup(group.guid,group.groupType,group.password,object :CometChat.CallbackListener<Group>(){
+                override fun onSuccess(p0: Group?) {
                     progressDialog?.dismiss()
-                    group.setHasJoined(true)
-                    groupJoin.onJoined(group,resId)
+                    p0?.let { groupJoin.onJoined(it,resId) }
                 }
 
                 override fun onError(p0: CometChatException?) {
@@ -224,10 +249,13 @@ class GroupRepository {
 
                 (context as CreateGroupActivity).finish()
                 Toast.makeText(CometChatPro.applicationContext(),p0?.groupType+" group created ",Toast.LENGTH_SHORT).show()
+
+                p0?.let { groupListMutable.add(it) }
+                groupList.value = groupListMutable
             }
 
             override fun onError(p0: CometChatException?) {
-                Toast.makeText(CometChatPro.applicationContext()," group creation failed  ",Toast.LENGTH_SHORT).show()
+                Toast.makeText(CometChatPro.applicationContext(),p0?.message,Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -237,7 +265,11 @@ class GroupRepository {
         CometChat.banGroupMember(uid,guid,object :CometChat.CallbackListener<String>(){
 
             override fun onSuccess(p0: String?) {
+                groupMemberList.remove(uid)
+                groupMemberLiveData.value=groupMemberList
                showToast("Successfully banned Member")
+
+
             }
             override fun onError(p0: CometChatException?) {
                 showToast(p0?.message.toString())
@@ -255,6 +287,10 @@ class GroupRepository {
         CometChat.kickGroupMember(uid,guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
                 showToast("Successfully kicked Member")
+
+                groupMemberList.remove(uid)
+                groupMemberLiveData.value=groupMemberList
+
             }
 
             override fun onError(p0: CometChatException?) {
@@ -300,8 +336,12 @@ class GroupRepository {
             override fun onSuccess(p0: String?) {
               Toast.makeText(CometChatPro.applicationContext(),"Success",Toast.LENGTH_SHORT).show()
 
-
-
+               val  member = groupMemberList[uid]
+                 member?.scope=scope
+                if (member!=null) {
+                    groupMemberList.put(member.uid,member)
+                    groupMemberLiveData.value = groupMemberList
+                }
             }
 
             override fun onError(p0: CometChatException?) {

@@ -11,21 +11,16 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.PopupMenu
 import android.support.v7.widget.RecyclerView
 import android.view.*
+import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Adapter.MemberListAdapter
 import com.inscripts.cometchatpulse.Extensions.setTitleTypeface
 import com.inscripts.cometchatpulse.Helpers.OnClickEvent
-import com.inscripts.cometchatpulse.Helpers.RecyclerviewTouchListener
-
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
-import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.ViewModel.GroupChatViewModel
 import kotlinx.android.synthetic.main.fragment_ban_member.view.*
-import kotlinx.android.synthetic.main.fragment_home.view.*
-import kotlinx.coroutines.*
-import java.lang.Exception
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -52,6 +47,8 @@ class BanMemberFragment : Fragment() {
 
     private lateinit var member: User
 
+    private var userScope: String? = null
+
     lateinit var my: View
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -65,6 +62,12 @@ class BanMemberFragment : Fragment() {
 
         ownerId = arguments?.getString(StringContract.IntentString.USER_ID).toString()
 
+        try {
+            userScope = arguments?.getString(StringContract.IntentString.USER_SCOPE)!!
+        } catch (e: NullPointerException) {
+            e.printStackTrace()
+        }
+
         (activity as AppCompatActivity).setSupportActionBar(my.banmember_toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         my.banmember_toolbar.title = "Banned Members"
@@ -73,10 +76,9 @@ class BanMemberFragment : Fragment() {
         my.banmember_toolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint,
                 PorterDuff.Mode.SRC_ATOP)
 
-        if (StringContract.AppDetails.theme== Appearance.AppTheme.AZURE_RADIANCE){
+        if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
             my.banmember_toolbar.setTitleTextColor(StringContract.Color.black)
-        }
-        else{
+        } else {
             my.banmember_toolbar.setTitleTextColor(StringContract.Color.white)
         }
 
@@ -85,33 +87,39 @@ class BanMemberFragment : Fragment() {
         linearLayoutManager = LinearLayoutManager(context)
         my.rv_ban_member.setLayoutManager(linearLayoutManager)
         try {
-            memberListAdapter = MemberListAdapter(ownerId,R.layout.group_member_item, object : OnClickEvent {
+            memberListAdapter = MemberListAdapter(context, ownerId, R.layout.group_member_item, object : OnClickEvent {
                 override fun onClickRl(item: View, user: Any) {
 
                     if (user is User) {
                         member = user
                         if (ownerId != user.getUid()) {
-                            val popup = context?.let { PopupMenu(it, item) }
-                            //Inflating the Popup using xml file
-                            popup?.getMenuInflater()?.inflate(R.menu.menu_group_action, popup.getMenu())
 
-                            popup?.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
-                                override fun onMenuItemClick(p0: MenuItem?): Boolean {
+                            if (userScope == CometChatConstants.SCOPE_ADMIN ||
+                                    userScope == CometChatConstants.SCOPE_MODERATOR) {
 
-                                    when (p0!!.itemId) {
 
-                                        R.id.menu_item_Reinstate -> {
-                                            groupChatViewModel.unbanMember(member.uid, guid)
+                                val popup = context?.let { PopupMenu(it, item) }
+                                //Inflating the Popup using xml file
+                                popup?.getMenuInflater()?.inflate(R.menu.menu_group_action, popup.getMenu())
+
+                                popup?.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
+                                    override fun onMenuItemClick(p0: MenuItem?): Boolean {
+
+                                        when (p0!!.itemId) {
+
+                                            R.id.menu_item_Reinstate -> {
+                                                groupChatViewModel.unbanMember(member.uid, guid)
+                                            }
+
                                         }
 
+                                        return true
                                     }
 
-                                    return true
-                                }
+                                })
 
-                            })
-
-                            popup?.show()
+                                popup?.show()
+                            }
                         }
                     }
                 }
@@ -149,19 +157,22 @@ class BanMemberFragment : Fragment() {
 
         return my
     }
+
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
-        when(item?.itemId){
+        when (item?.itemId) {
 
-            android.R.id.home->{
+            android.R.id.home -> {
                 activity?.onBackPressed()
             }
         }
 
         return true
     }
+
+
 }

@@ -49,8 +49,7 @@ class DownloadFile() : AsyncTask<String, Int, String>() {
             inputStream = connection.inputStream
 
 
-            file = File(FileUtil.getPath(CometChatPro.applicationContext(), type) +
-                    FileUtil.getFileName(mediaUrl))
+            file = File(FileUtil.getPath(CometChatPro.applicationContext(), type) + FileUtil.getFileName(mediaUrl))
 
             outputStream = FileOutputStream(file)
 
@@ -116,10 +115,10 @@ class DownloadFile() : AsyncTask<String, Int, String>() {
             leftAudioBinding.download.setImageResource(R.drawable.ic_close_24dp)
             leftAudioBinding.progress.progress = values[0]!!
             leftAudioBinding.playButton.visibility = View.GONE
+
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-
     }
 
     override fun onPostExecute(result: String?) {

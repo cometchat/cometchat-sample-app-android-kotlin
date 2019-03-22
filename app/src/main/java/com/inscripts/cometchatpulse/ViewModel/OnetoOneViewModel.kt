@@ -110,7 +110,4 @@ class  OnetoOneViewModel  constructor(application: Application) : AndroidViewMod
          messageRepository.initiateCall(call,context)
      }
 
-
-
-
  }
