@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <import type="android.view.View"/>
+        <variable
+            name="message"
+            type="com.cometchat.pro.models.TextMessage" />
+
+    </data>
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardview"
+        android:layout_toStartOf="@id/img_message_status"
+        android:layout_width="250dp"
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="16dp"
+        android:layout_height="200dp">
+
+
+    <com.google.android.gms.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        map:cameraZoom="13"
+        map:mapType="normal"
+        map:liteMode="true"/>
+
+    </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/timestamp"
+            setTimeStamp="@{message.sentAt}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/cardview"
+            android:layout_marginEnd="4dp"
+            android:padding="4dp"
+            android:layout_marginBottom="8dp"
+            android:layout_toStartOf="@id/cardview"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/small_text"
+            tools:text="10:00 AM" />
+
+        <com.inscripts.cometchatpulse.CustomView.CircleImageView
+            android:id="@+id/img_message_status"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@id/cardview"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            setDeliveryStatus="@{1}"
+            android:layout_marginBottom="8dp" />
+
+
+    </RelativeLayout>
+
+
+</layout>

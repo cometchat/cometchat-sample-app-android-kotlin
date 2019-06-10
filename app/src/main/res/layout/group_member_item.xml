@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+
+    <data>
+
+        <variable
+            name="member"
+            type="com.cometchat.pro.models.GroupMember"/>
+
+    </data>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        style="@style/SelectableItemBackground">
+
+
+    <com.inscripts.cometchatpulse.CustomView.CircleImageView
+        android:id="@+id/imageViewUserAvatar"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        setUserImage="@{member.avatar}"
+        android:layout_marginStart="16dp"
+        android:layout_centerVertical="true"
+        tools:src="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/textviewUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/imageViewUserAvatar"
+        android:layout_marginBottom="4dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:text="@{member.name}"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="0.15dp"
+        android:singleLine="true"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="14sp"
+        tools:text="@tools:sample/full_names" />
+
+
+    <!--todo add emojicompacttextview-->
+
+
+    <TextView
+        android:id="@+id/textviewUserStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textviewUserName"
+        android:layout_alignStart="@id/textviewUserName"
+        android:layout_toEndOf="@+id/imageViewUserAvatar"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:singleLine="true"
+        android:text="@{member.scope}"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="12sp" />
+
+
+    </RelativeLayout>
+
+
+</layout>
+
