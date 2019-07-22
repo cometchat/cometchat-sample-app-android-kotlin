@@ -4,6 +4,7 @@ package com.inscripts.cometchatpulse.Fragment
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.Application
+import android.app.SearchManager
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
@@ -17,9 +18,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
+import android.support.v4.content.ContextCompat.getSystemService
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -67,7 +70,12 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         var isReply: Boolean = false
         var metaData: JSONObject? = JSONObject()
         var currentId: String? = null
+        var scrollFlag: Boolean = true
     }
+
+    private lateinit var searchView: SearchView
+
+    private var isEditMessage: Boolean=false
 
     private lateinit var linearLayoutManager: LinearLayoutManager
 
@@ -109,8 +117,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
     private val scope = CoroutineScope(coroutineContext)
 
     var currentScrollPosition = 0
-
-    var scrollFlag: Boolean = true
 
     private var mode: ActionMode? = null
 
@@ -224,12 +230,9 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         }
 
 
-        binding.messageBox?.replyLayout?.ivClose?.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(p0: View?) {
-                hideReplyContainer()
-            }
-
-        })
+        binding.messageBox?.replyLayout?.ivClose?.setOnClickListener {
+            hideReplyContainer()
+        }
 
 
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
@@ -257,8 +260,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         }
 
-
-
         onetoOneViewModel.messageList.observe(this, Observer { messages ->
             messages?.let {
                 oneToOneAdapter.setMessageList(it)
@@ -267,6 +268,20 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     scrollFlag = false
                 }
             }
+        })
+
+        onetoOneViewModel.livefilter.observe(this, Observer { filter->
+            filter?.let {
+                oneToOneAdapter.setFilterList(it)
+            }
+        })
+
+        onetoOneViewModel.liveDeletedMessage.observe(this, Observer { deletedMessage->
+              deletedMessage?.let { oneToOneAdapter.setDeletedMessage(deletedMessage) }
+        })
+
+        onetoOneViewModel.liveEditMessage.observe(this, Observer { editMessage->
+            editMessage?.let { oneToOneAdapter.setEditMessage(editMessage) }
         })
 
 
@@ -371,6 +386,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         p0?.finish()
 
         when (p1?.itemId) {
+
             R.id.reply -> {
 
                 isReply = true
@@ -422,6 +438,23 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
                 }
             }
+
+            R.id.delete->{
+                 if (any is TextMessage) {
+                     onetoOneViewModel.deleteMessage(any as TextMessage)
+                 }
+            }
+
+            R.id.edit->{
+                var textMessage: TextMessage
+                isEditMessage = true
+                if (any is TextMessage) {
+                    textMessage = any as TextMessage
+                    binding.messageBox?.editTextChatMessage?.setText(textMessage.text)
+                }
+            }
+
+
         }
 
         return true
@@ -446,7 +479,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         mode = null
     }
 
-    fun scrollBottom() {
+    private fun scrollBottom() {
         binding.recycler.scrollToPosition(oneToOneAdapter.itemCount - 1)
     }
 
@@ -470,7 +503,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
             onetoOneViewModel.sendMediaMessage(audioFileNamewithPath, CometChatConstants.MESSAGE_TYPE_AUDIO, userId, this)
 
         }
-
     }
 
     override fun onRecordLessTime() {
@@ -537,10 +569,35 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         val audioCall = menu?.findItem(R.id.voice_call)
         val videoCall = menu?.findItem(R.id.video_call)
 
-        menu?.findItem(R.id.menu_leave)?.setVisible(false)
+
+        menu?.findItem(R.id.menu_leave)?.isVisible = false
 
         audioCall?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
         videoCall?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
+
+        var searchItem = menu?.findItem(R.id.app_bar_search)
+        searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
+
+        if (searchItem != null) {
+
+            searchView = searchItem.getActionView() as SearchView
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(s: String): Boolean {
+                    return false
+                }
+                override fun onQueryTextChange(s: String): Boolean {
+                    onetoOneViewModel.searchMessage(s, userId)
+                    return false
+                }
+            })
+
+            searchView.setOnCloseListener({
+                onetoOneViewModel.fetchMessage(30, userId)
+                false
+            })
+        }
+
 
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -603,14 +660,23 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 
-                    if (isReply) {
-                        binding.messageBox?.replyLayout?.rlMain?.visibility = View.GONE
-                        textMessage.metadata = metaData
-                        metaData = null
-                        metaData = JSONObject()
+                    if (!isEditMessage) {
+                        if (isReply) {
+                            binding.messageBox?.replyLayout?.rlMain?.visibility = View.GONE
+                            textMessage.metadata = metaData
+                            metaData = null
+                            metaData = JSONObject()
+                        }
+                        onetoOneViewModel.sendTextMessage(textMessage)
+                    }
+                    else{
+                        isEditMessage=false
+                        binding.messageBox?.editTextChatMessage?.setText("")
+                        onetoOneViewModel.sendEditMessage(any as TextMessage,messageText)
+
                     }
 
-                    onetoOneViewModel.sendTextMessage(textMessage)
+
                     onetoOneViewModel.sendTypingIndicator(userId, true)
 
                 }

@@ -11,11 +11,9 @@ import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.databinding.GroupListItemBinding
 
-
-
 class GroupListAdapter(val context: Context?) : RecyclerView.Adapter<GroupListAdapter.GroupHolder>() {
 
-    private var groupList: MutableList<Group> = arrayListOf()
+    private var groupList: MutableMap<String,Group> = mutableMapOf()
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): GroupHolder {
         val layoutInflater:LayoutInflater = LayoutInflater.from(context)
@@ -33,7 +31,7 @@ class GroupListAdapter(val context: Context?) : RecyclerView.Adapter<GroupListAd
 
     override fun onBindViewHolder(groupHolder: GroupHolder, p1: Int) {
 
-        val group = groupList[p1]
+        val group = groupList.values.toMutableList()[p1]
 
         groupHolder.binding.group=group
         groupHolder.binding.childClick=context as ChildClickListener
@@ -44,11 +42,16 @@ class GroupListAdapter(val context: Context?) : RecyclerView.Adapter<GroupListAd
 
     }
 
-    fun setGroup(it: MutableList<Group>) {
+    fun setGroup(it: MutableMap<String,Group>) {
         this.groupList = it
         notifyDataSetChanged()
     }
 
+    fun filterList(it: MutableMap<String, Group>) {
+        groupList.clear()
+        groupList=it
+        notifyDataSetChanged()
+    }
 
     class GroupHolder(val binding:GroupListItemBinding) : RecyclerView.ViewHolder(binding.root)
 

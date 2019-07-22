@@ -4,12 +4,14 @@ import android.content.Context
 import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Helpers.ChildClickListener
 import com.inscripts.cometchatpulse.Helpers.OnClickEvent
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
+import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.ViewHolder.ContactViewHolder
 import com.inscripts.cometchatpulse.databinding.ContactItemBinding
 import com.inscripts.cometchatpulse.ViewModel.UserViewModel
@@ -17,6 +19,7 @@ import com.inscripts.cometchatpulse.ViewModel.UserViewModel
 
 class ContactListAdapter(val context: Context?, private val isBlockedList:Boolean,val listener:OnClickEvent?=null) : RecyclerView.Adapter<ContactViewHolder>() {
 
+    private var unReadCountMap: MutableMap<String, Int> = mutableMapOf()
     private var userList: MutableMap<String,User> = mutableMapOf()
 
     private var  onClickEvent:OnClickEvent?=listener
@@ -40,9 +43,21 @@ class ContactListAdapter(val context: Context?, private val isBlockedList:Boolea
 
         contactViewHolder.binding.user=user
         contactViewHolder.binding.isBlockedList=isBlockedList
+        contactViewHolder.binding.textviewSingleChatUnreadCount.background=CommonUtil.setDrawable(StringContract.Color.primaryColor,40f)
+
         if (!isBlockedList) {
             contactViewHolder.binding.childClick = context as ChildClickListener
+
+            if (unReadCountMap.containsKey(user.uid)){
+
+                contactViewHolder.binding.textviewSingleChatUnreadCount.visibility= View.VISIBLE
+                contactViewHolder.binding.textviewSingleChatUnreadCount.text= unReadCountMap.get(user.uid).toString()
+            }
+            else{
+                contactViewHolder.binding.textviewSingleChatUnreadCount.visibility=View.INVISIBLE
+            }
         }
+
         contactViewHolder.binding.textviewUserName.typeface=StringContract.Font.name
         contactViewHolder.binding.textviewUserStatus.typeface=StringContract.Font.status
         contactViewHolder.binding.executePendingBindings()
@@ -54,7 +69,6 @@ class ContactListAdapter(val context: Context?, private val isBlockedList:Boolea
                  onClickEvent?.onClickRl(it, user)
              }
          }
-
     }
 
     internal fun setUser(users: MutableMap<String,User>) {
@@ -64,6 +78,16 @@ class ContactListAdapter(val context: Context?, private val isBlockedList:Boolea
 
     fun removeUser(it: User?) {
         userList.remove(it?.uid)
+        notifyDataSetChanged()
+    }
+
+    fun setUnreadCount(it: MutableMap<String, Int>) {
+        unReadCountMap= it
+    }
+
+    fun setFilter(it: MutableMap<String, User>) {
+        userList.clear()
+        userList=it
         notifyDataSetChanged()
     }
 

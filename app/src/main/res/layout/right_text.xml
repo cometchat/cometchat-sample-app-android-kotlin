@@ -31,7 +31,6 @@
             android:id="@+id/tvMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ivContact"
             android:layout_marginTop="4dp"
             android:layout_toStartOf="@id/img_message_status"
             android:background="@drawable/cc_custom_right_bubble"
@@ -40,7 +39,6 @@
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
             android:paddingBottom="8dp"
-            android:text="@{message.text}"
             android:textColor="@color/secondaryTextColor"
             android:textSize="@dimen/title_size"
             tools:text="Message" />

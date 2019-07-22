@@ -115,17 +115,17 @@
 
         <TextView
             android:id="@+id/textviewSingleChatUnreadCount"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginRight="20dp"
-            android:gravity="center_vertical|center_horizontal"
+            android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@id/right_arrow"
             android:padding="1dp"
+            android:gravity="center|center_horizontal"
             android:singleLine="true"
             android:textColor="#FFF"
             android:textSize="12sp"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
 
         <ImageView

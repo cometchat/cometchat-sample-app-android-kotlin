@@ -18,6 +18,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import android.widget.TextView
@@ -50,6 +53,7 @@ import kotlinx.coroutines.Job
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 // TODO: Rename parameter arguments, choose names that match
@@ -63,8 +67,13 @@ private val TAG="GroupFragment"
  * A simple [Fragment] subclass.
  *
  */
-class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMode.Callback,OnClickEvent {
+class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMode.Callback,OnClickEvent,TextWatcher{
 
+
+    private lateinit var searchView: SearchView
+
+    private  var memberMap: MutableMap<String, GroupMember> = mutableMapOf()
+    private var isEditMessage: Boolean=false
     private lateinit var binding: FragmentGroupBinding
 
     private lateinit var guid: String
@@ -98,18 +107,19 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
     private val scope = CoroutineScope(coroutineContext)
 
-    var scrollFlag: Boolean = true
-
     private lateinit var any: Any
 
     private var mode: ActionMode? = null
 
     private var userScope:String?=null
 
+    private var timer: Timer? =Timer()
+
     companion object {
 
         var isReply: Boolean = false
         var metaData: JSONObject?= JSONObject()
+        var scrollFlag: Boolean = true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -163,6 +173,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         binding.messageBox?.buttonSendMessage?.setOnClickListener(this)
         binding.messageBox?.ivAttchment?.setOnClickListener(this)
         binding.rlTitlecontainer.setOnClickListener(this)
+
+        binding.messageBox?.editTextChatMessage?.addTextChangedListener(this)
 
         binding.messageBox?.recordButton?.setListenForRecord(true)
 
@@ -227,11 +239,56 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
             }
         })
 
-        groupViewModel.groupMemberList.observe(this, Observer { groupMemeberList ->
-            groupMemeberList?.let {
+        groupViewModel.groupMemberList.observe(this, Observer { groupMemberList ->
+            groupMemberList?.let {
+                memberMap=it
                 setGroupMemberList(it, binding.subTitle)
 
             }
+        })
+
+        groupChatViewModel.filterMessageList.observe(this, Observer {
+            filterList->filterList?.let {
+             groupChatAdapter.setFilter(filterList)
+           }
+        })
+
+        groupChatViewModel.liveStartTypingIndicator.observe(this, Observer { startTyping->
+             startTyping?.let {
+                 binding.subTitle.text = startTyping.sender.name+" Typing..."
+             }
+        })
+
+        groupChatViewModel.liveDeliveryReceipts.observe(this, Observer {
+            messageReceipts->
+            messageReceipts?.let {
+                groupChatAdapter.setDeliveryReceipts(it)
+            }
+        })
+
+        groupChatViewModel.liveDeletedMessage.observe(this, Observer {
+            deletedMessage->deletedMessage?.let {
+                  groupChatAdapter.setDeletedMessage(it)
+               }
+        })
+
+        groupChatViewModel.liveEditMessage.observe(this, Observer {
+            editMessage->editMessage?.let {
+                 groupChatAdapter.setEditMessage(it)
+             }
+        })
+
+        groupChatViewModel.liveReadReceipts.observe(this, Observer {
+            messageReceipts->
+            messageReceipts?.let {
+                groupChatAdapter.setRead(it)
+            }
+        })
+
+
+        groupChatViewModel.liveEndTypingIndicator.observe(this, Observer { typingIndicator ->
+                     setGroupMemberList(memberMap,binding.subTitle)
+
         })
 
         binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -264,8 +321,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         })
 
-
-
         return binding.root
     }
 
@@ -289,6 +344,36 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         }
 
+    }
+
+    override fun afterTextChanged(s: Editable?) {
+        if (timer != null) {
+            timer()
+        } else {
+            timer = Timer()
+            timer()
+        }
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+    }
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        val length = binding.messageBox?.editTextChatMessage?.text.toString().length
+
+        if (length > 0) {
+            groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid)
+        }
+    }
+
+    private fun timer() {
+
+        timer?.schedule(object : TimerTask() {
+            override fun run() {
+                groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid, true)
+            }
+        }, 2000)
     }
 
     override fun onRecordLessTime() {
@@ -358,6 +443,30 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         audioCall?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
         videoCall?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
 
+        var searchItem = menu?.findItem(R.id.app_bar_search)
+
+        searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
+
+        if (searchItem != null) {
+
+            searchView = searchItem.getActionView() as SearchView
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(s: String): Boolean {
+                     return false
+                }
+                override fun onQueryTextChange(s: String): Boolean {
+                     groupChatViewModel.searchMessage(s, guid)
+                     return false
+                }
+            })
+
+            searchView.setOnCloseListener {
+                groupChatViewModel.fetchMessage(30, guid)
+                false
+            }
+        }
+
         super.onCreateOptionsMenu(menu, inflater)
 
     }
@@ -419,20 +528,20 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
             R.id.reply -> {
 
                 GroupFragment.isReply = true
-                GroupFragment.metaData =null
-                GroupFragment.metaData =JSONObject()
-                GroupFragment.metaData?.put("reply", "reply")
+                metaData =null
+                metaData =JSONObject()
+                metaData?.put("reply", "reply")
 
                 binding.messageBox?.replyLayout?.rlMain?.visibility = View.VISIBLE
 
                 if (any is TextMessage) {
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as TextMessage).sender.name
                     binding.messageBox?.replyLayout?.tvTextMessage?.text = (any as TextMessage).text
-                    GroupFragment.metaData?.put("senderName", (any as TextMessage).sender.name)
-                    GroupFragment.metaData?.put("senderUid", (any as TextMessage).sender.uid)
-                    GroupFragment.metaData?.put("type", (any as TextMessage).type)
-                    GroupFragment.metaData?.put("id", (any as TextMessage).id)
-                    GroupFragment.metaData?.put("text", (any as TextMessage).text)
+                    metaData?.put("senderName", (any as TextMessage).sender.name)
+                    metaData?.put("senderUid", (any as TextMessage).sender.uid)
+                    metaData?.put("type", (any as TextMessage).type)
+                    metaData?.put("id", (any as TextMessage).id)
+                    metaData?.put("text", (any as TextMessage).text)
 
                     Log.d(TAG, "onActionItemClicked: " + OneToOneFragment.metaData?.toString())
 
@@ -441,12 +550,12 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
                 if (any is MediaMessage) {
 
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as MediaMessage).sender.name
-                    GroupFragment.metaData?.put("senderName", (any as MediaMessage).sender.name)
-                    GroupFragment.metaData?.put("url", (any as MediaMessage).url)
-                    GroupFragment.metaData?.put("id", (any as MediaMessage).id)
-                    GroupFragment.metaData?.put("senderUid", (any as MediaMessage).sender.uid)
+                    metaData?.put("senderName", (any as MediaMessage).sender.name)
+                    metaData?.put("url", (any as MediaMessage).url)
+                    metaData?.put("id", (any as MediaMessage).id)
+                    metaData?.put("senderUid", (any as MediaMessage).sender.uid)
                     val type = (any as MediaMessage).type
-                    GroupFragment.metaData?.put("type", type)
+                    metaData?.put("type", type)
 
                     if (type == CometChatConstants.MESSAGE_TYPE_IMAGE
                             || type == CometChatConstants.MESSAGE_TYPE_VIDEO) {
@@ -459,20 +568,34 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                         binding.messageBox?.replyLayout?.tvTextMessage?.text = "Audio message"
 
-                        GroupFragment.metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        GroupFragment.metaData?.put("url", (any as MediaMessage).url)
-                        GroupFragment.metaData?.put("id", (any as MediaMessage).id)
+                        metaData?.put("senderName", (any as MediaMessage).sender.name)
+                        metaData?.put("url", (any as MediaMessage).url)
+                        metaData?.put("id", (any as MediaMessage).id)
 
                     } else if (type == CometChatConstants.MESSAGE_TYPE_FILE) {
 
-                        GroupFragment.metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        GroupFragment.metaData?.put("url", (any as MediaMessage).url)
-                        GroupFragment.metaData?.put("id", (any as MediaMessage).id)
+                        metaData?.put("senderName", (any as MediaMessage).sender.name)
+                        metaData?.put("url", (any as MediaMessage).url)
+                        metaData?.put("id", (any as MediaMessage).id)
 //                        metaData.put("fileName",(any as MediaMessage).file.name)
 
                         binding.messageBox?.replyLayout?.tvTextMessage?.text = "File message"
                     }
 
+                }
+            }
+            R.id.delete->{
+                if (any is TextMessage) {
+                    groupChatViewModel.deleteMessage(any as TextMessage)
+                }
+            }
+
+            R.id.edit->{
+                var textMessage: TextMessage
+                isEditMessage = true
+                if (any is TextMessage) {
+                    textMessage = any as TextMessage
+                    binding.messageBox?.editTextChatMessage?.setText(textMessage.text)
                 }
             }
         }
@@ -522,14 +645,23 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 
-                    if (GroupFragment.isReply) {
-                        binding.messageBox?.replyLayout?.rlMain?.visibility = View.GONE
-                        textMessage.metadata = GroupFragment.metaData
-                        GroupFragment.metaData =null
-                        GroupFragment.metaData = JSONObject()
+                    if (!isEditMessage) {
+                         if (isReply) {
+                             binding.messageBox?.replyLayout?.rlMain?.visibility = View.GONE
+                             textMessage.metadata = metaData
+                             metaData = null
+                             metaData = JSONObject()
+                         }
+                        groupChatViewModel.sendTextMessage(textMessage)
                     }
+                    else {
+                        isEditMessage=false
+                        binding.messageBox?.editTextChatMessage?.setText("")
+                        groupChatViewModel.sendEditMessage(any as TextMessage,messageText)
 
-                    groupChatViewModel.sendTextMessage(textMessage)
+                    }
+                    groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid,true)
+
                     scrollFlag = true
                 }
             }

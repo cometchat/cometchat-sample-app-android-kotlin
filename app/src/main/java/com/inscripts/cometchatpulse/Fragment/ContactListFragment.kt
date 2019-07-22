@@ -13,16 +13,22 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.cometchat.pro.models.User
+import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Adapter.ContactListAdapter
 import com.inscripts.cometchatpulse.Helpers.CardItemTouchHelper
+import com.inscripts.cometchatpulse.Helpers.UnreadCountInterface
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
+import com.inscripts.cometchatpulse.Utils.Appearance
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.ViewModel.UserViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_contact_list.view.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -46,6 +52,7 @@ class ContactListFragment : Fragment() {
     private lateinit var user:User
 
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
@@ -54,13 +61,45 @@ class ContactListFragment : Fragment() {
         if (config.smallestScreenWidthDp < 600) {
             CommonUtil.setCardView(view.contact_cardview)
         }
-
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
         linearLayoutManager = LinearLayoutManager(activity)
         view.contact_recycler.layoutManager = linearLayoutManager
         view.contact_recycler.itemAnimator=DefaultItemAnimator()
         contactListAdapter = ContactListAdapter(activity,false)
         view.contact_recycler.adapter = contactListAdapter
+
+        if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
+            view.etSearch.setHintTextColor(StringContract.Color.black)
+            view.etSearch.setTextColor(StringContract.Color.black)
+
+        } else {
+            view.etSearch.setHintTextColor(StringContract.Color.white)
+            view.etSearch.setTextColor(StringContract.Color.white)
+        }
+
+        view. etSearch.background=CommonUtil.setDrawable(StringContract.Color.primaryDarkColor,16f)
+
+        view.etSearch.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                var searchString=s.toString()
+                if (searchString.isNotEmpty()) {
+                    searchUser(searchString)
+                }
+                else{
+                    userViewModel.fetchUser(LIMIT = 30,shimmer = view.contact_shimmer)
+                }
+            }
+
+        })
 
         try {
 
@@ -83,12 +122,28 @@ class ContactListFragment : Fragment() {
             e.printStackTrace()
         }
 
-
         userViewModel.fetchUser(LIMIT = 30,shimmer = view.contact_shimmer)
+
+        userViewModel.fetchUnreadCountForUser()
 
 
         userViewModel.userList.observe(this, Observer { users ->
             users?.let { contactListAdapter.setUser(it) }
+        })
+
+
+        userViewModel.filterUserList.observe(this, Observer {
+            filterList->filterList?.let {
+            contactListAdapter.setFilter(it) }
+        })
+
+
+        userViewModel.unReadCount.observe(this, Observer {unReadCount->
+            unReadCount?.let {
+                contactListAdapter.setUnreadCount(it)
+            }
+
+
         })
 
 
@@ -104,6 +159,16 @@ class ContactListFragment : Fragment() {
         })
 
         return view
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+    }
+
+     fun searchUser(userName:String){
+
+          userViewModel.searchUser(userName)
     }
 
     override fun onStart() {

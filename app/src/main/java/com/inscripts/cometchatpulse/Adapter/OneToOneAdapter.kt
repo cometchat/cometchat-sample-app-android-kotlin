@@ -6,6 +6,7 @@ import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
+import android.graphics.Typeface
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -197,7 +198,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
         try {
-            val date = Date(messagesList.get(messagesList.keyAt(var2))?.getSentAt()?.times(1000)!!)
+            val date = Date(messagesList[messagesList.keyAt(var2)]?.sentAt?.times(1000)!!)
 
             val formattedDate = DateUtil.getCustomizeDate(date.getTime())
 
@@ -240,8 +241,11 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
 
-                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
-                                return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null) {
+
+                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
+                                    return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+                                }
                             }
 
                             return StringContract.ViewType.RIGHT_TEXT_MESSAGE
@@ -287,9 +291,12 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
 
-                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
+                               if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null){
 
-                                return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
+
+                                    return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                                }
                             }
 
                             return StringContract.ViewType.LEFT_TEXT_MESSAGE
@@ -329,13 +336,12 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     fun setMessageList(messageList: MutableList<BaseMessage>) {
         for(baseMessage:BaseMessage in messageList){
             this.messagesList.put(baseMessage.id.toLong(),baseMessage)
+            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
         }
         notifyDataSetChanged()
-
     }
 
-
-    fun setLongClick(view: View, baseMessage: BaseMessage) {
+    private fun setLongClick(view: View, baseMessage: BaseMessage) {
         var message: Any? = null
         if (baseMessage is TextMessage)
             message = baseMessage
@@ -365,6 +371,8 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
 
         val baseMessage = messagesList.get(messagesList.keyAt(p1))
+
+
         val timeStampLong = messagesList.get(messagesList.keyAt(p1))?.sentAt
         var message: String? = null
         var filePath: String? = null
@@ -408,21 +416,42 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
                 setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
 
+                if (baseMessage.deletedAt!=0L){
+                    rightTextMessageHolder.binding.tvMessage.text="message deleted"
+                    rightTextMessageHolder.binding.tvMessage.setTypeface(null,Typeface.ITALIC)
+                    rightTextMessageHolder.binding.tvMessage.setTextColor(context.resources.getColor(R.color.deletedTextColor))
+                }
+                else {
+                    rightTextMessageHolder.binding.tvMessage.text = baseMessage.text
+                    rightTextMessageHolder.binding.tvMessage.setTextColor(StringContract.Color.white)
+                    rightTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
+                }
+
             }
 
             StringContract.ViewType.LEFT_TEXT_MESSAGE -> {
                 val leftTextMessageHolder = p0 as LeftTextMessageHolder
                 leftTextMessageHolder.binding.message = (baseMessage as TextMessage)
-                leftTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
                 leftTextMessageHolder.binding.senderName.typeface = StringContract.Font.status
                 leftTextMessageHolder.binding.timestamp.typeface = StringContract.Font.status
-                leftTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.leftMessageColor,
-                        PorterDuff.Mode.SRC_ATOP)
+                leftTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.leftMessageColor,PorterDuff.Mode.SRC_ATOP)
 
                 setLongClick(leftTextMessageHolder.binding.root, baseMessage)
 
-                if (baseMessage.readAt==0L)
+                if (baseMessage.readAt==0L) {
                     CometChat.markMessageAsRead(baseMessage)
+                }
+
+                if (baseMessage.deletedAt!=0L){
+                    leftTextMessageHolder.binding.tvMessage.text="message deleted"
+                    leftTextMessageHolder.binding.tvMessage.setTextColor(context.resources.getColor(R.color.deletedTextColor))
+                    leftTextMessageHolder.binding.tvMessage.setTypeface(null,Typeface.ITALIC)
+                }
+                else {
+                    leftTextMessageHolder.binding.tvMessage.text = baseMessage.text
+                    leftTextMessageHolder.binding.tvMessage.setTextColor(StringContract.Color.black)
+                    leftTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
+                }
 
             }
 
@@ -556,7 +585,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                                 { DateUtil.convertTimeStampToDurationTime(it) })
 
                             } else {
-                                val duration = timeStampLong?.let { audioDurations.get(it) }
+                                val duration = timeStampLong.let { audioDurations.get(it) }
                                 rightReplyMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                                 { DateUtil.convertTimeStampToDurationTime(it) })
 
@@ -1365,12 +1394,10 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
     private fun startIntent(baseMessage: MediaMessage) {
-
         val imageIntent = Intent(context, ImageViewActivity::class.java)
         imageIntent.putExtra(StringContract.IntentString.FILE_TYPE, baseMessage.type);
         imageIntent.putExtra(StringContract.IntentString.URL, (baseMessage.url))
         context.startActivity(imageIntent)
-
     }
 
     fun playAudio(message: String?, sentTimeStamp: Long, player: MediaPlayer,
@@ -1450,6 +1477,24 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
             messagesList.put(baseMessage.getId().toLong(), baseMessage)
             notifyDataSetChanged()
         }
+    }
+
+    fun setDeletedMessage(deletedMessage: BaseMessage) {
+        messagesList.put(deletedMessage.id.toLong(),deletedMessage)
+        notifyDataSetChanged()
+    }
+
+    fun setEditMessage(editMessage: BaseMessage) {
+        messagesList.put(editMessage.id.toLong(),editMessage)
+        notifyDataSetChanged()
+    }
+
+    fun setFilterList(it: MutableList<BaseMessage>) {
+        messagesList.clear()
+        for (baseMessage in it){
+            messagesList.put(baseMessage.id.toLong(),baseMessage)
+        }
+        notifyDataSetChanged()
     }
 
 }

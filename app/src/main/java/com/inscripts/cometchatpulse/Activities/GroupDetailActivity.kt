@@ -15,6 +15,7 @@ import com.inscripts.cometchatpulse.Adapter.GroupOptionAdapter
 import com.inscripts.cometchatpulse.Extensions.setTitleTypeface
 import com.inscripts.cometchatpulse.Fragment.BanMemberFragment
 import com.inscripts.cometchatpulse.Fragment.MemberFragment
+import com.inscripts.cometchatpulse.Fragment.UserFragment
 import com.inscripts.cometchatpulse.Helpers.OnOptionClickListener
 import com.inscripts.cometchatpulse.Pojo.GroupOption
 import com.inscripts.cometchatpulse.R
@@ -91,7 +92,19 @@ class GroupDetailActivity : AppCompatActivity() {
                                 .replace(R.id.group_frame, memberListFragment).addToBackStack(null).commit()
                     }
 
-                    1 -> {
+                    1->{
+                       val userFragment=UserFragment().apply {
+                           arguments=Bundle().apply {
+                               putString(StringContract.IntentString.GROUP_ID,groupId)
+                               putString(StringContract.IntentString.USER_ID,ownerUid)
+                               putString(StringContract.IntentString.USER_SCOPE,userScope)
+                           }
+                       }
+                        supportFragmentManager.beginTransaction()
+                                .replace(R.id.group_frame, userFragment).addToBackStack(null).commit()
+                    }
+
+                    2 -> {
                         val banMemberListFragment = BanMemberFragment().apply {
                             arguments = Bundle().apply {
                                 putString(StringContract.IntentString.GROUP_ID, groupId)
@@ -102,11 +115,11 @@ class GroupDetailActivity : AppCompatActivity() {
                         supportFragmentManager.beginTransaction()
                                 .replace(R.id.group_frame, banMemberListFragment).addToBackStack(null).commit()
                     }
-                    2 -> {
+                    3 -> {
                         showDialog(getString(R.string.leave_group_waring)+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
                                 getString(R.string.leave_group),position)
                     }
-                    3 -> {
+                    4 -> {
                         showDialog(getString(R.string.delete_group_warning)+intent?.getStringExtra(StringContract.IntentString.GROUP_NAME),
                                 getString(R.string.delete_group),position)
                     }
@@ -140,6 +153,9 @@ class GroupDetailActivity : AppCompatActivity() {
     private fun GroupOptionItemList(): MutableList<GroupOption> {
 
         groupOptionList.add(GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
+        if(userScope==CometChatConstants.SCOPE_ADMIN||userScope==CometChatConstants.SCOPE_MODERATOR) {
+            groupOptionList.add(GroupOption(getString(R.string.add_members), ContextCompat.getDrawable(this, R.drawable.ic_person_add_black_24dp)))
+        }
         groupOptionList.add(GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
         groupOptionList.add(GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
          if (userScope==CometChatConstants.SCOPE_ADMIN) {

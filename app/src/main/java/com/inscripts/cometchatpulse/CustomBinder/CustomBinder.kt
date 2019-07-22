@@ -55,7 +55,6 @@ fun setDeliveryStatus(deliveryStatusView: CircleImageView, deliveryStatus: Int) 
 }
 
 
-
 @BindingAdapter(value = ["setVideoMessage", "setContext"])
 fun setVideoMessage(videoVideoView: VideoView, url: String, context: Context) {
     videoVideoView.setVideoPath(url)
@@ -79,7 +78,6 @@ fun setOptionImage(ivOption: CircleImageView,drawable: Drawable) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
-
 
 }
 

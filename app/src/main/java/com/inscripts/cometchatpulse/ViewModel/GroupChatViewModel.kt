@@ -15,23 +15,43 @@ import java.io.File
 
 class GroupChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository = GroupRepository()
 
     private val messageRepository: MessageRepository
 
     val messageList: MutableLiveData<MutableList<BaseMessage>>
 
+    val filterMessageList: MutableLiveData<MutableList<BaseMessage>>
+
     val groupMemberList: MutableLiveData<MutableMap<String,GroupMember>>
 
     val banMemberList: MutableLiveData<MutableMap<String,GroupMember>>
 
+    var liveReadReceipts: MutableLiveData<MessageReceipt>
+
+    var liveDeliveryReceipts: MutableLiveData<MessageReceipt>
+
+    var liveEditMessage:MutableLiveData<BaseMessage>
+
+    var liveDeletedMessage:MutableLiveData<BaseMessage>
+
+    var liveStartTypingIndicator: MutableLiveData<TypingIndicator>
+
+    var liveEndTypingIndicator: MutableLiveData<TypingIndicator>
+
 
     init {
-        groupRepository = GroupRepository()
         messageRepository = MessageRepository()
         banMemberList = groupRepository.banMemberLiveData
         messageList = messageRepository.groupMessageList
         groupMemberList = groupRepository.groupMemberLiveData
+        liveReadReceipts = messageRepository.liveReadReceipts
+        liveDeliveryReceipts = messageRepository.liveDeliveryReceipts
+        liveDeletedMessage=messageRepository.liveMessageDeleted
+        liveEditMessage=messageRepository.liveMessageEdited
+        liveStartTypingIndicator = messageRepository.liveStartTypingIndicator
+        liveEndTypingIndicator = messageRepository.liveEndTypingIndicator
+        filterMessageList=messageRepository.filterLivegroupMessageList
     }
 
     fun fetchMessage(LIMIT: Int, guid: String) {
@@ -108,6 +128,24 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun updateScope(fragment:MemberFragment,uid: String, guid: String,scope:String) {
         groupRepository.updateScope(fragment,uid,guid,scope)
+    }
+
+    fun deleteMessage(textMessage: TextMessage) {
+        messageRepository.deleteMessage(textMessage)
+    }
+
+    fun sendEditMessage(baseMessage: BaseMessage, messageText: String) {
+         messageRepository.editMessage(baseMessage,messageText)
+    }
+
+    fun sendTypingIndicator(uid: String?,isEndTyping:Boolean=false) {
+        val typingIndicator = uid?.let { TypingIndicator(it, CometChatConstants.RECEIVER_TYPE_GROUP) }
+        typingIndicator?.let { messageRepository.sendTypingIndicator(it, isEndTyping) }
+    }
+
+    fun searchMessage(s: String, guid: String) {
+
+        messageRepository.searchGroupMessage(s,guid)
     }
 
 }

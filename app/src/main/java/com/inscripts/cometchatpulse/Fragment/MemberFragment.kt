@@ -85,7 +85,7 @@ class MemberFragment : Fragment() {
 
         (activity as AppCompatActivity).setSupportActionBar(myView.member_toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        myView.member_toolbar.title = "Group Members"
+        myView.member_toolbar.title = getString(R.string.group_members)
 
         myView.member_toolbar.setTitleTypeface(StringContract.Font.title)
 

@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.location.LocationManager
 import android.media.AudioManager
 import android.net.ConnectivityManager
@@ -42,6 +44,16 @@ class CommonUtil {
 
         }
 
+
+         fun setDrawable(color:Int,radius:Float): Drawable? {
+
+            val drawable= GradientDrawable()
+            drawable.shape= GradientDrawable.RECTANGLE
+            drawable.cornerRadius= radius
+            drawable.setColor(color)
+
+            return drawable
+        }
 
 
 

@@ -1,10 +1,12 @@
 package com.inscripts.cometchatpulse.ViewModel
 
+import android.app.Activity
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
+import android.view.View
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.models.User
@@ -19,9 +21,13 @@ import kotlin.coroutines.CoroutineContext
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
+    var unReadCount: MutableLiveData<MutableMap<String, Int>> = MutableLiveData()
+
     private val userRepository: UserRepository = UserRepository()
 
     var userList: MutableLiveData<MutableMap<String,User>>
+
+    var filterUserList: MutableLiveData<MutableMap<String,User>>
 
     var blockedUserList:MutableLiveData<MutableMap<String,User>> = MutableLiveData()
 
@@ -34,6 +40,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         userList = userRepository.usersList
         user=userRepository.user
         blockedUser=userRepository.blockedUser
+        filterUserList=userRepository.filterUsersList
     }
 
     fun fetchUser(LIMIT: Int,shimmer: ShimmerFrameLayout?){
@@ -66,5 +73,19 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     fun unBlockUser(user: User) {
        userRepository.unBlockUser(user)
     }
+
+    fun searchUser(userName: String) {
+        userRepository.searchUser(userName)
+    }
+
+    fun fetchUnreadCountForUser() {
+        unReadCount=userRepository.getUnreadCount()
+    }
+
+    fun addMembertoGroup(activity: Activity,guidList: MutableSet<String>, guid: String) {
+        userRepository.addMember(activity,guidList,guid)
+    }
+
+
 }
 

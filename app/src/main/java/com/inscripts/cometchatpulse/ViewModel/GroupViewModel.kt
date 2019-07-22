@@ -25,9 +25,13 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
 
     private val messageRepository:MessageRepository
 
-    val groupList:MutableLiveData<MutableList<Group>>
+    val groupList:MutableLiveData<MutableMap<String,Group>>
+
+    val filterGroupList:MutableLiveData<MutableMap<String,Group>>
 
     val groupMemberList:MutableLiveData<MutableMap<String,GroupMember>>
+
+    val unreadCountForGroup:MutableLiveData<MutableMap<String,Int>>
 
 
 
@@ -35,7 +39,10 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
         groupRepository= GroupRepository()
         messageRepository= MessageRepository()
         groupList=groupRepository.groupList
+        unreadCountForGroup=groupRepository.unreadCountGroup
         groupMemberList=groupRepository.groupMemberLiveData
+        filterGroupList=groupRepository.filterGroupList
+
     }
 
     fun fetchGroups(LIMIT:Int,shimmerFrameLayout: ShimmerFrameLayout?){
@@ -75,6 +82,14 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addCallListener(applicationContext: Context, calL_EVENT_LISTENER: String, relative: RelativeLayout?) {
          messageRepository.addCallListener(applicationContext,calL_EVENT_LISTENER,relative)
+    }
+
+    fun searchGroup(s: String) {
+        groupRepository.searchGroup(s)
+    }
+
+    fun fetchGroupUnreadCount() {
+        groupRepository.fetchUnreadCount()
     }
 
 

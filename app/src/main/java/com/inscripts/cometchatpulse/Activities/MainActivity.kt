@@ -9,11 +9,15 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -33,10 +37,7 @@ import com.inscripts.cometchatpulse.Fragment.ContactListFragment
 import com.inscripts.cometchatpulse.Fragment.GroupFragment
 import com.inscripts.cometchatpulse.Fragment.GroupListFragment
 import com.inscripts.cometchatpulse.Fragment.OneToOneFragment
-import com.inscripts.cometchatpulse.Helpers.ChildClickListener
-import com.inscripts.cometchatpulse.Helpers.CustomAlertDialogHelper
-import com.inscripts.cometchatpulse.Helpers.OnAlertDialogButtonClickListener
-import com.inscripts.cometchatpulse.Helpers.OnBackArrowClickListener
+import com.inscripts.cometchatpulse.Helpers.*
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.Repository.GroupRepository
 import com.inscripts.cometchatpulse.StringContract
@@ -46,10 +47,13 @@ import com.inscripts.cometchatpulse.ViewModel.GroupChatViewModel
 import com.inscripts.cometchatpulse.ViewModel.GroupViewModel
 import com.inscripts.cometchatpulse.ViewModel.OnetoOneViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.record_audio.*
 
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener,
-        ChildClickListener, OnBackArrowClickListener, OnAlertDialogButtonClickListener, GroupRepository.onGroupJoin {
+        ChildClickListener, OnBackArrowClickListener, OnAlertDialogButtonClickListener,GroupRepository.onGroupJoin {
+
+    private var fragment : Fragment=ContactListFragment()
 
     private var twoPane: Boolean = false
 
@@ -69,6 +73,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private val TAG="MainActivity"
 
+    private var selectedPage=0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -82,7 +88,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         groupChatViewModel = ViewModelProviders.of(this).get(GroupChatViewModel::class.java)
         oneToOneChatViewModel = ViewModelProviders.of(this).get(OnetoOneViewModel::class.java)
 
-
         setSupportActionBar(toolbar)
         supportActionBar?.title = ""
         toolbar.title = ""
@@ -95,25 +100,34 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         overrideFont(this,navigation)
 
 
+
+
         if (main_frame != null) {
             main_frame.setBackgroundColor(StringContract.Color.primaryColor)
         }
+
         toolbar.overflowIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
-        toolbar_title?.setTypeface(StringContract.Font.title)
+
+        toolbar_title?.typeface = StringContract.Font.title
+
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
+
             toolbar_title.setTextColor(StringContract.Color.black)
+
         } else {
+
             toolbar_title.setTextColor(StringContract.Color.white)
         }
         toolbar_title?.text = getString(R.string.contacts)
 
         if (frame_container_detail != null) {
-
             twoPane = true
         }
+
         CommonUtil.setStatusBarColor(this)
         
     }
+
 
     private fun overrideFont(context: Context, v: View) {
         val typeface = StringContract.Font.status
@@ -122,7 +136,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 for (i in 0..v.childCount) {
                     overrideFont(context, v.getChildAt(i))
                 }
-
             } else if (v is TextView) {
                 v.typeface = typeface
             }
@@ -198,8 +211,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         } else {
             colors = intArrayOf(StringContract.Color.inactiveColor, StringContract.Color.primaryColor)
         }
-
-
         return ColorStateList(states, colors)
     }
 
@@ -210,10 +221,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     }
 
-      fun  hideKeyboard() {
+    private fun  hideKeyboard() {
         val inputManager =getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         // check if no view has focus:
+
         val  currentFocusedView = currentFocus
         if (currentFocusedView != null) {
             inputManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -221,7 +233,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     override fun OnChildClick(t: Any) {
-
 
         if (twoPane) {
             resId = R.id.frame_container_detail
@@ -285,7 +296,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 } else {
                     try {
                         alertDialog?.dismiss()
-                        group.setPassword(groupPassword)
+                        group.password = groupPassword
 
                         groupViewModel.joinGroup(group, progressDialog, resId, this@MainActivity)
 
@@ -384,8 +395,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     }
 
-
-
     override fun onResume() {
         super.onResume()
         Log.d(TAG,"onResume: ")
@@ -404,22 +413,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         startGroupChatFragment(group, resId)
     }
 
-
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-
-        var fragment: Fragment? = null
 
         when (p0.itemId) {
 
             R.id.menu_contacts -> {
+
+                selectedPage=0
                 fragment = ContactListFragment()
                 toolbar_title?.text = getString(R.string.contacts)
                 position = R.id.menu_contacts
-
             }
 
             R.id.menu_group -> {
-
+                selectedPage=1
                 fragment = GroupListFragment()
                 toolbar_title?.text = getString(R.string.groups)
                 position = R.id.menu_group

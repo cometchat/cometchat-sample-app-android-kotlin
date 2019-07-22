@@ -22,15 +22,27 @@ import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.Fragment.MemberFragment
 import java.lang.Exception
+import com.cometchat.pro.models.BaseMessage
+import com.cometchat.pro.models.TextMessage
+import com.cometchat.pro.models.MediaMessage
+import com.cometchat.pro.core.MessagesRequest
+
+
+
+
 
 
 class GroupRepository {
 
-    var groupList: MutableLiveData<MutableList<Group>> = MutableLiveData()
+    var groupList: MutableLiveData<MutableMap<String,Group>> = MutableLiveData()
+
+    var filterGroupList: MutableLiveData<MutableMap<String,Group>> = MutableLiveData()
 
     var group: MutableLiveData<Group> = MutableLiveData()
 
-    var groupListMutable = mutableListOf<Group>()
+    var groupListMutable = mutableMapOf<String,Group>()
+
+    var groupFilterList = mutableMapOf<String,Group>()
 
     var groupMemberList = mutableMapOf<String,GroupMember>()
 
@@ -39,6 +51,8 @@ class GroupRepository {
     var groupMemberLiveData:MutableLiveData<MutableMap<String,GroupMember>> = MutableLiveData()
 
     var banMemberLiveData:MutableLiveData<MutableMap<String,GroupMember>> = MutableLiveData()
+
+    var unreadCountGroup:MutableLiveData<MutableMap<String,Int>> = MutableLiveData()
 
     var groupRequest: GroupsRequest? = null
 
@@ -58,7 +72,14 @@ class GroupRepository {
 
                 groupRequest!!.fetchNext(object : CometChat.CallbackListener<List<Group>>() {
                     override fun onSuccess(p0: List<Group>?) {
-                        p0?.let { groupListMutable.addAll(it) }
+
+                           if (p0!=null) {
+                               for (group: Group in p0) {
+                                   groupListMutable[group.guid] = group
+                               }
+                               groupList.value=groupListMutable
+                           }
+
                         groupList.value = groupListMutable
                         shimmerFrameLayout?.stopShimmer()
                         shimmerFrameLayout?.visibility=View.GONE
@@ -66,17 +87,19 @@ class GroupRepository {
                     }
 
                     override fun onError(p0: CometChatException?) {
-                        Toast.makeText(CometChatPro.applicationContext(),p0?.message,Toast.LENGTH_SHORT).show()
-                        shimmerFrameLayout?.stopShimmer()
-                        shimmerFrameLayout?.visibility=View.GONE
+                        Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                     }
 
                 })
             } else {
                 groupRequest!!.fetchNext(object : CometChat.CallbackListener<List<Group>>() {
                     override fun onSuccess(p0: List<Group>?) {
-                        p0?.let { groupListMutable.addAll(it) }
-                        groupList.value = groupListMutable
+                        if (p0!=null){
+                            for (group:Group in p0){
+                                groupListMutable[group.guid]=group
+                            }
+                            groupList.value=groupListMutable
+                        }
                     }
 
                     override fun onError(p0: CometChatException?) {
@@ -217,7 +240,6 @@ class GroupRepository {
 
     @WorkerThread
     fun clearjob() {
-
     }
 
     @WorkerThread
@@ -246,8 +268,10 @@ class GroupRepository {
                 (context as CreateGroupActivity).finish()
                 Toast.makeText(CometChatPro.applicationContext(),p0?.groupType+" group created ",Toast.LENGTH_SHORT).show()
 
-                p0?.let { groupListMutable.add(it) }
-                groupList.value = groupListMutable
+                  if (p0!=null) {
+                      groupListMutable.put(p0.guid, p0)
+                      groupList.value = groupListMutable
+                  }
             }
 
             override fun onError(p0: CometChatException?) {
@@ -342,6 +366,43 @@ class GroupRepository {
 
             override fun onError(p0: CometChatException?) {
                 Toast.makeText(CometChatPro.applicationContext(),p0?.message,Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+
+    fun searchGroup(s: String) {
+
+        groupFilterList.clear()
+            val groupSearchRequest = GroupsRequest.GroupsRequestBuilder().setSearchKeyWord(s).setLimit(100).build()
+
+            groupSearchRequest?.fetchNext(object : CometChat.CallbackListener<List<Group>>() {
+
+                override fun onSuccess(p0: List<Group>?) {
+                     if (p0!=null) {
+                         for (group: Group in p0) {
+                          groupFilterList.put(group.guid,group)
+                         }
+                         filterGroupList.value=groupFilterList
+                     }
+                }
+
+                override fun onError(p0: CometChatException?) {
+                  Log.d("","onError: groupSearchRequest ${p0?.message}")
+                }
+
+            })
+    }
+
+    fun fetchUnreadCount() {
+        CometChat.getUnreadMessageCountForAllGroups(object : CometChat.CallbackListener<HashMap<String, Int>>(){
+            override fun onSuccess(p0: HashMap<String, Int>?) {
+                unreadCountGroup.value=p0
+            }
+
+            override fun onError(p0: CometChatException?) {
+               Log.d("fetchUnreadCount","onError: ${p0?.message}")
             }
 
         })

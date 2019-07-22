@@ -70,7 +70,7 @@ class BanMemberFragment : Fragment() {
 
         (activity as AppCompatActivity).setSupportActionBar(my.banmember_toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        my.banmember_toolbar.title = "Banned Members"
+        my.banmember_toolbar.title = getString(R.string.banned_members)
         my.banmember_toolbar.setTitleTypeface(StringContract.Font.title)
 
         my.banmember_toolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint,

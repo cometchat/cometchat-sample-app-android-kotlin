@@ -10,9 +10,9 @@ class StringContract {
 
         companion object {
 
-          const val APP_ID: String = "XXXXXXXXXXXXX"
+          const val APP_ID: String = "XXXXXXXXXXXXXX"
 
-          const val API_KEY: String = "XXXXXXXXXXXXX"
+          const val API_KEY: String = "XXXXXXXXXXXXXX"
 
           lateinit var theme: Appearance.AppTheme
 
@@ -73,8 +73,7 @@ class StringContract {
             val GROUP_DESCRIPTION:String="description"
 
             val USER_SCOPE: String="scope"
-
-
+            
         }
     }
 
@@ -123,7 +122,6 @@ class StringContract {
 
 
     class Font {
-
 
         companion object {
 
@@ -192,6 +190,8 @@ class StringContract {
 
             val CALL_EVENT_LISTENER = "call_event_listener"
         }
+
+
 
 
     }

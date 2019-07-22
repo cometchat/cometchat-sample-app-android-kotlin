@@ -15,11 +15,12 @@ class ImageViewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         CommonUtil.setStatusBarColor(this)
+
         binding=DataBindingUtil.setContentView(this,R.layout.activity_image_view)
 
         binding.context=this
-
 
         binding.type=intent?.getStringExtra(StringContract.IntentString.FILE_TYPE)
 

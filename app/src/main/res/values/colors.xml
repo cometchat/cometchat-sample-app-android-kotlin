@@ -4,8 +4,8 @@
     <color name="primaryLightColor">#69b3ff</color>
     <color name="primaryDarkColor">#0058cb</color>
 
-
     <color name="primaryTextColor">#000000</color>
+    <color name="deletedTextColor">#A29B9B</color>
     <color name="grey">#CACACC</color>
     <color name="popup">#fafafa</color>
     <color name="red_600">#E53935</color>

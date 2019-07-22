@@ -7,4 +7,14 @@
         app:showAsAction="always"
         android:title=""/>
 
+    <item android:id="@+id/delete"
+        app:showAsAction="always"
+        android:title=""
+        android:icon="@drawable/ic_delete_black_24dp"/>
+
+    <item android:title=""
+        android:icon="@drawable/ic_edit_black_24dp"
+        app:showAsAction="always"
+        android:id="@+id/edit"/>
+
 </menu>

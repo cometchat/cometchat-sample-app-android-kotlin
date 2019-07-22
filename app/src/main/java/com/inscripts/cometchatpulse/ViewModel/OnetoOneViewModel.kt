@@ -35,12 +35,23 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
 
     var liveDeliveryReceipts: MutableLiveData<MessageReceipt>
 
+    var liveEditMessage:MutableLiveData<BaseMessage>
+
+    var livefilter:MutableLiveData<MutableList<BaseMessage>>
+
+    var liveDeletedMessage:MutableLiveData<BaseMessage>
+
     init {
         messageList = messageRepository.onetoOneMessageList
         liveStartTypingIndicator = messageRepository.liveStartTypingIndicator
         liveEndTypingIndicator = messageRepository.liveEndTypingIndicator
         liveReadReceipts = messageRepository.liveReadReceipts
         liveDeliveryReceipts = messageRepository.liveDeliveryReceipts
+        liveDeletedMessage=messageRepository.liveMessageDeleted
+        liveEditMessage=messageRepository.liveMessageEdited
+        livefilter=messageRepository.filterLiveonetoOneMessageList
+
+
         user = messageRepository.user
 
     }
@@ -128,6 +139,18 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
           uidList.add(userId)
         userRepository.blockUser(uidList)
 
+    }
+
+    fun deleteMessage(textMessage:TextMessage) {
+       messageRepository.deleteMessage(textMessage)
+    }
+
+    fun sendEditMessage(any: BaseMessage, messageText: String) {
+        messageRepository.editMessage(any,messageText)
+    }
+
+    fun searchMessage(s: String, userId: String) {
+        messageRepository.searchMessage(s,userId)
     }
 
 }

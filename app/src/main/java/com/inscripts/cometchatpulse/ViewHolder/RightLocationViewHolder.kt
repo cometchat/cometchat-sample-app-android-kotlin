@@ -37,7 +37,7 @@ class RightLocationViewHolder(val binding: RightLocationBinding):
         setMapLocation()
     }
 
-    fun bindView(pos:Int,messageList: LongSparseArray<BaseMessage>){
+    fun bindView(pos: Int,messageList: LongSparseArray<BaseMessage>){
         val item =messageList.get(messageList.keyAt(pos))
         binding.root.tag=this
         binding.map.tag=item

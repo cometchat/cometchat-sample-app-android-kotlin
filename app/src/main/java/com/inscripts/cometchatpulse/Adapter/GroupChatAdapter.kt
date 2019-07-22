@@ -6,11 +6,13 @@ import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
+import android.graphics.Typeface
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Handler
+import android.support.v4.content.ContextCompat
 import android.support.v4.util.LongSparseArray
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
@@ -25,10 +27,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
+import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.ImageViewActivity
 import com.inscripts.cometchatpulse.AsyncTask.DownloadFile
 import com.inscripts.cometchatpulse.CometChatPro
+import com.inscripts.cometchatpulse.CustomView.CircleImageView
 import com.inscripts.cometchatpulse.CustomView.StickyHeaderAdapter
 import com.inscripts.cometchatpulse.Helpers.CCPermissionHelper
 import com.inscripts.cometchatpulse.Helpers.OnClickEvent
@@ -46,7 +50,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         RecyclerView.Adapter<RecyclerView.ViewHolder>(), StickyHeaderAdapter<TextHeaderHolder> {
 
 
-    private var messagesList: MutableList<BaseMessage> = mutableListOf()
+    private var messagesList: LongSparseArray<BaseMessage> = LongSparseArray()
 
     lateinit var viewHolder: RecyclerView.ViewHolder
 
@@ -183,7 +187,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     override fun getHeaderId(var1: Int): Long {
 
-        return java.lang.Long.parseLong(DateUtil.getDateId(messagesList.get(var1).getSentAt() * 1000))
+        return java.lang.Long.parseLong(DateUtil.getDateId(messagesList.get(messagesList.keyAt(var1))?.getSentAt()!! * 1000))
     }
 
     override fun onCreateHeaderViewHolder(var1: ViewGroup): TextHeaderHolder {
@@ -193,7 +197,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
-        val date = Date(messagesList.get(var2).getSentAt() * 1000)
+        val date = Date(messagesList[messagesList.keyAt(var2)]?.sentAt?.times(1000)!!)
 
         val formattedDate = DateUtil.getCustomizeDate(date.getTime())
 
@@ -220,12 +224,12 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     override fun getItemCount(): Int {
 
-        return messagesList.size
+        return messagesList.size()
     }
 
     override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
-        val baseMessage = messagesList.get(p1)
-        val timeStampLong = messagesList.get(p1).sentAt
+        val baseMessage = messagesList.get(messagesList.keyAt(p1))
+        val timeStampLong =baseMessage?.sentAt
         var message: String? = null
         var mediaFile: String? = null
 
@@ -263,6 +267,21 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightTextMessageHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.rightMessageColor, PorterDuff.Mode.SRC_ATOP)
                 setLongClick(rightTextMessageHolder.binding.root,baseMessage)
+
+                if (baseMessage.deletedAt!=0L){
+                    rightTextMessageHolder.binding.tvMessage.text="message deleted"
+                    rightTextMessageHolder.binding.tvMessage.setTypeface(null, Typeface.ITALIC)
+                    rightTextMessageHolder.binding.tvMessage.setTextColor(context.resources.getColor(R.color.deletedTextColor))
+                }
+                else {
+                    rightTextMessageHolder.binding.tvMessage.text = baseMessage.text
+                    rightTextMessageHolder.binding.tvMessage.setTextColor(StringContract.Color.white)
+                    rightTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
+                }
+
+                 setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+                 setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+
             }
 
             StringContract.ViewType.LEFT_TEXT_MESSAGE -> {
@@ -273,6 +292,21 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftTextMessageHolder.binding.timestamp.typeface = StringContract.Font.status
                 leftTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.leftMessageColor, PorterDuff.Mode.SRC_ATOP)
                 setLongClick(leftTextMessageHolder.binding.root,baseMessage)
+
+                if (baseMessage.getReadByMeAt() == 0L) {
+                    CometChat.markMessageAsRead(baseMessage)
+                }
+
+                if (baseMessage.deletedAt!=0L){
+                    leftTextMessageHolder.binding.tvMessage.text="message deleted"
+                    leftTextMessageHolder.binding.tvMessage.setTextColor(context.resources.getColor(R.color.deletedTextColor))
+                    leftTextMessageHolder.binding.tvMessage.setTypeface(null,Typeface.ITALIC)
+                }
+                else {
+                    leftTextMessageHolder.binding.tvMessage.text = baseMessage.text
+                    leftTextMessageHolder.binding.tvMessage.setTextColor(StringContract.Color.black)
+                    leftTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
+                }
 
             }
 
@@ -289,6 +323,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                 })
 
+                if (baseMessage.getReadByMeAt() == 0L) {
+                    CometChat.markMessageAsRead(baseMessage)
+                }
+
                setLongClick(leftImageVideoMessageHolder.binding.imageMessage,baseMessage)
 
             }
@@ -304,7 +342,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-
+                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.imageMessage,baseMessage)
             }
 
@@ -321,6 +360,9 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     rightFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
                     val finalMediaFile = mediaFile
                     setLongClick(rightFileViewHolder.binding.root,baseMessage)
+                    setDeliveryIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
+                    setReadIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
+
                     rightFileViewHolder.binding.fileName.setOnClickListener(View.OnClickListener { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile))) })
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -333,7 +375,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 val rightLocationViewHolder = p0 as RightLocationViewHolder
                 rightLocationViewHolder.binding.message = baseMessage as TextMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-//                rightLocationViewHolder.bindView(p1, messagesList)
+                rightLocationViewHolder.bindView(p1, messagesList)
+                setDeliveryIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
+                setReadIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
+
 
             }
 
@@ -341,7 +386,11 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 val leftLocationViewHolder = p0 as LeftLocationViewHolder
                 leftLocationViewHolder.binding.message = baseMessage as TextMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-//                leftLocationViewHolder.bindView(p1, messagesList)
+                leftLocationViewHolder.bindView(p1, messagesList)
+
+                if (baseMessage.getReadByMeAt() == 0L) {
+                    CometChat.markMessageAsRead(baseMessage)
+                }
             }
 
             StringContract.ViewType.RIGHT_TEXT_REPLY_MESSAGE -> {
@@ -351,7 +400,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-
+                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is TextMessage) {
 
                     rightReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
@@ -409,7 +459,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                 }
 
-                setLongClick(rightReplyMessageHolder.binding.root, baseMessage)
+                baseMessage?.let { setLongClick(rightReplyMessageHolder.binding.root, it) }
 
             }
 
@@ -420,6 +470,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
+                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
 
                 if (baseMessage is MediaMessage) {
 
@@ -459,7 +511,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                         try {
 
-                            if (GroupChatAdapter.audioDurations.get(timeStampLong) == null) {
+                            if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
                                 player?.reset()
                                 try {
                                     player?.setDataSource(filePath)
@@ -468,12 +520,12 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                     e.printStackTrace()
                                 }
                                 val duration = player?.duration
-                                GroupChatAdapter.audioDurations.put(timeStampLong, duration)
+                                timeStampLong?.let { GroupChatAdapter.audioDurations.put(it, duration) }
                                 rightReplyMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                                 { DateUtil.convertTimeStampToDurationTime(it) })
 
                             } else {
-                                val duration = GroupChatAdapter.audioDurations.get(timeStampLong)
+                                val duration = timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) }
                                 rightReplyMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                                 { DateUtil.convertTimeStampToDurationTime(it) })
 
@@ -530,8 +582,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                     } else {
                                         rightReplyMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_black_24dp)
                                         player?.let {
-                                            playAudio(filePath, timeStampLong, it, rightReplyMessageHolder.binding.playButton,
-                                                    rightReplyMessageHolder.binding.audioLength, rightReplyMessageHolder.binding.audioSeekBar)
+                                            timeStampLong?.let { it1 ->
+                                                playAudio(filePath, it1, it, rightReplyMessageHolder.binding.playButton,
+                                                        rightReplyMessageHolder.binding.audioLength, rightReplyMessageHolder.binding.audioSeekBar)
+                                            }
                                         }
                                     }
 
@@ -588,7 +642,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
                 }
 
-                setLongClick(rightReplyMessageHolder.binding.root, baseMessage)
+                baseMessage?.let { setLongClick(rightReplyMessageHolder.binding.root, it) }
             }
 
             StringContract.ViewType.LEFT_TEXT_REPLY_MESSAGE -> {
@@ -597,6 +651,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftReplyMessageHolder.binding.message = baseMessage
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
+
+                if (baseMessage!=null&&baseMessage.getReadByMeAt() == 0L) {
+                    baseMessage.let { CometChat.markMessageAsRead(it) }
+                }
 
                 if (baseMessage is TextMessage) {
 
@@ -652,7 +710,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                 }
 
-                setLongClick(leftReplyMessageHolder.binding.root, baseMessage)
+                baseMessage?.let { setLongClick(leftReplyMessageHolder.binding.root, it) }
             }
 
             StringContract.ViewType.LEFT_MEDIA_REPLY_MESSAGE -> {
@@ -662,6 +720,9 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
+                if (baseMessage!=null&&baseMessage.getReadByMeAt() == 0L) {
+                    baseMessage?.let { CometChat.markMessageAsRead(it) }
+                }
                 if (baseMessage is MediaMessage) {
 
                     when {
@@ -700,7 +761,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                             try {
 
-                                if (GroupChatAdapter.audioDurations.get(timeStampLong) == null) {
+                                if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
                                     player?.reset()
                                     try {
                                         player?.setDataSource(baseMessage.url)
@@ -709,7 +770,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                         e.printStackTrace()
                                     }
                                     val duration = player?.duration
-                                    GroupChatAdapter.audioDurations.put(timeStampLong, duration)
+                                    timeStampLong?.let { GroupChatAdapter.audioDurations.put(it, duration) }
                                     leftReplyMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                                     { DateUtil.convertTimeStampToDurationTime(it) })
 
@@ -769,9 +830,11 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                         } else {
                                             leftReplyMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_white_24dp)
                                             player?.let {
-                                                playAudio(baseMessage.url, timeStampLong, it, leftReplyMessageHolder.binding.playButton,
-                                                        leftReplyMessageHolder.binding.audioLength,
-                                                        leftReplyMessageHolder.binding.audioSeekBar)
+                                                timeStampLong?.let { it1 ->
+                                                    playAudio(baseMessage.url, it1, it, leftReplyMessageHolder.binding.playButton,
+                                                            leftReplyMessageHolder.binding.audioLength,
+                                                            leftReplyMessageHolder.binding.audioSeekBar)
+                                                }
                                             }
                                         }
 
@@ -826,7 +889,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
                 }
 
-                setLongClick(leftReplyMessageHolder.binding.root, baseMessage)
+                baseMessage?.let { setLongClick(leftReplyMessageHolder.binding.root, it) }
             }
 
             StringContract.ViewType.LEFT_FILE_MESSAGE -> {
@@ -843,6 +906,9 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     leftFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
                     leftFileViewHolder.binding.senderName.typeface = StringContract.Font.status
                     setLongClick(leftFileViewHolder.binding.root,baseMessage)
+                    if (baseMessage.getReadByMeAt() == 0L) {
+                        CometChat.markMessageAsRead(baseMessage)
+                    }
                     leftFileViewHolder.binding.fileName.setOnClickListener({ context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile))) })
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -870,6 +936,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                 })
 
+                if (baseMessage.getReadByMeAt() == 0L) {
+                    CometChat.markMessageAsRead(baseMessage)
+                }
+
                 setLongClick(leftImageVideoMessageHolder.binding.root,baseMessage)
             }
 
@@ -893,8 +963,9 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-
-                setLongClick(rightImageVideoMessageHolder.binding.root,baseMessage)
+                 setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                 setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                 setLongClick(rightImageVideoMessageHolder.binding.root,baseMessage)
             }
 
 
@@ -906,10 +977,11 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightAudioMessageHolder.binding.timeStamp.typeface = StringContract.Font.status
                 rightAudioMessageHolder.binding.audioLength.typeface = StringContract.Font.status
                 setLongClick(rightAudioMessageHolder.binding.root, baseMessage)
-
+                setDeliveryIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
+                setReadIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
                 try {
 
-                    if (GroupChatAdapter.audioDurations.get(timeStampLong) == null) {
+                    if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
                         player?.reset()
                         try {
                             player?.setDataSource(filePath)
@@ -918,12 +990,12 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                             e.printStackTrace()
                         }
                         val duration = player?.duration
-                        GroupChatAdapter.audioDurations.put(timeStampLong, duration)
+                        timeStampLong?.let { GroupChatAdapter.audioDurations.put(it, duration) }
                         rightAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                         { DateUtil.convertTimeStampToDurationTime(it) })
 
                     } else {
-                        val duration = GroupChatAdapter.audioDurations.get(timeStampLong)
+                        val duration = timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) }
                         rightAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                         { DateUtil.convertTimeStampToDurationTime(it) })
 
@@ -980,8 +1052,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 } else {
                                     rightAudioMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_white_24dp)
                                     player?.let {
-                                        playAudio(filePath, timeStampLong, it, rightAudioMessageHolder.binding.playButton,
-                                                rightAudioMessageHolder.binding.audioLength, rightAudioMessageHolder.binding.audioSeekBar)
+                                        timeStampLong?.let { it1 ->
+                                            playAudio(filePath, it1, it, rightAudioMessageHolder.binding.playButton,
+                                                    rightAudioMessageHolder.binding.audioLength, rightAudioMessageHolder.binding.audioSeekBar)
+                                        }
                                     }
                                 }
 
@@ -1010,10 +1084,15 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 setLongClick(leftAudioMessageHolder.itemView, baseMessage)
                 leftAudioMessageHolder.binding.progress.visibility = View.GONE
 
+
                 val audioPath: String = FileUtil.getPath(context, CometChatConstants.MESSAGE_TYPE_AUDIO) +
                         FileUtil.getFileName(baseMessage.url)
 
                 val audioFile = File(audioPath)
+
+                if (baseMessage.getReadByMeAt() == 0L) {
+                    CometChat.markMessageAsRead(baseMessage)
+                }
 
                 if (audioFile.exists()) {
 
@@ -1023,7 +1102,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                     try {
 
-                        if (GroupChatAdapter.audioDurations.get(timeStampLong) == null) {
+                        if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
                             player?.reset()
                             try {
                                 player?.setDataSource(audioPath)
@@ -1032,12 +1111,12 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 e.printStackTrace()
                             }
                             val duration = player?.duration
-                            GroupChatAdapter.audioDurations.put(timeStampLong, duration)
+                            timeStampLong?.let { GroupChatAdapter.audioDurations.put(it, duration) }
                             leftAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                             { DateUtil.convertTimeStampToDurationTime(it) })
 
                         } else {
-                            val duration = GroupChatAdapter.audioDurations.get(timeStampLong)
+                            val duration = timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) }
                             leftAudioMessageHolder.binding.audioLength.setText(duration?.toLong()?.let
                             { DateUtil.convertTimeStampToDurationTime(it) })
 
@@ -1132,8 +1211,10 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 } else {
                                     leftAudioMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_black_24dp)
                                     player?.let {
-                                        playAudio(if (audioFile.exists()) audioPath else baseMessage.url, timeStampLong, it, leftAudioMessageHolder.binding.playButton,
-                                                leftAudioMessageHolder.binding.audioLength, leftAudioMessageHolder.binding.audioSeekBar, true)
+                                        timeStampLong?.let { it1 ->
+                                            playAudio(if (audioFile.exists()) audioPath else baseMessage.url, it1, it, leftAudioMessageHolder.binding.playButton,
+                                                    leftAudioMessageHolder.binding.audioLength, leftAudioMessageHolder.binding.audioSeekBar, true)
+                                        }
                                     }
                                 }
 
@@ -1263,44 +1344,55 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     override fun getItemViewType(position: Int): Int {
 
-        if (messagesList.get(position).category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
+        if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
 
-            if (ownerId.equals(messagesList.get(position).sender.uid, ignoreCase = true)) {
+            if (ownerId.equals(messagesList.get(messagesList.keyAt(position))?.sender?.uid, ignoreCase = true)) {
 
-                if ((messagesList.get(position) is TextMessage)
-                        &&(messagesList[position] as TextMessage).metadata!=null
-                        &&(messagesList[position] as TextMessage).metadata.has("reply")) {
+                if ((messagesList.get(messagesList.keyAt(position))is TextMessage)
+                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
+                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.RIGHT_TEXT_REPLY_MESSAGE
-                }
-                else  if ((messagesList[position] is MediaMessage)
-                        &&(messagesList[position] as MediaMessage).metadata!=null
-                        &&(messagesList[position] as MediaMessage).metadata.has("reply")){
+
+                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
+                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
+                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
+
                     return StringContract.ViewType.RIGHT_MEDIA_REPLY_MESSAGE
-                }
-                else {
-                    when (messagesList.get(position).type) {
+
+                } else {
+
+                    when (messagesList.get(messagesList.keyAt(position))?.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
-                            if ((messagesList.get(position) as TextMessage).text.equals("custom_location")) {
-                                return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+
+                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null) {
+
+                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
+                                    return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+                                }
                             }
+
                             return StringContract.ViewType.RIGHT_TEXT_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+
                             return StringContract.ViewType.RIGHT_IMAGE_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_AUDIO -> {
+
                             return StringContract.ViewType.RIGHT_AUDIO_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+
                             return StringContract.ViewType.RIGHT_VIDEO_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_FILE -> {
+
                             return StringContract.ViewType.RIGHT_FILE_MESSAGE
                         }
 
@@ -1308,64 +1400,127 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 }
             } else {
 
-                if ((messagesList[position] is TextMessage)
-                        &&(messagesList[position] as TextMessage).metadata!=null
-                        &&(messagesList[position] as TextMessage).metadata.has("reply")) {
+
+                if ((messagesList.get(messagesList.keyAt(position)) is TextMessage)
+                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
+                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_TEXT_REPLY_MESSAGE
-                }
-                else  if ((messagesList[position] is MediaMessage)
-                        &&(messagesList[position] as MediaMessage).metadata!=null
-                        &&(messagesList[position] as MediaMessage).metadata.has("reply")){
+                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
+                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
+                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_MEDIA_REPLY_MESSAGE
-                }
-
-                else {
-                    when (messagesList.get(position).type) {
+                } else {
+                    when (messagesList.get(messagesList.keyAt(position))?.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
 
-                            if ((messagesList.get(position) as TextMessage).text.equals("custom_location")) {
+                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null){
 
-                                return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
+
+                                    return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                                }
                             }
-                            return StringContract.ViewType.LEFT_TEXT_MESSAGE
 
+                            return StringContract.ViewType.LEFT_TEXT_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+
                             return StringContract.ViewType.LEFT_IMAGE_MESSAGE
+
                         }
 
                         CometChatConstants.MESSAGE_TYPE_AUDIO -> {
+
                             return StringContract.ViewType.LEFT_AUDIO_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+
                             return StringContract.ViewType.LEFT_VIDEO_MESSAGE
                         }
 
                         CometChatConstants.MESSAGE_TYPE_FILE -> {
+
                             return StringContract.ViewType.LEFT_FILE_MESSAGE
                         }
 
                     }
                 }
             }
-        } else if (messagesList.get(position).category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true)) {
+        }else if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true)) {
             return StringContract.ViewType.ACTION_MESSAGE
-
-        } else if (messagesList.get(position).category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
+        }
+        else if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
             return StringContract.ViewType.CALL_MESSAGE
         }
+
         return super.getItemViewType(position)
     }
 
     fun setMessageList(messageList: MutableList<BaseMessage>) {
-        this.messagesList = messageList
+
+        for(baseMessage:BaseMessage in messageList){
+            this.messagesList.put(baseMessage.id.toLong(),baseMessage)
+            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
+        }
 
         notifyDataSetChanged()
     }
 
+    private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+        if (baseMessage.deliveredAt != 0L) {
+            circleImageView.setImageResource(R.drawable.ic_double_tick)
+        }
+    }
+
+    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+        if (baseMessage.readAt != 0L) {
+            val drawable= ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
+            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
+            circleImageView.setImageDrawable(drawable)
+            circleImageView.setCircleBackgroundColor(context.resources.getColor(android.R.color.transparent))
+        }
+    }
+
+    fun setDeletedMessage(deletedMessage: BaseMessage) {
+        messagesList.put(deletedMessage.id.toLong(),deletedMessage)
+        notifyDataSetChanged()
+    }
+
+    fun setEditMessage(editMessage: BaseMessage) {
+        messagesList.put(editMessage.id.toLong(),editMessage)
+        notifyDataSetChanged()
+    }
+
+    fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
+        val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
+
+        if (baseMessage!=null) {
+            baseMessage.deliveredAt = messageReceipt.timestamp
+            messagesList.put(baseMessage.id.toLong(),baseMessage)
+            notifyDataSetChanged()
+        }
+
+    }
+
+    fun setRead(messageReceipt: MessageReceipt) {
+        val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
+        if (baseMessage != null) {
+            baseMessage.readAt = messageReceipt.timestamp
+            messagesList.put(baseMessage.id.toLong(), baseMessage)
+            notifyDataSetChanged()
+        }
+    }
+
+    fun setFilter(filterList: MutableList<BaseMessage>) {
+        messagesList.clear()
+        for (baseMessage in filterList){
+            messagesList.put(baseMessage.id.toLong(),baseMessage)
+        }
+        notifyDataSetChanged()
+    }
 }

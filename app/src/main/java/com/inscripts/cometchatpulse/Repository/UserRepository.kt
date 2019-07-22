@@ -1,5 +1,6 @@
 package com.inscripts.cometchatpulse.Repository
 
+import android.app.Activity
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.support.annotation.WorkerThread
@@ -16,6 +17,8 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.cometchat.pro.core.BlockedUsersRequest
+import com.cometchat.pro.models.GroupMember
+import com.inscripts.cometchatpulse.Activities.MainActivity
 import java.lang.Exception
 import java.util.ArrayList
 
@@ -24,11 +27,15 @@ class UserRepository {
 
     var usersList = MutableLiveData<MutableMap<String, User>>()
 
+    var filterUsersList = MutableLiveData<MutableMap<String, User>>()
+
     var user = MutableLiveData<User>()
 
     var blockedUser = MutableLiveData<User>()
 
     var mutableUserList = mutableMapOf<String, User>()
+
+    var mutableFilterUserList= mutableMapOf<String,User>()
 
     var mutableBlockedUserList = mutableMapOf<String, User>()
 
@@ -36,22 +43,11 @@ class UserRepository {
 
     var userRequest: UsersRequest? = null
 
+    var unreadCountmap:MutableMap<String,Int> = mutableMapOf()
+
+    var liveUnreadCountMap:MutableLiveData<MutableMap<String,Int>> = MutableLiveData()
+
      private val TAG = "UserRepository"
-
-    @WorkerThread
-    fun getUser(uid: String) {
-
-        CometChat.getUser(uid, object : CometChat.CallbackListener<User>() {
-            override fun onError(p0: CometChatException?) {
-
-            }
-
-            override fun onSuccess(p0: User?) {
-                user.value = p0
-            }
-
-        })
-    }
 
     @WorkerThread
     fun fetchUsers(LIMIT: Int, shimmer: ShimmerFrameLayout?) {
@@ -223,5 +219,64 @@ class UserRepository {
 
     }
 
+    fun searchUser(userName: String) {
 
+            mutableFilterUserList.clear()
+               userRequest=null
+            val searchUserRequest = UsersRequest.UsersRequestBuilder().setLimit(100).setSearchKeyword(userName).build()
+            searchUserRequest?.fetchNext(object : CometChat.CallbackListener<List<User>>() {
+                override fun onSuccess(p0: List<User>?) {
+                        if (p0 != null) {
+                            for (user: User in p0) {
+                                mutableFilterUserList[user.uid] = user
+                            }
+                            filterUsersList.value=mutableFilterUserList
+                        }
+                }
+                override fun onError(p0: CometChatException?) {
+                    Log.d(TAG, "search onError: ${p0?.message}")
+                }
+
+            })
+    }
+
+    fun getUnreadCount():MutableLiveData<MutableMap<String,Int>> {
+
+        CometChat.getUnreadMessageCountForAllUsers(object : CometChat.CallbackListener<HashMap<String, Int>>() {
+            override fun onSuccess(stringIntegerHashMap: HashMap<String, Int>) {
+                Log.d(TAG,"onSuccess: ${stringIntegerHashMap.size}")
+                 unreadCountmap=stringIntegerHashMap
+                 liveUnreadCountMap.value=unreadCountmap
+
+            }
+            override fun onError(e: CometChatException) {
+                Log.d(TAG,"onError: ${e.message}")
+            }
+
+        })
+
+        return liveUnreadCountMap
+    }
+
+    fun addMember(activity:Activity,guidList: MutableSet<String>, guid: String) {
+
+        val member:MutableList<GroupMember> = arrayListOf()
+        guidList.forEach { id->
+            member.add(GroupMember(id,CometChatConstants.SCOPE_PARTICIPANT))
+        }
+
+        CometChat.addMembersToGroup(guid,member,null,object :CometChat.CallbackListener<HashMap<String,String>>(){
+
+            override fun onSuccess(p0: HashMap<String, String>?) {
+               Toast.makeText(CometChatPro.applicationContext(),"Success",Toast.LENGTH_SHORT).show()
+                activity?.onBackPressed()
+            }
+
+            override fun onError(p0: CometChatException?) {
+             Log.d(TAG,"addMembersToGroup onError: $p0")
+            }
+
+        })
+
+    }
 }
