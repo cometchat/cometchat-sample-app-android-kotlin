@@ -74,7 +74,7 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 ## Note
 
-   You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pulse Dashboard](https://app.cometchat.com/)
+   You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
 
    For more information read [CometChat-Pro Android SDK](https://prodocs.cometchat.com/docs/android-quick-start) Documentation
 
