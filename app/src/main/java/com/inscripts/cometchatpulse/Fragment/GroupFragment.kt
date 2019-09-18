@@ -640,8 +640,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                 if (messageText != null && !messageText.isEmpty()) {
 
-                    val textMessage = TextMessage(guid, messageText, CometChatConstants.MESSAGE_TYPE_TEXT,
-                            CometChatConstants.RECEIVER_TYPE_GROUP)
+                    val textMessage = TextMessage(guid, messageText, CometChatConstants.RECEIVER_TYPE_GROUP)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 

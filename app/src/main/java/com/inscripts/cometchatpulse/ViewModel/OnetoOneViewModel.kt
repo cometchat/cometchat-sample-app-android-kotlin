@@ -51,13 +51,12 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
         liveEditMessage=messageRepository.liveMessageEdited
         livefilter=messageRepository.filterLiveonetoOneMessageList
 
-
         user = messageRepository.user
 
     }
 
-    fun fetchMessage(LIMIT: Int, userId: String) {
-        messageRepository.fetchMessage(LIMIT, userId)
+    fun fetchMessage(LIMIT: Int, userId: String,isRefresh:Boolean=false) {
+        messageRepository.fetchMessage(LIMIT, userId,isRefresh)
     }
 
     override fun onCleared() {

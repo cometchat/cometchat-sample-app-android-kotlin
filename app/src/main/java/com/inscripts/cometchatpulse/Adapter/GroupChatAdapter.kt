@@ -293,9 +293,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.leftMessageColor, PorterDuff.Mode.SRC_ATOP)
                 setLongClick(leftTextMessageHolder.binding.root,baseMessage)
 
-                if (baseMessage.getReadByMeAt() == 0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
 
                 if (baseMessage.deletedAt!=0L){
                     leftTextMessageHolder.binding.tvMessage.text="message deleted"
@@ -322,10 +319,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-
-                if (baseMessage.getReadByMeAt() == 0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
 
                setLongClick(leftImageVideoMessageHolder.binding.imageMessage,baseMessage)
 
@@ -388,9 +381,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 leftLocationViewHolder.bindView(p1, messagesList)
 
-                if (baseMessage.getReadByMeAt() == 0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
             }
 
             StringContract.ViewType.RIGHT_TEXT_REPLY_MESSAGE -> {
@@ -652,9 +642,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
-                if (baseMessage!=null&&baseMessage.getReadByMeAt() == 0L) {
-                    baseMessage.let { CometChat.markMessageAsRead(it) }
-                }
 
                 if (baseMessage is TextMessage) {
 
@@ -720,9 +707,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
-                if (baseMessage!=null&&baseMessage.getReadByMeAt() == 0L) {
-                    baseMessage?.let { CometChat.markMessageAsRead(it) }
-                }
                 if (baseMessage is MediaMessage) {
 
                     when {
@@ -906,9 +890,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     leftFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
                     leftFileViewHolder.binding.senderName.typeface = StringContract.Font.status
                     setLongClick(leftFileViewHolder.binding.root,baseMessage)
-                    if (baseMessage.getReadByMeAt() == 0L) {
-                        CometChat.markMessageAsRead(baseMessage)
-                    }
+
                     leftFileViewHolder.binding.fileName.setOnClickListener({ context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile))) })
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -935,10 +917,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-
-                if (baseMessage.getReadByMeAt() == 0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
 
                 setLongClick(leftImageVideoMessageHolder.binding.root,baseMessage)
             }
@@ -1090,9 +1068,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                 val audioFile = File(audioPath)
 
-                if (baseMessage.getReadByMeAt() == 0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
 
                 if (audioFile.exists()) {
 

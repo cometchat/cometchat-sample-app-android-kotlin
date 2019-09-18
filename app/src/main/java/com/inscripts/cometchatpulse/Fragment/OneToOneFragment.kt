@@ -30,6 +30,7 @@ import android.view.*
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.cometchat.pro.constants.CometChatConstants
+import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.MediaMessage
@@ -45,6 +46,7 @@ import com.inscripts.cometchatpulse.Helpers.*
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.StringContract.IntentString.Companion.EXTRA_MIME_DOC
+import com.inscripts.cometchatpulse.StringContract.ListenerName.Companion.MESSAGE_LISTENER
 import com.inscripts.cometchatpulse.Utils.Appearance
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.Utils.FileUtil
@@ -376,8 +378,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         timer?.schedule(object : TimerTask() {
             override fun run() {
-                onetoOneViewModel.sendTypingIndicator(userId, true)
-            }
+            onetoOneViewModel.sendTypingIndicator(userId, true)
+          }
         }, 2000)
     }
 
@@ -656,7 +658,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
                 if (messageText != null && !messageText.isEmpty()) {
 
-                    val textMessage = TextMessage(userId, messageText, CometChatConstants.MESSAGE_TYPE_TEXT, CometChatConstants.RECEIVER_TYPE_USER)
+                    val textMessage = TextMessage(userId, messageText, CometChatConstants.RECEIVER_TYPE_USER)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 
@@ -955,8 +957,11 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         super.onResume()
         Log.d(TAG, "onResume: ")
         currentId = userId
-        onetoOneViewModel.receiveMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, ownerId)
+        onetoOneViewModel.receiveMessageListener(MESSAGE_LISTENER, ownerId)
         onetoOneViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
+
+
+
     }
 
     override fun onDetach() {
@@ -972,7 +977,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
     override fun onDestroy() {
         super.onDestroy()
         currentId = null
-        timer = null;
+        timer = null
     }
 
 
@@ -980,8 +985,9 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         super.onPause()
         Log.d(TAG, "onPause: ")
         parentJob.cancel()
-        onetoOneViewModel.removeMessageListener(StringContract.ListenerName.MESSAGE_LISTENER)
+        onetoOneViewModel.removeMessageListener(MESSAGE_LISTENER)
         onetoOneViewModel.removePresenceListener(StringContract.ListenerName.USER_LISTENER)
+
         stopRecording(false)
         oneToOneAdapter?.stopPlayer()
         timer()

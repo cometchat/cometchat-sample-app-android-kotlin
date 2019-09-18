@@ -26,7 +26,10 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 5. [Integrating this sample into your own app](#integrating-this-sample-into-your-own-app)
 
-5. [Contribute](#contribute)
+6. [Contribute](#contribute)
+
+7. [Issue Template](#issue-template)
+
 
 
 
@@ -119,4 +122,11 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 
  Feel free to make Pull Request.
+ 
+## Issue Template 
+
+ To report an issue or bug please follow the template to create a github issue
+ 
+ <a href="https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">ISSUE TEMPLATE</a>
+ 
    

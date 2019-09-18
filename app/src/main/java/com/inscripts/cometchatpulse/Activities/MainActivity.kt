@@ -100,8 +100,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         overrideFont(this,navigation)
 
 
-
-
         if (main_frame != null) {
             main_frame.setBackgroundColor(StringContract.Color.primaryColor)
         }

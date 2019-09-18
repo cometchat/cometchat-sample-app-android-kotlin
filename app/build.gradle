@@ -18,15 +18,15 @@ android {
         versionName "1.0"
         resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
 
-//        packagingOptions {
-//            exclude "lib/arm64-v8a/libgnustl_shared.so"
-//        }
-
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
     dataBinding {
         enabled = true
@@ -65,8 +65,11 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     kapt "android.arch.lifecycle:compiler:1.1.1"
     //cometchat sdk
-    implementation 'com.cometchat:pro-android-chat-sdk:1.8.3'
+    implementation 'com.cometchat:pro-android-chat-sdk:2.0.0-beta2'
+
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0'
+
+    testImplementation "org.robolectric:robolectric:3.6.1"
 }

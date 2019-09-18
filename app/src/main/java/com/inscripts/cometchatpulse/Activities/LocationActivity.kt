@@ -122,7 +122,7 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
                     jObject.put("lat", markerLatLng?.latitude)
                     jObject.put("logt", markerLatLng?.longitude)
 
-                    val textMessage = TextMessage(receiverId, "custom_location",CometChatConstants.MESSAGE_TYPE_TEXT, receiverType)
+                    val textMessage = TextMessage(receiverId, "custom_location", receiverType)
 
                     textMessage.metadata = jObject
 

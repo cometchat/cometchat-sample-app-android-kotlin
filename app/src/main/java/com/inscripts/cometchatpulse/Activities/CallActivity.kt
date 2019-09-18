@@ -56,7 +56,6 @@ class CallActivity : AppCompatActivity(), View.OnClickListener {
 
         try {
 
-
             if (intent?.action?.equals(CometChatConstants.CALL_TYPE_VIDEO)!!) {
                 if (!CCPermissionHelper.hasPermissions(this, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
                     CCPermissionHelper.requestPermissions(this, arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO),

@@ -438,10 +438,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                 setLongClick(leftTextMessageHolder.binding.root, baseMessage)
 
-                if (baseMessage.readAt==0L) {
-                    CometChat.markMessageAsRead(baseMessage)
-                }
-
                 if (baseMessage.deletedAt!=0L){
                     leftTextMessageHolder.binding.tvMessage.text="message deleted"
                     leftTextMessageHolder.binding.tvMessage.setTextColor(context.resources.getColor(R.color.deletedTextColor))
@@ -711,9 +707,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
-                if (baseMessage?.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
-
                 if (baseMessage is TextMessage) {
 
                     leftReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
@@ -772,8 +765,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 leftReplyMessageHolder.binding.message = baseMessage
                 leftReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.leftMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                if (baseMessage?.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
+
                 if (baseMessage is MediaMessage) {
 
                     when {
@@ -962,8 +954,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     }
 
                 })
-                if (baseMessage.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
+
                 setLongClick(leftImageVideoMessageHolder.binding.imageMessage, baseMessage)
             }
 
@@ -997,8 +988,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 leftLocationViewHolder.binding.message = baseMessage as TextMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 leftLocationViewHolder.bindView(p1, messagesList)
-                if (baseMessage.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
+
             }
 
             StringContract.ViewType.RIGHT_FILE_MESSAGE -> {
@@ -1042,8 +1032,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile)))
                     })
                     setLongClick(leftFileViewHolder.binding.root, baseMessage)
-                    if (baseMessage.readAt==0L)
-                        CometChat.markMessageAsRead(baseMessage)
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -1063,9 +1052,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                         .apply(requestOptions)
                         .into(leftImageVideoMessageHolder.binding.imageMessage)
 
-                if (baseMessage.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
-
                 leftImageVideoMessageHolder.binding.btnPlayVideo.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(p0: View?) {
                      startIntent(baseMessage)
@@ -1083,6 +1069,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 message = "Call " + (baseMessage as Call).callStatus
 
                 listHeaderItem.binding.txtMessageDate.text = message
+
             }
 
             StringContract.ViewType.RIGHT_VIDEO_MESSAGE -> {
@@ -1234,9 +1221,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                 val audioFile = File(audioPath)
 
-                if (baseMessage.readAt==0L)
-                    CometChat.markMessageAsRead(baseMessage)
-
                 if (audioFile.exists()) {
 
                     leftAudioMessageHolder.binding.progress.visibility = View.GONE
@@ -1381,6 +1365,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
         if (baseMessage.deliveredAt != 0L) {
                circleImageView.setImageResource(R.drawable.ic_double_tick)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
         }
     }
 
@@ -1389,7 +1374,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
             val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
             drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
             circleImageView.setImageDrawable(drawable)
-            circleImageView.setCircleBackgroundColor(context.resources.getColor(android.R.color.transparent))
+            circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
         }
     }
 
@@ -1474,7 +1459,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
         if (baseMessage != null) {
             baseMessage.readAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.getId().toLong(), baseMessage)
+            messagesList.put(baseMessage.id.toLong(), baseMessage)
             notifyDataSetChanged()
         }
     }

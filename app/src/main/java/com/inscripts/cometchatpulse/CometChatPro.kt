@@ -3,6 +3,7 @@ package com.inscripts.cometchatpulse
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.cometchat.pro.core.AppSettings
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -28,7 +29,9 @@ class CometChatPro : Application() {
 
         Appearance(Appearance.AppTheme.PERSIAN_BLUE)
 
-        CometChat.init(applicationContext, StringContract.AppDetails.APP_ID.trim(), object : CometChat.CallbackListener<String>() {
+        val appSettings =AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(StringContract.AppDetails.REGION).build();
+
+        CometChat.init(applicationContext, StringContract.AppDetails.APP_ID.trim(),appSettings, object : CometChat.CallbackListener<String>() {
             override fun onSuccess(p0: String?) {
                 Log.d("INIT", "Initialization completed successfully");
             }

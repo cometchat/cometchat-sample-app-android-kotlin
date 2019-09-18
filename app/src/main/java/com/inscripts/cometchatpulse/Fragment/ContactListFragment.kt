@@ -15,9 +15,12 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.cometchat.pro.core.Call
+import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Adapter.ContactListAdapter
@@ -31,16 +34,11 @@ import com.inscripts.cometchatpulse.ViewModel.UserViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_contact_list.view.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 
 class ContactListFragment : Fragment() {
 
     companion object {
-        private val TAG = this::class.java.simpleName
+        private val TAG = "ContactListFragment"
     }
 
     lateinit var userViewModel: UserViewModel
@@ -167,8 +165,11 @@ class ContactListFragment : Fragment() {
     }
 
      fun searchUser(userName:String){
+         userViewModel.searchUser(userName)
+    }
 
-          userViewModel.searchUser(userName)
+    override fun onResume() {
+        super.onResume()
     }
 
     override fun onStart() {
@@ -189,9 +190,8 @@ class ContactListFragment : Fragment() {
                 .setCancelable(true)
                 .setNegativeButton(CommonUtil.setTitle("Cancel", context)) {
                     dialogInterface, i -> dialogInterface.dismiss() }
-                .setPositiveButton(CommonUtil.setTitle("Yes", context), {
-                    dialogInterface, i ->  userViewModel.initCall(context,user)
-                }).show()
+                .setPositiveButton(CommonUtil.setTitle("Yes", context)) { dialogInterface, i ->  userViewModel.initCall(context,user)
+                }.show()
     }
 
 }

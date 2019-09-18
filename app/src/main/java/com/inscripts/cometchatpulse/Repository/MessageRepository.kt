@@ -70,9 +70,15 @@ class MessageRepository {
     private val TAG = "MessageRepository"
 
     @WorkerThread
-    fun fetchMessage(LIMIT: Int, userId: String) {
+    fun fetchMessage(LIMIT: Int, userId: String,isRefresh:Boolean) {
+
+
 
         try {
+              if (isRefresh){
+                  messageRequest= null
+              }
+
             if (messageRequest == null) {
                 messageRequest = MessagesRequest.MessagesRequestBuilder().setUID(userId).setLimit(LIMIT).build()
 
@@ -82,12 +88,15 @@ class MessageRepository {
                         if (p0 != null) {
                             for (baseMessage: BaseMessage in p0) {
                                 Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
-                                if (!baseMessage.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true)) {
+                                if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
                                     mutableOneToOneMessageList.add(baseMessage)
                                 }
                             }
+                            if(p0.isNotEmpty()){
+                                val message=p0.get(p0.size-1)
+                                CometChat.markAsRead(message.id,message.sender.uid,message.receiverType);
+                            }
                             onetoOneMessageList.value = mutableOneToOneMessageList
-
                         }
 
                         Log.d(TAG, "messageRequest onSuccess: ${p0?.size}")
@@ -97,7 +106,6 @@ class MessageRepository {
                     override fun onError(p0: CometChatException?) {
                         Log.d(TAG, "messageRequest onError: ${p0?.message}")
                     }
-
 
                 })
 
@@ -112,11 +120,15 @@ class MessageRepository {
                         if (p0 != null) {
                             for (baseMessage: BaseMessage in p0) {
                                 Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
-                                if (!baseMessage.category.equals(CometChatConstants.CATEGORY_ACTION)) {
+                                if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
                                     mutableOneToOneMessageList.add(baseMessage)
                                 }
                             }
                             onetoOneMessageList.value = mutableOneToOneMessageList
+                            if(p0.isNotEmpty()){
+                                val message=p0.get(p0.size-1);
+                               CometChat.markAsRead(message.id,message.sender.uid,message.receiverType);
+                            }
                         }
 
                     }
@@ -132,19 +144,31 @@ class MessageRepository {
 
     @WorkerThread
     fun fetchGroupMessage(guid: String, LIMIT: Int) {
+
+
         if (groupMessageRequest == null) {
 
             groupMessageRequest = MessagesRequest.MessagesRequestBuilder().setGUID(guid).setLimit(LIMIT).build()
 
             groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
                 override fun onSuccess(p0: List<BaseMessage>?) {
-                    p0?.let { mutableGroupMessageList.addAll(0, it) }
-                    groupMessageList.value = mutableGroupMessageList
+                    if (p0!=null) {
+                        for (message in p0) {
+                            if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
+                                p0.let { mutableGroupMessageList.addAll(0, it) }
+                                groupMessageList.value = mutableGroupMessageList
+                            }
+                        }
+                        if(p0.isNotEmpty()){
+                            val message=p0.get(p0.size-1)
+                            CometChat.markAsRead(message.id,message.receiverUid,message.receiverType)
+                        }
+                    }
 
                 }
 
                 override fun onError(p0: CometChatException?) {
-                    Log.d(TAG, "fetchGroupMessageonError: " + p0?.message)
+                    Log.d(TAG, "fetchGroupMessage onError: " + p0?.message)
                 }
 
 
@@ -153,12 +177,22 @@ class MessageRepository {
 
             groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
                 override fun onSuccess(p0: List<BaseMessage>?) {
-                    p0?.let { mutableGroupMessageList.addAll(0, it) }
-                    groupMessageList.value = mutableGroupMessageList
+                    if (p0!=null) {
+                        for (message in p0) {
+                            if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
+                                p0.let { mutableGroupMessageList.addAll(0, it) }
+                                groupMessageList.value = mutableGroupMessageList
+                            }
+                        }
+                        if(p0.isNotEmpty()){
+                            val message=p0.get(p0.size-1)
+                            CometChat.markAsRead(message.id,message.receiverUid,message.receiverType)
+                        }
+                    }
                 }
 
                 override fun onError(p0: CometChatException?) {
-
+                   Log.d(TAG,"fetchGroupMessage  onError: ")
                 }
             })
         }
@@ -238,6 +272,17 @@ class MessageRepository {
     fun messageReceiveListener(listener: String) {
 
         CometChat.addMessageListener(listener, object : CometChat.MessageListener() {
+
+            override fun onMessagesDelivered(messageReceipt: MessageReceipt?) {
+                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                    liveDeliveryReceipts.value = messageReceipt
+            }
+
+            override fun onMessagesRead(messageReceipt: MessageReceipt?) {
+                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                    liveReadReceipts.value = messageReceipt
+            }
+
             override fun onMessageEdited(message: BaseMessage?) {
                 Log.d(TAG, "onMessageEdited: $message")
                 liveMessageEdited.value = message
@@ -247,10 +292,7 @@ class MessageRepository {
                 liveMessageDeleted.value = message
             }
 
-            override fun onMessageRead(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null)
-                    liveReadReceipts.value = messageReceipt
-            }
+
 
             override fun onTypingEnded(typingIndicator: TypingIndicator?) {
                 if (typingIndicator != null)
@@ -262,11 +304,6 @@ class MessageRepository {
                 if (typingIndicator != null)
                     liveStartTypingIndicator.value = typingIndicator
 
-            }
-
-            override fun onMessageDelivered(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null)
-                    liveDeliveryReceipts.value = messageReceipt
             }
 
             override fun onTextMessageReceived(p0: TextMessage?) {
@@ -281,12 +318,13 @@ class MessageRepository {
                                 OneToOneFragment.scrollFlag = true
                                 mutableOneToOneMessageList.add(p0)
                                 onetoOneMessageList.value = mutableOneToOneMessageList
-
+                                CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
                             }
                         } catch (e: NullPointerException) {
                             e.printStackTrace()
                         }
                     } else {
+                        CometChat.markAsRead(p0.id,p0.receiverUid,p0.receiverType)
                         GroupFragment.scrollFlag = true
                         mutableGroupMessageList.add(p0)
                         groupMessageList.value = mutableGroupMessageList
@@ -304,8 +342,10 @@ class MessageRepository {
                         OneToOneFragment.scrollFlag = true
                         mutableOneToOneMessageList.add(p0)
                         onetoOneMessageList.value = mutableOneToOneMessageList
+                        CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
 
                     } else {
+                        CometChat.markAsRead(p0.id,p0.receiverUid,p0.receiverType)
                         GroupFragment.scrollFlag = true
                         mutableGroupMessageList.add(p0)
                         groupMessageList.value = mutableGroupMessageList
@@ -633,7 +673,7 @@ class MessageRepository {
 
     fun editMessage(any: BaseMessage, messageText: String) {
 
-        val textMessage = TextMessage(any.receiverUid, messageText, CometChatConstants.MESSAGE_TYPE_TEXT, CometChatConstants.RECEIVER_TYPE_USER)
+        val textMessage = TextMessage(any.receiverUid, messageText, CometChatConstants.RECEIVER_TYPE_USER)
 
         textMessage.id = any.id
 
