@@ -90,7 +90,7 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 
 
-  ![Studio Guide](https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/ScreenShot/guide.png)
+  ![Studio Guide](https://github.com/Tristankluivert/CometChatPro/blob/master/ScreenShot/guide.png)
 
  ## Customizing the UI
 
