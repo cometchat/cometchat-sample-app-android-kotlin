@@ -67,6 +67,7 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
       
       us = USA (if your app region is USA).
       
+      
       Find out more with the new dashboard.
        
   - To Run the app you also need to include **google-services.json** from your firebase console ,To connect the app to     
