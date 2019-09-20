@@ -63,12 +63,15 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
        `val API_KEY: String  = "XXXXXXXXX"`
        
-      `val REGION: String = "us"`
+       `val REGION: String = "us"`
       
-      us = USA (if your app region is USA).
+        us = USA (if your app region is USA).
+        eu = EUROPE (if your app region is EUROPE).
+     
       
-      
-      Find out more with the new dashboard.
+   Find out more with the new Dashboard.[CometChat-Pro Dashboard](https://app.cometchat.io/)
+
+
        
   - To Run the app you also need to include **google-services.json** from your firebase console ,To connect the app to     
     firebase follow the instruction below :
@@ -84,14 +87,15 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 ## Note
 
-   You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
+   You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
 
    For more information read [CometChat-Pro Android SDK](https://prodocs.cometchat.com/docs/android-quick-start) Documentation
 
 
 
 
-  ![Studio Guide](https://github.com/Tristankluivert/CometChatPro/blob/master/ScreenShot/guide.png)
+
+  ![Studio Guide](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/ScreenShot/help_k.png)
 
  ## Customizing the UI
 
