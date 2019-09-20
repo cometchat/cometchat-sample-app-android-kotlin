@@ -65,8 +65,10 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
        
        `val REGION: String = "us"`
       
-        us = USA (if your app region is USA).
-        eu = EUROPE (if your app region is EUROPE).
+         us = USA (if your app region is USA).
+	
+	
+         eu = EUROPE (if your app region is EUROPE).
      
       
    Find out more with the new Dashboard.[CometChat-Pro Dashboard](https://app.cometchat.io/)
