@@ -63,7 +63,7 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
        `val API_KEY: String  = "XXXXXXXXX"`
        
-      `val REGION: String = "us"  
+      `val REGION: String = "us"`
       
       us = USA (if your app region is USA).
       
