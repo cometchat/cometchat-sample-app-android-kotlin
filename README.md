@@ -42,7 +42,11 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
    Simply Clone the project from android-kotlin-chat-app repository and open in Android Studio.
    Build the Demo App and it will be ready to Run
 
+## Note
 
+   Branch v1.8 contains UI with SDK v1.8+ .
+   
+   Branch v2.0 contains UI with SDK v2.0+ . Apps created in v2 requires Region. Branch v2 and master contains CometChat Pro    SDK with latest feature and updates
 
 
 ## Run the Sample App
