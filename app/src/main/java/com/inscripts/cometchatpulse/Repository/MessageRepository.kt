@@ -152,6 +152,7 @@ class MessageRepository {
 
             groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
                 override fun onSuccess(p0: List<BaseMessage>?) {
+                    Log.e("groupMessageRequest","${p0?.size}")
                     if (p0!=null) {
                         for (message in p0) {
                             if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
@@ -177,6 +178,7 @@ class MessageRepository {
 
             groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
                 override fun onSuccess(p0: List<BaseMessage>?) {
+                    Log.e("groupMessageRequest 1","${p0?.size}")
                     if (p0!=null) {
                         for (message in p0) {
                             if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
@@ -192,7 +194,7 @@ class MessageRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                   Log.d(TAG,"fetchGroupMessage  onError: ")
+                   Log.d(TAG,"fetchGroupMessage 1  onError: ")
                 }
             })
         }

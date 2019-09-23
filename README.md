@@ -43,7 +43,12 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
    Build the Demo App and it will be ready to Run
 
 
+## Note
 
+   Branch v1.8 contains UI with SDK v1.8+ .
+   
+   Branch v2.0 contains UI with SDK v2.0+ . Apps created in v2 requires Region. Branch v2 and master contains CometChat Pro    SDK with latest feature and updates
+   
 
 ## Run the Sample App
 
@@ -92,8 +97,6 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
    You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
 
    For more information read [CometChat-Pro Android SDK](https://prodocs.cometchat.com/docs/android-quick-start) Documentation
-
-
 
 
 

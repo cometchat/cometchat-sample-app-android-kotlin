@@ -10,11 +10,11 @@ class StringContract {
 
         companion object {
 
-          const val APP_ID: String = "XXXXXXXXXXXXXXXX"
+          const val APP_ID: String = "XXXXXXXXXXXXXXXXXX"
 
-          const val API_KEY: String = "XXXXXXXXXXXXXXXX"
+          const val API_KEY: String = "XXXXXXXXXXXXXXXXX"
 
-          const val REGION:String="XXXXXXXX"
+          const val REGION:String="XXXXXXX"
 
           lateinit var theme: Appearance.AppTheme
 
@@ -143,7 +143,8 @@ class StringContract {
     class Color {
 
         companion object {
-            var primaryColor: Int = 0;
+
+            var primaryColor: Int = 0
 
             var primaryDarkColor: Int = 0
 
@@ -211,7 +212,6 @@ class StringContract {
 
             val STORAGE_PERMISSION = arrayOf(CCPermissionHelper.REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)
 
-//            val LOCATION_PERMISSION= arrayOf(CCPermissionHelper.L)
         }
     }
 

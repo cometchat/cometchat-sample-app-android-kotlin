@@ -228,7 +228,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
-        val baseMessage = messagesList.get(messagesList.keyAt(p1))
+        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
         val timeStampLong =baseMessage?.sentAt
         var message: String? = null
         var mediaFile: String? = null
@@ -1440,7 +1440,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
         for(baseMessage:BaseMessage in messageList){
             this.messagesList.put(baseMessage.id.toLong(),baseMessage)
-            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
+//            Log.d("groupChatAdapter","setMessageList: "+this.messagesList.toString())
         }
 
         notifyDataSetChanged()
