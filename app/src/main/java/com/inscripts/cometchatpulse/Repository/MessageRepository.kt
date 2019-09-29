@@ -276,12 +276,13 @@ class MessageRepository {
         CometChat.addMessageListener(listener, object : CometChat.MessageListener() {
 
             override fun onMessagesDelivered(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid && messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
                     liveDeliveryReceipts.value = messageReceipt
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid
+                        && messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
                     liveReadReceipts.value = messageReceipt
             }
 
@@ -316,12 +317,10 @@ class MessageRepository {
 
                     if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
                         try {
-                            if (OneToOneFragment.currentId!!.equals(p0.sender.uid)) {
-                                OneToOneFragment.scrollFlag = true
+                               OneToOneFragment.scrollFlag = true
                                 mutableOneToOneMessageList.add(p0)
                                 onetoOneMessageList.value = mutableOneToOneMessageList
                                 CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
-                            }
                         } catch (e: NullPointerException) {
                             e.printStackTrace()
                         }

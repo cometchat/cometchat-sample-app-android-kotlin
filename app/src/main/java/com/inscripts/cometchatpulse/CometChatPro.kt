@@ -27,7 +27,7 @@ class CometChatPro : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        Appearance(Appearance.AppTheme.PERSIAN_BLUE)
+        Appearance(Appearance.AppTheme.ISLAND)
 
         val appSettings =AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(StringContract.AppDetails.REGION).build();
 

@@ -70,6 +70,7 @@ private val TAG="GroupFragment"
 class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMode.Callback,OnClickEvent,TextWatcher{
 
 
+
     private lateinit var searchView: SearchView
 
     private  var memberMap: MutableMap<String, GroupMember> = mutableMapOf()

@@ -18,6 +18,8 @@ import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.cometchat.pro.core.BlockedUsersRequest
 import com.cometchat.pro.models.GroupMember
+import com.cometchat.pro.models.MediaMessage
+import com.cometchat.pro.models.TextMessage
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import java.lang.Exception
 import java.util.ArrayList
@@ -244,7 +246,7 @@ class UserRepository {
 
         CometChat.getUnreadMessageCountForAllUsers(object : CometChat.CallbackListener<HashMap<String, Int>>() {
             override fun onSuccess(stringIntegerHashMap: HashMap<String, Int>) {
-                Log.d(TAG,"onSuccess: ${stringIntegerHashMap.size}")
+                Log.d(TAG,"getUnreadMessageCountForAllUsers onSuccess: ${stringIntegerHashMap.size}")
                  unreadCountmap=stringIntegerHashMap
                  liveUnreadCountMap.value=unreadCountmap
 
@@ -277,6 +279,42 @@ class UserRepository {
             }
 
         })
+
+    }
+
+    fun addMessageListener(tag: String) {
+        var i=1
+        CometChat.addMessageListener(tag,object :CometChat.MessageListener(){
+            override fun onTextMessageReceived(message: TextMessage?) {
+                 if (message!=null) {
+                      if (unreadCountmap[message.sender.uid]==null){
+                          unreadCountmap.put(message.sender.uid,i++)
+                      }else{
+                          if (unreadCountmap[message.sender.uid]!=null) {
+                              unreadCountmap[message.sender.uid]?.plus(1)?.let { unreadCountmap.put(message.sender.uid, it) }
+                          }
+                      }
+                     liveUnreadCountMap.value=unreadCountmap
+                 }
+            }
+
+            override fun onMediaMessageReceived(message: MediaMessage?) {
+                if (message!=null) {
+                    if (unreadCountmap[message.sender.uid]==null){
+                        unreadCountmap.put(message.sender.uid,i++)
+                    }else{
+                        if (unreadCountmap[message.sender.uid]!=null) {
+                            unreadCountmap[message.sender.uid]?.plus(1)?.let { unreadCountmap.put(message.sender.uid, it) }
+                        }
+                    }
+                    liveUnreadCountMap.value=unreadCountmap
+                }
+            }
+
+        })
+    }
+
+    fun removeMessageListener(tag: String) {
 
     }
 }

@@ -45,7 +45,7 @@ class UserFragment : Fragment() {
     lateinit var contactListAdapter:ContactListAdapter
 
     lateinit var userViewModel: UserViewModel
-    var selectedUserView:MutableMap<String,View> = mutableMapOf()
+    var selectedUserView:MutableMap<String,View?> = mutableMapOf()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

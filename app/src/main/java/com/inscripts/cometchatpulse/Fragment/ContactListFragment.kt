@@ -24,8 +24,7 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Adapter.ContactListAdapter
-import com.inscripts.cometchatpulse.Helpers.CardItemTouchHelper
-import com.inscripts.cometchatpulse.Helpers.UnreadCountInterface
+import com.inscripts.cometchatpulse.Helpers.*
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -49,6 +48,9 @@ class ContactListFragment : Fragment() {
 
     private lateinit var user:User
 
+    private lateinit var childClickListener: ChildClickListener
+
+    private var unreadCountmap:MutableMap<String,Int> = mutableMapOf()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -59,11 +61,22 @@ class ContactListFragment : Fragment() {
         if (config.smallestScreenWidthDp < 600) {
             CommonUtil.setCardView(view.contact_cardview)
         }
+        childClickListener=activity as ChildClickListener
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
         linearLayoutManager = LinearLayoutManager(activity)
         view.contact_recycler.layoutManager = linearLayoutManager
         view.contact_recycler.itemAnimator=DefaultItemAnimator()
-        contactListAdapter = ContactListAdapter(activity,false)
+        contactListAdapter = ContactListAdapter(context,false,null,object :OnUserClick{
+
+            override fun onItemClick(item:View,any: Any) {
+                 if (any is User) {
+                     unreadCountmap.remove(any.uid)
+                     userViewModel.unReadCount.value=unreadCountmap
+                     contactListAdapter.notifyDataSetChanged()
+                 }
+                childClickListener.OnChildClick(any)
+            }
+        })
         view.contact_recycler.adapter = contactListAdapter
 
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
@@ -138,6 +151,7 @@ class ContactListFragment : Fragment() {
 
         userViewModel.unReadCount.observe(this, Observer {unReadCount->
             unReadCount?.let {
+                unreadCountmap=unReadCount
                 contactListAdapter.setUnreadCount(it)
             }
 
@@ -170,16 +184,20 @@ class ContactListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        userViewModel.fetchUnreadCountForUser()
     }
 
     override fun onStart() {
         super.onStart()
+        userViewModel.fetchUnreadCountForUser()
         userViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
+        userViewModel.addMessageListener(TAG)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         userViewModel.removeUserListener(StringContract.ListenerName.USER_LISTENER)
+        userViewModel.removeMessageListener(TAG)
     }
 
     fun showDialog(message: String, title: String, contactName: String, context: Context) {

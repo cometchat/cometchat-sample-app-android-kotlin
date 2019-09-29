@@ -10,13 +10,13 @@ class StringContract {
 
         companion object {
 
-          const val APP_ID: String = "XXXXXXXXXXXXXXXXXX"
+            const val APP_ID: String = "XXXXXXXXXXXXXXXX"
 
-          const val API_KEY: String = "XXXXXXXXXXXXXXXXX"
+            const val API_KEY: String = "XXXXXXXXXXXXXX"
 
-          const val REGION:String="XXXXXXX"
+            const val REGION:String="XXXXXX"
 
-          lateinit var theme: Appearance.AppTheme
+            lateinit var theme: Appearance.AppTheme
 
         }
     }

@@ -80,6 +80,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
 
+
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
 
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
@@ -193,6 +194,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
         val binding: ListHeaderBinding = DataBindingUtil.inflate(layoutInflater, R.layout.list_header, var1, false)
         return TextHeaderHolder(binding)
+
+    }
+
+    override fun getItemId(position: Int): Long {
+
+       val baseMessage=messagesList[messagesList.keyAt(position)]
+         if (baseMessage!=null){
+             return baseMessage.id.toLong()
+         }else{
+             return 0L
+         }
 
     }
 
@@ -336,8 +348,8 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     fun setMessageList(messageList: MutableList<BaseMessage>) {
         for(baseMessage:BaseMessage in messageList){
             this.messagesList.put(baseMessage.id.toLong(),baseMessage)
-            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
         }
+
         notifyDataSetChanged()
     }
 
@@ -370,10 +382,10 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
 
-        val baseMessage = messagesList.get(messagesList.keyAt(p1))
+        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
 
 
-        val timeStampLong = messagesList.get(messagesList.keyAt(p1))?.sentAt
+        val timeStampLong = messagesList.get(messagesList.keyAt(p0.adapterPosition))?.sentAt
         var message: String? = null
         var filePath: String? = null
         var mediaFile: String? = null
@@ -1363,19 +1375,30 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
     private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.deliveredAt != 0L) {
-               circleImageView.setImageResource(R.drawable.ic_double_tick)
-            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
-        }
-    }
 
-    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
         if (baseMessage.readAt != 0L) {
             val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
             drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
             circleImageView.setImageDrawable(drawable)
             circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
         }
+        else if (baseMessage.deliveredAt != 0L) {
+               circleImageView.setImageResource(R.drawable.ic_double_tick)
+               circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
+        else{
+            circleImageView.setImageResource(R.drawable.ic_check_24dp)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
+    }
+
+    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+//        if (baseMessage.readAt != 0L) {
+//            val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
+//            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
+//            circleImageView.setImageDrawable(drawable)
+//            circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
+//        }
     }
 
     private fun startIntent(baseMessage: MediaMessage) {
@@ -1446,10 +1469,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
         val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
-
         if (baseMessage!=null) {
             baseMessage.deliveredAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(),baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.deliveredAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.deliveredAt = messageReceipt.deliveredAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
 
@@ -1458,8 +1488,15 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     fun setRead(messageReceipt: MessageReceipt) {
         val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
         if (baseMessage != null) {
-            baseMessage.readAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(), baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.readAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.readAt = messageReceipt.readAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
     }

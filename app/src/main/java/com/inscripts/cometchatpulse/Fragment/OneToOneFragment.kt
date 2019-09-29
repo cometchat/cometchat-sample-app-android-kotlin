@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
+import android.support.v7.widget.SimpleItemAnimator
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -134,6 +135,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     init {
         ownerId = CometChat.getLoggedInUser().uid
+        scrollFlag=true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -191,11 +193,11 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         binding.title.typeface = StringContract.Font.name
         binding.subTitle.typeface = StringContract.Font.status
 
-        binding.recycler.itemAnimator?.changeDuration = 0
+        (binding.recycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations=false
         oneToOneAdapter = OneToOneAdapter(context!!, CometChat.getLoggedInUser().uid, this)
         binding.recycler.addItemDecoration(StickyHeaderDecoration(oneToOneAdapter))
         binding.recycler.setRecyclerListener(RecycleListenerHelper())
-
+        oneToOneAdapter.setHasStableIds(true)
         binding.recycler.adapter = oneToOneAdapter
 
 
@@ -269,6 +271,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     scrollBottom()
                     scrollFlag = false
                 }
+
             }
         })
 
@@ -657,7 +660,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                 val messageText: String? = binding.messageBox?.editTextChatMessage?.text.toString().trim()
 
                 if (messageText != null && !messageText.isEmpty()) {
-
                     val textMessage = TextMessage(userId, messageText, CometChatConstants.RECEIVER_TYPE_USER)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
@@ -796,7 +798,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         if (resultCode == RESULT_OK && data != null) {
-
             when (requestCode) {
 
                 StringContract.RequestCode.ADD_GALLERY -> {
