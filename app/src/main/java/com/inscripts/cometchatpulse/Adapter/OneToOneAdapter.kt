@@ -14,7 +14,6 @@ import android.os.AsyncTask
 import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.support.v4.util.LongSparseArray
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
@@ -28,8 +27,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
-import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.ImageViewActivity
 import com.inscripts.cometchatpulse.AsyncTask.DownloadFile
@@ -45,7 +42,6 @@ import com.inscripts.cometchatpulse.Utils.FileUtil
 import com.inscripts.cometchatpulse.ViewHolder.*
 import com.inscripts.cometchatpulse.databinding.*
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -425,8 +421,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightTextMessageHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.rightMessageColor, PorterDuff.Mode.SRC_ATOP)
                 setLongClick(rightTextMessageHolder.binding.root, baseMessage)
-                setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
-                setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+                setStatusIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
 
                 if (baseMessage.deletedAt!=0L){
                     rightTextMessageHolder.binding.tvMessage.text="message deleted"
@@ -470,8 +465,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is TextMessage) {
                     rightReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
                     rightReplyMessageHolder.binding.txtNewmsg.text = baseMessage.text
@@ -539,8 +533,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is MediaMessage) {
 
 
@@ -980,8 +973,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     }
 
                 })
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.imageMessage, baseMessage)
 
             }
@@ -991,8 +983,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightLocationViewHolder.binding.message = baseMessage as TextMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightLocationViewHolder.bindView(p1, messagesList)
-                setDeliveryIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
-                setReadIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
+                setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
             }
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
@@ -1018,8 +1009,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     rightFileViewHolder.binding.fileName.setOnClickListener(View.OnClickListener {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile)))
                     })
-                    setDeliveryIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
-                    setReadIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
+                    setStatusIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
                     setLongClick(rightFileViewHolder.binding.root, baseMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1104,9 +1094,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                 })
 
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.root, baseMessage)
 
             }
@@ -1120,8 +1108,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightAudioMessageHolder.binding.audioLength.typeface = StringContract.Font.status
                 setLongClick(rightAudioMessageHolder.binding.root, baseMessage)
 
-                setDeliveryIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
+                setStatusIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
 
                 try {
 
@@ -1374,7 +1361,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         }
     }
 
-    private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+    private fun setStatusIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
 
         if (baseMessage.readAt != 0L) {
             val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
@@ -1392,14 +1379,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         }
     }
 
-    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-//        if (baseMessage.readAt != 0L) {
-//            val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
-//            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
-//            circleImageView.setImageDrawable(drawable)
-//            circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
-//        }
-    }
 
     private fun startIntent(baseMessage: MediaMessage) {
         val imageIntent = Intent(context, ImageViewActivity::class.java)

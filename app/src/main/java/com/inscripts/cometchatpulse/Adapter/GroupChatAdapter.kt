@@ -27,7 +27,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
-import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.ImageViewActivity
 import com.inscripts.cometchatpulse.AsyncTask.DownloadFile
@@ -279,8 +278,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     rightTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
                 }
 
-                 setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
-                 setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+                 setStatusIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
 
             }
 
@@ -335,8 +333,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.imageMessage,baseMessage)
             }
 
@@ -353,8 +350,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     rightFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
                     val finalMediaFile = mediaFile
                     setLongClick(rightFileViewHolder.binding.root,baseMessage)
-                    setDeliveryIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
-                    setReadIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
+                    setStatusIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
 
                     rightFileViewHolder.binding.fileName.setOnClickListener(View.OnClickListener { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile))) })
                 } catch (e: Exception) {
@@ -369,10 +365,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightLocationViewHolder.binding.message = baseMessage as TextMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightLocationViewHolder.bindView(p1, messagesList)
-                setDeliveryIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
-                setReadIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
-
-
+                setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
             }
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
@@ -390,8 +383,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is TextMessage) {
 
                     rightReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
@@ -460,8 +452,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
 
                 if (baseMessage is MediaMessage) {
 
@@ -941,8 +932,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-                 setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
-                 setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                 setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
                  setLongClick(rightImageVideoMessageHolder.binding.root,baseMessage)
             }
 
@@ -955,8 +945,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightAudioMessageHolder.binding.timeStamp.typeface = StringContract.Font.status
                 rightAudioMessageHolder.binding.audioLength.typeface = StringContract.Font.status
                 setLongClick(rightAudioMessageHolder.binding.root, baseMessage)
-                setDeliveryIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
-                setReadIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
+                setStatusIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
                 try {
 
                     if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
@@ -1446,20 +1435,24 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         notifyDataSetChanged()
     }
 
-    private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.deliveredAt != 0L) {
+    private fun setStatusIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+
+        if (baseMessage.readAt != 0L) {
+            val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
+            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
+            circleImageView.setImageDrawable(drawable)
+            circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
+        }
+        else if (baseMessage.deliveredAt != 0L) {
             circleImageView.setImageResource(R.drawable.ic_double_tick)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
+        else{
+            circleImageView.setImageResource(R.drawable.ic_check_24dp)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
         }
     }
 
-    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.readAt != 0L) {
-            val drawable= ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
-            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
-            circleImageView.setImageDrawable(drawable)
-            circleImageView.setCircleBackgroundColor(context.resources.getColor(android.R.color.transparent))
-        }
-    }
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
         messagesList.put(deletedMessage.id.toLong(),deletedMessage)

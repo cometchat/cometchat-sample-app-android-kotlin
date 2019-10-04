@@ -121,8 +121,6 @@ class RecordMicButton : android.support.v7.widget.AppCompatImageView, View.OnTou
 
                 MotionEvent.ACTION_DOWN ->{ recordAudio!!.onActionDown(view as RecordMicButton, context)}
 
-                MotionEvent.ACTION_MOVE -> {recordAudio!!.onActionMove(view as RecordMicButton, motionEvent)}
-
                 MotionEvent.ACTION_UP -> {recordAudio!!.onActionUp(view as RecordMicButton)}
             }
 

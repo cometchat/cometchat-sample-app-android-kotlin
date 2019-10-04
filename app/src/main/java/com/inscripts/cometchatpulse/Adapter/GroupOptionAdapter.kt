@@ -16,7 +16,7 @@ import com.inscripts.cometchatpulse.ViewHolder.GroupOptionViewHolder
 import com.inscripts.cometchatpulse.databinding.GroupOptionItemBinding
 
 
-class GroupOptionAdapter(val context:Context,val groupOptionList: MutableList<GroupOption>,
+class GroupOptionAdapter(val context:Context,val groupOptionList: MutableMap<Int,GroupOption>,
                          val ownerId:String,val guid:String, onOptionClickListener: OnOptionClickListener): RecyclerView.Adapter<GroupOptionViewHolder>() {
 
     private  var onOptionClickListener:OnOptionClickListener
@@ -38,7 +38,7 @@ class GroupOptionAdapter(val context:Context,val groupOptionList: MutableList<Gr
 
     override fun onBindViewHolder(p0: GroupOptionViewHolder, p1: Int) {
 
-        val groupOption=groupOptionList.get(p1)
+        val groupOption=groupOptionList.values.toMutableList()[p1]
 
         p0.binding.groupOption=groupOption
 
@@ -48,7 +48,7 @@ class GroupOptionAdapter(val context:Context,val groupOptionList: MutableList<Gr
         p0.binding.root.setOnClickListener(object :View.OnClickListener{
             override fun onClick(v: View?) {
 
-                  onOptionClickListener.OnOptionClick(p0.adapterPosition)
+                  onOptionClickListener.OnOptionClick(groupOptionList.keys.toMutableList()[p1])
 
             }
 

@@ -37,7 +37,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_alignBottom="@id/frame"
             android:layout_marginBottom="8dp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
@@ -45,19 +44,14 @@
             app:srcCompat="@drawable/ic_send_24dp" />
 
 
-        <FrameLayout
-            android:id="@+id/frame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_toStartOf="@+id/buttonSendMessage"
-            android:layout_toEndOf="@id/iv_attchment">
-
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/edit_text_round"
+                android:layout_toEndOf="@id/iv_attchment"
+                android:layout_centerVertical="true"
+                android:background="@drawable/edit_background"
+                android:layout_toStartOf="@id/buttonSendMessage"
                 android:layout_height="wrap_content">
 
 
@@ -71,7 +65,7 @@
             <EditText
                 android:id="@+id/editTextChatMessage"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:autoLink="web"
                 android:ems="10"
@@ -93,11 +87,12 @@
 
             <com.inscripts.cometchatpulse.CustomView.RecordMicButton
                 android:id="@+id/record_button"
-                android:layout_width="48dp"
-                android:layout_marginTop="4dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end|bottom"
+                android:layout_width="45dp"
+                android:layout_marginTop="8dp"
+                android:layout_height="30dp"
                 android:layout_marginBottom="16dp"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/buttonSendMessage"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_mic_24dp"
@@ -107,13 +102,13 @@
             <com.inscripts.cometchatpulse.CustomView.RecordAudio
                 android:id="@+id/record_audio_view"
                 android:layout_width="wrap_content"
+                android:layout_toStartOf="@id/record_button"
+                android:layout_centerVertical="true"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end|center"
-                android:layout_marginEnd="60dp">
+                android:layout_marginEnd="16dp">
 
             </com.inscripts.cometchatpulse.CustomView.RecordAudio>
 
-        </FrameLayout>
     </RelativeLayout>
 
 

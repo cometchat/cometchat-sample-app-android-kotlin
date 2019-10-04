@@ -14,7 +14,7 @@ class StringContract {
 
             const val API_KEY: String = "XXXXXXXXXXXXXX"
 
-            const val REGION:String="XXXXXX"
+            const val REGION:String="XXXX"
 
             lateinit var theme: Appearance.AppTheme
 

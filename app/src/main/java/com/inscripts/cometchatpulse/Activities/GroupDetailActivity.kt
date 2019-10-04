@@ -37,7 +37,7 @@ class GroupDetailActivity : AppCompatActivity() {
 
     private lateinit var groupOptionAdapter: GroupOptionAdapter
 
-    private var groupOptionList: MutableList<GroupOption> = mutableListOf()
+    private var groupOptionList: MutableMap<Int,GroupOption> = mutableMapOf()
 
     private lateinit var groupViewModel: GroupViewModel
 
@@ -150,16 +150,16 @@ class GroupDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun GroupOptionItemList(): MutableList<GroupOption> {
+    private fun GroupOptionItemList(): MutableMap<Int,GroupOption> {
 
-        groupOptionList.add(GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
+        groupOptionList.put(0,GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
         if(userScope==CometChatConstants.SCOPE_ADMIN||userScope==CometChatConstants.SCOPE_MODERATOR) {
-            groupOptionList.add(GroupOption(getString(R.string.add_members), ContextCompat.getDrawable(this, R.drawable.ic_person_add_black_24dp)))
+            groupOptionList.put(1,GroupOption(getString(R.string.add_members), ContextCompat.getDrawable(this, R.drawable.ic_person_add_black_24dp)))
         }
-        groupOptionList.add(GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
-        groupOptionList.add(GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
+        groupOptionList.put(2,GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
+        groupOptionList.put(3,GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
          if (userScope==CometChatConstants.SCOPE_ADMIN) {
-             groupOptionList.add(GroupOption(getString(R.string.delete_group), ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
+             groupOptionList.put(4,GroupOption(getString(R.string.delete_group), ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
          }
         return groupOptionList
     }
