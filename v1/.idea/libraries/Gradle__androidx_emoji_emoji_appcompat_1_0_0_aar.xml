@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: androidx.emoji:emoji-appcompat:1.0.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/emoji-appcompat-1.0.0.aar/a39fde722b0f27905dc5074be9a55197/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/emoji-appcompat-1.0.0.aar/a39fde722b0f27905dc5074be9a55197/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/androidx.emoji/emoji-appcompat/1.0.0/698b3079f19d883fd1532dbe3b9d42b60a1c3da1/emoji-appcompat-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

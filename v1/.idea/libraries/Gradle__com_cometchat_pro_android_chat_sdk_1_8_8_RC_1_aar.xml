@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.cometchat:pro-android-chat-sdk:1.8.8-RC-1@aar">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-pro-android-chat-sdk-1.8.8-RC-1.aar/09ec95edf449eddc19555a1c19a5c554/annotations.zip!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-pro-android-chat-sdk-1.8.8-RC-1.aar/09ec95edf449eddc19555a1c19a5c554/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-pro-android-chat-sdk-1.8.8-RC-1.aar/09ec95edf449eddc19555a1c19a5c554/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

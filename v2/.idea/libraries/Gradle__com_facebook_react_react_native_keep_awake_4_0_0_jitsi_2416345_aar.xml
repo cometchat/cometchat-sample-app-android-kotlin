@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.facebook.react:react-native-keep-awake:4.0.0-jitsi-2416345@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/react-native-keep-awake-4.0.0-jitsi-2416345.aar/aa7f47646197525ecd38e767f3d9a634/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/react-native-keep-awake-4.0.0-jitsi-2416345.aar/aa7f47646197525ecd38e767f3d9a634/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.facebook.react/react-native-keep-awake/4.0.0-jitsi-2416345/ba5404f93d5630424d18d227915ff90f06a8f73/react-native-keep-awake-4.0.0-jitsi-2416345-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.amplitude:android-sdk:2.14.1@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amplitude/android-sdk/2.14.1/ef688443a7e7db9bbf188edd13cb7b3c1edce47a/android-sdk-2.14.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amplitude/android-sdk/2.14.1/69ad94a1e592bfc13e37ac081de2bc5f640711d/android-sdk-2.14.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amplitude/android-sdk/2.14.1/7d65cd5b7edcd4c69165a1ff002601f2ae18e330/android-sdk-2.14.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

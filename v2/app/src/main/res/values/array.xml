@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <array name="material_color">
+
+        <item name="red_500" type="color">#e51c23</item>
+        <item name="pink_500" type="color">#e91e63</item>
+        <item name="purple_500" type="color">#9c27b0</item>
+        <item name="deep_purple_500" type="color">#673ab7</item>
+        <item name="indigo_500" type="color">#3f51b5</item>
+        <item name="blue_500" type="color">#5677fc</item>
+        <item name="light_blue_500" type="color">#03a9f4</item>
+        <item name="cyan_500" type="color">#00bcd4</item>
+        <item name="teal_500" type="color">#009688</item>
+        <item name="green_500" type="color">#259b24</item>
+        <item name="light_green_500" type="color">#8bc34a</item>
+        <item name="lime_500" type="color">#cddc39</item>
+        <item name="yellow_500" type="color">#ffeb3b</item>
+        <item name="orange_500" type="color">#ff9800</item>
+        <item name="deep_orange_500" type="color">#ff5722</item>
+        <item name="brown_500" type="color">#795548</item>
+        <item name="grey_500" type="color">#9e9e9e</item>
+        <item name="blue_grey_500" type="color">#607d8b</item>
+
+        <item name="red_700" type="color">#d01716</item>
+        <item name="pink_700" type="color">#c2185b</item>
+        <item name="purple_700" type="color">#7b1fa2</item>
+        <item name="deep_purple_700" type="color">#512da8</item>
+        <item name="indigo_700" type="color">#303f9f</item>
+        <item name="blue_700" type="color">#455ede</item>
+        <item name="light_blue_700" type="color">#0288d1</item>
+        <item name="cyan_700" type="color">#0097a7</item>
+        <item name="teal_700" type="color">#00796b</item>
+        <item name="green_700" type="color">#0a7e07</item>
+        <item name="light_green_700" type="color">#689f38</item>
+        <item name="lime_700" type="color">#afb42b</item>
+        <item name="yellow_700" type="color">#fbc02d</item>
+        <item name="orange_700" type="color">#f57c00</item>
+        <item name="deep_orange_700" type="color">#e64a19</item>
+        <item name="brown_700" type="color">#5d4037</item>
+        <item name="grey_700" type="color">#616161</item>
+        <item name="blue_grey_700" type="color">#455a64</item>
+
+        <item name="red_800" type="color">#c41411</item>
+        <item name="pink_800" type="color">#ad1457</item>
+        <item name="purple_800" type="color">#6a1b9a</item>
+        <item name="deep_purple_800" type="color">#4527a0</item>
+        <item name="indigo_800" type="color">#283593</item>
+        <item name="blue_800" type="color">#3b50ce</item>
+        <item name="light_blue_800" type="color">#0277bd</item>
+        <item name="cyan_800" type="color">#00838f</item>
+        <item name="teal_800" type="color">#00695c</item>
+        <item name="green_800" type="color">#056f00</item>
+        <item name="light_green_800" type="color">#558b2f</item>
+        <item name="lime_800" type="color">#9e9d24</item>
+        <item name="yellow_800" type="color">#f9a825</item>
+        <item name="orange_800" type="color">#ef6c00</item>
+        <item name="deep_orange_800" type="color">#d84315</item>
+        <item name="brown_800" type="color">#4e342e</item>
+        <item name="grey_800" type="color">#424242</item>
+        <item name="blue_grey_800" type="color">#37474f</item>
+
+        <item name="red_A400" type="color">#ff2d6f</item>
+        <item name="pink_A400" type="color">#f50057</item>
+        <item name="purple_A400" type="color">#d500f9</item>
+        <item name="deep_purple_A400" type="color">#651fff</item>
+        <item name="indigo_A400" type="color">#3d5afe</item>
+        <item name="blue_A400" type="color">#4d73ff</item>
+        <item name="light_blue_A400" type="color">#00b0ff</item>
+        <item name="cyan_A400" type="color">#00e5ff</item>
+        <item name="teal_A400" type="color">#1de9b6</item>
+        <item name="green_A400" type="color">#14e715</item>
+        <item name="light_green_A400" type="color">#76ff03</item>
+        <item name="lime_A400" type="color">#c6ff00</item>
+        <item name="yellow_A400" type="color">#ffea00</item>
+        <item name="orange_A400" type="color">#ff9100</item>
+        <item name="deep_orange_A400" type="color">#ff3d00</item>
+
+        <item name="red_A700" type="color">#e00032</item>
+        <item name="pink_A700" type="color">#c51162</item>
+        <item name="purple_A700" type="color">#aa00ff</item>
+        <item name="deep_purple_A700" type="color">#6200ea</item>
+        <item name="indigo_A700" type="color">#304ffe</item>
+        <item name="blue_A700" type="color">#4d69ff</item>
+        <item name="light_blue_A700" type="color">#0091ea</item>
+        <item name="cyan_A700" type="color">#00b8d4</item>
+        <item name="teal_A700" type="color">#00bfa5</item>
+        <item name="green_A700" type="color">#12c700</item>
+        <item name="light_green_A700" type="color">#64dd17</item>
+        <item name="lime_A700" type="color">#aeea00</item>
+        <item name="yellow_A700" type="color">#ffd600</item>
+        <item name="orange_A700" type="color">#ff6d00</item>
+        <item name="deep_orange_A700" type="color">#dd2c00</item>
+
+    </array>
+
+
+</resources>
