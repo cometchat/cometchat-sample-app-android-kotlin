@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linear"
+    android:layout_height="match_parent">
+
+
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:hint="Search"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_height="40dp" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/contact_cardview"
+        android:layout_below="@id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="-8dp">
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/contact_recycler"
+            android:layout_margin="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="ifContentScrolls"
+            tools:listitem="@layout/contact_item" />
+
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/contact_shimmer"
+            android:layout_width="match_parent"
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1000"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+            <include layout="@layout/contact_placeholder" />
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+</RelativeLayout>

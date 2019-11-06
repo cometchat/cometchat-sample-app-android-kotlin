@@ -1,0 +1,84 @@
+<resources>
+    <string name="app_name">CometChat Pro</string>
+
+
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="type_your_message">Type your message</string>
+
+
+    <string-array name="group_type">
+        <item>Select Group Type</item>
+        <item>public</item>
+        <item>private</item>
+        <item>password</item>
+    </string-array>
+
+
+    <string name="today_last_seen">Last seen today at </string>
+    <string name="slide_to_cancel">Slide to cancel</string>
+    <string name="password">password</string>
+    <string name="deleted">message deleted</string>
+    <string name="group">group</string>
+    <string name="image">image</string>
+    <string name="type_video">video</string>
+    <string name="type_image">image</string>
+    <string name="yesterday_last_seen">Last seen yesterday at </string>
+    <string name="popup_gallary">Gallary</string>
+    <string name="popup_camera">Camera</string>
+    <string name="popup_audio">Audio</string>
+    <string name="popup_document">Document</string>
+    <string name="user">user</string>
+    <string name="joining">Joining</string>
+    <string name="group_password">Group Password*</string>
+    <string name="cancel">Cancel</string>
+    <string name="accept">Ok</string>
+    <string name="enter">Enter</string>
+    <string name="warning">Can Not Join Group No Internet</string>
+    <string name="incorrect_password">Incorrect Password</string>
+    <string name="members">Members</string>
+    <string name="ban_members">Ban Members</string>
+    <string name="title_activity_location">Map</string>
+    <string name="group_member">Group Members</string>
+    <string name="group_detail">Group Details</string>
+    <string name="contacts">Contacts</string>
+    <string name="groups">Groups</string>
+    <string name="guid">GUID*</string>
+    <string name="group_name">Group Name*</string>
+    <string name="group_description">Group Description</string>
+    <string name="group_type">Group Type*</string>
+    <string name="you">You</string>
+    <string name="photo">Photo</string>
+    <string name="video">Video</string>
+    <string name="audio_message">Audio Message</string>
+    <string name="file_message">File Message</string>
+    <string name="incoming_call">Incoming call...</string>
+    <string name="ringing">Ringing...</string>
+    <string name="voice_call_warning">Voice call will behave inappropriately</string>
+    <string name="video_call_warning">Video call will behave inappropriately</string>
+    <string name="create_group">Create Group</string>
+    <string name="guid_empty_warning">GUID can\'t be empty</string>
+    <string name="password_is_mandatory">Password is mandatory</string>
+    <string name="select_group_type">Select Group Type</string>
+    <string name="please_select_group_type">Please select group type</string>
+    <string name="leave_group_waring">Are you sure want to leave ?</string>
+    <string name="delete_group_warning">Are you sure want to delete ?</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="group_details">Group Details</string>
+    <string name="view_members">View Members</string>
+    <string name="unban_members">Unban Members</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="yes">Yes</string>
+    <string name="location_permission">Location permission denied, can\'t fetch location</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="online">online</string>
+    <string name="haven_t_created_a_user_yet_select_one_of_our_default_users_for_testing">Haven\'t created a user yet? Select one of our default users for testing:</string>
+    <string name="add_members">Add Members</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_list">User List</string>
+    <string name="banned_members">Banned Members</string>
+    <string name="group_members">Group Members</string>
+
+</resources>

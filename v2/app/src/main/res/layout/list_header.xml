@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <data>
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="35dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textSize="@dimen/small_text"
+        android:text=""
+        android:layout_margin="4dp"
+        android:gravity="center"
+        android:paddingTop="3dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:paddingRight="10dp"
+        android:maxWidth="300dp"
+        android:paddingLeft="10dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/grey"
+        android:textStyle="bold"
+        android:id="@+id/txt_message_date"/>
+
+    </RelativeLayout>
+
+</layout>

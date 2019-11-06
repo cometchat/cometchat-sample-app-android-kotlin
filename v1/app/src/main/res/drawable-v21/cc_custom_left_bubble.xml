@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="@color/edit_text_border"/>
+    <corners android:radius="24dp"/>
+
+    <!--<gradient-->
+
+    <!--android:centerColor="@color/primaryLightColor"-->
+    <!--android:startColor="@color/secondaryLightColor"-->
+    <!--android:endColor="@color/secondaryLightColor"-->
+    <!--android:angle="45"/>-->
+
+</shape>

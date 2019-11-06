@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+
+        <variable
+            name="message"
+            type="com.cometchat.pro.models.MediaMessage" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+        <com.inscripts.cometchatpulse.CustomView.CircleImageView
+            android:id="@+id/imgAvatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp"
+            tools:src="@tools:sample/avatars"
+            setUserImage="@{message.sender.avatar}"
+            android:visibility="@{message.receiverType.equals(@string/group)?View.VISIBLE:View.GONE}"
+            app:srcCompat="@drawable/default_avatar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/senderName"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/senderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/small_text"
+            android:text="@{message.sender.name}"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgAvatar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Sender Name" />
+
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/leftGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.6" />
+
+        <View
+            android:id="@+id/fileContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/cc_custom_left_bubble"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/leftGuideline"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgAvatar"
+            app:layout_constraintTop_toBottomOf="@+id/senderName"
+            app:layout_constraintWidth_default="wrap" />
+
+        <ImageView
+            android:id="@+id/playButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="8dp"
+            android:alpha="0.8"
+            app:srcCompat="@drawable/ic_play_arrow_black"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+            app:layout_constraintEnd_toEndOf="@+id/fileContainer"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="@+id/fileContainer" />
+
+        <SeekBar
+            android:id="@+id/audioSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.8"
+            android:thumbTint="@color/primaryTextColor"
+            app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+            app:layout_constraintEnd_toStartOf="@+id/audioLength"
+            app:layout_constraintStart_toStartOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="@+id/fileContainer" />
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+            app:layout_constraintEnd_toEndOf="@+id/fileContainer"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="@+id/fileContainer">
+
+
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:indeterminateTintMode="src_atop"
+            android:indeterminateTint="@color/primaryTextColor"
+            android:progressTintMode="src_atop"
+            android:progressTint="@color/primaryTextColor"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="visible"
+            />
+
+        <ImageView
+            android:id="@+id/download"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_file_download"
+            android:visibility="visible" />
+
+
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/audioLength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/small_text"
+            app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+            app:layout_constraintEnd_toStartOf="@+id/leftGuideline"
+            app:layout_constraintTop_toTopOf="@+id/fileContainer"
+            tools:text="00:00" />
+
+
+        <TextView
+            android:id="@+id/timeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            setTimeStamp="@{message.sentAt}"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/small_text"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/fileContainer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="10:00 AM" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

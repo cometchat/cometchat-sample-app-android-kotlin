@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <variable
+            name="message"
+            type="com.cometchat.pro.models.MediaMessage"/>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
+        android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/fileContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
+        android:padding="8dp"
+        android:background="@drawable/cc_custom_right_bubble"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/rightGuideline"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/rightGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <ImageView
+        android:id="@+id/playButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:srcCompat="@drawable/ic_play_arrow"
+        app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+        app:layout_constraintStart_toStartOf="@+id/fileContainer"
+        app:layout_constraintTop_toTopOf="@+id/fileContainer"
+        android:tint="@android:color/white"/>
+
+    <SeekBar
+        android:id="@+id/audioSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="20dp"
+        android:thumbTint="@color/secondaryTextColor"
+        app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+        app:layout_constraintEnd_toStartOf="@+id/audioLength"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/rightGuideline"
+        app:layout_constraintTop_toTopOf="@+id/fileContainer" />
+
+    <TextView
+        android:id="@+id/audioLength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/fileContainer"
+        app:layout_constraintEnd_toEndOf="@+id/fileContainer"
+        app:layout_constraintTop_toTopOf="@+id/fileContainer"
+        android:textSize="@dimen/small_text"
+        android:textColor="@android:color/white"
+        tools:text="00:00" />
+
+    <com.inscripts.cometchatpulse.CustomView.CircleImageView
+        android:id="@+id/messageStatus"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        app:civ_circle_background_color="@color/primaryColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        setDeliveryStatus="@{1}"
+        app:layout_constraintStart_toEndOf="@+id/fileContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"/>
+
+    <TextView
+        android:id="@+id/timeStamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="@dimen/small_text"
+        android:layout_marginBottom="8dp"
+        setTimeStamp="@{message.sentAt}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/fileContainer"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:text="10:00 AM" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

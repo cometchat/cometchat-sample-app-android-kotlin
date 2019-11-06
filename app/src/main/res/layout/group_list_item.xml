@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="group"
+            type="com.cometchat.pro.models.Group"/>
+
+        <variable
+            name="constant"
+            type="com.cometchat.pro.constants.CometChatConstants"/>
+
+        <variable
+            name="childClick"
+            type="com.inscripts.cometchatpulse.Helpers.ChildClickListener" />
+    </data>
+
+    <android.support.v7.widget.CardView
+
+        style="@style/SelectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{()->childClick.OnChildClick(group)}"
+        android:layout_width="match_parent"
+        app:cardElevation="0dp"
+        android:layout_height="wrap_content">
+
+
+    <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+        style="@style/SelectableItemBackground"
+        android:layout_width="match_parent"
+        android:paddingStart="5dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="10dp"
+        android:layout_height="wrap_content">
+
+
+        <com.inscripts.cometchatpulse.CustomView.CircleImageView
+            android:id="@+id/imageViewGroupAvatar"
+            setGroupIcon="@{group.icon}"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_centerVertical="true"
+            android:layout_margin="8dp"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/edit_text_border"
+            android:transitionName="groupImage"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/textViewGroupName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="12dp"
+            android:layout_toStartOf="@+id/imageViewGroupProtected"
+            android:layout_toEndOf="@+id/imageViewGroupAvatar"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="@{group.name}"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/title_size"
+            android:transitionName="groupName"
+            tools:text="@tools:sample/last_names" />
+
+        <TextView
+            android:id="@+id/textViewUsersOnlineMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewGroupName"
+            android:layout_alignStart="@+id/textViewGroupName"
+            android:layout_alignLeft="@+id/textViewGroupName"
+            android:gravity="left"
+            android:text="@{group.groupType}"
+            android:textSize="@dimen/small_text"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/textViewGroupUsersOnline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/textViewUsersOnlineMessage"
+            android:layout_toEndOf="@id/textViewUsersOnlineMessage"
+            android:layout_toRightOf="@id/textViewUsersOnlineMessage"
+            android:paddingStart="2dp"
+            android:paddingLeft="2dp"
+            android:text="0"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/textViewGroupUnreadCount"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:padding="1dp"
+            android:singleLine="true"
+            android:textColor="@color/primaryColor"
+            android:textSize="12sp"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/imageViewGroupProtected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/textViewGroupName"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@+id/textViewGroupUnreadCount"
+            android:adjustViewBounds="true"
+            android:maxWidth="24dp"
+            android:padding="3dp"
+            android:visibility="@{group.groupType.equals(@string/password)?View.VISIBLE:View.GONE}"
+            app:srcCompat="@drawable/ic_lock_outline_black_24dp"/>
+
+        <ImageView
+            android:id="@+id/right_arrow"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:srcCompat="@drawable/ic_keyboard_arrow_right_24dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp" />
+
+    </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</layout>
