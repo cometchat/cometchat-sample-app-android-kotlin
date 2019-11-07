@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.media.MediaPlayer
 import android.os.SystemClock
-import android.support.v7.content.res.AppCompatResources
+import androidx.appcompat.content.res.AppCompatResources
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -87,6 +87,7 @@ class RecordAudio : RelativeLayout {
 
         recordMic?.drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
         arrow?.drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
+
 
         hideViews(true)
 

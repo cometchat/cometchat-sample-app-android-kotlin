@@ -28,15 +28,14 @@
     </data>
 
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         style="@style/SelectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:background="@android:color/transparent"
         android:focusable="true"
-        app:cardElevation="0dp"
-        android:onClick="@{()->childClick.OnChildClick(user)}">
+        app:cardElevation="0dp">
 
 
     <RelativeLayout
@@ -158,7 +157,7 @@
 
     </RelativeLayout>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </layout>
 

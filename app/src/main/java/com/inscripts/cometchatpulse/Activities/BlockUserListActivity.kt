@@ -1,13 +1,13 @@
 package com.inscripts.cometchatpulse.Activities
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.graphics.PorterDuff
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.PopupMenu
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.widget.PopupMenu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
@@ -62,11 +62,11 @@ class BlockUserListActivity : AppCompatActivity() {
 
                 if (user is User) {
 
-                    val popup =  PopupMenu(this@BlockUserListActivity, item)
+                    val popup = item?.let { PopupMenu(this@BlockUserListActivity, it) }
                             //Inflating the Popup using xml file
-                            popup.menuInflater.inflate(R.menu.menu_unblock, popup.getMenu())
+                            popup?.menuInflater?.inflate(R.menu.menu_unblock, popup.getMenu())
 
-                            popup.setOnMenuItemClickListener { p0 ->
+                            popup?.setOnMenuItemClickListener { p0 ->
 
                                 when (p0!!.itemId) {
 
@@ -87,7 +87,7 @@ class BlockUserListActivity : AppCompatActivity() {
         })
 
         binding.rvBlockedUser.apply {
-            layoutManager=LinearLayoutManager(this@BlockUserListActivity)
+            layoutManager= androidx.recyclerview.widget.LinearLayoutManager(this@BlockUserListActivity)
             adapter=contactListAdapter
         }
 

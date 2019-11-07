@@ -2,14 +2,14 @@ package com.inscripts.cometchatpulse.Fragment
 
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import android.widget.Toast
 import com.cometchat.pro.models.User
@@ -45,7 +45,7 @@ class UserFragment : Fragment() {
     lateinit var contactListAdapter:ContactListAdapter
 
     lateinit var userViewModel: UserViewModel
-    var selectedUserView:MutableMap<String,View> = mutableMapOf()
+    var selectedUserView:MutableMap<String,View?> = mutableMapOf()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -84,7 +84,7 @@ class UserFragment : Fragment() {
         })
         (activity as AppCompatActivity).setSupportActionBar(mainView.userList_Toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        mainView.userList_Toolbar.title = getString(R.string.user_list)
+        mainView.userList_Toolbar.title = getString(R.string.add_members)
         mainView.userList_Toolbar.setTitleTypeface(StringContract.Font.title)
 
         mainView.userList_Toolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint,
@@ -104,7 +104,7 @@ class UserFragment : Fragment() {
 
 
          mainView.rvAddMember.apply {
-             layoutManager=LinearLayoutManager(context)
+             layoutManager= LinearLayoutManager(context)
              adapter=contactListAdapter
          }
 
@@ -115,8 +115,8 @@ class UserFragment : Fragment() {
         })
 
 
-        mainView.rvAddMember.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        mainView.rvAddMember.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (!recyclerView.canScrollVertically(1)) {

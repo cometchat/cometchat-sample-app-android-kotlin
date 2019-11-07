@@ -1,13 +1,13 @@
 package com.inscripts.cometchatpulse.Helpers
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 
-class RecyclerviewTouchListener(var1: Context, var2: RecyclerView, private val clickListener: ClickListener?) :
-        RecyclerView.OnItemTouchListener {
+class RecyclerviewTouchListener(var1: Context, var2: androidx.recyclerview.widget.RecyclerView, private val clickListener: ClickListener?) :
+        androidx.recyclerview.widget.RecyclerView.OnItemTouchListener {
 
     private val gestureDetector: GestureDetector
 
@@ -27,7 +27,7 @@ class RecyclerviewTouchListener(var1: Context, var2: RecyclerView, private val c
         })
     }
 
-    override fun onInterceptTouchEvent(var1: RecyclerView, var2: MotionEvent): Boolean {
+    override fun onInterceptTouchEvent(var1: androidx.recyclerview.widget.RecyclerView, var2: MotionEvent): Boolean {
         val var3 = var1.findChildViewUnder(var2.x, var2.y)
         if (var3 != null && this.clickListener != null && this.gestureDetector.onTouchEvent(var2)) {
             this.clickListener.onClick(var3, var1.getChildPosition(var3))
@@ -36,7 +36,7 @@ class RecyclerviewTouchListener(var1: Context, var2: RecyclerView, private val c
         return false
     }
 
-    override fun onTouchEvent(var1: RecyclerView, var2: MotionEvent) {}
+    override fun onTouchEvent(var1: androidx.recyclerview.widget.RecyclerView, var2: MotionEvent) {}
 
     override fun onRequestDisallowInterceptTouchEvent(var1: Boolean) {}
 

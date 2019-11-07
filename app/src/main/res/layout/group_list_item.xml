@@ -20,7 +20,7 @@
             type="com.inscripts.cometchatpulse.Helpers.ChildClickListener" />
     </data>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
 
         style="@style/SelectableItemBackground"
         android:clickable="true"
@@ -136,6 +136,6 @@
 
     </RelativeLayout>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </layout>

@@ -1,14 +1,15 @@
 package com.inscripts.cometchatpulse.Adapter
 
 import android.content.Context
-import android.databinding.DataBindingUtil
-import android.support.v7.widget.RecyclerView
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Helpers.ChildClickListener
 import com.inscripts.cometchatpulse.Helpers.OnClickEvent
+import com.inscripts.cometchatpulse.Helpers.OnUserClick
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.CommonUtil
@@ -17,12 +18,15 @@ import com.inscripts.cometchatpulse.databinding.ContactItemBinding
 import com.inscripts.cometchatpulse.ViewModel.UserViewModel
 
 
-class ContactListAdapter(val context: Context?, private val isBlockedList:Boolean,val listener:OnClickEvent?=null) : RecyclerView.Adapter<ContactViewHolder>() {
+class ContactListAdapter(val context: Context?, private val isBlockedList:Boolean,val listener:OnClickEvent?=null,
+                         val countListener:OnUserClick?=null) : androidx.recyclerview.widget.RecyclerView.Adapter<ContactViewHolder>() {
 
     private var unReadCountMap: MutableMap<String, Int> = mutableMapOf()
     private var userList: MutableMap<String,User> = mutableMapOf()
 
     private var  onClickEvent:OnClickEvent?=listener
+
+    private var onUserClick:OnUserClick?=countListener
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ContactViewHolder {
 
@@ -46,7 +50,11 @@ class ContactListAdapter(val context: Context?, private val isBlockedList:Boolea
         contactViewHolder.binding.textviewSingleChatUnreadCount.background=CommonUtil.setDrawable(StringContract.Color.primaryColor,40f)
 
         if (!isBlockedList) {
-            contactViewHolder.binding.childClick = context as ChildClickListener
+
+              contactViewHolder.binding.root.setOnClickListener{
+                  onUserClick!!.onItemClick(it,user)
+
+              }
 
             if (unReadCountMap.containsKey(user.uid)){
 
@@ -83,6 +91,7 @@ class ContactListAdapter(val context: Context?, private val isBlockedList:Boolea
 
     fun setUnreadCount(it: MutableMap<String, Int>) {
         unReadCountMap= it
+        notifyDataSetChanged()
     }
 
     fun setFilter(it: MutableMap<String, User>) {

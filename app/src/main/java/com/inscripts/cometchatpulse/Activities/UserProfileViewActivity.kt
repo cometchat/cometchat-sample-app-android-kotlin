@@ -1,11 +1,11 @@
 package com.inscripts.cometchatpulse.Activities
 
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -17,7 +17,7 @@ import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.ViewModel.OnetoOneViewModel
 import com.inscripts.cometchatpulse.databinding.ActivityUserProfileViewBinding
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import com.inscripts.cometchatpulse.Extensions.setTitleTypeface

@@ -1,15 +1,15 @@
 package com.inscripts.cometchatpulse.Fragment
 
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.PopupMenu
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.User
@@ -39,7 +39,7 @@ class BanMemberFragment : Fragment() {
 
     private lateinit var ownerId: String
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var groupChatViewModel: GroupChatViewModel
 
@@ -84,7 +84,7 @@ class BanMemberFragment : Fragment() {
 
         my.banmember_toolbar.setBackgroundColor(StringContract.Color.primaryColor)
 
-        linearLayoutManager = LinearLayoutManager(context)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         my.rv_ban_member.setLayoutManager(linearLayoutManager)
         try {
             memberListAdapter = MemberListAdapter(context, ownerId, R.layout.group_member_item, object : OnClickEvent {
@@ -138,8 +138,8 @@ class BanMemberFragment : Fragment() {
         })
 
 
-        my.rv_ban_member.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        my.rv_ban_member.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (!recyclerView.canScrollVertically(1)) {

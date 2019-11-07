@@ -1,9 +1,9 @@
 package com.inscripts.cometchatpulse.Repository
 
 import android.app.Activity
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -18,6 +18,8 @@ import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.cometchat.pro.core.BlockedUsersRequest
 import com.cometchat.pro.models.GroupMember
+import com.cometchat.pro.models.MediaMessage
+import com.cometchat.pro.models.TextMessage
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import java.lang.Exception
 import java.util.ArrayList
@@ -96,6 +98,7 @@ class UserRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                     Log.d("fetchNext", "UsersRequest onError: ${p0?.message}")
                 }
 
@@ -147,6 +150,7 @@ class UserRepository {
 
             override fun onError(p0: CometChatException?) {
                 Log.d("initiateCall", "onError: ${p0?.message}")
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -161,7 +165,8 @@ class UserRepository {
             }
 
             override fun onError(e: CometChatException) {
-               Log.d(TAG,"blockUsers onError: ")
+                Toast.makeText(CometChatPro.applicationContext(), e?.message, Toast.LENGTH_SHORT).show()
+                Log.d(TAG,"blockUsers onError: ")
             }
         })
     }
@@ -185,7 +190,8 @@ class UserRepository {
             }
 
             override fun onError(p0: CometChatException?) {
-               Log.d(TAG,"onError: ")
+                Log.d(TAG,"onError: ")
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -212,6 +218,7 @@ class UserRepository {
             }
 
             override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 Log.d(TAG,"onError: "+p0?.message)
             }
 
@@ -220,17 +227,15 @@ class UserRepository {
     }
 
     fun searchUser(userName: String) {
-
-            mutableFilterUserList.clear()
-               userRequest=null
+            var filterList:MutableMap<String,User> = mutableMapOf()
             val searchUserRequest = UsersRequest.UsersRequestBuilder().setLimit(100).setSearchKeyword(userName).build()
             searchUserRequest?.fetchNext(object : CometChat.CallbackListener<List<User>>() {
                 override fun onSuccess(p0: List<User>?) {
                         if (p0 != null) {
                             for (user: User in p0) {
-                                mutableFilterUserList[user.uid] = user
+                                filterList[user.uid] = user
                             }
-                            filterUsersList.value=mutableFilterUserList
+                            usersList.value=filterList
                         }
                 }
                 override fun onError(p0: CometChatException?) {
@@ -244,7 +249,7 @@ class UserRepository {
 
         CometChat.getUnreadMessageCountForAllUsers(object : CometChat.CallbackListener<HashMap<String, Int>>() {
             override fun onSuccess(stringIntegerHashMap: HashMap<String, Int>) {
-                Log.d(TAG,"onSuccess: ${stringIntegerHashMap.size}")
+                Log.d(TAG,"getUnreadMessageCountForAllUsers onSuccess: ${stringIntegerHashMap.size}")
                  unreadCountmap=stringIntegerHashMap
                  liveUnreadCountMap.value=unreadCountmap
 
@@ -268,15 +273,56 @@ class UserRepository {
         CometChat.addMembersToGroup(guid,member,null,object :CometChat.CallbackListener<HashMap<String,String>>(){
 
             override fun onSuccess(p0: HashMap<String, String>?) {
-               Toast.makeText(CometChatPro.applicationContext(),"Success",Toast.LENGTH_SHORT).show()
+               Toast.makeText(CometChatPro.applicationContext(),"Group Member Added Successfully",Toast.LENGTH_SHORT).show()
                 activity?.onBackPressed()
             }
 
             override fun onError(p0: CometChatException?) {
-             Log.d(TAG,"addMembersToGroup onError: $p0")
+                Log.d(TAG,"addMembersToGroup onError: $p0")
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
             }
 
         })
+
+    }
+
+    fun addMessageListener(tag: String) {
+        var i=1
+        CometChat.addMessageListener(tag,object :CometChat.MessageListener(){
+            override fun onTextMessageReceived(message: TextMessage?) {
+                 if (message!=null) {
+                     if (message.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                         if (unreadCountmap[message.sender.uid] == null) {
+                             unreadCountmap.put(message.sender.uid, i++)
+                         } else {
+                             if (unreadCountmap[message.sender.uid] != null) {
+                                 unreadCountmap[message.sender.uid]?.plus(1)?.let { unreadCountmap.put(message.sender.uid, it) }
+                             }
+                         }
+                         liveUnreadCountMap.value = unreadCountmap
+                     }
+                 }
+            }
+
+            override fun onMediaMessageReceived(message: MediaMessage?) {
+                if (message!=null) {
+                    if (message.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                        if (unreadCountmap[message.sender.uid] == null) {
+                            unreadCountmap.put(message.sender.uid, i++)
+                        } else {
+                            if (unreadCountmap[message.sender.uid] != null) {
+                                unreadCountmap[message.sender.uid]?.plus(1)?.let { unreadCountmap.put(message.sender.uid, it) }
+                            }
+                        }
+                        liveUnreadCountMap.value = unreadCountmap
+                    }
+                }
+            }
+
+        })
+    }
+
+    fun removeMessageListener(tag: String) {
 
     }
 }

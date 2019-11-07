@@ -1,15 +1,15 @@
 package com.inscripts.cometchatpulse.Fragment
 
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -29,8 +29,8 @@ import kotlinx.coroutines.*
 import java.lang.Exception
 import android.R.attr.button
 import android.graphics.PorterDuff
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.PopupMenu
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.GroupMember
 import com.inscripts.cometchatpulse.Activities.MainActivity
@@ -54,7 +54,7 @@ class MemberFragment : Fragment() {
 
     private lateinit var ownerId: String
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var groupChatViewModel: GroupChatViewModel
 
@@ -104,7 +104,7 @@ class MemberFragment : Fragment() {
 
         groupChatViewModel = ViewModelProviders.of(this).get(GroupChatViewModel::class.java)
 
-        linearLayoutManager = LinearLayoutManager(context)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         myView.rv_member.layoutManager = linearLayoutManager
         try {
 
@@ -178,8 +178,8 @@ class MemberFragment : Fragment() {
         })
 
 
-        myView.rv_member.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        myView.rv_member.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (!recyclerView.canScrollVertically(1)) {

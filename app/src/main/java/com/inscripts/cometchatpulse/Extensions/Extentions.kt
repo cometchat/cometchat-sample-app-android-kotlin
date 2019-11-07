@@ -1,7 +1,7 @@
 package com.inscripts.cometchatpulse.Extensions
 
 import android.graphics.Typeface
-import android.support.v7.widget.Toolbar
+import androidx.appcompat.widget.Toolbar
 import android.widget.TextView
 
 

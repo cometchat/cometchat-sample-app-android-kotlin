@@ -2,11 +2,11 @@ package com.inscripts.cometchatpulse.Repository
 
 
 import android.app.ProgressDialog
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import android.content.Intent
-import android.support.annotation.WorkerThread
-import android.support.v4.app.FragmentActivity
+import androidx.annotation.WorkerThread
+import androidx.fragment.app.FragmentActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -103,7 +103,8 @@ class GroupRepository {
                     }
 
                     override fun onError(p0: CometChatException?) {
-                       p0?.printStackTrace()
+                        Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                        p0?.printStackTrace()
                     }
 
                 })
@@ -165,7 +166,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 }
 
             })
@@ -182,7 +183,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 }
 
             })
@@ -211,7 +212,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 }
 
             })
@@ -229,7 +230,8 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                   p0?.printStackTrace()
+                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                    p0?.printStackTrace()
                 }
 
 
@@ -324,8 +326,8 @@ class GroupRepository {
         CometChat.leaveGroup(guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
                 showToast("Successfully left group")
-
-                activity?.onBackPressed()
+                activity?.startActivity(Intent(activity,MainActivity::class.java))
+//                activity?.onBackPressed()
             }
 
             override fun onError(p0: CometChatException?) {
@@ -374,7 +376,7 @@ class GroupRepository {
 
     fun searchGroup(s: String) {
 
-        groupFilterList.clear()
+        var filterGroup : MutableMap<String,Group> = mutableMapOf()
             val groupSearchRequest = GroupsRequest.GroupsRequestBuilder().setSearchKeyWord(s).setLimit(100).build()
 
             groupSearchRequest?.fetchNext(object : CometChat.CallbackListener<List<Group>>() {
@@ -382,10 +384,11 @@ class GroupRepository {
                 override fun onSuccess(p0: List<Group>?) {
                      if (p0!=null) {
                          for (group: Group in p0) {
-                          groupFilterList.put(group.guid,group)
+                          filterGroup.put(group.guid,group)
                          }
-                         filterGroupList.value=groupFilterList
+                         groupList.value=filterGroup
                      }
+                    Log.d("","onSuccess groupSearchRequest ${p0?.size}")
                 }
 
                 override fun onError(p0: CometChatException?) {

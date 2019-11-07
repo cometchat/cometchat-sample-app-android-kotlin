@@ -1,7 +1,7 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
-import android.support.v4.util.LongSparseArray
-import android.support.v7.widget.RecyclerView
+import androidx.collection.LongSparseArray
+import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.TextMessage
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -14,7 +14,7 @@ import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.databinding.LeftLocationBinding
 import java.lang.Exception
 
-class LeftLocationViewHolder(val binding:LeftLocationBinding):RecyclerView.ViewHolder(binding.root),OnMapReadyCallback {
+class LeftLocationViewHolder(val binding:LeftLocationBinding): androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root),OnMapReadyCallback {
 
     var googleMap: GoogleMap? = null
 

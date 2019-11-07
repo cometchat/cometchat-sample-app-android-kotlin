@@ -1,7 +1,7 @@
 package com.inscripts.cometchatpulse.CustomView
 
 import android.content.Context
-import android.support.v7.content.res.AppCompatResources
+import androidx.appcompat.content.res.AppCompatResources
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -11,7 +11,7 @@ import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.Utils.AnimUtil
 
 
-class RecordMicButton : android.support.v7.widget.AppCompatImageView, View.OnTouchListener, View.OnClickListener {
+class RecordMicButton : androidx.appcompat.widget.AppCompatImageView, View.OnTouchListener, View.OnClickListener {
 
     private var scaleView: View? = null
 
@@ -120,8 +120,6 @@ class RecordMicButton : android.support.v7.widget.AppCompatImageView, View.OnTou
             when (motionEvent.action) {
 
                 MotionEvent.ACTION_DOWN ->{ recordAudio!!.onActionDown(view as RecordMicButton, context)}
-
-                MotionEvent.ACTION_MOVE -> {recordAudio!!.onActionMove(view as RecordMicButton, motionEvent)}
 
                 MotionEvent.ACTION_UP -> {recordAudio!!.onActionUp(view as RecordMicButton)}
             }

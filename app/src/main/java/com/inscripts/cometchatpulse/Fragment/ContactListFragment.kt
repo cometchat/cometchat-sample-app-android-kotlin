@@ -1,18 +1,18 @@
 package com.inscripts.cometchatpulse.Fragment
 
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -24,8 +24,7 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Adapter.ContactListAdapter
-import com.inscripts.cometchatpulse.Helpers.CardItemTouchHelper
-import com.inscripts.cometchatpulse.Helpers.UnreadCountInterface
+import com.inscripts.cometchatpulse.Helpers.*
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -45,11 +44,15 @@ class ContactListFragment : Fragment() {
 
     lateinit var contactListAdapter: ContactListAdapter
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var user:User
 
+    private lateinit var childClickListener: ChildClickListener
 
+    private var unreadCountmap:MutableMap<String,Int> = mutableMapOf()
+
+    var searchBoxOpen : Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -59,11 +62,22 @@ class ContactListFragment : Fragment() {
         if (config.smallestScreenWidthDp < 600) {
             CommonUtil.setCardView(view.contact_cardview)
         }
+        childClickListener=activity as ChildClickListener
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
-        linearLayoutManager = LinearLayoutManager(activity)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
         view.contact_recycler.layoutManager = linearLayoutManager
-        view.contact_recycler.itemAnimator=DefaultItemAnimator()
-        contactListAdapter = ContactListAdapter(activity,false)
+        view.contact_recycler.itemAnimator= androidx.recyclerview.widget.DefaultItemAnimator()
+        contactListAdapter = ContactListAdapter(context,false,null,object :OnUserClick{
+
+            override fun onItemClick(item:View,any: Any) {
+                 if (any is User) {
+                     unreadCountmap.remove(any.uid)
+                     userViewModel.unReadCount.value=unreadCountmap
+                     contactListAdapter.notifyDataSetChanged()
+                 }
+                childClickListener.OnChildClick(any)
+            }
+        })
         view.contact_recycler.adapter = contactListAdapter
 
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
@@ -90,9 +104,11 @@ class ContactListFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 var searchString=s.toString()
                 if (searchString.isNotEmpty()) {
+                    searchBoxOpen = true
                     searchUser(searchString)
                 }
                 else{
+                    searchBoxOpen = false
                     userViewModel.fetchUser(LIMIT = 30,shimmer = view.contact_shimmer)
                 }
             }
@@ -105,7 +121,7 @@ class ContactListFragment : Fragment() {
             icon?.setColorFilter(StringContract.Color.white,PorterDuff.Mode.SRC_ATOP)
             val color = StringContract.Color.primaryDarkColor
             val helper = object : CardItemTouchHelper(context!!,icon!!, color) {
-                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+                override fun onSwiped(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
                     contactListAdapter.notifyDataSetChanged()
                     user = (p0.itemView.getTag(  R.string.user) as User)
                     showDialog("Are you sure you want to call ","Please Confirm",user.name,context)
@@ -138,6 +154,7 @@ class ContactListFragment : Fragment() {
 
         userViewModel.unReadCount.observe(this, Observer {unReadCount->
             unReadCount?.let {
+                unreadCountmap=unReadCount
                 contactListAdapter.setUnreadCount(it)
             }
 
@@ -145,12 +162,13 @@ class ContactListFragment : Fragment() {
         })
 
 
-        view.contact_recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        view.contact_recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-
-                if (!recyclerView.canScrollVertically(1)) {
-                    userViewModel.fetchUser(LIMIT = 30,shimmer = view.contact_shimmer)
+                if (!searchBoxOpen) {
+                    if (!recyclerView.canScrollVertically(1)) {
+                        userViewModel.fetchUser(LIMIT = 30, shimmer = view.contact_shimmer)
+                    }
                 }
             }
 
@@ -170,20 +188,24 @@ class ContactListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        userViewModel.fetchUnreadCountForUser()
     }
 
     override fun onStart() {
         super.onStart()
+        userViewModel.fetchUnreadCountForUser()
         userViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
+        userViewModel.addMessageListener(TAG)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         userViewModel.removeUserListener(StringContract.ListenerName.USER_LISTENER)
+        userViewModel.removeMessageListener(TAG)
     }
 
     fun showDialog(message: String, title: String, contactName: String, context: Context) {
-        val builder = android.support.v7.app.AlertDialog.Builder(context)
+        val builder = androidx.appcompat.app.AlertDialog.Builder(context)
         builder.setTitle(CommonUtil.setTitle(title, context))
 
                 .setMessage(message + contactName)

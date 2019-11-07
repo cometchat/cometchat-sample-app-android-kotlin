@@ -2,27 +2,28 @@ package com.inscripts.cometchatpulse.Fragment
 
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.graphics.PorterDuff
 import android.media.MediaRecorder
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.SearchView
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -70,6 +71,7 @@ private val TAG="GroupFragment"
 class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMode.Callback,OnClickEvent,TextWatcher{
 
 
+
     private lateinit var searchView: SearchView
 
     private  var memberMap: MutableMap<String, GroupMember> = mutableMapOf()
@@ -92,7 +94,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
     var mediaRecorder: MediaRecorder? = null
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var groupChatAdapter: GroupChatAdapter
 
@@ -151,7 +153,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         clickListener = context as OnBackArrowClickListener
 
-        linearLayoutManager = LinearLayoutManager(activity)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
         binding.recycler.layoutManager = linearLayoutManager
 
 
@@ -291,8 +293,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         })
 
-        binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        binding.recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: androidx.recyclerview.widget.RecyclerView, newState: Int) {
 
                 binding.cometchatToolbar.isSelected = binding.recycler.canScrollVertically(-1)
 
@@ -433,7 +435,10 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         val videoCall = menu?.findItem(R.id.video_call)
 
         val leaveMenu = menu?.findItem(R.id.menu_leave)
-        leaveMenu?.setVisible(true)
+        val blockMenu = menu?.findItem(R.id.menu_block)
+        blockMenu?.isVisible = false
+        leaveMenu?.isVisible = true
+
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
             val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.ic_more_vert) }
             drawable?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
@@ -446,7 +451,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         var searchItem = menu?.findItem(R.id.app_bar_search)
 
         searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
-
+        var editText : EditText? = menu?.findItem(R.id.app_bar_search)?.actionView?.findViewById(androidx.appcompat.R.id.search_src_text)
+        editText?.setTextColor(StringContract.Color.white)
         if (searchItem != null) {
 
             searchView = searchItem.getActionView() as SearchView
@@ -551,7 +557,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as MediaMessage).sender.name
                     metaData?.put("senderName", (any as MediaMessage).sender.name)
-                    metaData?.put("url", (any as MediaMessage).url)
+                    metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
                     metaData?.put("id", (any as MediaMessage).id)
                     metaData?.put("senderUid", (any as MediaMessage).sender.uid)
                     val type = (any as MediaMessage).type
@@ -562,20 +568,20 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                         binding.messageBox?.replyLayout?.ivReplyImage?.visibility = View.VISIBLE
 
-                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).url).into(it) }
+                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).attachment.fileUrl).into(it) }
 
                     } else if (type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
                         binding.messageBox?.replyLayout?.tvTextMessage?.text = "Audio message"
 
                         metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        metaData?.put("url", (any as MediaMessage).url)
+                        metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
                         metaData?.put("id", (any as MediaMessage).id)
 
                     } else if (type == CometChatConstants.MESSAGE_TYPE_FILE) {
 
                         metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        metaData?.put("url", (any as MediaMessage).url)
+                        metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
                         metaData?.put("id", (any as MediaMessage).id)
 //                        metaData.put("fileName",(any as MediaMessage).file.name)
 

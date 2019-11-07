@@ -1,6 +1,6 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.inscripts.cometchatpulse.databinding.GroupMemberItemBinding
 
-class GroupMemberHolder( val binding:GroupMemberItemBinding) :RecyclerView.ViewHolder(binding.root)
+class GroupMemberHolder( val binding:GroupMemberItemBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)

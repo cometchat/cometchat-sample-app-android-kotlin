@@ -3,7 +3,7 @@ package com.inscripts.cometchatpulse.Adapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.Typeface
@@ -12,9 +12,9 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Handler
-import android.support.v4.content.ContextCompat
-import android.support.v4.util.LongSparseArray
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.collection.LongSparseArray
+import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,7 +27,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
-import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.ImageViewActivity
 import com.inscripts.cometchatpulse.AsyncTask.DownloadFile
@@ -47,12 +46,12 @@ import java.io.IOException
 import java.util.*
 
 class GroupChatAdapter(val context: Context, val guid: String, val ownerId: String, val listener: OnClickEvent ) :
-        RecyclerView.Adapter<RecyclerView.ViewHolder>(), StickyHeaderAdapter<TextHeaderHolder> {
+        androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>(), StickyHeaderAdapter<TextHeaderHolder> {
 
 
     private var messagesList: LongSparseArray<BaseMessage> = LongSparseArray()
 
-    lateinit var viewHolder: RecyclerView.ViewHolder
+    lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
 
     private var currentPlayingSong: String? = null
     private var timerRunnable: Runnable? = null
@@ -80,7 +79,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         private lateinit var videoThumbnails: LongSparseArray<Bitmap>
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
         when (p1) {
@@ -227,8 +226,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         return messagesList.size()
     }
 
-    override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
-        val baseMessage = messagesList.get(messagesList.keyAt(p1))
+    override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
+        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
         val timeStampLong =baseMessage?.sentAt
         var message: String? = null
         var mediaFile: String? = null
@@ -254,7 +253,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         }
 
         if (baseMessage is MediaMessage) {
-            mediaFile = baseMessage.url
+            mediaFile = baseMessage.attachment.fileUrl
 
         }
 
@@ -279,8 +278,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     rightTextMessageHolder.binding.tvMessage.typeface = StringContract.Font.message
                 }
 
-                 setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
-                 setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+                 setStatusIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
 
             }
 
@@ -335,8 +333,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.imageMessage,baseMessage)
             }
 
@@ -353,8 +350,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     rightFileViewHolder.binding.timeStamp.typeface = StringContract.Font.status
                     val finalMediaFile = mediaFile
                     setLongClick(rightFileViewHolder.binding.root,baseMessage)
-                    setDeliveryIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
-                    setReadIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
+                    setStatusIcon(rightFileViewHolder.binding.messageStatus,baseMessage)
 
                     rightFileViewHolder.binding.fileName.setOnClickListener(View.OnClickListener { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile))) })
                 } catch (e: Exception) {
@@ -369,10 +365,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightLocationViewHolder.binding.message = baseMessage as TextMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightLocationViewHolder.bindView(p1, messagesList)
-                setDeliveryIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
-                setReadIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
-
-
+                setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
             }
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
@@ -390,8 +383,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is TextMessage) {
 
                     rightReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
@@ -460,8 +452,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
 
                 if (baseMessage is MediaMessage) {
 
@@ -478,19 +469,19 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                             }
                         }
                         rightReplyMessageHolder.binding.tvReplyTextMessage.visibility = View.VISIBLE
-                        Glide.with(context).load(baseMessage.url)
+                        Glide.with(context).load(baseMessage.attachment.fileUrl)
                                 .into(rightReplyMessageHolder.binding.ivNewMessage)
 
                     } else if (baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
 
                         rightReplyMessageHolder.binding.fileContainer.visibility = View.VISIBLE
 
-                        rightReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.url)
-                        rightReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.url)
+                        rightReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.attachment.fileUrl)
+                        rightReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.attachment.fileUrl)
 
                         rightReplyMessageHolder.binding.fileName.setOnClickListener {
 
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.url)))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.attachment.fileUrl)))
                         }
                     } else if (baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
@@ -722,18 +713,18 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 }
 
                             }
-                            Glide.with(context).load(baseMessage.url)
+                            Glide.with(context).load(baseMessage.attachment.fileUrl)
                                     .into(leftReplyMessageHolder.binding.ivNewMessage)
 
                         }
                         baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_FILE) -> {
 
                             leftReplyMessageHolder.binding.fileContainer.visibility = View.VISIBLE
-                            leftReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.url)
-                            leftReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.url)
+                            leftReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.attachment.fileUrl)
+                            leftReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.attachment.fileUrl)
                             leftReplyMessageHolder.binding.fileName.setOnClickListener {
 
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.url)))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.attachment.fileUrl)))
                             }
                         }
                         baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO) -> {
@@ -748,7 +739,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                 if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
                                     player?.reset()
                                     try {
-                                        player?.setDataSource(baseMessage.url)
+                                        player?.setDataSource(baseMessage.attachment.fileUrl)
                                         player?.prepare()
                                     } catch (e: IOException) {
                                         e.printStackTrace()
@@ -771,7 +762,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
                             leftReplyMessageHolder.binding.playButton.setOnClickListener {
 
-                                if (!TextUtils.isEmpty(baseMessage.url)) {
+                                if (!TextUtils.isEmpty(baseMessage.attachment.fileUrl)) {
 
                                     try {
                                         if (baseMessage.sentAt == currentlyPlayingId) {
@@ -815,7 +806,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                             leftReplyMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_white_24dp)
                                             player?.let {
                                                 timeStampLong?.let { it1 ->
-                                                    playAudio(baseMessage.url, it1, it, leftReplyMessageHolder.binding.playButton,
+                                                    playAudio(baseMessage.attachment.fileUrl, it1, it, leftReplyMessageHolder.binding.playButton,
                                                             leftReplyMessageHolder.binding.audioLength,
                                                             leftReplyMessageHolder.binding.audioSeekBar)
                                                 }
@@ -907,7 +898,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                         .fitCenter()
                         .placeholder(R.drawable.ic_broken_image)
                 Glide.with(context)
-                        .load(baseMessage.url)
+                        .load(baseMessage.attachment.fileUrl)
                         .apply(requestOptions)
                         .into(leftImageVideoMessageHolder.binding.imageMessage)
 
@@ -930,7 +921,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                         .fitCenter()
                         .placeholder(R.drawable.ic_broken_image)
                 Glide.with(context)
-                        .load(baseMessage.url)
+                        .load(baseMessage.attachment.fileUrl)
                         .apply(requestOptions)
                         .into(rightImageVideoMessageHolder.binding.imageMessage)
 
@@ -941,8 +932,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
 
                 })
-                 setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
-                 setReadIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
+                 setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus,baseMessage)
                  setLongClick(rightImageVideoMessageHolder.binding.root,baseMessage)
             }
 
@@ -955,8 +945,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 rightAudioMessageHolder.binding.timeStamp.typeface = StringContract.Font.status
                 rightAudioMessageHolder.binding.audioLength.typeface = StringContract.Font.status
                 setLongClick(rightAudioMessageHolder.binding.root, baseMessage)
-                setDeliveryIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
-                setReadIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
+                setStatusIcon(rightAudioMessageHolder.binding.messageStatus,baseMessage)
                 try {
 
                     if (timeStampLong?.let { GroupChatAdapter.audioDurations.get(it) } == null) {
@@ -1064,7 +1053,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
 
                 val audioPath: String = FileUtil.getPath(context, CometChatConstants.MESSAGE_TYPE_AUDIO) +
-                        FileUtil.getFileName(baseMessage.url)
+                        FileUtil.getFileName(baseMessage.attachment.fileUrl)
 
                 val audioFile = File(audioPath)
 
@@ -1123,7 +1112,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                             if (CCPermissionHelper.hasPermissions(CometChatPro.applicationContext(), CCPermissionHelper.REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)) {
                                 if (FileUtil.checkDirExistence(context, CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
-                                    downloadFile = DownloadFile(CometChatConstants.MESSAGE_TYPE_AUDIO, baseMessage.url,
+                                    downloadFile = DownloadFile(CometChatConstants.MESSAGE_TYPE_AUDIO, baseMessage.attachment.fileUrl,
                                             leftAudioMessageHolder.binding)
 
                                     downloadFile?.execute()
@@ -1140,7 +1129,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 leftAudioMessageHolder.binding.playButton.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(v: View?) {
 
-                        if (!TextUtils.isEmpty(baseMessage.url)) {
+                        if (!TextUtils.isEmpty(baseMessage.attachment.fileUrl)) {
 
                             try {
                                 if (baseMessage.sentAt == currentlyPlayingId) {
@@ -1187,7 +1176,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                                     leftAudioMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_black_24dp)
                                     player?.let {
                                         timeStampLong?.let { it1 ->
-                                            playAudio(if (audioFile.exists()) audioPath else baseMessage.url, it1, it, leftAudioMessageHolder.binding.playButton,
+                                            playAudio(if (audioFile.exists()) audioPath else baseMessage.attachment.fileUrl, it1, it, leftAudioMessageHolder.binding.playButton,
                                                     leftAudioMessageHolder.binding.audioLength, leftAudioMessageHolder.binding.audioSeekBar, true)
                                         }
                                     }
@@ -1239,7 +1228,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
         val imageIntent = Intent(context, ImageViewActivity::class.java)
         imageIntent.putExtra(StringContract.IntentString.FILE_TYPE, baseMessage.type);
-        imageIntent.putExtra(StringContract.IntentString.URL, (baseMessage.url))
+        imageIntent.putExtra(StringContract.IntentString.URL, (baseMessage.attachment.fileUrl))
         context.startActivity(imageIntent)
     }
 
@@ -1440,26 +1429,30 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
         for(baseMessage:BaseMessage in messageList){
             this.messagesList.put(baseMessage.id.toLong(),baseMessage)
-            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
+//            Log.d("groupChatAdapter","setMessageList: "+this.messagesList.toString())
         }
 
         notifyDataSetChanged()
     }
 
-    private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.deliveredAt != 0L) {
+    private fun setStatusIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
+
+        if (baseMessage.readAt != 0L) {
+            val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
+            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
+            circleImageView.setImageDrawable(drawable)
+            circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
+        }
+        else if (baseMessage.deliveredAt != 0L) {
             circleImageView.setImageResource(R.drawable.ic_double_tick)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
+        else{
+            circleImageView.setImageResource(R.drawable.ic_check_24dp)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
         }
     }
 
-    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.readAt != 0L) {
-            val drawable= ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
-            drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
-            circleImageView.setImageDrawable(drawable)
-            circleImageView.setCircleBackgroundColor(context.resources.getColor(android.R.color.transparent))
-        }
-    }
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
         messagesList.put(deletedMessage.id.toLong(),deletedMessage)
@@ -1471,12 +1464,20 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         notifyDataSetChanged()
     }
 
+
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
         val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
-
         if (baseMessage!=null) {
             baseMessage.deliveredAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(),baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.deliveredAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.deliveredAt = messageReceipt.deliveredAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
 
@@ -1485,11 +1486,19 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     fun setRead(messageReceipt: MessageReceipt) {
         val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
         if (baseMessage != null) {
-            baseMessage.readAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(), baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.readAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.readAt = messageReceipt.readAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
     }
+
 
     fun setFilter(filterList: MutableList<BaseMessage>) {
         messagesList.clear()

@@ -3,7 +3,7 @@ package com.inscripts.cometchatpulse.Adapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.Typeface
@@ -12,10 +12,9 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Handler
-import android.support.v4.content.ContextCompat
-import android.support.v4.util.LongSparseArray
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.collection.LongSparseArray
+import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
@@ -28,8 +27,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
-import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.ImageViewActivity
 import com.inscripts.cometchatpulse.AsyncTask.DownloadFile
@@ -45,16 +42,15 @@ import com.inscripts.cometchatpulse.Utils.FileUtil
 import com.inscripts.cometchatpulse.ViewHolder.*
 import com.inscripts.cometchatpulse.databinding.*
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 class OneToOneAdapter(val context: Context, val ownerId: String,
-                      val listener: OnClickEvent) : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
+                      val listener: OnClickEvent) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>(),
         StickyHeaderAdapter<TextHeaderHolder> {
 
-    private lateinit var viewHolder: RecyclerView.ViewHolder
+    private lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
     private var messagesList: LongSparseArray<BaseMessage> = LongSparseArray()
     private var currentPlayingSong: String? = null
     private var timerRunnable: Runnable? = null
@@ -80,7 +76,8 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
+
+    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
 
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -193,6 +190,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
         val binding: ListHeaderBinding = DataBindingUtil.inflate(layoutInflater, R.layout.list_header, var1, false)
         return TextHeaderHolder(binding)
+
+    }
+
+    override fun getItemId(position: Int): Long {
+
+       val baseMessage=messagesList[messagesList.keyAt(position)]
+         if (baseMessage!=null){
+             return baseMessage.id.toLong()
+         }else{
+             return 0L
+         }
 
     }
 
@@ -336,8 +344,8 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     fun setMessageList(messageList: MutableList<BaseMessage>) {
         for(baseMessage:BaseMessage in messageList){
             this.messagesList.put(baseMessage.id.toLong(),baseMessage)
-            Log.d("onetoOne","setMessageList: "+this.messagesList.toString())
         }
+
         notifyDataSetChanged()
     }
 
@@ -368,12 +376,12 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
 
-    override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
+    override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
 
-        val baseMessage = messagesList.get(messagesList.keyAt(p1))
+        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
 
 
-        val timeStampLong = messagesList.get(messagesList.keyAt(p1))?.sentAt
+        val timeStampLong = messagesList.get(messagesList.keyAt(p0.adapterPosition))?.sentAt
         var message: String? = null
         var filePath: String? = null
         var mediaFile: String? = null
@@ -389,7 +397,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     e.printStackTrace()
                 }
             }
-            mediaFile = baseMessage.url
+            mediaFile = baseMessage.attachment.fileUrl
 
         }
 
@@ -413,8 +421,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightTextMessageHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightTextMessageHolder.binding.tvMessage.background.setColorFilter(StringContract.Color.rightMessageColor, PorterDuff.Mode.SRC_ATOP)
                 setLongClick(rightTextMessageHolder.binding.root, baseMessage)
-                setDeliveryIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
-                setReadIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
+                setStatusIcon(rightTextMessageHolder.binding.imgMessageStatus,baseMessage)
 
                 if (baseMessage.deletedAt!=0L){
                     rightTextMessageHolder.binding.tvMessage.text="message deleted"
@@ -458,8 +465,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightReplyMessageHolder.binding.message = baseMessage
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is TextMessage) {
                     rightReplyMessageHolder.binding.txtNewmsg.visibility = View.VISIBLE
                     rightReplyMessageHolder.binding.txtNewmsg.text = baseMessage.text
@@ -527,8 +533,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightReplyMessageHolder.binding.rlMain.background.setColorFilter(StringContract.Color.rightMessageColor,
                         PorterDuff.Mode.SRC_ATOP)
 
-                baseMessage?.let { setDeliveryIcon(rightReplyMessageHolder.binding.messageStatus, it) }
-                baseMessage?.let { setReadIcon(rightReplyMessageHolder.binding.messageStatus, it) }
+                baseMessage?.let { setStatusIcon(rightReplyMessageHolder.binding.messageStatus, it) }
                 if (baseMessage is MediaMessage) {
 
 
@@ -545,18 +550,18 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                         }
 
-                        Glide.with(context).load(baseMessage.url)
+                        Glide.with(context).load(baseMessage.attachment.fileUrl)
                                 .into(rightReplyMessageHolder.binding.ivNewMessage)
                     } else if (baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
 
                         rightReplyMessageHolder.binding.fileContainer.visibility = View.VISIBLE
 
-                        rightReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.url)
-                        rightReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.url)
+                        rightReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.attachment.fileUrl)
+                        rightReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.attachment.fileUrl)
 
                         rightReplyMessageHolder.binding.fileName.setOnClickListener {
 
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.url)))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.attachment.fileUrl)))
                         }
                     } else if (baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
@@ -774,7 +779,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                             leftReplyMessageHolder.binding.ivNewMessage.visibility = View.VISIBLE
 
-                            Glide.with(context).load(baseMessage.url)
+                            Glide.with(context).load(baseMessage.attachment.fileUrl)
                                     .into(leftReplyMessageHolder.binding.ivNewMessage)
 
                             if (baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_VIDEO)) {
@@ -788,11 +793,11 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                         baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_FILE) -> {
 
                             leftReplyMessageHolder.binding.fileContainer.visibility = View.VISIBLE
-                            leftReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.url)
-                            leftReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.url)
+                            leftReplyMessageHolder.binding.fileName.text = FileUtil.getFileName(baseMessage.attachment.fileUrl)
+                            leftReplyMessageHolder.binding.fileType.text = FileUtil.getFileExtension(baseMessage.attachment.fileUrl)
                             leftReplyMessageHolder.binding.fileName.setOnClickListener {
 
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.url)))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(baseMessage.attachment.fileUrl)))
                             }
                         }
                         baseMessage.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO) -> {
@@ -807,7 +812,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                                 if (timeStampLong?.let { audioDurations.get(it) } == null) {
                                     player?.reset()
                                     try {
-                                        player?.setDataSource(baseMessage.url)
+                                        player?.setDataSource(baseMessage.attachment.fileUrl)
                                         player?.prepare()
                                     } catch (e: IOException) {
                                         e.printStackTrace()
@@ -830,7 +835,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                             leftReplyMessageHolder.binding.playButton.setOnClickListener {
 
-                                if (!TextUtils.isEmpty(baseMessage.url)) {
+                                if (!TextUtils.isEmpty(baseMessage.attachment.fileUrl)) {
 
                                     try {
                                         if (baseMessage.sentAt == currentlyPlayingId) {
@@ -874,7 +879,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                                             leftReplyMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_white_24dp)
                                             player?.let {
                                                 timeStampLong?.let { it1 ->
-                                                    playAudio(baseMessage.url, it1, it, leftReplyMessageHolder.binding.playButton,
+                                                    playAudio(baseMessage.attachment.fileUrl, it1, it, leftReplyMessageHolder.binding.playButton,
                                                             leftReplyMessageHolder.binding.audioLength,
                                                             leftReplyMessageHolder.binding.audioSeekBar)
                                                 }
@@ -968,8 +973,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     }
 
                 })
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.imageMessage, baseMessage)
 
             }
@@ -979,8 +983,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightLocationViewHolder.binding.message = baseMessage as TextMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightLocationViewHolder.bindView(p1, messagesList)
-                setDeliveryIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
-                setReadIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
+                setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
             }
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
@@ -1006,8 +1009,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     rightFileViewHolder.binding.fileName.setOnClickListener(View.OnClickListener {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(finalMediaFile)))
                     })
-                    setDeliveryIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
-                    setReadIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
+                    setStatusIcon(rightFileViewHolder.binding.messageStatus, baseMessage)
                     setLongClick(rightFileViewHolder.binding.root, baseMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1048,7 +1050,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                         .fitCenter()
                         .placeholder(R.drawable.ic_broken_image)
                 Glide.with(context)
-                        .load(baseMessage.url)
+                        .load(baseMessage.attachment.fileUrl)
                         .apply(requestOptions)
                         .into(leftImageVideoMessageHolder.binding.imageMessage)
 
@@ -1081,7 +1083,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                         .fitCenter()
                         .placeholder(R.drawable.ic_broken_image)
                 Glide.with(context)
-                        .load(baseMessage.url)
+                        .load(baseMessage.attachment.fileUrl)
                         .apply(requestOptions)
                         .into(rightImageVideoMessageHolder.binding.imageMessage)
 
@@ -1092,9 +1094,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
                 })
 
-                setDeliveryIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
-
+                setStatusIcon(rightImageVideoMessageHolder.binding.messageStatus, baseMessage)
                 setLongClick(rightImageVideoMessageHolder.binding.root, baseMessage)
 
             }
@@ -1108,8 +1108,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 rightAudioMessageHolder.binding.audioLength.typeface = StringContract.Font.status
                 setLongClick(rightAudioMessageHolder.binding.root, baseMessage)
 
-                setDeliveryIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
-                setReadIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
+                setStatusIcon(rightAudioMessageHolder.binding.messageStatus, baseMessage)
 
                 try {
 
@@ -1217,7 +1216,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 leftAudioMessageHolder.binding.progress.visibility = View.GONE
 
                 val audioPath: String = FileUtil.getPath(context, CometChatConstants.MESSAGE_TYPE_AUDIO) +
-                        FileUtil.getFileName(baseMessage.url)
+                        FileUtil.getFileName(baseMessage.attachment.fileUrl)
 
                 val audioFile = File(audioPath)
 
@@ -1275,7 +1274,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                             if (CCPermissionHelper.hasPermissions(CometChatPro.applicationContext(), CCPermissionHelper.REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)) {
                                 if (FileUtil.checkDirExistence(context, CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
-                                    downloadFile = DownloadFile(CometChatConstants.MESSAGE_TYPE_AUDIO, baseMessage.url,
+                                    downloadFile = DownloadFile(CometChatConstants.MESSAGE_TYPE_AUDIO, baseMessage.attachment.fileUrl,
                                             leftAudioMessageHolder.binding)
 
                                     downloadFile?.execute()
@@ -1293,7 +1292,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 leftAudioMessageHolder.binding.playButton.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(v: View?) {
 
-                        if (!TextUtils.isEmpty(baseMessage.url)) {
+                        if (!TextUtils.isEmpty(baseMessage.attachment.fileUrl)) {
 
                             try {
                                 if (baseMessage.sentAt == currentlyPlayingId) {
@@ -1339,7 +1338,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                                     leftAudioMessageHolder.binding.playButton.setImageResource(R.drawable.ic_pause_black_24dp)
                                     player?.let {
                                         timeStampLong?.let { it1 ->
-                                            playAudio(if (audioFile.exists()) audioPath else baseMessage.url, it1, it, leftAudioMessageHolder.binding.playButton,
+                                            playAudio(if (audioFile.exists()) audioPath else baseMessage.attachment.fileUrl, it1, it, leftAudioMessageHolder.binding.playButton,
                                                     leftAudioMessageHolder.binding.audioLength, leftAudioMessageHolder.binding.audioSeekBar, true)
                                         }
                                     }
@@ -1362,26 +1361,29 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         }
     }
 
-    private fun setDeliveryIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
-        if (baseMessage.deliveredAt != 0L) {
-               circleImageView.setImageResource(R.drawable.ic_double_tick)
-            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
-        }
-    }
+    private fun setStatusIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
 
-    private fun setReadIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
         if (baseMessage.readAt != 0L) {
             val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
             drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
             circleImageView.setImageDrawable(drawable)
             circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
         }
+        else if (baseMessage.deliveredAt != 0L) {
+               circleImageView.setImageResource(R.drawable.ic_double_tick)
+               circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
+        else{
+            circleImageView.setImageResource(R.drawable.ic_check_24dp)
+            circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
+        }
     }
+
 
     private fun startIntent(baseMessage: MediaMessage) {
         val imageIntent = Intent(context, ImageViewActivity::class.java)
         imageIntent.putExtra(StringContract.IntentString.FILE_TYPE, baseMessage.type);
-        imageIntent.putExtra(StringContract.IntentString.URL, (baseMessage.url))
+        imageIntent.putExtra(StringContract.IntentString.URL, (baseMessage.attachment.fileUrl))
         context.startActivity(imageIntent)
     }
 
@@ -1446,10 +1448,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
         val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
-
         if (baseMessage!=null) {
             baseMessage.deliveredAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(),baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.deliveredAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.deliveredAt = messageReceipt.deliveredAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
 
@@ -1458,8 +1467,15 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     fun setRead(messageReceipt: MessageReceipt) {
         val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
         if (baseMessage != null) {
-            baseMessage.readAt = messageReceipt.timestamp
-            messagesList.put(baseMessage.id.toLong(), baseMessage)
+            for(i in messagesList.size()-1 downTo 0){
+                if(messagesList.get(messagesList.keyAt(i))?.readAt!! >0){
+                    break
+                }else{
+                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
+                    message?.readAt = messageReceipt.readAt;
+                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                }
+            }
             notifyDataSetChanged()
         }
     }

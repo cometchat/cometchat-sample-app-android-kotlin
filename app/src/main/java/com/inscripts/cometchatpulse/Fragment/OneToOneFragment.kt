@@ -5,28 +5,30 @@ import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.Application
 import android.app.SearchManager
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.graphics.PorterDuff
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.ContextCompat.getSystemService
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.SearchView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
+import android.widget.EditText
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.cometchat.pro.constants.CometChatConstants
@@ -79,7 +81,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     private var isEditMessage: Boolean=false
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var oneToOneAdapter: OneToOneAdapter
 
@@ -134,6 +136,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     init {
         ownerId = CometChat.getLoggedInUser().uid
+        scrollFlag=true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -185,17 +188,17 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         clickListener = context as OnBackArrowClickListener
 
-        linearLayoutManager = LinearLayoutManager(activity)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
         binding.recycler.layoutManager = linearLayoutManager
 
         binding.title.typeface = StringContract.Font.name
         binding.subTitle.typeface = StringContract.Font.status
 
-        binding.recycler.itemAnimator?.changeDuration = 0
+        (binding.recycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations=false
         oneToOneAdapter = OneToOneAdapter(context!!, CometChat.getLoggedInUser().uid, this)
         binding.recycler.addItemDecoration(StickyHeaderDecoration(oneToOneAdapter))
         binding.recycler.setRecyclerListener(RecycleListenerHelper())
-
+        oneToOneAdapter.setHasStableIds(true)
         binding.recycler.adapter = oneToOneAdapter
 
 
@@ -269,6 +272,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     scrollBottom()
                     scrollFlag = false
                 }
+
             }
         })
 
@@ -323,8 +327,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
             }
         })
 
-        binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        binding.recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: androidx.recyclerview.widget.RecyclerView, newState: Int) {
 
                 binding.cometchatToolbar.isSelected = binding.recycler.canScrollVertically(-1)
 
@@ -334,7 +338,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                 }
             }
 
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
 
             }
 
@@ -416,7 +420,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     metaData?.put("senderUid", (any as MediaMessage).sender.uid)
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as MediaMessage).sender.name
                     metaData?.put("senderName", (any as MediaMessage).sender.name)
-                    metaData?.put("url", (any as MediaMessage).url)
+                    metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
                     metaData?.put("id", (any as MediaMessage).id)
                     val type = (any as MediaMessage).type
                     metaData?.put("type", type)
@@ -426,7 +430,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
                         binding.messageBox?.replyLayout?.ivReplyImage?.visibility = View.VISIBLE
 
-                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).url).into(it) }
+                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).attachment.fileUrl).into(it) }
 
                     } else if (type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
@@ -579,6 +583,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         var searchItem = menu?.findItem(R.id.app_bar_search)
         searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
+        var editText : EditText? = menu?.findItem(R.id.app_bar_search)?.actionView?.findViewById(androidx.appcompat.R.id.search_src_text)
+        editText?.setTextColor(StringContract.Color.white)
 
         if (searchItem != null) {
 
@@ -657,7 +663,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                 val messageText: String? = binding.messageBox?.editTextChatMessage?.text.toString().trim()
 
                 if (messageText != null && !messageText.isEmpty()) {
-
                     val textMessage = TextMessage(userId, messageText, CometChatConstants.RECEIVER_TYPE_USER)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
@@ -796,7 +801,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         if (resultCode == RESULT_OK && data != null) {
-
             when (requestCode) {
 
                 StringContract.RequestCode.ADD_GALLERY -> {
@@ -938,7 +942,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
 
     private fun showDialog(message: String, title: String) {
-        val builder = context?.let { android.support.v7.app.AlertDialog.Builder(it) }
+        val builder = context?.let { androidx.appcompat.app.AlertDialog.Builder(it) }
         builder?.setTitle(context?.let { CommonUtil.setTitle(title, it) })?.setMessage(message)
                 ?.setCancelable(true)
                 ?.setNegativeButton(context?.let { CommonUtil.setTitle("Cancel", it) }) { dialogInterface, i -> dialogInterface.dismiss() }

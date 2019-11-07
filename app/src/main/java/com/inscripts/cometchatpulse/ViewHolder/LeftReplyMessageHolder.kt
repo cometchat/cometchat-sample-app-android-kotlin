@@ -1,6 +1,6 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.inscripts.cometchatpulse.databinding.LeftReplyBinding
 
-class LeftReplyMessageHolder(val binding:LeftReplyBinding):RecyclerView.ViewHolder(binding.root)
+class LeftReplyMessageHolder(val binding:LeftReplyBinding): androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)

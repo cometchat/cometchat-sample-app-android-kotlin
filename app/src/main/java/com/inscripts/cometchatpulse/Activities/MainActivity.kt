@@ -2,7 +2,7 @@ package com.inscripts.cometchatpulse.Activities
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -12,10 +12,10 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -53,7 +53,7 @@ import kotlinx.android.synthetic.main.record_audio.*
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener,
         ChildClickListener, OnBackArrowClickListener, OnAlertDialogButtonClickListener,GroupRepository.onGroupJoin {
 
-    private var fragment : Fragment=ContactListFragment()
+    private var fragment : Fragment =ContactListFragment()
 
     private var twoPane: Boolean = false
 

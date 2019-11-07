@@ -1,13 +1,12 @@
 package com.inscripts.cometchatpulse.Activities
 
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.graphics.PorterDuff
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
-import android.view.Menu
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.MenuItem
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
@@ -33,11 +32,11 @@ class GroupDetailActivity : AppCompatActivity() {
 
     private lateinit var ownerUid: String
 
-    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var layoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var groupOptionAdapter: GroupOptionAdapter
 
-    private var groupOptionList: MutableList<GroupOption> = mutableListOf()
+    private var groupOptionList: MutableMap<Int,GroupOption> = mutableMapOf()
 
     private lateinit var groupViewModel: GroupViewModel
 
@@ -72,9 +71,9 @@ class GroupDetailActivity : AppCompatActivity() {
 
         groupViewModel = ViewModelProviders.of(this).get(GroupViewModel::class.java)
 
-        layoutManager = LinearLayoutManager(this)
+        layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         binding.rvGroupOptions.layoutManager = layoutManager
-        groupOptionAdapter = GroupOptionAdapter(this, GroupOptionItemList(), ownerUid, groupId,object :OnOptionClickListener(){
+        groupOptionAdapter = GroupOptionAdapter(this, groupOptionItemList(), ownerUid, groupId,object :OnOptionClickListener(){
 
             override fun OnOptionClick( position:Int){
 
@@ -150,22 +149,22 @@ class GroupDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun GroupOptionItemList(): MutableList<GroupOption> {
+    private fun groupOptionItemList(): MutableMap<Int,GroupOption> {
 
-        groupOptionList.add(GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
+        groupOptionList.put(0,GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
         if(userScope==CometChatConstants.SCOPE_ADMIN||userScope==CometChatConstants.SCOPE_MODERATOR) {
-            groupOptionList.add(GroupOption(getString(R.string.add_members), ContextCompat.getDrawable(this, R.drawable.ic_person_add_black_24dp)))
+            groupOptionList.put(1,GroupOption(getString(R.string.add_members), ContextCompat.getDrawable(this, R.drawable.ic_person_add_black_24dp)))
         }
-        groupOptionList.add(GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
-        groupOptionList.add(GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
+        groupOptionList.put(2,GroupOption(getString(R.string.unban_members), ContextCompat.getDrawable(this, R.drawable.ic_supervisor_account_black_24dp)))
+        groupOptionList.put(3,GroupOption(getString(R.string.leave_group), ContextCompat.getDrawable(this, R.drawable.ic_exit_to_app_black_24dp)))
          if (userScope==CometChatConstants.SCOPE_ADMIN) {
-             groupOptionList.add(GroupOption(getString(R.string.delete_group), ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
+             groupOptionList.put(4,GroupOption(getString(R.string.delete_group), ContextCompat.getDrawable(this, R.drawable.ic_delete_black_24dp)))
          }
         return groupOptionList
     }
 
     fun showDialog(message: String, title: String, position: Int) {
-        val builder = android.support.v7.app.AlertDialog.Builder(this)
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         builder.setTitle(CommonUtil.setTitle(title, this))
 
                 .setMessage(message)
@@ -175,11 +174,11 @@ class GroupDetailActivity : AppCompatActivity() {
                 .setPositiveButton(CommonUtil.setTitle(getString(R.string.yes), this)) {
                     dialogInterface, i ->  when(position){
 
-                    2->{
+                    3->{
                         groupViewModel.leaveGroup(groupId, this@GroupDetailActivity)
                     }
 
-                    3->{
+                    4->{
                         groupViewModel.deleteGroup(groupId,this@GroupDetailActivity)
                     }
                 }

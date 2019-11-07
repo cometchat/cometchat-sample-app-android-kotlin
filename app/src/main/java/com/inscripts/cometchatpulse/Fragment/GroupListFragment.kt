@@ -2,14 +2,14 @@ package com.inscripts.cometchatpulse.Fragment
 
 
 import android.app.ProgressDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -40,7 +40,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class GroupListFragment : Fragment() {
 
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager
 
     private lateinit var groupListAdapter: GroupListAdapter
 
@@ -58,7 +58,7 @@ class GroupListFragment : Fragment() {
             CommonUtil.setCardView(view.group_Card)
         }
         //recycler view setup
-        linearLayoutManager = LinearLayoutManager(context)
+        linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         view.group_recycler.layoutManager = linearLayoutManager
         groupListAdapter = GroupListAdapter(context)
         view.group_recycler.adapter = groupListAdapter
@@ -117,9 +117,9 @@ class GroupListFragment : Fragment() {
         })
 
 
-        view.group_recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        view.group_recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
 
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            override fun onScrollStateChanged(recyclerView: androidx.recyclerview.widget.RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
 
                 if (!recyclerView.canScrollVertically(1)) {

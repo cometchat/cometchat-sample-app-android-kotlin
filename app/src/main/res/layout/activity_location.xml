@@ -20,7 +20,7 @@
         android:layout_weight="90"
         tools:context=".Activities.LocationActivity"/>
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_weight="10"
             android:layout_height="0dp">
@@ -49,7 +49,7 @@
 
             </RelativeLayout>
 
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 

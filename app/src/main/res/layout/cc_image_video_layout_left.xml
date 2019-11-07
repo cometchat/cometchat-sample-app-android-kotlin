@@ -12,7 +12,7 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -32,7 +32,7 @@
             app:srcCompat="@drawable/default_avatar"
             tools:src="@tools:sample/avatars" />
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:id="@+id/cardview"
             android:layout_width="250dp"
             android:layout_height="200dp"
@@ -49,13 +49,13 @@
 
             <ImageView
                 android:id="@+id/imageMessage"
-                setImage="@{message.url}"
+                setImage="@{message.attachment.fileUrl}"
                 android:layout_width="236dp"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/ic_broken_image_black" />
 
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
     <ImageView
         android:id="@+id/btnPlayVideo"
@@ -94,7 +94,7 @@
         app:layout_constraintVertical_bias="1.0"
         tools:text="10:00 AM" />
 
-    <android.support.constraint.Guideline
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/leftGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -138,6 +138,6 @@
         app:layout_constraintTop_toTopOf="@+id/cardview" />
 
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

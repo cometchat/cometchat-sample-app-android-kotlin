@@ -1,9 +1,9 @@
 package com.inscripts.cometchatpulse.Repository
 
 import android.app.Activity
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import android.util.Log
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -22,7 +22,6 @@ import com.cometchat.pro.models.MessageReceipt
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.models.TextMessage
 import com.cometchat.pro.models.BaseMessage
-import com.google.android.gms.location.places.ui.PlaceAutocomplete.getStatus
 import com.inscripts.cometchatpulse.Fragment.GroupFragment
 
 class MessageRepository {
@@ -72,8 +71,6 @@ class MessageRepository {
     @WorkerThread
     fun fetchMessage(LIMIT: Int, userId: String,isRefresh:Boolean) {
 
-
-
         try {
               if (isRefresh){
                   messageRequest= null
@@ -81,65 +78,72 @@ class MessageRepository {
 
             if (messageRequest == null) {
                 messageRequest = MessagesRequest.MessagesRequestBuilder().setUID(userId).setLimit(LIMIT).build()
-
-                messageRequest?.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
-                    override fun onSuccess(p0: List<BaseMessage>?) {
-
-                        if (p0 != null) {
-                            for (baseMessage: BaseMessage in p0) {
-                                Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
-                                if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
-                                    mutableOneToOneMessageList.add(baseMessage)
-                                }
-                            }
-                            if(p0.isNotEmpty()){
-                                val message=p0.get(p0.size-1)
-                                CometChat.markAsRead(message.id,message.sender.uid,message.receiverType);
-                            }
-                            onetoOneMessageList.value = mutableOneToOneMessageList
-                        }
-
-                        Log.d(TAG, "messageRequest onSuccess: ${p0?.size}")
-
-                    }
-
-                    override fun onError(p0: CometChatException?) {
-                        Log.d(TAG, "messageRequest onError: ${p0?.message}")
-                    }
-
-                })
-
-            } else {
-                messageRequest?.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
-                    override fun onError(p0: CometChatException?) {
-
-                    }
-
-                    override fun onSuccess(p0: List<BaseMessage>?) {
-
-                        if (p0 != null) {
-                            for (baseMessage: BaseMessage in p0) {
-                                Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
-                                if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
-                                    mutableOneToOneMessageList.add(baseMessage)
-                                }
-                            }
-                            onetoOneMessageList.value = mutableOneToOneMessageList
-                            if(p0.isNotEmpty()){
-                                val message=p0.get(p0.size-1);
-                               CometChat.markAsRead(message.id,message.sender.uid,message.receiverType);
-                            }
-                        }
-
-                    }
-
-                })
-
             }
+            fetchMessageRequest(messageRequest)
         } catch (e: NullPointerException) {
             e.printStackTrace()
         }
 
+    }
+
+    private fun fetchMessageRequest(messagesRequest: MessagesRequest?){
+
+        messagesRequest?.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
+            override fun onSuccess(p0: List<BaseMessage>?) {
+
+                if (p0 != null) {
+                    for (baseMessage: BaseMessage in p0) {
+                        Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
+                        if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
+                            mutableOneToOneMessageList.add(baseMessage)
+                        }
+                    }
+                    if(p0.isNotEmpty()){
+                        val message=p0.get(p0.size-1)
+                        CometChat.markAsRead(message.id,message.sender.uid,message.receiverType);
+                    }
+                    onetoOneMessageList.value = mutableOneToOneMessageList
+                }
+
+                Log.d(TAG, "messageRequest onSuccess: ${p0?.size}")
+
+            }
+
+            override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "messageRequest onError: ${p0?.message}")
+            }
+
+        })
+    }
+
+    private fun fetchGroupMessageRequest(messagesRequest: MessagesRequest?){
+
+        messagesRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
+            override fun onSuccess(p0: List<BaseMessage>?) {
+                Log.e("groupMessageRequest","${p0?.size}")
+                if (p0!=null) {
+                    for (message in p0) {
+                        if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
+                            p0.let { mutableGroupMessageList.addAll(0, it) }
+                            groupMessageList.value = mutableGroupMessageList
+                        }
+                    }
+                    if(p0.isNotEmpty()){
+                        val message=p0.get(p0.size-1)
+                        CometChat.markAsRead(message.id,message.receiverUid,message.receiverType)
+                    }
+                }
+
+            }
+
+            override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "fetchGroupMessage onError: " + p0?.message)
+            }
+
+
+        })
     }
 
     @WorkerThread
@@ -150,52 +154,8 @@ class MessageRepository {
 
             groupMessageRequest = MessagesRequest.MessagesRequestBuilder().setGUID(guid).setLimit(LIMIT).build()
 
-            groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
-                override fun onSuccess(p0: List<BaseMessage>?) {
-                    if (p0!=null) {
-                        for (message in p0) {
-                            if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
-                                p0.let { mutableGroupMessageList.addAll(0, it) }
-                                groupMessageList.value = mutableGroupMessageList
-                            }
-                        }
-                        if(p0.isNotEmpty()){
-                            val message=p0.get(p0.size-1)
-                            CometChat.markAsRead(message.id,message.receiverUid,message.receiverType)
-                        }
-                    }
-
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Log.d(TAG, "fetchGroupMessage onError: " + p0?.message)
-                }
-
-
-            })
-        } else {
-
-            groupMessageRequest!!.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
-                override fun onSuccess(p0: List<BaseMessage>?) {
-                    if (p0!=null) {
-                        for (message in p0) {
-                            if (message.category != CometChatConstants.CATEGORY_ACTION && message.deletedAt == 0L) {
-                                p0.let { mutableGroupMessageList.addAll(0, it) }
-                                groupMessageList.value = mutableGroupMessageList
-                            }
-                        }
-                        if(p0.isNotEmpty()){
-                            val message=p0.get(p0.size-1)
-                            CometChat.markAsRead(message.id,message.receiverUid,message.receiverType)
-                        }
-                    }
-                }
-
-                override fun onError(p0: CometChatException?) {
-                   Log.d(TAG,"fetchGroupMessage  onError: ")
-                }
-            })
         }
+            fetchGroupMessageRequest(groupMessageRequest)
     }
 
     @WorkerThread
@@ -204,6 +164,7 @@ class MessageRepository {
         CometChat.sendMessage(textMessage, object : CometChat.CallbackListener<TextMessage>() {
             override fun onSuccess(p0: TextMessage?) {
                 if (p0 != null) {
+                    Toast.makeText(CometChatPro.applicationContext(), "Text Message Sent Successfully", Toast.LENGTH_SHORT).show()
                     Log.d("messageDao", "  $p0")
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                         mutableOneToOneMessageList.add(p0)
@@ -274,12 +235,12 @@ class MessageRepository {
         CometChat.addMessageListener(listener, object : CometChat.MessageListener() {
 
             override fun onMessagesDelivered(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid )
                     liveDeliveryReceipts.value = messageReceipt
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&& messageReceipt.receivertype != CometChatConstants.RECEIVER_TYPE_GROUP)
+                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid)
                     liveReadReceipts.value = messageReceipt
             }
 
@@ -314,12 +275,10 @@ class MessageRepository {
 
                     if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
                         try {
-                            if (OneToOneFragment.currentId!!.equals(p0.sender.uid)) {
-                                OneToOneFragment.scrollFlag = true
+                               OneToOneFragment.scrollFlag = true
                                 mutableOneToOneMessageList.add(p0)
                                 onetoOneMessageList.value = mutableOneToOneMessageList
                                 CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
-                            }
                         } catch (e: NullPointerException) {
                             e.printStackTrace()
                         }
@@ -405,10 +364,12 @@ class MessageRepository {
                     }
 
                 }
+                Toast.makeText(CometChatPro.applicationContext(), "Media Message Sent Successfully", Toast.LENGTH_SHORT).show()
                 Log.d("MediaMessage", "baseMessage")
             }
 
             override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 p0?.printStackTrace()
             }
 
@@ -425,7 +386,8 @@ class MessageRepository {
         CometChat.addCallListener(call_event_listener, object : CometChat.CallListener() {
 
             override fun onIncomingCallCancelled(p0: Call?) {
-                Log.d(TAG, "onIncomingCallCancelled " + p0.toString())
+                Toast.makeText(CometChatPro.applicationContext(), "Incoming Call Cancelled", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "onIncomingCallCancelled " )
 
                 if (p0 != null) {
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
@@ -445,7 +407,8 @@ class MessageRepository {
 
             override fun onOutgoingCallAccepted(p0: Call?) {
 
-                Log.d(TAG, "onOutgoingCallAccepted: " + p0?.toString())
+                Toast.makeText(CometChatPro.applicationContext(), "Outgoing Call Accepted", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "onOutgoingCallAccepted: " )
 
                 if (p0 != null) {
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
@@ -461,20 +424,23 @@ class MessageRepository {
                         CometChat.startCall(context as Activity, it, view, object : CometChat.OngoingCallListener {
 
                             override fun onUserJoined(p0: User?) {
-                                Log.d(TAG, "onUserJoined: " + p0?.toString())
+                                Toast.makeText(CometChatPro.applicationContext(), p0?.uid+" User joined", Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "onUserJoined: " + p0?.uid)
                             }
 
                             override fun onUserLeft(p0: User?) {
-                                Log.d(TAG, "onUserLeft: " + p0?.toString())
+                                Toast.makeText(CometChatPro.applicationContext(), p0?.uid+" User Left", Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "onUserLeft: " + p0?.uid)
                             }
 
                             override fun onError(p0: CometChatException?) {
+                                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                                 Log.d(TAG, "CallonError: " + p0?.message)
                             }
 
                             override fun onCallEnded(p0: Call?) {
-
-                                Log.d(TAG, "onCallEnded " + "onOutgoingCallAccepted " + p0.toString())
+                                Toast.makeText(CometChatPro.applicationContext(),"Call Ended "+p0?.toString(), Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "onCallEnded " + "onOutgoingCallAccepted ")
 
                                 if (context is CallActivity) {
 
@@ -498,8 +464,8 @@ class MessageRepository {
                         groupMessageList.value = mutableGroupMessageList
                     }
                 }
-
-                Log.d(TAG, "onIncomingCallReceived: " + p0.toString())
+                Toast.makeText(CometChatPro.applicationContext(), "Incoming Call Recieved", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "onIncomingCallReceived: " )
                 if (p0 != null) {
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
 
@@ -524,8 +490,8 @@ class MessageRepository {
                         groupMessageList.value = mutableGroupMessageList
                     }
                 }
-
-                Log.d(TAG, "onOutgoingCallRejected: " + p0?.toString())
+                Toast.makeText(CometChatPro.applicationContext(), "Outgoing Call Rejected", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "onOutgoingCallRejected: ")
                 if (context is CallActivity) {
 
                     context.finish()
@@ -560,18 +526,22 @@ class MessageRepository {
                 p0?.sessionId?.let {
                     CometChat.startCall(activity, it, view, object : CometChat.OngoingCallListener {
                         override fun onUserJoined(p0: User?) {
-                            Log.d(TAG, "onUserJoined: " + p0?.toString())
+                            Toast.makeText(CometChatPro.applicationContext(), p0?.uid+" User Joined", Toast.LENGTH_LONG).show()
+                            Log.d(TAG, "onUserJoined: " + p0?.uid)
                         }
 
                         override fun onUserLeft(p0: User?) {
-                            Log.d(TAG, "onUserLeft: " + p0?.toString())
+                            Toast.makeText(CometChatPro.applicationContext(), p0?.uid+" User Left", Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, "onUserLeft: " + p0?.uid)
                         }
 
                         override fun onError(p0: CometChatException?) {
+                            Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                         }
 
                         override fun onCallEnded(p0: Call?) {
-                            Log.d(TAG, "onCallEnded: " + p0.toString())
+                            Toast.makeText(CometChatPro.applicationContext(),"Call Ended", Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, "onCallEnded: ")
 
                             activity.finish()
                         }
@@ -590,7 +560,8 @@ class MessageRepository {
     fun rejectCall(sessionID: String, call_status_rejected: String, activity: Activity) {
         CometChat.rejectCall(sessionID, call_status_rejected, object : CometChat.CallbackListener<Call>() {
             override fun onSuccess(p0: Call?) {
-                Log.d(TAG, "onSuccess: " + p0?.toString())
+                Log.d(TAG, "onSuccess: " )
+                Toast.makeText(CometChatPro.applicationContext(), "Call Rejected", Toast.LENGTH_SHORT).show()
                 activity.finish()
                 if (p0 != null) {
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
@@ -604,7 +575,7 @@ class MessageRepository {
             }
 
             override fun onError(p0: CometChatException?) {
-
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -614,7 +585,8 @@ class MessageRepository {
     fun initiateCall(call: Call, context: Context) {
         CometChat.initiateCall(call, object : CometChat.CallbackListener<Call>() {
             override fun onSuccess(p0: Call?) {
-                Log.d(TAG, "onSuccess: " + p0?.toString())
+                Toast.makeText(CometChatPro.applicationContext(),"Call Initiated ", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "onSuccess: " )
                 if (p0 != null) {
 
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
@@ -634,7 +606,7 @@ class MessageRepository {
             }
 
             override fun onError(p0: CometChatException?) {
-
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -661,10 +633,12 @@ class MessageRepository {
                         mutableGroupMessageList.add(p0)
                         groupMessageList.value = mutableGroupMessageList
                     }
+                    Toast.makeText(CometChatPro.applicationContext(), "Delete Message Successfully", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 Log.d(TAG, "deleteMessage onError: ${p0?.message}")
             }
 
@@ -683,6 +657,7 @@ class MessageRepository {
 
             override fun onSuccess(p0: BaseMessage?) {
                 if (p0 != null) {
+                    Toast.makeText(CometChatPro.applicationContext(), "Message Edited Successfully", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "editMessage: onSuccess " + p0.id)
                     if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                         mutableOneToOneMessageList.add(p0)
@@ -695,6 +670,7 @@ class MessageRepository {
             }
 
             override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                 Log.d(TAG, "editMessage onError: ${p0?.message}")
             }
 

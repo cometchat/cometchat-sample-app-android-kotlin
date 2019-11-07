@@ -1,7 +1,7 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
-import android.support.v4.util.LongSparseArray
-import android.support.v7.widget.RecyclerView
+import androidx.collection.LongSparseArray
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapsInitializer
@@ -19,7 +19,7 @@ import com.google.android.gms.maps.model.LatLng
 
 
 class RightLocationViewHolder(val binding: RightLocationBinding):
-        RecyclerView.ViewHolder(binding.root),OnMapReadyCallback{
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root),OnMapReadyCallback{
 
 
     var googleMap: GoogleMap? = null

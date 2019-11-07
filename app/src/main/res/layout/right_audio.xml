@@ -12,7 +12,7 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:paddingEnd="4dp"
         android:paddingStart="4dp"
@@ -32,7 +32,7 @@
         app:layout_constraintStart_toStartOf="@+id/rightGuideline"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.constraint.Guideline
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/rightGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -115,6 +115,6 @@
         app:layout_constraintVertical_bias="1.0"
         tools:text="10:00 AM" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

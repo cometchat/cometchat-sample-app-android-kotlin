@@ -2,9 +2,9 @@ package com.inscripts.cometchatpulse.ViewModel
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import android.view.View
 import com.cometchat.pro.constants.CometChatConstants
@@ -38,6 +38,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     init {
 
         userList = userRepository.usersList
+        unReadCount=userRepository.getUnreadCount()
         user=userRepository.user
         blockedUser=userRepository.blockedUser
         filterUserList=userRepository.filterUsersList
@@ -84,6 +85,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addMembertoGroup(activity: Activity,guidList: MutableSet<String>, guid: String) {
         userRepository.addMember(activity,guidList,guid)
+    }
+
+    fun removeMessageListener(tag: String) {
+        userRepository.removeMessageListener(tag)
+    }
+
+    fun addMessageListener(tag: String) {
+        userRepository.addMessageListener(tag)
     }
 
 

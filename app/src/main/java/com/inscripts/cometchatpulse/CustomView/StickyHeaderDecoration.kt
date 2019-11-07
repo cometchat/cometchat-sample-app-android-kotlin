@@ -2,23 +2,23 @@ package com.inscripts.cometchatpulse.CustomView
 
 import android.graphics.Canvas
 import android.graphics.Rect
-import android.support.v4.view.ViewCompat
-import android.support.v7.widget.RecyclerView
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import com.inscripts.cometchatpulse.ViewHolder.TextHeaderHolder
 import java.util.HashMap
 
 class StickyHeaderDecoration  constructor(private val mAdapter: StickyHeaderAdapter<TextHeaderHolder>
-     ) : RecyclerView.ItemDecoration() {
+     ) : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
-    private val mHeaderCache: MutableMap<Long, RecyclerView.ViewHolder>
+    private val mHeaderCache: MutableMap<Long, androidx.recyclerview.widget.RecyclerView.ViewHolder>
     private val mRenderInline: Boolean = false
     init {
         this.mHeaderCache = HashMap()
     }
 
-    override fun getItemOffsets(var1: Rect, var2: View, var3: RecyclerView, var4: RecyclerView.State) {
+    override fun getItemOffsets(var1: Rect, var2: View, var3: androidx.recyclerview.widget.RecyclerView, var4: androidx.recyclerview.widget.RecyclerView.State) {
         val var5 = var3.getChildAdapterPosition(var2)
         var var6 = 0
         if (var5 != -1 && this.hasHeader(var5) && this.showHeaderAboveItem(var5)) {
@@ -64,10 +64,10 @@ class StickyHeaderDecoration  constructor(private val mAdapter: StickyHeaderAdap
         return this.mAdapter.getHeaderId(var1) !== -1L
     }
 
-    private fun getHeader(var1: RecyclerView, var2: Int): RecyclerView.ViewHolder {
+    private fun getHeader(var1: androidx.recyclerview.widget.RecyclerView, var2: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         val var3 = this.mAdapter.getHeaderId(var2)
         if (this.mHeaderCache.containsKey(var3)) {
-            return this.mHeaderCache[var3] as RecyclerView.ViewHolder
+            return this.mHeaderCache[var3] as androidx.recyclerview.widget.RecyclerView.ViewHolder
         } else {
             val var5 = this.mAdapter.onCreateHeaderViewHolder(var1)
             val var6 = var5.itemView
@@ -83,7 +83,7 @@ class StickyHeaderDecoration  constructor(private val mAdapter: StickyHeaderAdap
         }
     }
 
-    override fun onDrawOver(var1: Canvas, var2: RecyclerView, var3: RecyclerView.State) {
+    override fun onDrawOver(var1: Canvas, var2: androidx.recyclerview.widget.RecyclerView, var3: androidx.recyclerview.widget.RecyclerView.State) {
         val var4 = var2.childCount
         var var5 = -1L
 
@@ -109,7 +109,7 @@ class StickyHeaderDecoration  constructor(private val mAdapter: StickyHeaderAdap
 
     }
 
-    private fun getHeaderTop(var1: RecyclerView, var2: View, var3: View, var4: Int, var5: Int): Int {
+    private fun getHeaderTop(var1: androidx.recyclerview.widget.RecyclerView, var2: View, var3: View, var4: Int, var5: Int): Int {
         val var6 = this.getHeaderHeightForLayout(var3)
         var var7 = var2.y.toInt() - var6
         if (var5 == 0) {

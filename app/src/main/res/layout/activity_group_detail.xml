@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="150dp" />
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content" />
 
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:id="@+id/groupCardView"
             android:layout_below="@id/tvDescription"
             android:layout_marginTop="16dp"
@@ -101,13 +101,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-           <android.support.v7.widget.RecyclerView
+           <androidx.recyclerview.widget.RecyclerView
                android:id="@+id/rv_group_options"
                android:overScrollMode="never"
                android:layout_width="match_parent"
                android:layout_height="match_parent"/>
 
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
 
     </RelativeLayout>

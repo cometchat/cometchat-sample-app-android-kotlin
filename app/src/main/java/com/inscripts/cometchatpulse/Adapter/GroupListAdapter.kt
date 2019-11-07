@@ -1,8 +1,8 @@
 package com.inscripts.cometchatpulse.Adapter
 
 import android.content.Context
-import android.databinding.DataBindingUtil
-import android.support.v7.widget.RecyclerView
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.cometchat.pro.models.Group
@@ -11,7 +11,7 @@ import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.databinding.GroupListItemBinding
 
-class GroupListAdapter(val context: Context?) : RecyclerView.Adapter<GroupListAdapter.GroupHolder>() {
+class GroupListAdapter(val context: Context?) : androidx.recyclerview.widget.RecyclerView.Adapter<GroupListAdapter.GroupHolder>() {
 
     private var groupList: MutableMap<String,Group> = mutableMapOf()
 
@@ -53,6 +53,6 @@ class GroupListAdapter(val context: Context?) : RecyclerView.Adapter<GroupListAd
         notifyDataSetChanged()
     }
 
-    class GroupHolder(val binding:GroupListItemBinding) : RecyclerView.ViewHolder(binding.root)
+    class GroupHolder(val binding:GroupListItemBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)
 
 }

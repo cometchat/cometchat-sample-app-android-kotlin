@@ -1,13 +1,13 @@
 package com.inscripts.cometchatpulse.Activities
 
 import android.app.Activity
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -89,6 +89,7 @@ class CallActivity : AppCompatActivity(), View.OnClickListener {
 
         if (intent?.type.equals(StringContract.IntentString.INCOMING)) {
             binding.tvCallText.text = getString(R.string.incoming_call)
+            binding.tvCallText.currentHintTextColor
             cometChatAudioHelper?.startIncomingAudio(notification, true)
             isOutGoing=false
         } else if (intent?.type.equals(StringContract.IntentString.OUTGOING)) {

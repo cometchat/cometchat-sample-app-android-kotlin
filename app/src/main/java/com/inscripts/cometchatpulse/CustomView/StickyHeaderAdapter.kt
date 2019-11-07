@@ -1,9 +1,9 @@
 package com.inscripts.cometchatpulse.CustomView
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 
-interface StickyHeaderAdapter<T:RecyclerView.ViewHolder> {
+interface StickyHeaderAdapter<T: androidx.recyclerview.widget.RecyclerView.ViewHolder> {
 
      fun getHeaderId(var1: Int): Long
 

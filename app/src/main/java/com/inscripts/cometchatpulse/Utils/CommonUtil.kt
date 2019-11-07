@@ -10,9 +10,9 @@ import android.location.LocationManager
 import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.os.Build
-import android.support.annotation.IdRes
-import android.support.v7.widget.CardView
-import android.support.v7.widget.Toolbar
+import androidx.annotation.IdRes
+import androidx.cardview.widget.CardView
+import androidx.appcompat.widget.Toolbar
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -34,7 +34,7 @@ class CommonUtil {
 
          var cm: ConnectivityManager?=null
 
-        fun setCardView(cardView: CardView) {
+        fun setCardView(cardView: androidx.cardview.widget.CardView) {
             cardView.cardElevation = StringContract.Dimensions.cardViewElevation
             cardView.radius = StringContract.Dimensions.cardViewCorner
             val param = cardView.layoutParams as RelativeLayout.LayoutParams

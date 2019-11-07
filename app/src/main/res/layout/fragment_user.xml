@@ -7,13 +7,13 @@
     android:background="@android:color/white"
     tools:context=".Fragment.UserFragment">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/userList_Toolbar"
         android:layout_width="match_parent"
 
         android:layout_height="wrap_content"/>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAddMember"
         android:layout_marginTop="8dp"
         android:layout_width="match_parent"

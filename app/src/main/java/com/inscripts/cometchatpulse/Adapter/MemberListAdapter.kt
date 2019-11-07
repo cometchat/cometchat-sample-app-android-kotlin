@@ -2,9 +2,9 @@ package com.inscripts.cometchatpulse.Adapter
 
 
 import android.content.Context
-import android.databinding.DataBindingUtil
-import android.support.v4.app.Fragment
-import android.support.v7.widget.RecyclerView
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +19,7 @@ import com.inscripts.cometchatpulse.databinding.ContactItemBinding
 import com.inscripts.cometchatpulse.databinding.GroupMemberItemBinding
 
 class MemberListAdapter(val context: Context?,val ownerId:String,
-                        val resId:Int,val listener: OnClickEvent): RecyclerView.Adapter<GroupMemberHolder>() {
+                        val resId:Int,val listener: OnClickEvent): androidx.recyclerview.widget.RecyclerView.Adapter<GroupMemberHolder>() {
 
     private var groupMemberList:MutableMap<String,GroupMember> = mutableMapOf()
 

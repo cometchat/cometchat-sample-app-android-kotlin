@@ -1,7 +1,7 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.inscripts.cometchatpulse.databinding.LeftAudioBinding
 import com.inscripts.cometchatpulse.databinding.RightAudioBinding
 
-class LeftAudioMessageHolder(val binding: LeftAudioBinding):RecyclerView.ViewHolder(binding.root)
+class LeftAudioMessageHolder(val binding: LeftAudioBinding): androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root)
