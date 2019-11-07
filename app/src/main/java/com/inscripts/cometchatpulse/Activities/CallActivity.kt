@@ -89,7 +89,6 @@ class CallActivity : AppCompatActivity(), View.OnClickListener {
 
         if (intent?.type.equals(StringContract.IntentString.INCOMING)) {
             binding.tvCallText.text = getString(R.string.incoming_call)
-            binding.tvCallText.currentHintTextColor
             cometChatAudioHelper?.startIncomingAudio(notification, true)
             isOutGoing=false
         } else if (intent?.type.equals(StringContract.IntentString.OUTGOING)) {

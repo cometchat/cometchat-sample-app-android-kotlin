@@ -88,7 +88,6 @@ class RecordAudio : RelativeLayout {
         recordMic?.drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
         arrow?.drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
 
-
         hideViews(true)
 
 

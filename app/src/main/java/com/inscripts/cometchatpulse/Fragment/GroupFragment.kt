@@ -23,7 +23,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -69,7 +68,6 @@ private val TAG="GroupFragment"
  *
  */
 class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMode.Callback,OnClickEvent,TextWatcher{
-
 
 
     private lateinit var searchView: SearchView
@@ -435,10 +433,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         val videoCall = menu?.findItem(R.id.video_call)
 
         val leaveMenu = menu?.findItem(R.id.menu_leave)
-        val blockMenu = menu?.findItem(R.id.menu_block)
-        blockMenu?.isVisible = false
-        leaveMenu?.isVisible = true
-
+        leaveMenu?.setVisible(true)
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
             val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.ic_more_vert) }
             drawable?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
@@ -451,8 +446,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         var searchItem = menu?.findItem(R.id.app_bar_search)
 
         searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
-        var editText : EditText? = menu?.findItem(R.id.app_bar_search)?.actionView?.findViewById(androidx.appcompat.R.id.search_src_text)
-        editText?.setTextColor(StringContract.Color.white)
+
         if (searchItem != null) {
 
             searchView = searchItem.getActionView() as SearchView
@@ -557,7 +551,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as MediaMessage).sender.name
                     metaData?.put("senderName", (any as MediaMessage).sender.name)
-                    metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
+                    metaData?.put("url", (any as MediaMessage).url)
                     metaData?.put("id", (any as MediaMessage).id)
                     metaData?.put("senderUid", (any as MediaMessage).sender.uid)
                     val type = (any as MediaMessage).type
@@ -568,20 +562,20 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                         binding.messageBox?.replyLayout?.ivReplyImage?.visibility = View.VISIBLE
 
-                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).attachment.fileUrl).into(it) }
+                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).url).into(it) }
 
                     } else if (type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
                         binding.messageBox?.replyLayout?.tvTextMessage?.text = "Audio message"
 
                         metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
+                        metaData?.put("url", (any as MediaMessage).url)
                         metaData?.put("id", (any as MediaMessage).id)
 
                     } else if (type == CometChatConstants.MESSAGE_TYPE_FILE) {
 
                         metaData?.put("senderName", (any as MediaMessage).sender.name)
-                        metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
+                        metaData?.put("url", (any as MediaMessage).url)
                         metaData?.put("id", (any as MediaMessage).id)
 //                        metaData.put("fileName",(any as MediaMessage).file.name)
 
@@ -646,7 +640,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
                 if (messageText != null && !messageText.isEmpty()) {
 
-                    val textMessage = TextMessage(guid, messageText, CometChatConstants.RECEIVER_TYPE_GROUP)
+                    val textMessage = TextMessage(guid, messageText,CometChatConstants.MESSAGE_TYPE_TEXT, CometChatConstants.RECEIVER_TYPE_GROUP)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 
@@ -805,7 +799,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
                     scrollFlag = true
                 }
                 StringContract.RequestCode.TAKE_PHOTO -> {
-                    val filePath = AttachmentHelper.handleCameraImage(context, data)
+                    val filePath = AttachmentHelper.handleCameraImage()
                     groupChatViewModel.sendMediaMessage(filePath, CometChatConstants.MESSAGE_TYPE_IMAGE, guid,this)
                     scrollFlag = true
                 }

@@ -4,11 +4,14 @@ package com.inscripts.cometchatpulse.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import android.content.Context
+import android.content.Context.AUDIO_SERVICE
 import android.content.res.Configuration
 import android.graphics.PorterDuff
+import android.media.AudioManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,15 +19,19 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.EditText
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuItemCompat
+import androidx.databinding.DataBindingUtil
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Activities.MainActivity
 import com.inscripts.cometchatpulse.Adapter.ContactListAdapter
-import com.inscripts.cometchatpulse.Helpers.*
+import com.inscripts.cometchatpulse.CometChatPro
+import com.inscripts.cometchatpulse.Helpers.CardItemTouchHelper
+import com.inscripts.cometchatpulse.Helpers.UnreadCountInterface
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
@@ -48,11 +55,8 @@ class ContactListFragment : Fragment() {
 
     private lateinit var user:User
 
-    private lateinit var childClickListener: ChildClickListener
-
-    private var unreadCountmap:MutableMap<String,Int> = mutableMapOf()
-
     var searchBoxOpen : Boolean = false
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -62,24 +66,12 @@ class ContactListFragment : Fragment() {
         if (config.smallestScreenWidthDp < 600) {
             CommonUtil.setCardView(view.contact_cardview)
         }
-        childClickListener=activity as ChildClickListener
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
         linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
         view.contact_recycler.layoutManager = linearLayoutManager
         view.contact_recycler.itemAnimator= androidx.recyclerview.widget.DefaultItemAnimator()
-        contactListAdapter = ContactListAdapter(context,false,null,object :OnUserClick{
-
-            override fun onItemClick(item:View,any: Any) {
-                 if (any is User) {
-                     unreadCountmap.remove(any.uid)
-                     userViewModel.unReadCount.value=unreadCountmap
-                     contactListAdapter.notifyDataSetChanged()
-                 }
-                childClickListener.OnChildClick(any)
-            }
-        })
+        contactListAdapter = ContactListAdapter(activity,false)
         view.contact_recycler.adapter = contactListAdapter
-
         if (StringContract.AppDetails.theme == Appearance.AppTheme.AZURE_RADIANCE) {
             view.etSearch.setHintTextColor(StringContract.Color.black)
             view.etSearch.setTextColor(StringContract.Color.black)
@@ -89,20 +81,18 @@ class ContactListFragment : Fragment() {
             view.etSearch.setTextColor(StringContract.Color.white)
         }
 
-        view. etSearch.background=CommonUtil.setDrawable(StringContract.Color.primaryDarkColor,16f)
-
-        view.etSearch.addTextChangedListener(object : TextWatcher {
-
-            override fun afterTextChanged(s: Editable?) {
+        view.etSearch.background=CommonUtil.setDrawable(StringContract.Color.primaryDarkColor,16f)
+        view.etSearch.addTextChangedListener(object : TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {
 
             }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                var searchString=s.toString()
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                var searchString=p0.toString()
                 if (searchString.isNotEmpty()) {
                     searchBoxOpen = true
                     searchUser(searchString)
@@ -112,7 +102,6 @@ class ContactListFragment : Fragment() {
                     userViewModel.fetchUser(LIMIT = 30,shimmer = view.contact_shimmer)
                 }
             }
-
         })
 
         try {
@@ -146,18 +135,11 @@ class ContactListFragment : Fragment() {
         })
 
 
-        userViewModel.filterUserList.observe(this, Observer {
-            filterList->filterList?.let {
-            contactListAdapter.setFilter(it) }
-        })
-
 
         userViewModel.unReadCount.observe(this, Observer {unReadCount->
             unReadCount?.let {
-                unreadCountmap=unReadCount
                 contactListAdapter.setUnreadCount(it)
             }
-
 
         })
 
@@ -188,20 +170,16 @@ class ContactListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        userViewModel.fetchUnreadCountForUser()
     }
 
     override fun onStart() {
         super.onStart()
-        userViewModel.fetchUnreadCountForUser()
         userViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
-        userViewModel.addMessageListener(TAG)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         userViewModel.removeUserListener(StringContract.ListenerName.USER_LISTENER)
-        userViewModel.removeMessageListener(TAG)
     }
 
     fun showDialog(message: String, title: String, contactName: String, context: Context) {
@@ -215,5 +193,4 @@ class ContactListFragment : Fragment() {
                 .setPositiveButton(CommonUtil.setTitle("Yes", context)) { dialogInterface, i ->  userViewModel.initCall(context,user)
                 }.show()
     }
-
 }

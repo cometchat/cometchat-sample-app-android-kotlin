@@ -38,7 +38,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     init {
 
         userList = userRepository.usersList
-        unReadCount=userRepository.getUnreadCount()
         user=userRepository.user
         blockedUser=userRepository.blockedUser
         filterUserList=userRepository.filterUsersList
@@ -85,14 +84,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addMembertoGroup(activity: Activity,guidList: MutableSet<String>, guid: String) {
         userRepository.addMember(activity,guidList,guid)
-    }
-
-    fun removeMessageListener(tag: String) {
-        userRepository.removeMessageListener(tag)
-    }
-
-    fun addMessageListener(tag: String) {
-        userRepository.addMessageListener(tag)
     }
 
 

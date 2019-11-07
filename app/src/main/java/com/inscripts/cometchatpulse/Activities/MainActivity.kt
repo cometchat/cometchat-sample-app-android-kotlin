@@ -174,6 +174,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                           finish()
                     }
                     override fun onError(p0: CometChatException?) {
+                        Log.e(TAG,p0?.code);
                     }
 
                 })

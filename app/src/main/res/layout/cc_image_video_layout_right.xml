@@ -60,7 +60,7 @@
         android:id="@+id/imageMessage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        setImage="@{message.attachment.fileUrl}"
+        setImage="@{message.url}"
         android:scaleType="centerCrop"
         android:cropToPadding="false"
         android:src="@drawable/ic_broken_image_black"/>

@@ -65,7 +65,7 @@
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.ImageViewActivity"
             android:launchMode="singleTop" />

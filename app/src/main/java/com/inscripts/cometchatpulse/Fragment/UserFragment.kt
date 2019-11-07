@@ -23,6 +23,7 @@ import com.inscripts.cometchatpulse.Utils.Appearance
 import com.inscripts.cometchatpulse.ViewModel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_ban_member.view.*
 import kotlinx.android.synthetic.main.fragment_contact_list.view.*
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_user.*
 import kotlinx.android.synthetic.main.fragment_user.view.*
 
@@ -45,7 +46,7 @@ class UserFragment : Fragment() {
     lateinit var contactListAdapter:ContactListAdapter
 
     lateinit var userViewModel: UserViewModel
-    var selectedUserView:MutableMap<String,View?> = mutableMapOf()
+    var selectedUserView:MutableMap<String,View> = mutableMapOf()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +56,7 @@ class UserFragment : Fragment() {
 
         setHasOptionsMenu(true)
         guid = arguments?.getString(StringContract.IntentString.GROUP_ID).toString()
+
 
         ownerId = arguments?.getString(StringContract.IntentString.USER_ID).toString()
 
@@ -104,7 +106,7 @@ class UserFragment : Fragment() {
 
 
          mainView.rvAddMember.apply {
-             layoutManager= LinearLayoutManager(context)
+             layoutManager= androidx.recyclerview.widget.LinearLayoutManager(context)
              adapter=contactListAdapter
          }
 

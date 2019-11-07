@@ -23,12 +23,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.SearchView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
-import android.widget.EditText
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.cometchat.pro.constants.CometChatConstants
@@ -136,7 +134,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     init {
         ownerId = CometChat.getLoggedInUser().uid
-        scrollFlag=true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -194,11 +191,11 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         binding.title.typeface = StringContract.Font.name
         binding.subTitle.typeface = StringContract.Font.status
 
-        (binding.recycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations=false
+        binding.recycler.itemAnimator?.changeDuration = 0
         oneToOneAdapter = OneToOneAdapter(context!!, CometChat.getLoggedInUser().uid, this)
         binding.recycler.addItemDecoration(StickyHeaderDecoration(oneToOneAdapter))
         binding.recycler.setRecyclerListener(RecycleListenerHelper())
-        oneToOneAdapter.setHasStableIds(true)
+
         binding.recycler.adapter = oneToOneAdapter
 
 
@@ -272,7 +269,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     scrollBottom()
                     scrollFlag = false
                 }
-
             }
         })
 
@@ -420,7 +416,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     metaData?.put("senderUid", (any as MediaMessage).sender.uid)
                     binding.messageBox?.replyLayout?.tvNameReply?.text = (any as MediaMessage).sender.name
                     metaData?.put("senderName", (any as MediaMessage).sender.name)
-                    metaData?.put("url", (any as MediaMessage).attachment.fileUrl)
+                    metaData?.put("url", (any as MediaMessage).url)
                     metaData?.put("id", (any as MediaMessage).id)
                     val type = (any as MediaMessage).type
                     metaData?.put("type", type)
@@ -430,7 +426,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
                         binding.messageBox?.replyLayout?.ivReplyImage?.visibility = View.VISIBLE
 
-                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).attachment.fileUrl).into(it) }
+                        binding.messageBox?.replyLayout?.ivReplyImage?.let { Glide.with(this).load((any as MediaMessage).url).into(it) }
 
                     } else if (type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
 
@@ -583,8 +579,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         var searchItem = menu?.findItem(R.id.app_bar_search)
         searchItem?.icon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
-        var editText : EditText? = menu?.findItem(R.id.app_bar_search)?.actionView?.findViewById(androidx.appcompat.R.id.search_src_text)
-        editText?.setTextColor(StringContract.Color.white)
 
         if (searchItem != null) {
 
@@ -663,7 +657,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                 val messageText: String? = binding.messageBox?.editTextChatMessage?.text.toString().trim()
 
                 if (messageText != null && !messageText.isEmpty()) {
-                    val textMessage = TextMessage(userId, messageText, CometChatConstants.RECEIVER_TYPE_USER)
+
+                    val textMessage = TextMessage(userId, messageText,CometChatConstants.MESSAGE_TYPE_TEXT, CometChatConstants.RECEIVER_TYPE_USER)
 
                     binding.messageBox?.editTextChatMessage?.setText("")
 
@@ -801,6 +796,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         if (resultCode == RESULT_OK && data != null) {
+
             when (requestCode) {
 
                 StringContract.RequestCode.ADD_GALLERY -> {
@@ -809,7 +805,7 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                     scrollFlag = true
                 }
                 StringContract.RequestCode.TAKE_PHOTO -> {
-                    val filePath = AttachmentHelper.handleCameraImage(context, data)
+                    val filePath =  AttachmentHelper.handleCameraImage()
                     scrollFlag = true
                     onetoOneViewModel.sendMediaMessage(filePath, CometChatConstants.MESSAGE_TYPE_IMAGE, userId, this)
 

@@ -10,13 +10,11 @@ class StringContract {
 
         companion object {
 
-            const val APP_ID:String = "XXXXXXXXXXXXXX"
+          const val APP_ID: String = "XXXXXXXXXXXXX"
 
-            const val API_KEY:String = "XXXXXXXXXXXXX"
+          const val API_KEY: String = "XXXXXXXXXXXX"
 
-            const val REGION:String = "XXXXX"
-
-            lateinit var theme:Appearance.AppTheme
+          lateinit var theme: Appearance.AppTheme
 
         }
     }
@@ -25,56 +23,56 @@ class StringContract {
 
         companion object {
 
-            val USER_ID: String = "user_id"
+            const val USER_ID: String = "user_id"
 
-            val USER_NAME: String = "user_name"
+            const val USER_NAME: String = "user_name"
 
-            val USER_AVATAR: String = "user_avatar"
+            const val USER_AVATAR: String = "user_avatar"
 
-            val USER_STATUS: String = "user_status"
+            const val USER_STATUS: String = "user_status"
 
-            val LAST_ACTIVE: String = "last_user"
+            const  val LAST_ACTIVE: String = "last_user"
 
-            val GROUP_ID: String = "group_id"
+            const val GROUP_ID: String = "group_id"
 
-            val GROUP_NAME: String = "group_name"
+            const val GROUP_NAME: String = "group_name"
 
-            val GROUP_ICON: String = "group_icon"
+            const val GROUP_ICON: String = "group_icon"
 
-            val GROUP_OWNER: String = "group_owner"
+            const val GROUP_OWNER: String = "group_owner"
 
-            val IMAGE_TYPE = "image/*"
+            const val IMAGE_TYPE = "image/*"
 
-            val AUDIO_TYPE = "audio/*"
+            const val AUDIO_TYPE = "audio/*"
 
-            val DOCUMENT_TYPE = arrayOf("*/*")
+             val DOCUMENT_TYPE = arrayOf("*/*")
 
-            val EXTRA_MIME_TYPE = arrayOf("image/*", "video/*")
+             val EXTRA_MIME_TYPE = arrayOf("image/*", "video/*")
 
             val EXTRA_MIME_DOC = arrayOf("text/plane", "text/html", "application/pdf", "application/msword",
                     "application/vnd.ms.excel", "application/mspowerpoint", "application/zip")
 
-            val TITLE: String = "title"
+            const val TITLE: String = "title"
 
-            val POSITION: String = "position"
+            const val POSITION: String = "position"
 
-            val SESSION_ID: String = "session_id"
+            const  val SESSION_ID: String = "session_id"
 
-            val OUTGOING: String = "outgoing"
+            const  val OUTGOING: String = "outgoing"
 
-            val INCOMING: String = "incoming"
+            const val INCOMING: String = "incoming"
 
-            val RECIVER_TYPE: String = "receiver_type"
+            const  val RECIVER_TYPE: String = "receiver_type"
 
-            val URL: String = "image"
+            const  val URL: String = "image"
 
-            val FILE_TYPE: String = "file_type"
+            const  val FILE_TYPE: String = "file_type"
 
-            val ID: String = "id"
+            const  val ID: String = "id"
 
-            val GROUP_DESCRIPTION:String="description"
+            const  val GROUP_DESCRIPTION:String="description"
 
-            val USER_SCOPE: String="scope"
+            const  val USER_SCOPE: String="scope"
             
         }
     }
@@ -85,7 +83,7 @@ class StringContract {
 
             const val  RIGHT_TEXT_MESSAGE = 334
 
-            const val LEFT_TEXT_MESSAGE = 734
+            const  val LEFT_TEXT_MESSAGE = 734
 
             const val LEFT_IMAGE_MESSAGE = 528
 
@@ -105,7 +103,7 @@ class StringContract {
 
             const val CALL_MESSAGE = 84
 
-            const val ACTION_MESSAGE = 99
+            const  val ACTION_MESSAGE = 99
 
             const val RIGHT_LOCATION_MESSAGE = 58
 
@@ -162,7 +160,7 @@ class StringContract {
 
             var grey: Int = android.graphics.Color.parseColor("#CACACC")
 
-            var inactiveColor = android.graphics.Color.parseColor("#9e9e9e");
+            var inactiveColor = android.graphics.Color.parseColor("#9e9e9e")
 
         }
 
@@ -186,13 +184,13 @@ class StringContract {
 
         companion object {
 
-            val MESSAGE_LISTENER = "message_listener"
+            const val MESSAGE_LISTENER = "message_listener"
 
-            val USER_LISTENER = "user_listener"
+            const val USER_LISTENER = "user_listener"
 
-            val GROUP_EVENT_LISTENER = "group_event_listener"
+            const val GROUP_EVENT_LISTENER = "group_event_listener"
 
-            val CALL_EVENT_LISTENER = "call_event_listener"
+            const  val CALL_EVENT_LISTENER = "call_event_listener"
         }
 
     }
@@ -212,6 +210,7 @@ class StringContract {
 
             val STORAGE_PERMISSION = arrayOf(CCPermissionHelper.REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)
 
+//            val LOCATION_PERMISSION= arrayOf(CCPermissionHelper.L)
         }
     }
 
@@ -219,27 +218,27 @@ class StringContract {
 
         companion object {
 
-            val ADD_GALLERY = 1
+            const val ADD_GALLERY = 1
 
-            val ADD_DOCUMENT = 2
+            const val ADD_DOCUMENT = 2
 
-            val ADD_SOUND = 3
+            const val ADD_SOUND = 3
 
-            val TAKE_PHOTO = 5
+            const val TAKE_PHOTO = 5
 
-            val LOCATION = 15
+            const val LOCATION = 15
 
-            val TAKE_VIDEO = 7
+            const val TAKE_VIDEO = 7
 
-            val LEFT = 8
+            const val LEFT = 8
 
-            val RECORD_CODE = 10
+            const val RECORD_CODE = 10
 
-            val VIDEO_CALL = 12
+            const val VIDEO_CALL = 12
 
-            val VOICE_CALL = 24
+            const val VOICE_CALL = 24
 
-            val FILE_WRITE =25
+            const val FILE_WRITE =25
         }
     }
 

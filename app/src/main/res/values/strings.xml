@@ -73,12 +73,12 @@
     <string name="please_wait">Please Wait</string>
     <string name="online">online</string>
     <string name="haven_t_created_a_user_yet_select_one_of_our_default_users_for_testing">Haven\'t created a user yet? Select one of our default users for testing:</string>
-    <string name="add_members">Add Members</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="user_list">User List</string>
     <string name="banned_members">Banned Members</string>
     <string name="group_members">Group Members</string>
+    <string name="add_members">Add Members</string>
 
 </resources>

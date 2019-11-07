@@ -5,7 +5,9 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
 import android.util.Log
@@ -17,10 +19,14 @@ import com.inscripts.cometchatpulse.Utils.MediaUtil
 import java.io.File
 import java.lang.Exception
 import java.net.URISyntaxException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AttachmentHelper {
 
     companion object {
+
+        private var pictureImagePath: String=""
 
         fun selectMedia(activity: FragmentActivity?, type: String,
                         extraMimeType: Array<String>?):Intent {
@@ -40,8 +46,23 @@ class AttachmentHelper {
 
         }
 
-        fun captureImage():Intent {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        fun captureImage():Intent?{
+            var intent:Intent?= null
+            try {
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+                val imageFileName = "$timeStamp.jpg"
+                val storageDir = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES)
+                pictureImagePath = storageDir.absolutePath + "/" + imageFileName
+                val file = File(pictureImagePath)
+                val outputFileUri: Uri
+                outputFileUri = Uri.fromFile(file)
+                intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             return intent
         }
 
@@ -54,21 +75,8 @@ class AttachmentHelper {
 
         }
 
-        fun  handleCameraImage(context: Context?, data: Intent):String {
-            var filePath: String=""
-            try {
-            Logger.error("uri", data.data?.toString())
-            val bitmap = data.extras!!.get("data") as Bitmap
-            val fileUri = FileUtil.getImageUri(context!!, bitmap)
-
-            Logger.error("", "fileUri: $fileUri")
-               filePath= FileUtil.ImagePath(fileUri, context)
-
-            }catch (e:Exception){
-                e.printStackTrace()
-            }
-
-            return filePath
+        fun handleCameraImage():String {
+            return pictureImagePath
         }
 
         fun handleCameraVideo(context: Context?, data: Intent): String? {
@@ -82,46 +90,7 @@ class AttachmentHelper {
 
             var filePath: Array<String?> = arrayOfNulls(3)
 
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                val uri = data.data
-//                val file = File(uri!!.path)//create path from uri
-//                val split = file.path.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//split the path.
-//                for (string in split){
-//                    Log.d("handleFile",string)
-//                }
-//                val path=split[0]
-//                Log.d("File",split[1])
-//                var messageType:String=""
-//                try {
-//                Log.d("filetype",context?.contentResolver?.getType(uri))
-//                val type: String? =context?.contentResolver?.getType(uri)?.toLowerCase()
 //
-//                 if (type!=null) {
-//                     if (type.contains("image")||type.contains("picture")||type.contains("photo")){
-//                         messageType=CometChatConstants.MESSAGE_TYPE_IMAGE
-//                     }
-//                    else if (type.contains("video")||type.contains("mp4")||type.contains("avi")||
-//                             type.contains("flv")){
-//                         messageType=CometChatConstants.MESSAGE_TYPE_VIDEO
-//                     }
-//                   else if (type.contains("aac")||type.contains("m4a")||type.contains("amr")
-//                         ||type.contains("opus")||type.contains("mp3")){
-//
-//                         messageType=CometChatConstants.MESSAGE_TYPE_AUDIO
-//                     }
-//                     else{
-//                         messageType=CometChatConstants.MESSAGE_TYPE_FILE
-//                     }
-//                 }
-//
-//                }catch (e:Exception){
-//                    e.printStackTrace()
-//                }
-//
-//
-//               filePath= arrayOf(path,messageType)
-//
-//            } else {
                 try {
                     filePath = getPath(context!!, data.data)
                 } catch (e: URISyntaxException) {

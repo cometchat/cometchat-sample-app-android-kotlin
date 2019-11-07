@@ -76,7 +76,7 @@ class RecordMicButton : androidx.appcompat.widget.AppCompatImageView, View.OnTou
         setClip(this)
     }
 
-    fun setClip(v: View) {
+    private fun setClip(v: View) {
         if (v.parent == null) {
             return
         }

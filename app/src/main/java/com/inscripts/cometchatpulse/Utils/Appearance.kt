@@ -13,8 +13,7 @@ class Appearance(appearance: AppTheme) {
     enum class AppTheme {
         AZURE_RADIANCE,
         MOUNTAIN_MEADOW,
-        PERSIAN_BLUE,
-        ISLAND
+        PERSIAN_BLUE
     }
 
 
@@ -149,49 +148,6 @@ class Appearance(appearance: AppTheme) {
 
 
             }
-
-            AppTheme.ISLAND -> {
-
-                StringContract.Font.title = Typeface.createFromAsset(CometChatPro.applicationContext().assets,
-                        "Avenir_Next.ttf")
-
-                StringContract.Font.message = Typeface.createFromAsset(CometChatPro.applicationContext().assets,
-                        "OpenSans-Regular.ttf")
-
-                StringContract.Font.name = Typeface.createFromAsset(CometChatPro.applicationContext().assets,
-                        "Roboto-Medium.ttf")
-
-                StringContract.Font.status = Typeface.createFromAsset(CometChatPro.applicationContext().assets,
-                        "RobotoCondensed-Regular.ttf")
-
-                //Dimensions
-
-                StringContract.Dimensions.cardViewCorner = 0f
-
-                StringContract.Dimensions.cardViewElevation = 0f
-
-                StringContract.Dimensions.marginEnd = 0
-
-                StringContract.Dimensions.marginStart = 0
-
-                //color
-
-                StringContract.Color.primaryColor = Color.parseColor("#B62828")
-
-                StringContract.Color.primaryDarkColor = Color.parseColor("#920202")
-
-                StringContract.Color.accentColor = Color.parseColor("#ff5858")
-
-                StringContract.Color.leftMessageColor = Color.parseColor("#eaeaea")
-
-                StringContract.Color.rightMessageColor =   StringContract.Color.primaryColor
-
-                StringContract.Color.iconTint = Color.parseColor("#ffffff")
-
-
-            }
-
-
 
         }
     }

@@ -62,11 +62,11 @@ class BlockUserListActivity : AppCompatActivity() {
 
                 if (user is User) {
 
-                    val popup = item?.let { PopupMenu(this@BlockUserListActivity, it) }
+                    val popup =  PopupMenu(this@BlockUserListActivity, item)
                             //Inflating the Popup using xml file
-                            popup?.menuInflater?.inflate(R.menu.menu_unblock, popup.getMenu())
+                            popup.menuInflater.inflate(R.menu.menu_unblock, popup.getMenu())
 
-                            popup?.setOnMenuItemClickListener { p0 ->
+                            popup.setOnMenuItemClickListener { p0 ->
 
                                 when (p0!!.itemId) {
 

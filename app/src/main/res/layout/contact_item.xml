@@ -35,7 +35,8 @@
         android:clickable="true"
         android:background="@android:color/transparent"
         android:focusable="true"
-        app:cardElevation="0dp">
+        app:cardElevation="0dp"
+        android:onClick="@{()->childClick.OnChildClick(user)}">
 
 
     <RelativeLayout

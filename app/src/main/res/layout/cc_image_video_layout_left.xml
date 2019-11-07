@@ -49,7 +49,7 @@
 
             <ImageView
                 android:id="@+id/imageMessage"
-                setImage="@{message.attachment.fileUrl}"
+                setImage="@{message.url}"
                 android:layout_width="236dp"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"

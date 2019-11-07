@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,18 +85,20 @@ class GroupListFragment : Fragment() {
         view.etSearch.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable?) {
-
+                Log.d("GroupListFragment","AfterTextChanges")
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+                Log.d("GroupListFragment","beforeTextChanges")
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val searchString = s.toString()
                 if (searchString.isNotEmpty()) {
+                    Log.d("","onSuccessSEARCH")
                     searchGroup(searchString)
                 } else {
+                    Log.d("","SEARCHFAILED")
                     groupViewModel.fetchGroups(LIMIT = 30, shimmerFrameLayout = view.contact_shimmer)
                 }
             }
@@ -110,11 +113,6 @@ class GroupListFragment : Fragment() {
             }
         })
 
-        groupViewModel.filterGroupList.observe(this, Observer { filterList ->
-            filterList?.let {
-                groupListAdapter.filterList(it)
-            }
-        })
 
 
         view.group_recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {

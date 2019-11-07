@@ -103,8 +103,7 @@ class GroupRepository {
                     }
 
                     override fun onError(p0: CometChatException?) {
-                        Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
-                        p0?.printStackTrace()
+                       p0?.printStackTrace()
                     }
 
                 })
@@ -122,7 +121,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-
+                    p0?.message?.let { showToast(it) }
                 }
             })
     }
@@ -166,7 +165,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                    p0?.message?.let { showToast(it) }
                 }
 
             })
@@ -183,7 +182,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                    p0?.message?.let { showToast(it) }
                 }
 
             })
@@ -212,7 +211,7 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                    p0?.message?.let { showToast(it) }
                 }
 
             })
@@ -230,8 +229,9 @@ class GroupRepository {
                 }
 
                 override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
                     p0?.printStackTrace()
+                    p0?.message?.let { showToast(it) }
+
                 }
 
 
@@ -326,8 +326,8 @@ class GroupRepository {
         CometChat.leaveGroup(guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
                 showToast("Successfully left group")
-                activity?.startActivity(Intent(activity,MainActivity::class.java))
-//                activity?.onBackPressed()
+
+                activity?.onBackPressed()
             }
 
             override fun onError(p0: CometChatException?) {
@@ -356,7 +356,7 @@ class GroupRepository {
 
         CometChat.updateGroupMemberScope(uid,guid,scope,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
-              Toast.makeText(CometChatPro.applicationContext(),"Success",Toast.LENGTH_SHORT).show()
+              Toast.makeText(CometChatPro.applicationContext(),"Successfully Update Scope",Toast.LENGTH_SHORT).show()
 
                val  member = groupMemberList[uid]
                  member?.scope=scope
@@ -376,7 +376,7 @@ class GroupRepository {
 
     fun searchGroup(s: String) {
 
-        var filterGroup : MutableMap<String,Group> = mutableMapOf()
+           var filterGroup:MutableMap<String,Group> = mutableMapOf()
             val groupSearchRequest = GroupsRequest.GroupsRequestBuilder().setSearchKeyWord(s).setLimit(100).build()
 
             groupSearchRequest?.fetchNext(object : CometChat.CallbackListener<List<Group>>() {
@@ -386,9 +386,9 @@ class GroupRepository {
                          for (group: Group in p0) {
                           filterGroup.put(group.guid,group)
                          }
+                         Log.d("","onSuccess groupSearchRequest ${p0?.size}")
                          groupList.value=filterGroup
                      }
-                    Log.d("","onSuccess groupSearchRequest ${p0?.size}")
                 }
 
                 override fun onError(p0: CometChatException?) {

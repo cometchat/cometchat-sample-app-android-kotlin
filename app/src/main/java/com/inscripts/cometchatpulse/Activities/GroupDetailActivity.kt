@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.Menu
 import android.view.MenuItem
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
@@ -73,7 +74,7 @@ class GroupDetailActivity : AppCompatActivity() {
 
         layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         binding.rvGroupOptions.layoutManager = layoutManager
-        groupOptionAdapter = GroupOptionAdapter(this, groupOptionItemList(), ownerUid, groupId,object :OnOptionClickListener(){
+        groupOptionAdapter = GroupOptionAdapter(this, GroupOptionItemList(), ownerUid, groupId,object :OnOptionClickListener(){
 
             override fun OnOptionClick( position:Int){
 
@@ -149,7 +150,7 @@ class GroupDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun groupOptionItemList(): MutableMap<Int,GroupOption> {
+    private fun GroupOptionItemList(): MutableMap<Int,GroupOption> {
 
         groupOptionList.put(0,GroupOption(getString(R.string.view_members), ContextCompat.getDrawable(this, R.drawable.ic_person_black_24dp)))
         if(userScope==CometChatConstants.SCOPE_ADMIN||userScope==CometChatConstants.SCOPE_MODERATOR) {
@@ -174,11 +175,11 @@ class GroupDetailActivity : AppCompatActivity() {
                 .setPositiveButton(CommonUtil.setTitle(getString(R.string.yes), this)) {
                     dialogInterface, i ->  when(position){
 
-                    3->{
+                    2->{
                         groupViewModel.leaveGroup(groupId, this@GroupDetailActivity)
                     }
 
-                    4->{
+                    3->{
                         groupViewModel.deleteGroup(groupId,this@GroupDetailActivity)
                     }
                 }
