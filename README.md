@@ -41,6 +41,36 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
    Simply Clone the project from android-kotlin-chat-app repository and open in Android Studio.
    Build the Demo App and it will be ready to Run
+   
+  ## v2 Apps
+
+To run our open source app with CometChat Pro v2, follow these steps:
+
+  1.  Checkout to branch v2
+  
+-  modify *APP_ID* and *API_KEY* with your own **ApiKey** , **AppId** and **REGION**
+
+       `val APP_ID: String = "XXXXXXXXX"`
+
+       `val API_KEY: String  = "XXXXXXXXX"`
+       
+       `val REGION: String = "XXXXXX"`
+       
+  2. Build and run the Sample App.
+   
+  ## v1 Apps
+
+To run our open source app with CometChat Pro v1, follow these steps:
+
+   1. Checkout to branch v1.8 
+
+ - modify *APP_ID* and *API_KEY* with your own **ApiKey** and **AppId** 
+
+       `val APP_ID: String = "XXXXXXXXX"`
+
+       `val API_KEY: String  = "XXXXXXXXX"`
+       
+  2. Build and run the Sample App.
 
 ## Note
 
