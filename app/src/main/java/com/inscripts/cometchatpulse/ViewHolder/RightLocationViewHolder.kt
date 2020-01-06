@@ -1,5 +1,6 @@
 package com.inscripts.cometchatpulse.ViewHolder
 
+import android.util.Log
 import androidx.collection.LongSparseArray
 import androidx.recyclerview.widget.RecyclerView
 import android.view.View
@@ -10,6 +11,7 @@ import com.inscripts.cometchatpulse.CometChatPro
 import com.inscripts.cometchatpulse.databinding.RightLocationBinding
 import android.widget.TextView
 import com.cometchat.pro.models.BaseMessage
+import com.cometchat.pro.models.CustomMessage
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.models.TextMessage
 import com.google.android.gms.maps.MapView
@@ -37,8 +39,8 @@ class RightLocationViewHolder(val binding: RightLocationBinding):
         setMapLocation()
     }
 
-    fun bindView(pos: Int,messageList: LongSparseArray<BaseMessage>){
-        val item =messageList.get(messageList.keyAt(pos))
+    fun bindView(pos: Int,messageList: LinkedHashMap<Int,BaseMessage>){
+        val item = ArrayList<BaseMessage>(messageList.values).get(pos)
         binding.root.tag=this
         binding.map.tag=item
         setMapLocation()
@@ -53,14 +55,10 @@ class RightLocationViewHolder(val binding: RightLocationBinding):
 
             if (googleMap == null) return
 
-            val data:BaseMessage? = binding.map.tag as BaseMessage
-
-            if (data==null){
-                return
-            }
+            val data: BaseMessage = binding.map.tag as BaseMessage ?: return
 
             // Add a marker for this item and set the camera
-            val metadata=(data as TextMessage).metadata
+            val metadata=(data as CustomMessage).metadata
             val lat=metadata.getString("lat").toDouble()
             val longt=metadata.getString("logt").toDouble()
 

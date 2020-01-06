@@ -41,12 +41,18 @@
             app:contentInsetStartWithNavigation="0dp"
             android:layout_alignParentTop="true"
             app:title="">
-
+            <ImageView
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/backIcon"
+                android:layout_margin="5dp"
+                android:src="@drawable/ic_arrow_back_white_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <RelativeLayout
                 android:id="@+id/rl_titlecontainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-
                 <com.inscripts.cometchatpulse.CustomView.CircleImageView
                     android:id="@+id/contact_pic"
                     setUserImage="@{avatar}"

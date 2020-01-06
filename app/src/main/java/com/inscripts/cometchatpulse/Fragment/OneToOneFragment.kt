@@ -35,9 +35,9 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.helpers.Logger
-import com.cometchat.pro.models.MediaMessage
-import com.cometchat.pro.models.TextMessage
-import com.cometchat.pro.models.User
+import com.cometchat.pro.models.*
+import com.inscripts.cometchatpulse.Activities.ChatActivity
+import com.inscripts.cometchatpulse.Activities.GroupMessageInfoActivity
 import com.inscripts.cometchatpulse.Activities.LocationActivity
 import com.inscripts.cometchatpulse.Activities.UserProfileViewActivity
 import com.inscripts.cometchatpulse.Adapter.OneToOneAdapter
@@ -54,11 +54,14 @@ import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.Utils.FileUtil
 import com.inscripts.cometchatpulse.ViewModel.OnetoOneViewModel
 import com.inscripts.cometchatpulse.databinding.FragmentContactDetailBinding
+import kotlinx.android.synthetic.main.fragment_contact_detail.*
+import kotlinx.android.synthetic.main.fragment_contact_detail.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.w3c.dom.Text
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -201,15 +204,14 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         oneToOneAdapter.setHasStableIds(true)
         binding.recycler.adapter = oneToOneAdapter
 
-
         (activity as AppCompatActivity).setSupportActionBar(binding.cometchatToolbar)
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding.cometchatToolbar.title = ""
 
         binding.cometchatToolbar.setBackgroundColor(StringContract.Color.primaryColor)
 
         binding.cometchatToolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
+
 
         binding.subTitle.isSelected = true
 
@@ -460,7 +462,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
                 }
             }
 
-
         }
 
         return true
@@ -616,11 +617,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
             android.R.id.home -> {
 
-                if (config.smallestScreenWidthDp >= 600) {
-                    clickListener.onBackClick()
-                } else {
-                    activity?.onBackPressed()
-                }
+                clickListener.onBackClick()
+
             }
             R.id.voice_call -> {
                 if (CCPermissionHelper.hasPermissions(activity, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
@@ -649,8 +647,9 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
             }
 
         }
-        return true
+        return super.onOptionsItemSelected(item)
     }
+
 
 
     override fun onClick(p0: View?) {
@@ -961,8 +960,10 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         super.onResume()
         Log.d(TAG, "onResume: ")
         currentId = userId
-        onetoOneViewModel.receiveMessageListener(MESSAGE_LISTENER, ownerId)
+        onetoOneViewModel.fetchMessage(LIMIT = 30,userId = userId);
+        onetoOneViewModel.receiveMessageListener(MESSAGE_LISTENER, userId)
         onetoOneViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
+
 
 
 

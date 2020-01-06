@@ -21,6 +21,7 @@ import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.models.TextMessage
 import com.inscripts.cometchatpulse.Activities.MainActivity
+import com.inscripts.cometchatpulse.Helpers.MyFirebaseMessagingService
 import java.lang.Exception
 import java.util.ArrayList
 
@@ -71,6 +72,7 @@ class UserRepository {
                         Log.d("UsersRequest", " " + p0.size)
                         for (user: User in p0) {
                             mutableUserList.put(user.uid, user)
+                            MyFirebaseMessagingService.unsubscribeUser(user.uid)
                         }
                         shimmer?.stopShimmer()
                         shimmer?.visibility = View.GONE
@@ -91,6 +93,7 @@ class UserRepository {
                     if (p0 != null) {
                         for (user: User in p0) {
                             mutableUserList.put(user.uid, user)
+                            MyFirebaseMessagingService.unsubscribeUser(user.uid)
                         }
                         usersList.value = mutableUserList
                     }

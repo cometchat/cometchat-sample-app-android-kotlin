@@ -114,8 +114,8 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
         uid?.let { groupRepository.unBanMember(guid, it) }
     }
 
-    fun addGroupMessageListener(message_listener: String,ownerId:String) {
-       messageRepository.messageReceiveListener(message_listener)
+    fun addGroupMessageListener(message_listener: String,guid:String) {
+       messageRepository.messageReceiveListener(message_listener,guid)
     }
 
     fun removeMessageListener(message_listener: String) {

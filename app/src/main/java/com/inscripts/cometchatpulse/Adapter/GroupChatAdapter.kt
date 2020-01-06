@@ -44,12 +44,14 @@ import com.inscripts.cometchatpulse.databinding.*
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 
 class GroupChatAdapter(val context: Context, val guid: String, val ownerId: String, val listener: OnClickEvent ) :
         androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>(), StickyHeaderAdapter<TextHeaderHolder> {
 
 
-    private var messagesList: LongSparseArray<BaseMessage> = LongSparseArray()
+    private var messagesList: LinkedHashMap<Int,BaseMessage> = LinkedHashMap()
 
     lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
 
@@ -186,7 +188,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     override fun getHeaderId(var1: Int): Long {
 
-        return java.lang.Long.parseLong(DateUtil.getDateId(messagesList.get(messagesList.keyAt(var1))?.getSentAt()!! * 1000))
+        return java.lang.Long.parseLong(DateUtil.getDateId(messagesList.get(var1)?.getSentAt()!! * 1000))
     }
 
     override fun onCreateHeaderViewHolder(var1: ViewGroup): TextHeaderHolder {
@@ -196,7 +198,8 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
-        val date = Date(messagesList[messagesList.keyAt(var2)]?.sentAt?.times(1000)!!)
+        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(var2)
+        val date = Date(baseMessage.sentAt?.times(1000)!!)
 
         val formattedDate = DateUtil.getCustomizeDate(date.getTime())
 
@@ -223,11 +226,11 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     override fun getItemCount(): Int {
 
-        return messagesList.size()
+        return messagesList.size
     }
 
     override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
-        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
+        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(p0.adapterPosition)
         val timeStampLong =baseMessage?.sentAt
         var message: String? = null
         var mediaFile: String? = null
@@ -362,7 +365,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
             StringContract.ViewType.RIGHT_LOCATION_MESSAGE -> {
                 val rightLocationViewHolder = p0 as RightLocationViewHolder
-                rightLocationViewHolder.binding.message = baseMessage as TextMessage
+                rightLocationViewHolder.binding.message = baseMessage as CustomMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 rightLocationViewHolder.bindView(p1, messagesList)
                 setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
@@ -370,7 +373,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
                 val leftLocationViewHolder = p0 as LeftLocationViewHolder
-                leftLocationViewHolder.binding.message = baseMessage as TextMessage
+                leftLocationViewHolder.binding.message = baseMessage as CustomMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
                 leftLocationViewHolder.bindView(p1, messagesList)
 
@@ -1307,35 +1310,28 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun getItemViewType(position: Int): Int {
+        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(position);
+        if (baseMessage?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
 
-        if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
+            if (ownerId.equals(baseMessage?.sender?.uid, ignoreCase = true)) {
 
-            if (ownerId.equals(messagesList.get(messagesList.keyAt(position))?.sender?.uid, ignoreCase = true)) {
-
-                if ((messagesList.get(messagesList.keyAt(position))is TextMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
+                if ((baseMessage is TextMessage)
+                        && (baseMessage as TextMessage).metadata != null
+                        && (baseMessage as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.RIGHT_TEXT_REPLY_MESSAGE
 
-                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
+                } else if ((baseMessage is MediaMessage)
+                        && (baseMessage as MediaMessage).metadata != null
+                        && (baseMessage as MediaMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.RIGHT_MEDIA_REPLY_MESSAGE
 
                 } else {
 
-                    when (messagesList.get(messagesList.keyAt(position))?.type) {
+                    when (baseMessage?.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
-
-                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null) {
-
-                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
-                                    return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
-                                }
-                            }
 
                             return StringContract.ViewType.RIGHT_TEXT_MESSAGE
                         }
@@ -1365,28 +1361,20 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
             } else {
 
 
-                if ((messagesList.get(messagesList.keyAt(position)) is TextMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
+                if ((baseMessage is TextMessage)
+                        && (baseMessage as TextMessage).metadata != null
+                        && (baseMessage as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_TEXT_REPLY_MESSAGE
-                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
+                } else if ((baseMessage is MediaMessage)
+                        && (baseMessage as MediaMessage).metadata != null
+                        && (baseMessage as MediaMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_MEDIA_REPLY_MESSAGE
                 } else {
-                    when (messagesList.get(messagesList.keyAt(position))?.type) {
+                    when (baseMessage?.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
-
-                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null){
-
-                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
-
-                                    return StringContract.ViewType.LEFT_LOCATION_MESSAGE
-                                }
-                            }
 
                             return StringContract.ViewType.LEFT_TEXT_MESSAGE
                         }
@@ -1415,10 +1403,37 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                     }
                 }
             }
-        }else if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true)) {
+        }
+        else if (baseMessage?.category.equals(CometChatConstants.CATEGORY_CUSTOM, ignoreCase = true))
+        {
+            if (ownerId.equals(baseMessage?.sender?.uid, ignoreCase = true)) {
+                if ((baseMessage as CustomMessage).type != null) {
+
+                    if ((baseMessage as CustomMessage).type.equals("LOCATION")) {
+                        return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+                    } else {
+                        return StringContract.ViewType.RIGHT_CUSTOM_MESSAGE
+                    }
+                }
+            }
+            else
+            {
+                if ((baseMessage as CustomMessage).type != null) {
+
+                    if ((baseMessage as CustomMessage).type.equals("LOCATION")) {
+                        return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                    }
+                    else
+                    {
+                        return StringContract.ViewType.LEFT_CUSTOM_MESSAGE
+                    }
+                }
+            }
+        }
+        else if (baseMessage?.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true)) {
             return StringContract.ViewType.ACTION_MESSAGE
         }
-        else if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
+        else if (baseMessage?.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
             return StringContract.ViewType.CALL_MESSAGE
         }
 
@@ -1428,7 +1443,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     fun setMessageList(messageList: MutableList<BaseMessage>) {
 
         for(baseMessage:BaseMessage in messageList){
-            this.messagesList.put(baseMessage.id.toLong(),baseMessage)
+            this.messagesList.put(baseMessage.id,baseMessage)
 //            Log.d("groupChatAdapter","setMessageList: "+this.messagesList.toString())
         }
 
@@ -1438,16 +1453,19 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     private fun setStatusIcon(circleImageView: CircleImageView, baseMessage: BaseMessage) {
 
         if (baseMessage.readAt != 0L) {
+            Log.e("Read",""+baseMessage.readAt)
             val drawable=ContextCompat.getDrawable(context,R.drawable.ic_double_tick_blue);
             drawable?.setColorFilter(StringContract.Color.primaryColor,PorterDuff.Mode.SRC_ATOP)
             circleImageView.setImageDrawable(drawable)
             circleImageView.circleBackgroundColor = context.resources.getColor(android.R.color.transparent)
         }
         else if (baseMessage.deliveredAt != 0L) {
+            Log.e("Delivered",""+baseMessage.readAt)
             circleImageView.setImageResource(R.drawable.ic_double_tick)
             circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
         }
         else{
+            Log.e("No Delivered",""+baseMessage.readAt)
             circleImageView.setImageResource(R.drawable.ic_check_24dp)
             circleImageView.circleBackgroundColor = StringContract.Color.primaryColor
         }
@@ -1455,27 +1473,27 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
-        messagesList.put(deletedMessage.id.toLong(),deletedMessage)
+        messagesList.put(deletedMessage.id,deletedMessage)
         notifyDataSetChanged()
     }
 
     fun setEditMessage(editMessage: BaseMessage) {
-        messagesList.put(editMessage.id.toLong(),editMessage)
+        messagesList.put(editMessage.id,editMessage)
         notifyDataSetChanged()
     }
 
 
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
-        val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
+        val baseMessage =messagesList.get(messageReceipt.messageId)
         if (baseMessage!=null) {
             baseMessage.deliveredAt = messageReceipt.timestamp
-            for(i in messagesList.size()-1 downTo 0){
-                if(messagesList.get(messagesList.keyAt(i))?.deliveredAt!! >0){
+            for(i in messagesList.size-1 downTo 0){
+                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
+                if(message?.deliveredAt!! >0){
                     break
                 }else{
-                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
                     message?.deliveredAt = messageReceipt.deliveredAt;
-                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                    message?.id?.let { messagesList.put(it, message) }
                 }
             }
             notifyDataSetChanged()
@@ -1484,15 +1502,15 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     fun setRead(messageReceipt: MessageReceipt) {
-        val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
+        val baseMessage = messagesList.get(messageReceipt.messageId)
         if (baseMessage != null) {
-            for(i in messagesList.size()-1 downTo 0){
-                if(messagesList.get(messagesList.keyAt(i))?.readAt!! >0){
+            for(i in messagesList.size-1 downTo 0){
+                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
+                if(message?.readAt!! >0){
                     break
                 }else{
-                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
                     message?.readAt = messageReceipt.readAt;
-                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                    message?.id?.let { messagesList.put(it, message) }
                 }
             }
             notifyDataSetChanged()
@@ -1503,7 +1521,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     fun setFilter(filterList: MutableList<BaseMessage>) {
         messagesList.clear()
         for (baseMessage in filterList){
-            messagesList.put(baseMessage.id.toLong(),baseMessage)
+            messagesList.put(baseMessage.id,baseMessage)
         }
         notifyDataSetChanged()
     }

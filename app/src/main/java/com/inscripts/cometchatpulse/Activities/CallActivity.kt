@@ -53,69 +53,85 @@ class CallActivity : AppCompatActivity(), View.OnClickListener {
         cometChatAudioHelper?.initAudio()
         notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
         onetoOneViewModel = ViewModelProviders.of(this).get(OnetoOneViewModel::class.java)
-
-        try {
-
-            if (intent?.action?.equals(CometChatConstants.CALL_TYPE_VIDEO)!!) {
-                if (!CCPermissionHelper.hasPermissions(this, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
-                    CCPermissionHelper.requestPermissions(this, arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO),
-                            StringContract.RequestCode.VIDEO_CALL)
-                }
-
-            } else if (intent?.action.equals(CometChatConstants.CALL_TYPE_AUDIO)) {
-                if (!CCPermissionHelper.hasPermissions(this, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
-
-                    CCPermissionHelper.requestPermissions(this, arrayOf(CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO),
-                            StringContract.RequestCode.VOICE_CALL)
-                }
+        if (intent.hasExtra("NotificationIntent"))
+        {
+            onetoOneViewModel.acceptCall(intent.getStringExtra(StringContract.IntentString.SESSION_ID), binding.mainCallView, this@CallActivity)
+            if (intent.hasExtra(StringContract.IntentString.USER_NAME) && intent.hasExtra(StringContract.IntentString.USER_AVATAR)) {
+                binding.name = intent.getStringExtra(StringContract.IntentString.USER_NAME)
+                binding.image = intent.getStringExtra(StringContract.IntentString.USER_AVATAR)
             }
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
-
-        if (intent.hasExtra(StringContract.IntentString.RECIVER_TYPE)) {
-
-            if (intent.getStringExtra(StringContract.IntentString.RECIVER_TYPE).equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-
-                name = intent.getStringExtra(StringContract.IntentString.GROUP_NAME)
-                id = intent.getStringExtra(StringContract.IntentString.GROUP_ID)
-                imageUrl = intent?.getStringExtra(StringContract.IntentString.GROUP_ICON)
-            } else {
-                name = intent.getStringExtra(StringContract.IntentString.USER_NAME)
-                id = intent.getStringExtra(StringContract.IntentString.USER_ID)
-                imageUrl = intent?.getStringExtra(StringContract.IntentString.USER_AVATAR)
+            else
+            {
+                binding.name = intent.getStringExtra(StringContract.IntentString.GROUP_NAME)
+                binding.image = intent.getStringExtra(StringContract.IntentString.GROUP_ICON)
             }
-        }
-
-        if (intent?.type.equals(StringContract.IntentString.INCOMING)) {
-            binding.tvCallText.text = getString(R.string.incoming_call)
-            binding.tvCallText.currentHintTextColor
-            cometChatAudioHelper?.startIncomingAudio(notification, true)
-            isOutGoing=false
-        } else if (intent?.type.equals(StringContract.IntentString.OUTGOING)) {
-            cometChatAudioHelper?.startOutgoingAudio(OutgoingAudioHelper.Type.IN_COMMUNICATION)
-            val rl = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT)
-
-            rl.addRule(RelativeLayout.CENTER_HORIZONTAL)
-            rl.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-            rl.bottomMargin = 56
-
-            isOutGoing=true
-
-            binding.hangUp.layoutParams = rl
             binding.acceptCall.visibility = View.GONE
-            binding.tvCallText.text = getString(R.string.ringing)
+            binding.hangUp.visibility = View.GONE
+            binding.tvCallText.text = "Calling "+binding.name
         }
+        else {
+            try {
 
-        binding.name = name
-        binding.image = imageUrl
+                if (intent?.action?.equals(CometChatConstants.CALL_TYPE_VIDEO)!!) {
+                    if (!CCPermissionHelper.hasPermissions(this, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
+                        CCPermissionHelper.requestPermissions(this, arrayOf(CCPermissionHelper.REQUEST_PERMISSION_CAMERA, CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO),
+                                StringContract.RequestCode.VIDEO_CALL)
+                    }
 
-        binding.acceptCall.setOnClickListener(this)
-        binding.hangUp.setOnClickListener(this)
+                } else if (intent?.action.equals(CometChatConstants.CALL_TYPE_AUDIO)) {
+                    if (!CCPermissionHelper.hasPermissions(this, *arrayOf(CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO))) {
 
-        sessionID = intent.getStringExtra(StringContract.IntentString.SESSION_ID)
+                        CCPermissionHelper.requestPermissions(this, arrayOf(CCPermissionHelper.REQUEST_PERMISSION_RECORD_AUDIO),
+                                StringContract.RequestCode.VOICE_CALL)
+                    }
+                }
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
+            }
 
+            if (intent.hasExtra(StringContract.IntentString.RECIVER_TYPE)) {
+
+                if (intent.getStringExtra(StringContract.IntentString.RECIVER_TYPE).equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+
+                    name = intent.getStringExtra(StringContract.IntentString.GROUP_NAME)
+                    id = intent.getStringExtra(StringContract.IntentString.GROUP_ID)
+                    imageUrl = intent?.getStringExtra(StringContract.IntentString.GROUP_ICON)
+                } else {
+                    name = intent.getStringExtra(StringContract.IntentString.USER_NAME)
+                    id = intent.getStringExtra(StringContract.IntentString.USER_ID)
+                    imageUrl = intent?.getStringExtra(StringContract.IntentString.USER_AVATAR)
+                }
+            }
+
+            if (intent?.type.equals(StringContract.IntentString.INCOMING)) {
+                binding.tvCallText.text = getString(R.string.incoming_call)
+                binding.tvCallText.currentHintTextColor
+                cometChatAudioHelper?.startIncomingAudio(notification, true)
+                isOutGoing = false
+            } else if (intent?.type.equals(StringContract.IntentString.OUTGOING)) {
+                cometChatAudioHelper?.startOutgoingAudio(OutgoingAudioHelper.Type.IN_COMMUNICATION)
+                val rl = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT)
+
+                rl.addRule(RelativeLayout.CENTER_HORIZONTAL)
+                rl.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                rl.bottomMargin = 56
+
+                isOutGoing = true
+
+                binding.hangUp.layoutParams = rl
+                binding.acceptCall.visibility = View.GONE
+                binding.tvCallText.text = getString(R.string.ringing)
+            }
+
+            binding.name = name
+            binding.image = imageUrl
+
+            binding.acceptCall.setOnClickListener(this)
+            binding.hangUp.setOnClickListener(this)
+
+            sessionID = intent.getStringExtra(StringContract.IntentString.SESSION_ID)
+        }
 
     }
 

@@ -109,7 +109,7 @@ fun setStatus(tvStatus: TextView, status: String, lastActive: Long?) {
         tvStatus.text = status
     } else if (status.equals(CometChatConstants.USER_STATUS_OFFLINE, ignoreCase = true)) {
         if (lastActive != null) {
-            tvStatus.text = DateUtil.getLastSeenDate(lastActive, CometChatPro.applicationContext())
+            tvStatus.text = DateUtil.getTimeStringFromTimestamp(lastActive, "dd/MM/yyyy  hh:mm a")
         } else {
             tvStatus.text = status
         }

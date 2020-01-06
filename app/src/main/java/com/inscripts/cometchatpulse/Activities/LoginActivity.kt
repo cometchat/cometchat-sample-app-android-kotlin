@@ -51,7 +51,7 @@ public class LoginActivity : AppCompatActivity() {
             binding.login = this
 
              if (StringContract.AppDetails.theme==Appearance.AppTheme.PERSIAN_BLUE||
-                     StringContract.AppDetails.theme==Appearance.AppTheme.MOUNTAIN_MEADOW) {
+                     StringContract.AppDetails.theme==Appearance.AppTheme.MOUNTAIN_MEADOW || StringContract.AppDetails.theme==Appearance.AppTheme.ISLAND) {
                  binding.btLogin.setTextColor(StringContract.Color.white)
                  binding.rlBack.setBackgroundColor(StringContract.Color.primaryColor)
                  binding.progressHorizontal.progressTintList= ColorStateList.valueOf(StringContract.Color.primaryColor)

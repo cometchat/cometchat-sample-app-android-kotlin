@@ -32,10 +32,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:replace="android:allowBackup">
-
-        <activity android:name=".Activities.BlockUserListActivity"
-            android:parentActivityName=".Activities.MainActivity"/>
+        tools:replace="android:allowBackup"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".Activities.ChatActivity"></activity>
+        <activity android:name=".Activities.GroupMessageInfoActivity" />
+        <activity
+            android:name=".Activities.BlockUserListActivity"
+            android:parentActivityName=".Activities.MainActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -82,10 +85,16 @@
         <activity
             android:name=".Activities.GroupDetailActivity"
             android:launchMode="singleTop" />
-
         <activity
             android:name=".Activities.LocationActivity"
             android:launchMode="singleTop" />
+        <service android:name=".Helpers.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".Helpers.CallNotificationAction" />
     </application>
 
 </manifest>

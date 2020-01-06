@@ -70,7 +70,6 @@ class MessageRepository {
 
     @WorkerThread
     fun fetchMessage(LIMIT: Int, userId: String,isRefresh:Boolean) {
-
         try {
               if (isRefresh){
                   messageRequest= null
@@ -90,10 +89,10 @@ class MessageRepository {
 
         messagesRequest?.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
             override fun onSuccess(p0: List<BaseMessage>?) {
-
+                Log.e(TAG,"FETCH MESSAGE")
                 if (p0 != null) {
                     for (baseMessage: BaseMessage in p0) {
-                        Log.d(TAG, "baseMessage onSuccess: " + baseMessage.id)
+                        Log.d(TAG, "baseMessage onSuccess: " + baseMessage)
                         if (baseMessage.category != CometChatConstants.CATEGORY_ACTION && baseMessage.deletedAt == 0L) {
                             mutableOneToOneMessageList.add(baseMessage)
                         }
@@ -175,11 +174,6 @@ class MessageRepository {
                         groupMessageList.value = mutableGroupMessageList
 
                     }
-
-                    if (context != null) {
-                        if (context is LocationActivity)
-                            context.finish()
-                    }
                 }
 
             }
@@ -230,55 +224,146 @@ class MessageRepository {
     }
 
     @WorkerThread
-    fun messageReceiveListener(listener: String) {
+    fun messageReceiveListener(listener: String,userId: String) {
 
         CometChat.addMessageListener(listener, object : CometChat.MessageListener() {
 
             override fun onMessagesDelivered(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid )
-                    liveDeliveryReceipts.value = messageReceipt
+                 if (messageReceipt != null) {
+                      if (messageReceipt.receivertype == CometChatConstants.RECEIVER_TYPE_USER) {
+                          if (messageReceipt.sender.uid == userId)
+                              liveDeliveryReceipts.value = messageReceipt
+                      }else
+                          if (messageReceipt.receiverId == userId)
+                              liveDeliveryReceipts.value = messageReceipt
+                 }
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt?) {
-                if (messageReceipt != null&&messageReceipt.receiverId== CometChat.getLoggedInUser().uid)
-                    liveReadReceipts.value = messageReceipt
+                if (messageReceipt != null) {
+                    if (messageReceipt.receivertype == CometChatConstants.RECEIVER_TYPE_USER) {
+                        if (messageReceipt.sender.uid == userId)
+                            liveDeliveryReceipts.value = messageReceipt
+                    }else
+                        if (messageReceipt.receiverId == userId)
+                            liveDeliveryReceipts.value = messageReceipt
+                }
             }
 
             override fun onMessageEdited(message: BaseMessage?) {
                 Log.d(TAG, "onMessageEdited: $message")
-                liveMessageEdited.value = message
+                 if(message!=null) {
+                     if (message.receiverType==CometChatConstants.RECEIVER_TYPE_USER) {
+                         if (message.sender.uid == userId)
+                             liveMessageEdited.value = message
+                     }else
+                         if (message.receiverUid==userId)
+                             liveMessageEdited.value = message
+                 }
             }
 
             override fun onMessageDeleted(message: BaseMessage?) {
-                liveMessageDeleted.value = message
+                Log.d(TAG,"onMessageDeleted: $message")
+                if(message!=null) {
+                    if (message.receiverType==CometChatConstants.RECEIVER_TYPE_USER) {
+                        if (message.sender.uid == userId)
+                            liveMessageDeleted.value = message
+                    }else
+                        if (message.receiverUid==userId)
+                            liveMessageDeleted.value = message
+                }
             }
 
 
 
             override fun onTypingEnded(typingIndicator: TypingIndicator?) {
-                if (typingIndicator != null)
-                    liveEndTypingIndicator.value = typingIndicator
-
+                Log.d(TAG,"onTypingEnded: $typingIndicator")
+                 if (typingIndicator!=null) {
+                      if (typingIndicator.receiverType==CometChatConstants.RECEIVER_TYPE_USER) {
+                          if (typingIndicator.sender.uid == userId)
+                              liveEndTypingIndicator.value = typingIndicator
+                      }else
+                          if (typingIndicator.receiverId==userId){
+                              liveEndTypingIndicator.value = typingIndicator
+                          }
+                 }
             }
 
             override fun onTypingStarted(typingIndicator: TypingIndicator?) {
-                if (typingIndicator != null)
-                    liveStartTypingIndicator.value = typingIndicator
-
+                Log.d(TAG,"onTypingStarted: $typingIndicator")
+                if (typingIndicator!=null) {
+                    if (typingIndicator.receiverType==CometChatConstants.RECEIVER_TYPE_USER) {
+                        if (typingIndicator.sender.uid == userId)
+                            liveStartTypingIndicator.value = typingIndicator
+                    }else
+                        if (typingIndicator.receiverId==userId){
+                            liveStartTypingIndicator.value = typingIndicator
+                        }
+                }
             }
 
             override fun onTextMessageReceived(p0: TextMessage?) {
                 if (p0 != null) {
 
-
                     Log.d(TAG, "onTextMessageReceived:   $p0")
 
+                    if (p0.receiverType != CometChatConstants.RECEIVER_TYPE_GROUP) {
+                         if (p0.sender.uid==userId) {
+                             try {
+                                 OneToOneFragment.scrollFlag = true
+                                 mutableOneToOneMessageList.add(p0)
+                                 onetoOneMessageList.value = mutableOneToOneMessageList
+                                 CometChat.markAsRead(p0.id, p0.sender.uid, p0.receiverType)
+                             } catch (e: NullPointerException) {
+                                 e.printStackTrace()
+                             }
+                         }
+                    } else {
+                        if (p0.receiverUid==userId) {
+                            CometChat.markAsRead(p0.id, p0.receiverUid, p0.receiverType)
+                            GroupFragment.scrollFlag = true
+                            mutableGroupMessageList.add(p0)
+                            groupMessageList.value = mutableGroupMessageList
+                        }
+
+                    }
+                }
+            }
+
+            override fun onMediaMessageReceived(p0: MediaMessage?) {
+                if (p0 != null) {
+
+                    Log.d(TAG, "onMediaMessageReceived: ${p0}")
                     if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                        if (p0.sender.uid==userId) {
+                            OneToOneFragment.scrollFlag = true
+                            mutableOneToOneMessageList.add(p0)
+                            onetoOneMessageList.value = mutableOneToOneMessageList
+                            CometChat.markAsRead(p0.id, p0.sender.uid, p0.receiverType)
+                        }
+
+                    } else {
+                        if (p0.receiverUid==userId) {
+                            CometChat.markAsRead(p0.id, p0.receiverUid, p0.receiverType)
+                            GroupFragment.scrollFlag = true
+                            mutableGroupMessageList.add(p0)
+                            groupMessageList.value = mutableGroupMessageList
+                        }
+                    }
+                }
+            }
+
+            override fun onCustomMessageReceived(p0: CustomMessage?) {
+                if (p0 != null) {
+
+                    Log.d(TAG, "onCustomMessageReceived:   $p0")
+
+                    if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                         try {
-                               OneToOneFragment.scrollFlag = true
-                                mutableOneToOneMessageList.add(p0)
-                                onetoOneMessageList.value = mutableOneToOneMessageList
-                                CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
+                            OneToOneFragment.scrollFlag = true
+                            mutableOneToOneMessageList.add(p0)
+                            onetoOneMessageList.value = mutableOneToOneMessageList
+                            CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
                         } catch (e: NullPointerException) {
                             e.printStackTrace()
                         }
@@ -291,27 +376,6 @@ class MessageRepository {
                     }
                 }
             }
-
-            override fun onMediaMessageReceived(p0: MediaMessage?) {
-                if (p0 != null) {
-
-                    Log.d(TAG, "onMediaMessageReceived: ${p0}")
-                    if (!p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-
-                        OneToOneFragment.scrollFlag = true
-                        mutableOneToOneMessageList.add(p0)
-                        onetoOneMessageList.value = mutableOneToOneMessageList
-                        CometChat.markAsRead(p0.id,p0.sender.uid,p0.receiverType)
-
-                    } else {
-                        CometChat.markAsRead(p0.id,p0.receiverUid,p0.receiverType)
-                        GroupFragment.scrollFlag = true
-                        mutableGroupMessageList.add(p0)
-                        groupMessageList.value = mutableGroupMessageList
-                    }
-                }
-            }
-
         })
     }
 
@@ -376,6 +440,37 @@ class MessageRepository {
         })
     }
 
+    @WorkerThread
+    fun sendCustomMessage(customMessage: CustomMessage, context: Context?) {
+
+        CometChat.sendCustomMessage(customMessage, object : CometChat.CallbackListener<CustomMessage>() {
+            override fun onSuccess(p0: CustomMessage?) {
+
+                if (p0 != null) {
+                    if (p0.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                        mutableOneToOneMessageList.add(p0)
+                        onetoOneMessageList.value = mutableOneToOneMessageList
+                    } else {
+                        mutableGroupMessageList.add(p0)
+                        groupMessageList.value = mutableGroupMessageList
+                    }
+                    if (context != null) {
+                        if (context is LocationActivity)
+                            context.finish()
+                    }
+
+                }
+                Toast.makeText(CometChatPro.applicationContext(), "Custom Message Sent Successfully", Toast.LENGTH_SHORT).show()
+                Log.d("CustomMessage", p0!!.category+"\n"+p0.type+"\n"+p0.toString())
+            }
+
+            override fun onError(p0: CometChatException?) {
+                Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
+                p0?.printStackTrace()
+            }
+
+        })
+    }
 
     fun removeGroupListener(group_event_listener: String) {
         CometChat.removeGroupListener(group_event_listener)

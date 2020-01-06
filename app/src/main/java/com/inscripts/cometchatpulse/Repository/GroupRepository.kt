@@ -26,10 +26,7 @@ import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.TextMessage
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.core.MessagesRequest
-
-
-
-
+import com.inscripts.cometchatpulse.Helpers.MyFirebaseMessagingService
 
 
 class GroupRepository {
@@ -252,6 +249,7 @@ class GroupRepository {
             CometChat.joinGroup(group.guid,group.groupType,group.password,object :CometChat.CallbackListener<Group>(){
                 override fun onSuccess(p0: Group?) {
                     progressDialog?.dismiss()
+                    MyFirebaseMessagingService.subscribeGroup(group.guid)
                     p0?.let { groupJoin.onJoined(it,resId) }
                 }
 
@@ -326,6 +324,7 @@ class GroupRepository {
         CometChat.leaveGroup(guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
                 showToast("Successfully left group")
+                MyFirebaseMessagingService.unsubscribeGroup(guid)
                 activity?.startActivity(Intent(activity,MainActivity::class.java))
 //                activity?.onBackPressed()
             }

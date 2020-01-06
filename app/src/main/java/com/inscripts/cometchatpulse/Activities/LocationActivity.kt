@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.cometchat.pro.constants.CometChatConstants
+import com.cometchat.pro.models.CustomMessage
 import com.cometchat.pro.models.TextMessage
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -122,11 +123,12 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
                     jObject.put("lat", markerLatLng?.latitude)
                     jObject.put("logt", markerLatLng?.longitude)
 
-                    val textMessage = TextMessage(receiverId, "custom_location", receiverType)
+                    val customMessage = CustomMessage(receiverId, receiverType,"LOCATION", jObject)
+//                    TextMessage(receiverId, "custom_location", receiverType)
 
-                    textMessage.metadata = jObject
+                    customMessage.metadata = jObject
 
-                    messageRepository.sendTextMessage(textMessage, this@LocationActivity)
+                    messageRepository.sendCustomMessage(customMessage, this@LocationActivity)
 
 
                 } catch (e: Exception) {
