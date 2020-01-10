@@ -122,7 +122,9 @@ To run our open source app with CometChat Pro v1, follow these steps:
       * Go to your app in [CometChat Dashboard ](https://app.cometchat.io/)
       * Go to Extension section 
       * Add Push Notification Extension
-      * Add **FCM Server Key** in Push Notification Extension     
+      * Add **FCM Server Key** in Push Notification Extension    
+      
+  - To send location message Add your google API Key in `google_maps_api.xml`     
 
 ## Note
 
