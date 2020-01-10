@@ -10,7 +10,7 @@
 </br>
 </div>
 
-CometChat Android Demo app (built using **CometChat Pro**) is a fully functional messaging app capable of **one-on-one** (private) and **group** messaging along with recent conversations. The app enables users to send **text** and **multimedia messages like audio, video, images, documents.**
+CometChat Android Demo app (built using **CometChat Pro**) is a fully functional messaging app capable of **one-on-one** (private) and **group** messaging. The app enables users to send **text** and **multimedia messages like audio, video, images, documents.**
 
 [![Platform](https://img.shields.io/badge/Platform-Android-brightgreen.svg)](#)      [![Platform](https://img.shields.io/badge/Language-Kotlin-yellowgreen.svg)](#)
 
@@ -35,7 +35,7 @@ CometChat Android Demo app (built using **CometChat Pro**) is a fully functional
 
 ## ScreenShots
 
- <img align="left" src="https://github.com/cometchat-pro/android-kotlin-chat-app/blob/v2/ScreenShot/latest_screenshot.png">
+ <img align="left" src="https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/ScreenShot/screenshots.png">
 
 ## Installtion
 
@@ -71,6 +71,9 @@ To run our open source app with CometChat Pro v1, follow these steps:
        `val API_KEY: String  = "XXXXXXXXX"`
        
   2. Build and run the Sample App.
+
+    
+
 
 ## Note
 
@@ -119,7 +122,9 @@ To run our open source app with CometChat Pro v1, follow these steps:
       * Go to your app in [CometChat Dashboard ](https://app.cometchat.io/)
       * Go to Extension section 
       * Add Push Notification Extension
-      * Add **FCM Server Key** in Push Notification Extension     
+      * Add **FCM Server Key** in Push Notification Extension    
+      
+  - To send location message Add your google API Key in `google_maps_api.xml`     
 
 ## Note
 
@@ -131,7 +136,7 @@ To run our open source app with CometChat Pro v1, follow these steps:
 
 
 
-  ![Studio Guide](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/v2/ScreenShot/help_k.png)
+  ![Studio Guide](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/ScreenShot/help_k.png)
 
  ## Customizing the UI
 
@@ -154,7 +159,7 @@ To run our open source app with CometChat Pro v1, follow these steps:
     Go to Under java --> com\inscripts\cometchatpulse--> Utils--> Appearance
 
    <p align="center">
- <img align="center" width="708.5" height="680" src="https://github.com/cometchat-pro/android-kotlin-chat-app/blob/v2/ScreenShot/latest_gib.gif">
+ <img align="center" width="708.5" height="680" src="https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/ScreenShot/gib.gif">
 </p>
 
 
@@ -174,6 +179,6 @@ To run our open source app with CometChat Pro v1, follow these steps:
 
  To report an issue or bug please follow the template to create a github issue
  
- <a href="https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/v2/.github/ISSUE_TEMPLATE/bug_report.md">ISSUE TEMPLATE</a>
+ <a href="https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">ISSUE TEMPLATE</a>
  
    
