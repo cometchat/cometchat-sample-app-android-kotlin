@@ -79,7 +79,7 @@ To run our open source app with CometChat Pro v1, follow these steps:
 
    Branch v1.8 contains UI with SDK v1.8+ .
    
-   Branch v2.0 contains UI with SDK v2.0+ . Apps created in v2 requires Region. Branch v2 and master contains CometChat Pro    SDK with latest feature and updates
+   Branch v2.0 contains UI with SDK v2.0+ . Apps created in v2 requires Region. Branch v2 CometChat Pro SDK with latest feature and updates
 
 
 ## Run the Sample App
