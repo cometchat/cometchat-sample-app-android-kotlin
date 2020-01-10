@@ -36,8 +36,6 @@ import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
-import com.inscripts.cometchatpulse.Activities.ChatActivity
-import com.inscripts.cometchatpulse.Activities.GroupMessageInfoActivity
 import com.inscripts.cometchatpulse.Activities.LocationActivity
 import com.inscripts.cometchatpulse.Activities.UserProfileViewActivity
 import com.inscripts.cometchatpulse.Adapter.OneToOneAdapter
@@ -135,6 +133,8 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
     private var lastActive:Long?=null
 
+    private lateinit var listener: ChildClickListener;
+
     private var timer: Timer? =Timer()
 
     init {
@@ -198,17 +198,20 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         binding.subTitle.typeface = StringContract.Font.status
 
         (binding.recycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations=false
+        binding.recycler.itemAnimator=null
         oneToOneAdapter = OneToOneAdapter(context!!, CometChat.getLoggedInUser().uid, this)
         binding.recycler.addItemDecoration(StickyHeaderDecoration(oneToOneAdapter))
         binding.recycler.setRecyclerListener(RecycleListenerHelper())
-        oneToOneAdapter.setHasStableIds(true)
+
         binding.recycler.adapter = oneToOneAdapter
 
         (activity as AppCompatActivity).setSupportActionBar(binding.cometchatToolbar)
 
         binding.cometchatToolbar.title = ""
 
+
         binding.cometchatToolbar.setBackgroundColor(StringContract.Color.primaryColor)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding.cometchatToolbar.navigationIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
 
@@ -261,11 +264,6 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
 
         binding.messageBox?.buttonSendMessage?.backgroundTintList = ColorStateList.valueOf(StringContract.Color.primaryColor)
 
-
-        scope.launch(Dispatchers.IO) {
-            onetoOneViewModel.fetchMessage(LIMIT = 30, userId = userId)
-
-        }
 
         onetoOneViewModel.messageList.observe(this, Observer { messages ->
             messages?.let {
@@ -341,6 +339,22 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
             }
 
             override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
+
+            }
+
+        })
+
+        binding.recycler.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                try {
+                    val heightDiff = binding.recycler.rootView.height - binding.recycler.height
+                    if (heightDiff > CommonUtil.dpToPx(CometChatPro.applicationContext(), 200f)) {
+                         if (oneToOneAdapter!=null)
+                        binding.recycler.scrollToPosition(oneToOneAdapter.itemCount - 1)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
 
             }
 
@@ -960,12 +974,9 @@ class OneToOneFragment : Fragment(), View.OnClickListener, RecordListener, Actio
         super.onResume()
         Log.d(TAG, "onResume: ")
         currentId = userId
-        onetoOneViewModel.fetchMessage(LIMIT = 30,userId = userId);
+        onetoOneViewModel.fetchMessage(LIMIT = 30,userId = userId,isRefresh = true)
         onetoOneViewModel.receiveMessageListener(MESSAGE_LISTENER, userId)
         onetoOneViewModel.addPresenceListener(StringContract.ListenerName.USER_LISTENER)
-
-
-
 
     }
 

@@ -52,6 +52,8 @@ class RecentListFragment : Fragment() {
 
     private lateinit var childClickListener: ChildClickListener
 
+    private lateinit var shimmerFrameLayout: ShimmerFrameLayout
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
@@ -89,7 +91,7 @@ class RecentListFragment : Fragment() {
         view.recent_recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 if (!recyclerView.canScrollVertically(1)) {
-                        recentViewModel.fetchConversation(LIMIT = 2, shimmer = view.contact_shimmer)
+                        recentViewModel.fetchConversation(LIMIT = 2, shimmer = recent_shimmer)
                 }
             }
 
@@ -106,7 +108,7 @@ class RecentListFragment : Fragment() {
         super.onResume()
         Log.e(TAG, "onResume called")
         recentViewModel.addMessageListener(TAG)
-        recentViewModel.fetchConversation(LIMIT = 2,shimmer = view?.contact_shimmer)
+        recentViewModel.fetchConversation(LIMIT = 2,shimmer = recent_shimmer,isRefresh = true)
 
     }
 

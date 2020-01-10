@@ -46,7 +46,7 @@ class ChatActivity : AppCompatActivity(), OnBackArrowClickListener {
 
     }
 
-    fun handleIntent()
+    private fun handleIntent()
     {
         if (twoPane) {
             resId = R.id.chat_frame_container_detail

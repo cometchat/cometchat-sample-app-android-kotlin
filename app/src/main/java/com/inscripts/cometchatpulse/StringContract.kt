@@ -10,11 +10,11 @@ class StringContract {
 
         companion object {
 
-            const val APP_ID:String = "1180062de409d58"
+            const val APP_ID:String = "XXXXXXXXXXXXXX"
 
-            const val API_KEY:String = "602651b12b70fceb23e7720af51558255c8e85bb"
+            const val API_KEY:String = "XXXXXXXXXXXXX"
 
-            const val REGION:String = "us"
+            const val REGION:String = "XXXXXXX"
 
             lateinit var theme:Appearance.AppTheme
 
@@ -33,9 +33,9 @@ class StringContract {
 
             val USER_NAME: String = "user_name"
 
-            val USER_AVATAR: String = "user_avatar"
+            const val USER_AVATAR: String = "user_avatar"
 
-            val USER_STATUS: String = "user_status"
+            const val USER_STATUS: String = "user_status"
 
             val LAST_ACTIVE: String = "last_user"
 
@@ -78,7 +78,7 @@ class StringContract {
 
             val GROUP_DESCRIPTION:String="description"
 
-            val USER_SCOPE: String="scope"
+            const val USER_SCOPE: String="scope"
             
         }
     }

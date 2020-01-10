@@ -152,4 +152,8 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
         messageRepository.searchMessage(s,userId)
     }
 
+    fun setMapMessage(userId: String?,t: CustomMessage) {
+        messageRepository.updateMap(userId,t);
+    }
+
 }

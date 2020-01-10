@@ -53,7 +53,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         StickyHeaderAdapter<TextHeaderHolder> {
 
     private lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
-    private var messagesList: LinkedHashMap<Int,BaseMessage> = LinkedHashMap()
+    private var messagesList = ArrayList<BaseMessage>()
     private var currentPlayingSong: String? = null
     private var timerRunnable: Runnable? = null
     private val seekHandler = Handler()
@@ -194,8 +194,10 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     }
 
+
+
     override fun getHeaderId(var1: Int): Long {
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(var1)
+        val baseMessage = messagesList[var1]
         return java.lang.Long.parseLong(DateUtil.getDateId(baseMessage.getSentAt()!! * 1000))
     }
 
@@ -206,20 +208,9 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     }
 
-//    override fun getItemId(position: Int): Long {
-//
-//       val baseMessage=messagesList[messagesList.keyAt(position)]
-//         if (baseMessage!=null){
-//             return baseMessage.sentAt
-//         }else{
-//             return 0L
-//         }
-//
-//    }
-
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
         try {
-            val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(var2)
+            val baseMessage = messagesList.get(var2)
             val date = Date(baseMessage.sentAt.times(1000)!!)
 
             val formattedDate = DateUtil.getCustomizeDate(date.getTime())
@@ -241,7 +232,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun getItemViewType(position: Int): Int {
 
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(position)
+        val baseMessage = messagesList[position]
         if (baseMessage.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
 
             if (ownerId.equals(baseMessage.sender?.uid, ignoreCase = true)) {
@@ -341,7 +332,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
             if (ownerId.equals(baseMessage.sender?.uid, ignoreCase = true)) {
                 if ((baseMessage as CustomMessage).type != null) {
 
-                    if ((baseMessage as CustomMessage).type.equals("LOCATION")) {
+                    if (baseMessage.type.equals("LOCATION")) {
                         return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
                     } else {
                         return StringContract.ViewType.RIGHT_CUSTOM_MESSAGE
@@ -352,7 +343,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
             {
                 if ((baseMessage as CustomMessage).type != null) {
 
-                    if ((baseMessage as CustomMessage).type.equals("LOCATION")) {
+                    if (baseMessage.type.equals("LOCATION")) {
                         return StringContract.ViewType.LEFT_LOCATION_MESSAGE
                     }
                     else
@@ -366,13 +357,6 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         return super.getItemViewType(position)
     }
 
-    fun setMessageList(messageList: MutableList<BaseMessage>) {
-        for(baseMessage:BaseMessage in messageList){
-            this.messagesList.put(baseMessage.id,baseMessage)
-        }
-
-        notifyDataSetChanged()
-    }
 
     private fun setLongClick(view: View, baseMessage: BaseMessage) {
         var message: Any? = null
@@ -403,7 +387,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
 
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(p0.adapterPosition)
+        val baseMessage = messagesList[p1]
 
 
         val timeStampLong = baseMessage.sentAt
@@ -1018,7 +1002,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 val rightLocationViewHolder = p0 as RightLocationViewHolder
                 rightLocationViewHolder.binding.message = baseMessage as CustomMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                rightLocationViewHolder.bindView(p1, messagesList)
+                rightLocationViewHolder.bindView(p1, baseMessage)
                 setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
             }
 
@@ -1026,7 +1010,7 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                 val leftLocationViewHolder = p0 as LeftLocationViewHolder
                 leftLocationViewHolder.binding.message = baseMessage as CustomMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                leftLocationViewHolder.bindView(p1, messagesList)
+                leftLocationViewHolder.bindView(p1, baseMessage)
 
             }
 
@@ -1483,55 +1467,83 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
-        val baseMessage = messagesList.get(messageReceipt.messageId)
-        if (baseMessage!=null) {
-            baseMessage.deliveredAt = messageReceipt.timestamp
+
+        with(messagesList.iterator()){
             for(i in messagesList.size-1 downTo 0){
-                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
+                val message : BaseMessage? = messagesList.get(i)
                 if(message?.deliveredAt!! >0){
                     break
                 }else{
-                    message?.deliveredAt = messageReceipt.deliveredAt;
-                    message?.id?.let { messagesList.put(it, message) }
+                    val baseMessage= messagesList[i]
+                    val index=messagesList.indexOf(baseMessage)
+                    messagesList.remove(baseMessage)
+                    baseMessage?.deliveredAt = messageReceipt.deliveredAt
+                    messagesList.add(index, message)
+
                 }
             }
-            notifyDataSetChanged()
         }
+            notifyDataSetChanged()
+    }
+
+    fun setMessageList(list: MutableList<BaseMessage>) {
+        messagesList.clear()
+        for (baseMessge:BaseMessage in list){
+            if (messagesList.contains(baseMessge)){
+                val index=messagesList.indexOf(baseMessge)
+                messagesList.removeAt(index)
+                messagesList.add(index,baseMessge)
+            }else
+                messagesList.add(baseMessge)
+        }
+        notifyDataSetChanged()
 
     }
 
     fun setRead(messageReceipt: MessageReceipt) {
-        val baseMessage = messagesList.get(messageReceipt.messageId)
-        if (baseMessage != null) {
-            for(i in messagesList.size-1 downTo 0){
-                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
+
+        with(messagesList.iterator()){
+            for (i in messagesList.size-1 downTo 0){
+                val message : BaseMessage? = messagesList[i]
                 if(message?.readAt!! >0){
                     break
                 }else{
-                    message?.readAt = messageReceipt.readAt;
-                    message?.id?.let { messagesList.put(it, message) }
+                    val baseMessage= messagesList[i]
+                    val index=messagesList.indexOf(baseMessage)
+                    messagesList.remove(baseMessage)
+                    baseMessage?.readAt = messageReceipt.readAt
+                    messagesList.add(index, message)
+
                 }
             }
-            notifyDataSetChanged()
         }
+
+            notifyDataSetChanged()
     }
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
-        messagesList.put(deletedMessage.id,deletedMessage)
+
+        if(messagesList.contains(deletedMessage)){
+            val index =messagesList.indexOf(deletedMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,deletedMessage)
+        }
         notifyDataSetChanged()
     }
 
     fun setEditMessage(editMessage: BaseMessage) {
-        messagesList.put(editMessage.id,editMessage)
+
+        if(messagesList.contains(editMessage)){
+            val index =messagesList.indexOf(editMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,editMessage)
+        }
         notifyDataSetChanged()
     }
 
     fun setFilterList(it: MutableList<BaseMessage>) {
         messagesList.clear()
-        for (baseMessage in it){
-            messagesList.put(baseMessage.id,baseMessage)
-        }
-        notifyDataSetChanged()
+        setMessageList(it)
     }
 
 }

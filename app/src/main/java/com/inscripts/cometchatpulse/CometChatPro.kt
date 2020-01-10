@@ -36,8 +36,7 @@ class CometChatPro : Application() {
         Appearance(Appearance.AppTheme.PERSIAN_BLUE)
 
         val appSettings =AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(StringContract.AppDetails.REGION).build();
-//        Logger.switchToDev("4ddd5d736cf33ca31a0b4c72ae64b6d5")
-        Logger.enableLogs("4ddd5d736cf33ca31a0b4c72ae64b6d5")
+
         CometChat.init(applicationContext, StringContract.AppDetails.APP_ID.trim(),appSettings, object : CometChat.CallbackListener<String>() {
             override fun onSuccess(p0: String?) {
                 Timber.d("Initialization completed successfully")

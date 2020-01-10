@@ -51,10 +51,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
         androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>(), StickyHeaderAdapter<TextHeaderHolder> {
 
 
-    private var messagesList: LinkedHashMap<Int,BaseMessage> = LinkedHashMap()
-
-    lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
-
+    private var messagesList: MutableList<BaseMessage> = mutableListOf()
     private var currentPlayingSong: String? = null
     private var timerRunnable: Runnable? = null
     private val seekHandler = Handler()
@@ -159,7 +156,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
             }
 
             StringContract.ViewType.RIGHT_MEDIA_REPLY_MESSAGE -> {
-
                 val binding: RightReplyBinding = DataBindingUtil.inflate(layoutInflater, R.layout.right_reply, p0, false)
                 return RightReplyMessageHolder(binding)
             }
@@ -175,7 +171,6 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 val binding: LeftReplyBinding = DataBindingUtil.inflate(layoutInflater, R.layout.left_reply, p0, false)
                 return LeftReplyMessageHolder(binding)
             }
-
 
             else -> {
                 Log.d(" onCreateViewHolder ", " Unknown View Type ")
@@ -198,18 +193,18 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(var2)
+        val baseMessage =messagesList.get(var2)
         val date = Date(baseMessage.sentAt?.times(1000)!!)
 
         val formattedDate = DateUtil.getCustomizeDate(date.getTime())
 
-        var1.binding.txtMessageDate.setBackground(context.resources.getDrawable(R.drawable.cc_rounded_date_button))
+        var1.binding.txtMessageDate.background = context.resources.getDrawable(R.drawable.cc_rounded_date_button)
 
-        var1.binding.txtMessageDate.setText(formattedDate)
+        var1.binding.txtMessageDate.text = formattedDate
     }
 
 
-    fun setLongClick(view: View, baseMessage: BaseMessage) {
+    private fun setLongClick(view: View, baseMessage: BaseMessage) {
         var message: Any? = null
         if (baseMessage is TextMessage)
             message = baseMessage
@@ -230,7 +225,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(p0.adapterPosition)
+        val baseMessage = messagesList.get(p0.adapterPosition)
         val timeStampLong =baseMessage?.sentAt
         var message: String? = null
         var mediaFile: String? = null
@@ -367,7 +362,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 val rightLocationViewHolder = p0 as RightLocationViewHolder
                 rightLocationViewHolder.binding.message = baseMessage as CustomMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                rightLocationViewHolder.bindView(p1, messagesList)
+//                rightLocationViewHolder.bindView(p1, messagesList)
                 setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus,baseMessage)
             }
 
@@ -375,7 +370,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
                 val leftLocationViewHolder = p0 as LeftLocationViewHolder
                 leftLocationViewHolder.binding.message = baseMessage as CustomMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                leftLocationViewHolder.bindView(p1, messagesList)
+//                leftLocationViewHolder.bindView(p1, messagesList)
 
             }
 
@@ -1310,7 +1305,7 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
     }
 
     override fun getItemViewType(position: Int): Int {
-        val baseMessage = ArrayList<BaseMessage>(messagesList.values).get(position);
+        val baseMessage = messagesList.get(position);
         if (baseMessage?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
 
             if (ownerId.equals(baseMessage?.sender?.uid, ignoreCase = true)) {
@@ -1442,11 +1437,16 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
     fun setMessageList(messageList: MutableList<BaseMessage>) {
 
-        for(baseMessage:BaseMessage in messageList){
-            this.messagesList.put(baseMessage.id,baseMessage)
-//            Log.d("groupChatAdapter","setMessageList: "+this.messagesList.toString())
+        messagesList.clear()
+        for (baseMessge:BaseMessage in messageList){
+            Log.e("GROUP MESSAGE",baseMessge.toString())
+            if (messagesList.contains(baseMessge)){
+                val index=messagesList.indexOf(baseMessge)
+                messagesList.removeAt(index)
+                messagesList.add(index,baseMessge)
+            }else
+                messagesList.add(baseMessge)
         }
-
         notifyDataSetChanged()
     }
 
@@ -1473,56 +1473,33 @@ class GroupChatAdapter(val context: Context, val guid: String, val ownerId: Stri
 
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
-        messagesList.put(deletedMessage.id,deletedMessage)
-        notifyDataSetChanged()
+
+        if(messagesList.contains(deletedMessage)){
+            val index =messagesList.indexOf(deletedMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,deletedMessage)
+            notifyItemChanged(index)
+        }
+
     }
 
     fun setEditMessage(editMessage: BaseMessage) {
-        messagesList.put(editMessage.id,editMessage)
-        notifyDataSetChanged()
-    }
 
-
-    fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
-        val baseMessage =messagesList.get(messageReceipt.messageId)
-        if (baseMessage!=null) {
-            baseMessage.deliveredAt = messageReceipt.timestamp
-            for(i in messagesList.size-1 downTo 0){
-                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
-                if(message?.deliveredAt!! >0){
-                    break
-                }else{
-                    message?.deliveredAt = messageReceipt.deliveredAt;
-                    message?.id?.let { messagesList.put(it, message) }
-                }
-            }
-            notifyDataSetChanged()
+        if(messagesList.contains(editMessage)){
+            val index =messagesList.indexOf(editMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,editMessage)
+            notifyItemChanged(index)
         }
 
     }
 
-    fun setRead(messageReceipt: MessageReceipt) {
-        val baseMessage = messagesList.get(messageReceipt.messageId)
-        if (baseMessage != null) {
-            for(i in messagesList.size-1 downTo 0){
-                val message : BaseMessage? = ArrayList<BaseMessage>(messagesList.values).get(i)
-                if(message?.readAt!! >0){
-                    break
-                }else{
-                    message?.readAt = messageReceipt.readAt;
-                    message?.id?.let { messagesList.put(it, message) }
-                }
-            }
-            notifyDataSetChanged()
-        }
-    }
+
 
 
     fun setFilter(filterList: MutableList<BaseMessage>) {
         messagesList.clear()
-        for (baseMessage in filterList){
-            messagesList.put(baseMessage.id,baseMessage)
-        }
+        setMessageList(filterList)
         notifyDataSetChanged()
     }
 }

@@ -32,10 +32,9 @@ class LeftLocationViewHolder(val binding:LeftLocationBinding): androidx.recycler
         setMapLocation()
     }
 
-    fun bindView(pos:Int,messageList: LinkedHashMap<Int,BaseMessage>){
-        val item = ArrayList<BaseMessage>(messageList.values).get(pos)
+    fun bindView(pos:Int,baseMessage: BaseMessage){
         binding.root.tag=this
-        binding.map.tag=item
+        binding.map.tag=baseMessage
         setMapLocation()
 
     }

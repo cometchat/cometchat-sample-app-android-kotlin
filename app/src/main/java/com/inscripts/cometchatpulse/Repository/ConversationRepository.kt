@@ -36,7 +36,12 @@ class ConversationRepository {
     private val TAG = "ConversationRepository"
 
     @WorkerThread
-    fun fetchConversations(LIMIT: Int, shimmer: ShimmerFrameLayout?) {
+    fun fetchConversations(LIMIT: Int, shimmer: ShimmerFrameLayout?,isRefresh:Boolean) {
+
+          if(isRefresh){
+              conversationRequest=null
+          }
+
         if (conversationRequest==null) {
             conversationRequest = ConversationsRequest.ConversationsRequestBuilder().setLimit(LIMIT).build()
         }
@@ -68,56 +73,15 @@ class ConversationRepository {
         CometChat.addMessageListener(tag,object :CometChat.MessageListener(){
             override fun onTextMessageReceived(message: TextMessage?) {
                 conversation.value = CometChatHelper.getConversationFromMessage(message)
-//                refreshConversation(message!!)
+
             }
 
             override fun onMediaMessageReceived(message: MediaMessage?) {
                 conversation.value = CometChatHelper.getConversationFromMessage(message)
-//                refreshConversation(message!!)
             }
 
         })
     }
 
-    fun refreshConversation(view: View?) {
-        conversationRequest=null
-        fetchConversations(LIMIT = 2, shimmer = view!!.recent_shimmer)
 
-    }
-
-//    fun searchConversation(userName: String) {
-//
-//        var filterList:MutableList<Conversation> = mutableListOf()
-//        val searchConversationRequest = ConversationsRequest.ConversationsRequestBuilder().setLimit(100).build()
-//        searchConversationRequest?.fetchNext(object : CometChat.CallbackListener<List<Conversation>>() {
-//            override fun onSuccess(p0: List<Conversation>?) {
-//                if (p0 != null) {
-//                    for (conversation: Conversation in p0) {
-//                        if (!userName.trim().isEmpty()) {
-//                            if (conversation.conversationType.equals(CometChatConstants.CONVERSATION_TYPE_USER)) {
-//                                val user = conversation.conversationWith as User
-//                                if (user.name.toLowerCase().contains(userName.toLowerCase())) {
-//                                    Log.e(TAG, user.name + "=" + userName)
-//                                    filterList.add(conversation)
-//                                }
-//                            } else {
-//                                val group = conversation.conversationWith as Group
-//                                if (group.name.toLowerCase().contains(userName.toLowerCase())) {
-//                                    Log.e(TAG, group.name + "=" + userName)
-//                                    filterList.add(conversation)
-//                                }
-//                            }
-//                        } else {
-//                            filterList.add(conversation)
-//                        }
-//                    }
-//                    conversationFilterList.value= filterList
-//                }
-//            }
-//            override fun onError(p0: CometChatException?) {
-//                Log.d(TAG, "search onError: ${p0?.message}")
-//            }
-//
-//        })
-//    }
 }

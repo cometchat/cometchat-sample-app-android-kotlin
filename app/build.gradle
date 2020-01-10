@@ -66,7 +66,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0'
     //cometchat sdk
-    implementation 'com.cometchat:pro-android-chat-sdk:2.0.1'
+    implementation 'com.cometchat:pro-android-chat-sdk:2.0.2'
     //Firebase
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'com.google.firebase:firebase-core:16.0.4'
@@ -75,5 +75,5 @@ dependencies {
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0'
     testImplementation "org.robolectric:robolectric:3.6.1"
-//    implementation project(path: ':pro-android-chat-sdk (1)')
+
 }

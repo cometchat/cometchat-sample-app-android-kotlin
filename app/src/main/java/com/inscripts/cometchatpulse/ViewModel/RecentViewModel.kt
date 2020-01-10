@@ -39,8 +39,8 @@ class RecentViewModel(application: Application) : AndroidViewModel(application) 
         filterList = conversationRepository.conversationFilterList
     }
 
-    fun fetchConversation(LIMIT: Int,shimmer: ShimmerFrameLayout?){
-        conversationRepository.fetchConversations(LIMIT,shimmer)
+    fun fetchConversation(LIMIT: Int,shimmer: ShimmerFrameLayout?,isRefresh:Boolean=false){
+        conversationRepository.fetchConversations(LIMIT,shimmer,isRefresh)
 
     }
 

@@ -18,11 +18,7 @@ import com.bumptech.glide.Glide
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.models.*
-import com.inscripts.cometchatpulse.Activities.ChatActivity
 import com.inscripts.cometchatpulse.CometChatPro
-import com.inscripts.cometchatpulse.Fragment.GroupFragment
-import com.inscripts.cometchatpulse.Fragment.OneToOneFragment
-import com.inscripts.cometchatpulse.Helpers.OnClickEvent
 import com.inscripts.cometchatpulse.Helpers.OnUserClick
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.StringContract
@@ -49,11 +45,11 @@ class RecentListAdapter(val context: Context, var conversations: MutableList<Con
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.recent_item, parent, false))
     }
 
-    // Binds each animal in the ArrayList to a view
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.unreadCount.background= CommonUtil.setDrawable(StringContract.Color.primaryColor,40f)
 
-        val conversation = conversations.get(position)
+        val conversation = conversations[position]
         if (conversation.conversationType.equals(CometChatConstants.CONVERSATION_TYPE_USER)) {
             val user = conversation.conversationWith as User
             holder.tvUserName.text = user.name
@@ -98,6 +94,10 @@ class RecentListAdapter(val context: Context, var conversations: MutableList<Con
                 val custom = conversation.lastMessage as CustomMessage
                 holder.tvLastMessage.text = custom.type
             }
+            else->{
+                holder.tvLastMessage.text = " "
+            }
+
         }
         if(conversation.unreadMessageCount>0)
         {
@@ -116,55 +116,11 @@ class RecentListAdapter(val context: Context, var conversations: MutableList<Con
                     var user = conversation.conversationWith as User
                     p0?.let { userClick?.onItemClick(it,user) }
 
-//                    var intent : Intent = Intent(context,ChatActivity::class.java)
-//                    intent.putExtra(StringContract.IntentString.RECIVER_TYPE,CometChatConstants.CONVERSATION_TYPE_USER)
-//                    intent.putExtra(StringContract.IntentString.USER_ID, user.uid)
-//                    intent.putExtra(StringContract.IntentString.USER_NAME, user.name)
-//                    intent.putExtra(StringContract.IntentString.USER_AVATAR, user.avatar)
-//                    intent.putExtra(StringContract.IntentString.USER_STATUS, user.status)
-//                    intent.putExtra(StringContract.IntentString.LAST_ACTIVE, user.lastActiveAt)
-//                    context.startActivity(intent)
-//                    val oneToOneFragment = OneToOneFragment().apply {
-//                        arguments = Bundle().apply {
-//                            putString(StringContract.IntentString.USER_ID, user.uid)
-//                            putString(StringContract.IntentString.USER_NAME, user.name)
-//                            putString(StringContract.IntentString.USER_AVATAR, user.avatar)
-//                            putString(StringContract.IntentString.USER_STATUS, user.status)
-//                            putLong(StringContract.IntentString.LAST_ACTIVE, user.lastActiveAt)
-//
-//                        }
-//                    }
-//                    var cont = context as FragmentActivity
-//                    cont.supportFragmentManager.beginTransaction()
-//                            .replace(R.id.main_frame, oneToOneFragment).addToBackStack(null).commit()
                 }
                 else
                 {
                     var group = conversation.conversationWith as Group
                     p0?.let { userClick?.onItemClick(it,group) }
-//                    var intent : Intent = Intent(context,ChatActivity::class.java)
-//                    intent.putExtra(StringContract.IntentString.RECIVER_TYPE,CometChatConstants.CONVERSATION_TYPE_GROUP)
-//                    intent.putExtra(StringContract.IntentString.GROUP_ID, group.guid)
-//                    intent.putExtra(StringContract.IntentString.GROUP_NAME, group.name)
-//                    intent.putExtra(StringContract.IntentString.GROUP_ICON, group.icon)
-//                    intent.putExtra(StringContract.IntentString.GROUP_OWNER, group.owner)
-//                    intent.putExtra(StringContract.IntentString.GROUP_DESCRIPTION, group.description)
-//                    intent.putExtra(StringContract.IntentString.USER_SCOPE,group.scope)
-//                    (context as Activity).finish()
-////                    context.startActivity(intent)
-//                    val groupFragment = GroupFragment().apply {
-//                        arguments = Bundle().apply {
-//                            putString(StringContract.IntentString.GROUP_ID, group.guid)
-//                            putString(StringContract.IntentString.GROUP_NAME, group.name)
-//                            putString(StringContract.IntentString.GROUP_ICON, group.icon)
-//                            putString(StringContract.IntentString.GROUP_OWNER, group.owner)
-//                            putString(StringContract.IntentString.GROUP_DESCRIPTION, group.description)
-//                            putString(StringContract.IntentString.USER_SCOPE,group.scope)
-//                        }
-//                    }
-//                    var cont = context as FragmentActivity
-//                    cont.supportFragmentManager.beginTransaction()
-//                            .replace(R.id.main_frame, groupFragment).addToBackStack(null).commit()
                 }
             }
         })

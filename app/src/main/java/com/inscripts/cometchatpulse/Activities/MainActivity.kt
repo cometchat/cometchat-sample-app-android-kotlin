@@ -33,6 +33,7 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
+import com.cometchat.pro.models.CustomMessage
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
 import com.inscripts.cometchatpulse.Fragment.*
@@ -50,9 +51,9 @@ import kotlinx.android.synthetic.main.record_audio.*
 
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener,
-        ChildClickListener, OnBackArrowClickListener, OnAlertDialogButtonClickListener,GroupRepository.onGroupJoin {
+        ChildClickListener, OnBackArrowClickListener, OnAlertDialogButtonClickListener, GroupRepository.onGroupJoin {
 
-    private var fragment : Fragment=RecentListFragment()
+    private var fragment: Fragment = RecentListFragment()
 
     private var twoPane: Boolean = false
 
@@ -70,9 +71,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private lateinit var oneToOneChatViewModel: OnetoOneViewModel
 
-    private val TAG="MainActivity"
+    private val TAG = "MainActivity"
 
-    private var selectedPage=0
+    private var selectedPage = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         navigation.itemIconTintList = getColorStateList()
 
-        overrideFont(this,navigation)
+        overrideFont(this, navigation)
 
 
         if (main_frame != null) {
@@ -130,29 +131,24 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         handleNotificationIntent()
     }
 
-    fun handleNotificationIntent()
-    {
+    fun handleNotificationIntent() {
         supportFragmentManager.fragments.clear();
-        if (intent.hasExtra(StringContract.IntentString.RECIVER_TYPE))
-        {
+        if (intent.hasExtra(StringContract.IntentString.RECIVER_TYPE)) {
             var recieverType = intent.getStringExtra(StringContract.IntentString.RECIVER_TYPE)
-            if(recieverType.equals(CometChatConstants.RECEIVER_TYPE_USER))
-            {
+            if (recieverType.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                 val oneToOneFragment = OneToOneFragment().apply {
                     arguments = Bundle().apply {
                         putString(StringContract.IntentString.USER_ID, intent.getStringExtra(StringContract.IntentString.USER_ID))
                         putString(StringContract.IntentString.USER_NAME, intent.getStringExtra(StringContract.IntentString.USER_NAME))
                         putString(StringContract.IntentString.USER_AVATAR, intent.getStringExtra(StringContract.IntentString.USER_AVATAR))
                         putString(StringContract.IntentString.USER_STATUS, intent.getStringExtra(StringContract.IntentString.USER_STATUS))
-                        putLong(StringContract.IntentString.LAST_ACTIVE, intent.getLongExtra(StringContract.IntentString.LAST_ACTIVE,0))
+                        putLong(StringContract.IntentString.LAST_ACTIVE, intent.getLongExtra(StringContract.IntentString.LAST_ACTIVE, 0))
 
                     }
                 }
                 supportFragmentManager.beginTransaction()
                         .replace(resId, oneToOneFragment).commit()
-            }
-            else
-            {
+            } else {
                 val groupChat = GroupFragment().apply {
                     arguments = Bundle().apply {
                         putString(StringContract.IntentString.GROUP_ID, intent.getStringExtra(StringContract.IntentString.GROUP_ID))
@@ -160,16 +156,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                         putString(StringContract.IntentString.GROUP_ICON, intent.getStringExtra(StringContract.IntentString.GROUP_ICON))
                         putString(StringContract.IntentString.GROUP_OWNER, intent.getStringExtra(StringContract.IntentString.GROUP_OWNER))
                         putString(StringContract.IntentString.GROUP_DESCRIPTION, intent.getStringExtra(StringContract.IntentString.GROUP_DESCRIPTION))
-                        putString(StringContract.IntentString.USER_SCOPE,intent.getStringExtra(StringContract.IntentString.USER_SCOPE))
+                        putString(StringContract.IntentString.USER_SCOPE, intent.getStringExtra(StringContract.IntentString.USER_SCOPE))
                     }
                 }
                 supportFragmentManager.beginTransaction()
                         .replace(resId, groupChat).commit()
             }
-        }
-        else
-        {
-            Log.e(TAG,"No Notifications");
+        } else {
+            Log.e(TAG, "No Notifications");
         }
         toolbar.visibility = View.VISIBLE
     }
@@ -201,8 +195,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         menuItem?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
 
+        return super.onCreateOptionsMenu(menu)
+    }
 
-        return true
+    override fun startActivityForResult(intent: Intent?, requestCode: Int, options: Bundle?) {
+        super.startActivityForResult(intent, requestCode, options)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -211,6 +209,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
             R.id.create_group -> {
                 startActivity(Intent(this, CreateGroupActivity::class.java))
+                return true
             }
 
             R.id.logout_menu -> {
@@ -218,17 +217,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 CometChat.logout(object : CometChat.CallbackListener<String>() {
                     override fun onSuccess(p0: String?) {
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                          finish()
+                        finish()
                     }
+
                     override fun onError(p0: CometChatException?) {
                     }
 
                 })
+                return true
 
             }
 
-            R.id.blockedList_menu->{
-                startActivity(Intent(this,BlockUserListActivity::class.java))
+            R.id.blockedList_menu -> {
+                startActivity(Intent(this, BlockUserListActivity::class.java))
+                return true
             }
 
             R.id.view_menu -> {
@@ -239,9 +241,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 profilViewIntent.putExtra(StringContract.IntentString.USER_STATUS, user.status)
                 profilViewIntent.putExtra(StringContract.IntentString.USER_AVATAR, user.avatar)
                 startActivity(profilViewIntent)
+                return true
             }
         }
-        return true
+        return super.onOptionsItemSelected(item)
     }
 
     private fun getColorStateList(): ColorStateList {
@@ -265,12 +268,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         hideKeyboard()
     }
 
-    private fun  hideKeyboard() {
-        val inputManager =getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    private fun hideKeyboard() {
+        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         // check if no view has focus:
 
-        val  currentFocusedView = currentFocus
+        val currentFocusedView = currentFocus
         if (currentFocusedView != null) {
             inputManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
@@ -288,8 +291,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                     putString(StringContract.IntentString.USER_STATUS, t.status)
                     putLong(StringContract.IntentString.LAST_ACTIVE, t.lastActiveAt)
 
+
                 }
             }
+
             supportFragmentManager.beginTransaction()
                     .replace(resId, oneToOneFragment).addToBackStack(null).commit()
         } else if (t is Group) {
@@ -297,9 +302,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             initJoinGroup(group, resId)
         }
 
+
     }
 
-    fun startGroupChatFragment(t: Group, resId: Int) {
+    private fun startGroupChatFragment(t: Group, resId: Int) {
         val groupChat = GroupFragment().apply {
             arguments = Bundle().apply {
                 putString(StringContract.IntentString.GROUP_ID, t.guid)
@@ -307,7 +313,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 putString(StringContract.IntentString.GROUP_ICON, t.icon)
                 putString(StringContract.IntentString.GROUP_OWNER, t.owner)
                 putString(StringContract.IntentString.GROUP_DESCRIPTION, t.description)
-                putString(StringContract.IntentString.USER_SCOPE,t.scope)
+                putString(StringContract.IntentString.USER_SCOPE, t.scope)
             }
         }
         supportFragmentManager.beginTransaction()
@@ -315,19 +321,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     }
 
-   fun getListener():FragmentManager.OnBackStackChangedListener{
-              var listener= FragmentManager.OnBackStackChangedListener {
-                  if (supportFragmentManager!=null){
-                      fragment?.onResume()
-                  }
-              }
-       return listener
+    fun getListener(): FragmentManager.OnBackStackChangedListener {
+        var listener = FragmentManager.OnBackStackChangedListener {
+            if (supportFragmentManager != null) {
+                fragment.onResume()
+            }
+        }
+        return listener
     }
 
     override fun onStart() {
-        Log.e(TAG,"OnStart")
+        Log.e(TAG, "OnStart")
         super.onStart()
     }
+
     private lateinit var groupPassword: String
 
     override fun onButtonClick(alertDialog: AlertDialog?, v: View?, which: Int, popupId: Int) {
@@ -415,8 +422,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             } else if (list_container.visibility == View.GONE) {
                 list_container.visibility = View.VISIBLE
             }
-        }
-        else{
+        } else {
             fragment.onResume()
             onBackPressed()
 
@@ -455,15 +461,15 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG,"onResume: ")
+        Log.d(TAG, "onResume: ")
         supportFragmentManager.addOnBackStackChangedListener(getListener())
-        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
+        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER,null)
         oneToOneChatViewModel.addCallListener(this, TAG, null)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(TAG,"onPause: ")
+        Log.d(TAG, "onPause: ")
         groupChatViewModel.removeGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
         oneToOneChatViewModel.removeCallListener(TAG)
     }
@@ -478,7 +484,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
             R.id.menu_recents -> {
 
-                selectedPage=0
+                selectedPage = 0
                 fragment = RecentListFragment()
                 toolbar_title?.text = getString(R.string.conversations)
                 position = R.id.menu_recents
@@ -486,14 +492,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
             R.id.menu_contacts -> {
 
-                selectedPage=1
+                selectedPage = 1
                 fragment = ContactListFragment()
                 toolbar_title?.text = getString(R.string.users)
                 position = R.id.menu_contacts
             }
 
             R.id.menu_group -> {
-                selectedPage=2
+                selectedPage = 2
                 fragment = GroupListFragment()
                 toolbar_title?.text = getString(R.string.groups)
                 position = R.id.menu_group

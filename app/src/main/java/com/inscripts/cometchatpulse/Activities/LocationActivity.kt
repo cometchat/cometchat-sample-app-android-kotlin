@@ -2,8 +2,6 @@ package com.inscripts.cometchatpulse.Activities
 
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -11,16 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.cometchat.pro.constants.CometChatConstants
+import androidx.fragment.app.Fragment
+import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.CustomMessage
-import com.cometchat.pro.models.TextMessage
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.Place
-import com.google.android.gms.location.places.PlaceDetectionClient
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -30,15 +26,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolygonOptions
+import com.inscripts.cometchatpulse.Fragment.OneToOneFragment
+import com.inscripts.cometchatpulse.Helpers.ChildClickListener
 import com.inscripts.cometchatpulse.R
 import com.inscripts.cometchatpulse.Repository.MessageRepository
 import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import kotlinx.android.synthetic.main.activity_location.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import org.json.JSONObject
 
 
@@ -65,7 +59,6 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
     private var marker: Marker? = null
 
     private lateinit var mLocationRequest:LocationRequest
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,6 +120,7 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
 //                    TextMessage(receiverId, "custom_location", receiverType)
 
                     customMessage.metadata = jObject
+                    customMessage.subType="test"
 
                     messageRepository.sendCustomMessage(customMessage, this@LocationActivity)
 
@@ -291,4 +285,9 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback, PlaceSelection
         }
 
     }
+
+}
+
+interface LocationMessageListener{
+    fun setLocationListener(baseMessage: CustomMessage)
 }

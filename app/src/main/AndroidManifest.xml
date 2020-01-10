@@ -34,8 +34,13 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".Activities.ChatActivity"></activity>
+        <activity android:name=".Activities.ChatActivity"/>
         <activity android:name=".Activities.GroupMessageInfoActivity" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
         <activity
             android:name=".Activities.BlockUserListActivity"
             android:parentActivityName=".Activities.MainActivity" />
@@ -68,7 +73,14 @@
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:windowSoftInputMode="stateAlwaysHidden" >
+            <intent-filter>
+                <action android:name="com.cometchat.map" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+
+        </activity>
         <activity
             android:name=".Activities.ImageViewActivity"
             android:launchMode="singleTop" />

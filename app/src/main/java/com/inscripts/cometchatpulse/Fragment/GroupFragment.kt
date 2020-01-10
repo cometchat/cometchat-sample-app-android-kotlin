@@ -156,7 +156,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         binding.recycler.layoutManager = linearLayoutManager
 
 
-        binding.recycler.getItemAnimator()?.changeDuration = 0
+        binding.recycler.itemAnimator?.changeDuration = 0
+        binding.recycler.itemAnimator=null
         groupChatAdapter = GroupChatAdapter(context!!, guid, CometChat.getLoggedInUser().uid,this)
         binding.recycler.adapter = groupChatAdapter
 
@@ -219,11 +220,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         binding.cometchatToolbar.overflowIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
 
-        Thread {
-            groupChatViewModel.fetchMessage(LIMIT = 30, guid = guid)
-
-        }.start()
-
 
         Thread {
             groupViewModel.fetchGroupMemeber(LIMIT = 30, guid = guid)
@@ -260,13 +256,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
              }
         })
 
-        groupChatViewModel.liveDeliveryReceipts.observe(this, Observer {
-            messageReceipts->
-            messageReceipts?.let {
-                groupChatAdapter.setDeliveryReceipts(it)
-            }
-        })
-
         groupChatViewModel.liveDeletedMessage.observe(this, Observer {
             deletedMessage->deletedMessage?.let {
                   groupChatAdapter.setDeletedMessage(it)
@@ -277,13 +266,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
             editMessage->editMessage?.let {
                  groupChatAdapter.setEditMessage(it)
              }
-        })
-
-        groupChatViewModel.liveReadReceipts.observe(this, Observer {
-            messageReceipts->
-            messageReceipts?.let {
-                groupChatAdapter.setRead(it)
-            }
         })
 
 
@@ -365,7 +347,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         val length = binding.messageBox?.editTextChatMessage?.text.toString().length
 
         if (length > 0) {
-            groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid)
+            groupChatViewModel.sendTypingIndicator(guid)
         }
     }
 
@@ -373,7 +355,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         timer?.schedule(object : TimerTask() {
             override fun run() {
-                groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid, true)
+                groupChatViewModel.sendTypingIndicator(guid, true)
             }
         }, 2000)
     }
@@ -972,8 +954,9 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
     override fun onResume() {
         super.onResume()
         Log.d(TAG,"onResume: ")
-        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
-        groupChatViewModel.addGroupMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, CometChat.getLoggedInUser().uid)
+        groupChatViewModel.fetchMessage(30,guid,true)
+        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER,guid)
+        groupChatViewModel.addGroupMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, guid)
     }
 
     override fun onDestroy() {

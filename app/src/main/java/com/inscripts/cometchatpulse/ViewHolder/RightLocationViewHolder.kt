@@ -39,10 +39,9 @@ class RightLocationViewHolder(val binding: RightLocationBinding):
         setMapLocation()
     }
 
-    fun bindView(pos: Int,messageList: LinkedHashMap<Int,BaseMessage>){
-        val item = ArrayList<BaseMessage>(messageList.values).get(pos)
+    fun bindView(pos: Int, baseMessage:BaseMessage){
         binding.root.tag=this
-        binding.map.tag=item
+        binding.map.tag=baseMessage
         setMapLocation()
 
     }
