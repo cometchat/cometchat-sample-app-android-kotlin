@@ -16,5 +16,4 @@
         android:icon="@drawable/ic_edit_black_24dp"
         app:showAsAction="always"
         android:id="@+id/edit"/>
-
 </menu>

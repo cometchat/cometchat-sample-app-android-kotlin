@@ -32,10 +32,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:replace="android:allowBackup">
+        tools:replace="android:allowBackup"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".Activities.ChatActivity"/>
+        <activity android:name=".Activities.GroupMessageInfoActivity" />
 
-        <activity android:name=".Activities.BlockUserListActivity"
-            android:parentActivityName=".Activities.MainActivity"/>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <activity
+            android:name=".Activities.BlockUserListActivity"
+            android:parentActivityName=".Activities.MainActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -65,7 +73,14 @@
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:windowSoftInputMode="stateAlwaysHidden" >
+            <intent-filter>
+                <action android:name="com.cometchat.map" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+
+        </activity>
         <activity
             android:name=".Activities.ImageViewActivity"
             android:launchMode="singleTop" />
@@ -82,10 +97,16 @@
         <activity
             android:name=".Activities.GroupDetailActivity"
             android:launchMode="singleTop" />
-
         <activity
             android:name=".Activities.LocationActivity"
             android:launchMode="singleTop" />
+        <service android:name=".Helpers.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".Helpers.CallNotificationAction" />
     </application>
 
 </manifest>

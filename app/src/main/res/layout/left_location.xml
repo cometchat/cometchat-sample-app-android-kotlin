@@ -11,7 +11,7 @@
 
         <variable
             name="message"
-            type="com.cometchat.pro.models.TextMessage" />
+            type="com.cometchat.pro.models.CustomMessage" />
 
     </data>
 

@@ -6,6 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'com.google.gms.google-services'
 
 android {
 
@@ -19,7 +20,7 @@ android {
         resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters "armeabi-v7a" ,"arm64-v8a" ,"x86" ,"x86_64"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
 
     }
@@ -65,9 +66,14 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0'
     //cometchat sdk
-    implementation 'com.cometchat:pro-android-chat-sdk:2.0.0-beta8'
+    implementation 'com.cometchat:pro-android-chat-sdk:2.0.2'
+    //Firebase
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.google.firebase:firebase-core:16.0.4'
+    implementation 'com.cometchat:dependencybundle:2.0.0'
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0'
     testImplementation "org.robolectric:robolectric:3.6.1"
+
 }

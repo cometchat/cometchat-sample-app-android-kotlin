@@ -26,10 +26,7 @@ import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.TextMessage
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.core.MessagesRequest
-
-
-
-
+import com.inscripts.cometchatpulse.Helpers.MyFirebaseMessagingService
 
 
 class GroupRepository {
@@ -195,6 +192,7 @@ class GroupRepository {
         if (groupMemberRequest==null) {
 
             groupMemberRequest = GroupMembersRequest.GroupMembersRequestBuilder(guid).setLimit(LIMIT).build()
+        }
 
             groupMemberRequest?.fetchNext(object : CometChat.CallbackListener<List<GroupMember>>() {
                 override fun onSuccess(p0: List<GroupMember>?) {
@@ -202,7 +200,7 @@ class GroupRepository {
                        if (p0!=null) {
 
                            for (groupMember in p0) {
-                              groupMemberList.put(groupMember.uid,groupMember)
+                               groupMemberList[groupMember.uid] = groupMember
                            }
 
                            groupMemberLiveData.value=groupMemberList
@@ -216,33 +214,9 @@ class GroupRepository {
                 }
 
             })
-        }
-        else{
-            groupMemberRequest?.fetchNext(object : CometChat.CallbackListener<List<GroupMember>>() {
-                override fun onSuccess(p0: List<GroupMember>?) {
-
-                    if (p0!=null) {
-                        for (groupMember in p0) {
-                            groupMemberList.put(groupMember.uid,groupMember)
-                        }
-                        groupMemberLiveData.value=groupMemberList
-                    }
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Toast.makeText(CometChatPro.applicationContext(), p0?.message, Toast.LENGTH_SHORT).show()
-                    p0?.printStackTrace()
-                }
-
-
-            })
-        }
 
     }
 
-    @WorkerThread
-    fun clearjob() {
-    }
 
     @WorkerThread
     fun joinGroup(group: Group, progressDialog: ProgressDialog?,resId:Int,context:Context) {
@@ -252,6 +226,7 @@ class GroupRepository {
             CometChat.joinGroup(group.guid,group.groupType,group.password,object :CometChat.CallbackListener<Group>(){
                 override fun onSuccess(p0: Group?) {
                     progressDialog?.dismiss()
+                    MyFirebaseMessagingService.subscribeGroup(group.guid)
                     p0?.let { groupJoin.onJoined(it,resId) }
                 }
 
@@ -326,8 +301,9 @@ class GroupRepository {
         CometChat.leaveGroup(guid,object :CometChat.CallbackListener<String>(){
             override fun onSuccess(p0: String?) {
                 showToast("Successfully left group")
+                MyFirebaseMessagingService.unsubscribeGroup(guid)
                 activity?.startActivity(Intent(activity,MainActivity::class.java))
-//                activity?.onBackPressed()
+                 activity?.onBackPressed()
             }
 
             override fun onError(p0: CometChatException?) {

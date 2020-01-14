@@ -41,8 +41,9 @@
     <string name="title_activity_location">Map</string>
     <string name="group_member">Group Members</string>
     <string name="group_detail">Group Details</string>
-    <string name="contacts">Contacts</string>
+    <string name="users">Users</string>
     <string name="groups">Groups</string>
+    <string name="conversations">Conversations</string>
     <string name="guid">GUID*</string>
     <string name="group_name">Group Name*</string>
     <string name="group_description">Group Description</string>
@@ -80,5 +81,6 @@
     <string name="user_list">User List</string>
     <string name="banned_members">Banned Members</string>
     <string name="group_members">Group Members</string>
+    <string name="channel_description">Notification Channel</string>
 
 </resources>

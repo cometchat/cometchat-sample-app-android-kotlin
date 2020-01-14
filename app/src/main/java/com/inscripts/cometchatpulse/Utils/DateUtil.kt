@@ -6,6 +6,8 @@ import com.inscripts.cometchatpulse.R
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+
 class DateUtil {
 
     companion object {
@@ -67,6 +69,16 @@ class DateUtil {
             val timestamp = java.sql.Timestamp.valueOf(time)
             return format.format(timestamp)
         }
+        fun getTimeStringFromTimestamp(timestamp: Long, format: String): String {
+
+            val dt = Date(timestamp * 1000)
+
+            val time = java.sql.Timestamp(dt.time)
+            //Log.e("timestamp", time + "rime" + dt.getDate() + " inside");
+            //Log.e("timestamp", str + dt.getTime() + " inside");
+            return getMessageTime(time.toString(), format)
+        }
+
     }
 
 

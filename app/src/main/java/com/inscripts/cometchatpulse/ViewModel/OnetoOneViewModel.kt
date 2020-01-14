@@ -68,8 +68,8 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
     }
 
 
-    fun receiveMessageListener(listener: String, ownerId: String) {
-        messageRepository.messageReceiveListener(listener)
+    fun receiveMessageListener(listener: String, userId:String) {
+        messageRepository.messageReceiveListener(listener,userId)
     }
 
     fun removeMessageListener(listener: String) {
@@ -150,6 +150,10 @@ class OnetoOneViewModel constructor(application: Application) : AndroidViewModel
 
     fun searchMessage(s: String, userId: String) {
         messageRepository.searchMessage(s,userId)
+    }
+
+    fun setMapMessage(userId: String?,t: CustomMessage) {
+        messageRepository.updateMap(userId,t);
     }
 
 }

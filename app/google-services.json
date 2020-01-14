@@ -1,0 +1,114 @@
+{
+  "project_info": {
+    "project_number": "801442401008",
+    "firebase_url": "https://android-java-push-notification.firebaseio.com",
+    "project_id": "android-java-push-notification",
+    "storage_bucket": "android-java-push-notification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801442401008:android:d7e00161d5569c58a49035",
+        "android_client_info": {
+          "package_name": "com.inscripts.cometchatpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801442401008-u2vmnkqs62e64np9pv4c3rnt7coceguf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.inscripts.cometchatpro",
+            "certificate_hash": "a9642e9042abc087b4dd8be998d462033fcff68f"
+          }
+        },
+        {
+          "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWQr2Fm90jGYzMXFMGVB5Pegja4UpMorM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801442401008:android:8b9dfbe942af12dca49035",
+        "android_client_info": {
+          "package_name": "com.inscripts.cometchatpulse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWQr2Fm90jGYzMXFMGVB5Pegja4UpMorM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801442401008:android:f44049d199eeee30a49035",
+        "android_client_info": {
+          "package_name": "com.inscripts.cometchatpulse.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801442401008-c15qif0e2qvsutaoepiui7sfl7i72uep.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.inscripts.cometchatpulse.demo",
+            "certificate_hash": "a9642e9042abc087b4dd8be998d462033fcff68f"
+          }
+        },
+        {
+          "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWQr2Fm90jGYzMXFMGVB5Pegja4UpMorM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801442401008-0hk2sjbvg5m5n1utk71s5e2eabh5ia9k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

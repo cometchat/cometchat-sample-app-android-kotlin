@@ -54,8 +54,8 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
         filterMessageList=messageRepository.filterLivegroupMessageList
     }
 
-    fun fetchMessage(LIMIT: Int, guid: String) {
-        messageRepository.fetchGroupMessage(guid, LIMIT)
+    fun fetchMessage(LIMIT: Int, guid: String,isRefresh:Boolean=false) {
+        messageRepository.fetchGroupMessage(guid, LIMIT,isRefresh)
     }
 
     override fun onCleared() {
@@ -67,8 +67,8 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
         messageRepository.sendTextMessage(textMessage)
     }
 
-    fun addGroupEventListener(group_event_listener: String) {
-        messageRepository.addGroupListener(group_event_listener)
+    fun addGroupEventListener(group_event_listener: String,GUID:String?) {
+        messageRepository.addGroupListener(group_event_listener,GUID)
     }
 
     fun sendMediaMessage(path: String?, type: String?, guid: String,groupFragment:GroupFragment) {
@@ -114,8 +114,8 @@ class GroupChatViewModel(application: Application) : AndroidViewModel(applicatio
         uid?.let { groupRepository.unBanMember(guid, it) }
     }
 
-    fun addGroupMessageListener(message_listener: String,ownerId:String) {
-       messageRepository.messageReceiveListener(message_listener)
+    fun addGroupMessageListener(message_listener: String,guid:String) {
+       messageRepository.messageReceiveListener(message_listener,guid)
     }
 
     fun removeMessageListener(message_listener: String) {

@@ -30,10 +30,9 @@ import com.bumptech.glide.Glide
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.helpers.Logger
-import com.cometchat.pro.models.GroupMember
-import com.cometchat.pro.models.MediaMessage
-import com.cometchat.pro.models.TextMessage
+import com.cometchat.pro.models.*
 import com.inscripts.cometchatpulse.Activities.GroupDetailActivity
+import com.inscripts.cometchatpulse.Activities.GroupMessageInfoActivity
 import com.inscripts.cometchatpulse.Activities.LocationActivity
 import com.inscripts.cometchatpulse.Adapter.GroupChatAdapter
 import com.inscripts.cometchatpulse.CometChatPro
@@ -157,7 +156,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         binding.recycler.layoutManager = linearLayoutManager
 
 
-        binding.recycler.getItemAnimator()?.changeDuration = 0
+        binding.recycler.itemAnimator?.changeDuration = 0
+        binding.recycler.itemAnimator=null
         groupChatAdapter = GroupChatAdapter(context!!, guid, CometChat.getLoggedInUser().uid,this)
         binding.recycler.adapter = groupChatAdapter
 
@@ -220,11 +220,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         binding.cometchatToolbar.overflowIcon?.setColorFilter(StringContract.Color.iconTint, PorterDuff.Mode.SRC_ATOP)
 
-        Thread {
-            groupChatViewModel.fetchMessage(LIMIT = 30, guid = guid)
-
-        }.start()
-
 
         Thread {
             groupViewModel.fetchGroupMemeber(LIMIT = 30, guid = guid)
@@ -261,13 +256,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
              }
         })
 
-        groupChatViewModel.liveDeliveryReceipts.observe(this, Observer {
-            messageReceipts->
-            messageReceipts?.let {
-                groupChatAdapter.setDeliveryReceipts(it)
-            }
-        })
-
         groupChatViewModel.liveDeletedMessage.observe(this, Observer {
             deletedMessage->deletedMessage?.let {
                   groupChatAdapter.setDeletedMessage(it)
@@ -278,13 +266,6 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
             editMessage->editMessage?.let {
                  groupChatAdapter.setEditMessage(it)
              }
-        })
-
-        groupChatViewModel.liveReadReceipts.observe(this, Observer {
-            messageReceipts->
-            messageReceipts?.let {
-                groupChatAdapter.setRead(it)
-            }
         })
 
 
@@ -299,6 +280,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
                 binding.cometchatToolbar.isSelected = binding.recycler.canScrollVertically(-1)
 
                 if (!recyclerView.canScrollVertically(-1)) {
+                    Log.e(TAG,"RecyclerView")
                     groupChatViewModel.fetchMessage(LIMIT = 30, guid = guid)
 
 
@@ -365,7 +347,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         val length = binding.messageBox?.editTextChatMessage?.text.toString().length
 
         if (length > 0) {
-            groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid)
+            groupChatViewModel.sendTypingIndicator(guid)
         }
     }
 
@@ -373,7 +355,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
 
         timer?.schedule(object : TimerTask() {
             override fun run() {
-                groupChatViewModel.sendTypingIndicator(CometChat.getLoggedInUser().uid, true)
+                groupChatViewModel.sendTypingIndicator(guid, true)
             }
         }, 2000)
     }
@@ -468,6 +450,7 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
             })
 
             searchView.setOnCloseListener {
+                Log.e(TAG,"SEARCHVIEW")
                 groupChatViewModel.fetchMessage(30, guid)
                 false
             }
@@ -482,12 +465,8 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
         when (item?.itemId) {
 
             android.R.id.home -> {
-
-                if (config.smallestScreenWidthDp >= 600) {
                     clickListener.onBackClick()
-                } else {
-                    activity?.onBackPressed()
-                }
+
             }
             R.id.voice_call -> {
 
@@ -604,13 +583,45 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
                     binding.messageBox?.editTextChatMessage?.setText(textMessage.text)
                 }
             }
+
+            R.id.info->{
+                val infoIntent = Intent(context, GroupMessageInfoActivity::class.java)
+                if (any is BaseMessage)
+                {
+                    val message = any as BaseMessage
+                    infoIntent.putExtra(StringContract.IntentString.ID,message.id)
+                    if(message is MediaMessage) {
+                        infoIntent.putExtra(StringContract.IntentString.IMAGE_TYPE, true)
+                        if (!message.type.equals(CometChatConstants.MESSAGE_TYPE_FILE)) {
+                            infoIntent.putExtra(StringContract.IntentString.MESSAGE, message.attachment.fileUrl)
+                        }
+                        else
+                        {
+                            infoIntent.putExtra(StringContract.IntentString.MESSAGE, message.attachment.fileName)
+                        }
+                    }
+                    else if (message is CustomMessage)
+                    {
+                        infoIntent.putExtra(StringContract.IntentString.IMAGE_TYPE, false)
+                        infoIntent.putExtra(StringContract.IntentString.MESSAGE,message.type)
+
+                    }
+                    else
+                    {
+                        val txtmessage = message as TextMessage
+                        infoIntent.putExtra(StringContract.IntentString.IMAGE_TYPE, false)
+                        infoIntent.putExtra(StringContract.IntentString.MESSAGE,txtmessage.text)
+                    }
+                }
+                startActivity(infoIntent)
+            }
         }
 
         return true
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.menuInflater?.inflate(R.menu.action_bar, menu)
+        mode?.menuInflater?.inflate(R.menu.group_action_bar, menu)
         this.mode = mode
 
         mode?.title = groupName
@@ -943,8 +954,13 @@ class GroupFragment : Fragment(), View.OnClickListener, RecordListener,ActionMod
     override fun onResume() {
         super.onResume()
         Log.d(TAG,"onResume: ")
-        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER)
-        groupChatViewModel.addGroupMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, CometChat.getLoggedInUser().uid)
+        groupChatViewModel.fetchMessage(30,guid,true)
+        groupChatViewModel.addGroupEventListener(StringContract.ListenerName.GROUP_EVENT_LISTENER,guid)
+        groupChatViewModel.addGroupMessageListener(StringContract.ListenerName.MESSAGE_LISTENER, guid)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     override fun onPause() {

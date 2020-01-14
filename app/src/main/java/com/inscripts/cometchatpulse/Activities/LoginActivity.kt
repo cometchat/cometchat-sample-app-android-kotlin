@@ -31,6 +31,7 @@ import com.inscripts.cometchatpulse.StringContract
 import com.inscripts.cometchatpulse.Utils.Appearance
 import com.inscripts.cometchatpulse.Utils.CommonUtil
 import com.inscripts.cometchatpulse.databinding.ActivityLoginBinding
+import java.util.*
 
 
 public class LoginActivity : AppCompatActivity() {
@@ -51,7 +52,7 @@ public class LoginActivity : AppCompatActivity() {
             binding.login = this
 
              if (StringContract.AppDetails.theme==Appearance.AppTheme.PERSIAN_BLUE||
-                     StringContract.AppDetails.theme==Appearance.AppTheme.MOUNTAIN_MEADOW) {
+                     StringContract.AppDetails.theme==Appearance.AppTheme.MOUNTAIN_MEADOW || StringContract.AppDetails.theme==Appearance.AppTheme.ISLAND) {
                  binding.btLogin.setTextColor(StringContract.Color.white)
                  binding.rlBack.setBackgroundColor(StringContract.Color.primaryColor)
                  binding.progressHorizontal.progressTintList= ColorStateList.valueOf(StringContract.Color.primaryColor)
@@ -69,10 +70,6 @@ public class LoginActivity : AppCompatActivity() {
             var autoAdapter=AutoCompleteAdapter(this,R.layout.sample_user_item,getSampleUserList())
             binding.sampleList.adapter=autoAdapter
 
-//            binding.editTextUid.onItemClickListener =
-//                    AdapterView.OnItemClickListener { parent, view, position, id ->
-//                        binding.editTextUid.setText(getSampleUserList()[position].id?.trim())
-//                    }
 
             binding.sampleList.setOnItemClickListener{
                 parent, view, position, id ->
@@ -94,7 +91,7 @@ public class LoginActivity : AppCompatActivity() {
 
     }
 
-     fun getSampleUserList():MutableList<GroupOption>{
+     private fun getSampleUserList():MutableList<GroupOption>{
          val sampleList:MutableList<GroupOption> = arrayListOf()
 
          sampleList.add(GroupOption("Iron Man",getDrawable(R.drawable.ironman),"superhero1"))
@@ -109,12 +106,16 @@ public class LoginActivity : AppCompatActivity() {
 
         Log.d("Login", uid)
         binding.progressHorizontal.visibility=View.VISIBLE
+
+
         kotlin.run {
+
             Toast.makeText(this@LoginActivity,getString(R.string.please_wait),Toast.LENGTH_SHORT).show()
             CometChat.login(uid.trim(), StringContract.AppDetails.API_KEY, object : CometChat.CallbackListener<User>() {
                 override fun onSuccess(p0: User?) {
                     startActivity()
                     Log.d(TAG,"login: ${StringContract.AppDetails.APP_ID}_user_${p0?.uid}")
+
 
                 }
 
@@ -129,10 +130,11 @@ public class LoginActivity : AppCompatActivity() {
 
         }
 
-
     }
 
     fun startActivity() {
+
+
        startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

@@ -45,13 +45,15 @@ import org.json.JSONException
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 
 class OneToOneAdapter(val context: Context, val ownerId: String,
                       val listener: OnClickEvent) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>(),
         StickyHeaderAdapter<TextHeaderHolder> {
 
     private lateinit var viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
-    private var messagesList: LongSparseArray<BaseMessage> = LongSparseArray()
+    private var messagesList = ArrayList<BaseMessage>()
     private var currentPlayingSong: String? = null
     private var timerRunnable: Runnable? = null
     private val seekHandler = Handler()
@@ -82,6 +84,16 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
         when (p1) {
+
+            StringContract.ViewType.RIGHT_CUSTOM_MESSAGE -> {
+                val binding: RightTextBinding = DataBindingUtil.inflate(layoutInflater, R.layout.right_text, p0, false)
+                return RightTextMessageHolder(binding)
+            }
+
+            StringContract.ViewType.LEFT_CUSTOM_MESSAGE -> {
+                val binding: LeftTextBinding = DataBindingUtil.inflate(layoutInflater, R.layout.left_text, p0, false)
+                return LeftTextMessageHolder(binding)
+            }
 
             StringContract.ViewType.RIGHT_TEXT_MESSAGE -> {
                 val binding: RightTextBinding = DataBindingUtil.inflate(layoutInflater, R.layout.right_text, p0, false)
@@ -182,8 +194,11 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     }
 
+
+
     override fun getHeaderId(var1: Int): Long {
-        return java.lang.Long.parseLong(DateUtil.getDateId(messagesList.get(messagesList.keyAt(var1))?.getSentAt()!! * 1000))
+        val baseMessage = messagesList[var1]
+        return java.lang.Long.parseLong(DateUtil.getDateId(baseMessage.getSentAt()!! * 1000))
     }
 
     override fun onCreateHeaderViewHolder(var1: ViewGroup): TextHeaderHolder {
@@ -193,20 +208,10 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     }
 
-    override fun getItemId(position: Int): Long {
-
-       val baseMessage=messagesList[messagesList.keyAt(position)]
-         if (baseMessage!=null){
-             return baseMessage.id.toLong()
-         }else{
-             return 0L
-         }
-
-    }
-
     override fun onBindHeaderViewHolder(var1: TextHeaderHolder, var2: Int, var3: Long) {
         try {
-            val date = Date(messagesList[messagesList.keyAt(var2)]?.sentAt?.times(1000)!!)
+            val baseMessage = messagesList.get(var2)
+            val date = Date(baseMessage.sentAt.times(1000)!!)
 
             val formattedDate = DateUtil.getCustomizeDate(date.getTime())
 
@@ -222,39 +227,33 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun getItemCount(): Int {
 
-        return messagesList.size()
+        return messagesList.size
     }
 
     override fun getItemViewType(position: Int): Int {
 
-        if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
+        val baseMessage = messagesList[position]
+        if (baseMessage.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
 
-            if (ownerId.equals(messagesList.get(messagesList.keyAt(position))?.sender?.uid, ignoreCase = true)) {
+            if (ownerId.equals(baseMessage.sender?.uid, ignoreCase = true)) {
 
-                if ((messagesList.get(messagesList.keyAt(position))is TextMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
+                if ((baseMessage is TextMessage)
+                        && (baseMessage as TextMessage).metadata != null
+                        && (baseMessage as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.RIGHT_TEXT_REPLY_MESSAGE
 
-                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
+                } else if ((baseMessage is MediaMessage)
+                        && (baseMessage as MediaMessage).metadata != null
+                        && (baseMessage as MediaMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.RIGHT_MEDIA_REPLY_MESSAGE
 
                 } else {
 
-                    when (messagesList.get(messagesList.keyAt(position))?.type) {
+                    when (baseMessage.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
-
-                            if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null) {
-
-                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
-                                    return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
-                                }
-                            }
 
                             return StringContract.ViewType.RIGHT_TEXT_MESSAGE
                         }
@@ -284,28 +283,20 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
             } else {
 
 
-                if ((messagesList.get(messagesList.keyAt(position)) is TextMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as TextMessage).metadata.has("reply")) {
+                if ((baseMessage is TextMessage)
+                        && (baseMessage as TextMessage).metadata != null
+                        && (baseMessage as TextMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_TEXT_REPLY_MESSAGE
-                } else if ((messagesList.get(messagesList.keyAt(position)) is MediaMessage)
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata != null
-                        && (messagesList.get(messagesList.keyAt(position)) as MediaMessage).metadata.has("reply")) {
+                } else if ((baseMessage is MediaMessage)
+                        && (baseMessage as MediaMessage).metadata != null
+                        && (baseMessage as MediaMessage).metadata.has("reply")) {
 
                     return StringContract.ViewType.LEFT_MEDIA_REPLY_MESSAGE
                 } else {
-                    when (messagesList.get(messagesList.keyAt(position))?.type) {
+                    when (baseMessage.type) {
 
                         CometChatConstants.MESSAGE_TYPE_TEXT -> {
-
-                               if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text!=null){
-
-                                if ((messagesList.get(messagesList.keyAt(position)) as TextMessage).text.equals("custom_location")) {
-
-                                    return StringContract.ViewType.LEFT_LOCATION_MESSAGE
-                                }
-                            }
 
                             return StringContract.ViewType.LEFT_TEXT_MESSAGE
                         }
@@ -334,20 +325,38 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
                     }
                 }
             }
-        } else if (messagesList.get(messagesList.keyAt(position))?.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
+        } else if (baseMessage.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
             return StringContract.ViewType.CALL_MESSAGE
+        } else if (baseMessage.category.equals(CometChatConstants.CATEGORY_CUSTOM, ignoreCase = true))
+        {
+            if (ownerId.equals(baseMessage.sender?.uid, ignoreCase = true)) {
+                if ((baseMessage as CustomMessage).type != null) {
+
+                    if (baseMessage.type.equals("LOCATION")) {
+                        return StringContract.ViewType.RIGHT_LOCATION_MESSAGE
+                    } else {
+                        return StringContract.ViewType.RIGHT_CUSTOM_MESSAGE
+                    }
+                }
+            }
+            else
+            {
+                if ((baseMessage as CustomMessage).type != null) {
+
+                    if (baseMessage.type.equals("LOCATION")) {
+                        return StringContract.ViewType.LEFT_LOCATION_MESSAGE
+                    }
+                    else
+                    {
+                        return StringContract.ViewType.LEFT_CUSTOM_MESSAGE
+                    }
+                }
+            }
         }
 
         return super.getItemViewType(position)
     }
 
-    fun setMessageList(messageList: MutableList<BaseMessage>) {
-        for(baseMessage:BaseMessage in messageList){
-            this.messagesList.put(baseMessage.id.toLong(),baseMessage)
-        }
-
-        notifyDataSetChanged()
-    }
 
     private fun setLongClick(view: View, baseMessage: BaseMessage) {
         var message: Any? = null
@@ -378,10 +387,10 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
     override fun onBindViewHolder(p0: androidx.recyclerview.widget.RecyclerView.ViewHolder, p1: Int) {
 
-        val baseMessage = messagesList.get(messagesList.keyAt(p0.adapterPosition))
+        val baseMessage = messagesList[p1]
 
 
-        val timeStampLong = messagesList.get(messagesList.keyAt(p0.adapterPosition))?.sentAt
+        val timeStampLong = baseMessage.sentAt
         var message: String? = null
         var filePath: String? = null
         var mediaFile: String? = null
@@ -413,6 +422,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
         }
 
         when (p0.itemViewType) {
+            StringContract.ViewType.RIGHT_CUSTOM_MESSAGE ->
+            {
+                val rightCustomMessageHolder = p0 as RightTextMessageHolder
+                rightCustomMessageHolder.binding.tvMessage.text = "Custom Message"
+            }
+
+            StringContract.ViewType.LEFT_CUSTOM_MESSAGE ->
+            {
+                val leftCustomMessageHolder = p0 as LeftTextMessageHolder
+                leftCustomMessageHolder.binding.tvMessage.text = "Custom Message"
+            }
 
             StringContract.ViewType.RIGHT_TEXT_MESSAGE -> {
                 val rightTextMessageHolder = p0 as RightTextMessageHolder
@@ -980,17 +1000,17 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
 
             StringContract.ViewType.RIGHT_LOCATION_MESSAGE -> {
                 val rightLocationViewHolder = p0 as RightLocationViewHolder
-                rightLocationViewHolder.binding.message = baseMessage as TextMessage
+                rightLocationViewHolder.binding.message = baseMessage as CustomMessage
                 rightLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                rightLocationViewHolder.bindView(p1, messagesList)
+                rightLocationViewHolder.bindView(p1, baseMessage)
                 setStatusIcon(rightLocationViewHolder.binding.imgMessageStatus, baseMessage)
             }
 
             StringContract.ViewType.LEFT_LOCATION_MESSAGE -> {
                 val leftLocationViewHolder = p0 as LeftLocationViewHolder
-                leftLocationViewHolder.binding.message = baseMessage as TextMessage
+                leftLocationViewHolder.binding.message = baseMessage as CustomMessage
                 leftLocationViewHolder.binding.timestamp.typeface = StringContract.Font.status
-                leftLocationViewHolder.bindView(p1, messagesList)
+                leftLocationViewHolder.bindView(p1, baseMessage)
 
             }
 
@@ -1447,55 +1467,83 @@ class OneToOneAdapter(val context: Context, val ownerId: String,
     }
 
     fun setDeliveryReceipts(messageReceipt: MessageReceipt) {
-        val baseMessage =messagesList.get(messageReceipt.messageId.toLong())
-        if (baseMessage!=null) {
-            baseMessage.deliveredAt = messageReceipt.timestamp
-            for(i in messagesList.size()-1 downTo 0){
-                if(messagesList.get(messagesList.keyAt(i))?.deliveredAt!! >0){
+
+        with(messagesList.iterator()){
+            for(i in messagesList.size-1 downTo 0){
+                val message : BaseMessage? = messagesList.get(i)
+                if(message?.deliveredAt!! >0){
                     break
                 }else{
-                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
-                    message?.deliveredAt = messageReceipt.deliveredAt;
-                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                    val baseMessage= messagesList[i]
+                    val index=messagesList.indexOf(baseMessage)
+                    messagesList.remove(baseMessage)
+                    baseMessage?.deliveredAt = messageReceipt.deliveredAt
+                    messagesList.add(index, message)
+
                 }
             }
-            notifyDataSetChanged()
         }
+            notifyDataSetChanged()
+    }
+
+    fun setMessageList(list: MutableList<BaseMessage>) {
+        messagesList.clear()
+        for (baseMessge:BaseMessage in list){
+            if (messagesList.contains(baseMessge)){
+                val index=messagesList.indexOf(baseMessge)
+                messagesList.removeAt(index)
+                messagesList.add(index,baseMessge)
+            }else
+                messagesList.add(baseMessge)
+        }
+        notifyDataSetChanged()
 
     }
 
     fun setRead(messageReceipt: MessageReceipt) {
-        val baseMessage = messagesList.get(messageReceipt.messageId.toLong())
-        if (baseMessage != null) {
-            for(i in messagesList.size()-1 downTo 0){
-                if(messagesList.get(messagesList.keyAt(i))?.readAt!! >0){
+
+        with(messagesList.iterator()){
+            for (i in messagesList.size-1 downTo 0){
+                val message : BaseMessage? = messagesList[i]
+                if(message?.readAt!! >0){
                     break
                 }else{
-                    val message : BaseMessage? = messagesList.get(messagesList.keyAt(i))
-                    message?.readAt = messageReceipt.readAt;
-                    message?.id?.toLong()?.let { messagesList.put(it, message) }
+                    val baseMessage= messagesList[i]
+                    val index=messagesList.indexOf(baseMessage)
+                    messagesList.remove(baseMessage)
+                    baseMessage?.readAt = messageReceipt.readAt
+                    messagesList.add(index, message)
+
                 }
             }
-            notifyDataSetChanged()
         }
+
+            notifyDataSetChanged()
     }
 
     fun setDeletedMessage(deletedMessage: BaseMessage) {
-        messagesList.put(deletedMessage.id.toLong(),deletedMessage)
+
+        if(messagesList.contains(deletedMessage)){
+            val index =messagesList.indexOf(deletedMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,deletedMessage)
+        }
         notifyDataSetChanged()
     }
 
     fun setEditMessage(editMessage: BaseMessage) {
-        messagesList.put(editMessage.id.toLong(),editMessage)
+
+        if(messagesList.contains(editMessage)){
+            val index =messagesList.indexOf(editMessage)
+            messagesList.removeAt(index);
+            messagesList.add(index,editMessage)
+        }
         notifyDataSetChanged()
     }
 
     fun setFilterList(it: MutableList<BaseMessage>) {
         messagesList.clear()
-        for (baseMessage in it){
-            messagesList.put(baseMessage.id.toLong(),baseMessage)
-        }
-        notifyDataSetChanged()
+        setMessageList(it)
     }
 
 }
