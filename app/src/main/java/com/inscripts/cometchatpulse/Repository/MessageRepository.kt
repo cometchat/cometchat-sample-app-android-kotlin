@@ -502,7 +502,7 @@ class MessageRepository {
                 Log.d(TAG, "onIncomingCallCancelled ")
 
                 if (p0 != null) {
-                    if (CometChat.getActiveCall() != null) {
+                    
                         if (p0.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                             mutableOneToOneMessageList.add(p0)
                             onetoOneMessageList.value = mutableOneToOneMessageList
@@ -510,7 +510,7 @@ class MessageRepository {
                             mutableGroupMessageList.add(p0)
                             groupMessageList.value = mutableGroupMessageList
                         }
-                    }
+                    
                 }
 
                 if (context is CallActivity) {
