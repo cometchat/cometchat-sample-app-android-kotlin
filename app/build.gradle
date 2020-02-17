@@ -70,7 +70,7 @@ dependencies {
     //Firebase
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'com.google.firebase:firebase-core:16.0.4'
-    implementation 'com.cometchat:dependencybundle:2.0.0'
+ 
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0'
