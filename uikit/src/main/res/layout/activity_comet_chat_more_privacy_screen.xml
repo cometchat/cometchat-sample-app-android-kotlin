@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="screen.CometChatMorePrivacyScreenActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/privacy_toolbar"
+        android:layout_width="match_parent"
+        app:title="@string/privacy_security"
+        android:layout_height="wrap_content"/>
+
+    <RelativeLayout
+        android:paddingLeft="16dp"
+        android:layout_marginTop="24dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="blockUserList"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@string/blocked_user"
+            android:textSize="@dimen/name"
+            android:textColor="@color/primaryTextColor"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tv_blocked_user_count"
+            android:gravity="center"
+            android:drawablePadding="8dp"
+            android:drawableEnd="@drawable/ic_arrow_right_24dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_grey"/>
+
+</LinearLayout>

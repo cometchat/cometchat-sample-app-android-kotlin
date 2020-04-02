@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item android:id="@+id/menu_conversation"
+      android:title="Conversation"
+      android:icon="@drawable/ic_chat_bubble_outline"
+      />
+
+
+    <item android:icon="@drawable/ic_group_black_24dp"
+        android:title="Groupa"
+        android:id="@+id/menu_group"/>
+
+
+
+</menu>

@@ -1,0 +1,154 @@
+<resources>
+    <string name="app_name">UI KIT</string>
+    <string name="rectangle">Rectangle</string>
+    <string name="online">Online</string>
+    <string name="user">user</string>
+    <string name="users">users</string>
+    <string name="group">group</string>
+    <string name="search">Search</string>
+    <string name="user_avatar">User Avatar</string>
+    <string name="conversation">conversation</string>
+
+    <!-- Preference Titles -->
+
+    <!-- Messages Preferences -->
+
+    <!-- Sync Preferences -->
+    <string name="message">message</string>
+    <string name="you_won_t_be_able_send_or_receive_messages">You won\'t be able send or receive messages</string>
+    <string name="unblock">Unblock</string>
+    <string name="unabl_to_join_message">Unable to join group</string>
+    <string name="you">You</string>
+    <string name="owner">Owner</string>
+    <string name="admin">Admin</string>
+    <string name="create_group">Create Group</string>
+    <string name="kindly_enter_group_name_to_proceed">Kindly, enter group name to proceed</string>
+    <string name="enter_group_name">Enter Group Name</string>
+    <array name="privacySettings">
+        <item>Everybody</item>
+        <item>Only Friends</item>
+    </array>
+
+    <string name="loremIpsum">Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer
+        took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+        but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s
+        with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+        \software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+    <string name="replyTxt">reply</string>
+    <string name="pin">pin</string>
+    <string name="message_deleted">This message was deleted</string>
+    <string name="tap_to_start_conversation">Tap to start conversation</string>
+    <string name="view_on_youtube">View on Youtube</string>
+    <string name="visit">Visit</string>
+    <string name="remove">Remove</string>
+    <string name="remove_from_admin">Remove  %1$s from a Admin</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+    <string name="you_cannot_perform_action">You cannot perform action on yourself</string>
+    <string name="only_group_owner_removes_admin">Only group owner can remove admin.</string>
+    <string name="removed_from_admin">%1$s is removed from admin privilege</string>
+    <string name="update_group_member_error">Unable to update Group Member</string>
+    <string name="admin_list_retrieve_error">Admin list retrieval failed</string>
+    <string name="unblock_user_question">Would you like to unblock %1$s</string>
+    <string name="user_unblocked">%1$s is unblocked</string>
+    <string name="unblock_user_error">Unblock User Failed</string>
+    <string name="block_user_list_error">Blocked user retrieval failed</string>
+    <string name="create_group_error">Unable to create a group</string>
+    <string name="make_admin">Make Admin</string>
+    <string name="make_admin_question">Do you like to make %1$s as a Admin</string>
+    <string name="user_is_admin">%1$s is now Admin</string>
+    <string name="update_scope_error">Operation failed on %1$s</string>
+    <string name="group_member_list_error">Error : Not able to load group member list</string>
+    <string name="edit_message">Edit Message</string>
+    <string name="text_copied_clipboard">Text Copied to clipboard</string>
+    <string name="grant_camera_permission">Please grant camera permission from app setting</string>
+    <string name="grant_storage_permission">Please grant storage permission from app setting</string>
+    <string name="file_not_exist">File doesn\'t exists</string>
+    <string name="call">Call</string>
+    <string name="call_list_error">Unable to fetch Call List</string>
+    <string name="calls">Calls</string>
+    <string name="no_call_message">You have not made any calls</string>
+    <string name="calling">Calling</string>
+    <string name="call_initiate_error">Unable to initiate call</string>
+    <string name="incoming_call">Incoming Call</string>
+    <string name="outgoing">Outgoing</string>
+    <string name="incoming">Incoming</string>
+    <string name="video_call">Video Call</string>
+    <string name="audio_call">Audio Call</string>
+    <string name="history">History</string>
+    <string name="all">All</string>
+    <string name="missed">Missed</string>
+    <string name="new_call">New Call</string>
+    <string name="incoming_audio_call">Incoming Audio Call</string>
+    <string name="incoming_video_call">Incoming Video Call</string>
+    <string name="missed_call">Missed</string>
+    <string name="rejected_call">Rejected</string>
+    <string name="fill_this_field">Fill this Field</string>
+    <string name="remove_from_group">Remove from %1$s</string>
+    <string name="add_in_group">Add in Group \" %1$s \"</string>
+    <string name="unblock_user">Unblock User</string>
+    <string name="block_user">Block User</string>
+    <string name="add_user_to_group">Add  %1$s  to \" %2$s \"</string>
+    <string name="user_added_to_group">%1$s is added to \"  %2$s \"</string>
+    <string name="user_removed_from_group">%1$s is removed from \" %2$s \"</string>
+    <string name="kicked_error">Group Member Kicked Failed</string>
+    <string name="user_is_blocked">%1$s  is Blocked</string>
+    <string name="block_user_error">Unable to Block %1$s</string>
+    <string name="exit_group_title">Exit Group</string>
+    <string name="exit_group_message">Exit from group ?</string>
+    <string name="exit">Exit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_group_title">Delete Group</string>
+    <string name="delete_group_message">Delete the group</string>
+    <string name="group_delete_error">Group Deletion Failed</string>
+    <string name="cannot_remove_member">Can\'t remove %1$s</string>
+    <string name="leave_group_error">Unable to leave group</string>
+    <string name="blocked_list_error">Blocked userlist retrieval failed</string>
+    <string name="edit">Edit</string>
+    <string name="preview">Preview</string>
+    <string name="password">Password</string>
+    <string name="join">Join</string>
+    <string name="joining">Joining</string>
+    <string name="incorrect">Incorrect</string>
+    <string name="scale_type_not_supported">ScaleType %1$s not supported.</string>
+    <string name="adjust_viewbound_not_supported">adjustViewBounds not supported.</string>
+    <string name="conversation_itemclick_error"><![CDATA[OnItemClickListener<Conversation> is null]]></string>
+    <string name="group_itemclick_error"><![CDATA[OnItemClickListener<Group> is null]]></string>
+    <string name="user_itemclick_error"><![CDATA[OnItemClickListener<User> is null]]></string>
+    <string name="smart_reply_itemclick_error"><![CDATA[OnItemClickListener<String> is null]]></string>
+    <string name="send">Send</string>
+    <string name="details">Details</string>
+    <string name="administrators">Administrators</string>
+    <string name="members">Members</string>
+    <string name="add_members">Add Members</string>
+    <string name="privacy_support"><![CDATA[Privacy & Support]]></string>
+    <string name="privacy_security"><![CDATA[Privacy &  Security]]></string>
+    <string name="send_message">Send Message</string>
+    <string name="actions">Actions</string>
+    <string name="user_title">User</string>
+    <string name="blocked_user">Blocked users</string>
+    <string name="forward">Forward</string>
+    <string name="add">Add</string>
+    <string name="add_as_admin">Add as Admin</string>
+    <string name="group_title">Groups</string>
+    <string name="more">More</string>
+    <string name="preferences">Preferences</string>
+    <string name="users_title">Users</string>
+    <string name="shared_media">Shared Media</string>
+    <string name="no_media">No Media Available</string>
+    <string name="baseMessage">baseMessage</string>
+    <string name="load_more">Load More</string>
+    <string name="load_more_members">Load more %1$s members</string>
+    <string name="group_list_error">Unable to fetch Group List</string>
+    <string name="images">Images</string>
+    <string name="videos">Videos</string>
+    <string name="files">Files</string>
+    <string name="no_conversations">You have no conversations.</string>
+    <string name="no_user_available">No users available</string>
+    <string name="no_group_available">No Groups Available</string>
+    <string name="custom_message">Custom Message not supported</string>
+    <string name="no_block_users">No Block Users</string>
+    <string name="no_missedcall_message">You dont have any missed calls</string>
+
+</resources>

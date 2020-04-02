@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#03A9F4</color>
+    <color name="colorPrimaryDark">#2196F3</color>
+    <color name="primaryTextColor">#000000</color>
+
+    <color name="textColorWhite">#FFFFFF</color>
+    <color name="bottom">#FAFAFA</color>
+    <color name="secondaryTextColor">#6b000000</color>
+    <color name="light_grey">#EEEEEE</color>
+    <color name="message_bubble_grey">#e0e0e0</color>
+    <color name="menu_background_grey">#40bdbdbd</color>
+    <color name="online_green">#E64CAF50</color>
+    <color name="red">#eecc0000</color>
+    <color name="file_icon">#B1AEAE</color>
+    <color name="search_bg">#979797</color>
+    <color name="shimmer">#ECECEC</color>
+
+    <color name="purple">#8867C5</color>
+
+    <color name="green_600">#43A047</color>
+    <color name="green_100">#C8E6C9</color>
+    <color name="red_100">#FFCDD2</color>
+    <color name="red_600">#E53935</color>
+</resources>

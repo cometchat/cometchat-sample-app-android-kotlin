@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="call"
+            type="com.cometchat.pro.core.Call" />
+
+    </data>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp">
+        <TextView
+            android:layout_alignParentStart="true"
+            android:id="@+id/call_date_tv"
+            tools:text="21/1/2020"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_marginLeft="16dp"
+            android:textStyle="bold"
+            android:drawablePadding="4dp"
+            tools:drawableLeft="@drawable/ic_call_outgoing_24dp"
+            android:layout_toRightOf="@+id/call_date_tv"
+            android:layout_toLeftOf="@+id/call_time_tv"
+            android:id="@+id/call_info_tv"
+            tools:text="IronMan initiated Audio Call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_marginLeft="8dp"
+            android:layout_alignParentRight="true"
+            android:id="@+id/call_time_tv"
+            tools:text="05:30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+</layout>

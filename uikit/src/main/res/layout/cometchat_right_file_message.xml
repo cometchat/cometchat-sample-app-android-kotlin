@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="end"
+    android:animateLayoutChanges="true">
+
+    <RelativeLayout
+        android:id="@+id/rl_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_alignParentRight="true"
+            android:id="@+id/cv_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:padding="8dp"
+            android:background="@drawable/cc_message_bubble_right"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="1dp">
+            <TextView
+                android:id="@+id/tvFileName"
+                android:layout_width="wrap_content"
+                tools:text="File Name"
+                android:textColor="@color/textColorWhite"
+                android:singleLine="true"
+                android:maxLength="15"
+                android:ellipsize="end"
+                android:focusable="true"
+                android:paddingTop="3dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:maxWidth="250dp"
+                android:focusableInTouchMode="true"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/tvFileSize"
+                android:textSize="12sp"
+                android:layout_width="wrap_content"
+                tools:text="File Size"
+                android:textColor="@color/textColorWhite"
+                android:layout_marginStart="10dp"
+                android:focusable="true"
+                android:layout_below="@+id/tvFileName"
+                android:focusableInTouchMode="true"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:background="@drawable/cc_rounded_date_button"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:padding="5dp"
+                android:gravity="center_horizontal"
+                android:layout_toRightOf="@+id/tvFileName"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/ivIcon"
+                android:tint="@color/textColorWhite"
+                android:src="@drawable/ic_insert_drive_file_black_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tvFileExtension"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="PDF"
+                android:textStyle="bold"
+                android:textSize="8sp"
+                android:textColor="@color/textColorWhite"
+                android:visibility="visible" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_alignParentRight="true"
+            android:id="@+id/txt_time"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="11:00 PM"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:textSize="12sp"
+            android:layout_below="@+id/cv_message_container"
+            android:textColor="@color/secondaryTextColor"
+            android:textStyle="bold"
+            tools:visibility="visible"
+            android:visibility="gone" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>

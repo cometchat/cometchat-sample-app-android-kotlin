@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:elevation="8dp"
+    android:layout_margin="4dp"
+    tools:background="@color/colorPrimary"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:cardCornerRadius="30dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical"
+        android:layout_width="100dp"
+        android:layout_gravity="center"
+        android:layout_height="100dp">
+        <RelativeLayout
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_insert_drive_file_black_24dp"
+                android:layout_width="70dp"
+                android:tint="@color/secondaryTextColor"
+                android:layout_height="70dp"/>
+            <TextView
+                android:textColor="@color/textColorWhite"
+                android:layout_centerInParent="true"
+                tools:text="PDF"
+                android:gravity="center"
+                android:layout_width="50dp"
+                android:maxLines="1"
+                android:id="@+id/extension_tv"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+        <TextView
+            android:id="@+id/fileName_tv"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

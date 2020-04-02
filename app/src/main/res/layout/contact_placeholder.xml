@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/SelectableItemBackground"
+    style="?attr/selectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
@@ -9,7 +9,7 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <com.inscripts.cometchatpulse.CustomView.CircleImageView
+    <com.cometchat.pro.uikit.Avatar
         android:id="@+id/imageViewUserAvatar"
         android:layout_width="45dp"
         android:layout_height="45dp"
@@ -24,8 +24,7 @@
         android:layout_alignStart="@+id/imageViewStatusIcon"
         android:layout_marginTop="7dp"
         android:layout_marginBottom="4dp"
-        android:layout_toStartOf="@+id/textviewSingleChatUnreadCount"
-        android:background="@color/shimmer_background"
+        android:background="#dddddd"
         android:ellipsize="end"
         android:fontFamily="sans-serif"
         android:lineSpacingExtra="0.15dp"
@@ -43,9 +42,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textviewUserName"
-        android:layout_toStartOf="@+id/textviewSingleChatUnreadCount"
         android:layout_toEndOf="@+id/imageViewStatusIcon"
-        android:background="@color/shimmer_background"
+        android:background="#dddddd"
         android:ellipsize="end"
         android:fontFamily="sans-serif"
         android:minWidth="100dp"
@@ -53,18 +51,6 @@
         android:textColor="@color/secondaryTextColor"
         android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/textviewSingleChatUnreadCount"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="20dp"
-        android:gravity="center_vertical|center_horizontal"
-        android:padding="1dp"
-        android:singleLine="true"
-        android:textColor="#FFF"
-        android:textSize="12sp"
-        android:visibility="gone" />
 
 
     <ImageView
@@ -79,14 +65,6 @@
         android:focusableInTouchMode="false"
         android:paddingEnd="5dp"
         android:src="@drawable/shimmer_status" />
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="48dp"
-        android:background="@color/shimmer_background"
-        android:layout_height="24dp" />
 
 
 </RelativeLayout>

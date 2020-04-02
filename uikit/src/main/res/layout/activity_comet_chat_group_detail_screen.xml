@@ -1,0 +1,301 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:scrollbars="none">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        app:elevation="0dp"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/groupDetailToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:navigationIcon="@drawable/ic_close_24dp"
+            app:title="@string/details"
+            android:background="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@android:color/white"
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/user_container"
+                android:layout_width="match_parent"
+                android:layout_height="72dp">
+
+                <com.cometchat.pro.uikit.Avatar
+                    android:id="@+id/iv_group"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    tools:src="@tools:sample/avatars" />
+
+                <LinearLayout
+                    android:layout_toStartOf="@id/video_callBtn_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="16dp"
+                    android:layout_toEndOf="@+id/iv_group"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_group_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primaryTextColor"
+                        android:textSize="@dimen/name"
+                        android:textStyle="bold"
+                        tools:text="@tools:sample/full_names" />
+
+                    <TextView
+                        android:id="@+id/tv_members"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        tools:text="3 members"
+                        tools:visibility="visible" />
+                </LinearLayout>
+                <ImageView
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:id="@+id/video_callBtn_iv"
+                    android:tint="@color/colorPrimary"
+                    android:layout_marginEnd="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/callBtn_iv"
+                    android:src="@drawable/ic_videocam_green_24dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <ImageView                    android:padding="8dp"
+                    android:clickable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:id="@+id/callBtn_iv"
+                    android:tint="@color/colorPrimary"
+                    android:layout_marginEnd="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_call_24dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlAdminView"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_below="@id/user_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@string/administrators"
+                    android:textSize="18sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tv_admin_count"
+                    android:gravity="center"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:drawableEnd="@drawable/ic_arrow_right_24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+
+            <include
+                android:id="@+id/divider"
+                layout="@layout/divider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rlAdminView" />
+
+            <TextView
+                android:id="@+id/tvMember"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/divider"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/members"
+                android:textSize="@dimen/twelve"
+                android:letterSpacing="0.1"
+                android:textAllCaps="true" />
+
+            <RelativeLayout
+                android:id="@+id/rl_add_member"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tvMember"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/ivAdd"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_add" />
+
+                <TextView
+                    android:id="@+id/tv_add_member"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:layout_toEndOf="@id/ivAdd"
+                    android:text="@string/add_members"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18sp" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/member_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rl_add_member"
+                android:overScrollMode="never"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <RelativeLayout
+                android:id="@+id/rl_load_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/member_list"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+                <TextView
+                    android:clickable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:id="@+id/tv_load_more"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:paddingRight="8dp"
+                    android:text="@string/load_more"
+                    android:textColor="@color/secondaryTextColor"/>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/tv_seperator_1"
+                android:layout_width="match_parent"
+                android:layout_height="0.8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="4dp"
+                android:layout_below="@id/rl_load_more"
+                android:background="@color/light_grey" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_below="@id/tv_seperator_1"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+                <!--Shared Media - This layout provides media files sent to group-->
+                <LinearLayout
+                    android:id="@+id/shared_media_layout"
+                    android:layout_below="@+id/tv_seperator_1"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:text="@string/shared_media"
+                        android:textAllCaps="true"
+                        android:paddingEnd="16dp"
+                        android:paddingStart="16dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:textSize="@dimen/twelve"
+                        android:letterSpacing="0.1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                    <com.cometchat.pro.uikit.SharedMediaView
+                        android:layout_width="match_parent"
+                        android:id="@+id/shared_media_view"
+                        android:layout_height="500dp"/>
+                </LinearLayout>
+                <!-- End of Shared Media-->
+                <TextView
+                    android:id="@+id/tvPrivacy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/privacy_support"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/twelve"
+                    android:letterSpacing="0.1" />
+
+                <TextView
+                    android:id="@+id/tv_delete"
+                    android:layout_marginTop="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="16dp"
+                    android:textSize="18sp"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="8dp"
+                    android:textColor="@color/catalyst_redbox_background"
+                    android:text="@string/delete"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tv_exit"
+                    android:paddingStart="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="16dp"
+                    android:textSize="18sp"
+                    android:paddingBottom="16dp"
+                    android:textStyle=""
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="56dp"
+                    android:textColor="@color/catalyst_redbox_background"
+                    android:text="@string/exit"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

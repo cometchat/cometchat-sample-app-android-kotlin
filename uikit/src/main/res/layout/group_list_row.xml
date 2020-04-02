@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="group"
+            type="com.cometchat.pro.models.Group" />
+    </data>
+
+    <RelativeLayout
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:layout_height="72dp">
+
+        <com.cometchat.pro.uikit.Avatar
+            android:id="@+id/av_group"
+            android:layout_width="40dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            tools:src="@tools:sample/avatars"
+            app:avatar="@{group}"
+            android:layout_height="40dp" />
+
+        <com.cometchat.pro.uikit.StatusIndicator
+            android:id="@+id/statusIndicator"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="-32dp"
+            android:layout_toEndOf="@id/av_group"
+            android:layout_alignBottom="@id/av_group" />
+
+
+            <TextView
+                android:id="@+id/txt_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="@tools:sample/full_names"
+                android:layout_marginEnd="16dp"
+                android:textSize="@dimen/name"
+                android:textColor="@color/primaryTextColor"
+                android:layout_toEndOf="@id/av_group"
+                android:layout_alignTop="@id/av_group"
+                android:text="@{group.name}"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_user_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_below="@id/txt_user_name"
+                android:layout_toEndOf="@id/av_group"
+                android:textSize="@dimen/fourteen"
+                android:text="@{group.groupType}"
+                android:maxLines="1"
+                tools:text="Public"
+                android:visibility="visible" />
+
+
+        <TextView
+            android:id="@+id/tvSeprator"
+            android:layout_width="match_parent"
+            android:layout_toEndOf="@id/av_group"
+            android:layout_alignParentBottom="true"
+            android:background="@color/light_grey"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_height="1dp"/>
+
+
+
+        <TextView
+            android:id="@+id/tvTimeStamp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:gravity="center"
+            tools:text="9:45"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
+
+</layout>
+

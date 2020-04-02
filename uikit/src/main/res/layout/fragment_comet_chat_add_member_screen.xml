@@ -1,0 +1,83 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <import type="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <import type="androidx.databinding.ObservableList"/>
+        <import type="com.cometchat.pro.models.User"/>
+
+        <variable
+            name="userList"
+            type="ObservableList&lt;User&gt;" />
+
+    </data>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        tools:context="screen.groupmemberlist.CometChatGroupMemberListScreen">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/add_member_toolbar"
+            android:layout_width="match_parent"
+            android:background="@android:color/white"
+            app:title="@string/add_members"
+            android:layout_height="wrap_content"/>
+
+        <RelativeLayout
+            android:id="@+id/searchbar_view"
+            android:layout_below="@id/add_member_toolbar"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:focusedByDefault="false"
+                android:id="@+id/search_bar"
+                android:hint="@string/search"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:inputType="text"
+                android:drawableStart="@drawable/ic_search_24dp"
+                android:drawablePadding="5dp"
+                android:padding="8dp"
+                android:background="@drawable/search_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:visibility="gone"
+                android:clickable="true"
+                android:layout_marginRight="8sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/clear_search"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_close_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_user_list"
+            android:layout_below="@+id/searchbar_view"
+            android:layout_width="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/user_list_row"
+            android:layout_height="match_parent"/>
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:text="@string/add"
+            tools:visibility="visible"
+            app:icon="@drawable/ic_add_24dp"
+            app:iconTint="@color/textColorWhite"
+            android:id="@+id/btn_add"
+            android:visibility="gone"
+            app:cornerRadius="25dp"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/transparent"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+</layout>

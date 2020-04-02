@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_conversation"
+            android:icon="@drawable/ic_chat"
+            android:title="Conversations" />
+        <item
+            android:id="@+id/nav_user"
+            android:icon="@drawable/ic_contacts"
+            android:title="Contacts" />
+        <item
+            android:id="@+id/nav_groups"
+            android:icon="@drawable/ic_group"
+            android:title="Groups" />
+        <item
+            android:id="@+id/nav_call"
+            android:icon="@android:drawable/ic_menu_call"
+            android:title="Calls" />
+    </group>
+
+    <item android:title="Accounts">
+        <menu>
+            <item
+                android:id="@+id/nav_profile"
+                android:icon="@drawable/ic_account"
+                android:title="Profile" />
+
+        </menu>
+    </item>
+
+</menu>

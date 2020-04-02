@@ -1,0 +1,104 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <import type="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <import type="androidx.databinding.ObservableList"/>
+        <import type="com.cometchat.pro.models.Conversation"/>
+
+        <variable
+            name="conversationList"
+            type="ObservableList&lt;Conversation&gt;" />
+
+    </data>
+
+    <!-- This layout is used to provide conversations list to
+    forward messages-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/forward_toolbar"
+            android:layout_width="match_parent"
+            app:title="Forward Message"
+            android:layout_height="wrap_content"/>
+
+        <!--Search_View - This layout is used to search conversations-->
+        <RelativeLayout
+            android:id="@+id/searchbar_view"
+            android:layout_below="@id/forward_toolbar"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:focusedByDefault="false"
+                android:id="@+id/search_bar"
+                android:hint="@string/search"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:inputType="text"
+                android:drawableStart="@drawable/ic_search_24dp"
+                android:drawablePadding="5dp"
+                android:padding="8dp"
+                android:background="@drawable/search_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:visibility="gone"
+                android:clickable="true"
+                android:layout_marginRight="8sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/clear_search"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_close_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+        <!--End of Search_View -->
+
+        <!---Selected_Conversations - This is used to provide
+        selected conversations-->
+        <HorizontalScrollView
+            android:id="@+id/selected_view"
+            android:layout_below="@+id/searchbar_view"
+            android:layout_width="match_parent"
+            android:scrollbars="none"
+            android:layout_height="wrap_content">
+           <com.google.android.material.chip.ChipGroup
+               android:layout_width="wrap_content"
+               android:id="@+id/selected_user"
+               app:singleLine="false"
+               android:layout_height="match_parent"/>
+        </HorizontalScrollView>
+        <!--End of Selected_Conversations-->
+
+        <!--Conversation_List - It is used to display ConversationList-->
+        <com.cometchat.pro.uikit.CometChatConversationList
+            android:id="@+id/rv_conversation_list"
+            android:layout_below="@+id/selected_view"
+            android:layout_width="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/user_list_row"
+            android:layout_height="match_parent"/>
+        <!--End of Conversation_List-->
+
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:text="@string/send"
+            tools:visibility="visible"
+            android:id="@+id/btn_forward"
+            android:visibility="gone"
+            app:cornerRadius="25dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+</layout>

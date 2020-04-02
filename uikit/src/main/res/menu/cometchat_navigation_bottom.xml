@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+      android:id="@+id/menu_conversation"
+      android:title="Conversation"
+      android:icon="@drawable/ic_nav_chat" />
+
+  <item
+      android:id="@+id/menu_call"
+      android:title="@string/call"
+      android:icon="@drawable/ic_call_24dp" />
+
+  <item
+      android:id="@+id/menu_users"
+      android:title="Users"
+      android:icon="@drawable/ic_contacts"/>
+
+  <item
+      android:icon="@drawable/ic_group"
+      android:title="Groups"
+      android:id="@+id/menu_group"/>
+  <item
+      android:icon="@drawable/ic_more"
+      android:title="More"
+      android:id="@+id/menu_more"/>
+
+</menu>

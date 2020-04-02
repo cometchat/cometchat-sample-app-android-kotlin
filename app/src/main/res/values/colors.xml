@@ -1,21 +1,22 @@
-<!--?xml version="1.0" encoding="UTF-8"?-->
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#0084ff</color>
-    <color name="primaryLightColor">#69b3ff</color>
-    <color name="primaryDarkColor">#0058cb</color>
+    <color name="colorPrimary">#0099ff</color>
+    <color name="colorPrimaryDark">#006ccb</color>
+    <color name="colorAccent">#69c9ff</color>
+    <color name="primaryTextColor">#FF000000</color>
+    <color name="textColorWhite">#FFFFFF</color>
+    <color name="bottom">#FAFAFA</color>
+    <color name="secondaryTextColor">#6b000000</color>
+    <color name="light_grey">#eeeeee</color>
+    <color name="message_bubble_grey">#e0e0e0</color>
+    <color name="message_text_grey">#757575</color>
+    <color name="menu_background_grey">#40bdbdbd</color>
 
-    <color name="primaryTextColor">#000000</color>
-    <color name="deletedTextColor">#A29B9B</color>
-    <color name="grey">#CACACC</color>
-    <color name="popup">#fafafa</color>
-    <color name="red_600">#E53935</color>
-    <color name="secondaryTextColor">#ffffff</color>
-    <color name="bottom_bar">#ffffff</color>
-    <color name="inactivecolor">#9e9e9e</color>
-    <color name="online_color">#65ef4d</color>
-    <color name="green_600">#43A047</color>
-    <color name="offline_color">#f2a757</color>
-    <color name="edit_text_border">#eaeaea</color>
-    <color name="shimmer_background">#dddddd</color>
-
+    <!--Used in color palette-->
+    <color name="red">#F44336</color>
+    <color name="green">#009688</color>
+    <color name="blue">#03A9F4</color>
+    <color name="purple">#9C27B0</color>
+    <color name="violet">#673AB7</color>
+    <color name="yellow">#FFC107</color>
 </resources>

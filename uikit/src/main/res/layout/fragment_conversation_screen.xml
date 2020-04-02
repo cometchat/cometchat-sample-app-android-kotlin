@@ -1,0 +1,87 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="screen.CometChatConversationListScreen">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:focusableInTouchMode="true">
+
+        <TextView
+            android:text="Conversations"
+            android:textSize="22sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:textStyle="bold"
+            android:textColor="@color/primaryTextColor"
+            android:id="@+id/tv_title"
+            android:layout_margin="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <RelativeLayout
+            android:id="@+id/rl_search_box"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/search_bar"
+                android:hint="@string/search"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:inputType="text"
+                android:drawableStart="@drawable/ic_search_24dp"
+                android:drawablePadding="5dp"
+                android:padding="8dp"
+                android:background="@drawable/search_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:alpha="0.6"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:id="@+id/no_conversation_view"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_gravity="center"
+                android:src="@drawable/no_conversation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="@string/no_conversations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <com.cometchat.pro.uikit.CometChatConversationList
+            android:id="@+id/rv_conversation_list"
+            android:layout_width="match_parent"
+            tools:listitem="@layout/conversation_list_row"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <include layout="@layout/conversation_shimmer"/>
+
+
+</RelativeLayout>

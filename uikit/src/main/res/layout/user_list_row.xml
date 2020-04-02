@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+
+    <RelativeLayout
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:layout_height="72dp">
+
+    <com.cometchat.pro.uikit.Avatar
+        android:id="@+id/av_user"
+        android:layout_width="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        tools:src="@tools:sample/avatars"
+        android:layout_height="40dp" />
+
+        <TextView
+            android:id="@+id/txt_user_name"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_toEndOf="@id/av_user"
+            android:layout_height="wrap_content"
+            tools:text="@tools:sample/full_names"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="@dimen/name"
+            android:maxLines="1"
+            android:textStyle="bold" />
+        <TextView
+            tools:visibility="visible"
+            android:id="@+id/txt_user_scope"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_height="wrap_content"
+            tools:text="Owner"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:textSize="@dimen/twelve"
+            android:maxLines="1"/>
+        <ImageView
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:id="@+id/unblockUser"
+            android:src="@drawable/ic_delete_24dp"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="16dp"/>
+
+        <TextView
+            android:id="@+id/tvSeprator"
+            android:layout_width="match_parent"
+            android:layout_toEndOf="@id/av_user"
+            android:background="@color/light_grey"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_height="0.8dp"/>
+
+    </RelativeLayout>
+
+</layout>
+

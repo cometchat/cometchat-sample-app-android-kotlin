@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context="screen.adminlist.CometChatAdminListScreen">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        app:title="Administrators"
+        android:layout_width="match_parent"
+        android:id="@+id/admin_toolbar"
+        android:layout_height="wrap_content"/>
+
+
+
+    <RelativeLayout
+        android:id="@+id/rl_add_Admin"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:foreground="?attr/selectableItemBackground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:layout_centerVertical="true"
+            android:id="@+id/ivNotification"
+            android:src="@drawable/ic_add"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+        <TextView
+            android:layout_toRightOf="@+id/ivNotification"
+            android:layout_marginLeft="16dp"
+            android:text="@string/add_as_admin"
+            android:layout_centerVertical="true"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:id="@+id/adminList"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

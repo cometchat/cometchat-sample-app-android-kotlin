@@ -20,42 +20,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# ServiceLoader support
--keepnames class kotlinx.** { *; }
-
--keep class android.support.annotation.Keep
--keep class androidx.annotation.Keep
-
--keep @android.support.annotation.Keep class * {*;}
--keep @androidx.annotation.Keep class * {*;}
-
--keepclasseswithmembers class * {
-    @android.support.annotation.Keep <methods>;
-}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <methods>;
-}
-
--keepclasseswithmembers class * {
-    @android.support.annotation.Keep <fields>;
-}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <fields>;
-}
-
--keepclasseswithmembers class * {
-    @android.support.annotation.Keep <init>(...);
-}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <init>(...);
-}
-
--dontwarn org.xmlpull.v1.**
--dontwarn android.**
-
--keep public class android.** { *; }
--keep class org.xmlpull.v1.** { *; }
-
+#-keep class com.reactnativecommunity.webview.**{*;}

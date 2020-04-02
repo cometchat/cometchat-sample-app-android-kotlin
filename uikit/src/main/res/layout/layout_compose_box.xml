@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:animateLayoutChanges="true"
+        android:id="@+id/rlActionContainer"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:layout_centerVertical="true"
+        tools:visibility="visible"
+        android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/ivCamera"
+        android:layout_width="30dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_camera"
+        android:layout_height="30dp"/>
+
+    <ImageView
+        android:id="@+id/ivImage"
+        android:layout_width="30dp"
+        android:layout_toEndOf="@id/ivCamera"
+        android:layout_centerVertical="true"
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_photo"
+        android:layout_height="30dp"/>
+
+    <ImageView
+        android:id="@+id/ivFile"
+        android:layout_width="30dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toEndOf="@id/ivImage"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_insert_drive_file_black_24dp"
+        android:layout_height="30dp"/>
+
+    </RelativeLayout>
+    <ImageView
+        android:id="@+id/ivArrow"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:layout_toEndOf="@id/rlActionContainer"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:rotation="90"
+        android:src="@drawable/ic_arrow"
+        android:layout_height="wrap_content"/>
+
+    <FrameLayout
+        android:id="@+id/flBox"
+        android:layout_width="match_parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_toEndOf="@id/ivArrow"
+        android:layout_toStartOf="@id/ivSend"
+        android:layout_height="wrap_content">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/etComposeBox"
+        android:hint="Aa"
+        android:padding="8dp"
+        android:maxLines="2"
+        android:imeOptions="actionSend"
+        android:background="@drawable/compose_box"
+        android:layout_height="40dp"/>
+
+    </FrameLayout>
+
+
+    <ImageView
+        android:id="@+id/ivSend"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_send"
+        android:layout_height="wrap_content"/>
+
+
+</RelativeLayout>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.chip.Chip
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:text="Smart Reply"
+    android:id="@+id/replyText"
+    app:chipStrokeColor="@color/secondaryTextColor"
+    app:chipStrokeWidth="2dp"
+    android:layout_marginEnd="8dp"
+    android:minWidth="100dp"
+    android:textAlignment="center"
+    android:textColor="@color/secondaryTextColor"
+    android:checkable="false"
+    app:rippleColor="@color/shimmer"
+    app:chipBackgroundColor="@null"
+    android:layout_marginStart="16dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>

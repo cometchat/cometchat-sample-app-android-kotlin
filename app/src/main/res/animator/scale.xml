@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- the pressed state; increase x and y size to 150% -->
+    <item android:state_pressed="true">
+        <set>
+            <objectAnimator android:propertyName="scaleX"
+                android:duration="@android:integer/config_shortAnimTime"
+                android:valueTo="1.5"
+                android:valueType="floatType"/>
+            <objectAnimator android:propertyName="scaleY"
+                android:duration="@android:integer/config_shortAnimTime"
+                android:valueTo="1.5"
+                android:valueType="floatType"/>
+        </set>
+    </item>
+    <!-- the default, non-pressed state; set x and y size to 100% -->
+    <item android:state_pressed="false">
+        <set>
+            <objectAnimator android:propertyName="scaleX"
+                android:duration="@android:integer/config_shortAnimTime"
+                android:valueTo="1"
+                android:valueType="floatType"/>
+            <objectAnimator android:propertyName="scaleY"
+                android:duration="@android:integer/config_shortAnimTime"
+                android:valueTo="1"
+                android:valueType="floatType"/>
+        </set>
+    </item>
+</selector>
