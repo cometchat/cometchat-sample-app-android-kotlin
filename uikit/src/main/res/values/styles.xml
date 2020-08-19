@@ -1,14 +1,24 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light" />
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge" />
 
-    <style name="TransparentCompat" parent="@style/Theme.MaterialComponents.Light">
+    <style name="TransparentCompat" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
     </style>
 
+    <style name="AppBottomSheetDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/rounded_dialog</item>
+    </style>
 </resources>

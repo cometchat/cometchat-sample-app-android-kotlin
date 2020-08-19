@@ -19,6 +19,7 @@ import java.util.List;
 
 import listeners.StickyHeaderAdapter;
 import utils.FontUtils;
+import utils.Utils;
 
 /**
  * Purpose - UserListAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -105,7 +106,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
         } else {
             userViewHolder.userListRowBinding.avUser.setAvatar(user.getAvatar());
         }
-
+        if(Utils.isDarkMode(context)) {
+            userViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+            userViewHolder.userListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.grey));
+        } else {
+            userViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+            userViewHolder.userListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.light_grey));
+        }
     }
 
     @Override

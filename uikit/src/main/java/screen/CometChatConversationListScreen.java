@@ -42,6 +42,7 @@ import java.util.List;
 
 import listeners.OnItemClickListener;
 import utils.FontUtils;
+import utils.Utils;
 
 /*
 
@@ -54,7 +55,7 @@ import utils.FontUtils;
 
 */
 
-public class CometChatConversationListScreen extends Fragment {
+public class CometChatConversationListScreen extends Fragment implements TextWatcher {
 
     private CometChatConversationList rvConversationList;    //Uses to display list of conversations.
 
@@ -75,6 +76,8 @@ public class CometChatConversationListScreen extends Fragment {
     private static final String TAG = "ConversationList";
 
     private View view;
+
+    private List<Conversation> conversationList = new ArrayList<>();
 
     public CometChatConversationListScreen() {
         // Required empty public constructor
@@ -100,30 +103,7 @@ public class CometChatConversationListScreen extends Fragment {
 
         conversationShimmer = view.findViewById(R.id.shimmer_layout);
 
-        searchEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() == 0) {
-//                    // if searchEdit is empty then fetch all conversations.
-                    conversationsRequest = null;
-                    rvConversationList.clearList();
-                    makeConversationList();
-                } else {
-//                    // Search conversation based on text in searchEdit field.
-                    rvConversationList.searchConversation(editable.toString());
-                }
-            }
-        });
+        checkDarkMode();
 
         searchEdit.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_SEARCH) {
@@ -158,6 +138,14 @@ public class CometChatConversationListScreen extends Fragment {
         return view;
     }
 
+    private void checkDarkMode() {
+        if(Utils.isDarkMode(getContext())) {
+            tvTitle.setTextColor(getResources().getColor(R.color.textColorWhite));
+        } else {
+            tvTitle.setTextColor(getResources().getColor(R.color.primaryTextColor));
+        }
+    }
+
     /**
      * This method is used to retrieve list of conversations you have done.
      * For more detail please visit our official documentation {@link "https://prodocs.cometchat.com/docs/android-messaging-retrieve-conversations" }
@@ -172,7 +160,8 @@ public class CometChatConversationListScreen extends Fragment {
         conversationsRequest.fetchNext(new CometChat.CallbackListener<List<Conversation>>() {
             @Override
             public void onSuccess(List<Conversation> conversations) {
-                if (conversations.size() != 0) {
+                conversationList.addAll(conversations);
+                if (conversationList.size() != 0) {
                     stopHideShimmer();
                     noConversationView.setVisibility(View.GONE);
                     rvConversationList.setConversationList(conversations);
@@ -312,6 +301,11 @@ public class CometChatConversationListScreen extends Fragment {
                    updateConversation(action,false);
                 }
             }
+
+            @Override
+            public void onGroupMemberScopeChanged(Action action, User updatedBy, User updatedUser, String scopeChangedTo, String scopeChangedFrom, Group group) {
+                updateConversation(action,false);
+            }
         });
     }
 
@@ -348,8 +342,8 @@ public class CometChatConversationListScreen extends Fragment {
         super.onResume();
         Log.d(TAG, "onResume: ");
         conversationsRequest = null;
-
-        rvConversationList.clearList();
+        searchEdit.addTextChangedListener(this);
+//        rvConversationList.clearList();
         makeConversationList();
         addConversationListener();
     }
@@ -365,6 +359,7 @@ public class CometChatConversationListScreen extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause: ");
+        searchEdit.removeTextChangedListener(this);
         removeConversationListener();
     }
 
@@ -375,4 +370,26 @@ public class CometChatConversationListScreen extends Fragment {
 
     }
 
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (s.length() == 0) {
+//                    // if searchEdit is empty then fetch all conversations.
+            conversationsRequest = null;
+            rvConversationList.clearList();
+            makeConversationList();
+        } else {
+//                    // Search conversation based on text in searchEdit field.
+            rvConversationList.searchConversation(s.toString());
+        }
+    }
 }

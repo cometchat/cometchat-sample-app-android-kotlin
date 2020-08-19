@@ -1,17 +1,24 @@
 package adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.MediaMessage;
@@ -23,7 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import listeners.StickyHeaderAdapter;
+import utils.Extensions;
 import utils.FontUtils;
+import utils.MediaUtils;
+import utils.Utils;
 
 /**
  * Purpose - UserListAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -138,21 +148,79 @@ public class SharedMediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private void setVideoData(VideoViewHolder viewHolder, int i) {
         BaseMessage message = messageArrayList.get(i);
-            Glide.with(context).load(((MediaMessage) message).getAttachment().getFileUrl()).into(viewHolder.imageView);
-            viewHolder.itemView.setTag(R.string.baseMessage, message);
+        Glide.with(context).load(((MediaMessage) message).getAttachment().getFileUrl()).into(viewHolder.imageView);
+        viewHolder.imageView.setOnClickListener(view ->{
+            MediaUtils.openFile(((MediaMessage) message).getAttachment().getFileUrl(), context);
+        });
+        viewHolder.itemView.setTag(R.string.baseMessage, message);
     }
 
 
     private void setFileData(FileViewHolder viewHolder, int i) {
         BaseMessage message = messageArrayList.get(i);
-            viewHolder.fileName.setText(((MediaMessage) message).getAttachment().getFileName());
-            viewHolder.fileExtension.setText(((MediaMessage) message).getAttachment().getFileExtension());
-            viewHolder.itemView.setTag(R.string.baseMessage, message);
+        viewHolder.fileName.setText(((MediaMessage) message).getAttachment().getFileName());
+        viewHolder.fileExtension.setText(((MediaMessage) message).getAttachment().getFileExtension());
+        viewHolder.itemView.setOnClickListener(view -> {
+                MediaUtils.openFile(((MediaMessage) message).getAttachment().getFileUrl(), context);
+        });
+        viewHolder.itemView.setTag(R.string.baseMessage, message);
     }
 
     private void setImageData(ImageViewHolder viewHolder, int i) {
         BaseMessage message = messageArrayList.get(i);
-        Glide.with(context).load(((MediaMessage) message).getAttachment().getFileUrl()).into(viewHolder.imageView);
+        boolean isImageNotSafe = Extensions.getImageModeration(context,message);
+        String smallUrl = Extensions.getThumbnailGeneration(context,message);
+
+        if (smallUrl!=null) {
+            Glide.with(context).asBitmap().load(smallUrl).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    if (isImageNotSafe)
+                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
+                    else
+                        viewHolder.imageView.setImageBitmap(resource);
+                }
+            });
+        } else {
+            Glide.with(context).asBitmap().load(((MediaMessage)message).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    if (isImageNotSafe)
+                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
+                    else
+                        viewHolder.imageView.setImageBitmap(resource);
+                }
+            });
+        }
+        if (isImageNotSafe) {
+            viewHolder.sensitiveLayout.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.sensitiveLayout.setVisibility(View.GONE);
+        }
+        viewHolder.imageView.setOnClickListener(view -> {
+            if (isImageNotSafe) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+                alert.setTitle("Unsafe Content");
+                alert.setIcon(R.drawable.ic_hand);
+                alert.setMessage("Are you surely want to see this unsafe content");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MediaUtils.openFile(((MediaMessage) message).getAttachment().getFileUrl(), context);
+                    }
+                });
+                alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                alert.create().show();
+            } else {
+                MediaUtils.openFile(((MediaMessage) message).getAttachment().getFileUrl(), context);
+            }
+
+        });
         viewHolder.itemView.setTag(R.string.baseMessage, message);
     }
 
@@ -169,10 +237,12 @@ public class SharedMediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     class ImageViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageView;
+        private RelativeLayout sensitiveLayout;
 
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
+            sensitiveLayout = itemView.findViewById(R.id.sensitive_layout);
         }
     }
 

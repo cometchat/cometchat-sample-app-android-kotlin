@@ -20,6 +20,7 @@ import java.util.List;
 
 import listeners.StickyHeaderAdapter;
 import utils.FontUtils;
+import utils.Utils;
 
 /**
  * Purpose - BlockListAdapter is a subclass of RecyclerView Adapter which is used to display the list of blocked
@@ -94,6 +95,10 @@ public class BlockedListAdapter extends RecyclerView.Adapter<BlockedListAdapter.
             blockedViewHolder.userListRowBinding.avUser.setAvatar(user.getAvatar());
         }
 
+        if(Utils.isDarkMode(context))
+            blockedViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+        else
+            blockedViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
     }
 
     @Override

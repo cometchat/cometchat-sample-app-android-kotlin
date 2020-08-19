@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="start"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <RelativeLayout
+        android:id="@+id/rl_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.cometchat.pro.uikit.Avatar
+            android:layout_width="50dp"
+            android:id="@+id/iv_user"
+            app:avatar_shape="@string/rectangle"
+            tools:src="@tools:sample/avatars"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_height="50dp"/>
+        <TextView
+            android:id="@+id/tv_user"
+            tools:text="Iron Man"
+            android:textSize="@dimen/fourteen"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/iv_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_below="@+id/tv_user"
+            android:layout_toEndOf="@+id/iv_user"
+            android:id="@+id/cv_link_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="10dp"
+            android:layout_margin="10dp">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:id="@+id/image_view"
+                    android:layout_width="250dp"
+                    android:layout_height="100dp">
+                    <ImageView
+                        android:id="@+id/link_img"
+                        android:layout_width="250dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_defaulf_image"
+                        android:background="@color/textColorWhite"
+                        android:scaleType="centerCrop"
+                        android:adjustViewBounds="true" />
+                    <ImageView
+                        android:id="@+id/videoLink"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_play_button"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"/>
+                </RelativeLayout>
+                <TextView
+                    android:paddingTop="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingBottom="8dp"
+                    android:id="@+id/link_title"
+                    android:layout_below="@+id/image_view"
+                    tools:text="SecondHand Shoes"
+                    android:textStyle="bold"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:paddingBottom="8dp"
+                    android:paddingStart="16dp"
+                    android:textStyle="italic"
+                    tools:text="Lorium Espium wet twe serew fae daq ruqa"
+                    android:id="@+id/link_subtitle"
+                    android:layout_below="@+id/link_title"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:paddingLeft="16dp"
+                    android:id="@+id/message"
+                    android:layout_marginTop="8dp"
+                    android:layout_below="@id/link_subtitle"
+                    tools:text="@string/loremIpsum"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"/>
+                <View
+                    android:layout_marginTop="16dp"
+                    android:background="@color/light_grey"
+                    android:id="@+id/linkSeperator"
+                    android:layout_below="@+id/message"
+                    android:layout_width="250dp"
+                    android:layout_height="1dp"/>
+                <TextView
+                    android:id="@+id/visitLink"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:gravity="center"
+                    android:text="@string/visit"
+                    android:layout_below="@+id/linkSeperator"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"/>
+
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="11:00 PM"
+            android:layout_marginLeft="8dp"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/tv_user"
+            android:layout_alignBottom="@+id/tv_user"
+            android:layout_gravity="center"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

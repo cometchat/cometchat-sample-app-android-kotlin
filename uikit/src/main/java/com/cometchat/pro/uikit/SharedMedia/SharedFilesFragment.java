@@ -56,13 +56,7 @@ public class SharedFilesFragment extends Fragment {
         Id = getArguments().getString("Id");
         type = getArguments().getString("type");
         fetchMessage();
-        rvFiles.addOnItemTouchListener(new RecyclerTouchListener(getContext(), rvFiles, new ClickListener() {
-            @Override
-            public void onClick(View var1, int var2) {
-                BaseMessage message = (BaseMessage)var1.getTag(R.string.baseMessage);
-                MediaUtils.openFile(((MediaMessage)message).getAttachment().getFileUrl(),getContext());
-            }
-        }));
+
         rvFiles.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {

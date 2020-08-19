@@ -6,31 +6,34 @@
     <application
         android:name=".UIKitApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/cc_small"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ComponentListActivity"/>
+        <activity android:name=".CreateUserActivity"></activity>
+        <activity android:name=".ComponentListActivity" />
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ComponentLoadActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".SelectActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".MainActivity"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".ComponentLoadActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SelectActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

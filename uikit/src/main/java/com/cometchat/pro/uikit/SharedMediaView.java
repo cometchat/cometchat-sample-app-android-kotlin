@@ -1,6 +1,7 @@
 package com.cometchat.pro.uikit;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -17,6 +18,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import adapter.TabAdapter;
 import listeners.ComposeActionListener;
+import utils.Utils;
 
 
 public class SharedMediaView extends RelativeLayout {
@@ -82,6 +84,15 @@ public class SharedMediaView extends RelativeLayout {
             viewPager.setAdapter(adapter);
             viewPager.setOffscreenPageLimit(3);
             tabLayout.setupWithViewPager(viewPager);
+
+            if(Utils.isDarkMode(context)) {
+                tabLayout.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grey)));
+                tabLayout.setTabTextColors(getResources().getColor(R.color.light_grey),getResources().getColor(R.color.textColorWhite));
+            } else {
+                tabLayout.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.textColorWhite)));
+                tabLayout.setTabTextColors(getResources().getColor(R.color.primaryTextColor),getResources().getColor(R.color.textColorWhite));
+            }
+
         }
     }
 

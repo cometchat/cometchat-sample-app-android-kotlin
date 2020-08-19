@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true">
+
+    <RelativeLayout
+        android:id="@+id/rl_message"
+        android:animateLayoutChanges="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <com.cometchat.pro.uikit.Avatar
+            android:layout_width="50dp"
+            android:id="@+id/iv_user"
+            app:avatar_shape="@string/rectangle"
+            tools:src="@tools:sample/avatars"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_height="50dp"/>
+        <TextView
+            android:id="@+id/tv_user"
+            tools:text="Iron Man"
+            android:textSize="@dimen/fourteen"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/iv_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RelativeLayout
+            android:layout_below="@+id/tv_user"
+            android:id="@+id/cv_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/iv_user"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/message_bubble_grey"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="1dp">
+            <include
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                layout="@layout/left_reply_message_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <RelativeLayout
+                android:background="@color/red_600"
+                android:visibility="gone"
+                android:id="@+id/sentiment_layout"
+                android:layout_width="250dp"
+                android:padding="16dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textSize="12dp"
+                    android:id="@+id/sentiment_message"
+                    android:textStyle="italic"
+                    android:textColor="@color/textColorWhite"
+                    android:layout_toLeftOf="@+id/view_sentiment"
+                    android:text="@string/sentimment_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:clickable="true"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/view_sentiment"
+                    android:layout_alignParentEnd="true"
+                    android:textStyle="bold"
+                    android:textColor="@color/textColorWhite"
+                    android:text="@string/view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+            <TextView
+                android:layout_below="@id/replyLayout"
+                android:id="@+id/go_txt_message"
+                android:layout_width="wrap_content"
+                tools:text="message"
+                android:textColor="@color/primaryTextColor"
+                android:focusable="true"
+                android:padding="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginEnd="10dp"
+                android:maxWidth="250dp"
+                android:focusableInTouchMode="true"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+
+        <ImageView
+            android:id="@+id/img_pending"
+            android:layout_width="15dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="11dp"
+            android:layout_marginStart="-5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toEndOf="@+id/cv_message_container"
+            android:visibility="visible"
+            android:contentDescription="@string/user_avatar" />
+
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="11:00 PM"
+            android:layout_marginLeft="8dp"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/tv_user"
+            android:layout_alignBottom="@+id/tv_user"
+            android:layout_gravity="center"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+</LinearLayout>

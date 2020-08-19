@@ -5,20 +5,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.cometchat.pro.constants.CometChatConstants;
+import com.cometchat.pro.core.BannedGroupMembersRequest;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.GroupMembersRequest;
@@ -31,8 +40,11 @@ import com.cometchat.pro.uikit.Avatar;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.SharedMediaView;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +54,14 @@ import constant.StringContract;
 import listeners.ClickListener;
 import listeners.RecyclerTouchListener;
 import screen.addmember.CometChatAddMemberScreenActivity;
-import screen.adminlist.CometChatAdminListScreenActivity;
+import screen.adminAndModeratorList.CometChatAdminModeratorListScreenActivity;
+import screen.banmembers.CometChatBanMemberScreenActivity;
 import screen.unified.CometChatUnified;
 import utils.FontUtils;
 import utils.Utils;
 
 import static utils.Utils.UserToGroupMember;
+import static utils.Utils.isLoggedInUser;
 
 
 public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
@@ -56,17 +70,25 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
     private Avatar groupIcon;
 
+    private String groupType;
+
     private String ownerId;
 
     private TextView tvGroupName;
 
+    private TextView tvGroupDesc;
+
     private TextView tvAdminCount;
+
+    private TextView tvModeratorCount;
+
+    private TextView tvBanMemberCount;
 
     private ArrayList<String> groupMemberUids = new ArrayList<>();
 
     private RecyclerView rvMemberList;
 
-    private String guid, gName;
+    private String guid, gName,gDesc,gPassword;
 
     private GroupMembersRequest groupMembersRequest;
 
@@ -74,11 +96,17 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
     private int adminCount;
 
+    private int moderatorCount;
+
     String[] s = new String[0];
 
     private RelativeLayout rlAddMemberView;
 
     private RelativeLayout rlAdminListView;
+
+    private RelativeLayout rlModeratorView;
+
+    private RelativeLayout rlBanMembers;
 
     private String loggedInUserScope;
 
@@ -89,6 +117,12 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
     private TextView tvLoadMore;
 
     private List<GroupMember> groupMembers = new ArrayList<>();
+
+    private AlertDialog.Builder dialog;
+
+    private TextView tvMemberCount;
+
+    private int groupMemberCount=0;
 
     private static int LIMIT = 30;
 
@@ -102,6 +136,11 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
     private ImageView callBtn;
 
+    private TextView dividerAdmin,dividerBan,dividerModerator,divider2;
+
+    private BannedGroupMembersRequest banMemberRequest;
+
+    private MaterialToolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,15 +152,36 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
     private void initComponent() {
 
+        dividerAdmin = findViewById(R.id.tv_seperator_admin);
+        dividerModerator = findViewById(R.id.tv_seperator_moderator);
+        dividerBan = findViewById(R.id.tv_seperator_ban);
+        divider2 = findViewById(R.id.tv_seperator_1);
         groupIcon = findViewById(R.id.iv_group);
         tvGroupName = findViewById(R.id.tv_group_name);
+        tvGroupDesc = findViewById(R.id.group_description);
+        tvGroupName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateGroupDialog();
+            }
+        });
+        tvMemberCount = findViewById(R.id.tv_members);
         tvAdminCount = findViewById(R.id.tv_admin_count);
+        tvModeratorCount = findViewById(R.id.tv_moderator_count);
+        tvBanMemberCount = findViewById(R.id.tv_ban_count);
         rvMemberList = findViewById(R.id.member_list);
         tvLoadMore = findViewById(R.id.tv_load_more);
         tvLoadMore.setText(String.format(getResources().getString(R.string.load_more_members),LIMIT));
         TextView tvAddMember = findViewById(R.id.tv_add_member);
         callBtn = findViewById(R.id.callBtn_iv);
         videoCallBtn = findViewById(R.id.video_callBtn_iv);
+        rlBanMembers = findViewById(R.id.rlBanView);
+        rlBanMembers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openBanMemberListScreen();
+            }
+        });
         rlAddMemberView = findViewById(R.id.rl_add_member);
         rlAddMemberView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,17 +189,21 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
                 addMembers();
             }
         });
-
         rlAdminListView = findViewById(R.id.rlAdminView);
         rlAdminListView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openAdminListScreen();
+                openAdminListScreen(false);
             }
+        });
+        rlModeratorView = findViewById(R.id.rlModeratorView);
+        rlModeratorView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { openAdminListScreen(true); }
         });
         tvDelete = findViewById(R.id.tv_delete);
         TextView tvExit = findViewById(R.id.tv_exit);
-        MaterialToolbar toolbar = findViewById(R.id.groupDetailToolbar);
+        toolbar = findViewById(R.id.groupDetailToolbar);
 
         tvDelete.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
         tvExit.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
@@ -155,6 +219,7 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 //        rvMemberList.setNestedScrollingEnabled(false);
 
         handleIntent();
+        checkDarkMode();
 
         sharedMediaView = findViewById(R.id.shared_media_view);
         sharedMediaView.setRecieverId(guid);
@@ -165,7 +230,7 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View var1, int var2) {
                 GroupMember user = (GroupMember) var1.getTag(R.string.user);
-                if (loggedInUserScope != null&&loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN)) {
+                if (loggedInUserScope != null&&(loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN)||loggedInUserScope.equals(CometChatConstants.SCOPE_MODERATOR))) {
                     groupMember = user;
                     boolean isAdmin =user.getScope().equals(CometChatConstants.SCOPE_ADMIN) ;
                     boolean isSelf = loggedInUser.getUid().equals(user.getUid());
@@ -194,13 +259,53 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
         tvExit.setOnClickListener(view -> createDialog(getResources().getString(R.string.exit_group_title), getResources().getString(R.string.exit_group_message),
                 getResources().getString(R.string.exit), getResources().getString(R.string.cancel), R.drawable.ic_exit_to_app));
 
-        callBtn.setOnClickListener(view -> initiateGroupCall(guid,CometChatConstants.RECEIVER_TYPE_GROUP,CometChatConstants.CALL_TYPE_AUDIO) );
+        callBtn.setOnClickListener(view -> checkOnGoingCall(CometChatConstants.CALL_TYPE_AUDIO));
 
-        videoCallBtn.setOnClickListener(view -> initiateGroupCall(guid,CometChatConstants.RECEIVER_TYPE_GROUP,CometChatConstants.CALL_TYPE_VIDEO));
+        videoCallBtn.setOnClickListener(view -> checkOnGoingCall(CometChatConstants.CALL_TYPE_VIDEO));
 
         tvDelete.setOnClickListener(view -> createDialog(getResources().getString(R.string.delete_group_title), getResources().getString(R.string.delete_group_message),
                 getResources().getString(R.string.delete), getResources().getString(R.string.cancel), R.drawable.ic_delete_24dp));
 
+    }
+
+    private void checkDarkMode() {
+        if(Utils.isDarkMode(this)) {
+            toolbar.setTitleTextColor(getResources().getColor(R.color.textColorWhite));
+            tvGroupName.setTextColor(getResources().getColor(R.color.textColorWhite));
+            dividerAdmin.setBackgroundColor(getResources().getColor(R.color.grey));
+            dividerModerator.setBackgroundColor(getResources().getColor(R.color.grey));
+            dividerBan.setBackgroundColor(getResources().getColor(R.color.grey));
+            divider2.setBackgroundColor(getResources().getColor(R.color.grey));
+        } else {
+            toolbar.setTitleTextColor(getResources().getColor(R.color.primaryTextColor));
+            tvGroupName.setTextColor(getResources().getColor(R.color.primaryTextColor));
+            dividerAdmin.setBackgroundColor(getResources().getColor(R.color.light_grey));
+            dividerModerator.setBackgroundColor(getResources().getColor(R.color.light_grey));
+            dividerBan.setBackgroundColor(getResources().getColor(R.color.light_grey));
+            divider2.setBackgroundColor(getResources().getColor(R.color.light_grey));
+        }
+    }
+
+    private void checkOnGoingCall(String callType) {
+        if(CometChat.getActiveCall()!=null && CometChat.getActiveCall().getCallStatus().equals(CometChatConstants.CALL_STATUS_ONGOING) && CometChat.getActiveCall().getSessionId()!=null) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle(getResources().getString(R.string.ongoing_call))
+                        .setMessage(getResources().getString(R.string.ongoing_call_message))
+                        .setPositiveButton(getResources().getString(R.string.join), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Utils.joinOnGoingCall(CometChatGroupDetailScreenActivity.this);
+                            }
+                        }).setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+        }
+        else {
+            initiateGroupCall(guid,CometChatConstants.RECEIVER_TYPE_GROUP,callType);
+        }
     }
 
     @Override
@@ -234,6 +339,8 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.item_remove) {
             kickMember();
+        } else if(item.getItemId() == R.id.item_ban) {
+            banMember();
         }
 
         return super.onContextItemSelected(item);
@@ -305,7 +412,21 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             loggedInUserScope = getIntent().getStringExtra(StringContract.IntentStrings.MEMBER_SCOPE);
             if (loggedInUserScope != null && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN)) {
                 rlAddMemberView.setVisibility(View.VISIBLE);
+                rlBanMembers.setVisibility(View.VISIBLE);
+                rlModeratorView.setVisibility(View.VISIBLE);
                 tvDelete.setVisibility(View.VISIBLE);
+            } else if(loggedInUserScope!=null && loggedInUserScope.equals(CometChatConstants.SCOPE_MODERATOR)) {
+                rlAddMemberView.setVisibility(View.GONE);
+                rlBanMembers.setVisibility(View.VISIBLE);
+                rlModeratorView.setVisibility(View.VISIBLE);
+                rlAdminListView.setVisibility(View.VISIBLE);
+            } else {
+                dividerModerator.setVisibility(View.GONE);
+                dividerAdmin.setVisibility(View.GONE);
+                rlAdminListView.setVisibility(View.GONE);
+                rlModeratorView.setVisibility(View.GONE);
+                rlBanMembers.setVisibility(View.GONE);
+                rlAddMemberView.setVisibility(View.GONE);
             }
 
         }
@@ -320,9 +441,40 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             else
                 groupIcon.setInitials(gName);
         }
+        if (getIntent().hasExtra(StringContract.IntentStrings.GROUP_DESC)) {
+            gDesc = getIntent().getStringExtra(StringContract.IntentStrings.GROUP_DESC);
+            tvGroupDesc.setText(gDesc);
+        }
+        if (getIntent().hasExtra(StringContract.IntentStrings.GROUP_PASSWORD)) {
+            gPassword = getIntent().getStringExtra(StringContract.IntentStrings.GROUP_PASSWORD);
+        }
         if (getIntent().hasExtra(StringContract.IntentStrings.GROUP_OWNER)) {
             ownerId = getIntent().getStringExtra(StringContract.IntentStrings.GROUP_OWNER);
         }
+        if(getIntent().hasExtra(StringContract.IntentStrings.MEMBER_COUNT)) {
+            tvMemberCount.setVisibility(View.VISIBLE);
+            groupMemberCount = getIntent().getIntExtra(StringContract.IntentStrings.MEMBER_COUNT,0);
+            tvMemberCount.setText((groupMemberCount)+" Members");
+        }
+        if (getIntent().hasExtra(StringContract.IntentStrings.GROUP_TYPE)) {
+            groupType = getIntent().getStringExtra(StringContract.IntentStrings.GROUP_TYPE);
+        }
+    }
+
+
+
+    /**
+     * This method is used whenever user click <b>Banned Members</b>. It takes user to
+     * <code>CometChatBanMemberScreenActivity.class</code>
+     *
+     * @see CometChatBanMemberScreenActivity
+     */
+    private void openBanMemberListScreen() {
+        Intent intent = new Intent(this, CometChatBanMemberScreenActivity.class);
+        intent.putExtra(StringContract.IntentStrings.GUID,guid);
+        intent.putExtra(StringContract.IntentStrings.GROUP_NAME,gName);
+        intent.putExtra(StringContract.IntentStrings.MEMBER_SCOPE,loggedInUserScope);
+        startActivity(intent);
     }
 
 
@@ -330,11 +482,12 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
      * This method is used whenever user click <b>Administrator</b>. It takes user to
      * <code>CometChatAdminListScreenActivity.class</code>
      *
-     * @see CometChatAdminListScreenActivity
+     * @see CometChatAdminModeratorListScreenActivity
      */
-    public void openAdminListScreen() {
-        Intent intent = new Intent(this, CometChatAdminListScreenActivity.class);
+    public void openAdminListScreen(boolean showModerators) {
+        Intent intent = new Intent(this, CometChatAdminModeratorListScreenActivity.class);
         intent.putExtra(StringContract.IntentStrings.GUID, guid);
+        intent.putExtra(StringContract.IntentStrings.SHOW_MODERATORLIST,showModerators);
         intent.putExtra(StringContract.IntentStrings.GROUP_OWNER, ownerId);
         intent.putExtra(StringContract.IntentStrings.MEMBER_SCOPE, loggedInUserScope);
         startActivity(intent);
@@ -392,6 +545,32 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String s) {
                 Log.e(TAG, "onSuccess: " + s);
+                tvMemberCount.setText((groupMemberCount-1)+" Members");
+                groupMemberUids.remove(groupMember.getUid());
+                groupMemberAdapter.removeGroupMember(groupMember);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                Snackbar.make(rvMemberList, String.format(getResources().getString(R.string.cannot_remove_member),groupMember.getName()), Snackbar.LENGTH_SHORT).show();
+                Log.e(TAG, "onError: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * This method is used to ban group member from the group. It is used only if loggedIn user is admin.
+     *
+     * @see CometChat#banGroupMember(String, String, CometChat.CallbackListener)
+     */
+    private void banMember() {
+        CometChat.banGroupMember(groupMember.getUid(), guid, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                Log.e(TAG, "onSuccess: " + s);
+                tvMemberCount.setText((groupMemberCount-1)+" Members");
+//                int count = Integer.parseInt(tvBanMemberCount.getText().toString());
+//                tvBanMemberCount.setText(String.valueOf(++count));
                 groupMemberUids.remove(groupMember.getUid());
                 groupMemberAdapter.removeGroupMember(groupMember);
             }
@@ -421,6 +600,7 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
                 Log.e(TAG, "onSuccess: " + groupMembers.size());
                 if (groupMembers != null && groupMembers.size() != 0) {
                     adminCount = 0;
+                    moderatorCount = 0;
                     groupMemberUids.clear();
                     s = new String[groupMembers.size()];
                     for (int j = 0; j < groupMembers.size(); j++) {
@@ -428,9 +608,13 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
                         if (groupMembers.get(j).getScope().equals(CometChatConstants.SCOPE_ADMIN)) {
                             adminCount++;
                         }
+                        if (groupMembers.get(j).getScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
+                            moderatorCount++;
+                        }
                         s[j] = groupMembers.get(j).getName();
                     }
-                    tvAdminCount.setText(adminCount + "");
+//                    tvAdminCount.setText(adminCount+"");
+//                    tvModeratorCount.setText(moderatorCount+"");
                     if (groupMemberAdapter == null) {
                         groupMemberAdapter = new GroupMemberAdapter(CometChatGroupDetailScreenActivity.this, groupMembers, ownerId);
                         rvMemberList.setAdapter(groupMemberAdapter);
@@ -456,6 +640,24 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
         });
     }
 
+//    private void getBannedMemberCount() {
+//        banMemberRequest = new BannedGroupMembersRequest.BannedGroupMembersRequestBuilder(guid).setLimit(100).build();
+//        banMemberRequest.fetchNext(new CometChat.CallbackListener<List<GroupMember>>() {
+//            @Override
+//            public void onSuccess(List<GroupMember> groupMembers) {
+//                if (groupMembers.size()>=99) {
+//                    tvBanMemberCount.setText("99+");
+//                } else {
+//                    tvBanMemberCount.setText(groupMembers.size()+"");
+//                }
+//            }
+//
+//            @Override
+//            public void onError(CometChatException e) {
+//                Log.e(TAG, "onError: "+e.getMessage()+"\n"+e.getCode());
+//            }
+//        });
+//    }
 
     /**
      * This method is used to leave the loggedIn User from respective group.
@@ -488,21 +690,21 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             public void onGroupMemberJoined(Action action, User joinedUser, Group joinedGroup) {
                 Log.e(TAG, "onGroupMemberJoined: " + joinedUser.getUid());
                 if (joinedGroup.getGuid().equals(guid))
-                    updateGroupMember(joinedUser,false,false,action);
+                    updateGroupMember(joinedUser, false, false, action);
             }
 
             @Override
             public void onGroupMemberLeft(Action action, User leftUser, Group leftGroup) {
                 Log.d(TAG, "onGroupMemberLeft: ");
                 if (leftGroup.getGuid().equals(guid))
-                    updateGroupMember(leftUser,true,false,action);
+                    updateGroupMember(leftUser, true, false, action);
             }
 
             @Override
             public void onGroupMemberKicked(Action action, User kickedUser, User kickedBy, Group kickedFrom) {
                 Log.d(TAG, "onGroupMemberKicked: ");
                 if (kickedFrom.getGuid().equals(guid))
-                    updateGroupMember(kickedUser,true,false,action);
+                    updateGroupMember(kickedUser, true, false, action);
             }
 
             @Override
@@ -515,7 +717,24 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             @Override
             public void onMemberAddedToGroup(Action action, User addedby, User userAdded, Group addedTo) {
                 if (addedTo.getGuid().equals(guid))
-                    updateGroupMember(userAdded,false,false,action);
+                    updateGroupMember(userAdded, false, false, action);
+            }
+
+            @Override
+            public void onGroupMemberBanned(Action action, User bannedUser, User bannedBy, Group bannedFrom) {
+                if (bannedFrom.getGuid().equals(guid)) {
+//                    int count = Integer.parseInt(tvBanMemberCount.getText().toString());
+//                    tvBanMemberCount.setText(String.valueOf(++count));
+                    updateGroupMember(bannedUser, true, false, action);
+                }
+            }
+
+            @Override
+            public void onGroupMemberUnbanned(Action action, User unbannedUser, User unbannedBy, Group unbannedFrom) {
+                if (unbannedFrom.getGuid().equals(guid)) {
+//                    int count = Integer.parseInt(tvBanMemberCount.getText().toString());
+//                    tvBanMemberCount.setText(String.valueOf(--count));
+                }
             }
         });
     }
@@ -536,31 +755,199 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
      */
     private void updateGroupMember(User user, boolean isRemoved, boolean isScopeUpdate, Action action) {
         if (groupMemberAdapter != null) {
-            if (!isRemoved && !isScopeUpdate)
+            if (!isRemoved && !isScopeUpdate) {
                 groupMemberAdapter.addGroupMember(UserToGroupMember(user, false, action.getOldScope()));
-            else if (isRemoved && !isScopeUpdate)
+                int count = ++groupMemberCount;
+                tvMemberCount.setText(count+" Members");
+            } else if (isRemoved && !isScopeUpdate) {
                 groupMemberAdapter.removeGroupMember(UserToGroupMember(user, false, action.getOldScope()));
-            else if (!isRemoved)
-            {
+                int count = --groupMemberCount;
+                tvMemberCount.setText(count+" Members");
+                if(action.getNewScope()!=null) {
+                    if (action.getNewScope().equals(CometChatConstants.SCOPE_ADMIN)) {
+                        adminCount = adminCount - 1;
+//                        tvAdminCount.setText(String.valueOf(adminCount));
+                    } else if (action.getNewScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
+                        moderatorCount = moderatorCount - 1;
+//                        tvModeratorCount.setText(String.valueOf(moderatorCount));
+                    }
+                }
+            } else if (!isRemoved) {
                 groupMemberAdapter.updateMember(UserToGroupMember(user, true, action.getNewScope()));
                 if (action.getNewScope().equals(CometChatConstants.SCOPE_ADMIN)) {
                     adminCount = adminCount + 1;
-                    tvAdminCount.setText(String.valueOf(adminCount));
+//                    tvAdminCount.setText(String.valueOf(adminCount));
                     if (user.getUid().equals(loggedInUser.getUid())) {
                         rlAddMemberView.setVisibility(View.VISIBLE);
                         loggedInUserScope = CometChatConstants.SCOPE_ADMIN;
                         tvDelete.setVisibility(View.VISIBLE);
-                    } else {
-                        loggedInUserScope = action.getNewScope();
-                        rlAddMemberView.setVisibility(View.GONE);
-                        tvDelete.setVisibility(View.GONE);
+                    }
+                } else if (action.getNewScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
+                    moderatorCount = moderatorCount + 1;
+//                    tvModeratorCount.setText(String.valueOf(moderatorCount));
+                    if (user.getUid().equals(loggedInUser.getUid())) {
+                        rlBanMembers.setVisibility(View.VISIBLE);
+                        loggedInUserScope = CometChatConstants.SCOPE_MODERATOR;
                     }
                 } else if (action.getOldScope().equals(CometChatConstants.SCOPE_ADMIN)) {
                     adminCount = adminCount - 1;
-                    tvAdminCount.setText(String.valueOf(adminCount));
+//                    tvAdminCount.setText(String.valueOf(adminCount));
+                } else if (action.getOldScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
+                    moderatorCount = moderatorCount -1;
+//                    tvModeratorCount.setText(String.valueOf(moderatorCount));
                 }
             }
         }
+    }
+
+
+    private void updateGroupDialog() {
+        dialog = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.update_group,null);
+        Avatar avatar = view.findViewById(R.id.group_icon);
+        TextInputEditText avatar_url = view.findViewById(R.id.icon_url_edt);
+        if (groupIcon.getAvatarUrl()!=null) {
+            avatar.setVisibility(View.VISIBLE);
+            avatar.setAvatar(groupIcon.getAvatarUrl());
+            avatar_url.setText(groupIcon.getAvatarUrl());
+        } else {
+            avatar.setVisibility(View.GONE);
+        }
+        TextInputEditText groupName = view.findViewById(R.id.groupname_edt);
+        TextInputEditText groupDesc = view.findViewById(R.id.groupdesc_edt);
+        TextInputEditText groupOldPwd = view.findViewById(R.id.group_old_pwd);
+        TextInputEditText groupNewPwd = view.findViewById(R.id.group_new_pwd);
+        TextInputLayout groupOldPwdLayout = view.findViewById(R.id.input_group_old_pwd);
+        TextInputLayout groupNewPwdLayout = view.findViewById(R.id.input_group_new_pwd);
+        Spinner groupTypeSp = view.findViewById(R.id.groupTypes);
+        MaterialButton updateGroupBtn = view.findViewById(R.id.updateGroupBtn);
+        MaterialButton cancelBtn = view.findViewById(R.id.cancelBtn);
+        groupName.setText(gName);
+        groupDesc.setText(gDesc);
+        if (groupType!=null && groupType.equals(CometChatConstants.GROUP_TYPE_PUBLIC)) {
+            groupTypeSp.setSelection(0);
+            groupOldPwdLayout.setVisibility(View.GONE);
+            groupNewPwdLayout.setVisibility(View.GONE);
+        } else if(groupType!=null && groupType.equals(CometChatConstants.GROUP_TYPE_PRIVATE)){
+            groupTypeSp.setSelection(1);
+            groupOldPwdLayout.setVisibility(View.GONE);
+            groupNewPwdLayout.setVisibility(View.GONE);
+        } else {
+            groupTypeSp.setSelection(2);
+            groupOldPwdLayout.setVisibility(View.VISIBLE);
+            groupNewPwdLayout.setVisibility(View.VISIBLE);
+        }
+
+        groupTypeSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (parent.getSelectedItemPosition()==2) {
+                    if (gPassword==null) {
+                        groupOldPwdLayout.setVisibility(View.GONE);
+                    } else
+                        groupOldPwdLayout.setVisibility(View.VISIBLE);
+                    groupNewPwdLayout.setVisibility(View.VISIBLE);
+                } else
+                {
+                    groupOldPwdLayout.setVisibility(View.GONE);
+                    groupNewPwdLayout.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        avatar_url.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(!s.toString().isEmpty())
+                {
+                    avatar.setVisibility(View.VISIBLE);
+                    Glide.with(CometChatGroupDetailScreenActivity.this).load(s.toString()).into(avatar);
+                } else
+                    avatar.setVisibility(View.GONE);
+            }
+        });
+        AlertDialog alertDialog = dialog.create();
+        alertDialog.setView(view);
+        updateGroupBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Group group = new Group();
+                group.setDescription(groupDesc.getText().toString().trim());
+                if(groupName.getText().toString().isEmpty()) {
+                    groupName.setError(getString(R.string.fill_this_field));
+                } else if (groupTypeSp.getSelectedItemPosition()==2) {
+                    if (gPassword != null && groupOldPwd.getText().toString().trim().isEmpty()) {
+                        groupOldPwd.setError(getResources().getString(R.string.fill_this_field));
+                    } else if (gPassword != null && !groupOldPwd.getText().toString().trim().equals(gPassword.trim())) {
+                        groupOldPwd.setError(getResources().getString(R.string.password_not_matched));
+                    } else if (groupNewPwd.getText().toString().trim().isEmpty()) {
+                        groupNewPwd.setError(getResources().getString(R.string.fill_this_field));
+                    } else {
+                        group.setName(groupName.getText().toString());
+                        group.setGuid(guid);
+                        group.setGroupType(CometChatConstants.GROUP_TYPE_PASSWORD);
+                        group.setPassword(groupNewPwd.getText().toString());
+                        group.setIcon(avatar_url.getText().toString());
+                        updateGroup(group, alertDialog);
+                    }
+                }
+                else if (groupTypeSp.getSelectedItemPosition()==1){
+                    group.setName(groupName.getText().toString());
+                    group.setGuid(guid);
+                    group.setGroupType(CometChatConstants.GROUP_TYPE_PRIVATE);
+                    group.setIcon(avatar_url.getText().toString());
+                } else {
+                    group.setName(groupName.getText().toString());
+                    group.setGroupType(CometChatConstants.GROUP_TYPE_PUBLIC);
+                    group.setIcon(avatar_url.getText().toString());
+                }
+                group.setGuid(guid);
+                updateGroup(group,alertDialog);
+            }
+        });
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+    private void updateGroup(Group group,AlertDialog dialog) {
+        CometChat.updateGroup(group, new CometChat.CallbackListener<Group>() {
+            @Override
+            public void onSuccess(Group group) {
+                if (rvMemberList!=null) {
+                    Snackbar.make(rvMemberList,getResources().getString(R.string.group_updated),Snackbar.LENGTH_LONG).show();
+                    getGroup();
+                }
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                if (rvMemberList!=null) {
+                    Snackbar.make(rvMemberList,getResources().getString(R.string.group_update_failed),Snackbar.LENGTH_LONG).show();
+                }
+                dialog.dismiss();
+            }
+        });
     }
 
     /**
@@ -570,16 +957,45 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
         CometChat.removeGroupListener(TAG);
     }
 
+    /**
+     * This method is used to get Group Details.
+     *
+     * @see CometChat#getGroup(String, CometChat.CallbackListener)
+     */
+    private void getGroup() {
+
+        CometChat.getGroup(guid, new CometChat.CallbackListener<Group>() {
+            @Override
+            public void onSuccess(Group group) {
+                gName = group.getName();
+                tvGroupName.setText(gName);
+                groupIcon.setAvatar(group.getIcon());
+                loggedInUserScope = group.getScope();
+                groupMemberCount = group.getMembersCount();
+                groupType = group.getGroupType();
+                gDesc = group.getDescription();
+                tvGroupDesc.setText(gDesc);
+                tvMemberCount.setText(groupMemberCount+" Members");
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                Toast.makeText(CometChatGroupDetailScreenActivity.this,"Error:"+e.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        getGroup();
         groupMembersRequest = null;
         if (groupMemberAdapter != null) {
             groupMemberAdapter.resetAdapter();
             groupMemberAdapter = null;
 
         }
+//        getBannedMemberCount();
         getGroupMembers();
         addGroupListener();
     }

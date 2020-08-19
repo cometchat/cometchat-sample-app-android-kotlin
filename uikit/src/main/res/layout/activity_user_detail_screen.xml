@@ -3,13 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@android:color/white"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:layout_width="match_parent"
         android:id="@+id/user_detail_toolbar"
-        android:background="@android:color/white"
         app:title="@string/user_title"
         android:layout_height="wrap_content"/>
 
@@ -17,7 +15,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:background="@android:color/white"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <LinearLayout
@@ -87,6 +84,7 @@
     <!--End of User_Detail_Layout-->
 
             <View
+                android:id="@+id/divider_1"
                 android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:background="@color/light_grey"
@@ -117,6 +115,7 @@
                     android:id="@+id/history_rv"
                     android:layout_height="wrap_content"/>
                 <View
+                    android:id="@+id/divider_2"
                     android:layout_marginTop="20dp"
                     android:layout_width="match_parent"
                     android:background="@color/light_grey"
@@ -170,7 +169,7 @@
                     android:layout_height="wrap_content"/>
 
                 <View
-                    android:id="@+id/tvSeprator"
+                    android:id="@+id/divider_3"
                     android:layout_width="match_parent"
                     android:background="@color/light_grey"
                     android:layout_marginBottom="4dp"

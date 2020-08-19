@@ -1,18 +1,19 @@
 package com.cometchat.pro.androiduikit
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.cometchat.pro.androiduikit.constants.AppConfig
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
-import java.util.ArrayList
-import com.cometchat.pro.androiduikit.constants.AppConfig
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import utils.Utils
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,6 +29,9 @@ class MainActivity : AppCompatActivity() {
     private var superhero3: MaterialCardView? = null
 
     private var superhero4: MaterialCardView? = null
+
+    private var ivLogo: ImageView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         superhero2 = findViewById(R.id.superhero2)
         superhero3 = findViewById(R.id.superhero3)
         superhero4 = findViewById(R.id.superhero4)
+        ivLogo = findViewById(R.id.ivLogo)
         loginBtn!!.setOnClickListener { startActivity(Intent(this@MainActivity, LoginActivity::class.java)) }
 
         superhero1!!.setOnClickListener { view ->
@@ -55,6 +60,11 @@ class MainActivity : AppCompatActivity() {
             login("superhero4")
         }
 
+        if (Utils.isDarkMode(this)) {
+            ivLogo!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+        } else {
+            ivLogo!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor)))
+        }
     }
 
     private fun login(uid: String) {

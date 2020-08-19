@@ -89,6 +89,8 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
 
     private boolean isIncoming;
 
+    private boolean isOngoing;
+
     private Uri notification;
 
     public static CometChatAudioHelper cometChatAudioHelper;
@@ -113,6 +115,10 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
      */
     private void handleIntent() {
         Intent intent = getIntent();
+        if (intent.hasExtra(StringContract.IntentStrings.JOIN_ONGOING))
+        {
+            isOngoing = intent.getBooleanExtra(StringContract.IntentStrings.JOIN_ONGOING,false);
+        }
         if (intent.hasExtra(StringContract.IntentStrings.ID)) {
             String id = intent.getStringExtra(StringContract.IntentStrings.ID);
         }
@@ -126,17 +132,19 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         if (intent.hasExtra(StringContract.IntentStrings.NAME)) {
             name = intent.getStringExtra(StringContract.IntentStrings.NAME);
         }
-        try {
-            isVideo = intent.getAction().equals(CometChatConstants.CALL_TYPE_VIDEO);
+        if(!isOngoing) {
+            try {
+                isVideo = intent.getAction().equals(CometChatConstants.CALL_TYPE_VIDEO);
 
-            isIncoming = intent.getType().equals(StringContract.IntentStrings.INCOMING);
+                isIncoming = intent.getType().equals(StringContract.IntentStrings.INCOMING);
 
-            if(isIncoming)
-                setTheme(R.style.TransparentCompat);
-            else
-                setTheme(R.style.AppTheme);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+                if (isIncoming)
+                    setTheme(R.style.TransparentCompat);
+                else
+                    setTheme(R.style.AppTheme);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -176,6 +184,14 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
      * This method is used to set the values recieve from <code>handleIntent()</code>.
      */
     private void setValues() {
+        if (isOngoing)
+        {
+            cometChatAudioHelper.stop(false);
+            if (CometChat.getActiveCall()!=null)
+                Utils.startCall(this,CometChat.getActiveCall(),mainView);
+            else
+                onBackPressed();
+        }
         userTv.setText(name);
         callerName.setText(name);
         userAv.setAvatar(avatar);
@@ -206,8 +222,6 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
                 callMessage.setText(getResources().getString(R.string.incoming_audio_call));
                 callMessage.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_call_incoming_24dp),null,null,null);
             }
-            if (getSupportActionBar()!=null)
-                getSupportActionBar().hide();
         } else {
             callTv.setText(getString(R.string.calling));
             cometChatAudioHelper.startOutgoingAudio(OutgoingAudioHelper.Type.IN_COMMUNICATION);
@@ -221,7 +235,8 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
                 hangUp.setImageDrawable(getResources().getDrawable(R.drawable.ic_call_end_white_24dp));
             }
         }
-
+        if (getSupportActionBar()!=null)
+            getSupportActionBar().hide();
     }
 
     /**
@@ -266,7 +281,8 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
 
             @Override
             public void onError(CometChatException e) {
-                Log.e(TAG, "onErrorReject: "+e.getMessage());
+                finish();
+                Log.e(TAG, "onErrorReject: "+e.getMessage()+" "+e.getCode());
                 Toast.makeText(CometChatCallActivity.this,"Unable to end call",Toast.LENGTH_LONG).show();
             }
         });
@@ -286,12 +302,14 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         CometChat.acceptCall(sessionId, new CometChat.CallbackListener<Call>() {
             @Override
             public void onSuccess(Call call) {
+                Log.e("CallMeta",call.toString());
                 startCall(mainView,call);
             }
 
             @Override
             public void onError(CometChatException e) {
-                Log.e(TAG, "onErrorAccept: "+e.getMessage() );
+                finish();
+                Log.e(TAG, "onErrorAccept: "+e.getMessage()+" "+e.getCode());
             }
 
         });
@@ -311,6 +329,9 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         Utils.startCall(CometChatCallActivity.this,call,mainView);
     }
 
+    public void startOnGoingCall(Call call) {
+
+    }
 
     @Override
     public void onBackPressed() {

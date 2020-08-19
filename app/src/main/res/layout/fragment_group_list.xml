@@ -13,7 +13,6 @@
     </data>
     <LinearLayout
         android:paddingRight="16dp"
-        android:background="@color/textColorWhite"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:orientation="vertical"
@@ -23,7 +22,6 @@
             android:layout_gravity="center"
             android:textStyle="bold"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/primaryTextColor"
             android:text="GroupList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context="screen.adminlist.CometChatAdminListScreen">
+    tools:context="screen.adminAndModeratorList.CometChatAdminModeratorListScreen">
 
     <com.google.android.material.appbar.MaterialToolbar
         app:title="Administrators"
@@ -35,6 +35,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"/>
         <TextView
+            android:id="@+id/add_as_tv"
             android:layout_toRightOf="@+id/ivNotification"
             android:layout_marginLeft="16dp"
             android:text="@string/add_as_admin"

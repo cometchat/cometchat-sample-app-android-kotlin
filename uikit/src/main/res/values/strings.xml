@@ -14,7 +14,7 @@
     <!-- Messages Preferences -->
 
     <!-- Sync Preferences -->
-    <string name="message">message</string>
+    <string name="message">Write a message</string>
     <string name="you_won_t_be_able_send_or_receive_messages">You won\'t be able send or receive messages</string>
     <string name="unblock">Unblock</string>
     <string name="unabl_to_join_message">Unable to join group</string>
@@ -22,7 +22,7 @@
     <string name="owner">Owner</string>
     <string name="admin">Admin</string>
     <string name="create_group">Create Group</string>
-    <string name="kindly_enter_group_name_to_proceed">Kindly, enter group name to proceed</string>
+    <string name="kindly_enter_group_details_to_proceed">Kindly, enter group details to proceed</string>
     <string name="enter_group_name">Enter Group Name</string>
     <array name="privacySettings">
         <item>Everybody</item>
@@ -98,14 +98,14 @@
     <string name="exit_group_title">Exit Group</string>
     <string name="exit_group_message">Exit from group ?</string>
     <string name="exit">Exit</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Delete Message</string>
     <string name="delete_group_title">Delete Group</string>
     <string name="delete_group_message">Delete the group</string>
     <string name="group_delete_error">Group Deletion Failed</string>
     <string name="cannot_remove_member">Can\'t remove %1$s</string>
     <string name="leave_group_error">Unable to leave group</string>
     <string name="blocked_list_error">Blocked userlist retrieval failed</string>
-    <string name="edit">Edit</string>
+    <string name="edit">Edit Message</string>
     <string name="preview">Preview</string>
     <string name="password">Password</string>
     <string name="join">Join</string>
@@ -128,7 +128,7 @@
     <string name="actions">Actions</string>
     <string name="user_title">User</string>
     <string name="blocked_user">Blocked users</string>
-    <string name="forward">Forward</string>
+    <string name="forward">Forward Message</string>
     <string name="add">Add</string>
     <string name="add_as_admin">Add as Admin</string>
     <string name="group_title">Groups</string>
@@ -150,5 +150,64 @@
     <string name="custom_message">Custom Message not supported</string>
     <string name="no_block_users">No Block Users</string>
     <string name="no_missedcall_message">You dont have any missed calls</string>
+    <string name="ongoing_call">Call is Ongoing</string>
+    <string name="ongoing_call_message">There is already Call ongoing. Would you like to join ?</string>
+    <string name="tap_to_join_call">Tap to join Ongoing Call</string>
+    <string name="slide_to_cancel">Slide To Cancel</string>
+    <string name="enter_avatar_url">Enter Url for avatar</string>
+    <string name="enter_user_name">Enter user name</string>
+    <string name="update_user">Update User</string>
+    <string name="banned_members">Banned Members</string>
+    <string name="ban_list_fetch_error">Unable to fetch Banned Members List</string>
+    <string name="ban_member_of_group">Banned Members of %1$s</string>
+    <string name="member_unbanned_success">%1$s unbanned from %2$s</string>
+    <string name="unban_error">Unable to unban %1$s</string>
 
+    <string name="enter_group_desc">Enter Group Description</string>
+    <string name="enter_group_pwd">Enter Group Password</string>
+    <string name="enter_group_cnf_pwd">Confirm Password</string>
+    <string name="password_not_matched">Password not matched</string>
+    <string name="enter_password_to_join">Enter Password to join %1$s</string>
+    <string name="no_ban_members">No Banned Members</string>
+    <string name="moderators">Moderators</string>
+    <string name="modertor_list_retrieve_error">Unable to retrieve moderator list.</string>
+    <string name="remove_from_moderator">Remove %1$s from Moderator</string>
+    <string name="removed_from_moderator">%1$s is removed from moderator privilege</string>
+    <string name="make_moderator">Make Moderator</string>
+    <string name="make_moderator_question">Do you like to make %1$s as a Moderator</string>
+    <string name="user_is_moderator">%1$s is now Moderator</string>
+    <string name="add_as_moderator">Add as Moderator</string>
+    <string name="only_admin_removes_moderator">Only Admin can remove moderator</string>
+    <string name="moderator">Moderator</string>
+    <string name="update_group">Update Group</string>
+    <string name="enter_groupicon_url">Enter Group Icon Url</string>
+    <string name="group_updated">Group Successfully Updated</string>
+    <string name="group_update_failed">Group not updated</string>
+    <string name="enter_old_group_pwd">Enter Old Password</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="reply">Reply in Message</string>
+    <string name="shared_a_image">Shared a Image</string>
+    <string name="shared_a_audio">Shared a Audio File %1$s</string>
+    <string name="shared_a_video">Shared a Video</string>
+    <string name="shared_a_file">Shared a File %1$s</string>
+    <string name="share">Share</string>
+    <string name="share_message">Share a message</string>
+    <string name="shared_from_cometchat">Shared from cometchat</string>
+    <string name="sensitive_content">Unsafe Content.</string>
+    <string name="sentimment_content">The following message include potentially sensitive content.</string>
+    <string name="view">View</string>
+    <string name="sentiment_alert">Sentiment Alert</string>
+    <string name="sentiment_alert_message">Would you like to view this message it may contains sensitive content.</string>
+    <string name="reply_message">Reply a message</string>
+    <string name="reply_thread">Start a Thread</string>K
+    <string name="ban">Ban</string>
+    <string name="thread">Thread</string>
+    <string name="thread_in_name">Thread in %1$s</string>
+    <string name="sentAtTxt">Sent at : %1$s</string>
+    <string name="copy_message">Copy Message</string>
+    <array name="groupType">
+        <item>Public Group</item>
+        <item>Private Group</item>
+        <item>Password Protected Group</item>
+    </array>
 </resources>

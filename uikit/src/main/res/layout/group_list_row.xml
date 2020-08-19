@@ -39,6 +39,9 @@
 
 
             <TextView
+                android:drawablePadding="8dp"
+                android:drawableTint="@color/grey"
+                tools:drawableRight="@drawable/ic_lock_24dp"
                 android:id="@+id/txt_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +64,6 @@
                 android:layout_below="@id/txt_user_name"
                 android:layout_toEndOf="@id/av_group"
                 android:textSize="@dimen/fourteen"
-                android:text="@{group.groupType}"
                 android:maxLines="1"
                 tools:text="Public"
                 android:visibility="visible" />

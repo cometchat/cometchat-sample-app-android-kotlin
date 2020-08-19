@@ -69,6 +69,7 @@ public class CometChatAddMemberScreen extends Fragment {
 
     private FontUtils fontUtils;
 
+    private MaterialToolbar toolbar;
 
     List<GroupMember> groupMembers = new ArrayList<>();
 
@@ -95,10 +96,11 @@ public class CometChatAddMemberScreen extends Fragment {
         rvUserList = view.findViewById(R.id.rv_user_list);
         etSearch = view.findViewById(R.id.search_bar);
 
-        MaterialToolbar toolbar = view.findViewById(R.id.add_member_toolbar);
+        toolbar = view.findViewById(R.id.add_member_toolbar);
 
         setToolbar(toolbar);
 
+        checkDarkMode();
 
         clearSearch = view.findViewById(R.id.clear_search);
         etSearch.addTextChangedListener(new TextWatcher() {
@@ -186,6 +188,14 @@ public class CometChatAddMemberScreen extends Fragment {
         }));
     }
 
+    private void checkDarkMode() {
+        if(Utils.isDarkMode(getContext())) {
+            toolbar.setTitleTextColor(getResources().getColor(R.color.textColorWhite));
+        } else {
+            toolbar.setTitleTextColor(getResources().getColor(R.color.primaryTextColor));
+        }
+    }
+
     private void setToolbar(MaterialToolbar toolbar) {
         if (Utils.changeToolbarFont(toolbar)!=null){
             Utils.changeToolbarFont(toolbar).setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
@@ -254,7 +264,6 @@ public class CometChatAddMemberScreen extends Fragment {
                         if (!groupMembersUids.contains(user.getUid()))
                         {
                             userArrayList.add(user);
-                            groupMembers.add(new GroupMember(user.getUid(),CometChatConstants.SCOPE_PARTICIPANT));
                         }
                     }
                     setAdapter(userArrayList);

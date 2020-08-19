@@ -361,6 +361,9 @@ public class Avatar extends AppCompatImageView {
         }
     }
 
+    public String getAvatarUrl() {
+        return  this.avatarUrl;
+    }
     /**
      * This method is used to set first two character as image. It is used when user, group or url
      * is null.

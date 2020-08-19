@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -83,6 +86,8 @@ public class CometChatUnified extends AppCompatActivity implements
 
     private Group group;
 
+    private Fragment active = new CometChatConversationListScreen();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,7 +131,7 @@ public class CometChatUnified extends AppCompatActivity implements
                     if (group.getGroupType().equals(CometChatConstants.GROUP_TYPE_PASSWORD)) {
                         View dialogview = getLayoutInflater().inflate(R.layout.cc_dialog, null);
                         TextView tvTitle = dialogview.findViewById(R.id.textViewDialogueTitle);
-                        tvTitle.setText("");
+                        tvTitle.setText(String.format(getResources().getString(R.string.enter_password_to_join),group.getName()));
                         new CustomAlertDialogHelper(CometChatUnified.this, getResources().getString(R.string.password), dialogview, getResources().getString(R.string.join),
                                 "", getResources().getString(R.string.cancel), CometChatUnified.this, 1, false);
                     } else if (group.getGroupType().equals(CometChatConstants.GROUP_TYPE_PUBLIC)) {
@@ -153,6 +158,14 @@ public class CometChatUnified extends AppCompatActivity implements
      */
     private void initViewComponent() {
 
+        if (!Utils.hasPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE})) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,
+                                Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        StringContract.RequestCode.RECORD);
+            }
+        }
         badgeDrawable = activityCometChatUnifiedBinding.bottomNavigation.getOrCreateBadge(R.id.menu_conversation);
 
         activityCometChatUnifiedBinding.bottomNavigation.setOnNavigationItemSelectedListener(this);
@@ -160,8 +173,6 @@ public class CometChatUnified extends AppCompatActivity implements
         badgeDrawable.setVisible(false);
 
         loadFragment(new CometChatConversationListScreen());
-
-
     }
 
     /**
@@ -178,23 +189,20 @@ public class CometChatUnified extends AppCompatActivity implements
         CometChat.joinGroup(group.getGuid(), group.getGroupType(), groupPassword, new CometChat.CallbackListener<Group>() {
             @Override
             public void onSuccess(Group group) {
-                if (progressDialog != null) {
+                if (progressDialog!=null)
                     progressDialog.dismiss();
-                }
+
                  if(group!=null)
                      startGroupIntent(group);
-
             }
 
             @Override
             public void onError(CometChatException e) {
+                if (progressDialog!=null)
+                    progressDialog.dismiss();
 
                 Snackbar.make(activityCometChatUnifiedBinding.bottomNavigation,getResources().getString(R.string.unabl_to_join_message)+e.getMessage(),
                         Snackbar.LENGTH_SHORT).show();
-
-                if (progressDialog != null) {
-                    progressDialog.dismiss();
-                }
 
             }
         });
@@ -221,7 +229,8 @@ public class CometChatUnified extends AppCompatActivity implements
         CometChat.getUnreadMessageCount(new CometChat.CallbackListener<HashMap<String, HashMap<String, Integer>>>() {
             @Override
             public void onSuccess(HashMap<String, HashMap<String, Integer>> stringHashMapHashMap) {
-
+                Log.e(TAG, "onSuccess: " + stringHashMapHashMap);
+                unreadCount.clear();
                 unreadCount.addAll(stringHashMapHashMap.get("user").keySet());    //Add users whose messages are unread.
                 unreadCount.addAll(stringHashMapHashMap.get("group").keySet());    //Add groups whose messages are unread.
 
@@ -230,8 +239,9 @@ public class CometChatUnified extends AppCompatActivity implements
                 } else {
                     badgeDrawable.setVisible(true);
                 }
-                if (unreadCount.size()!=0)
+                if (unreadCount.size() != 0) {
                     badgeDrawable.setNumber(unreadCount.size());  //add total count of users and groups whose messages are unread in BadgeDrawable
+                }
             }
 
             @Override
@@ -269,8 +279,8 @@ public class CometChatUnified extends AppCompatActivity implements
     private void setBadge(){
         if (badgeDrawable.getNumber()==0){
             badgeDrawable.setVisible(false);
-        }
-        badgeDrawable.setVisible(true);
+        } else
+            badgeDrawable.setVisible(true);
         badgeDrawable.setNumber(badgeDrawable.getNumber() + 1);
     }
 
@@ -328,7 +338,11 @@ public class CometChatUnified extends AppCompatActivity implements
         intent.putExtra(StringContract.IntentStrings.AVATAR, group.getIcon());
         intent.putExtra(StringContract.IntentStrings.GROUP_OWNER,group.getOwner());
         intent.putExtra(StringContract.IntentStrings.NAME, group.getName());
+        intent.putExtra(StringContract.IntentStrings.GROUP_TYPE,group.getGroupType());
         intent.putExtra(StringContract.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP);
+        intent.putExtra(StringContract.IntentStrings.MEMBER_COUNT,group.getMembersCount());
+        intent.putExtra(StringContract.IntentStrings.GROUP_DESC,group.getDescription());
+        intent.putExtra(StringContract.IntentStrings.GROUP_PASSWORD,group.getPassword());
         startActivity(intent);
     }
 
@@ -344,6 +358,7 @@ public class CometChatUnified extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
+        Fragment fragment = null;
         if (itemId == R.id.menu_users) {
             fragment = new CometChatUserListScreen();
         } else if (itemId == R.id.menu_group) {
@@ -366,8 +381,6 @@ public class CometChatUnified extends AppCompatActivity implements
             alertDialog.dismiss();
         } else if (which == DialogInterface.BUTTON_POSITIVE) { // Join
             try {
-                progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.joining));
-                progressDialog.setCancelable(false);
                 groupPassword = groupPasswordInput.getText().toString();
                 if (groupPassword.length() == 0) {
                     groupPasswordInput.setText("");
@@ -406,5 +419,4 @@ public class CometChatUnified extends AppCompatActivity implements
         super.onPause();
         unreadCount.clear();    //Clear conversation count when app pauses or goes background.
     }
-
 }

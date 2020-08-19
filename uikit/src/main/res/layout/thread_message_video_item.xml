@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:id="@+id/rl_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.cometchat.pro.uikit.Avatar
+            android:layout_width="50dp"
+            android:id="@+id/iv_user"
+            app:avatar_shape="@string/rectangle"
+            tools:src="@tools:sample/avatars"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_height="50dp"/>
+        <TextView
+            android:id="@+id/tv_user"
+            tools:text="Iron Man"
+            android:textSize="@dimen/fourteen"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/iv_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_below="@+id/tv_user"
+            android:layout_toEndOf="@id/iv_user"
+            android:id="@+id/cv_image_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/colorPrimary"
+            android:layout_margin="10dp">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/go_video_message"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:src="@drawable/ic_defaulf_image"
+                    android:background="@color/textColorWhite"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true" />
+                <ImageView
+                    android:id="@+id/playBtn"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_play_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/img_progress_bar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateDrawable="@drawable/cc_progress_drawable"
+                />
+
+        </androidx.cardview.widget.CardView>
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="11:00 PM"
+            android:layout_marginLeft="8dp"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/tv_user"
+            android:layout_alignBottom="@+id/tv_user"
+            android:layout_gravity="center"
+            android:textStyle="bold"/>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

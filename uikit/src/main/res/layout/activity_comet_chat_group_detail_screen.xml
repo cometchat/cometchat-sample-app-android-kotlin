@@ -6,26 +6,17 @@
     android:layout_height="match_parent"
     android:scrollbars="none">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/groupDetailToolbar"
         android:layout_width="match_parent"
-        app:elevation="0dp"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/groupDetailToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:navigationIcon="@drawable/ic_close_24dp"
-            app:title="@string/details"
-            android:background="@android:color/white" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/ic_close_24dp"
+        app:title="@string/details" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:background="@android:color/white"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -57,6 +48,8 @@
 
                     <TextView
                         android:id="@+id/tv_group_name"
+                        android:maxLines="2"
+                        android:ellipsize="end"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/primaryTextColor"
@@ -65,12 +58,10 @@
                         tools:text="@tools:sample/full_names" />
 
                     <TextView
-                        android:id="@+id/tv_members"
+                        android:id="@+id/group_description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        tools:text="3 members"
-                        tools:visibility="visible" />
+                        tools:text="@tools:sample/lorem/random" />
                 </LinearLayout>
                 <ImageView
                     android:padding="8dp"
@@ -84,7 +75,8 @@
                     android:src="@drawable/ic_videocam_green_24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
-                <ImageView                    android:padding="8dp"
+                <ImageView
+                    android:padding="8dp"
                     android:clickable="true"
                     android:foreground="?attr/selectableItemBackground"
                     android:id="@+id/callBtn_iv"
@@ -125,25 +117,101 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </RelativeLayout>
-
-
-            <include
-                android:id="@+id/divider"
-                layout="@layout/divider"
+            <TextView
+                android:id="@+id/tv_seperator_admin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="4dp"
+                android:background="@color/light_grey"
                 android:layout_below="@id/rlAdminView" />
+            <RelativeLayout
+                android:id="@+id/rlModeratorView"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_below="@+id/tv_seperator_admin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@string/moderators"
+                    android:textSize="18sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tv_moderator_count"
+                    android:gravity="center"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:drawableEnd="@drawable/ic_arrow_right_24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_seperator_moderator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="4dp"
+                android:background="@color/light_grey"
+                android:layout_below="@id/rlModeratorView" />
+            <RelativeLayout
+                android:id="@+id/rlBanView"
+                android:visibility="gone"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_below="@id/tv_seperator_moderator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@string/banned_members"
+                    android:textSize="18sp"
+                    android:textColor="@color/red"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tv_ban_count"
+                    android:gravity="center"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:drawableEnd="@drawable/ic_arrow_right_24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/tvMember"
+                android:id="@+id/tv_seperator_ban"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="4dp"
+                android:background="@color/light_grey"
+                android:layout_below="@id/rlBanView" />
+
+            <TextView
+                android:id="@+id/tv_members"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/divider"
+                android:layout_below="@+id/tv_seperator_ban"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
+                android:textStyle="bold"
                 android:layout_marginBottom="8dp"
                 android:text="@string/members"
-                android:textSize="@dimen/twelve"
+                android:textSize="@dimen/fourteen"
                 android:letterSpacing="0.1"
                 android:textAllCaps="true" />
 
@@ -151,7 +219,7 @@
                 android:id="@+id/rl_add_member"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tvMember"
+                android:layout_below="@id/tv_members"
                 android:clickable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:paddingTop="8dp"
@@ -206,8 +274,7 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:paddingRight="8dp"
-                    android:text="@string/load_more"
-                    android:textColor="@color/secondaryTextColor"/>
+                    android:text="@string/load_more"/>
             </RelativeLayout>
 
             <TextView

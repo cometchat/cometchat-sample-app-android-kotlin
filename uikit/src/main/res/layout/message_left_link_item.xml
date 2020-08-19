@@ -16,7 +16,7 @@
             android:layout_width="24dp"
             android:id="@+id/iv_user"
             tools:src="@tools:sample/avatars"
-            android:layout_alignBottom="@id/cv_image_message_container"
+            android:layout_alignTop="@id/cv_link_message_container"
             android:layout_marginBottom="4dp"
             android:layout_marginStart="4dp"
             android:layout_height="24dp"/>
@@ -33,7 +33,7 @@
     <androidx.cardview.widget.CardView
         android:layout_below="@+id/tv_user"
         android:layout_toEndOf="@+id/iv_user"
-        android:id="@+id/cv_image_message_container"
+        android:id="@+id/cv_link_message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardCornerRadius="10dp"
@@ -115,17 +115,41 @@
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
+        <LinearLayout
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_alignStart="@+id/cv_link_message_container"
+            android:layout_below="@+id/cv_link_message_container"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                android:id="@+id/reply_avatar_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:clickable="true"
+                android:foreground="?selectableItemBackground"
+                android:id="@+id/thread_reply_count"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                tools:text="2 replies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
         <TextView
             android:id="@+id/txt_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="11:00 PM"
-            android:layout_marginStart="16dp"
+            tools:drawableStart="@drawable/ic_double_tick"
             android:layout_marginEnd="16dp"
             android:textSize="12sp"
-            android:layout_alignEnd="@id/cv_image_message_container"
+            android:layout_alignBottom="@+id/cv_link_message_container"
             android:layout_gravity="center"
-            android:layout_below="@id/cv_image_message_container"
+            android:layout_toRightOf="@+id/cv_link_message_container"
             android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"

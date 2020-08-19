@@ -56,6 +56,8 @@ public class CometChatGroupMemberListScreen extends Fragment {
 
     private GroupMembersRequest groupMembersRequest;
 
+    private boolean showModerators;
+
     private RecyclerView rvUserList;
 
     private EditText etSearch;
@@ -71,6 +73,7 @@ public class CometChatGroupMemberListScreen extends Fragment {
         super.onCreate(savedInstanceState);
        if (getArguments()!=null) {
            guid = getArguments().getString(StringContract.IntentStrings.GUID);
+           showModerators = getArguments().getBoolean(StringContract.IntentStrings.SHOW_MODERATORLIST);
        }
     }
 
@@ -146,15 +149,27 @@ public class CometChatGroupMemberListScreen extends Fragment {
             @Override
             public void onClick(View var1, int var2) {
                 GroupMember groupMember = (GroupMember) var1.getTag(R.string.user);
-                if (getActivity() != null) {
-                    MaterialAlertDialogBuilder alert_dialog = new MaterialAlertDialogBuilder(getActivity());
-                    alert_dialog.setTitle(getResources().getString(R.string.make_admin));
-                    alert_dialog.setMessage(String.format(getResources().getString(R.string.make_admin_question),groupMember.getName()));
-                    alert_dialog.setPositiveButton(getResources().getString(R.string.yes), (dialogInterface, i) -> updateScope(groupMember));
-                    alert_dialog.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
-                    alert_dialog.create();
-                    alert_dialog.show();
+                if (showModerators){
+                    if (getActivity() != null) {
+                        MaterialAlertDialogBuilder alert_dialog = new MaterialAlertDialogBuilder(getActivity());
+                        alert_dialog.setTitle(getResources().getString(R.string.make_moderator));
+                        alert_dialog.setMessage(String.format(getResources().getString(R.string.make_moderator_question), groupMember.getName()));
+                        alert_dialog.setPositiveButton(getResources().getString(R.string.yes), (dialogInterface, i) -> updateAsModeratorScope(groupMember));
+                        alert_dialog.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
+                        alert_dialog.create();
+                        alert_dialog.show();
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        MaterialAlertDialogBuilder alert_dialog = new MaterialAlertDialogBuilder(getActivity());
+                        alert_dialog.setTitle(getResources().getString(R.string.make_admin));
+                        alert_dialog.setMessage(String.format(getResources().getString(R.string.make_admin_question), groupMember.getName()));
+                        alert_dialog.setPositiveButton(getResources().getString(R.string.yes), (dialogInterface, i) -> updateAsAdminScope(groupMember));
+                        alert_dialog.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
+                        alert_dialog.create();
+                        alert_dialog.show();
 
+                    }
                 }
             }
         }));
@@ -174,7 +189,7 @@ public class CometChatGroupMemberListScreen extends Fragment {
         }
     }
 
-    private void updateScope(GroupMember groupMember) {
+    private void updateAsAdminScope(GroupMember groupMember) {
 
         CometChat.updateGroupMemberScope(groupMember.getUid(), guid, CometChatConstants.SCOPE_ADMIN, new CometChat.CallbackListener<String>() {
             @Override
@@ -182,7 +197,25 @@ public class CometChatGroupMemberListScreen extends Fragment {
                 Log.d(TAG, "onSuccess: "+s);
                 groupMemberListAdapter.removeGroupMember(groupMember);
                 Snackbar.make(rvUserList,String.format(getResources().getString(R.string.user_is_admin),groupMember.getName()), Snackbar.LENGTH_LONG).show();
-//                Toast.makeText(getContext(),groupMember.getName()+" is now Admin ",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                Log.e(TAG, "onError: "+e.getMessage() );
+                Snackbar.make(rvUserList,String.format(getResources().getString(R.string.update_scope_error),groupMember.getName()),Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateAsModeratorScope(GroupMember groupMember) {
+
+        CometChat.updateGroupMemberScope(groupMember.getUid(), guid, CometChatConstants.SCOPE_MODERATOR, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                Log.d(TAG, "onSuccess: "+s);
+                groupMemberListAdapter.removeGroupMember(groupMember);
+                if (rvUserList!=null)
+                    Snackbar.make(rvUserList,String.format(getResources().getString(R.string.user_is_moderator),groupMember.getName()), Snackbar.LENGTH_LONG).show();
             }
 
             @Override
@@ -208,9 +241,14 @@ public class CometChatGroupMemberListScreen extends Fragment {
                 if (users.size() > 0) {
                     List<GroupMember> filterlist = new ArrayList<>();
                     for (GroupMember gmember : users) {
-                        if (gmember.getScope().equals(CometChatConstants.SCOPE_PARTICIPANT))
-                        {
-                            filterlist.add(gmember);
+                        if (showModerators) {
+                            if (gmember.getScope().equals(CometChatConstants.SCOPE_PARTICIPANT)) {
+                                filterlist.add(gmember);
+                            }
+                        } else {
+                            if (gmember.getScope().equals(CometChatConstants.SCOPE_PARTICIPANT) || gmember.getScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
+                                filterlist.add(gmember);
+                            }
                         }
                     }
                     setAdapter(filterlist);

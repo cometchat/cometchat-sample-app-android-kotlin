@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context="screen.banmembers.CometChatBanMemberScreenActivity">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/banToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/ic_close_24dp"
+        app:title="@string/banned_members" />
+    <FrameLayout
+        android:id="@+id/ban_member_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

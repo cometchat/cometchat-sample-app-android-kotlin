@@ -164,7 +164,7 @@ public class CometChatBlockUserListScreen extends Fragment {
      */
     private void fetchBlockedUser() {
         if (blockedUserRequest == null) {
-            blockedUserRequest = new BlockedUsersRequest.BlockedUsersRequestBuilder().setLimit(LIMIT).build();
+            blockedUserRequest = new BlockedUsersRequest.BlockedUsersRequestBuilder().setDirection(BlockedUsersRequest.DIRECTION_BLOCKED_BY_ME).setLimit(LIMIT).build();
         }
         blockedUserRequest.fetchNext(new CometChat.CallbackListener<List<User>>() {
             @Override

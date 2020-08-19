@@ -34,12 +34,13 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:padding="4dp"
-            android:text="@string/kindly_enter_group_name_to_proceed"
+            android:text="@string/kindly_enter_group_details_to_proceed"
             android:textColor="@color/primaryTextColor"
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:id="@+id/inputLayout"
             android:animateLayoutChanges="true"
             android:layout_below="@id/tvDes2"
@@ -49,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputUID"
+                android:id="@+id/input_group_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,16 +75,101 @@
                     android:imeOptions="actionDone"
                     android:textColor="@color/primaryTextColor" />
             </com.google.android.material.textfield.TextInputLayout>
-            <ProgressBar
-                android:id="@+id/loginProgress"
-                android:visibility="gone"
-                android:indeterminateTint="@color/primaryTextColor"
-                android:layout_alignEnd="@+id/inputUID"
-                android:layout_alignBottom="@+id/inputUID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_group_desc"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusedByDefault="false"
+                android:layout_marginTop="16dp"
+                android:hint="@string/enter_group_desc"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp">
 
-        </RelativeLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/group_desc"
+                    android:layout_width="match_parent"
+                    android:focusedByDefault="false"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <Spinner
+                android:id="@+id/grouptype_spinner"
+                android:background="@drawable/search_box"
+                android:layout_marginTop="16dp"
+                android:padding="8dp"
+                android:entries="@array/groupType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_group_pwd"
+                android:visibility="gone"
+                app:passwordToggleEnabled="true"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusedByDefault="false"
+                android:layout_marginTop="16dp"
+                android:hint="@string/enter_group_pwd"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/group_pwd"
+                    android:layout_width="match_parent"
+                    android:focusedByDefault="false"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_group_cnf_pwd"
+                android:visibility="gone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusedByDefault="false"
+                android:layout_marginTop="16dp"
+                app:passwordToggleEnabled="true"
+                android:hint="@string/enter_group_cnf_pwd"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/group_cnf_pwd"
+                    android:layout_width="match_parent"
+                    android:focusedByDefault="false"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"
             android:layout_alignParentBottom="true"

@@ -2,9 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/item_remove"
-        android:title="Remove" />
+        android:title="@string/remove" />
+    <item android:id="@+id/item_ban"
+        android:title="@string/ban" />
 
     <item android:id="@+id/item_make_admin"
-        android:title="Make Admin"/>
+        android:title="@string/make_admin"/>
 
 </menu>

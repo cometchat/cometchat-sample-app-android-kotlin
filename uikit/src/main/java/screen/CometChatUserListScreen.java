@@ -124,6 +124,12 @@ public class CometChatUserListScreen extends Fragment {
 
         shimmerFrameLayout=view.findViewById(R.id.shimmer_layout);
 
+        if(Utils.isDarkMode(getContext())) {
+            title.setTextColor(getResources().getColor(R.color.textColorWhite));
+        } else {
+            title.setTextColor(getResources().getColor(R.color.primaryTextColor));
+        }
+
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -145,7 +151,6 @@ public class CometChatUserListScreen extends Fragment {
                 }
             }
         });
-
 
         etSearch.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override

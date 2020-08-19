@@ -14,14 +14,14 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
 
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
 
     dataBinding {
         enabled = true
     }
-    
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -61,5 +61,5 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
 
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:2.0.4-beta1'
+    compileOnly 'com.cometchat:pro-android-chat-sdk:2.0.7'
 }

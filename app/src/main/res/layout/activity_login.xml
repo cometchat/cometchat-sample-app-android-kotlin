@@ -20,7 +20,7 @@
             android:layout_marginTop="16dp"
             android:padding="4dp"
             android:text="SignIn"
-            android:textColor="@color/primaryTextColor"
+            style="@style/TextAppearance.AppCompat.Title"
             android:textSize="40sp"
             android:textStyle="bold" />
 
@@ -44,7 +44,7 @@
             android:layout_marginStart="16dp"
             android:padding="4dp"
             android:text="Please Enter UID to Continue"
-            android:textColor="@color/primaryTextColor"
+            style="@style/TextAppearance.AppCompat.Title"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -91,7 +91,26 @@
                 android:layout_alignBottom="@+id/inputUID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-
+            <LinearLayout
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:paddingBottom="16dp"
+                android:layout_alignParentBottom="true"
+                android:layout_height="wrap_content">
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:text="Don't have any users?"
+                    android:layout_height="wrap_content"/>
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:onClick="createUser"
+                    android:text="Create Now"
+                    android:textAllCaps="true"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginLeft="8dp"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
         </RelativeLayout>
 
     </RelativeLayout>

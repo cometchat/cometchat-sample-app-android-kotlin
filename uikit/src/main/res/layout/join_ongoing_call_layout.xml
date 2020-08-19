@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout tools:visibility="visible"
+    android:visibility="gone"
+    android:id="@+id/ongoing_call_view"
+    android:padding="8dp"
+    android:background="@color/green_600"
+    android:layout_below="@+id/chatList_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <ImageView
+        android:tint="@color/textColorWhite"
+        android:id="@+id/close_ongoing_view"
+        android:src="@drawable/ic_close_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/textColorWhite"
+        android:id="@+id/ongoing_call"
+        android:text="@string/tap_to_join_call"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

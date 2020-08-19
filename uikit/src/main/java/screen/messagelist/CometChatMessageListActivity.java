@@ -1,5 +1,6 @@
 package screen.messagelist;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,8 @@ import java.util.List;
 
 import adapter.MessageAdapter;
 import constant.StringContract;
+import listeners.MessageActionCloseListener;
+import listeners.OnMessageLongClick;
 import screen.CometChatUserDetailScreenActivity;
 import utils.Utils;
 
@@ -72,6 +75,10 @@ public class CometChatMessageListActivity extends AppCompatActivity implements M
               }else {
                   bundle.putString(StringContract.IntentStrings.GUID, getIntent().getStringExtra(StringContract.IntentStrings.GUID));
                   bundle.putString(StringContract.IntentStrings.GROUP_OWNER,getIntent().getStringExtra(StringContract.IntentStrings.GROUP_OWNER));
+                  bundle.putInt(StringContract.IntentStrings.MEMBER_COUNT,getIntent().getIntExtra(StringContract.IntentStrings.MEMBER_COUNT,0));
+                  bundle.putString(StringContract.IntentStrings.GROUP_TYPE,getIntent().getStringExtra(StringContract.IntentStrings.GROUP_TYPE));
+                  bundle.putString(StringContract.IntentStrings.GROUP_DESC,getIntent().getStringExtra(StringContract.IntentStrings.GROUP_DESC));
+                  bundle.putString(StringContract.IntentStrings.GROUP_PASSWORD,getIntent().getStringExtra(StringContract.IntentStrings.GROUP_PASSWORD));
               }
               fragment.setArguments(bundle);
              getSupportFragmentManager().beginTransaction().replace(R.id.ChatFragment, fragment).commit();
@@ -112,11 +119,6 @@ public class CometChatMessageListActivity extends AppCompatActivity implements M
         ((OnMessageLongClick)fragment).setLongMessageClick(baseMessage);
     }
 
-    public interface OnMessageLongClick
-    {
-        void setLongMessageClick(List<BaseMessage> baseMessagesList);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -127,4 +129,7 @@ public class CometChatMessageListActivity extends AppCompatActivity implements M
         super.onPause();
     }
 
+    public void handleDialogClose(DialogInterface dialog) {
+        ((MessageActionCloseListener)fragment).handleDialogClose(dialog);
+    }
 }

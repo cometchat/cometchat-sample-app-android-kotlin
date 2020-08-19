@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import utils.FontUtils;
+import utils.Utils;
 
 /**
  * Purpose - GroupMemberAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -108,6 +109,8 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
             groupMemberViewHolder.userListRowBinding.txtUserScope.setText(R.string.owner);
         } else if (groupMember.getScope().equals(CometChatConstants.SCOPE_ADMIN)) {
             groupMemberViewHolder.userListRowBinding.txtUserScope.setText(R.string.admin);
+        } else if (groupMember.getScope().equals(CometChatConstants.SCOPE_MODERATOR)){
+            groupMemberViewHolder.userListRowBinding.txtUserScope.setText(R.string.moderator);
         } else {
             groupMemberViewHolder.userListRowBinding.txtUserScope.setText("");
         }
@@ -117,6 +120,17 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
             groupMemberViewHolder.userListRowBinding.avUser.setInitials(groupMember.getName());
         else
             groupMemberViewHolder.userListRowBinding.avUser.setAvatar(groupMember.getAvatar());
+
+        if (Utils.isDarkMode(context))
+        {
+            groupMemberViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+            groupMemberViewHolder.userListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.grey));
+            groupMemberViewHolder.userListRowBinding.txtUserScope.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+        } else {
+            groupMemberViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+            groupMemberViewHolder.userListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.light_grey));
+            groupMemberViewHolder.userListRowBinding.txtUserScope.setTextColor(context.getResources().getColor(R.color.secondaryTextColor));
+        }
 
         if (i == getItemCount() - 1)
             groupMemberViewHolder.userListRowBinding.tvSeprator.setVisibility(View.GONE);

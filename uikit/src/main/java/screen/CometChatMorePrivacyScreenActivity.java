@@ -30,14 +30,19 @@ public class CometChatMorePrivacyScreenActivity extends AppCompatActivity {
 
     private BlockedUsersRequest blockedUsersRequest;
 
+    private TextView blockUserTv;
+
+    private View divider;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comet_chat_more_privacy_screen);
 
+        blockUserTv = findViewById(R.id.blocked_user_tv);
         tvBlockUserCount = findViewById(R.id.tv_blocked_user_count);
         MaterialToolbar toolbar = findViewById(R.id.privacy_toolbar);
-
+        divider = findViewById(R.id.divider);
         setSupportActionBar(toolbar);
 
          if (getSupportActionBar()!=null)
@@ -45,6 +50,13 @@ public class CometChatMorePrivacyScreenActivity extends AppCompatActivity {
 
          if (Utils.changeToolbarFont(toolbar)!=null){
              Utils.changeToolbarFont(toolbar).setTypeface(FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium));
+         }
+         if(Utils.isDarkMode(this)) {
+             divider.setBackgroundColor(getResources().getColor(R.color.grey));
+             blockUserTv.setTextColor(getResources().getColor(R.color.textColorWhite));
+         } else {
+             divider.setBackgroundColor(getResources().getColor(R.color.light_grey));
+             blockUserTv.setTextColor(getResources().getColor(R.color.primaryTextColor));
          }
          getBlockCount();
     }
@@ -55,7 +67,7 @@ public class CometChatMorePrivacyScreenActivity extends AppCompatActivity {
 
     public void getBlockCount() {
 
-         blockedUsersRequest = new BlockedUsersRequest.BlockedUsersRequestBuilder().setLimit(100).build();
+         blockedUsersRequest = new BlockedUsersRequest.BlockedUsersRequestBuilder().setDirection(BlockedUsersRequest.DIRECTION_BLOCKED_BY_ME).setLimit(100).build();
          blockedUsersRequest.fetchNext(new CometChat.CallbackListener<List<User>>() {
             @Override
             public void onSuccess(List<User> users) {

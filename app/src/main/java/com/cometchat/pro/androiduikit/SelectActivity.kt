@@ -53,7 +53,10 @@ class SelectActivity : AppCompatActivity() {
             screenLaunch!!.text = "Make Call"
         }
         if (audioCallRb!!.isChecked) {
-            audioCallRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                audioCallRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                audioCallRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             conversationRb!!.background = null
             videoCallRb!!.background = null
             userRb!!.background = null
@@ -61,7 +64,10 @@ class SelectActivity : AppCompatActivity() {
             groupRb!!.background = null
             moreInfoRb!!.background = null
         } else if (videoCallRb!!.isChecked) {
-            videoCallRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                videoCallRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                videoCallRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             conversationRb!!.background = null
             audioCallRb!!.background = null
             userRb!!.background = null
@@ -79,7 +85,10 @@ class SelectActivity : AppCompatActivity() {
 
         }
         if (userRb!!.isChecked) {
-            userRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                userRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                userRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             groupRb!!.background = null
             callsRb!!.background = null
             conversationRb!!.background = null
@@ -87,7 +96,10 @@ class SelectActivity : AppCompatActivity() {
             audioCallRb!!.background = null
             videoCallRb!!.background = null
         } else if (callsRb!!.isChecked) {
-            callsRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                callsRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                callsRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             userRb!!.background = null
             groupRb!!.background = null
             conversationRb!!.background = null
@@ -95,7 +107,10 @@ class SelectActivity : AppCompatActivity() {
             audioCallRb!!.background = null
             videoCallRb!!.background = null
         } else if (conversationRb!!.isChecked) {
-            conversationRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                conversationRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                conversationRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             userRb!!.background = null
             callsRb!!.background = null
             groupRb!!.background = null
@@ -103,7 +118,10 @@ class SelectActivity : AppCompatActivity() {
             audioCallRb!!.background = null
             videoCallRb!!.background = null
         } else if (groupRb!!.isChecked) {
-            groupRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                groupRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                groupRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             userRb!!.background = null
             conversationRb!!.background = null
             moreInfoRb!!.background = null
@@ -111,7 +129,10 @@ class SelectActivity : AppCompatActivity() {
             videoCallRb!!.background = null
             callsRb!!.background = null
         } else {
-            moreInfoRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
+            if (Utils.isDarkMode(this))
+                moreInfoRb!!.background = resources.getDrawable(R.drawable.darkmode_radiobuttonbackground)
+            else
+                moreInfoRb!!.background = resources.getDrawable(R.drawable.radiobuttonbackground)
             userRb!!.background = null
             groupRb!!.background = null
             conversationRb!!.background = null

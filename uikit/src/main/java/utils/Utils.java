@@ -7,6 +7,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -31,6 +33,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.BindingAdapter;
+import androidx.renderscript.Allocation;
+import androidx.renderscript.Element;
+import androidx.renderscript.RenderScript;
+import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
@@ -56,6 +62,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -66,13 +73,61 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import constant.StringContract;
+import kotlin.ranges.RangesKt;
 import screen.CometChatCallActivity;
 
 public class Utils {
 
     private static final String TAG = "Utils";
+
+    public static String removeEmojiAndSymbol(String content) {
+        String utf8tweet = "";
+        try {
+            byte[] utf8Bytes = content.getBytes("UTF-8");
+            utf8tweet = new String(utf8Bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        Pattern unicodeOutliers = Pattern.compile(
+                "[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]",
+                        Pattern.UNICODE_CASE |
+                                Pattern.CASE_INSENSITIVE);
+        Matcher unicodeOutlierMatcher = unicodeOutliers.matcher(utf8tweet);
+        utf8tweet = unicodeOutlierMatcher.replaceAll(" ");
+        return utf8tweet;
+    }
+    public static boolean isDarkMode(Context context)
+    {
+        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (nightMode== Configuration.UI_MODE_NIGHT_YES)
+            return true;
+        else
+            return false;
+    }
+
+    public static final float softTransition(float $this$softTransition, float compareWith, float allowedDiff, float scaleFactor) {
+        if (scaleFactor == 0.0F) {
+            return $this$softTransition;
+        } else {
+            float result = $this$softTransition;
+            float diff;
+            if (compareWith > $this$softTransition) {
+                if (compareWith / $this$softTransition > allowedDiff) {
+                    diff = RangesKt.coerceAtLeast($this$softTransition, compareWith) - RangesKt.coerceAtMost($this$softTransition, compareWith);
+                    result = $this$softTransition + diff / scaleFactor;
+                }
+            } else if ($this$softTransition > compareWith && $this$softTransition / compareWith > allowedDiff) {
+                diff = RangesKt.coerceAtLeast($this$softTransition, compareWith) - RangesKt.coerceAtMost($this$softTransition, compareWith);
+                result = $this$softTransition - diff / scaleFactor;
+            }
+
+            return result;
+        }
+    }
 
     public static AudioManager getAudioManager(Context context) {
         return (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
@@ -88,6 +143,13 @@ public class Utils {
     public static void initiatecall(Context context,String recieverID,String receiverType,String callType)
     {
         Call call = new Call(recieverID,receiverType,callType);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("bookingId", 6);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        call.setMetadata(jsonObject);
         CometChat.initiateCall(call, new CometChat.CallbackListener<Call>() {
             @Override
             public void onSuccess(Call call) {
@@ -101,6 +163,13 @@ public class Utils {
             }
         });
     }
+    public static String convertTimeStampToDurationTime(long var0) {
+        long var2 = var0 / 1000L;
+        long var4 = var2 / 60L % 60L;
+        long var6 = var2 / 60L / 60L % 24L;
+        return var6 == 0L ? String.format(Locale.getDefault(), "%02d:%02d", var4, var2 % 60L) : String.format(Locale.getDefault(), "%02d:%02d:%02d", var6, var4, var2 % 60L);
+    }
+
     public static String getDateId(long var0) {
         Calendar var2 = Calendar.getInstance(Locale.ENGLISH);
         var2.setTimeInMillis(var0);
@@ -152,7 +221,8 @@ public class Utils {
                 if (lastMessage instanceof TextMessage) {
 
                     if (isLoggedInUser(lastMessage.getSender()))
-                        message = "You: " + ((TextMessage) lastMessage).getText();
+                        message = "You: " + (((TextMessage) lastMessage).getText()==null
+                                ?"This message was deleted":((TextMessage) lastMessage).getText());
                     else
                         message = lastMessage.getSender().getName() + ": " + ((TextMessage) lastMessage).getText();
 
@@ -176,16 +246,7 @@ public class Utils {
 
                 break;
             case CometChatConstants.CATEGORY_ACTION:
-
-                if (isLoggedInUser(lastMessage.getSender())) {
-                    if (((Action) lastMessage).getActionOn()!=null)
-                        message = "You " + ((Action) lastMessage).getAction() + " " + ((User) ((Action) lastMessage).getActionOn()).getName();
-                    else
-                        message = ((Action) lastMessage).getMessage();
-                } else {
-                    message = ((Action) lastMessage).getMessage();
-                }
-
+                message = ((Action) lastMessage).getMessage();
                 break;
 
             case CometChatConstants.CATEGORY_CALL:
@@ -225,16 +286,9 @@ public class Utils {
         return groupMember;
     }
 
-    @BindingAdapter(value = {"app:deliveredAt"})
-    public static String getHeaderDate(TextView textView, long timestamp) {
-        Calendar messageTimestamp = Calendar.getInstance();
-        messageTimestamp.setTimeInMillis(timestamp);
-        Calendar now = Calendar.getInstance();
-//        if (now.get(5) == messageTimestamp.get(5)) {
-        return DateFormat.format("hh:mm a", messageTimestamp).toString();
-//        } else {
-//            return now.get(5) - messageTimestamp.get(5) == 1 ? "Yesterday " + DateFormat.format("hh:mm a", messageTimestamp).toString() : DateFormat.format("d MMMM", messageTimestamp).toString() + " " + DateFormat.format("hh:mm a", messageTimestamp).toString();
-//        }
+    public static String getMessageDate(long timestamp) {
+        String messageDate = new SimpleDateFormat("dd/MM/yyyy hh:mm a").format(new java.util.Date(timestamp * 1000));
+        return messageDate;
     }
 
     public static String getHeaderDate(long timestamp) {
@@ -271,6 +325,22 @@ public class Utils {
 
     }
 
+    public static Boolean checkDirExistence(Context context,String type) {
+
+        File  audioDir = new File(Environment.getExternalStorageDirectory().toString() + "/" +
+                context.getResources().getString(R.string.app_name) + "/" + type + "/");
+
+        return audioDir.isDirectory();
+
+    }
+
+    public static void  makeDirectory(Context context,String type) {
+
+        String  audioDir = Environment.getExternalStorageDirectory().toString() + "/" +
+                context.getResources().getString(R.string.app_name) + "/" + type + "/";
+
+        createDirectory(audioDir);
+    }
     public static boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null
                 && permissions != null) {
@@ -459,6 +529,12 @@ public class Utils {
         return dir;
     }
 
+    public static String  getPath(Context context, String folder) {
+
+        return Environment.getExternalStorageDirectory().toString() + "/" +
+                context.getResources().getString(R.string.app_name) + "/" + folder + "/";
+    }
+
     public static String getPath(final Context context, final Uri uri) {
         String absolutePath = getImagePathFromUri(context, uri);
         return absolutePath != null ? absolutePath : uri.toString();
@@ -472,6 +548,11 @@ public class Utils {
         return filename.substring(index + 1);
     }
 
+
+    public static String getFileName(String mediaFile) {
+        String t1[] = mediaFile.substring(mediaFile.lastIndexOf("/")).split("_");
+        return t1[2];
+    }
 
     public static String getFileName(@NonNull Context context, Uri uri) {
         String mimeType = context.getContentResolver().getType(uri);
@@ -517,69 +598,40 @@ public class Utils {
         return null;
     }
 
-
-
-    public static List<String> checkSmartReply(BaseMessage lastMessage) {
-        if (lastMessage!=null && !lastMessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
-            if (lastMessage.getMetadata()!=null) {
-                return getSmartReplyList(lastMessage);
-            }
+    public static String getOutputMediaFile(Context context) {
+        File var0 = new File(Environment.getExternalStorageDirectory(), context.getResources().getString(R.string.app_name));
+        if (!var0.exists() && !var0.mkdirs()) {
+            return null;
+        } else {
+            String var1 = Environment.getExternalStorageDirectory() + "/" + context.getResources().getString(R.string.app_name) + "/"
+                    + "audio/";
+            createDirectory(var1);
+            return var1 + (new SimpleDateFormat("yyyyMMddHHmmss")).format(new Date()) + ".mp3";
         }
-        return null;
     }
 
-    private static List<String> getSmartReplyList(BaseMessage baseMessage){
-
-        HashMap<String, JSONObject> extensionList = Utils.extensionCheck(baseMessage);
-        if (extensionList != null && extensionList.containsKey("smartReply")) {
-            JSONObject replyObject = extensionList.get("smartReply");
-            List<String> replyList = new ArrayList<>();
-            try {
-                replyList.add(replyObject.getString("reply_positive"));
-                replyList.add(replyObject.getString("reply_neutral"));
-                replyList.add(replyObject.getString("reply_negative"));
-            } catch (Exception e) {
-                Log.e(TAG, "onSuccess: " + e.getMessage());
-            }
-            return replyList;
+    public static void createDirectory(String var0) {
+        if (!(new File(var0)).exists()) {
+            (new File(var0)).mkdirs();
         }
-        return null;
+
     }
 
-
-    public static HashMap<String,JSONObject> extensionCheck(BaseMessage baseMessage)
-    {
-        JSONObject metadata = baseMessage.getMetadata();
-        HashMap<String,JSONObject> extensionMap = new HashMap<>();
-        try {
-            if (metadata != null) {
-                JSONObject injectedObject = metadata.getJSONObject("@injected");
-                if (injectedObject != null && injectedObject.has("extensions")) {
-                    JSONObject extensionsObject = injectedObject.getJSONObject("extensions");
-                    if (extensionsObject != null && extensionsObject.has("link-preview")) {
-                        JSONObject linkPreviewObject = extensionsObject.getJSONObject("link-preview");
-                        JSONArray linkPreview = linkPreviewObject.getJSONArray("links");
-                        if (linkPreview.length() > 0) {
-                            extensionMap.put("linkPreview",linkPreview.getJSONObject(0));
-                        }
-
-                    }
-                    if (extensionsObject !=null && extensionsObject.has("smart-reply")) {
-                        extensionMap.put("smartReply",extensionsObject.getJSONObject("smart-reply"));
-                    }
-                }
-                return extensionMap;
-            }
-            else
-                return null;
-        }  catch (Exception e) {
-            Log.e(TAG, "isLinkPreview: "+e.getMessage() );
-        }
-        return null;
+    public static Bitmap blur(Context context, Bitmap image) {
+        int width = Math.round(image.getWidth() * 0.6f);
+        int height = Math.round(image.getHeight() * 0.6f);
+        Bitmap inputBitmap = Bitmap.createScaledBitmap(image, width, height, false);
+        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
+        RenderScript rs = RenderScript.create(context);
+        ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        Allocation tmpIn = Allocation.createFromBitmap(rs, inputBitmap);
+        Allocation tmpOut = Allocation.createFromBitmap(rs, outputBitmap);
+        intrinsicBlur.setRadius(15f);
+        intrinsicBlur.setInput(tmpIn);
+        intrinsicBlur.forEach(tmpOut);
+        tmpOut.copyTo(outputBitmap);
+        return outputBitmap;
     }
-
-
-
     public static void startCallIntent(Context context, User user, String type,
                                        boolean isOutgoing, @NonNull String sessionId) {
         Intent videoCallIntent = new Intent(context, CometChatCallActivity.class);
@@ -711,10 +763,6 @@ public class Utils {
 
             @Override
             public void onUserLeft(User user) {
-                if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER))
-                {
-                    activity.finish();
-                }
                 Snackbar.make(activity.getWindow().getDecorView().getRootView(),"User Left: "+user.getName(),Snackbar.LENGTH_LONG).show();
                 Log.e( "onUserLeft: ",user.getUid() );
             }
@@ -726,8 +774,15 @@ public class Utils {
 
             @Override
             public void onCallEnded(Call call) {
+                Log.e(TAG, "onCallEnded: "+call.toString() );
                 activity.finish();
             }
         });
+    }
+
+    public static void joinOnGoingCall(Context context) {
+        Intent intent = new Intent(context,CometChatCallActivity.class);
+        intent.putExtra(StringContract.IntentStrings.JOIN_ONGOING,true);
+        context.startActivity(intent);
     }
 }

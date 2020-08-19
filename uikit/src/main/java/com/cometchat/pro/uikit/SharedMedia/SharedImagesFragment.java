@@ -65,25 +65,7 @@ public class SharedImagesFragment extends Fragment {
         Id = this.getArguments().getString("Id");
         type = this.getArguments().getString("type");
         fetchMessage();
-        rvFiles.addOnItemTouchListener(new RecyclerTouchListener(getContext(), rvFiles, new ClickListener() {
-            @Override
-            public void onClick(View var1, int var2) {
-                BaseMessage message = (BaseMessage)var1.getTag(R.string.baseMessage);
-                Dialog imageDialog = new Dialog(getContext());
-                View messageVw = LayoutInflater.from(getContext()).inflate(R.layout.image_dialog_view, null);
-                ZoomIv imageView = messageVw.findViewById(R.id.imageView);
-                Glide.with(getContext()).asBitmap().load(((MediaMessage) message).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        imageView.setImageBitmap(resource);
-                    }
-                });
-                imageDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                imageDialog.setContentView(messageVw);
-                imageDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                imageDialog.show();
-            }
-        }));
+
         rvFiles.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {

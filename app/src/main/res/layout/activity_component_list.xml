@@ -56,7 +56,6 @@
                         android:id="@+id/avatar_title"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -94,7 +93,6 @@
                         android:id="@+id/status_title"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -132,7 +130,6 @@
                         android:id="@+id/badge_title"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -170,7 +167,6 @@
                         android:id="@+id/uservwtitle"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -208,7 +204,6 @@
                         android:id="@+id/groupvwtitle"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -247,7 +242,6 @@
                         android:id="@+id/conversation_title"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -285,7 +279,6 @@
                         android:id="@+id/callList_title"
                         android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/primaryTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView

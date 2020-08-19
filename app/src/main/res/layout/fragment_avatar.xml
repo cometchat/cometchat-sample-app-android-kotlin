@@ -20,7 +20,6 @@
             <TextView
                 android:layout_gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/primaryTextColor"
                 android:text="Avatar"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -58,8 +57,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:maxLines="1"
-                    android:imeOptions="actionGo"
-                    android:textColor="@color/primaryTextColor" />
+                    android:imeOptions="actionGo" />
             </com.google.android.material.textfield.TextInputLayout>
             <RadioGroup
                 android:id="@+id/shapeGroup"

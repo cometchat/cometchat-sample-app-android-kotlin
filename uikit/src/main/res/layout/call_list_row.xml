@@ -43,7 +43,6 @@
                     android:layout_alignTop="@id/call_sender_avatar"
                     android:layout_toStartOf="@+id/calltime_tv"
                     android:layout_marginStart="8dp"
-                    android:textColor="@color/primaryTextColor"
                     android:layout_toEndOf="@id/call_sender_avatar"
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names"

@@ -34,7 +34,7 @@ import utils.Utils;
  *
  * Created on - 23rd March 2020
  *
- * Modified on  - 24th March 2020
+ * Modified on  - 02nd April 2020
  *
  */
 
@@ -136,7 +136,7 @@ public class CallListAdapter extends RecyclerView.Adapter<CallListAdapter.CallVi
         } else {
             callViewHolder.callListRowBinding.callSenderName.setText(((Group)call.getCallReceiver()).getName());
             callViewHolder.callListRowBinding.callSenderAvatar.setAvatar(((Group)call.getCallReceiver()));
-            if (call.getSender().getUid().equals(loggedInUser))
+            if (((User)call.getCallInitiator()).getUid().equals(loggedInUser))
             {
                 if(call.getCallStatus().equals(CometChatConstants.CALL_STATUS_UNANSWERED)) {
                     callMessageText = context.getResources().getString(R.string.missed_call);
@@ -189,50 +189,8 @@ public class CallListAdapter extends RecyclerView.Adapter<CallListAdapter.CallVi
         }
         callViewHolder.callListRowBinding.calltimeTv.setText(Utils.getLastMessageDate(call.getInitiatedAt()));
         callViewHolder.callListRowBinding.callMessage.setText(callMessageText);
-
-//        callViewHolder.callListRowBinding.executePendingBindings();
-//        callType = call.getType();
-//        callCategory = call.getCategory();
-//        callViewHolder.callListRowBinding.callMessage.setText(call.getAction());
-//        callViewHolder.callListRowBinding.callMessage.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
-//        callViewHolder.callListRowBinding.callSenderName.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
-
-//        if (conversation.getConversationType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-//            name = ((User) conversation.getConversationWith()).getName();
-//            avatar = ((User) conversation.getConversationWith()).getAvatar();
-//        } else {
-//            name = ((Group) conversation.getConversationWith()).getName();
-//            avatar = ((Group) conversation.getConversationWith()).getIcon();
-//        }
-//
-//        conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.getUnreadMessageCount());
-//        conversationViewHolder.conversationListRowBinding.txtUserName.setText(name);
-//        conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
-//
-//        if (avatar != null && !avatar.isEmpty()) {
-//            conversationViewHolder.conversationListRowBinding.avUser.setAvatar(avatar);
-//        } else {
-//            conversationViewHolder.conversationListRowBinding.avUser.setInitials(name);
-//        }
-
         callViewHolder.callListRowBinding.getRoot().setTag(R.string.call, call);
 
-    }
-
-    private void setCallClick(String uid, String type, String callTypeAudio) {
-        Call callM = new Call(uid,type,callTypeAudio);
-        CometChat.initiateCall(callM, new CometChat.CallbackListener<Call>() {
-            @Override
-            public void onSuccess(Call call) {
-                if (type.equals(CometChatConstants.RECEIVER_TYPE_USER))
-                    Utils.startCallIntent(context,(User)call.getCallReceiver(),callTypeAudio,false,call.getSessionId());
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                Toast.makeText(context,e.getMessage(),Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     @Override
@@ -249,15 +207,6 @@ public class CallListAdapter extends RecyclerView.Adapter<CallListAdapter.CallVi
     public void updateList(List<BaseMessage> calls) {
 
         callList.addAll(filterList(calls));
-//        for (int i = 0; i <calls.size() ; i++) {
-//           if (callList.contains(calls.get(i))){
-//               int index=callList.indexOf(calls.get(i));
-//               callList.remove(calls.get(i));
-//               callList.add(index,calls.get(i));
-//            }else {
-//               callList.add(calls.get(i));
-//           }
-//        }
         notifyDataSetChanged();
     }
 

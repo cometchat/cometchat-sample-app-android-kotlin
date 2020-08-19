@@ -40,6 +40,7 @@ import listeners.OnItemClickListener;
 import listeners.RecyclerTouchListener;
 import screen.creategroup.CometChatCreateGroupScreenActivity;
 import utils.FontUtils;
+import utils.Utils;
 
 /*
 
@@ -91,6 +92,12 @@ public class CometChatGroupListScreen extends Fragment  {
         clearSearch = view.findViewById(R.id.clear_search);
 
         ivCreateGroup = view.findViewById(R.id.create_group);
+
+        if(Utils.isDarkMode(getContext())) {
+            title.setTextColor(getResources().getColor(R.color.textColorWhite));
+        } else {
+            title.setTextColor(getResources().getColor(R.color.primaryTextColor));
+        }
 
         ivCreateGroup.setOnClickListener(view1 -> {
             Intent intent = new Intent(getContext(), CometChatCreateGroupScreenActivity.class);
@@ -255,6 +262,5 @@ public class CometChatGroupListScreen extends Fragment  {
         groupsRequest=null;
         groupListAdapter=null;
         fetchGroup();
-
     }
 }

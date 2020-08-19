@@ -2,10 +2,12 @@ package listeners;
 
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.CometChatCallList;
@@ -31,13 +33,24 @@ public class CometChatCallListener {
         CometChat.addCallListener(TAG, new CometChat.CallListener() {
             @Override
             public void onIncomingCallReceived(Call call) {
-                if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                    Utils.startCallIntent(context, (User) call.getCallInitiator(), call.getType(),
-                            false, call.getSessionId());
-                }
-                else {
-                    Utils.startGroupCallIntent(context, (Group) call.getReceiver(), call.getType(),
-                            false, call.getSessionId());
+                if (CometChat.getActiveCall()==null) {
+                    if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                        Utils.startCallIntent(context, (User) call.getCallInitiator(), call.getType(),
+                                false, call.getSessionId());
+                    } else {
+                        Utils.startGroupCallIntent(context, (Group) call.getReceiver(), call.getType(),
+                                false, call.getSessionId());
+                    }
+                } else {
+                    CometChat.rejectCall(call.getSessionId(), CometChatConstants.CALL_STATUS_BUSY, new CometChat.CallbackListener<Call>() {
+                        @Override
+                        public void onSuccess(Call call) {}
+
+                        @Override
+                        public void onError(CometChatException e) {
+                            Toast.makeText(context,"Error:"+e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
 

@@ -198,6 +198,37 @@ public class MediaUtils {
         return chooserIntent;
     }
 
+    public static Intent openAudio(Activity a)
+    {
+        activity = a;
+        List<Intent> allIntents = new ArrayList();
+        PackageManager packageManager = activity.getPackageManager();
+        Intent audioIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        audioIntent.setType("audio/*");
+        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(audioIntent, 0);
+        for (ResolveInfo res : listGallery) {
+            Intent intent = new Intent(audioIntent);
+            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            intent.setPackage(res.activityInfo.packageName);
+            allIntents.add(intent);
+        }
+        Intent mainIntent = allIntents.get(allIntents.size() - 1);
+        for (Intent intent : allIntents) {
+            if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
+                mainIntent = intent;
+                break;
+            }
+        }
+        allIntents.remove(mainIntent);
+
+        // Create a chooser from the main intent
+        Intent chooserIntent = Intent.createChooser(mainIntent, "Select source");
+
+        // Add all other intents
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[allIntents.size()]));
+
+        return chooserIntent;
+    }
     private static Uri getCaptureImageOutputUri() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = timeStamp + ".jpg";

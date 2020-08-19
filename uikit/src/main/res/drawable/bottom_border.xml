@@ -3,8 +3,7 @@
     <item android:bottom="1dp" android:left="-6dp" android:right="-6dp" android:top="-6dp">
         <shape
             android:shape="rectangle">
-            <stroke android:width="1dp" android:color="#FFDDDDDD" />
-            <solid android:color="#FFF" />
+            <stroke android:width="1dp" android:color="@color/message_bubble_grey" />
         </shape>
     </item>
 </layer-list>

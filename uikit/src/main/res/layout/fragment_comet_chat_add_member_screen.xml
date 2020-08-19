@@ -15,13 +15,11 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
         tools:context="screen.groupmemberlist.CometChatGroupMemberListScreen">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/add_member_toolbar"
             android:layout_width="match_parent"
-            android:background="@android:color/white"
             app:title="@string/add_members"
             android:layout_height="wrap_content"/>
 

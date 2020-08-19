@@ -73,7 +73,6 @@ public class CometChatConversationList extends RecyclerView {
     private void setViewModel(){
         if (conversationViewModel==null)
             conversationViewModel=new ConversationViewModel(context,this);
-
     }
 
     /**

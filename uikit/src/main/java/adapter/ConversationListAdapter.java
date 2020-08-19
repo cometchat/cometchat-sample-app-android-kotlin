@@ -27,6 +27,7 @@ import com.cometchat.pro.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.Extensions;
 import utils.FontUtils;
 import utils.Utils;
 
@@ -111,6 +112,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
         String avatar;
         String name;
+        String status;
         String lastMessageText = null;
         BaseMessage baseMessage = conversation.getLastMessage();
         conversationViewHolder.conversationListRowBinding.setConversation(conversation);
@@ -133,6 +135,12 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             conversationViewHolder.conversationListRowBinding.messageTime.setVisibility(View.GONE);
         }
         conversationViewHolder.conversationListRowBinding.txtUserMessage.setText(lastMessageText);
+        if (baseMessage!=null) {
+            boolean isSentimentNegative = Extensions.checkSentiment(baseMessage);
+            if (isSentimentNegative && !baseMessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
+                conversationViewHolder.conversationListRowBinding.txtUserMessage.setText(context.getResources().getString(R.string.sentimment_content));
+            }
+        }
         conversationViewHolder.conversationListRowBinding.txtUserMessage.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
         conversationViewHolder.conversationListRowBinding.txtUserName.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
         conversationViewHolder.conversationListRowBinding.messageTime.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
@@ -140,9 +148,16 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
         if (conversation.getConversationType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
             name = ((User) conversation.getConversationWith()).getName();
             avatar = ((User) conversation.getConversationWith()).getAvatar();
+            status = ((User)conversation.getConversationWith()).getStatus();
+            if (status.equals(CometChatConstants.USER_STATUS_ONLINE)) {
+                conversationViewHolder.conversationListRowBinding.userStatus.setVisibility(View.VISIBLE);
+                conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status);
+            } else
+                conversationViewHolder.conversationListRowBinding.userStatus.setVisibility(View.GONE);
         } else {
             name = ((Group) conversation.getConversationWith()).getName();
             avatar = ((Group) conversation.getConversationWith()).getIcon();
+            conversationViewHolder.conversationListRowBinding.userStatus.setVisibility(View.GONE);
         }
 
         conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.getUnreadMessageCount());
@@ -155,6 +170,13 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
             conversationViewHolder.conversationListRowBinding.avUser.setInitials(name);
         }
 
+        if(Utils.isDarkMode(context)) {
+            conversationViewHolder.conversationListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+            conversationViewHolder.conversationListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.grey));
+        } else {
+            conversationViewHolder.conversationListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+            conversationViewHolder.conversationListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.light_grey));
+        }
         conversationViewHolder.conversationListRowBinding.getRoot().setTag(R.string.conversation, conversation);
 
     }

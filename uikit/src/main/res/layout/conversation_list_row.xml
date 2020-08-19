@@ -32,7 +32,13 @@
                     android:layout_marginBottom="4dp"
                     tools:src="@tools:sample/avatars"
                     android:layout_height="40dp" />
-
+                <com.cometchat.pro.uikit.StatusIndicator
+                    android:layout_width="16dp"
+                    android:visibility="gone"
+                    android:layout_alignEnd="@+id/av_user"
+                    android:layout_alignBottom="@+id/av_user"
+                    android:id="@+id/user_status"
+                    android:layout_height="16dp"/>
                 <TextView
                     android:ellipsize="end"
                     android:id="@+id/txt_user_name"
@@ -40,7 +46,6 @@
                     android:layout_alignTop="@id/av_user"
                     android:layout_toStartOf="@+id/messageTime"
                     android:layout_marginStart="8dp"
-                    android:textColor="@color/primaryTextColor"
                     android:layout_toEndOf="@id/av_user"
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names"

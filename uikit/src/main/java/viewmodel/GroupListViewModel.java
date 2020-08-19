@@ -66,9 +66,9 @@ public class GroupListViewModel {
     }
 
 
-    public void update(Group group) {
+    public void update(Group group,int i) {
         if (groupListAdapter!=null)
-            groupListAdapter.updateGroup(group);
+            groupListAdapter.updateGroup(group,i);
     }
 
     public void add(Group group) {

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fillViewport="true"
+    tools:context="screen.CometChatGroupListScreen"
+    tools:ignore="MissingDefaultResource">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:padding="4dp"
+            android:text="SignUp"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTitle"
+            android:id="@+id/tvDes1"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Welcome to CometChat"
+            android:textColor="@color/colorPrimary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvDes1"
+            android:id="@+id/tvDes2"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Please Enter below details to continue"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:animateLayoutChanges="true"
+            android:layout_below="@id/tvDes2"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputUID"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter UID"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etUID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Enter Name"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:background="@color/primaryTextColor"
+                android:layout_marginTop="48dp"
+                android:layout_height="wrap_content">
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="match_parent"
+                    android:backgroundTint="@color/primaryTextColor"
+                    android:text="Create User"
+                    android:id="@+id/create_user_btn"
+                    app:rippleColor="@color/light_grey"
+                    android:layout_height="wrap_content"/>
+                <ProgressBar
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:layout_alignEnd="@+id/create_user_btn"
+                    android:id="@+id/createUser_pb"
+                    android:elevation="8dp"
+                    android:indeterminateTint="@color/textColorWhite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

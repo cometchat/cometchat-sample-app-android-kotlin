@@ -19,7 +19,6 @@
     </data>
 
     <RelativeLayout
-        android:background="@color/textColorWhite"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <FrameLayout
@@ -37,8 +36,7 @@
             android:layout_alignParentBottom="true"
             app:labelVisibilityMode="unlabeled"
             app:itemIconSize="@dimen/bottom_nav_icon_size"
-            app:menu="@menu/cometchat_navigation_bottom"
-            android:background="@color/bottom" />
+            app:menu="@menu/cometchat_navigation_bottom" />
 
     </RelativeLayout>
 </layout>

@@ -21,7 +21,6 @@
                 android:textStyle="bold"
                 android:layout_gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/primaryTextColor"
                 android:text="Badge Count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -59,8 +58,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:maxLines="1"
-                    android:imeOptions="actionGo"
-                    android:textColor="@color/primaryTextColor" />
+                    android:imeOptions="actionGo"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -81,8 +79,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:maxLines="1"
-                    android:imeOptions="actionGo"
-                    android:textColor="@color/primaryTextColor" />
+                    android:imeOptions="actionGo" />
             </com.google.android.material.textfield.TextInputLayout>
             <TextView
                 android:layout_marginTop="16dp"

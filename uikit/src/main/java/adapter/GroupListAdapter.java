@@ -1,6 +1,7 @@
 package adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -8,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.databinding.GroupListRowBinding;
 import com.cometchat.pro.models.Group;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utils.FontUtils;
+import utils.Utils;
 
 /**
  * Purpose - GroupListAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -81,11 +84,30 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         Group group = groupList.get(position);
         groupViewHolder.groupListRowBinding.setGroup(group);
         groupViewHolder.groupListRowBinding.executePendingBindings();
+        groupViewHolder.groupListRowBinding.txtUserMessage.setText("Members: "+group.getMembersCount());
+
+        if (group.getGroupType().equals(CometChatConstants.GROUP_TYPE_PRIVATE))
+            groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_security_24dp,0);
+        else if (group.getGroupType().equals(CometChatConstants.GROUP_TYPE_PASSWORD))
+            groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_lock_24dp,0);
+        else
+            groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
+
+        groupViewHolder.groupListRowBinding.executePendingBindings();
         groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
         groupViewHolder.groupListRowBinding.getRoot().setTag(R.string.group, group);
         groupViewHolder.groupListRowBinding.txtUserMessage.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
         groupViewHolder.groupListRowBinding.txtUserName.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));
 
+        if(Utils.isDarkMode(context)) {
+            groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawableTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.grey)));
+            groupViewHolder.groupListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
+            groupViewHolder.groupListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.grey));
+        } else {
+            groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawableTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.message_bubble_grey)));
+            groupViewHolder.groupListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+            groupViewHolder.groupListRowBinding.tvSeprator.setBackgroundColor(context.getResources().getColor(R.color.light_grey));
+        }
     }
 
     /**
@@ -95,11 +117,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
     public void updateGroupList(List<Group> groupList) {
 
         for (int i = 0; i <groupList.size() ; i++) {
-            if (!this.groupList.contains(groupList.get(i))) {
-                this.groupList.add(groupList.get(i));
-            }
+                updateGroup(groupList.get(i),i);
         }
-        notifyDataSetChanged();
     }
 
     /**
@@ -107,12 +126,12 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
      *
      * @param group is an object of Group. It will be updated with previous group in a list.
      */
-    public void updateGroup(Group group) {
+    public void updateGroup(Group group,int i) {
         if (group != null) {
             if (groupList.contains(group)) {
-                int index = groupList.indexOf(group);
+                int index = groupList.indexOf(groupList.get(i));
                 groupList.remove(index);
-                groupList.add(group);
+                groupList.add(index,group);
                 notifyItemChanged(index);
             } else {
                 groupList.add(group);
@@ -167,7 +186,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
      */
     public void add(Group group) {
         if (group != null) {
-            updateGroup(group);
+            groupList.add(group);
+            notifyItemInserted(getItemCount()-1);
         }
     }
 

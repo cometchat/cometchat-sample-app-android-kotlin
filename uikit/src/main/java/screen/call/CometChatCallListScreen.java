@@ -2,6 +2,7 @@ package screen.call;
 
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -53,6 +54,7 @@ import listeners.RecyclerTouchListener;
 import screen.CometChatCallActivity;
 import screen.CometChatUserCallListScreenActivity;
 import utils.FontUtils;
+import utils.Utils;
 
 /**
  * * Purpose - CometChatCallList class is a activity used to display list of calls recieved to user and perform certain action on click of item.
@@ -99,6 +101,7 @@ public class CometChatCallListScreen extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.call_screen, container, false);
+        tvTitle = view.findViewById(R.id.tv_title);
         phoneAddIv = view.findViewById(R.id.add_phone_iv);
         phoneAddIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,8 +118,21 @@ public class CometChatCallListScreen extends Fragment {
             viewPager.setAdapter(tabAdapter);
         }
         tabLayout.setupWithViewPager(viewPager);
-
+        checkDarkMode();
         return view;
+    }
+
+    private void checkDarkMode() {
+        if(Utils.isDarkMode(getContext())) {
+            tvTitle.setTextColor(getResources().getColor(R.color.textColorWhite));
+            tabLayout.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.grey)));
+            tabLayout.setTabTextColors(getResources().getColor(R.color.textColorWhite),getResources().getColor(R.color.light_grey));
+        } else {
+            tvTitle.setTextColor(getResources().getColor(R.color.primaryTextColor));
+            tabLayout.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.textColorWhite)));
+            tabLayout.setTabTextColors(getResources().getColor(R.color.primaryTextColor),getResources().getColor(R.color.textColorWhite));
+        }
+
     }
 
     private void openUserListScreen() {

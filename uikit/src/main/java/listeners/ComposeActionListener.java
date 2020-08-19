@@ -7,30 +7,22 @@ import android.widget.ImageView;
 
 public abstract class ComposeActionListener {
 
-    public void onMoreActionClicked(ImageView moreIcon) {
+    public void onMoreActionClicked(ImageView moreIcon) {}
 
-    }
+    public void onCameraActionClicked(ImageView cameraIcon) {}
 
-    public void onCameraActionClicked(ImageView cameraIcon) {
+    public void onGalleryActionClicked(ImageView galleryIcon) {}
 
-    }
+    public void onAudioActionClicked(ImageView audioIcon) {}
 
-    public void onGalleryActionClicked(ImageView galleryIcon) {
+    public void onFileActionClicked(ImageView fileIcon) {}
 
-    }
+    public void onEmojiActionClicked(ImageView emojiIcon) {}
 
+    public void onSendActionClicked(EditText editText ) {}
 
-    public void onFileActionClicked(ImageView fileIcon) {
+    public void onVoiceNoteComplete(String string) {}
 
-    }
-
-    public void onEmojiActionClicked(ImageView emojiIcon) {
-
-    }
-
-    public void onSendActionClicked(EditText editText ) {
-
-    }
     public abstract void  beforeTextChanged(CharSequence charSequence, int i, int i1, int i2);
 
     public abstract void onTextChanged(CharSequence charSequence, int i, int i1, int i2);

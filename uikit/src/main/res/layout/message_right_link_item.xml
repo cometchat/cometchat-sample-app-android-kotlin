@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="end"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -14,7 +13,8 @@
 
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cv_image_message_container"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/cv_link_message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardCornerRadius="10dp"
@@ -97,17 +97,41 @@
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
+        <LinearLayout
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_alignEnd="@+id/cv_link_message_container"
+            android:layout_below="@+id/cv_link_message_container"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                android:id="@+id/reply_avatar_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:clickable="true"
+                android:foreground="?selectableItemBackground"
+                android:id="@+id/thread_reply_count"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                tools:text="2 replies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
         <TextView
             android:id="@+id/txt_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="11:00 PM"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            tools:drawableEnd="@drawable/ic_double_tick"
             android:textSize="12sp"
-            android:layout_alignEnd="@id/cv_image_message_container"
+            android:layout_alignBottom="@+id/cv_link_message_container"
             android:layout_gravity="center"
-            android:layout_below="@id/cv_image_message_container"
+            android:layout_toLeftOf="@+id/cv_link_message_container"
             android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"

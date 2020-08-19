@@ -10,7 +10,6 @@
         android:layout_gravity="center"
         android:textStyle="bold"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/primaryTextColor"
         android:text="CallList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

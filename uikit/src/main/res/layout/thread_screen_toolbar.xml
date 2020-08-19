@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:stateListAnimator="@animator/toolbar_elevation"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_centerInParent="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/tv_name"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:layout_marginLeft="16dp"
+                tools:text="Thread in Conversation"
+                android:layout_width="wrap_content"
+                android:textColor="@color/primaryTextColor"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tv_typing"
+                android:layout_below="@id/tv_name"
+                android:layout_marginStart="16dp"
+                android:layout_centerHorizontal="true"
+                android:textSize="12sp"
+                tools:text="is Typing"
+                android:visibility="gone"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:maxWidth="200dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+
+</androidx.appcompat.widget.Toolbar>

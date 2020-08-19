@@ -37,11 +37,11 @@ import viewmodel.ConversationViewModel;
  *
  * Created on - 23rd March 2020
  *
- * Modified on  - 24th March 2020
+ * Modified on  - 02nd April 2020
  *
 */
 
-@BindingMethods( value ={@BindingMethod(type = CometChatCallList.class, attribute = "app:conversationlist", method = "setConversationList")})
+@BindingMethods( value ={@BindingMethod(type = CometChatCallList.class, attribute = "app:calllist", method = "setCallList")})
 public class CometChatCallList extends RecyclerView {
 
     private  Context context;
@@ -156,11 +156,11 @@ public class CometChatCallList extends RecyclerView {
                 String type;
                 Call call=(Call)var1.getTag(R.string.call);
                 if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                    if (call.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
+                    if (((User)call.getCallInitiator()).getUid().equals(CometChat.getLoggedInUser().getUid())) {
                         uid = ((User)call.getCallReceiver()).getUid();
                     }
                     else {
-                        uid = call.getSender().getUid();
+                        uid = ((User)call.getCallInitiator()).getUid();
                     }
                     type = CometChatConstants.RECEIVER_TYPE_USER;
                 }

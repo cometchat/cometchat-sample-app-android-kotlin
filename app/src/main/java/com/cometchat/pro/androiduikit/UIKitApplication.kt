@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.emoji.bundled.BundledEmojiCompatConfig
+import androidx.emoji.text.EmojiCompat
 import com.cometchat.pro.core.AppSettings
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
@@ -19,6 +21,8 @@ class UIKitApplication : Application() {
 
         super.onCreate()
         Log.d(TAG, "onCreate: " + this.packageName)
+        val emojiConfig = BundledEmojiCompatConfig(this)
+        EmojiCompat.init(emojiConfig)
         val appSettings = AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build()
         CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, object : CometChat.CallbackListener<String>() {
             override fun onSuccess(s: String) {
