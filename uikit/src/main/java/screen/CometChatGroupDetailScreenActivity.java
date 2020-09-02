@@ -529,7 +529,6 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
 
     private void launchUnified() {
         Intent intent = new Intent(CometChatGroupDetailScreenActivity.this, CometChatUnified.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
@@ -943,7 +942,7 @@ public class CometChatGroupDetailScreenActivity extends AppCompatActivity {
             @Override
             public void onError(CometChatException e) {
                 if (rvMemberList!=null) {
-                    Snackbar.make(rvMemberList,getResources().getString(R.string.group_update_failed),Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(rvMemberList,getResources().getString(R.string.group_update_failed)+" "+e.getMessage(),Snackbar.LENGTH_LONG).show();
                 }
                 dialog.dismiss();
             }

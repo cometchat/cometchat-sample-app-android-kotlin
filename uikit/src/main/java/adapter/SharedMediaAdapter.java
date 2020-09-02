@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.databinding.UserListRowBinding;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,29 +174,16 @@ public class SharedMediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         String smallUrl = Extensions.getThumbnailGeneration(context,message);
 
         if (smallUrl!=null) {
-            Glide.with(context).asBitmap().load(smallUrl).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    if (isImageNotSafe)
-                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
-                    else
-                        viewHolder.imageView.setImageBitmap(resource);
-                }
-            });
+            Glide.with(context).asBitmap().load(smallUrl).into(viewHolder.imageView);
         } else {
-            Glide.with(context).asBitmap().load(((MediaMessage)message).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    if (isImageNotSafe)
-                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
-                    else
-                        viewHolder.imageView.setImageBitmap(resource);
-                }
-            });
+            Glide.with(context).asBitmap().load(((MediaMessage)message).getAttachment().getFileUrl())
+                    .into(viewHolder.imageView);
         }
         if (isImageNotSafe) {
+            viewHolder.imageView.setAlpha(0.3f);
             viewHolder.sensitiveLayout.setVisibility(View.VISIBLE);
         } else {
+            viewHolder.imageView.setAlpha(1f);
             viewHolder.sensitiveLayout.setVisibility(View.GONE);
         }
         viewHolder.imageView.setOnClickListener(view -> {
@@ -219,7 +208,6 @@ public class SharedMediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             } else {
                 MediaUtils.openFile(((MediaMessage) message).getAttachment().getFileUrl(), context);
             }
-
         });
         viewHolder.itemView.setTag(R.string.baseMessage, message);
     }

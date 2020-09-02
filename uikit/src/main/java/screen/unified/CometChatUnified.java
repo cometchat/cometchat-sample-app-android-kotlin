@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.emoji.bundled.BundledEmojiCompatConfig;
+import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
@@ -41,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import constant.StringContract;
+import listeners.CometChatCallListener;
 import listeners.CustomAlertDialogHelper;
 import listeners.OnAlertDialogButtonClickListener;
 import listeners.OnItemClickListener;
@@ -91,6 +94,12 @@ public class CometChatUnified extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!CometChatCallListener.isInitialized)
+            CometChatCallListener.addCallListener(TAG,this);
+
+        EmojiCompat.Config config = new BundledEmojiCompatConfig(getApplicationContext());
+        EmojiCompat.init(config);
         activityCometChatUnifiedBinding = DataBindingUtil.setContentView(this, R.layout.activity_cometchat_unified);
         initViewComponent();
         // It performs action on click of user item in CometChatUserListScreen.
@@ -277,7 +286,7 @@ public class CometChatUnified extends AppCompatActivity implements
      * Updating BadgeDrawable set on conversation menu in BottomNavigationBar
      */
     private void setBadge(){
-        if (badgeDrawable.getNumber()==0){
+        if (unreadCount.size()==0){
             badgeDrawable.setVisible(false);
         } else
             badgeDrawable.setVisible(true);
@@ -293,7 +302,6 @@ public class CometChatUnified extends AppCompatActivity implements
             @Override
             public void onTextMessageReceived(TextMessage message) {
                 setUnreadCount(message);
-
             }
 
             @Override
@@ -417,6 +425,7 @@ public class CometChatUnified extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+        badgeDrawable.clearNumber();
         unreadCount.clear();    //Clear conversation count when app pauses or goes background.
     }
 }

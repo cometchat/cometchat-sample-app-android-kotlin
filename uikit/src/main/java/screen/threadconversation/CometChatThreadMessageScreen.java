@@ -388,7 +388,8 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         composeBox = view.findViewById(R.id.message_box);
         messageShimmer = view.findViewById(R.id.shimmer_layout);
         composeBox = view.findViewById(R.id.message_box);
-
+        composeBox.ivMic.setVisibility(GONE);
+        composeBox.ivSend.setVisibility(VISIBLE);
         setComposeBoxListener();
 
         rvSmartReply = view.findViewById(R.id.rv_smartReply);
@@ -459,41 +460,10 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             rvChatListView.setBackgroundColor(getResources().getColor(R.color.textColorWhite));
             tvName.setTextColor(getResources().getColor(R.color.primaryTextColor));
         }
-        composeBox.etComposeBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length()>0) {
-                    composeBox.ivMic.setVisibility(GONE);
-                    composeBox.ivSend.setVisibility(View.VISIBLE);
-                } else {
-                    composeBox.ivMic.setVisibility(View.VISIBLE);
-                    composeBox.ivSend.setVisibility(GONE);;
-                }
-            }
-        });
-        KeyBoardUtils.setKeyboardVisibilityListener(getActivity(),nestedScrollView, keyboardVisible -> {
+        KeyBoardUtils.setKeyboardVisibilityListener(getActivity(),(View) rvChatListView.getParent(), keyboardVisible -> {
             if (keyboardVisible) {
                 scrollToBottom();
-                composeBox.ivMic.setVisibility(GONE);
-                composeBox.ivSend.setVisibility(View.VISIBLE);
-            } else {
-                if (isEdit) {
-                    composeBox.ivMic.setVisibility(GONE);
-                    composeBox.ivSend.setVisibility(View.VISIBLE);
-                }else {
-                    composeBox.ivMic.setVisibility(View.VISIBLE);
-                    composeBox.ivSend.setVisibility(GONE);;
-                }
             }
         });
 
@@ -1382,6 +1352,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
      */
     private void setMessage(BaseMessage message) {
        setReply();
+       noReplyMessages.setVisibility(GONE);
         if (messageAdapter != null) {
             messageAdapter.addMessage(message);
             checkSmartReply(message);
@@ -1725,7 +1696,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             isReply = false;
             tvMessageTitle.setText(getResources().getString(R.string.edit_message));
             tvMessageSubTitle.setText(message);
-            composeBox.ivMic.setVisibility(GONE);
             composeBox.ivSend.setVisibility(View.VISIBLE);
             editMessageLayout.setVisibility(View.VISIBLE);
             composeBox.etComposeBox.setText(message);
@@ -1738,7 +1708,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             isReply = false;
             tvMessageTitle.setText(getResources().getString(R.string.edit_message));
             tvMessageSubTitle.setText(((TextMessage) baseMessage).getText());
-            composeBox.ivMic.setVisibility(GONE);
             composeBox.ivSend.setVisibility(View.VISIBLE);
             editMessageLayout.setVisibility(View.VISIBLE);
             composeBox.etComposeBox.setText(((TextMessage) baseMessage).getText());
@@ -1813,7 +1782,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                 replyMessage.setText(messageStr);
                 replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0);
             }
-            composeBox.ivMic.setVisibility(GONE);
             composeBox.ivSend.setVisibility(View.VISIBLE);
             replyMessageLayout.setVisibility(View.VISIBLE);
             if (messageAdapter != null) {

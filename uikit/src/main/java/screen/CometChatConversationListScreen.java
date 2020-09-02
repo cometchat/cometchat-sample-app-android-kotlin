@@ -343,7 +343,7 @@ public class CometChatConversationListScreen extends Fragment implements TextWat
         Log.d(TAG, "onResume: ");
         conversationsRequest = null;
         searchEdit.addTextChangedListener(this);
-//        rvConversationList.clearList();
+        rvConversationList.clearList();
         makeConversationList();
         addConversationListener();
     }

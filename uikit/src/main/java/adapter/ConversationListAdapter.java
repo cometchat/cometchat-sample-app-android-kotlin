@@ -351,7 +351,9 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
                         } else if (conversation.getConversationType().equals(CometChatConstants.CONVERSATION_TYPE_GROUP) &&
                                 ((Group) conversation.getConversationWith()).getName().toLowerCase().contains(searchKeyword)) {
                             tempFilter.add(conversation);
-                        } else if (conversation.getLastMessage()!=null && conversation.getLastMessage().getType().equals(CometChatConstants.MESSAGE_TYPE_TEXT)
+                        } else if (conversation.getLastMessage()!=null &&
+                                conversation.getLastMessage().getCategory().equals(CometChatConstants.CATEGORY_MESSAGE) &&
+                                conversation.getLastMessage().getType().equals(CometChatConstants.MESSAGE_TYPE_TEXT)
                                 && ((TextMessage)conversation.getLastMessage()).getText().contains(searchKeyword)) {
                             tempFilter.add(conversation);
                         }

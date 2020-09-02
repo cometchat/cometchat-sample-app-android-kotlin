@@ -68,6 +68,7 @@ import com.cometchat.pro.models.TypingIndicator;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.SmartReplyList;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -238,6 +239,8 @@ public class CometChatMessageScreen extends Fragment implements View.OnClickList
     private ImageView onGoingCallClose;
 
     public int count = 0;
+
+    private MessageActionFragment messageActionFragment;
 
     public CometChatMessageScreen() {
         // Required empty public constructor
@@ -702,7 +705,7 @@ public class CometChatMessageScreen extends Fragment implements View.OnClickList
         List<BaseMessage> tempList = new ArrayList<>();
         for(BaseMessage baseMessage : baseMessages)
         {
-            Log.e(TAG, "filterBaseMessages: "+baseMessage.getSentAt());
+            Log.e(TAG, "filterBaseMessages: "+baseMessage.toString());
             if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_ACTION)) {
                 Action action = ((Action)baseMessage);
                 if (action.getAction().equals(CometChatConstants.ActionKeys.ACTION_MESSAGE_DELETED) ||
@@ -1391,15 +1394,17 @@ public class CometChatMessageScreen extends Fragment implements View.OnClickList
      * @see BaseMessage
      */
     private void setMessage(BaseMessage message) {
-        if (messageAdapter != null) {
-            messageAdapter.addMessage(message);
-            checkSmartReply(message);
-            markMessageAsRead(message);
-            if ((messageAdapter.getItemCount() - 1) - ((LinearLayoutManager) rvChatListView.getLayoutManager()).findLastVisibleItemPosition() < 5)
-                scrollToBottom();
-        } else {
-            messageList.add(message);
-            initMessageAdapter(messageList);
+        if (message.getParentMessageId() == 0) {
+            if (messageAdapter != null) {
+                messageAdapter.addMessage(message);
+                checkSmartReply(message);
+                markMessageAsRead(message);
+                if ((messageAdapter.getItemCount() - 1) - ((LinearLayoutManager) rvChatListView.getLayoutManager()).findLastVisibleItemPosition() < 5)
+                    scrollToBottom();
+            } else {
+                messageList.add(message);
+                initMessageAdapter(messageList);
+            }
         }
     }
 
@@ -1479,6 +1484,9 @@ public class CometChatMessageScreen extends Fragment implements View.OnClickList
         checkOnGoingCall();
         fetchMessage();
         addMessageListener();
+
+        if (messageActionFragment!=null)
+            messageActionFragment.dismiss();
 
         if (type != null) {
             if (type.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
@@ -1635,7 +1643,7 @@ public class CometChatMessageScreen extends Fragment implements View.OnClickList
         Log.e(TAG, "setLongMessageClick: " + baseMessagesList);
         isReply = false;
         isEdit = false;
-        MessageActionFragment messageActionFragment = new MessageActionFragment();
+        messageActionFragment = new MessageActionFragment();
         replyMessageLayout.setVisibility(GONE);
         editMessageLayout.setVisibility(GONE);
         boolean shareVisible = true;

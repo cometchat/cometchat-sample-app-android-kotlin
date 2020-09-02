@@ -74,7 +74,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
 
     private Avatar userAv;
 
-    public static RelativeLayout mainView;
+    public RelativeLayout mainView;
 
     private FloatingActionButton hangUp;
     //
@@ -95,7 +95,6 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
 
     public static CometChatAudioHelper cometChatAudioHelper;
 
-    @SuppressLint("StaticFieldLeak")
     public static CometChatCallActivity callActivity;
 
     @Override
@@ -188,7 +187,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         {
             cometChatAudioHelper.stop(false);
             if (CometChat.getActiveCall()!=null)
-                Utils.startCall(this,CometChat.getActiveCall(),mainView);
+                Utils.startCall(this,CometChat.getActiveCall());
             else
                 onBackPressed();
         }
@@ -326,7 +325,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
      */
     private void startCall(RelativeLayout mainView,Call call) {
         hangUp.setVisibility(View.GONE);
-        Utils.startCall(CometChatCallActivity.this,call,mainView);
+        Utils.startCall(CometChatCallActivity.this,call);
     }
 
     public void startOnGoingCall(Call call) {

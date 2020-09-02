@@ -19,6 +19,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -389,19 +390,21 @@ public class Avatar extends AppCompatImageView {
      * Set user specific fields in here
      * */
     private void setValues() {
-
-
-        if (avatarUrl != null && !avatarUrl.isEmpty()) {
-            if (context!=null) {
-                Glide.with(context)
-                        .load(avatarUrl)
-                        .placeholder(drawable)
-                        .centerCrop()
-                        .override(imageSize, imageSize)
-                        .into(this);
+        try {
+            if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                if (context != null) {
+                    Glide.with(context)
+                            .load(avatarUrl)
+                            .placeholder(drawable)
+                            .centerCrop()
+                            .override(imageSize, imageSize)
+                            .into(this);
+                }
+            } else {
+                setImageDrawable(drawable);
             }
-        } else {
-            setImageDrawable(drawable);
+        } catch (Exception e) {
+            Toast.makeText(context,e.getMessage(),Toast.LENGTH_LONG).show();
         }
         invalidate();
     }

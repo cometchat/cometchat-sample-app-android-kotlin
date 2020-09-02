@@ -16,8 +16,10 @@
         android:usesCleartextTraffic="true"
         tools:node="merge"
         tools:targetApi="m">
-        <activity android:name="screen.threadconversation.CometChatThreadMessageActivity"
-            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name="screen.CometChatStartCallActivity"></activity>
+        <activity
+            android:name="screen.threadconversation.CometChatThreadMessageActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name="screen.banmembers.CometChatBanMemberScreenActivity" />
         <activity
             android:name="screen.CometChatCallActivity"
@@ -55,12 +57,16 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>

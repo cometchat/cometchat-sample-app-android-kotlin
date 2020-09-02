@@ -14,6 +14,7 @@ import com.cometchat.pro.uikit.CometChatCallList;
 
 import helper.CometChatAudioHelper;
 import screen.CometChatCallActivity;
+import screen.CometChatStartCallActivity;
 import utils.Utils;
 
 /**
@@ -22,6 +23,7 @@ import utils.Utils;
  */
 public class CometChatCallListener {
 
+    public static boolean isInitialized;
 
     /**
      * This method is used to add CallListener in app
@@ -30,6 +32,7 @@ public class CometChatCallListener {
      */
     public static void addCallListener(String TAG,Context context)
     {
+        isInitialized = true;
         CometChat.addCallListener(TAG, new CometChat.CallListener() {
             @Override
             public void onIncomingCallReceived(Call call) {
@@ -56,9 +59,9 @@ public class CometChatCallListener {
 
             @Override
             public void onOutgoingCallAccepted(Call call) {
-                if (CometChatCallActivity.mainView!=null) {
+                if (CometChatCallActivity.callActivity!=null) {
                     CometChatCallActivity.cometChatAudioHelper.stop(false);
-                    Utils.startCall(CometChatCallActivity.callActivity,call,CometChatCallActivity.mainView);
+                    Utils.startCall(CometChatCallActivity.callActivity, call);
                 }
             }
 
@@ -81,6 +84,8 @@ public class CometChatCallListener {
      * @param TAG is a unique Identifier
      */
     public static void removeCallListener(String TAG) {
+
+        isInitialized = false;
         CometChat.removeCallListener(TAG);
     }
 

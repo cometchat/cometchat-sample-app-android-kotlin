@@ -117,7 +117,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
     public void updateGroupList(List<Group> groupList) {
 
         for (int i = 0; i <groupList.size() ; i++) {
-                updateGroup(groupList.get(i),i);
+                updateGroup(groupList.get(i));
         }
     }
 
@@ -126,10 +126,10 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
      *
      * @param group is an object of Group. It will be updated with previous group in a list.
      */
-    public void updateGroup(Group group,int i) {
+    public void updateGroup(Group group) {
         if (group != null) {
             if (groupList.contains(group)) {
-                int index = groupList.indexOf(groupList.get(i));
+                int index = groupList.indexOf(group);
                 groupList.remove(index);
                 groupList.add(index,group);
                 notifyItemChanged(index);

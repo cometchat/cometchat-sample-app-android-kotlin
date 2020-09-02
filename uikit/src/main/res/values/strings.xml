@@ -205,6 +205,7 @@
     <string name="thread_in_name">Thread in %1$s</string>
     <string name="sentAtTxt">Sent at : %1$s</string>
     <string name="copy_message">Copy Message</string>
+    <string name="connecting_to_call">Connecting to call</string>
     <array name="groupType">
         <item>Public Group</item>
         <item>Private Group</item>

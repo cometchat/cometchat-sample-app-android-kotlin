@@ -77,11 +77,10 @@ public class CometChatGroupList extends RecyclerView {
      * This method helps updating the group in CometChatGroupList
      *
      * @param group object to be updated in the list
-     * @param position is int value which indicates position of group in list.
      */
-    public void update(Group group,int position){
+    public void update(Group group){
         if (groupListViewModel!=null){
-            groupListViewModel.update(group,position);
+            groupListViewModel.update(group);
         }
     }
     /**

@@ -79,6 +79,7 @@ import java.util.regex.Pattern;
 import constant.StringContract;
 import kotlin.ranges.RangesKt;
 import screen.CometChatCallActivity;
+import screen.CometChatStartCallActivity;
 
 public class Utils {
 
@@ -143,13 +144,6 @@ public class Utils {
     public static void initiatecall(Context context,String recieverID,String receiverType,String callType)
     {
         Call call = new Call(recieverID,receiverType,callType);
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("bookingId", 6);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        call.setMetadata(jsonObject);
         CometChat.initiateCall(call, new CometChat.CallbackListener<Call>() {
             @Override
             public void onSuccess(Call call) {
@@ -754,30 +748,12 @@ public class Utils {
         }
     }
 
-    public static void startCall(Activity activity, Call call, RelativeLayout mainView) {
-        CometChat.startCall(activity, call.getSessionId(), mainView, new CometChat.OngoingCallListener() {
-            @Override
-            public void onUserJoined(User user) {
-                Log.e("onUserJoined: ",user.getUid() );
-            }
-
-            @Override
-            public void onUserLeft(User user) {
-                Snackbar.make(activity.getWindow().getDecorView().getRootView(),"User Left: "+user.getName(),Snackbar.LENGTH_LONG).show();
-                Log.e( "onUserLeft: ",user.getUid() );
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                Log.e( "onError: ",e.getMessage() );
-            }
-
-            @Override
-            public void onCallEnded(Call call) {
-                Log.e(TAG, "onCallEnded: "+call.toString() );
-                activity.finish();
-            }
-        });
+    public static void startCall(Context context, Call call) {
+        Intent intent = new Intent(context, CometChatStartCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
+        ((Activity)context).finish();
+        context.startActivity(intent);
     }
 
     public static void joinOnGoingCall(Context context) {

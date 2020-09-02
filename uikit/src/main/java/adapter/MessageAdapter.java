@@ -1326,18 +1326,22 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             String txtMessage = ((TextMessage) baseMessage).getText().trim();
             viewHolder.txtMessage.setTextSize(16f);
             int count = 0;
-            CharSequence processed = EmojiCompat.get().process(txtMessage, 0,
-                        txtMessage.length() -1, Integer.MAX_VALUE, EmojiCompat.REPLACE_STRATEGY_ALL);
-            if (processed instanceof Spannable) {
-                Spannable spannable = (Spannable) processed;
-                count = spannable.getSpans(0, spannable.length() - 1, EmojiSpan.class).length;
-                if (Utils.removeEmojiAndSymbol(txtMessage).trim().length() == 0) {
-                    if (count == 1) {
-                        viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 32));
-                    } else if (count == 2) {
-                        viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 24));
+            try {
+                CharSequence processed = EmojiCompat.get().process(txtMessage, 0,
+                        txtMessage.length() - 1, Integer.MAX_VALUE, EmojiCompat.REPLACE_STRATEGY_ALL);
+                if (processed instanceof Spannable) {
+                    Spannable spannable = (Spannable) processed;
+                    count = spannable.getSpans(0, spannable.length() - 1, EmojiSpan.class).length;
+                    if (Utils.removeEmojiAndSymbol(txtMessage).trim().length() == 0) {
+                        if (count == 1) {
+                            viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 32));
+                        } else if (count == 2) {
+                            viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 24));
+                        }
                     }
                 }
+            } catch (Exception e ) {
+                Log.e(TAG, "setTextDataError: "+e.getMessage());
             }
 
             viewHolder.txtMessage.setText(txtMessage);
