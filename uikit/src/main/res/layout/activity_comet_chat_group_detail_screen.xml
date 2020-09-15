@@ -340,8 +340,8 @@
                     tools:visibility="visible"
                     android:gravity="center_vertical"
                     android:drawablePadding="8dp"
-                    android:textColor="@color/catalyst_redbox_background"
-                    android:text="@string/delete"
+                    android:textColor="@color/red"
+                    android:text="@string/delete_group_title"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"/>
 
@@ -355,7 +355,7 @@
                     android:textStyle=""
                     android:gravity="center_vertical"
                     android:layout_marginBottom="56dp"
-                    android:textColor="@color/catalyst_redbox_background"
+                    android:textColor="@color/red"
                     android:text="@string/exit"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"/>

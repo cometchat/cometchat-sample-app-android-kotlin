@@ -40,14 +40,17 @@ import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.BaseMessage;
+import com.cometchat.pro.models.CustomMessage;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.Avatar;
 import com.cometchat.pro.uikit.R;
+import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -99,6 +102,11 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private static final int CUSTOM_MESSAGE = 19;
 
+    private static final int LOCATION_CUSTOM_MESSAGE = 20;
+
+    public static double LATITUDE;
+    public static double LONGITUDE;
+
     public Context context;
 
     private User loggedInUser = CometChat.getLoggedInUser();
@@ -124,6 +132,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private boolean isTextMessageClick;
 
     private boolean isImageMessageClick;
+
+    private boolean isLocationMessageClick;
+
     /**
      * It is used to initialize the adapter wherever we needed. It has parameter like messageList
      * which contains list of messages and it will be used in adapter and paramter type is a String
@@ -234,6 +245,11 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thread_message_item, parent, false);
                 view.setTag(TEXT_MESSAGE);
                 return new CustomMessageViewHolder(view);
+
+            case LOCATION_CUSTOM_MESSAGE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thread_location_message_item, parent, false);
+                view.setTag(LOCATION_CUSTOM_MESSAGE);
+                return new LocationMessageViewHolder(view);
             default:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thread_message_item, parent, false);
                 view.setTag(-1);
@@ -287,8 +303,89 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             case CUSTOM_MESSAGE:
                 setCustomData((CustomMessageViewHolder) viewHolder, i);
                 break;
+            case LOCATION_CUSTOM_MESSAGE:
+                setLocationData((LocationMessageViewHolder) viewHolder, i);
+                break;
 
+        }
+    }
 
+    private void setLocationData(ThreadAdapter.LocationMessageViewHolder viewHolder, int i) {
+        BaseMessage baseMessage = messageList.get(i);
+        viewHolder.tvUser.setVisibility(View.VISIBLE);
+        viewHolder.ivUser.setVisibility(View.VISIBLE);
+        setAvatar(viewHolder.ivUser, baseMessage.getSender().getAvatar(), baseMessage.getSender().getName());
+        viewHolder.tvUser.setText(baseMessage.getSender().getName());
+        setLocationData(baseMessage, viewHolder.tvAddress, viewHolder.ivMap);
+        viewHolder.senderTxt.setText(String.format(context.getString(R.string.shared_location),baseMessage.getSender().getName()));
+        viewHolder.navigateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    double latitude = ((CustomMessage)baseMessage).getCustomData().getDouble("latitude");
+                    double longitude = ((CustomMessage)baseMessage).getCustomData().getDouble("longitude");;
+                    String label = Utils.getAddress(context,latitude,longitude);
+                    String uriBegin = "geo:" + latitude + "," + longitude;
+                    String query = label;
+                    String encodedQuery = Uri.encode(query);
+                    String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
+                    Uri uri = Uri.parse(uriString);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+//                    mapIntent.setPackage("com.google.android.apps.maps");
+                    context.startActivity(mapIntent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        showMessageTime(viewHolder,baseMessage);
+        if (messageList.get(messageList.size()-1).equals(baseMessage))
+        {
+            selectedItemList.add(baseMessage.getId());
+        }
+        if (selectedItemList.contains(baseMessage.getId()))
+            viewHolder.txtTime.setVisibility(View.VISIBLE);
+        else
+            viewHolder.txtTime.setVisibility(View.GONE);
+
+        viewHolder.rlMessageBubble.setOnClickListener(view -> {
+            if (isLongClickEnabled && !isImageMessageClick) {
+                setLongClickSelectedItem(baseMessage);
+                messageLongClick.setLongMessageClick(longselectedItemList);
+            }
+            else {
+                setSelectedMessage(baseMessage.getId());
+            }
+            notifyDataSetChanged();
+        });
+        viewHolder.rlMessageBubble.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (!isImageMessageClick && !isTextMessageClick) {
+                    isLongClickEnabled = true;
+                    isLocationMessageClick = true;
+                    setLongClickSelectedItem(baseMessage);
+                    messageLongClick.setLongMessageClick(longselectedItemList);
+                    notifyDataSetChanged();
+                }
+                return true;
+            }
+        });
+
+    }
+
+    private void setLocationData(BaseMessage baseMessage, TextView tvAddress, ImageView ivMap) {
+        try {
+            LATITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("latitude");
+            LONGITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("longitude");
+            tvAddress.setText(Utils.getAddress(context, LATITUDE, LONGITUDE));
+            String mapUrl = StringContract.MapUrl.MAPS_URL +LATITUDE+","+LONGITUDE+"&key="+ StringContract.MapUrl.MAP_ACCESS_KEY;
+            Glide.with(context)
+                    .load(mapUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(ivMap);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -1016,7 +1113,10 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 }
             } else {
                 if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_CUSTOM)){
-                    return CUSTOM_MESSAGE;
+                    if (baseMessage.getType().equalsIgnoreCase("LOCATION"))
+                        return LOCATION_CUSTOM_MESSAGE;
+                    else
+                        return CUSTOM_MESSAGE;
                 }
             }
         }
@@ -1116,6 +1216,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         isLongClickEnabled = false;
         isTextMessageClick = false;
         isImageMessageClick = false;
+        isLocationMessageClick = false;
         longselectedItemList.clear();
         notifyDataSetChanged();
     }
@@ -1306,6 +1407,39 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
             this.view = view;
+        }
+    }
+
+    public class LocationMessageViewHolder extends RecyclerView.ViewHolder {
+
+        public RelativeLayout rlMessageBubble;
+        private View view;
+        private int type;
+
+        public ImageView ivMap;
+        public TextView tvAddress;
+        public TextView senderTxt;
+        public MaterialButton navigateBtn;
+
+        public TextView txtTime;
+        public TextView tvUser;
+        public Avatar ivUser;
+
+
+        public LocationMessageViewHolder(View itemView) {
+            super(itemView);
+
+            type = (int) itemView.getTag();
+
+            ivMap = itemView.findViewById(R.id.iv_map);
+            tvAddress = itemView.findViewById(R.id.tv_place_name);
+            txtTime = itemView.findViewById(R.id.txt_time);
+            rlMessageBubble = itemView.findViewById(R.id.rl_message);
+            tvUser = itemView.findViewById(R.id.tv_user);
+            ivUser = itemView.findViewById(R.id.iv_user);
+            senderTxt = itemView.findViewById(R.id.sender_location_txt);
+            navigateBtn = itemView.findViewById(R.id.navigate_btn);
+            this.view = itemView;
         }
     }
 

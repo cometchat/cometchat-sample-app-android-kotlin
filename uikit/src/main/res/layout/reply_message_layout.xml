@@ -24,7 +24,6 @@
             android:layout_height="wrap_content"/>
         <TextView
             android:textStyle="italic"
-            android:gravity="center"
             android:drawablePadding="8dp"
             android:layout_marginTop="8dp"
             android:id="@+id/tv_reply_layout_subtitle"

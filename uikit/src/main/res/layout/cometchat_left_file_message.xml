@@ -17,7 +17,7 @@
             android:layout_width="24dp"
             android:id="@+id/iv_user"
             tools:src="@tools:sample/avatars"
-            android:layout_alignBottom="@id/cv_message_container"
+            android:layout_alignTop="@id/cv_message_container"
             android:layout_marginBottom="4dp"
             android:layout_marginStart="4dp"
             android:layout_height="24dp"/>
@@ -37,11 +37,9 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/iv_user"
             android:layout_marginTop="1dp"
-            android:layout_marginEnd="10dp"
             android:background="@drawable/cc_message_bubble_left"
             android:layout_marginStart="4dp"
-            android:padding="8dp"
-            android:layout_marginBottom="1dp">
+            android:padding="8dp">
 
             <TextView
                 android:layout_toRightOf="@+id/file_type_layout"

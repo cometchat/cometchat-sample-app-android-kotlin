@@ -59,11 +59,11 @@ public class CometChatMessageListActivity extends AppCompatActivity implements M
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_cometchat_message_list);
         EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
         EmojiCompat.init(config);
-        setContentView(R.layout.activity_cometchat_message_list);
 
-         if (getIntent()!=null) {
+        if (getIntent()!=null) {
              Bundle bundle = new Bundle();
 
              bundle.putString(StringContract.IntentStrings.AVATAR, getIntent().getStringExtra(StringContract.IntentStrings.AVATAR));

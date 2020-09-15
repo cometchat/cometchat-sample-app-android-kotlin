@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="screen.CometChatMessageInfoScreenActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/detail_toolbar"
+                android:layout_width="match_parent"
+                android:elevation="8dp"
+                android:background="@color/textColorWhite"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin">
+                <ImageView
+                    android:id="@+id/backIcon"
+                    android:paddingRight="16dp"
+                    android:clickable="true"
+                    android:src="@drawable/ic_arrow_back_24dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
+                    android:text="Message Info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </androidx.appcompat.widget.Toolbar>
+            <RelativeLayout
+                android:layout_marginTop="?actionBarSize"
+                android:paddingTop="8dp"
+                android:id="@+id/message_layout"
+                android:layout_width="match_parent"
+                android:background="@color/light_grey"
+                android:layout_height="match_parent">
+                <include
+                    android:layout_centerVertical="true"
+                    android:id="@+id/vwTextMessage"
+                    layout="@layout/right_message_item"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <include android:id="@+id/vwImageMessage"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:layout_height="220dp"
+                    layout="@layout/message_right_list_image_item"/>
+
+                <include android:id="@+id/vwVideoMessage"
+                    android:layout_centerVertical="true"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:layout_height="220dp"
+                    layout="@layout/message_right_list_video_item"/>
+
+                <include android:id="@+id/vwFileMessage"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    layout="@layout/cometchat_right_file_message"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+                <include android:id="@+id/vwAudioMessage"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    layout="@layout/cometchat_audio_layout_right"
+                    android:visibility="gone"/>
+
+                <include android:id="@+id/vwLocationMessage"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    layout="@layout/right_location_message_item"
+                    android:visibility="gone"/>
+            </RelativeLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:id="@+id/swipe_refresh"
+        android:layout_height="match_parent">
+        <com.cometchat.pro.uikit.CometChatReceiptsList
+            android:id="@+id/rvReceipts"
+            android:layout_marginTop="16dp"
+            app:showDeliveryReceipt="true"
+            app:showReadReceipt="true"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

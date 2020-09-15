@@ -31,26 +31,26 @@
     <include layout="@layout/edit_message_layout"/>
 
     <include layout="@layout/reply_message_layout"/>
-    <RelativeLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:id="@+id/bottom_layout"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.cometchat.pro.uikit.SmartReplyList
             android:layout_width="match_parent"
-            android:elevation="10dp"
+            android:elevation="16dp"
             android:orientation="horizontal"
             tools:listitem="@layout/reply_list_row"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:id="@+id/rv_smartReply"
-            android:layout_above="@id/message_box"
             android:layout_height="wrap_content"/>
 
-        <com.cometchat.pro.uikit.ComposeBox
+        <com.cometchat.pro.uikit.ComposeBox.ComposeBox
             android:id="@+id/message_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </RelativeLayout>
+    </LinearLayout>
 
     <include layout="@layout/block_user_message_layout"/>
 

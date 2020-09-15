@@ -206,6 +206,24 @@
     <string name="sentAtTxt">Sent at : %1$s</string>
     <string name="copy_message">Copy Message</string>
     <string name="connecting_to_call">Connecting to call</string>
+    <string name="read_at">Read At : %1$s</string>
+    <string name="delivered_at">Delivered At : %1$s</string>
+    <string name="message_info">Message Info</string>
+    <string name="navigate">Navigate</string>
+    <string name="grant_location_permission">Please allow location permission.</string>
+    <string name="send_audio_files">Send Audio Files</string>
+    <string name="send_files_from_gallery">Photo &amp; Video Gallery</string>
+    <string name="send_from_camera">Capture Image</string>
+    <string name="send_files">Files &amp; Documents</string>
+    <string name="share_location">Share your location</string>
+    <string name="shared_location">%1$s shared a location</string>
+    <string name="no">No</string>
+    <string name="shared_location_address">Shared a Location \n %1$s</string>
+    <string name="turn_on_gps">Turn On GPS</string>
+    <string name="on">ON</string>
+    <string name="gps_enabled">GPS enabled</string>
+    <string name="gps_disabled">GPS disabled</string>
+    <string name="unable_to_get_location">Unable to get your location</string>
     <array name="groupType">
         <item>Public Group</item>
         <item>Private Group</item>

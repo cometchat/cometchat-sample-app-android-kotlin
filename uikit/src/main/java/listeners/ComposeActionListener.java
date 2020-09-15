@@ -9,13 +9,13 @@ public abstract class ComposeActionListener {
 
     public void onMoreActionClicked(ImageView moreIcon) {}
 
-    public void onCameraActionClicked(ImageView cameraIcon) {}
+    public void onCameraActionClicked() {}
 
-    public void onGalleryActionClicked(ImageView galleryIcon) {}
+    public void onGalleryActionClicked() {}
 
-    public void onAudioActionClicked(ImageView audioIcon) {}
+    public void onAudioActionClicked() {}
 
-    public void onFileActionClicked(ImageView fileIcon) {}
+    public void onFileActionClicked() {}
 
     public void onEmojiActionClicked(ImageView emojiIcon) {}
 
@@ -42,4 +42,10 @@ public abstract class ComposeActionListener {
         fileIcon.setVisibility(View.VISIBLE);
     }
 
+    public void getLocationActionView(ImageView locationIcon) {
+        locationIcon.setVisibility(View.VISIBLE);
+    }
+
+    public void onLocationActionClicked() {
+    }
 }

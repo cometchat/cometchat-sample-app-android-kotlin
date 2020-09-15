@@ -207,7 +207,7 @@
                     android:layout_marginTop="8dp"
                     android:paddingBottom="16dp"
                     android:textSize="18sp"
-                    android:textColor="@color/catalyst_redbox_background"
+                    android:textColor="@color/red"
                     android:text="@string/block_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

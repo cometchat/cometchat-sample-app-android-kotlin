@@ -33,11 +33,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/iv_user"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/cc_message_bubble_left"
-            android:layout_marginStart="10dp"
-            android:layout_marginBottom="1dp">
+            android:layout_marginStart="10dp">
             <include
                 android:layout_below="@+id/go_txt_message"
                 android:layout_marginLeft="16dp"

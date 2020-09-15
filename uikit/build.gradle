@@ -63,9 +63,13 @@ dependencies {
 
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
 
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:2.1.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0"
+    compileOnly 'com.cometchat:pro-android-chat-sdk:2.1.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0'
 }
 repositories {
     mavenCentral()

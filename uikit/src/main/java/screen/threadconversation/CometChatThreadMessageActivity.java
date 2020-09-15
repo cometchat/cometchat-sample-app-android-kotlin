@@ -79,21 +79,35 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
 
     private long sentAt;
 
+    private String messageCategory;
+
+    private double latitude;
+
+    private double longitude;
+
     private int replyCount;
 
     private String conversationName;
+
+    private String baseMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_message_list);
-
         EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
         EmojiCompat.init(config);
 
-         if (getIntent()!=null) {
+        if (getIntent()!=null) {
              Bundle bundle = new Bundle();
-
+//             if (getIntent().hasExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE))
+//                 baseMessage = getIntent().getStringExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE);
+             if (getIntent().hasExtra(StringContract.IntentStrings.MESSAGE_CATEGORY))
+                 messageCategory = getIntent().getStringExtra(StringContract.IntentStrings.MESSAGE_CATEGORY);
+             if (getIntent().hasExtra(StringContract.IntentStrings.LOCATION_LONGITUDE))
+                 longitude = getIntent().getDoubleExtra(StringContract.IntentStrings.LOCATION_LONGITUDE,0);
+             if (getIntent().hasExtra(StringContract.IntentStrings.LOCATION_LATITUDE))
+                 latitude = getIntent().getDoubleExtra(StringContract.IntentStrings.LOCATION_LATITUDE,0);
              if (getIntent().hasExtra(StringContract.IntentStrings.CONVERSATION_NAME))
                  conversationName = getIntent().getStringExtra(StringContract.IntentStrings.CONVERSATION_NAME);
              if (getIntent().hasExtra(StringContract.IntentStrings.PARENT_ID))
@@ -132,6 +146,10 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
                  if (getIntent().hasExtra(StringContract.IntentStrings.UID))
                      Id = getIntent().getStringExtra(StringContract.IntentStrings.UID);
              }
+//             bundle.putString(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage);
+             bundle.putString(StringContract.IntentStrings.MESSAGE_CATEGORY,messageCategory);
+             bundle.putDouble(StringContract.IntentStrings.LOCATION_LATITUDE,latitude);
+             bundle.putDouble(StringContract.IntentStrings.LOCATION_LONGITUDE,longitude);
              bundle.putString(StringContract.IntentStrings.ID,Id);
              bundle.putString(StringContract.IntentStrings.CONVERSATION_NAME,conversationName);
              bundle.putString(StringContract.IntentStrings.TYPE,type);
@@ -205,5 +223,6 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
 
     public void handleDialogClose(DialogInterface dialog) {
         ((MessageActionCloseListener)fragment).handleDialogClose(dialog);
+        dialog.dismiss();
     }
 }

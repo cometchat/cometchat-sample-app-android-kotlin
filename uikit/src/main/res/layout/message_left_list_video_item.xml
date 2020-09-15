@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="10dp"
             app:cardBackgroundColor="@color/colorPrimary"
-            android:layout_margin="10dp">
+            android:layout_margin="8dp">
 
 
             <RelativeLayout
@@ -98,7 +98,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="11:00 PM"
-            android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:textSize="12sp"
             android:layout_alignBottom="@id/cv_image_message_container"

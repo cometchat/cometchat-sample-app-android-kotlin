@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.databinding.UserListRowBinding;
 import com.cometchat.pro.models.User;
@@ -94,6 +95,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
         } else {
             userViewHolder.userListRowBinding.tvSeprator.setVisibility(View.VISIBLE);
         }
+        if (user.getStatus().equals(CometChatConstants.USER_STATUS_ONLINE))
+            userViewHolder.userListRowBinding.statusIndicator.setVisibility(View.VISIBLE);
+
+        userViewHolder.userListRowBinding.statusIndicator.setUserStatus(user.getStatus());
         userViewHolder.userListRowBinding.txtUserName.setText(user.getName());
         userViewHolder.userListRowBinding.executePendingBindings();
         userViewHolder.userListRowBinding.avUser.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));

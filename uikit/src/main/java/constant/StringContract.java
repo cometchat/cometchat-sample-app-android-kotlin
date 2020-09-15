@@ -81,8 +81,23 @@ public class StringContract {
 
         public static final String CONVERSATION_NAME = "conversation_name";
 
-
         public static final String INTENT_MEDIA_MESSAGE = "intent_media_message" ;
+
+        public static final String IMAGE_MODERATION = "image_moderation" ;
+
+        public static final String CUSTOM_MESSAGE = "custom_message" ;
+
+        public static final String LOCATION = "LOCATION" ;
+
+        public static final String LOCATION_LATITUDE = "latitude";
+
+        public static final String LOCATION_LONGITUDE = "longitude" ;
+
+        public static final String MESSAGE_CATEGORY = "message_category";
+
+        public static final String PARENT_BASEMESSAGE = "parent_baseMessage";
+
+        public static final String MEDIA_SIZE = "media_size" ;
     }
 
     public static class Tab {
@@ -109,5 +124,13 @@ public class StringContract {
         public static final int READ_STORAGE = 001;
 
         public static final int RECORD = 003;
+
+        public static final int LOCATION = 14;
+    }
+    public static class MapUrl{
+
+        public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
+
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXX"; // Replace with your MAPS API Key
     }
 }

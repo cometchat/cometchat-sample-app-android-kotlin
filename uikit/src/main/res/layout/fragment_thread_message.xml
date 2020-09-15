@@ -59,12 +59,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
+                    android:visibility="gone"
                     android:id="@+id/tv_textMessage"
                     android:textStyle="bold"
                     tools:text="@string/loremIpsum"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
                 <ImageView
+                    android:visibility="gone"
                     android:scaleType="center"
                     android:id="@+id/iv_imageMessage"
                     tools:src="@tools:sample/backgrounds/scenic"
@@ -75,6 +77,25 @@
                     android:id="@+id/vv_videoMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="250dp"/>
+                <RelativeLayout
+                    android:visibility="gone"
+                    android:id="@+id/rl_locationMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp">
+                    <ImageView
+                        android:id="@+id/iv_mapView"
+                        tools:src="@tools:sample/avatars"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                    <TextView
+                        android:padding="16dp"
+                        android:id="@+id/tv_address"
+                        android:textColor="@color/textColorWhite"
+                        android:background="@color/grey"
+                        android:layout_alignParentBottom="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
                 <RelativeLayout
                     android:visibility="gone"
                     android:id="@+id/rl_fileMessage"
@@ -222,7 +243,7 @@
             android:layout_above="@id/message_box"
             android:layout_height="wrap_content"/>
 
-        <com.cometchat.pro.uikit.ComposeBox
+        <com.cometchat.pro.uikit.ComposeBox.ComposeBox
             android:id="@+id/message_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

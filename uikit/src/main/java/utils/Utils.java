@@ -12,6 +12,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -20,6 +22,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -101,6 +104,8 @@ public class Utils {
         utf8tweet = unicodeOutlierMatcher.replaceAll(" ");
         return utf8tweet;
     }
+
+
     public static boolean isDarkMode(Context context)
     {
         int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -300,6 +305,29 @@ public class Utils {
         String lastMessageTime = new SimpleDateFormat("h:mm a").format(new java.util.Date(timestamp * 1000));
         String lastMessageDate = new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(timestamp * 1000));
         String lastMessageWeek = new SimpleDateFormat("EEE").format(new java.util.Date(timestamp * 1000));
+        long currentTimeStamp = System.currentTimeMillis();
+
+        long diffTimeStamp = currentTimeStamp - timestamp * 1000;
+
+        Log.e(TAG, "getLastMessageDate: " + 24 * 60 * 60 * 1000);
+        if (diffTimeStamp < 24 * 60 * 60 * 1000) {
+            return lastMessageTime;
+
+        } else if (diffTimeStamp < 48 * 60 * 60 * 1000) {
+
+            return "Yesterday";
+        } else if (diffTimeStamp < 7 * 24 * 60 * 60 * 1000) {
+            return lastMessageWeek;
+        } else {
+            return lastMessageDate;
+        }
+
+    }
+
+    public static String getReceiptDate(long timestamp) {
+        String lastMessageTime = new SimpleDateFormat("h:mm a").format(new java.util.Date(timestamp * 1000));
+        String lastMessageDate = new SimpleDateFormat("dd/MM h:mm a").format(new java.util.Date(timestamp * 1000));
+        String lastMessageWeek = new SimpleDateFormat("EEE h:mm a").format(new java.util.Date(timestamp * 1000));
         long currentTimeStamp = System.currentTimeMillis();
 
         long diffTimeStamp = currentTimeStamp - timestamp * 1000;
@@ -760,5 +788,19 @@ public class Utils {
         Intent intent = new Intent(context,CometChatCallActivity.class);
         intent.putExtra(StringContract.IntentStrings.JOIN_ONGOING,true);
         context.startActivity(intent);
+    }
+
+    public static String getAddress(Context context, double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && addresses.size() > 0){
+                String address = addresses.get(0).getAddressLine(0);
+                return address;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

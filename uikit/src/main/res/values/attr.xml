@@ -21,6 +21,12 @@
         <attr name="headers" format="boolean"/>
     </declare-styleable>
 
+    <declare-styleable name="CometChatReceiptsList">
+        <attr name="receiptlist" format="reference" />
+        <attr name="showDeliveryReceipt" format="boolean"/>
+        <attr name="showReadReceipt" format="boolean"/>
+    </declare-styleable>
+
 
     <declare-styleable name="CometChatConversationList">
         <attr name="conversationlist" format="reference" />

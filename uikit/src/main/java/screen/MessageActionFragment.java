@@ -28,6 +28,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
     private TextView forwardMessage;
     private TextView deleteMessage;
     private TextView copyMessage;
+    private TextView messageInfo;
     private TextView shareMessage;
 
     private boolean isShareVisible;
@@ -37,6 +38,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
     private boolean isDeleteVisible;
     private boolean isForwardVisible;
     private boolean isReplyVisible;
+    private boolean isMessageInfoVisible;
 
     private MessageActionListener messageActionListener;
 
@@ -57,6 +59,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
             isReplyVisible = getArguments().getBoolean("replyVisible");
             isForwardVisible = getArguments().getBoolean("forwardVisible");
             isShareVisible = getArguments().getBoolean("shareVisible");
+            isMessageInfoVisible = getArguments().getBoolean("messageInfoVisible");
             type = getArguments().getString("type");
         }
     }
@@ -85,6 +88,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
         deleteMessage = view.findViewById(R.id.delete_message);
         copyMessage = view.findViewById(R.id.copy_message);
         shareMessage = view.findViewById(R.id.share_message);
+        messageInfo = view.findViewById(R.id.message_info);
 
         if (isThreadVisible)
             threadMessage.setVisibility(View.VISIBLE);
@@ -115,6 +119,10 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
         else
             shareMessage.setVisibility(View.GONE);
 
+        if (isMessageInfoVisible)
+            messageInfo.setVisibility(View.VISIBLE);
+        else
+            messageInfo.setVisibility(View.GONE);
         if (type!=null && type.equals(CometChatThreadMessageActivity.class.getName())) {
             threadMessage.setVisibility(View.GONE);
         }
@@ -175,6 +183,14 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
                 dismiss();
             }
         });
+        messageInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (messageActionListener!=null)
+                    messageActionListener.onMessageInfoClick();
+                dismiss();
+            }
+        });
 
         return view;
     }
@@ -193,6 +209,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
         void onDeleteMessageClick();
         void onCopyMessageClick();
         void onShareMessageClick();
+        void onMessageInfoClick();
     }
 
     @Override
