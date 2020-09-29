@@ -153,6 +153,57 @@
                             android:visibility="visible" />
                     </LinearLayout>
                 </RelativeLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@+id/iv_user"
+                    android:layout_below="@+id/iv_user"
+                    android:background="@drawable/cc_message_bubble_left"
+                    android:orientation="vertical"
+                    android:id="@+id/poll_message"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tv_question"
+                        style="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:maxWidth="240dp"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="16dp"
+                        android:textColor="@color/primaryTextColor"
+                        android:textStyle="bold"
+                        tools:text="What color is rose ?" />
+
+                    <ProgressBar
+                        android:visibility="gone"
+                        android:id="@+id/loading_progressBar"
+                        android:layout_gravity="end"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"/>
+                    <LinearLayout
+                        android:layout_marginTop="8dp"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:orientation="vertical"
+                        android:id="@+id/options_group"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                    </LinearLayout>
+                    <TextView
+                        android:text="0 Votes"
+                        android:id="@+id/total_votes"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:textStyle="italic"
+                        android:textColor="@color/primaryTextColor"
+                        tools:text="2 Votes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
             </RelativeLayout>
             <RelativeLayout
                 android:padding="8dp"
@@ -167,24 +218,28 @@
                     tools:text="2 Replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
-                <ImageView
-                    android:id="@+id/ic_forward_option"
-                    android:layout_marginRight="16dp"
-                    android:clickable="true"
-                    android:foreground="?selectableItemBackground"
-                    android:layout_toLeftOf="@+id/ic_more_option"
-                    android:tint="@color/primaryTextColor"
-                    android:src="@drawable/ic_baseline_forward_24"
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <ImageView
-                    android:id="@+id/ic_more_option"
-                    android:clickable="true"
-                    android:foreground="?selectableItemBackground"
                     android:layout_alignParentEnd="true"
-                    android:src="@drawable/ic_baseline_more_vert_24"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:id="@+id/ic_forward_option"
+                        android:clickable="true"
+                        android:foreground="?selectableItemBackground"
+                        android:tint="@color/primaryTextColor"
+                        android:src="@drawable/ic_baseline_forward_24"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:layout_marginLeft="16dp"
+                        android:id="@+id/ic_more_option"
+                        android:clickable="true"
+                        android:foreground="?selectableItemBackground"
+                        android:src="@drawable/ic_baseline_more_vert_24"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
 
             </RelativeLayout>
             <LinearLayout

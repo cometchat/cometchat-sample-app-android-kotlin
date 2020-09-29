@@ -9,6 +9,8 @@ public abstract class ComposeActionListener {
 
     public void onMoreActionClicked(ImageView moreIcon) {}
 
+    public void onPollActionClicked() {}
+
     public void onCameraActionClicked() {}
 
     public void onGalleryActionClicked() {}

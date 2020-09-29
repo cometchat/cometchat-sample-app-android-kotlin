@@ -95,6 +95,14 @@
                     tools:visibility="visible"
                     layout="@layout/right_location_message_item"
                     android:visibility="gone"/>
+                <include
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    android:id="@+id/polls_message"
+                    layout="@layout/right_polls_message_item"/>
             </RelativeLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

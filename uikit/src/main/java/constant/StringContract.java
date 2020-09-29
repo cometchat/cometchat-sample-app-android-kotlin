@@ -97,6 +97,18 @@ public class StringContract {
 
         public static final String PARENT_BASEMESSAGE = "parent_baseMessage";
 
+        public static final String POLL_VOTE_COUNT = "poll_vote_count";
+
+        public static String Polls = "extension_poll";
+
+        public static String POLL_QUESTION = "poll_question";
+
+        public static String POLL_OPTION = "poll_option";
+
+        public static String POLL_RESULT = "poll_result";
+
+        public static String POLL_ID = "poll_id";
+
         public static final String MEDIA_SIZE = "media_size" ;
     }
 
@@ -131,6 +143,6 @@ public class StringContract {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXX"; // Replace with your MAPS API Key
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Replace with Google API Key.
     }
 }

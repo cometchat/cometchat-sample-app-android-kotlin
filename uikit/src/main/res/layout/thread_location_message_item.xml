@@ -17,8 +17,9 @@
         <com.cometchat.pro.uikit.Avatar
             android:layout_width="50dp"
             android:id="@+id/iv_user"
-            app:avatar_shape="@string/rectangle"
             tools:src="@tools:sample/avatars"
+            app:border_width="0.5dp"
+            app:border_color="@color/colorPrimary"
             android:layout_marginBottom="4dp"
             android:layout_marginStart="4dp"
             android:layout_height="50dp"/>
@@ -39,7 +40,6 @@
             android:layout_marginEnd="10dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp"
-            android:background="@drawable/cc_message_bubble_left"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="1dp">
             <RelativeLayout

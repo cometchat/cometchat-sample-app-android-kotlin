@@ -7,6 +7,20 @@
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
+        android:id="@+id/polls_message"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:textStyle="bold"
+        android:text="@string/add_a_poll"
+        android:drawableTint="@color/grey"
+        android:drawableStart="@drawable/ic_poll_24dp"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/grey"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
         android:id="@+id/gallery_message"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"

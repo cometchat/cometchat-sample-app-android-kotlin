@@ -20,13 +20,14 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
     private TextView fileMessage;
     private TextView audioMessage;
     private TextView locationMessage;
+    private TextView pollsMessage;
 
     private boolean isGalleryVisible;
     private boolean isCameraVisible;
     private boolean isAudioVisible;
     private boolean isFileVisible;
     private boolean isLocationVisible;
-
+    private boolean isPollsVisible;
 
     private ComposeBoxActionListener composeBoxActionListener;
 
@@ -41,6 +42,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
             isFileVisible = getArguments().getBoolean("isFileVisible");
             isAudioVisible = getArguments().getBoolean("isAudioVisible");
             isLocationVisible = getArguments().getBoolean("isLocationVisible");
+            isPollsVisible = getArguments().getBoolean("isPollsVisible");
         }
     }
 
@@ -61,12 +63,17 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
                 behavior.setPeekHeight(0);
             }
         });
+        pollsMessage = view.findViewById(R.id.polls_message);
         galleryMessage = view.findViewById(R.id.gallery_message);
         cameraMessage = view.findViewById(R.id.camera_message);
         fileMessage = view.findViewById(R.id.file_message);
         audioMessage = view.findViewById(R.id.audio_message);
         locationMessage = view.findViewById(R.id.location_message);
 
+        if (isPollsVisible)
+            pollsMessage.setVisibility(View.VISIBLE);
+        else
+            pollsMessage.setVisibility(View.GONE);
         if (isGalleryVisible)
             galleryMessage.setVisibility(View.VISIBLE);
         else
@@ -88,6 +95,14 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
         else
             locationMessage.setVisibility(View.GONE);
 
+        pollsMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (composeBoxActionListener!=null)
+                    composeBoxActionListener.onPollClick();
+                dismiss();
+            }
+        });
         galleryMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,6 +158,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
         void onFileClick();
         void onAudioClick();
         void onLocationClick();
+        void onPollClick();
     }
 
 }

@@ -15,14 +15,19 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.text.Spannable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,8 +43,10 @@ import com.bumptech.glide.request.transition.Transition;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.CustomMessage;
+import com.cometchat.pro.models.Group;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.Avatar;
 import com.cometchat.pro.models.BaseMessage;
@@ -49,7 +56,6 @@ import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.google.android.material.button.MaterialButton;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -130,6 +136,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private static final int RIGHT_LOCATION_CUSTOM_MESSAGE = 32;
 
+    private static final int RIGHT_POLLS_CUSTOM_MESSAGE = 41;
+
+    private static final int LEFT_POLLS_CUSTOM_MESSAGE = 42;
+
     public static double LATITUDE;
     public static double LONGITUDE;
 
@@ -162,6 +172,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean isImageMessageClick;
 
     private boolean isLocationMessageClick;
+
+    private String selectedOption;
+
     /**
      * It is used to initialize the adapter wherever we needed. It has parameter like messageList
      * which contains list of messages and it will be used in adapter and paramter type is a String
@@ -336,6 +349,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 view.setTag(LEFT_LOCATION_CUSTOM_MESSAGE);
                 return new LocationMessageViewHolder(view);
 
+            case RIGHT_POLLS_CUSTOM_MESSAGE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.right_polls_message_item,parent,false);
+                view.setTag(RIGHT_POLLS_CUSTOM_MESSAGE);
+                return new PollMessageViewHolder(view);
+
+            case LEFT_POLLS_CUSTOM_MESSAGE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.left_polls_message_item,parent,false);
+                view.setTag(RIGHT_POLLS_CUSTOM_MESSAGE);
+                return new PollMessageViewHolder(view);
+
             default:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.right_message_item, parent, false);
                 view.setTag(-1);
@@ -447,11 +470,194 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 setLocationData((LocationMessageViewHolder) viewHolder, i);
                 break;
 
+            case RIGHT_POLLS_CUSTOM_MESSAGE:
+            case LEFT_POLLS_CUSTOM_MESSAGE:
+                setPollsData((PollMessageViewHolder) viewHolder,i);
+                break;
+
 
         }
     }
 
+    private void setPollsData(PollMessageViewHolder viewHolder, int i) {
+        BaseMessage baseMessage = messageList.get(i);
+        if (!baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
+            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                viewHolder.tvUser.setVisibility(View.GONE);
+                viewHolder.ivUser.setVisibility(View.GONE);
+            } else if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                if (isUserDetailVisible) {
+                    viewHolder.tvUser.setVisibility(View.VISIBLE);
+                    viewHolder.ivUser.setVisibility(View.VISIBLE);
+                } else {
+                    viewHolder.tvUser.setVisibility(View.GONE);
+                    viewHolder.ivUser.setVisibility(View.INVISIBLE);
+                }
+                setAvatar(viewHolder.ivUser, baseMessage.getSender().getAvatar(), baseMessage.getSender().getName());
+                viewHolder.tvUser.setText(baseMessage.getSender().getName());
+            }
+        }
+        if (baseMessage.getReplyCount()!=0) {
+            viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
+            viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
+        } else {
+            viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
+        }
+        viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
+            Intent intent = new Intent(context, CometChatThreadMessageActivity.class);
+//            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
+            intent.putExtra(StringContract.IntentStrings.NAME,baseMessage.getSender().getName());
+            intent.putExtra(StringContract.IntentStrings.AVATAR,baseMessage.getSender().getAvatar());
+            intent.putExtra(StringContract.IntentStrings.REPLY_COUNT,baseMessage.getReplyCount());
+            intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getName());
+            intent.putExtra(StringContract.IntentStrings.PARENT_ID,baseMessage.getId());
+            intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,baseMessage.getType());
+            intent.putExtra(StringContract.IntentStrings.SENTAT,baseMessage.getSentAt());
+            try {
+                JSONObject option = ((CustomMessage) baseMessage).getCustomData().getJSONObject("options");
+                intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.Polls);
+                intent.putExtra(StringContract.IntentStrings.POLL_QUESTION,
+                        ((CustomMessage) baseMessage).getCustomData().getString("question"));
+                intent.putExtra(StringContract.IntentStrings.POLL_OPTION,option.toString());
+                intent.putExtra(StringContract.IntentStrings.POLL_VOTE_COUNT,Extensions.getVoteCount(baseMessage));
+                intent.putExtra(StringContract.IntentStrings.POLL_RESULT, Extensions.getVoterInfo(baseMessage,option.length()));
+            }catch (Exception e) {
+                Log.e(TAG, "startThreadActivityError: "+e.getMessage());
+            }
+            intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY,baseMessage.getCategory());
+            intent.putExtra(StringContract.IntentStrings.TYPE,baseMessage.getReceiverType());
+            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                intent.putExtra(StringContract.IntentStrings.GUID,baseMessage.getReceiverUid());
+            }
+            else {
+                if (baseMessage.getReceiverUid().equals(loggedInUser.getUid()))
+                    intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getUid());
+                else
+                    intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getReceiverUid());
+            }
+            context.startActivity(intent);
+        });
+        viewHolder.optionGroup.removeAllViews();
+        viewHolder.totalCount.setText("0 Votes");
+        ArrayList<String> optionList = new ArrayList<>();
+        try {
+            JSONObject jsonObject = ((CustomMessage) baseMessage).getCustomData();
+            JSONObject options = jsonObject.getJSONObject("options");
+            ArrayList<String> voterInfo = Extensions.getVoterInfo(baseMessage,options.length());
+            viewHolder.tvQuestion.setText(jsonObject.getString("question"));
+                for (int k = 0; k < options.length(); k++) {
+                    viewHolder.totalCount.setText(Extensions.getVoteCount(baseMessage)+" Votes");
+                        LinearLayout linearLayout = new LinearLayout(context);
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout
+                                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                        linearLayout.setPadding(8,8,8,8);
+                        linearLayout.setBackground(context.getResources()
+                                .getDrawable(R.drawable.cc_message_bubble_right));
+                        linearLayout.setBackgroundTintList(ColorStateList.valueOf(context.getResources()
+                                .getColor(R.color.textColorWhite)));
+                        layoutParams.bottomMargin = (int) Utils.dpToPx(context, 8);
+                        linearLayout.setLayoutParams(layoutParams);
 
+                        TextView textViewPercentage = new TextView(context);
+                        TextView textViewOption = new TextView(context);
+                        textViewPercentage.setPadding(16, 4, 0, 4);
+                        textViewOption.setPadding(16, 4, 0, 4);
+                        textViewOption.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium);
+                        textViewPercentage.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium);
+
+                            textViewPercentage.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+                            textViewOption.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+                        String optionStr = options.getString(String.valueOf(k + 1));
+                        textViewOption.setText(optionStr);
+                        int voteCount = Extensions.getVoteCount(baseMessage);
+                        if (voteCount>0) {
+                            int percentage = Math.round((Integer.parseInt(voterInfo.get(k)) * 100) /
+                                    voteCount);
+                            if (percentage > 0)
+                                textViewPercentage.setText(percentage + "% ");
+                        }
+                        if (k+1==Extensions.userVotedOn(baseMessage,optionList.size()+1,loggedInUser.getUid())) {
+                            textViewPercentage.setCompoundDrawablePadding(8);
+                            textViewPercentage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_circle_24,0,0,0);
+                        }
+                        int finalK = k;
+                        if (viewHolder.optionGroup.getChildCount()!=options.length()) {
+                            viewHolder.loadingProgress.setVisibility(View.GONE);
+                            linearLayout.addView(textViewPercentage);
+                            linearLayout.addView(textViewOption);
+                            viewHolder.optionGroup.addView(linearLayout);
+                        }
+                        linearLayout.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put("vote",finalK+1);
+                                    jsonObject.put("id",baseMessage.getId());
+                                    CometChat.callExtension("polls", "POST", "/v1/vote",
+                                            jsonObject,new CometChat.CallbackListener<JSONObject>() {
+                                                @Override
+                                                public void onSuccess(JSONObject jsonObject) {
+                                                    // Voted successfully
+                                                    viewHolder.loadingProgress.setVisibility(View.VISIBLE);
+                                                    viewHolder.totalCount.setText("0 Votes");
+                                                    Log.e(TAG, "onSuccess: "+jsonObject.toString());
+                                                    Toast.makeText(context,"Voted Success",Toast.LENGTH_LONG).show();
+                                                }
+
+                                                @Override
+                                                public void onError(CometChatException e) {
+                                                    // Some error occured
+                                                    Log.e(TAG, "onErrorExtension: "+e.getMessage()+"\n"+e.getCode());
+                                                }
+                                            });
+                                } catch (Exception e) {
+                                    Log.e(TAG, "onError: "+e.getMessage());
+                                }
+                            }
+                        });
+                    optionList.add(options.getString(String.valueOf(k + 1)));
+                }
+        } catch (Exception e) {
+            Log.e(TAG, "setPollsData: "+e.getMessage()+"\n"+viewHolder.totalCount.getText());
+        }
+        showMessageTime(viewHolder,baseMessage);
+//        if (messageList.get(messageList.size()-1).equals(baseMessage))
+//        {
+//            selectedItemList.add(baseMessage.getId());
+//        }
+//        if (selectedItemList.contains(baseMessage.getId()))
+        viewHolder.txtTime.setVisibility(View.VISIBLE);
+//        else
+//            viewHolder.txtTime.setVisibility(View.GONE);
+
+
+        viewHolder.rlMessageBubble.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (!isImageMessageClick && !isTextMessageClick) {
+                    isLongClickEnabled = true;
+                    isLocationMessageClick = true;
+                    setLongClickSelectedItem(baseMessage);
+                    messageLongClick.setLongMessageClick(longselectedItemList);
+                }
+                return true;
+            }
+        });
+    }
+
+
+    /**
+     * This method is called whenever viewType of item is customMessage and customType is Location.
+     * It is used to bind LocationMessageViewHolder
+     * contents with CustomMessage at a given position.
+     *
+     * @param viewHolder is a object of LocationMessageViewHolder.
+     * @param i is a position of item in recyclerView.
+     * @see CustomMessage
+     * @see BaseMessage
+     */
     private void setLocationData(LocationMessageViewHolder viewHolder, int i) {
         BaseMessage baseMessage = messageList.get(i);
         if (!baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
@@ -565,7 +771,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         });
 
     }
-
+    /**
+     * This method is used inside #setLocationData() to set location data in
+     * a LocationMessageViewHolder elements.
+     *
+     * @see #setLocationData(LocationMessageViewHolder, int)
+     * @param baseMessage is a CustomMessage which has LocationData
+     * @param tvAddress is TextView which displays address
+     * @param ivMap is a ImageView which displays mapView of a particular latitude and longitude.
+     *
+     * */
     private void setLocationData(BaseMessage baseMessage, TextView tvAddress, ImageView ivMap) {
         try {
             LATITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("latitude");
@@ -580,6 +795,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             e.printStackTrace();
         }
     }
+    /**
+     * This method is called whenever viewType of item is file. It is used to bind AudioMessageViewHolder
+     * contents with MediaMessage at a given position.
+     *
+     * @param viewHolder is a object of AudioMessageViewHolder.
+     * @param i is a position of item in recyclerView.
+     * @see MediaMessage
+     * @see BaseMessage
+     */
     private void setAudioData(AudioMessageViewHolder viewHolder, int i) {
         BaseMessage baseMessage = messageList.get(i);
         if (baseMessage!=null&&baseMessage.getDeletedAt()==0) {
@@ -1284,6 +1508,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                          viewHolder.replyMessage.setText(String.format(context
                                  .getString(R.string.shared_location_address),"").trim());
                          viewHolder.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp,0,0,0);
+                     } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+                         viewHolder.replyMessage.setText(String.format(context.getString(R.string.shared_a_polls),message));
+                         viewHolder.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_poll_24dp,0,0,0);
                      }
                  }catch (Exception e) {
                      Log.e(TAG, "setTextData: "+e.getMessage());
@@ -1748,14 +1975,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     return CALL_MESSAGE;
                 } else if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_CUSTOM)){
                     if (baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
-                        if (baseMessage.getType().equalsIgnoreCase("LOCATION"))
+                        if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.LOCATION))
                             return RIGHT_LOCATION_CUSTOM_MESSAGE;
+                        else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.Polls))
+                            return RIGHT_POLLS_CUSTOM_MESSAGE;
                         else
                             return RIGHT_CUSTOM_MESSAGE;
                     }
                     else
-                        if (baseMessage.getType().equalsIgnoreCase("LOCATION"))
+                        if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.LOCATION))
                             return LEFT_LOCATION_CUSTOM_MESSAGE;
+                        else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.Polls))
+                            return LEFT_POLLS_CUSTOM_MESSAGE;
                         else
                             return LEFT_CUSTOM_MESSAGE;
                 }
@@ -2107,6 +2338,39 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
             senderTxt = itemView.findViewById(R.id.sender_location_txt);
             navigateBtn = itemView.findViewById(R.id.navigate_btn);
+            this.view = itemView;
+        }
+    }
+
+    public class PollMessageViewHolder extends RecyclerView.ViewHolder {
+        public RelativeLayout rlMessageBubble;
+        private View view;
+        private int type;
+
+        public TextView tvQuestion;
+        public TextView totalCount;
+        public LinearLayout optionGroup;
+        public ProgressBar loadingProgress;
+
+        public TextView tvThreadReplyCount;
+        public TextView txtTime;
+        public TextView tvUser;
+        public Avatar ivUser;
+
+        public PollMessageViewHolder(View itemView) {
+            super(itemView);
+
+            type = (int) itemView.getTag();
+
+            totalCount = itemView.findViewById(R.id.total_votes);
+            tvQuestion = itemView.findViewById(R.id.tv_question);
+            optionGroup = itemView.findViewById(R.id.options_group);
+            txtTime = itemView.findViewById(R.id.txt_time);
+            rlMessageBubble = itemView.findViewById(R.id.rl_message);
+            tvUser = itemView.findViewById(R.id.tv_user);
+            ivUser = itemView.findViewById(R.id.iv_user);
+            loadingProgress = itemView.findViewById(R.id.loading_progressBar);
+            tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
             this.view = itemView;
         }
     }

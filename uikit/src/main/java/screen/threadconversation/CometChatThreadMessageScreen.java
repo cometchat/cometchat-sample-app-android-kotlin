@@ -42,7 +42,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,7 +55,6 @@ import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.MessagesRequest;
 import com.cometchat.pro.exceptions.CometChatException;
-import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.CustomMessage;
@@ -99,7 +97,7 @@ import screen.CometChatForwardMessageScreenActivity;
 import screen.CometChatGroupDetailScreenActivity;
 import screen.CometChatMessageInfoScreenActivity;
 import screen.CometChatUserDetailScreenActivity;
-import screen.MessageActionFragment;
+import screen.messagelist.MessageActionFragment;
 import utils.Extensions;
 import utils.FontUtils;
 import utils.KeyBoardUtils;
@@ -197,11 +195,17 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private int parentId;
     private String type;
     private String groupOwnerId;
+
     private TextView textMessage;
     private ImageView imageMessage;
     private VideoView videoMessage;
     private RelativeLayout fileMessage;
     private RelativeLayout locationMessage;
+    private View pollMessage;
+
+    private TextView pollQuestionTv;
+    private LinearLayout pollOptionsLL;
+
     private ImageView mapView;
     private TextView addressView;
     private TextView fileName;
@@ -225,8 +229,10 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private final long MIN_DIST = 5;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private double parentMessageLatitude, parentMessageLongitude;
-    private String customType = "LOCATION";
-
+    private String pollQuestion,pollOptions;
+    private ArrayList<String> pollResult;
+    private TextView totalCount;
+    private int voteCount;
     public CometChatThreadMessageScreen() {
         // Required empty public constructor
     }
@@ -244,8 +250,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
      */
     private void handleArguments() {
         if (getArguments() != null) {
-            parentMessageLatitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LATITUDE);
-            parentMessageLongitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LONGITUDE);
             parentId = getArguments().getInt(StringContract.IntentStrings.PARENT_ID,0);
             replyCount = getArguments().getInt(StringContract.IntentStrings.REPLY_COUNT,0);
             type = getArguments().getString(StringContract.IntentStrings.TYPE);
@@ -258,6 +262,15 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             parentMessageCategory = getArguments().getString(StringContract.IntentStrings.MESSAGE_CATEGORY);
             if (messageType.equals(CometChatConstants.MESSAGE_TYPE_TEXT)) {
                 message = getArguments().getString(StringContract.IntentStrings.TEXTMESSAGE);
+            } else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
+                parentMessageLatitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LATITUDE);
+                parentMessageLongitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LONGITUDE);
+
+            } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+                pollQuestion = getArguments().getString(StringContract.IntentStrings.POLL_QUESTION);
+                pollOptions = getArguments().getString(StringContract.IntentStrings.POLL_OPTION);
+                pollResult = getArguments().getStringArrayList(StringContract.IntentStrings.POLL_RESULT);
+                voteCount = getArguments().getInt(StringContract.IntentStrings.POLL_VOTE_COUNT);
             } else {
                 message = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL);
                 messageFileName = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME);
@@ -302,6 +315,11 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         fileSize = view.findViewById(R.id.tvFileSize);
         fileExtension = view.findViewById(R.id.tvFileExtension);
 
+        pollMessage = view.findViewById(R.id.poll_message);
+        pollQuestionTv = view.findViewById(R.id.tv_question);
+        pollOptionsLL = view.findViewById(R.id.options_group);
+        totalCount = view.findViewById(R.id.total_votes);
+
         if (messageType.equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
             imageMessage.setVisibility(View.VISIBLE);
             Glide.with(context).load(message).into(imageMessage);
@@ -311,8 +329,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             mediacontroller.setAnchorView(videoMessage);
             videoMessage.setMediaController(mediacontroller);
             videoMessage.setVideoURI(Uri.parse(message));
-        }
-        else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_FILE) ||
+        } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_FILE) ||
                 messageType.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
             fileMessage.setVisibility(VISIBLE);
             if (messageFileName!=null)
@@ -325,6 +342,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             textMessage.setVisibility(View.VISIBLE);
             textMessage.setText(message);
         } else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
+            initLocation();
             locationMessage.setVisibility(VISIBLE);
             addressView.setText(Utils.getAddress(context, parentMessageLatitude, parentMessageLongitude));
             String mapUrl = StringContract.MapUrl.MAPS_URL +parentMessageLatitude+","+parentMessageLongitude+"&key="+ StringContract.MapUrl.MAP_ACCESS_KEY;
@@ -332,19 +350,97 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     .load(mapUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(mapView);
+        } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+            ivForwardMessage.setVisibility(GONE);
+            TextView threadReplyCount = view.findViewById(R.id.thread_reply_count);
+            threadReplyCount.setVisibility(GONE);
+            pollMessage.setVisibility(VISIBLE);
+            totalCount.setText(voteCount+" Votes");
+            pollQuestionTv.setText(pollQuestion);
+            try {
+                JSONObject options = new JSONObject(pollOptions);
+                ArrayList<String> voterInfo = pollResult;
+                for (int k = 0; k < options.length(); k++) {
+                    LinearLayout linearLayout = new LinearLayout(context);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout
+                            .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT);
+                    linearLayout.setPadding(8,8,8,8);
+                    linearLayout.setBackground(context.getResources()
+                            .getDrawable(R.drawable.cc_message_bubble_right));
+                    linearLayout.setBackgroundTintList(ColorStateList.valueOf(context.getResources()
+                            .getColor(R.color.textColorWhite)));
+                    layoutParams.bottomMargin = (int) Utils.dpToPx(context, 8);
+                    linearLayout.setLayoutParams(layoutParams);
+
+                    TextView textViewPercentage = new TextView(context);
+                    TextView textViewOption = new TextView(context);
+                    textViewPercentage.setPadding(16, 4, 0, 4);
+                    textViewOption.setPadding(16, 4, 0, 4);
+                    textViewOption.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium);
+                    textViewPercentage.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium);
+
+                    textViewPercentage.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+                    textViewOption.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
+
+                    String optionStr = options.getString(String.valueOf(k + 1));
+                    if (voteCount>0) {
+                        int percentage = Math.round((Integer.parseInt(voterInfo.get(k)) * 100) /
+                                voteCount);
+                        if (percentage > 0)
+                            textViewPercentage.setText(percentage + "% ");
+                    }
+                    textViewOption.setText(optionStr);
+                    int finalK = k;
+                    if (pollOptionsLL.getChildCount()!=options.length()) {
+                        linearLayout.addView(textViewPercentage);
+                        linearLayout.addView(textViewOption);
+                        pollOptionsLL.addView(linearLayout);
+                    }
+                    textViewOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("vote",finalK+1);
+                                jsonObject.put("id",baseMessage.getId());
+                                CometChat.callExtension("polls", "POST", "/v1/vote",
+                                        jsonObject,new CometChat.CallbackListener<JSONObject>() {
+                                            @Override
+                                            public void onSuccess(JSONObject jsonObject) {
+                                                // Voted successfully
+                                                Log.e(TAG, "onSuccess: "+jsonObject.toString());
+                                                Toast.makeText(context,"Voted Success",Toast.LENGTH_LONG).show();
+                                            }
+
+                                            @Override
+                                            public void onError(CometChatException e) {
+                                                // Some error occured
+                                                Log.e(TAG, "onErrorExtension: "+e.getMessage()+"\n"+e.getCode());
+                                            }
+                                        });
+                            } catch (Exception e) {
+                                Log.e(TAG, "onError: "+e.getMessage());
+                            }
+                        }
+                    });
+                 }
+            } catch (Exception e) {
+                Log.e(TAG, "setPollsData: "+e.getMessage());
+            }
         }
         bottomLayout = view.findViewById(R.id.bottom_layout);
         composeBox = view.findViewById(R.id.message_box);
         messageShimmer = view.findViewById(R.id.shimmer_layout);
         composeBox = view.findViewById(R.id.message_box);
         composeBox.usedIn(CometChatThreadMessageActivity.class.getName());
+        composeBox.isPollVisible = false;
         composeBox.ivMic.setVisibility(GONE);
         composeBox.ivSend.setVisibility(VISIBLE);
         setComposeBoxListener();
 
         rvSmartReply = view.findViewById(R.id.rv_smartReply);
 
-        initLocation();
 
         editMessageLayout = view.findViewById(R.id.editMessageLayout);
         tvMessageTitle = view.findViewById(R.id.tv_message_layout_title);
@@ -368,7 +464,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         tvReplyCount = view.findViewById(R.id.thread_reply_count);
         rvChatListView = view.findViewById(R.id.rv_message_list);
         if (parentMessageCategory.equals(CometChatConstants.CATEGORY_CUSTOM))
-            ivMoreOption.setVisibility(View.INVISIBLE);
+            ivMoreOption.setVisibility(GONE);
         if (replyCount>0) {
             tvReplyCount.setText(replyCount + " Replies");
             noReplyMessages.setVisibility(GONE);
@@ -614,8 +710,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     }
 
                     initAlert(customData);
-                } else {
-                    Toast.makeText(context,getString(R.string.unable_to_get_location),Toast.LENGTH_LONG).show();
                 }
             }
         });

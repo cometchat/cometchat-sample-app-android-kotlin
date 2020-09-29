@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="2px"
+        android:bottom="2px">
+
+        <shape android:shape="rectangle">
+            <corners android:bottomLeftRadius="16dp"
+                android:bottomRightRadius="16dp"/>
+            <solid android:color="@color/message_bubble_grey" />
+        </shape>
+    </item>
+</layer-list>

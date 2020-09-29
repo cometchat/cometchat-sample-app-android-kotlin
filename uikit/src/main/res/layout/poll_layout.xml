@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:drawablePadding="16dp"
+            android:textColor="@color/textColorWhite"
+            style="@style/TextAppearance.AppCompat.Large"
+            android:background="@color/colorPrimary"
+            android:padding="16dp"
+            android:drawableStart="@drawable/ic_poll_24dp"
+            android:text="Polls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            android:clickable="true"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:id="@+id/close_poll_dialog"
+            android:layout_margin="16dp"
+            android:tint="@color/textColorWhite"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_close_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+    <TextView
+        android:layout_margin="16dp"
+        android:id="@+id/question_tv"
+        style="@style/TextAppearance.AppCompat.Large"
+        tools:text="What is rose ?"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <RadioGroup
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/options_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </RadioGroup>
+    <com.google.android.material.button.MaterialButton
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:text="@string/vote"
+        android:id="@+id/vote_btn"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/textColorWhite"
+        android:backgroundTint="@color/colorPrimary"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

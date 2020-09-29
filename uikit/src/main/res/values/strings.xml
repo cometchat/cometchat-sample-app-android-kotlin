@@ -223,6 +223,18 @@
     <string name="on">ON</string>
     <string name="gps_enabled">GPS enabled</string>
     <string name="gps_disabled">GPS disabled</string>
+    <string name="create_poll">Create Poll</string>
+    <string name="option">Options</string>
+    <string name="vote">Vote</string>
+    <string name="poll">Poll</string>
+    <string name="sending_media_message">Sending Media Message</string>
+    <string name="create_polls">Create a Poll</string>
+    <string name="add_a_poll">Add a Poll</string>
+    <string name="enter_your_option">Enter your option</string>
+    <string name="shared_a_polls">Shared a Polls : \n %1$s</string>
+    <string name="enter_your_question">Enter your Question</string>
+    <string name="question">Question</string>
+    <string name="add_a_new_option">Add a New Option</string>
     <string name="unable_to_get_location">Unable to get your location</string>
     <array name="groupType">
         <item>Public Group</item>

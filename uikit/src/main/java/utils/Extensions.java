@@ -4,8 +4,10 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cometchat.pro.models.AppEntity;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.TextMessage;
+import com.cometchat.pro.models.User;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -102,6 +104,9 @@ public class Extensions {
                     if (extensionsObject!=null && extensionsObject.has("sentiment-analysis")) {
                         extensionMap.put("sentimentAnalysis",extensionsObject.getJSONObject("sentiment-analysis"));
                     }
+                    if (extensionsObject!=null && extensionsObject.has("polls")) {
+                        extensionMap.put("polls",extensionsObject.getJSONObject("polls"));
+                    }
                 }
                 return extensionMap;
             }
@@ -152,5 +157,72 @@ public class Extensions {
             }
         }
         return result;
+    }
+    public static int userVotedOn(BaseMessage baseMessage,int totalOptions,String loggedInUserId) {
+        int result = 0;
+        JSONObject resultJson = getPollsResult(baseMessage);
+        try {
+            if (resultJson.has("options")) {
+                JSONObject options = resultJson.getJSONObject("options");
+                for (int k = 0; k <totalOptions; k++) {
+                    JSONObject option = options.getJSONObject(String.valueOf(k+1));
+                    if (option.has("voters") && option.get("voters") instanceof JSONObject) {
+                        JSONObject voterList = option.getJSONObject("voters");
+                        if (voterList.has(loggedInUserId)) {
+                                result = k+1;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e) {
+            Log.e(TAG, "userVotedOn: "+e.getMessage());
+        }
+        return result;
+    }
+    public static int getVoteCount(BaseMessage baseMessage) {
+        int voteCount = 0;
+        JSONObject result = getPollsResult(baseMessage);
+        try {
+
+            if (result.has("total")) {
+                voteCount = result.getInt("total");
+            }
+        }catch (Exception e) {
+            Log.e(TAG, "getVoteCount: "+e.getMessage());
+        }
+        return voteCount;
+    }
+    public static JSONObject getPollsResult(BaseMessage baseMessage) {
+        JSONObject result = new JSONObject();
+        HashMap<String, JSONObject> extensionList = Extensions.extensionCheck(baseMessage);
+        if (extensionList != null) {
+            try {
+                if (extensionList.containsKey("polls")) {
+                    JSONObject polls = extensionList.get("polls");
+                    if (polls.has("results")) {
+                        result = polls.getJSONObject("results");
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "getPollsResult: "+e.getMessage());
+            }
+        }
+        return result;
+    }
+    public static ArrayList<String> getVoterInfo(BaseMessage baseMessage,int totalOptions) {
+        ArrayList<String> votes = new ArrayList<>();
+        JSONObject result = getPollsResult(baseMessage);
+        try {
+            if (result.has("options")) {
+                JSONObject options = result.getJSONObject("options");
+                for (int k=0;k<totalOptions;k++) {
+                    JSONObject optionK = options.getJSONObject(String.valueOf(k+1));
+                    votes.add(optionK.getString("count"));
+                }
+            }
+        } catch (Exception e) {
+                Log.e(TAG, "checkProfanityMessage:Error: "+e.getMessage() );
+        }
+        return votes;
     }
 }

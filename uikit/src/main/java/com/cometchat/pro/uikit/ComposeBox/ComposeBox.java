@@ -29,6 +29,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.uikit.R;
 
 import java.io.File;
@@ -88,7 +89,7 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
     private Bundle bundle = new Bundle();
 
     public boolean isGalleryVisible = true,isAudioVisible = true,isCameraVisible = true,
-            isFileVisible = true,isLocationVisible = true;
+            isFileVisible = true,isLocationVisible = true,isPollVisible = true;
 
     public ComposeBox(Context context) {
         super(context);
@@ -202,6 +203,9 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             public void onLocationClick() {
                 composeActionListener.onLocationActionClicked();
             }
+
+            @Override
+            public void onPollClick() { composeActionListener.onPollActionClicked(); }
         });
         etComposeBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -333,6 +337,8 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             bundle.putBoolean("isFileVisible",isFileVisible);
             bundle.putBoolean("isAudioVisible",isAudioVisible);
             bundle.putBoolean("isLocationVisible",isLocationVisible);
+            if (CometChat.isExtensionEnabled("polls"))
+                bundle.putBoolean("isPollsVisible",isPollVisible);
             composeBoxActionFragment.setArguments(bundle);
             composeBoxActionFragment.show(fm,composeBoxActionFragment.getTag());
         }

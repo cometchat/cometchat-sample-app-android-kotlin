@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="start"
+    android:layout_marginBottom="8dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -15,7 +16,8 @@
         <com.cometchat.pro.uikit.Avatar
             android:layout_width="50dp"
             android:id="@+id/iv_user"
-            app:avatar_shape="@string/rectangle"
+            app:border_width="0.5dp"
+            app:border_color="@color/colorPrimary"
             tools:src="@tools:sample/avatars"
             android:layout_marginBottom="4dp"
             android:layout_marginStart="4dp"

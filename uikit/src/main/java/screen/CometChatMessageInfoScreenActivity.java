@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
+import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.uikit.CometChatReceiptsList;
 import com.cometchat.pro.uikit.R;
@@ -24,9 +28,11 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import constant.StringContract;
+import utils.Extensions;
 import utils.Utils;
 
 public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
@@ -37,6 +43,10 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
     private View fileMessage;
     private View videoMessage;
     private View locationMessage;
+    private View pollsMessage;
+
+    private TextView question;
+    private LinearLayout optionGroup;
 
     private ImageView ivMap;
     private TextView tvPlaceName;
@@ -58,7 +68,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
     private String messageType;
     private int messageSize;
     private String messageExtension;
-
+    private int percentage=0;
     private String TAG = "CometChatMessageInfo";
 
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -73,6 +83,10 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
         audioMessage = findViewById(R.id.vwAudioMessage);
         fileMessage = findViewById(R.id.vwFileMessage);
         locationMessage = findViewById(R.id.vwLocationMessage);
+        pollsMessage = findViewById(R.id.polls_message);
+        findViewById(R.id.total_votes).setVisibility(View.GONE);
+        question = findViewById(R.id.tv_question);
+        optionGroup = findViewById(R.id.options_group);
         messageText = findViewById(R.id.go_txt_message);
         txtTime = findViewById(R.id.txt_time);
         txtTime.setVisibility(View.VISIBLE);
@@ -154,6 +168,9 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
             message = getIntent().getStringExtra(StringContract.IntentStrings.CUSTOM_MESSAGE);
         }
 
+        if (getIntent().hasExtra(StringContract.IntentStrings.POLL_RESULT)) {
+            percentage = getIntent().getIntExtra(StringContract.IntentStrings.POLL_RESULT,0);
+        }
         if (messageType!=null) {
             if (messageType.equals(CometChatConstants.MESSAGE_TYPE_TEXT)) {
                 textMessage.setVisibility(View.VISIBLE);
@@ -172,7 +189,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
             } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
                 audioMessage.setVisibility(View.VISIBLE);
                 audioFileSize.setText(Utils.getFileSize(messageSize));
-            } else if (messageType.equals(CometChatConstants.CATEGORY_CUSTOM)) {
+            } else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
                 try {
                     locationMessage.setVisibility(View.VISIBLE);
                     JSONObject jsonObject = new JSONObject(message);
@@ -183,6 +200,47 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
                     Glide.with(this)
                             .load(mapUrl)
                             .into(ivMap);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+                pollsMessage.setVisibility(View.VISIBLE);
+                try {
+                    JSONObject jsonObject = new JSONObject(message);
+                    String questionStr = jsonObject.getString("question");
+                    question.setText(questionStr);
+                    JSONObject options = jsonObject.getJSONObject("options");
+                    for (int i=0;i<options.length();i++) {
+                        LinearLayout linearLayout = new LinearLayout(this);
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout
+                                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                        layoutParams.bottomMargin = (int) Utils.dpToPx(this, 8);
+                        linearLayout.setLayoutParams(layoutParams);
+
+                        linearLayout.setPadding(8,8,8,8);
+                        linearLayout.setBackground(getResources()
+                                .getDrawable(R.drawable.cc_message_bubble_right));
+                        linearLayout.setBackgroundTintList(ColorStateList.valueOf(getResources()
+                                .getColor(R.color.textColorWhite)));
+                        TextView textViewPercentage = new TextView(this);
+                        TextView textViewOption = new TextView(this);
+                        textViewPercentage.setPadding(16, 4, 0, 4);
+                        textViewOption.setPadding(16, 4, 0, 4);
+                        textViewOption.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium);
+                        textViewPercentage.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium);
+                        textViewPercentage.setTextColor(getResources().getColor(R.color.primaryTextColor));
+                        textViewOption.setTextColor(getResources().getColor(R.color.primaryTextColor));
+                        String optionStr = options.getString(String.valueOf(i + 1));
+                        textViewOption.setText(optionStr);
+                        if (percentage>0)
+                                textViewPercentage.setText(percentage + "% ");
+                        if (optionGroup.getChildCount()!=options.length()) {
+                            linearLayout.addView(textViewPercentage);
+                            linearLayout.addView(textViewOption);
+                            optionGroup.addView(linearLayout);
+                        }
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
