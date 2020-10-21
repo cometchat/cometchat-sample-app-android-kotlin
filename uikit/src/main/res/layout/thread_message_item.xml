@@ -42,6 +42,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="1dp">
             <include
+                android:layout_below="@id/go_txt_message"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp"
@@ -77,9 +78,11 @@
                     android:layout_height="wrap_content"/>
             </RelativeLayout>
             <TextView
-                android:layout_below="@id/replyLayout"
                 android:id="@+id/go_txt_message"
                 android:layout_width="wrap_content"
+                android:autoLink="web|all"
+                android:linksClickable="true"
+                android:textColorLink="@color/dark_blue"
                 tools:text="message"
                 android:textColor="@color/primaryTextColor"
                 android:focusable="true"

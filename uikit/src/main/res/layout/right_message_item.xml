@@ -36,15 +36,17 @@
                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColorHighlight="@color/colorSecondary"
                 android:layout_marginStart="10dp"
+                android:textColorLink="@color/dark_blue"
                 android:layout_marginLeft="10dp"
                 android:layout_marginEnd="10dp"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:padding="10dp"
+                android:maxEms="12"
                 android:textColor="@color/textColorWhite"
-                android:maxWidth="250dp"
-                tools:text="message" />
+                tools:text="@tools:sample/lorem/random" />
         </RelativeLayout>
         <LinearLayout
             android:layout_marginBottom="16dp"

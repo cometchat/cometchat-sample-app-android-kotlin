@@ -30,6 +30,7 @@ import com.cometchat.pro.uikit.R;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import adapter.SharedMediaAdapter;
@@ -86,9 +87,15 @@ public class SharedImagesFragment extends Fragment {
         if (messagesRequest==null)
         {
             if (type!=null && type.equals(CometChatConstants.RECEIVER_TYPE_USER))
-                messagesRequest = new MessagesRequest.MessagesRequestBuilder().setType(CometChatConstants.MESSAGE_TYPE_IMAGE).setUID(Id).setLimit(30).build();
+                messagesRequest = new MessagesRequest.MessagesRequestBuilder()
+                        .setCategories(Arrays.asList(CometChatConstants.CATEGORY_MESSAGE))
+                        .setTypes(Arrays.asList(CometChatConstants.MESSAGE_TYPE_IMAGE))
+                        .setUID(Id).setLimit(30).build();
             else
-                messagesRequest = new MessagesRequest.MessagesRequestBuilder().setType(CometChatConstants.MESSAGE_TYPE_IMAGE).setGUID(Id).setLimit(30).build();
+                messagesRequest = new MessagesRequest.MessagesRequestBuilder()
+                        .setCategories(Arrays.asList(CometChatConstants.CATEGORY_MESSAGE))
+                        .setTypes(Arrays.asList(CometChatConstants.MESSAGE_TYPE_IMAGE))
+                        .setGUID(Id).setLimit(30).build();
         }
         messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
             @Override

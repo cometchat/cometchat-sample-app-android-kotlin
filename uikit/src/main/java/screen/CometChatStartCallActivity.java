@@ -16,6 +16,15 @@ import com.google.android.material.snackbar.Snackbar;
 
 import constant.StringContract;
 
+/**
+ * CometChatStartCallActivity is activity class which is used to start a call. It takes sessionID
+ * as a parameter and start call for particular sessionID.
+ *
+ * Created On - 22nd August 2020
+ *
+ * Modified On -  07th October 2020
+ *
+ */
 public class CometChatStartCallActivity extends AppCompatActivity {
 
     public static CometChatStartCallActivity activity;
@@ -27,6 +36,7 @@ public class CometChatStartCallActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = this;
         setContentView(R.layout.activity_comet_chat_start_call);
         mainView = findViewById(R.id.call_view);
         sessionID = getIntent().getStringExtra(StringContract.IntentStrings.SESSION_ID);

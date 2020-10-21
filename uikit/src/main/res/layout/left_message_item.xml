@@ -76,6 +76,7 @@
             <TextView
                 android:maxWidth="250dp"
                 android:id="@+id/go_txt_message"
+                android:autoLink="web|all"
                 android:layout_width="wrap_content"
                 tools:text="message"
                 android:textColor="@color/primaryTextColor"

@@ -820,7 +820,6 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     }
                 }
             }
-
             viewHolder.txtMessage.setText(txtMessage);
             String profanityFilter = Extensions.checkProfanityMessage(baseMessage);
             viewHolder.txtMessage.setText(profanityFilter);
@@ -828,6 +827,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             viewHolder.txtMessage.setTextColor(context.getResources().getColor(R.color.primaryTextColor));
 
+            Utils.setHyperLinkSupport(context,viewHolder.txtMessage);
             showMessageTime(viewHolder, baseMessage);
             if (messageList.get(messageList.size()-1).equals(baseMessage))
             {
@@ -953,7 +953,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     }
                 }
             }
-
+            Utils.setHyperLinkSupport(context,viewHolder.message);
             showMessageTime(viewHolder, baseMessage);
             String finalUrl = url;
             viewHolder.linkVisit.setOnClickListener(new View.OnClickListener() {

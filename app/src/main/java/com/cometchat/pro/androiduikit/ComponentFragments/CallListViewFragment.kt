@@ -31,6 +31,7 @@ import listeners.OnItemClickListener
 import screen.CometChatGroupDetailScreenActivity
 import screen.CometChatUserDetailScreenActivity
 import screen.messagelist.CometChatMessageListActivity
+import utils.CallUtils
 import utils.Utils
 
 class CallListViewFragment : Fragment() {
@@ -94,9 +95,9 @@ class CallListViewFragment : Fragment() {
                             } else {
                                 user = `var`.sender
                             }
-                            Utils.startCallIntent(context, user, CometChatConstants.CALL_TYPE_AUDIO, true, call.sessionId)
+                            CallUtils.startCallIntent(context, user, CometChatConstants.CALL_TYPE_AUDIO, true, call.sessionId)
                         } else
-                            Utils.startGroupCallIntent(context, call.callReceiver as Group, CometChatConstants.CALL_TYPE_AUDIO, true, call.sessionId)
+                            CallUtils.startGroupCallIntent(context, call.callReceiver as Group, CometChatConstants.CALL_TYPE_AUDIO, true, call.sessionId)
                     }
 
                     override fun onError(e: CometChatException) {

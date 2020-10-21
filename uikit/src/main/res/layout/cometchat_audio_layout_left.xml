@@ -94,7 +94,6 @@
         android:layout_alignBottom="@id/cv_message_container"
         android:layout_gravity="center"
         android:layout_toRightOf="@id/cv_message_container"
-        android:textColor="@color/secondaryTextColor"
         android:textStyle="bold"
         tools:visibility="visible"
         android:visibility="gone" />

@@ -98,6 +98,7 @@ import screen.CometChatGroupDetailScreenActivity;
 import screen.CometChatMessageInfoScreenActivity;
 import screen.CometChatUserDetailScreenActivity;
 import screen.messagelist.MessageActionFragment;
+import utils.CallUtils;
 import utils.Extensions;
 import utils.FontUtils;
 import utils.KeyBoardUtils;
@@ -266,7 +267,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                 parentMessageLatitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LATITUDE);
                 parentMessageLongitude = getArguments().getDouble(StringContract.IntentStrings.LOCATION_LONGITUDE);
 
-            } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+            } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
                 pollQuestion = getArguments().getString(StringContract.IntentStrings.POLL_QUESTION);
                 pollOptions = getArguments().getString(StringContract.IntentStrings.POLL_OPTION);
                 pollResult = getArguments().getStringArrayList(StringContract.IntentStrings.POLL_RESULT);
@@ -350,7 +351,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     .load(mapUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(mapView);
-        } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+        } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
             ivForwardMessage.setVisibility(GONE);
             TextView threadReplyCount = view.findViewById(R.id.thread_reply_count);
             threadReplyCount.setVisibility(GONE);
@@ -566,7 +567,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                         @Override
                         public void onClick(View v) {
                             onGoingCallView.setVisibility(View.GONE);
-                            Utils.joinOnGoingCall(getContext());
+                            CallUtils.joinOnGoingCall(getContext());
                         }
                     });
                 }

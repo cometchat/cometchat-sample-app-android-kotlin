@@ -21,7 +21,6 @@ import com.cometchat.pro.uikit.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import adapter.MessageAdapter;
 import adapter.ThreadAdapter;
 import constant.StringContract;
 import listeners.MessageActionCloseListener;
@@ -181,7 +180,7 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
               else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
                   bundle.putDouble(StringContract.IntentStrings.LOCATION_LATITUDE,latitude);
                   bundle.putDouble(StringContract.IntentStrings.LOCATION_LONGITUDE,longitude);
-              } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+              } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
                   bundle.putStringArrayList(StringContract.IntentStrings.POLL_RESULT,pollResult);
                   bundle.putString(StringContract.IntentStrings.POLL_QUESTION,pollQuestion);
                   bundle.putString(StringContract.IntentStrings.POLL_OPTION,pollOptions);

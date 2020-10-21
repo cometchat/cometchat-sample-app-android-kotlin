@@ -21,6 +21,7 @@
                     android:drawablePadding="16dp"
                     style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:padding="16dp"
+                    android:textColor="@color/primaryTextColor"
                     android:textStyle="bold"
                     android:layout_toLeftOf="@+id/close_poll"
                     android:text="@string/create_polls"
@@ -53,6 +54,7 @@
                 <TextView
                     style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:textStyle="bold"
+                    android:textColor="@color/primaryTextColor"
                     android:layout_marginLeft="8dp"
                     android:text="@string/question"
                     android:layout_width="wrap_content"
@@ -60,6 +62,8 @@
                 <EditText
                     android:layout_marginLeft="8dp"
                     android:padding="8dp"
+                    android:textColor="@color/primaryTextColor"
+                    android:textColorHint="@color/secondaryTextColor"
                     android:background="@android:color/transparent"
                     android:id="@+id/question_edt"
                     android:layout_width="match_parent"
@@ -67,6 +71,7 @@
                     android:layout_height="wrap_content"/>
                 <TextView
                     android:layout_marginTop="16dp"
+                    android:textColor="@color/primaryTextColor"
                     android:layout_marginLeft="8dp"
                     style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:textStyle="bold"
@@ -89,8 +94,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/textColorWhite"
                 android:id="@+id/add_options"
                 android:layout_below="@+id/poll_layout"
+                app:rippleColor="@color/light_grey"
                 android:layout_margin="8dp"
                 android:clickable="true"
                 android:layout_height="wrap_content">

@@ -1,7 +1,7 @@
 package screen;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.res.ColorStateList;
@@ -12,14 +12,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
-import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.uikit.CometChatReceiptsList;
 import com.cometchat.pro.uikit.R;
@@ -28,11 +25,9 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import constant.StringContract;
-import utils.Extensions;
 import utils.Utils;
 
 public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
@@ -74,10 +69,17 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private CometChatReceiptsList cometChatReceiptsList;
 
+    private Toolbar toolbar;
+    private RelativeLayout messageLayout;
+    private ImageView backIcon;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comet_chat_message_info_screen);
+        toolbar = findViewById(R.id.detail_toolbar);
+        messageLayout = findViewById(R.id.message_layout);
+        backIcon = findViewById(R.id.backIcon);
         textMessage = findViewById(R.id.vwTextMessage);
         imageMessage = findViewById(R.id.vwImageMessage);
         audioMessage = findViewById(R.id.vwAudioMessage);
@@ -113,6 +115,14 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
         tvPlaceName = findViewById(R.id.tv_place_name);
         handleIntent();
         fetchReceipts();
+        backIcon.setOnClickListener(view -> onBackPressed());
+        if(Utils.isDarkMode(this)) {
+            toolbar.setBackgroundColor(getResources().getColor(R.color.darkModeBackground));
+            messageLayout.setBackgroundColor(getResources().getColor(R.color.darkModeBackground));
+        } else {
+            toolbar.setBackgroundColor(getResources().getColor(R.color.textColorWhite));
+            messageLayout.setBackgroundColor(getResources().getColor(R.color.light_grey));
+        }
     }
 
     private void fetchReceipts() {
@@ -203,7 +213,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (messageType.equals(StringContract.IntentStrings.Polls)) {
+            } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
                 pollsMessage.setVisibility(View.VISIBLE);
                 try {
                     JSONObject jsonObject = new JSONObject(message);

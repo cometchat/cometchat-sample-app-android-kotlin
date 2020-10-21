@@ -236,6 +236,8 @@
     <string name="question">Question</string>
     <string name="add_a_new_option">Add a New Option</string>
     <string name="unable_to_get_location">Unable to get your location</string>
+    <string name="ended">Ended</string>
+    <string name="ongoing">Ongoing</string>
     <array name="groupType">
         <item>Public Group</item>
         <item>Private Group</item>

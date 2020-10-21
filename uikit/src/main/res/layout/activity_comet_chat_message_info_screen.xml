@@ -23,7 +23,6 @@
                 android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
                 android:elevation="8dp"
-                android:background="@color/textColorWhite"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin">
                 <ImageView
@@ -45,7 +44,6 @@
                 android:paddingTop="8dp"
                 android:id="@+id/message_layout"
                 android:layout_width="match_parent"
-                android:background="@color/light_grey"
                 android:layout_height="match_parent">
                 <include
                     android:layout_centerVertical="true"

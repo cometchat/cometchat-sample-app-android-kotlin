@@ -30,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import adapter.GroupMemberAdapter;
@@ -233,33 +234,28 @@ public class CometChatGroupMemberListScreen extends Fragment {
      */
     private void fetchGroupMembers() {
         if (groupMembersRequest == null) {
-            groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(guid).setLimit(10).build();
+            if (showModerators)
+                groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(guid)
+                        .setScopes(Arrays.asList(CometChatConstants.SCOPE_PARTICIPANT))
+                        .setLimit(10).build();
+            else
+                groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(guid)
+                        .setScopes(Arrays.asList(CometChatConstants.SCOPE_PARTICIPANT,
+                                CometChatConstants.SCOPE_MODERATOR))
+                        .setLimit(10).build();
         }
         groupMembersRequest.fetchNext(new CometChat.CallbackListener<List<GroupMember>>() {
             @Override
             public void onSuccess(List<GroupMember> users) {
                 if (users.size() > 0) {
-                    List<GroupMember> filterlist = new ArrayList<>();
-                    for (GroupMember gmember : users) {
-                        if (showModerators) {
-                            if (gmember.getScope().equals(CometChatConstants.SCOPE_PARTICIPANT)) {
-                                filterlist.add(gmember);
-                            }
-                        } else {
-                            if (gmember.getScope().equals(CometChatConstants.SCOPE_PARTICIPANT) || gmember.getScope().equals(CometChatConstants.SCOPE_MODERATOR)) {
-                                filterlist.add(gmember);
-                            }
-                        }
-                    }
-                    setAdapter(filterlist);
+                    setAdapter(users);
                 }
             }
-
             @Override
             public void onError(CometChatException e) {
-                Log.e(TAG, "onError: "+e.getMessage());
-                Snackbar.make(rvUserList,getResources().getString(R.string.group_member_list_error),Snackbar.LENGTH_LONG).show();
-//                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onError: " + e.getMessage());
+                Snackbar.make(rvUserList, getResources().getString(R.string.group_member_list_error), Snackbar.LENGTH_LONG).show();
+                //                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

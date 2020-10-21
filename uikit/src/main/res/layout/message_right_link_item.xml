@@ -16,6 +16,7 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/cv_link_message_container"
         android:layout_width="wrap_content"
+        app:cardBackgroundColor="@color/colorPrimary"
         android:layout_height="wrap_content"
         app:cardCornerRadius="10dp"
         android:layout_margin="8dp">
@@ -52,6 +53,7 @@
                 android:paddingStart="16dp"
                 android:paddingBottom="8dp"
                 android:id="@+id/link_title"
+                android:textColor="@color/textColorWhite"
                 android:layout_below="@+id/image_view"
                 tools:text="SecondHand Shoes"
                 android:textStyle="bold"
@@ -61,6 +63,7 @@
                 android:paddingBottom="8dp"
                 android:paddingStart="16dp"
                 android:textStyle="italic"
+                android:textColor="@color/textColorWhite"
                 tools:text="Lorium Espium wet twe serew fae daq ruqa"
                 android:id="@+id/link_subtitle"
                 android:layout_below="@+id/link_title"
@@ -70,6 +73,7 @@
                 android:layout_height="wrap_content"/>
             <TextView
                 android:paddingLeft="16dp"
+                android:textColor="@color/textColorWhite"
                 android:id="@+id/message"
                 android:layout_marginTop="8dp"
                 android:layout_below="@id/link_subtitle"
@@ -84,6 +88,7 @@
                 android:layout_width="250dp"
                 android:layout_height="1dp"/>
             <TextView
+                android:background="@color/textColorWhite"
                 android:id="@+id/visitLink"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
@@ -131,7 +136,6 @@
             android:layout_alignBottom="@+id/cv_link_message_container"
             android:layout_gravity="center"
             android:layout_toLeftOf="@+id/cv_link_message_container"
-            android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"
             android:visibility="gone" />

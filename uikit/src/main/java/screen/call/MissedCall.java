@@ -29,6 +29,7 @@ import com.cometchat.pro.uikit.R;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import listeners.OnItemClickListener;
 import screen.CometChatCallActivity;
 import screen.CometChatGroupDetailScreenActivity;
 import screen.CometChatUserDetailScreenActivity;
+import utils.CallUtils;
 import utils.Utils;
 
 /**
@@ -131,7 +133,7 @@ public class MissedCall extends Fragment {
                     .setPositiveButton(getContext().getResources().getString(R.string.join), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Utils.joinOnGoingCall(getContext());
+                            CallUtils.joinOnGoingCall(getContext());
                         }
                     }).setNegativeButton(getContext().getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 @Override
@@ -157,9 +159,9 @@ public class MissedCall extends Fragment {
                     } else {
                         user = (User) call.getCallInitiator();
                     }
-                    Utils.startCallIntent(getContext(), user, CometChatConstants.CALL_TYPE_AUDIO, true, call.getSessionId());
+                    CallUtils.startCallIntent(getContext(), user, CometChatConstants.CALL_TYPE_AUDIO, true, call.getSessionId());
                 } else
-                    Utils.startGroupCallIntent(getContext(), ((Group) call.getCallReceiver()), CometChatConstants.CALL_TYPE_AUDIO, true, call.getSessionId());
+                    CallUtils.startGroupCallIntent(getContext(), ((Group) call.getCallReceiver()), CometChatConstants.CALL_TYPE_AUDIO, true, call.getSessionId());
             }
 
             @Override
@@ -173,7 +175,8 @@ public class MissedCall extends Fragment {
     private void getCallList() {
         if (messagesRequest == null)
         {
-            messagesRequest = new MessagesRequest.MessagesRequestBuilder().setCategory(CometChatConstants.CATEGORY_CALL).build();
+            messagesRequest = new MessagesRequest.MessagesRequestBuilder()
+                    .setCategories(Arrays.asList(CometChatConstants.CATEGORY_CALL)).build();
         }
 
         messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {

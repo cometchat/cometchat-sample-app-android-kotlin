@@ -11,13 +11,12 @@
     <TextView
         android:id="@+id/go_txt_message"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         tools:text="message"
         android:gravity="center"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:focusable="true"
         android:padding="8dp"
-        android:maxWidth="250dp"
         android:focusableInTouchMode="true"/>
 </LinearLayout>

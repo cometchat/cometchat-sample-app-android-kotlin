@@ -2,8 +2,11 @@ package listeners;
 
 import android.text.Editable;
 import android.view.View;
+import android.view.inputmethod.InputContentInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 public abstract class ComposeActionListener {
 
@@ -30,6 +33,8 @@ public abstract class ComposeActionListener {
     public abstract void onTextChanged(CharSequence charSequence, int i, int i1, int i2);
 
     public abstract void afterTextChanged(Editable editable);
+
+    public void onEditTextMediaSelected(InputContentInfoCompat inputContentInfo) {};
 
 
     public void getCameraActionView(ImageView cameraIcon) {

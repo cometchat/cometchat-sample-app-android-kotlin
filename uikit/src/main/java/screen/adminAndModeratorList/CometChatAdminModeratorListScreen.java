@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import adapter.GroupMemberAdapter;
@@ -258,7 +259,8 @@ public class CometChatAdminModeratorListScreen extends Fragment {
      */
     private void getAdminList(String groupId) {
         if (groupMembersRequest == null) {
-            groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(groupId).setLimit(100).build();
+            groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(groupId).
+                    setScopes(Arrays.asList(CometChatConstants.SCOPE_ADMIN)).setLimit(100).build();
         }
         groupMembersRequest.fetchNext(new CometChat.CallbackListener<List<GroupMember>>() {
             @Override
@@ -266,9 +268,9 @@ public class CometChatAdminModeratorListScreen extends Fragment {
                 ArrayList<GroupMember> memberList = new ArrayList<>();
                 for (GroupMember groupMember : groupMembers) {
 
-                    if (groupMember.getScope().equals(CometChatConstants.SCOPE_ADMIN)) {
+//                    if (groupMember.getScope().equals(CometChatConstants.SCOPE_ADMIN)) {
                         memberList.add(groupMember);
-                    }
+//                    }
                 }
                 adapter.addAll(memberList);
             }
@@ -288,7 +290,9 @@ public class CometChatAdminModeratorListScreen extends Fragment {
      */
     private void getModeratorList(String groupId) {
         if (groupMembersRequest == null) {
-            groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(groupId).setLimit(100).build();
+            groupMembersRequest = new GroupMembersRequest.GroupMembersRequestBuilder(groupId)
+                    .setScopes(Arrays.asList(CometChatConstants.SCOPE_MODERATOR))
+                    .setLimit(100).build();
         }
         groupMembersRequest.fetchNext(new CometChat.CallbackListener<List<GroupMember>>() {
             @Override

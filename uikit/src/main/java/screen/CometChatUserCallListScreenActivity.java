@@ -57,6 +57,7 @@ import listeners.ClickListener;
 import listeners.OnItemClickListener;
 import listeners.RecyclerTouchListener;
 import listeners.StickyHeaderDecoration;
+import utils.CallUtils;
 import utils.FontUtils;
 import utils.Utils;
 
@@ -262,21 +263,8 @@ public class CometChatUserCallListScreenActivity extends AppCompatActivity {
         });
     }
 
-    public void initiatecall(String recieverID,String receiverType,String callType)
+    public void initiatecall(String receiverID,String receiverType,String callType)
     {
-        Call call = new Call(recieverID,receiverType,callType);
-        CometChat.initiateCall(call, new CometChat.CallbackListener<Call>() {
-            @Override
-            public void onSuccess(Call call) {
-                Utils.startCallIntent(CometChatUserCallListScreenActivity.this,((User)call.getCallReceiver()),call.getType(),true,call.getSessionId());
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                Log.e(TAG, "onError: "+e.getMessage());
-                if (rvUserList!=null)
-                    Snackbar.make(rvUserList,getResources().getString(R.string.call_initiate_error)+":"+e.getMessage(),Snackbar.LENGTH_LONG).show();
-            }
-        });
+        CallUtils.initiateCall(CometChatUserCallListScreenActivity.this,receiverID,receiverType,callType);
     }
 }

@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ComposeBox;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -19,6 +20,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -27,6 +30,10 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.os.BuildCompat;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.core.view.inputmethod.InputConnectionCompat;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.cometchat.pro.core.CometChat;
@@ -43,6 +50,8 @@ import utils.AudioVisualizer.AudioRecordView;
 import utils.Utils;
 
 public class ComposeBox extends RelativeLayout implements View.OnClickListener {
+
+    private static final String TAG = ComposeBox.class.getName();
 
     private AudioRecordView audioRecordView;
 
@@ -68,7 +77,7 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
     private Chronometer recordTime;
 
-    public EditText etComposeBox;
+    public CometChatEditText etComposeBox;
 
     private RelativeLayout composeBox;
 
@@ -231,6 +240,16 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
                 }
             }
         });
+        etComposeBox.setMediaSelected(new CometChatEditText.OnEditTextMediaListener() {
+            @Override
+            public void OnMediaSelected(InputContentInfoCompat i) {
+                composeActionListener.onEditTextMediaSelected(i);
+            }
+        });
+//        InputConnection ic = etComposeBox.onCreateInputConnection(new EditorInfo());
+//        EditorInfoCompat.setContentMimeTypes(new EditorInfo(),
+//                new String [] {"image/png","image/gif"});
+
 
         if (Utils.isDarkMode(context)) {
             composeBox.setBackgroundColor(getResources().getColor(R.color.darkModeBackground));

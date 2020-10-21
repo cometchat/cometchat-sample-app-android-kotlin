@@ -1,6 +1,11 @@
 package constant;
 
-import android.graphics.Color;
+import com.cometchat.pro.constants.CometChatConstants;
+import com.cometchat.pro.uikit.R;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StringContract {
 
@@ -99,7 +104,7 @@ public class StringContract {
 
         public static final String POLL_VOTE_COUNT = "poll_vote_count";
 
-        public static String Polls = "extension_poll";
+        public static final String POLLS = "extension_poll";
 
         public static String POLL_QUESTION = "poll_question";
 
@@ -143,6 +148,62 @@ public class StringContract {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Replace with Google API Key.
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Replace with yout MAP_API_KEY
+    }
+
+    public static class Sounds {
+
+        public static boolean enableMessageSounds = true;
+
+        public static boolean enableCallSounds = true;
+    }
+
+    public static class HyperLink {
+        public static int emailColor = R.color.primaryTextColor;
+
+        public static int phoneColor = R.color.purple;
+
+        public static int urlColor = R.color.dark_blue;
+    }
+
+
+    public static class MessageRequest {
+
+        public static List<String> messageTypesForUser = new ArrayList<>(Arrays.asList(
+                CometChatConstants.MESSAGE_TYPE_CUSTOM,
+                CometChatConstants.MESSAGE_TYPE_AUDIO,
+                CometChatConstants.MESSAGE_TYPE_TEXT,
+                CometChatConstants.MESSAGE_TYPE_IMAGE,
+                CometChatConstants.MESSAGE_TYPE_VIDEO,
+                CometChatConstants.MESSAGE_TYPE_FILE,
+                //Custom Messages
+                StringContract.IntentStrings.LOCATION,
+                StringContract.IntentStrings.POLLS
+        )) ;
+        public static List<String> messageTypesForGroup = new ArrayList<>(Arrays.asList(
+                CometChatConstants.MESSAGE_TYPE_CUSTOM,
+                CometChatConstants.MESSAGE_TYPE_AUDIO,
+                CometChatConstants.MESSAGE_TYPE_TEXT,
+                CometChatConstants.MESSAGE_TYPE_IMAGE,
+                CometChatConstants.MESSAGE_TYPE_VIDEO,
+                CometChatConstants.MESSAGE_TYPE_FILE,
+                //For Group Actions
+                CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER,
+                //Custom Messages
+                StringContract.IntentStrings.LOCATION,
+                StringContract.IntentStrings.POLLS
+        ));
+
+        public static List<String> messageCategoriesForGroup = new ArrayList<>(Arrays.asList(
+                CometChatConstants.CATEGORY_MESSAGE,
+                CometChatConstants.CATEGORY_CUSTOM,
+                CometChatConstants.CATEGORY_CALL,
+                CometChatConstants.CATEGORY_ACTION));
+
+
+        public static List<String> messageCategoriesForUser = new ArrayList<>(Arrays.asList(
+                CometChatConstants.CATEGORY_MESSAGE,
+                CometChatConstants.CATEGORY_CUSTOM,
+                CometChatConstants.CATEGORY_CALL));
     }
 }

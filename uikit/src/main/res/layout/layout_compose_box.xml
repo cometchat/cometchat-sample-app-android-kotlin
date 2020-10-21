@@ -68,7 +68,7 @@
         android:layout_toEndOf="@id/ivArrow"
         android:layout_toStartOf="@+id/boxEndLayout"
         android:layout_height="wrap_content">
-        <EditText
+        <com.cometchat.pro.uikit.ComposeBox.CometChatEditText
             android:background="@android:color/transparent"
             android:layout_width="match_parent"
             android:id="@+id/etComposeBox"

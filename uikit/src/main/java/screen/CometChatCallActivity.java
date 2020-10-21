@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,15 +32,18 @@ import constant.StringContract;
 import utils.AnimUtil;
 import helper.CometChatAudioHelper;
 import helper.OutgoingAudioHelper;
+import utils.CallUtils;
+import utils.CameraPreview;
+import utils.MediaUtils;
 import utils.Utils;
 
 /**
- * CometChatCallActivity.class is a activity class which is used to laod the incoming and outgoing
+ * CometChatCallActivity.class is a activity class which is used to load the incoming and outgoing
  * call screens. It is used to handle the audio and video call.
  *
  * Created At : 29th March 2020
  *
- * Modified On : 29th March 2020
+ * Modified On : 07th October 2020
  *
  */
 public class CometChatCallActivity extends AppCompatActivity implements View.OnClickListener {
@@ -77,6 +81,11 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
     public RelativeLayout mainView;
 
     private FloatingActionButton hangUp;
+
+    private FrameLayout cameraFrame;
+
+    private CameraPreview cameraPreview;
+
     //
 
     private String sessionId;
@@ -126,7 +135,6 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         }
         if (intent.hasExtra(StringContract.IntentStrings.AVATAR)) {
             avatar = intent.getStringExtra(StringContract.IntentStrings.AVATAR);
-
         }
         if (intent.hasExtra(StringContract.IntentStrings.NAME)) {
             name = intent.getStringExtra(StringContract.IntentStrings.NAME);
@@ -161,6 +169,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         incomingCallView = findViewById(R.id.incoming_call_view);
         outgoingCallView = findViewById(R.id.outgoing_call_view);
         callTv = findViewById(R.id.calling_tv);
+        cameraFrame = findViewById(R.id.camera_frame);
         userTv = findViewById(R.id.user_tv);
         userAv = findViewById(R.id.user_av);
         hangUp = findViewById(R.id.call_hang_btn);
@@ -169,9 +178,11 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         hangUp.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.red_600)));
         mainView = findViewById(R.id.main_view);
         cometChatAudioHelper = new CometChatAudioHelper(this);
-        cometChatAudioHelper.initAudio();
+        if (StringContract.Sounds.enableCallSounds)
+            cometChatAudioHelper.initAudio();
         String packageName = getPackageName();
-        notification = Uri.parse("android.resource://" + packageName + "/" +R.raw.incoming_call);
+        if (StringContract.Sounds.enableCallSounds)
+            notification = Uri.parse("android.resource://" + packageName + "/" +R.raw.incoming_call);
         setCallType(isVideo, isIncoming);
         if (!Utils.hasPermissions(this, Manifest.permission.RECORD_AUDIO) && !Utils.hasPermissions(this,Manifest.permission.CAMERA))
         {
@@ -187,12 +198,14 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         {
             cometChatAudioHelper.stop(false);
             if (CometChat.getActiveCall()!=null)
-                Utils.startCall(this,CometChat.getActiveCall());
+                CallUtils.startCall(this,CometChat.getActiveCall());
             else
                 onBackPressed();
         }
         userTv.setText(name);
         callerName.setText(name);
+        userAv.setInitials(name);
+        callerAvatar.setInitials(name);
         userAv.setAvatar(avatar);
         callerAvatar.setAvatar(avatar);
     }
@@ -228,6 +241,8 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
             outgoingCallView.setVisibility(View.VISIBLE);
             hangUp.setVisibility(View.VISIBLE);
             if (isVideoCall) {
+                cameraPreview = new CameraPreview(this);
+                cameraFrame.addView(cameraPreview);
                 hangUp.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_white_24dp));
 
             } else {
@@ -263,7 +278,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
     }
 
     /**
-     * This methof is used to reject the call.
+     * This method is used to reject the call.
      *
      * @param sessionId is a String, It is call session Id.
      * @param callStatus is a String, It the reason for call being rejected.
@@ -325,7 +340,7 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
      */
     private void startCall(RelativeLayout mainView,Call call) {
         hangUp.setVisibility(View.GONE);
-        Utils.startCall(CometChatCallActivity.this,call);
+        CallUtils.startCall(CometChatCallActivity.this,call);
     }
 
     public void startOnGoingCall(Call call) {

@@ -1,6 +1,7 @@
 package com.cometchat.pro.uikit.SharedMedia;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.cometchat.pro.uikit.R;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import adapter.SharedMediaAdapter;
@@ -77,14 +79,21 @@ public class SharedFilesFragment extends Fragment {
         if (messagesRequest==null)
         {
             if (type!=null && type.equals(CometChatConstants.RECEIVER_TYPE_USER))
-                messagesRequest = new MessagesRequest.MessagesRequestBuilder().setType(CometChatConstants.MESSAGE_TYPE_FILE).setUID(Id).setLimit(30).build();
+                messagesRequest = new MessagesRequest.MessagesRequestBuilder()
+                        .setCategories(Arrays.asList(CometChatConstants.CATEGORY_MESSAGE))
+                        .setTypes(Arrays.asList(CometChatConstants.MESSAGE_TYPE_FILE))
+                        .setUID(Id).setLimit(30).build();
             else
-                messagesRequest = new MessagesRequest.MessagesRequestBuilder().setType(CometChatConstants.MESSAGE_TYPE_FILE).setGUID(Id).setLimit(30).build();
+                messagesRequest = new MessagesRequest.MessagesRequestBuilder()
+                        .setCategories(Arrays.asList(CometChatConstants.CATEGORY_MESSAGE))
+                        .setTypes(Arrays.asList(CometChatConstants.MESSAGE_TYPE_FILE))
+                        .setGUID(Id).setLimit(30).build();
         }
         messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
             @Override
             public void onSuccess(List<BaseMessage> baseMessageList) {
                 if(baseMessageList.size()!=0)
+
                     setAdapter(baseMessageList);
                 checkMediaVisble();
             }
