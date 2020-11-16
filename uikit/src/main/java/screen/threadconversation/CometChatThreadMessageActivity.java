@@ -2,6 +2,7 @@ package screen.threadconversation;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import adapter.ThreadAdapter;
 import constant.StringContract;
 import listeners.MessageActionCloseListener;
 import listeners.OnMessageLongClick;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 /**
 
@@ -104,6 +106,9 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_message_list);
 
+        if (UISettings.getColor() !=null) {
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+        }
         EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
         EmojiCompat.init(config);
 
@@ -185,8 +190,10 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
                   bundle.putString(StringContract.IntentStrings.POLL_QUESTION,pollQuestion);
                   bundle.putString(StringContract.IntentStrings.POLL_OPTION,pollOptions);
                   bundle.putInt(StringContract.IntentStrings.POLL_VOTE_COUNT,voteCount);
-              }
-              else {
+              } else if (messageType.equals(StringContract.IntentStrings.STICKERS)) {
+                  bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,mediaUrl);
+                  bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,messagefileName);
+              } else {
                   bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,mediaUrl);
                   bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,messagefileName);
                   bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION,mediaExtension);

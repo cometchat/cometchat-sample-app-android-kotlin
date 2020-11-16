@@ -2,31 +2,18 @@ package screen.banmembers;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.BannedGroupMembersRequest;
-import com.cometchat.pro.core.CometChat;
-import com.cometchat.pro.exceptions.CometChatException;
-import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.uikit.R;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.util.List;
-
-import adapter.GroupMemberAdapter;
 import constant.StringContract;
-import listeners.ClickListener;
-import listeners.RecyclerTouchListener;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 public class CometChatBanMemberScreenActivity extends AppCompatActivity {
 
@@ -45,6 +32,8 @@ public class CometChatBanMemberScreenActivity extends AppCompatActivity {
             }
         });
         handleIntent();
+        if (UISettings.getColor()!=null)
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
         CometChatBanMemberScreen banFragment = new CometChatBanMemberScreen();
         Bundle bundle = new Bundle();
         bundle.putString(StringContract.IntentStrings.GUID,guid);

@@ -24,5 +24,7 @@
     <color name="red_100">#FFCDD2</color>
     <color name="red_600">#E53935</color>
     <color name="grey">#B96B6B6B</color>
+    <color name="grey_100">#C4C4C4</color>
+    <color name="grey_200">#9E9C9C</color>
     <color name="darkModeBackground">#202124</color>
 </resources>

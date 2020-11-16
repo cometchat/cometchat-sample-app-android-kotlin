@@ -2,6 +2,7 @@ package adapter;
 
 import android.content.Context;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import utils.Extensions;
 import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -162,7 +164,9 @@ public class ConversationListAdapter extends RecyclerView.Adapter<ConversationLi
 
         conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.getUnreadMessageCount());
         conversationViewHolder.conversationListRowBinding.txtUserName.setText(name);
-        conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(Color.parseColor(UISettings.getColor()));
+        conversationViewHolder.conversationListRowBinding.messageCount.setCountBackground(Color.parseColor(UISettings.getColor()));
+
 
         if (avatar != null && !avatar.isEmpty()) {
             conversationViewHolder.conversationListRowBinding.avUser.setAvatar(avatar);

@@ -2,6 +2,7 @@ package adapter;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.cometchat.pro.uikit.databinding.GroupListRowBinding;
 import com.cometchat.pro.models.Group;
 
@@ -94,7 +96,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
             groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
 
         groupViewHolder.groupListRowBinding.executePendingBindings();
-        groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(Color.parseColor(UISettings.getColor()));
         groupViewHolder.groupListRowBinding.getRoot().setTag(R.string.group, group);
         groupViewHolder.groupListRowBinding.txtUserMessage.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
         groupViewHolder.groupListRowBinding.txtUserName.setTypeface(fontUtils.getTypeFace(FontUtils.robotoMedium));

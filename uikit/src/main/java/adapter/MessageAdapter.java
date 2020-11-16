@@ -1,7 +1,6 @@
 package adapter;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -37,9 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
@@ -54,6 +50,7 @@ import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONException;
@@ -73,7 +70,6 @@ import utils.Extensions;
 import utils.FontUtils;
 import utils.MediaUtils;
 import utils.Utils;
-import utils.ZoomIv;
 
 /**
  * Purpose - MessageAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -93,6 +89,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int RIGHT_IMAGE_MESSAGE = 56;
 
     private static final int LEFT_IMAGE_MESSAGE = 89;
+
+    private static final int RIGHT_STICKER_MESSAGE = 21;
+
+    private static final int LEFT_STICKER_MESSAGE = 22;
 
     private static final int RIGHT_VIDEO_MESSAGE = 78;
 
@@ -289,6 +289,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 view.setTag(LEFT_AUDIO_MESSAGE);
                 return new AudioMessageViewHolder(view);
 
+            case LEFT_STICKER_MESSAGE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_left_sticker_item, parent, false);
+                view.setTag(LEFT_STICKER_MESSAGE);
+                return new StickerMessageViewHolder(view);
+
+            case RIGHT_STICKER_MESSAGE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_right_sticker_item, parent, false);
+                view.setTag(RIGHT_STICKER_MESSAGE);
+                return new StickerMessageViewHolder(view);
+
             case LEFT_IMAGE_MESSAGE:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_left_list_image_item, parent, false);
                 view.setTag(LEFT_IMAGE_MESSAGE);
@@ -443,6 +453,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             case RIGHT_IMAGE_MESSAGE:
                 setImageData((ImageMessageViewHolder) viewHolder, i);
                 break;
+
+            case LEFT_STICKER_MESSAGE:
+            case RIGHT_STICKER_MESSAGE:
+                setStickerData((StickerMessageViewHolder) viewHolder,i);
+                break;
+
             case LEFT_AUDIO_MESSAGE:
             case RIGHT_AUDIO_MESSAGE:
                 setAudioData((AudioMessageViewHolder) viewHolder,i);
@@ -497,7 +513,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.tvUser.setText(baseMessage.getSender().getName());
             }
         }
-        if (baseMessage.getReplyCount()!=0) {
+        if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
@@ -552,8 +568,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT);
                         linearLayout.setPadding(8,8,8,8);
-                        linearLayout.setBackground(context.getResources()
-                                .getDrawable(R.drawable.cc_message_bubble_right));
+                        linearLayout.setBackgroundColor(Color.parseColor(UISettings.getColor()));
                         linearLayout.setBackgroundTintList(ColorStateList.valueOf(context.getResources()
                                 .getColor(R.color.textColorWhite)));
                         layoutParams.bottomMargin = (int) Utils.dpToPx(context, 8);
@@ -633,7 +648,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //        else
 //            viewHolder.txtTime.setVisibility(View.GONE);
 
-
+        setColorFilter(baseMessage,viewHolder.cvMessageView);
         viewHolder.rlMessageBubble.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -677,7 +692,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.tvUser.setText(baseMessage.getSender().getName());
             }
         }
-        if (baseMessage.getReplyCount()!=0) {
+        if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
@@ -715,7 +730,20 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             context.startActivity(intent);
         });
-        setLocationData(baseMessage, viewHolder.tvAddress, viewHolder.ivMap);
+        try {
+            LATITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("latitude");
+            LONGITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("longitude");
+            viewHolder.tvAddress.setText(Utils.getAddress(context, LATITUDE, LONGITUDE));
+            String mapUrl = StringContract.MapUrl.MAPS_URL +LATITUDE+","+LONGITUDE+"&key="+ StringContract.MapUrl.MAP_ACCESS_KEY;
+            Glide.with(context)
+                    .load(mapUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(viewHolder.ivMap);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
         viewHolder.senderTxt.setText(String.format(context.getString(R.string.shared_location),baseMessage.getSender().getName()));
         viewHolder.navigateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -738,6 +766,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         });
         showMessageTime(viewHolder,baseMessage);
+        setColorFilter(baseMessage,viewHolder.cvMessageView);
 //        if (messageList.get(messageList.size()-1).equals(baseMessage))
 //        {
 //            selectedItemList.add(baseMessage.getId());
@@ -772,30 +801,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         });
 
     }
-    /**
-     * This method is used inside #setLocationData() to set location data in
-     * a LocationMessageViewHolder elements.
-     *
-     * @see #setLocationData(LocationMessageViewHolder, int)
-     * @param baseMessage is a CustomMessage which has LocationData
-     * @param tvAddress is TextView which displays address
-     * @param ivMap is a ImageView which displays mapView of a particular latitude and longitude.
-     *
-     * */
-    private void setLocationData(BaseMessage baseMessage, TextView tvAddress, ImageView ivMap) {
-        try {
-            LATITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("latitude");
-            LONGITUDE = ((CustomMessage) baseMessage).getCustomData().getDouble("longitude");
-            tvAddress.setText(Utils.getAddress(context, LATITUDE, LONGITUDE));
-            String mapUrl = StringContract.MapUrl.MAPS_URL +LATITUDE+","+LONGITUDE+"&key="+ StringContract.MapUrl.MAP_ACCESS_KEY;
-            Glide.with(context)
-                    .load(mapUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(ivMap);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+
     /**
      * This method is called whenever viewType of item is file. It is used to bind AudioMessageViewHolder
      * contents with MediaMessage at a given position.
@@ -824,9 +830,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     setAvatar(viewHolder.ivUser, baseMessage.getSender().getAvatar(), baseMessage.getSender().getName());
                     viewHolder.tvUser.setText(baseMessage.getSender().getName());
                 }
+            } else {
+                viewHolder.playBtn.setImageTintList(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
             }
 
-            if (baseMessage.getReplyCount()!=0) {
+            if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
@@ -863,6 +871,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
             showMessageTime(viewHolder,baseMessage);
+            setColorFilter(baseMessage,viewHolder.rlMessageBubble);
 //            if (selectedItemList.contains(baseMessage.getId()))
                 viewHolder.txtTime.setVisibility(View.VISIBLE);
 //            else
@@ -941,7 +950,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
               viewHolder.fileSize.setText(Utils.getFileSize(fileSize));
 
               viewHolder.lvReplyAvatar.setVisibility(View.GONE);
-              if (baseMessage.getReplyCount()!=0) {
+              if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
                   viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                   viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
               } else {
@@ -978,7 +987,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
               showMessageTime(viewHolder, baseMessage);
-
+              setColorFilter(baseMessage,viewHolder.cvMessageView);
 //              if (selectedItemList.contains(baseMessage.getId()))
                   viewHolder.txtTime.setVisibility(View.VISIBLE);
 //              else
@@ -1064,7 +1073,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.sensitiveLayout.setVisibility(View.GONE);
         }
 
-        if (baseMessage.getReplyCount()!=0) {
+        if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
@@ -1148,6 +1157,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         });
     }
 
+
     private void setImageDrawable(ImageMessageViewHolder viewHolder, String url, boolean gif,boolean isImageNotSafe) {
         if (gif) {
             Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -1184,6 +1194,105 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
 
+    /**
+     * This method is called whenever viewType of item is sticker. It is used to bind StickerMessageViewHolder
+     * contents with CustomMessage at a given position.
+     * It loads image from url availabl in CustomMessage.
+     *
+     * @param viewHolder is a object of StickerMessageViewHolder.
+     * @param i is a position of item in recyclerView.
+     * @see CustomMessage
+     * @see BaseMessage
+     */
+    private void setStickerData(StickerMessageViewHolder viewHolder, int i) {
+
+
+        BaseMessage baseMessage = messageList.get(i);
+        if (!baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
+            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                viewHolder.tvUser.setVisibility(View.GONE);
+                viewHolder.ivUser.setVisibility(View.GONE);
+            } else if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                if (isUserDetailVisible) {
+                    viewHolder.tvUser.setVisibility(View.VISIBLE);
+                    viewHolder.ivUser.setVisibility(View.VISIBLE);
+                }
+                else {
+                    viewHolder.tvUser.setVisibility(View.GONE);
+                    viewHolder.ivUser.setVisibility(View.INVISIBLE);
+                }
+                setAvatar(viewHolder.ivUser, baseMessage.getSender().getAvatar(), baseMessage.getSender().getName());
+                viewHolder.tvUser.setText(baseMessage.getSender().getName());
+            }
+        }
+
+
+        viewHolder.stickerView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_defaulf_image));
+        try {
+            Glide.with(context).load(((CustomMessage)baseMessage).getCustomData().getString("url")).into(viewHolder.stickerView);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
+            viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
+            viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
+        } else {
+            viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
+        }
+        viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
+            Intent intent = new Intent(context, CometChatThreadMessageActivity.class);
+//            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
+            intent.putExtra(StringContract.IntentStrings.NAME,baseMessage.getSender().getName());
+            intent.putExtra(StringContract.IntentStrings.AVATAR,baseMessage.getSender().getAvatar());
+            intent.putExtra(StringContract.IntentStrings.REPLY_COUNT,baseMessage.getReplyCount());
+            intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getName());
+            intent.putExtra(StringContract.IntentStrings.PARENT_ID,baseMessage.getId());
+            intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,StringContract.IntentStrings.STICKERS);
+            intent.putExtra(StringContract.IntentStrings.SENTAT,baseMessage.getSentAt());
+            try {
+                intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,((CustomMessage)baseMessage).getCustomData().getString("name"));
+                intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,((CustomMessage)baseMessage).getCustomData().getString("url"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            intent.putExtra(StringContract.IntentStrings.TYPE,baseMessage.getReceiverType());
+            intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY,baseMessage.getCategory());
+            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                intent.putExtra(StringContract.IntentStrings.GUID,baseMessage.getReceiverUid());
+            }
+            else {
+                if (baseMessage.getReceiverUid().equals(loggedInUser.getUid()))
+                    intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getUid());
+                else
+                    intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getReceiverUid());
+            }
+            context.startActivity(intent);
+        });
+
+
+
+        showMessageTime(viewHolder, baseMessage);
+//        if (selectedItemList.contains(baseMessage.getId()))
+        viewHolder.txtTime.setVisibility(View.VISIBLE);
+//        else
+//            viewHolder.txtTime.setVisibility(View.GONE);
+
+
+        viewHolder.stickerView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (!isLongClickEnabled && !isTextMessageClick) {
+                    isImageMessageClick = true;
+                    setLongClickSelectedItem(baseMessage);
+                    messageLongClick.setLongMessageClick(longselectedItemList);
+                    notifyDataSetChanged();
+                }
+                return true;
+            }
+        });
+    }
+
+
     private void setVideoData(VideoMessageViewHolder viewHolder, int i) {
 
 
@@ -1207,7 +1316,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         if (((MediaMessage)baseMessage).getAttachment()!=null)
             Glide.with(context).load(((MediaMessage) baseMessage).getAttachment().getFileUrl()).into(viewHolder.imageView);
-        if (baseMessage.getReplyCount()!=0) {
+        if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
@@ -1311,7 +1420,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.txtMessage.setTypeface(null, Typeface.ITALIC);
         }
         showMessageTime(viewHolder, baseMessage);
-
+        setColorFilter(baseMessage,viewHolder.cardView);
 //        if (selectedItemList.contains(baseMessage.getId()))
             viewHolder.txtTime.setVisibility(View.VISIBLE);
 //        else
@@ -1412,6 +1521,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             setStatusIcon(((AudioMessageViewHolder)viewHolder).txtTime, baseMessage);
         } else if (viewHolder instanceof LocationMessageViewHolder){
             setStatusIcon(((LocationMessageViewHolder) viewHolder).txtTime, baseMessage);
+        } else if (viewHolder instanceof  PollMessageViewHolder) {
+            setStatusIcon(((PollMessageViewHolder) viewHolder).txtTime, baseMessage);
+        } else if (viewHolder instanceof StickerMessageViewHolder) {
+            setStatusIcon(((StickerMessageViewHolder) viewHolder).txtTime,baseMessage);
         }
 
     }
@@ -1426,26 +1539,28 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @see BaseMessage
      */
     private void setStatusIcon(TextView txtTime, BaseMessage baseMessage) {
-        if (baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
-            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                if (baseMessage.getReadAt() != 0) {
-                    txtTime.setText(Utils.getHeaderDate(baseMessage.getReadAt() * 1000));
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0);
-                    txtTime.setCompoundDrawablePadding(10);
-                } else if (baseMessage.getDeliveredAt() != 0) {
-                    txtTime.setText(Utils.getHeaderDate(baseMessage.getDeliveredAt() * 1000));
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0);
-                    txtTime.setCompoundDrawablePadding(10);
+        if (UISettings.isShowReadDeliveryReceipts()) {
+            if (baseMessage.getSender().getUid().equals(loggedInUser.getUid())) {
+                if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                    if (baseMessage.getReadAt() != 0) {
+                        txtTime.setText(Utils.getHeaderDate(baseMessage.getReadAt() * 1000));
+                        txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0);
+                        txtTime.setCompoundDrawablePadding(10);
+                    } else if (baseMessage.getDeliveredAt() != 0) {
+                        txtTime.setText(Utils.getHeaderDate(baseMessage.getDeliveredAt() * 1000));
+                        txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0);
+                        txtTime.setCompoundDrawablePadding(10);
+                    } else {
+                        txtTime.setText(Utils.getHeaderDate(baseMessage.getSentAt() * 1000));
+                        txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0);
+                        txtTime.setCompoundDrawablePadding(10);
+                    }
                 } else {
                     txtTime.setText(Utils.getHeaderDate(baseMessage.getSentAt() * 1000));
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0);
-                    txtTime.setCompoundDrawablePadding(10);
                 }
             } else {
                 txtTime.setText(Utils.getHeaderDate(baseMessage.getSentAt() * 1000));
             }
-        } else {
-            txtTime.setText(Utils.getHeaderDate(baseMessage.getSentAt() * 1000));
         }
     }
 
@@ -1542,13 +1657,29 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                      } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
                          viewHolder.replyMessage.setText(String.format(context.getString(R.string.shared_a_polls),message));
                          viewHolder.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_poll_24dp,0,0,0);
+                     } else if (messageType.equals(StringContract.IntentStrings.STICKERS)) {
+                         viewHolder.replyMessage.setText(String.format(context.getString(R.string.shared_a_sticker)));
+                         viewHolder.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker,0,0,0);
                      }
+                     viewHolder.rlMessageBubble.setOnLongClickListener(new View.OnLongClickListener() {
+                         @Override
+                         public boolean onLongClick(View view) {
+                             if (!isImageMessageClick) {
+                                 isLongClickEnabled = true;
+                                 isTextMessageClick = true;
+                                 setLongClickSelectedItem(baseMessage);
+                                 messageLongClick.setLongMessageClick(longselectedItemList);
+                                 notifyDataSetChanged();
+                             }
+                             return true;
+                         }
+                     });
                  }catch (Exception e) {
                      Log.e(TAG, "setTextData: "+e.getMessage());
                  }
              }
 
-            if (baseMessage.getReplyCount()!=0) {
+            if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
@@ -1590,10 +1721,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Spannable spannable = (Spannable) processed;
                 count = spannable.getSpans(0, spannable.length() - 1, EmojiSpan.class).length;
                 if (Utils.removeEmojiAndSymbol(txtMessage).trim().length() == 0) {
-                    if (count == 1) {
-                        viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 32));
-                    } else if (count == 2) {
-                        viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 24));
+                    if (UISettings.isSendEmojisLargeSize()) {
+                        if (count == 1) {
+                            viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 32));
+                        } else if (count == 2) {
+                            viewHolder.txtMessage.setTextSize((int) Utils.dpToPx(context, 24));
+                        }
                     }
                 }
             }
@@ -1633,7 +1766,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //             else
 //                 viewHolder.txtTime.setVisibility(View.GONE);
 
-              setColorFilter(baseMessage,viewHolder.cardView);
+              setColorFilter(baseMessage,viewHolder.cvMessageView);
 
 //             viewHolder.rlMessageBubble.setOnClickListener(view -> {
 //                 if (isLongClickEnabled && !isImageMessageClick) {
@@ -1706,7 +1839,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.txtTime.setVisibility(View.VISIBLE);
 //            else
 //                viewHolder.txtTime.setVisibility(View.GONE);
-
+            setColorFilter(baseMessage,viewHolder.cardView);
             viewHolder.rlMessageBubble.setOnClickListener(view -> {
                 setSelectedMessage(baseMessage.getId());
                 notifyDataSetChanged();
@@ -1721,21 +1854,35 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (!longselectedItemList.contains(baseMessage))
         {
             if (baseMessage.getSender().equals(CometChat.getLoggedInUser())) {
-                if (Build.VERSION.SDK_INT >= 29)
-                    view.getBackground().setColorFilter(new PorterDuffColorFilter(context.getColor(R.color.colorPrimary),PorterDuff.Mode.SRC_ATOP));
-                else
-                    view.getBackground().setColorFilter(context.getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+                if (view instanceof CardView) {
+                    ((CardView)view).setCardBackgroundColor(Color.parseColor(UISettings.getColor()));
+                } else {
+                    if (Build.VERSION.SDK_INT >= 29) {
+                        view.getBackground().setColorFilter(new PorterDuffColorFilter(Color.parseColor(UISettings.getColor()), PorterDuff.Mode.SRC_ATOP));
+                    } else {
+                        view.getBackground().setColorFilter(Color.parseColor(UISettings.getColor()), PorterDuff.Mode.SRC_ATOP);
+                    }
+                }
             } else {
-                if (Build.VERSION.SDK_INT>=29)
-                    view.getBackground().setColorFilter(new PorterDuffColorFilter(context.getColor(R.color.message_bubble_grey),PorterDuff.Mode.SRC_ATOP));
-                else
-                    view.getBackground().setColorFilter(context.getResources().getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP);
+                if (!(view instanceof CardView)) {
+                    if (Build.VERSION.SDK_INT >= 29)
+                        view.getBackground().setColorFilter(new PorterDuffColorFilter(context.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP));
+                    else
+                        view.getBackground().setColorFilter(context.getResources().getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP);
+                }
             }
         } else {
-            if (baseMessage.getSender().equals(CometChat.getLoggedInUser()))
-                view.getBackground().setColorFilter(context.getResources().getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_ATOP);
-            else
-                view.getBackground().setColorFilter(context.getResources().getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP);
+            if ((UISettings.isEnableEditingMessage() &&
+                    UISettings.isEnableDeleteMessage()) ||
+                    UISettings.isEnableShareCopyForward() ||
+                    UISettings.isEnableThreadedReplies() ||
+                    UISettings.isEnableReplyToMessage()) {
+                if (baseMessage.getSender().equals(CometChat.getLoggedInUser()))
+                    view.getBackground().setColorFilter(context.getResources().getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_ATOP);
+                else
+                    view.getBackground().setColorFilter(context.getResources().getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP);
+
+            }
         }
 
     }
@@ -1802,7 +1949,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
 
-            if (baseMessage.getReplyCount()!=0) {
+            if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
@@ -1866,6 +2013,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //            } else
 //                viewHolder.txtTime.setVisibility(View.VISIBLE);
 
+            setColorFilter(baseMessage,viewHolder.cvMessageView);
             viewHolder.rlMessageBubble.setOnClickListener(view -> {
                 if (isLongClickEnabled && !isImageMessageClick) {
                     setLongClickSelectedItem(baseMessage);
@@ -2037,6 +2185,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             return RIGHT_LOCATION_CUSTOM_MESSAGE;
                         else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.POLLS))
                             return RIGHT_POLLS_CUSTOM_MESSAGE;
+                        else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.STICKERS))
+                            return RIGHT_STICKER_MESSAGE;
                         else
                             return RIGHT_CUSTOM_MESSAGE;
                     }
@@ -2045,6 +2195,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             return LEFT_LOCATION_CUSTOM_MESSAGE;
                         else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.POLLS))
                             return LEFT_POLLS_CUSTOM_MESSAGE;
+                        else if (baseMessage.getType().equalsIgnoreCase(StringContract.IntentStrings.STICKERS))
+                            return LEFT_STICKER_MESSAGE;
                         else
                             return LEFT_CUSTOM_MESSAGE;
                 }
@@ -2246,6 +2398,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private TextView tvUser;
         private View view;
         private Avatar ivUser;
+        private RelativeLayout cvMessageView;
         private RelativeLayout rlMessageBubble;
         private TextView tvThreadReplyCount;
         private LinearLayout lvReplyAvatar;
@@ -2258,6 +2411,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             fileExt = itemView.findViewById(R.id.tvFileExtension);
             txtTime = itemView.findViewById(R.id.txt_time);
             fileName = itemView.findViewById(R.id.tvFileName);
+            cvMessageView = itemView.findViewById(R.id.cv_message_container);
             rlMessageBubble = itemView.findViewById(R.id.rl_message);
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
             lvReplyAvatar = itemView.findViewById(R.id.reply_avatar_layout);
@@ -2301,7 +2455,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public class TextMessageViewHolder extends RecyclerView.ViewHolder {
 
         private RelativeLayout rlMessageBubble;
-        private RelativeLayout cardView;
+        private RelativeLayout cvMessageView;
         private View view;
         private TextView txtMessage;            //Text Message
         private TextView tvThreadReplyCount;    //Thread Reply Count
@@ -2326,7 +2480,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             type = (int) view.getTag();
             tvUser = view.findViewById(R.id.tv_user);
             txtMessage = view.findViewById(R.id.go_txt_message);
-            cardView = view.findViewById(R.id.cv_message_container);
+            cvMessageView = view.findViewById(R.id.cv_message_container);
             txtTime = view.findViewById(R.id.txt_time);
             imgStatus = view.findViewById(R.id.img_pending);
             ivUser = view.findViewById(R.id.iv_user);
@@ -2371,6 +2525,31 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    public class StickerMessageViewHolder extends RecyclerView.ViewHolder {
+        public ImageView stickerView;
+        public TextView tvThreadReplyCount;
+        public TextView txtTime;
+        public TextView tvUser;
+        public Avatar ivUser;
+
+        public int type;
+        public View view;
+
+        public StickerMessageViewHolder(View itemView) {
+            super(itemView);
+
+            type =  (int) itemView.getTag();
+
+            stickerView = itemView.findViewById(R.id.sticker_view);
+            tvUser = itemView.findViewById(R.id.tv_user);
+            ivUser = itemView.findViewById(R.id.iv_user);
+            tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
+            txtTime = itemView.findViewById(R.id.txt_time);
+
+            this.view = itemView;
+
+        }
+    }
     public class LocationMessageViewHolder extends RecyclerView.ViewHolder {
         public RelativeLayout rlMessageBubble;
         private View view;
@@ -2380,6 +2559,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView tvAddress;
         public TextView senderTxt;
         public MaterialButton navigateBtn;
+
+        public CardView cvMessageView;
 
         public TextView tvThreadReplyCount;
         public TextView txtTime;
@@ -2394,6 +2575,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivMap = itemView.findViewById(R.id.iv_map);
             tvAddress = itemView.findViewById(R.id.tv_place_name);
             txtTime = itemView.findViewById(R.id.txt_time);
+            cvMessageView = itemView.findViewById(R.id.cv_message_container);
             rlMessageBubble = itemView.findViewById(R.id.rl_message);
             tvUser = itemView.findViewById(R.id.tv_user);
             ivUser = itemView.findViewById(R.id.iv_user);
@@ -2414,6 +2596,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public LinearLayout optionGroup;
         public ProgressBar loadingProgress;
 
+        public LinearLayout cvMessageView;
         public TextView tvThreadReplyCount;
         public TextView txtTime;
         public TextView tvUser;
@@ -2429,6 +2612,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             optionGroup = itemView.findViewById(R.id.options_group);
             txtTime = itemView.findViewById(R.id.txt_time);
             rlMessageBubble = itemView.findViewById(R.id.rl_message);
+            cvMessageView = itemView.findViewById(R.id.cv_message_container);
             tvUser = itemView.findViewById(R.id.tv_user);
             ivUser = itemView.findViewById(R.id.iv_user);
             loadingProgress = itemView.findViewById(R.id.loading_progressBar);
@@ -2468,7 +2652,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private TextView linkSubtitle;
         private TextView message;
         private ImageView videoLink;
-        private RelativeLayout cardView;
+        private CardView cvMessageView;
         private View view;
         public TextView txtTime;
         private ImageView imgStatus;
@@ -2491,7 +2675,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             linkImg = view.findViewById(R.id.link_img);
             message = view.findViewById(R.id.message);
             videoLink = view.findViewById(R.id.videoLink);
-            cardView = view.findViewById(R.id.cv_message_container);
+            cvMessageView = view.findViewById(R.id.cv_link_message_container);
             txtTime = view.findViewById(R.id.txt_time);
             imgStatus = view.findViewById(R.id.img_pending);
             ivUser = view.findViewById(R.id.iv_user);

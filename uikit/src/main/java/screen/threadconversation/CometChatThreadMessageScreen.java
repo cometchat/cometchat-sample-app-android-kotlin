@@ -203,6 +203,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private RelativeLayout fileMessage;
     private RelativeLayout locationMessage;
     private View pollMessage;
+    private ImageView stickerMessage;
 
     private TextView pollQuestionTv;
     private LinearLayout pollOptionsLL;
@@ -234,6 +235,8 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private ArrayList<String> pollResult;
     private TextView totalCount;
     private int voteCount;
+    private MessageActionFragment messageActionFragment;
+
     public CometChatThreadMessageScreen() {
         // Required empty public constructor
     }
@@ -272,6 +275,9 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                 pollOptions = getArguments().getString(StringContract.IntentStrings.POLL_OPTION);
                 pollResult = getArguments().getStringArrayList(StringContract.IntentStrings.POLL_RESULT);
                 voteCount = getArguments().getInt(StringContract.IntentStrings.POLL_VOTE_COUNT);
+            } else if (messageType.equals(StringContract.IntentStrings.STICKERS)) {
+                message = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL);
+                messageFileName = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME);
             } else {
                 message = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL);
                 messageFileName = getArguments().getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME);
@@ -316,6 +322,8 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         fileSize = view.findViewById(R.id.tvFileSize);
         fileExtension = view.findViewById(R.id.tvFileExtension);
 
+        stickerMessage = view.findViewById(R.id.iv_stickerMessage);
+
         pollMessage = view.findViewById(R.id.poll_message);
         pollQuestionTv = view.findViewById(R.id.tv_question);
         pollOptionsLL = view.findViewById(R.id.options_group);
@@ -342,6 +350,10 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_TEXT)) {
             textMessage.setVisibility(View.VISIBLE);
             textMessage.setText(message);
+        } else if (messageType.equals(StringContract.IntentStrings.STICKERS)) {
+            ivForwardMessage.setVisibility(GONE);
+            stickerMessage.setVisibility(View.VISIBLE);
+            Glide.with(context).load(message).into(stickerMessage);
         } else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
             initLocation();
             locationMessage.setVisibility(VISIBLE);
@@ -353,8 +365,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     .into(mapView);
         } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
             ivForwardMessage.setVisibility(GONE);
-            TextView threadReplyCount = view.findViewById(R.id.thread_reply_count);
-            threadReplyCount.setVisibility(GONE);
             pollMessage.setVisibility(VISIBLE);
             totalCount.setText(voteCount+" Votes");
             pollQuestionTv.setText(pollQuestion);
@@ -436,6 +446,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         composeBox = view.findViewById(R.id.message_box);
         composeBox.usedIn(CometChatThreadMessageActivity.class.getName());
         composeBox.isPollVisible = false;
+        composeBox.isStickerVisible = false;
         composeBox.ivMic.setVisibility(GONE);
         composeBox.ivSend.setVisibility(VISIBLE);
         setComposeBoxListener();
@@ -464,8 +475,9 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         sentAt.setText(String.format(getString(R.string.sentAtTxt),Utils.getMessageDate(messageSentAt)));
         tvReplyCount = view.findViewById(R.id.thread_reply_count);
         rvChatListView = view.findViewById(R.id.rv_message_list);
-        if (parentMessageCategory.equals(CometChatConstants.CATEGORY_CUSTOM))
+        if (parentMessageCategory.equals(CometChatConstants.CATEGORY_CUSTOM)) {
             ivMoreOption.setVisibility(GONE);
+        }
         if (replyCount>0) {
             tvReplyCount.setText(replyCount + " Replies");
             noReplyMessages.setVisibility(GONE);
@@ -1649,6 +1661,9 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         isNoMoreMessages = false;
         addMessageListener();
 
+        if (messageActionFragment!=null)
+            messageActionFragment.dismiss();
+
         if (type != null) {
             if (type.equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                 new Thread(this::getUser).start();
@@ -1754,7 +1769,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         isReply = false;
         isEdit = false;
         isParent = false;
-        MessageActionFragment messageActionFragment = new MessageActionFragment();
+        messageActionFragment = new MessageActionFragment();
         replyMessageLayout.setVisibility(GONE);
         editMessageLayout.setVisibility(GONE);
         boolean copyVisible = true;

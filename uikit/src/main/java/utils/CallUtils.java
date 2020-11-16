@@ -131,10 +131,12 @@ public class CallUtils {
     public static void startCall(Context context, Call call) {
         Intent intent = new Intent(context, CometChatStartCallActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(StringContract.IntentStrings.TYPE,call.getReceiverType());
         intent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
         ((Activity)context).finish();
         context.startActivity(intent);
     }
+
 
     /**
      * This method is used to join an ongoing call.

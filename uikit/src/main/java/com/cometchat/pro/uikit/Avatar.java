@@ -28,10 +28,10 @@ import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
 
 import com.bumptech.glide.Glide;
-import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
 
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -241,7 +241,12 @@ public class Avatar extends AppCompatImageView {
         cornerRadius = (int) Utils.dpToPixel(2, getResources());
 
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(getResources().getColor(R.color.colorPrimary));
+        if (UISettings.getColor()!=null && !UISettings.getColor().isEmpty()) {
+            paint.setColor(Color.parseColor(UISettings.getColor()));
+        }
+        else
+            paint.setColor(getResources().getColor(R.color.colorPrimary));
+
         textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextSize(16f * getResources().getDisplayMetrics().scaledDensity);
         textPaint.setColor(Color.WHITE);
@@ -255,7 +260,12 @@ public class Avatar extends AppCompatImageView {
         borderPaint.setColor(borderColor);
         borderPaint.setAntiAlias(true);
         borderPaint.setStrokeWidth(borderWidth);
-        color = getResources().getColor(R.color.colorPrimary);
+
+        if (UISettings.getColor()!=null && UISettings.getColor().isEmpty())
+            color = Color.parseColor(UISettings.getColor());
+        else
+            color = getResources().getColor(R.color.colorPrimary);
+
         setOutlineProvider(new OutlineProvider());
     }
 

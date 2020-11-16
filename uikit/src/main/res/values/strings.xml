@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">UI KIT</string>
+    <string name="app_name" translatable="false">UI KIT</string>
     <string name="rectangle">Rectangle</string>
     <string name="online">Online</string>
     <string name="user">user</string>
@@ -20,7 +20,7 @@
     <string name="unabl_to_join_message">Unable to join group</string>
     <string name="you">You</string>
     <string name="owner">Owner</string>
-    <string name="admin">Admin</string>
+    <string name="admin" translatable="false">Admin</string>
     <string name="create_group">Create Group</string>
     <string name="kindly_enter_group_details_to_proceed">Kindly, enter group details to proceed</string>
     <string name="enter_group_name">Enter Group Name</string>
@@ -49,11 +49,11 @@
     <string name="only_group_owner_removes_admin">Only group owner can remove admin.</string>
     <string name="removed_from_admin">%1$s is removed from admin privilege</string>
     <string name="update_group_member_error">Unable to update Group Member</string>
-    <string name="admin_list_retrieve_error">Admin list retrieval failed</string>
+    <string name="admin_list_retrieve_error" translatable="false">Admin list retrieval failed</string>
     <string name="unblock_user_question">Would you like to unblock %1$s</string>
     <string name="user_unblocked">%1$s is unblocked</string>
     <string name="unblock_user_error">Unblock User Failed</string>
-    <string name="block_user_list_error">Blocked user retrieval failed</string>
+    <string name="block_user_list_error" translatable="false">Blocked user retrieval failed</string>
     <string name="create_group_error">Unable to create a group</string>
     <string name="make_admin">Make Admin</string>
     <string name="make_admin_question">Do you like to make %1$s as a Admin</string>
@@ -75,9 +75,9 @@
     <string name="outgoing">Outgoing</string>
     <string name="incoming">Incoming</string>
     <string name="video_call">Video Call</string>
-    <string name="audio_call">Audio Call</string>
+    <string name="audio_call" translatable="false">Audio Call</string>
     <string name="history">History</string>
-    <string name="all">All</string>
+    <string name="all" translatable="false">All</string>
     <string name="missed">Missed</string>
     <string name="new_call">New Call</string>
     <string name="incoming_audio_call">Incoming Audio Call</string>
@@ -86,15 +86,15 @@
     <string name="rejected_call">Rejected</string>
     <string name="fill_this_field">Fill this Field</string>
     <string name="remove_from_group">Remove from %1$s</string>
-    <string name="add_in_group">Add in Group \" %1$s \"</string>
+    <string name="add_in_group" translatable="false">Add in Group \" %1$s \"</string>
     <string name="unblock_user">Unblock User</string>
-    <string name="block_user">Block User</string>
-    <string name="add_user_to_group">Add  %1$s  to \" %2$s \"</string>
+    <string name="block_user" translatable="false">Block User</string>
+    <string name="add_user_to_group" translatable="false">Add  %1$s  to \" %2$s \"</string>
     <string name="user_added_to_group">%1$s is added to \"  %2$s \"</string>
     <string name="user_removed_from_group">%1$s is removed from \" %2$s \"</string>
     <string name="kicked_error">Group Member Kicked Failed</string>
     <string name="user_is_blocked">%1$s  is Blocked</string>
-    <string name="block_user_error">Unable to Block %1$s</string>
+    <string name="block_user_error" translatable="false">Unable to Block %1$s</string>
     <string name="exit_group_title">Exit Group</string>
     <string name="exit_group_message">Exit from group ?</string>
     <string name="exit">Exit</string>
@@ -104,7 +104,7 @@
     <string name="group_delete_error">Group Deletion Failed</string>
     <string name="cannot_remove_member">Can\'t remove %1$s</string>
     <string name="leave_group_error">Unable to leave group</string>
-    <string name="blocked_list_error">Blocked userlist retrieval failed</string>
+    <string name="blocked_list_error" translatable="false">Blocked userlist retrieval failed</string>
     <string name="edit">Edit Message</string>
     <string name="preview">Preview</string>
     <string name="password">Password</string>
@@ -112,32 +112,32 @@
     <string name="joining">Joining</string>
     <string name="incorrect">Incorrect</string>
     <string name="scale_type_not_supported">ScaleType %1$s not supported.</string>
-    <string name="adjust_viewbound_not_supported">adjustViewBounds not supported.</string>
+    <string name="adjust_viewbound_not_supported" translatable="false">adjustViewBounds not supported.</string>
     <string name="conversation_itemclick_error"><![CDATA[OnItemClickListener<Conversation> is null]]></string>
     <string name="group_itemclick_error"><![CDATA[OnItemClickListener<Group> is null]]></string>
     <string name="user_itemclick_error"><![CDATA[OnItemClickListener<User> is null]]></string>
     <string name="smart_reply_itemclick_error"><![CDATA[OnItemClickListener<String> is null]]></string>
     <string name="send">Send</string>
     <string name="details">Details</string>
-    <string name="administrators">Administrators</string>
+    <string name="administrators" translatable="false">Administrators</string>
     <string name="members">Members</string>
-    <string name="add_members">Add Members</string>
+    <string name="add_members" translatable="false">Add Members</string>
     <string name="privacy_support"><![CDATA[Privacy & Support]]></string>
     <string name="privacy_security"><![CDATA[Privacy &  Security]]></string>
     <string name="send_message">Send Message</string>
-    <string name="actions">Actions</string>
+    <string name="actions" translatable="false">Actions</string>
     <string name="user_title">User</string>
-    <string name="blocked_user">Blocked users</string>
+    <string name="blocked_user" translatable="false">Blocked users</string>
     <string name="forward">Forward Message</string>
-    <string name="add">Add</string>
-    <string name="add_as_admin">Add as Admin</string>
+    <string name="add" translatable="false">Add</string>
+    <string name="add_as_admin" translatable="false">Add as Admin</string>
     <string name="group_title">Groups</string>
     <string name="more">More</string>
     <string name="preferences">Preferences</string>
     <string name="users_title">Users</string>
     <string name="shared_media">Shared Media</string>
     <string name="no_media">No Media Available</string>
-    <string name="baseMessage">baseMessage</string>
+    <string name="baseMessage" translatable="false">baseMessage</string>
     <string name="load_more">Load More</string>
     <string name="load_more_members">Load more %1$s members</string>
     <string name="group_list_error">Unable to fetch Group List</string>
@@ -157,9 +157,9 @@
     <string name="enter_avatar_url">Enter Url for avatar</string>
     <string name="enter_user_name">Enter user name</string>
     <string name="update_user">Update User</string>
-    <string name="banned_members">Banned Members</string>
-    <string name="ban_list_fetch_error">Unable to fetch Banned Members List</string>
-    <string name="ban_member_of_group">Banned Members of %1$s</string>
+    <string name="banned_members" translatable="false">Banned Members</string>
+    <string name="ban_list_fetch_error" translatable="false">Unable to fetch Banned Members List</string>
+    <string name="ban_member_of_group" translatable="false">Banned Members of %1$s</string>
     <string name="member_unbanned_success">%1$s unbanned from %2$s</string>
     <string name="unban_error">Unable to unban %1$s</string>
 
@@ -176,7 +176,7 @@
     <string name="make_moderator">Make Moderator</string>
     <string name="make_moderator_question">Do you like to make %1$s as a Moderator</string>
     <string name="user_is_moderator">%1$s is now Moderator</string>
-    <string name="add_as_moderator">Add as Moderator</string>
+    <string name="add_as_moderator" translatable="false">Add as Moderator</string>
     <string name="only_admin_removes_moderator">Only Admin can remove moderator</string>
     <string name="moderator">Moderator</string>
     <string name="update_group">Update Group</string>
@@ -200,7 +200,7 @@
     <string name="sentiment_alert_message">Would you like to view this message it may contains sensitive content.</string>
     <string name="reply_message">Reply a message</string>
     <string name="reply_thread">Start a Thread</string>K
-    <string name="ban">Ban</string>
+    <string name="ban" translatable="false">Ban</string>
     <string name="thread">Thread</string>
     <string name="thread_in_name">Thread in %1$s</string>
     <string name="sentAtTxt">Sent at : %1$s</string>
@@ -229,15 +229,23 @@
     <string name="poll">Poll</string>
     <string name="sending_media_message">Sending Media Message</string>
     <string name="create_polls">Create a Poll</string>
-    <string name="add_a_poll">Add a Poll</string>
+    <string name="add_a_poll" translatable="false">Add a Poll</string>
     <string name="enter_your_option">Enter your option</string>
     <string name="shared_a_polls">Shared a Polls : \n %1$s</string>
     <string name="enter_your_question">Enter your Question</string>
     <string name="question">Question</string>
-    <string name="add_a_new_option">Add a New Option</string>
+    <string name="add_a_new_option" translatable="false">Add a New Option</string>
     <string name="unable_to_get_location">Unable to get your location</string>
     <string name="ended">Ended</string>
     <string name="ongoing">Ongoing</string>
+    <string name="not_a_member">You are not a member of this group (%1$s)</string>
+    <string name="sticker">sticker</string>
+    <string name="owner_alert">Owner Alert</string>
+    <string name="owner_alert_message">Please transfer group ownership to another member before leaving the group</string>
+    <string name="ok">Ok</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="send_sticker">Send Stickers</string>
+    <string name="shared_a_sticker">Shared a Sticker</string>
     <array name="groupType">
         <item>Public Group</item>
         <item>Private Group</item>

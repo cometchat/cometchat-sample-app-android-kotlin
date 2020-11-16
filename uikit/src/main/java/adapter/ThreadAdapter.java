@@ -848,7 +848,8 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             });
 
-            viewHolder.rlMessageBubble.setOnLongClickListener(new View.OnLongClickListener() {
+
+            viewHolder.txtMessage.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
                     if (!isImageMessageClick) {

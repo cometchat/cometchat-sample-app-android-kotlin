@@ -9,10 +9,11 @@ import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +23,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.uikit.R;
@@ -47,14 +47,13 @@ import listeners.CometChatCallListener;
 import listeners.CustomAlertDialogHelper;
 import listeners.OnAlertDialogButtonClickListener;
 import listeners.OnItemClickListener;
-import screen.CometChatCallActivity;
 import screen.CometChatConversationListScreen;
 import screen.CometChatGroupListScreen;
-import screen.CometChatUserDetailScreenActivity;
 import screen.call.CometChatCallListScreen;
 import screen.messagelist.CometChatMessageListActivity;
 import screen.CometChatUserInfoScreen;
 import screen.CometChatUserListScreen;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -179,9 +178,40 @@ public class CometChatUnified extends AppCompatActivity implements
 
         activityCometChatUnifiedBinding.bottomNavigation.setOnNavigationItemSelectedListener(this);
 
-        badgeDrawable.setVisible(false);
+        if (UISettings.getColor()!=null && !UISettings.getColor().isEmpty()) {
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+            int widgetColor = Color.parseColor(UISettings.getColor());
+            ColorStateList colorStateList = new ColorStateList(new int[][] {
+                    { -android.R.attr.state_selected }, {} }, new int[] { Color.GRAY, widgetColor });
 
-        loadFragment(new CometChatConversationListScreen());
+            activityCometChatUnifiedBinding.bottomNavigation.setItemIconTintList(colorStateList);
+
+        }
+//        activityCometChatUnifiedBinding.bottomNavigation.getMenu().add(Menu.NONE,12,Menu.NONE,"Test").setIcon(R.drawable.ic_security_24dp);
+        activityCometChatUnifiedBinding.bottomNavigation.getMenu().findItem(R.id.menu_conversation)
+                .setVisible(UISettings.isShowChatsBB());
+        activityCometChatUnifiedBinding.bottomNavigation.getMenu().findItem(R.id.menu_users)
+                .setVisible(UISettings.isShowUsersBB());
+        activityCometChatUnifiedBinding.bottomNavigation.getMenu().findItem(R.id.menu_group)
+                .setVisible(UISettings.isShowGroupsBB());
+        activityCometChatUnifiedBinding.bottomNavigation.getMenu().findItem(R.id.menu_call)
+                .setVisible(UISettings.isShowCallsBB());
+        activityCometChatUnifiedBinding.bottomNavigation.getMenu().findItem(R.id.menu_more)
+                .setVisible(UISettings.isShowUserSettingsBB());
+
+        
+        badgeDrawable.setVisible(false);
+        if (UISettings.isShowChatsBB())
+            loadFragment(new CometChatConversationListScreen());
+        else if (UISettings.isShowCallsBB())
+            loadFragment(new CometChatCallListScreen());
+        else if (UISettings.isShowUsersBB())
+            loadFragment(new CometChatUserListScreen());
+        else if (UISettings.isShowGroupsBB())
+            loadFragment(new CometChatGroupListScreen());
+        else if (UISettings.isShowUserSettingsBB())
+            loadFragment(new CometChatUserInfoScreen());
+
     }
 
     /**
@@ -193,28 +223,30 @@ public class CometChatUnified extends AppCompatActivity implements
      *
      */
     private void joinGroup(Group group) {
-        progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.joining));
-        progressDialog.setCancelable(false);
-        CometChat.joinGroup(group.getGuid(), group.getGroupType(), groupPassword, new CometChat.CallbackListener<Group>() {
-            @Override
-            public void onSuccess(Group group) {
-                if (progressDialog!=null)
-                    progressDialog.dismiss();
+        if (UISettings.isJoinOrLeaveGroup()) {
+            progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.joining));
+            progressDialog.setCancelable(false);
+            CometChat.joinGroup(group.getGuid(), group.getGroupType(), groupPassword, new CometChat.CallbackListener<Group>() {
+                @Override
+                public void onSuccess(Group group) {
+                    if (progressDialog != null)
+                        progressDialog.dismiss();
 
-                 if(group!=null)
-                     startGroupIntent(group);
-            }
+                    if (group != null)
+                        startGroupIntent(group);
+                }
 
-            @Override
-            public void onError(CometChatException e) {
-                if (progressDialog!=null)
-                    progressDialog.dismiss();
+                @Override
+                public void onError(CometChatException e) {
+                    if (progressDialog != null)
+                        progressDialog.dismiss();
 
-                Snackbar.make(activityCometChatUnifiedBinding.bottomNavigation,getResources().getString(R.string.unabl_to_join_message)+e.getMessage(),
-                        Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(activityCometChatUnifiedBinding.bottomNavigation, getResources().getString(R.string.unabl_to_join_message) + e.getMessage(),
+                            Snackbar.LENGTH_SHORT).show();
 
-            }
-        });
+                }
+            });
+        }
     }
 
     /**

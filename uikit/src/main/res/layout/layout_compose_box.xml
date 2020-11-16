@@ -152,5 +152,12 @@
             android:padding="8dp"
             android:src="@drawable/ic_send"
             android:layout_height="wrap_content"/>
+        <ImageView
+            android:layout_margin="8dp"
+            android:id="@+id/live_reaction_btn"
+            android:layout_gravity="center"
+            android:src="@drawable/heart_reaction"
+            android:layout_width="24dp"
+            android:layout_height="24dp"/>
     </LinearLayout>
 </RelativeLayout>

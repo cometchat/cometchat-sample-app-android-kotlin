@@ -39,6 +39,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
     private View videoMessage;
     private View locationMessage;
     private View pollsMessage;
+    private View stickerMessage;
 
     private TextView question;
     private LinearLayout optionGroup;
@@ -51,6 +52,8 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
     private ImageView messageVideo;
     private TextView txtTime;
     private RelativeLayout sensitiveLayout;
+
+    private ImageView messageSticker;
 
     private TextView audioFileSize;
 
@@ -86,12 +89,15 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
         fileMessage = findViewById(R.id.vwFileMessage);
         locationMessage = findViewById(R.id.vwLocationMessage);
         pollsMessage = findViewById(R.id.polls_message);
+        stickerMessage = findViewById(R.id.vwStickerMessage);
+        messageSticker = findViewById(R.id.sticker_view);
         findViewById(R.id.total_votes).setVisibility(View.GONE);
         question = findViewById(R.id.tv_question);
         optionGroup = findViewById(R.id.options_group);
         messageText = findViewById(R.id.go_txt_message);
         txtTime = findViewById(R.id.txt_time);
         txtTime.setVisibility(View.VISIBLE);
+        messageSticker = findViewById(R.id.sticker_view);
         messageImage = findViewById(R.id.go_img_message);
         messageVideo = findViewById(R.id.go_video_message);
         sensitiveLayout = findViewById(R.id.sensitive_layout);
@@ -188,7 +194,15 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
             } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
                 imageMessage.setVisibility(View.VISIBLE);
                 Glide.with(this).load(message).into(messageImage);
-            } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_VIDEO)) {
+            } else if (messageType.equals(StringContract.IntentStrings.STICKERS)) {
+                stickerMessage.setVisibility(View.VISIBLE);
+                try {
+                    JSONObject jsonObject = new JSONObject(message);
+                    Glide.with(this).load(jsonObject.getString("url")).into(messageSticker);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_VIDEO)) {
                 videoMessage.setVisibility(View.VISIBLE);
                 Glide.with(this).load(message).into(messageVideo);
             } else if (messageType.equals(CometChatConstants.MESSAGE_TYPE_FILE)) {

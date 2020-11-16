@@ -21,6 +21,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
     private TextView audioMessage;
     private TextView locationMessage;
     private TextView pollsMessage;
+    private TextView stickerMessage;
 
     private boolean isGalleryVisible;
     private boolean isCameraVisible;
@@ -28,6 +29,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
     private boolean isFileVisible;
     private boolean isLocationVisible;
     private boolean isPollsVisible;
+    private boolean isStickerVisible;
 
     private ComposeBoxActionListener composeBoxActionListener;
 
@@ -43,6 +45,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
             isAudioVisible = getArguments().getBoolean("isAudioVisible");
             isLocationVisible = getArguments().getBoolean("isLocationVisible");
             isPollsVisible = getArguments().getBoolean("isPollsVisible");
+            isStickerVisible = getArguments().getBoolean("isStickerVisible");
         }
     }
 
@@ -63,6 +66,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
                 behavior.setPeekHeight(0);
             }
         });
+        stickerMessage = view.findViewById(R.id.sticker_message);
         pollsMessage = view.findViewById(R.id.polls_message);
         galleryMessage = view.findViewById(R.id.gallery_message);
         cameraMessage = view.findViewById(R.id.camera_message);
@@ -70,6 +74,10 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
         audioMessage = view.findViewById(R.id.audio_message);
         locationMessage = view.findViewById(R.id.location_message);
 
+        if (isStickerVisible)
+            stickerMessage.setVisibility(View.VISIBLE);
+        else
+            stickerMessage.setVisibility(View.GONE);
         if (isPollsVisible)
             pollsMessage.setVisibility(View.VISIBLE);
         else
@@ -95,6 +103,14 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
         else
             locationMessage.setVisibility(View.GONE);
 
+        stickerMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (composeBoxActionListener!=null)
+                    composeBoxActionListener.onStickerClick();
+                dismiss();
+            }
+        });
         pollsMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,6 +175,7 @@ public class ComposeBoxActionFragment extends BottomSheetDialogFragment {
         void onAudioClick();
         void onLocationClick();
         void onPollClick();
+        void onStickerClick();
     }
 
 }

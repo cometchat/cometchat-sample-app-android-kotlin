@@ -32,6 +32,8 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
     <ImageView
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
         android:id="@+id/iv_reply_media"
         tools:src="@tools:sample/avatars"
         android:layout_alignParentEnd="true"
@@ -42,7 +44,7 @@
         android:foreground="?attr/selectableItemBackground"
         android:id="@+id/iv_reply_close"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_close_24dp"
+        android:src="@drawable/ic_close_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

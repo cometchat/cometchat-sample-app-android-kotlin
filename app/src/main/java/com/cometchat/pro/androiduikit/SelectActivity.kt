@@ -12,6 +12,7 @@ import android.widget.RadioGroup
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
+import com.cometchat.pro.uikit.Settings.UIKitSettings
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 
@@ -150,6 +151,7 @@ class SelectActivity : AppCompatActivity() {
         screenLaunch = findViewById(R.id.fragmentlaunch)
         componentLaunch = findViewById(R.id.componentLaunch)
         logout!!.setOnClickListener { v -> logoutUser(v) }
+
         unifiedLaunch!!.setOnClickListener {
             startActivity(Intent(this@SelectActivity, CometChatUnified::class.java))
             overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)

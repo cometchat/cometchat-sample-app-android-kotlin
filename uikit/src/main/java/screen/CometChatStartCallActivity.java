@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CallSettings;
 import com.cometchat.pro.core.CometChat;
@@ -33,6 +35,11 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
     private String sessionID;
 
+    private String type;
+
+    private CallSettings callSettings;
+
+    private boolean joinOnGoing;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,31 +47,40 @@ public class CometChatStartCallActivity extends AppCompatActivity {
         setContentView(R.layout.activity_comet_chat_start_call);
         mainView = findViewById(R.id.call_view);
         sessionID = getIntent().getStringExtra(StringContract.IntentStrings.SESSION_ID);
-        CallSettings callSettings = new CallSettings.CallSettingsBuilder(this,mainView)
-                .setSessionId(sessionID)
-                .build();
+        type = getIntent().getStringExtra(StringContract.IntentStrings.TYPE);
+        if (type!=null && type.equalsIgnoreCase(CometChatConstants.RECEIVER_TYPE_USER))
+            callSettings = new CallSettings.CallSettingsBuilder(this,mainView)
+                    .setSessionId(sessionID)
+                    .setMode(CallSettings.MODE_SINGLE)
+                    .build();
+        else
+            callSettings = new CallSettings.CallSettingsBuilder(this,mainView)
+                    .setSessionId(sessionID)
+                    .build();
+
         CometChat.startCall(callSettings, new CometChat.OngoingCallListener() {
-            @Override
-            public void onUserJoined(User user) {
-                Log.e("onUserJoined: ",user.getUid() );
-            }
+                @Override
+                public void onUserJoined(User user) {
+                    Log.e("onUserJoined: ", user.getUid());
+                }
 
-            @Override
-            public void onUserLeft(User user) {
-                Snackbar.make(mainView,"User Left: "+user.getName(),Snackbar.LENGTH_LONG).show();
-                Log.e( "onUserLeft: ",user.getUid() );
-            }
+                @Override
+                public void onUserLeft(User user) {
+                    Snackbar.make(mainView, "User Left: " + user.getName(), Snackbar.LENGTH_LONG).show();
+                    Log.e("onUserLeft: ", user.getUid());
+                }
 
-            @Override
-            public void onError(CometChatException e) {
-                Log.e( "onError: ",e.getMessage() );
-            }
+                @Override
+                public void onError(CometChatException e) {
+                    Log.e("onstartcallError: ", e.getMessage());
+                    Toast.makeText(CometChatStartCallActivity.this,e.getMessage(),Toast.LENGTH_LONG).show();
+                }
 
-            @Override
-            public void onCallEnded(Call call) {
-                Log.e("onCallEnded: ",call.toString() );
-                finish();
-            }
+                @Override
+                public void onCallEnded(Call call) {
+                    Log.e("TAG", "onCallEnded: ");
+                    finish();
+                }
         });
     }
 }

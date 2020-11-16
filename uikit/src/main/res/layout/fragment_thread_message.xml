@@ -68,6 +68,11 @@
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:visibility="gone"
+                    android:id="@+id/iv_stickerMessage"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"/>
+                <ImageView
+                    android:visibility="gone"
                     android:scaleType="center"
                     android:id="@+id/iv_imageMessage"
                     tools:src="@tools:sample/backgrounds/scenic"

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import screen.blockuserlist.CometChatBlockUserListScreenActivity;
 import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 public class CometChatMorePrivacyScreenActivity extends AppCompatActivity {
@@ -48,6 +50,9 @@ public class CometChatMorePrivacyScreenActivity extends AppCompatActivity {
          if (getSupportActionBar()!=null)
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        if (UISettings.getColor()!=null)
+            getWindow().setStatusBarColor(
+                    Color.parseColor(UISettings.getColor()));
          if (Utils.changeToolbarFont(toolbar)!=null){
              Utils.changeToolbarFont(toolbar).setTypeface(FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium));
          }

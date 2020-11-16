@@ -18,6 +18,7 @@ package screen;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -36,11 +37,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.UsersRequest;
 import com.cometchat.pro.exceptions.CometChatException;
@@ -52,14 +51,10 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-import adapter.UserListAdapter;
-import listeners.ClickListener;
 import listeners.OnItemClickListener;
-import listeners.RecyclerTouchListener;
-import listeners.StickyHeaderDecoration;
 import utils.CallUtils;
 import utils.FontUtils;
-import utils.Utils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 /**
 
@@ -104,7 +99,14 @@ public class CometChatUserCallListScreenActivity extends AppCompatActivity {
         title = findViewById(R.id.tv_title);
         ImageView imageView = new ImageView(this);
         imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_close_24dp));
-        imageView.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        if (UISettings.getColor()!=null) {
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+            imageView.setImageTintList(ColorStateList.valueOf(
+                    Color.parseColor(UISettings.getColor())));
+        } else
+            imageView.setImageTintList(
+                    ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+
         imageView.setClickable(true);
         imageView.setPadding(8,8,8,8);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

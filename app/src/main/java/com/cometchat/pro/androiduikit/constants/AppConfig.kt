@@ -4,9 +4,9 @@ class AppConfig {
 
     object AppDetails {
 
-        val APP_ID = "XXXXXXXXXXXXXX"
+        val APP_ID = "XXXXXXXXXXXX"
 
-        val API_KEY = "XXXXXXXXXXXXXXXXX"
+        val API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
         val REGION = "XX"
     }

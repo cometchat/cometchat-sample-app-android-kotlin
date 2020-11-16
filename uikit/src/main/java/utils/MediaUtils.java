@@ -30,12 +30,12 @@ import androidx.core.content.FileProvider;
 import androidx.loader.content.CursorLoader;
 
 import com.cometchat.pro.uikit.BuildConfig;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -612,19 +612,21 @@ public class MediaUtils {
     }
 
     public static void playSendSound(Context context ,int ringId) {
-        MediaPlayer mMediaPlayer = MediaPlayer.create(context, ringId);
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.start();
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
+        if (UISettings.isEnableMessageSounds()) {
+            MediaPlayer mMediaPlayer = MediaPlayer.create(context, ringId);
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.start();
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    if (mediaPlayer != null) {
+                        mediaPlayer.stop();
+                        mediaPlayer.release();
+                        mediaPlayer = null;
+                    }
                 }
-            }
-        });
+            });
+        }
 
     }
     public static void vibrate(Context context)

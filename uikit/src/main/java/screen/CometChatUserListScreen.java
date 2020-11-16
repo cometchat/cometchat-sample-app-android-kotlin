@@ -51,11 +51,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapter.UserListAdapter;
-import listeners.ClickListener;
 import listeners.OnItemClickListener;
-import listeners.RecyclerTouchListener;
-import listeners.StickyHeaderDecoration;
 import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /*
@@ -225,8 +223,13 @@ public class CometChatUserListScreen extends Fragment {
     private void fetchUsers() {
 
         if (usersRequest == null) {
-            Log.e(TAG, "newfetchUsers: " );
-            usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(30).build();
+            if (UISettings.getUserListing()
+                    .equalsIgnoreCase("friends"))
+                usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(30)
+                        .friendsOnly(true).build();
+            else if (UISettings.getUserListing()
+                    .equalsIgnoreCase("all_users"))
+                usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(30).build();
         }
         usersRequest.fetchNext(new CometChat.CallbackListener<List<User>>() {
             @Override

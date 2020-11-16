@@ -3,41 +3,21 @@ package screen.call;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
-import com.cometchat.pro.core.CometChat;
-import com.cometchat.pro.core.ConversationsRequest;
 import com.cometchat.pro.core.MessagesRequest;
-import com.cometchat.pro.exceptions.CometChatException;
-import com.cometchat.pro.helpers.CometChatHelper;
-import com.cometchat.pro.models.Action;
-import com.cometchat.pro.models.BaseMessage;
-import com.cometchat.pro.models.Conversation;
-import com.cometchat.pro.models.CustomMessage;
-import com.cometchat.pro.models.Group;
-import com.cometchat.pro.models.MediaMessage;
-import com.cometchat.pro.models.MessageReceipt;
-import com.cometchat.pro.models.TextMessage;
-import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.CometChatCallList;
 import com.cometchat.pro.uikit.R;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -46,14 +26,10 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import adapter.ConversationListAdapter;
 import adapter.TabAdapter;
-import listeners.ClickListener;
 import listeners.OnItemClickListener;
-import listeners.RecyclerTouchListener;
-import screen.CometChatCallActivity;
 import screen.CometChatUserCallListScreenActivity;
-import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -118,6 +94,41 @@ public class CometChatCallListScreen extends Fragment {
             viewPager.setAdapter(tabAdapter);
         }
         tabLayout.setupWithViewPager(viewPager);
+        if (UISettings.getColor()!=null) {
+            phoneAddIv.setImageTintList(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+            Drawable wrappedDrawable = DrawableCompat.wrap(getResources().
+                    getDrawable(R.drawable.tab_layout_background_active));
+            DrawableCompat.setTint(wrappedDrawable, Color.parseColor(UISettings.getColor()));
+            tabLayout.getTabAt(tabLayout.getSelectedTabPosition()).view.setBackground(wrappedDrawable);
+            tabLayout.setSelectedTabIndicatorColor(Color.parseColor(UISettings.getColor()));
+        } else {
+            tabLayout.getTabAt(tabLayout.getSelectedTabPosition()).
+                    view.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorPrimary));
+        }
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (UISettings.getColor()!=null) {
+                    Drawable wrappedDrawable = DrawableCompat.wrap(getResources().
+                            getDrawable(R.drawable.tab_layout_background_active));
+                    DrawableCompat.setTint(wrappedDrawable, Color.parseColor(UISettings.getColor()));
+                    tab.view.setBackground(wrappedDrawable);
+                }
+                else
+                    tab.view.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                tab.view.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
         checkDarkMode();
         return view;
     }

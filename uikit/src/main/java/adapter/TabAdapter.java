@@ -12,6 +12,7 @@ import java.util.List;
 public class TabAdapter extends FragmentStatePagerAdapter {
     private final List<Fragment> mFragmentList = new ArrayList<>();
     private final List<String> mFragmentTitleList = new ArrayList<>();
+    private final List<String> mFragmentIconList = new ArrayList<>();
     public TabAdapter(FragmentManager fm) {
         super(fm);
     }
@@ -25,6 +26,7 @@ public class TabAdapter extends FragmentStatePagerAdapter {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
     }
+
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {

@@ -90,5 +90,19 @@
         android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/sticker_message"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:drawableStart="@drawable/default_sticker"
+        android:drawableTint="@color/grey"
+        android:textStyle="bold"
+        android:textColor="@color/grey"
+        android:text="@string/send_sticker"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
 

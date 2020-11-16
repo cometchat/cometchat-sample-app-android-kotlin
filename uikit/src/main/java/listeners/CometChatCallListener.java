@@ -49,7 +49,9 @@ public class CometChatCallListener {
                 } else {
                     CometChat.rejectCall(call.getSessionId(), CometChatConstants.CALL_STATUS_BUSY, new CometChat.CallbackListener<Call>() {
                         @Override
-                        public void onSuccess(Call call) {}
+                        public void onSuccess(Call call) {
+                            Toast.makeText(context,call.getSender().getName()+" tried to call you",Toast.LENGTH_LONG).show();
+                        }
 
                         @Override
                         public void onError(CometChatException e) {
@@ -62,6 +64,12 @@ public class CometChatCallListener {
             @Override
             public void onOutgoingCallAccepted(Call call) {
                 if(CometChatStartCallActivity.activity==null) {
+                    if (CometChatCallActivity.callActivity != null) {
+                        CometChatCallActivity.cometChatAudioHelper.stop(false);
+                        CallUtils.startCall(CometChatCallActivity.callActivity, call);
+                    }
+                } else {
+                    CometChatStartCallActivity.activity.finish();
                     if (CometChatCallActivity.callActivity != null) {
                         CometChatCallActivity.cometChatAudioHelper.stop(false);
                         CallUtils.startCall(CometChatCallActivity.callActivity, call);

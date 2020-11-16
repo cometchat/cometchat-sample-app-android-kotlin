@@ -1,10 +1,11 @@
 package adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -13,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
-import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Conversation;
 import com.cometchat.pro.models.Group;
@@ -22,10 +22,10 @@ import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.databinding.CallListRowBinding;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -190,6 +190,13 @@ public class CallListAdapter extends RecyclerView.Adapter<CallListAdapter.CallVi
         callViewHolder.callListRowBinding.calltimeTv.setText(Utils.getLastMessageDate(call.getInitiatedAt()));
         callViewHolder.callListRowBinding.callMessage.setText(callMessageText);
         callViewHolder.callListRowBinding.getRoot().setTag(R.string.call, call);
+        if (UISettings.isEnableVoiceCalling())
+            callViewHolder.callListRowBinding.callIv.setVisibility(View.VISIBLE);
+        else
+            callViewHolder.callListRowBinding.callIv.setVisibility(View.GONE);
+
+        callViewHolder.callListRowBinding.callIv.setImageTintList(
+                ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
 
     }
 

@@ -2,6 +2,8 @@ package screen;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.GroupsRequest;
 import com.cometchat.pro.exceptions.CometChatException;
@@ -35,11 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapter.GroupListAdapter;
-import listeners.ClickListener;
 import listeners.OnItemClickListener;
-import listeners.RecyclerTouchListener;
 import screen.creategroup.CometChatCreateGroupScreenActivity;
 import utils.FontUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /*
@@ -92,6 +94,12 @@ public class CometChatGroupListScreen extends Fragment  {
         clearSearch = view.findViewById(R.id.clear_search);
 
         ivCreateGroup = view.findViewById(R.id.create_group);
+        ivCreateGroup.setImageTintList(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+
+        if(UISettings.isGroupCreate())
+            ivCreateGroup.setVisibility(View.VISIBLE);
+        else
+            ivCreateGroup.setVisibility(View.GONE);
 
         if(Utils.isDarkMode(getContext())) {
             title.setTextColor(getResources().getColor(R.color.textColorWhite));
@@ -193,7 +201,8 @@ public class CometChatGroupListScreen extends Fragment  {
         groupsRequest.fetchNext(new CometChat.CallbackListener<List<Group>>() {
             @Override
             public void onSuccess(List<Group> groups) {
-                rvGroupList.setGroupList(groups); // sets the groups in rvGroupList i.e CometChatGroupList Component.
+                List<Group> filteredList = filterGroup(groups);
+                rvGroupList.setGroupList(filteredList); // sets the groups in rvGroupList i.e CometChatGroupList Component.
                 groupList.addAll(groups);
                 if (groupList.size()==0) {
                     noGroupLayout.setVisibility(View.VISIBLE);
@@ -209,6 +218,27 @@ public class CometChatGroupListScreen extends Fragment  {
                     Snackbar.make(rvGroupList,getResources().getString(R.string.group_list_error),Snackbar.LENGTH_LONG).show();
             }
         });
+    }
+    private List<Group> filterGroup(List<Group> groups) {
+        List<Group> resultList = new ArrayList<>();
+        for (Group group : groups) {
+            if (group.isJoined()) {
+                resultList.add(group);
+            }
+            if (UISettings.getGroupListing()
+                    .equalsIgnoreCase("public_groups") &&
+                    group.getGroupType().equalsIgnoreCase(CometChatConstants.GROUP_TYPE_PUBLIC)) {
+                resultList.add(group);
+            } else if (UISettings.getGroupListing()
+                    .equalsIgnoreCase("password_protected_groups") &&
+                    group.getGroupType().equalsIgnoreCase(CometChatConstants.GROUP_TYPE_PASSWORD)) {
+                resultList.add(group);
+            } else if (UISettings.getGroupListing()
+                    .equalsIgnoreCase("public_and_password_protected_groups")) {
+                resultList.add(group);
+            }
+        }
+        return resultList;
     }
 
     /**

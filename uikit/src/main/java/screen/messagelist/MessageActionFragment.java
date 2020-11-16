@@ -214,6 +214,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
         Activity activity = getActivity();
         if (activity!=null)
             if (type!=null && type== CometChatMessageListActivity.class.getName())
@@ -224,6 +225,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
         Activity activity = getActivity();
         if (activity!=null)
             if (type!=null && type==CometChatMessageListActivity.class.getName())

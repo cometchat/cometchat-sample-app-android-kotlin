@@ -13,6 +13,7 @@ import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.models.TypingIndicator;
+import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.databinding.UserListRowBinding;
 
@@ -121,6 +122,11 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
         else
             groupMemberViewHolder.userListRowBinding.avUser.setAvatar(groupMember.getAvatar());
 
+        if (groupMember.getStatus().equalsIgnoreCase(CometChatConstants.USER_STATUS_ONLINE))
+            groupMemberViewHolder.userListRowBinding.statusIndicator.setVisibility(View.VISIBLE);
+
+        groupMemberViewHolder.userListRowBinding.statusIndicator.setUserStatus(groupMember.getStatus());
+
         if (Utils.isDarkMode(context))
         {
             groupMemberViewHolder.userListRowBinding.txtUserName.setTextColor(context.getResources().getColor(R.color.textColorWhite));
@@ -210,6 +216,15 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
         }
     }
 
+    public void updateMemberByStatus(User user) {
+        for (GroupMember groupMember : groupMemberList) {
+            if (groupMember.getUid().equalsIgnoreCase(user.getUid())) {
+                int index = groupMemberList.indexOf(groupMember);
+                groupMember.setStatus(user.getStatus());
+                notifyItemChanged(index);
+            }
+        }
+    }
     public void resetAdapter() {
         groupMemberList.clear();
         notifyDataSetChanged();

@@ -2,6 +2,7 @@ package screen.messagelist;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -15,11 +16,7 @@ import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 
 import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.Call;
-import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.models.BaseMessage;
-import com.cometchat.pro.models.Group;
-import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
 
 import java.util.List;
@@ -28,8 +25,7 @@ import adapter.MessageAdapter;
 import constant.StringContract;
 import listeners.MessageActionCloseListener;
 import listeners.OnMessageLongClick;
-import screen.CometChatUserDetailScreenActivity;
-import utils.Utils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 /**
 
@@ -60,6 +56,9 @@ public class CometChatMessageListActivity extends AppCompatActivity implements M
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_message_list);
+        if (UISettings.getColor() !=null) {
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+        }
 
         EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
         EmojiCompat.init(config);

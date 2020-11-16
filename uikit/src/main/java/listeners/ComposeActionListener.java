@@ -55,4 +55,7 @@ public abstract class ComposeActionListener {
 
     public void onLocationActionClicked() {
     }
+
+    public void onStickerClicked() {
+    }
 }

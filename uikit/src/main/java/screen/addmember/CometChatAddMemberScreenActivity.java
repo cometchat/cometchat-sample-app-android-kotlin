@@ -1,5 +1,6 @@
 package screen.addmember;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.cometchat.pro.uikit.R;
 
 import constant.StringContract;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 public class CometChatAddMemberScreenActivity extends AppCompatActivity {
 
@@ -21,6 +23,8 @@ public class CometChatAddMemberScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_block_screen);
         handleIntent();
+        if (UISettings.getColor()!=null)
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
     }
 
     private void handleIntent() {

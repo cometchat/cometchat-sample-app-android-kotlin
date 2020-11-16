@@ -31,6 +31,10 @@
     <include layout="@layout/edit_message_layout"/>
 
     <include layout="@layout/reply_message_layout"/>
+    <FrameLayout
+        android:id="@+id/reactions_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/bottom_layout"
@@ -51,7 +55,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/sticker_layout"
+        android:background="@drawable/cc_message_bubble_left"
+        android:backgroundTint="@color/grey_100"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content">
+        <com.cometchat.pro.uikit.Sticker.StickerView
+            android:layout_width="match_parent"
+            android:padding="8dp"
+            android:id="@+id/stickersView"
+            android:layout_height="250dp"/>
+        <ImageView
+            android:layout_alignParentEnd="true"
+            android:padding="8dp"
+            android:id="@+id/close_sticker_layout"
+            android:src="@drawable/ic_close_circle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
     <include layout="@layout/block_user_message_layout"/>
 
 

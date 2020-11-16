@@ -11,6 +11,8 @@ public class StringContract {
 
     public static class AppInfo {
         public static String API_KEY = "";
+
+        public static String APP_ID = "";
     }
     public static class IntentStrings {
 
@@ -106,6 +108,10 @@ public class StringContract {
 
         public static final String POLLS = "extension_poll";
 
+        public static final String TRANSFER_OWNERSHIP = "transfer_ownership";
+
+        public static final String STICKERS = "Sticker";
+
         public static String POLL_QUESTION = "poll_question";
 
         public static String POLL_OPTION = "poll_option";
@@ -148,22 +154,7 @@ public class StringContract {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Replace with yout MAP_API_KEY
-    }
-
-    public static class Sounds {
-
-        public static boolean enableMessageSounds = true;
-
-        public static boolean enableCallSounds = true;
-    }
-
-    public static class HyperLink {
-        public static int emailColor = R.color.primaryTextColor;
-
-        public static int phoneColor = R.color.purple;
-
-        public static int urlColor = R.color.dark_blue;
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     }
 
 
@@ -178,7 +169,8 @@ public class StringContract {
                 CometChatConstants.MESSAGE_TYPE_FILE,
                 //Custom Messages
                 StringContract.IntentStrings.LOCATION,
-                StringContract.IntentStrings.POLLS
+                StringContract.IntentStrings.POLLS,
+                StringContract.IntentStrings.STICKERS
         )) ;
         public static List<String> messageTypesForGroup = new ArrayList<>(Arrays.asList(
                 CometChatConstants.MESSAGE_TYPE_CUSTOM,
@@ -191,7 +183,8 @@ public class StringContract {
                 CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER,
                 //Custom Messages
                 StringContract.IntentStrings.LOCATION,
-                StringContract.IntentStrings.POLLS
+                StringContract.IntentStrings.POLLS,
+                StringContract.IntentStrings.STICKERS
         ));
 
         public static List<String> messageCategoriesForGroup = new ArrayList<>(Arrays.asList(

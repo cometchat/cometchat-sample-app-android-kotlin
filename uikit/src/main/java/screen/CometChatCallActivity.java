@@ -1,14 +1,11 @@
 package screen;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,7 +31,7 @@ import helper.CometChatAudioHelper;
 import helper.OutgoingAudioHelper;
 import utils.CallUtils;
 import utils.CameraPreview;
-import utils.MediaUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 /**
@@ -178,14 +175,13 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
         hangUp.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.red_600)));
         mainView = findViewById(R.id.main_view);
         cometChatAudioHelper = new CometChatAudioHelper(this);
-        if (StringContract.Sounds.enableCallSounds)
+        if (UISettings.isEnableCallSounds()) {
             cometChatAudioHelper.initAudio();
-        String packageName = getPackageName();
-        if (StringContract.Sounds.enableCallSounds)
-            notification = Uri.parse("android.resource://" + packageName + "/" +R.raw.incoming_call);
+            String packageName = getPackageName();
+            notification = Uri.parse("android.resource://" + packageName + "/" + R.raw.incoming_call);
+        }
         setCallType(isVideo, isIncoming);
-        if (!Utils.hasPermissions(this, Manifest.permission.RECORD_AUDIO) && !Utils.hasPermissions(this,Manifest.permission.CAMERA))
-        {
+        if (!Utils.hasPermissions(this, Manifest.permission.RECORD_AUDIO) && !Utils.hasPermissions(this,Manifest.permission.CAMERA)) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.CAMERA},REQUEST_PERMISSION);
         }
     }
@@ -202,12 +198,16 @@ public class CometChatCallActivity extends AppCompatActivity implements View.OnC
             else
                 onBackPressed();
         }
-        userTv.setText(name);
-        callerName.setText(name);
-        userAv.setInitials(name);
-        callerAvatar.setInitials(name);
-        userAv.setAvatar(avatar);
-        callerAvatar.setAvatar(avatar);
+        if (name!=null) {
+            userTv.setText(name);
+            callerName.setText(name);
+            userAv.setInitials(name);
+            callerAvatar.setInitials(name);
+        }
+        if (avatar!=null) {
+            userAv.setAvatar(avatar);
+            callerAvatar.setAvatar(avatar);
+        }
     }
 
     /**

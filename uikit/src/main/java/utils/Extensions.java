@@ -4,17 +4,21 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cometchat.pro.models.AppEntity;
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.TextMessage;
-import com.cometchat.pro.models.User;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import listeners.ExtensionResponseListener;
+import com.cometchat.pro.uikit.Sticker.model.Sticker;
 
 public class Extensions {
 
@@ -112,6 +116,9 @@ public class Extensions {
                     }
                     if (extensionsObject!=null && extensionsObject.has("image-moderation")) {
                         extensionMap.put("imageModeration",extensionsObject.getJSONObject("image-moderation"));
+                    }
+                    if (extensionsObject!=null && extensionsObject.has("thumbnail-generator")) {
+                        extensionMap.put("thumbnailGeneration",extensionsObject.getJSONObject("thumbnail-generator"));
                     }
                     if (extensionsObject!=null && extensionsObject.has("sentiment-analysis")) {
                         extensionMap.put("sentimentAnalysis",extensionsObject.getJSONObject("sentiment-analysis"));
@@ -244,4 +251,93 @@ public class Extensions {
         }
         return votes;
     }
+
+    public static void fetchStickers(ExtensionResponseListener extensionResponseListener) {
+        CometChat.callExtension("stickers", "GET", "/v1/fetch", null, new CometChat.CallbackListener<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject jsonObject) {
+                extensionResponseListener.OnResponseSuccess(jsonObject);
+            }
+            @Override
+            public void onError(CometChatException e) {
+                extensionResponseListener.OnResponseFailed(e);
+            }
+        });
+    }
+
+    public static HashMap<String,List<Sticker>> extractStickersFromJSON(JSONObject jsonObject) {
+        List<Sticker> stickers = new ArrayList<>();
+        if (jsonObject != null) {
+            try {
+                JSONObject dataObject = jsonObject.getJSONObject("data");
+                JSONArray defaultStickersArray = dataObject.getJSONArray("defaultStickers");
+                Log.d(TAG, "getStickersList: defaultStickersArray "+defaultStickersArray.length());
+                for (int i = 0; i < defaultStickersArray.length(); i++) {
+                    JSONObject stickerObject = defaultStickersArray.getJSONObject(i);
+                    String stickerOrder = stickerObject.getString("stickerOrder");
+                    String stickerSetId = stickerObject.getString("stickerSetId");
+                    String stickerUrl = stickerObject.getString("stickerUrl");
+                    String stickerSetName = stickerObject.getString("stickerSetName");
+                    String stickerName = stickerObject.getString("stickerName");
+                    Sticker sticker = new Sticker(stickerName,stickerUrl,stickerSetName);
+                    stickers.add(sticker);
+                }
+                if (dataObject.has("customStickers")) {
+                    JSONArray customSticker = dataObject.getJSONArray("customStickers");
+                    Log.d(TAG, "getStickersList: customStickersArray " + customSticker.length());
+                    for (int i = 0; i < customSticker.length(); i++) {
+                        JSONObject stickerObject = defaultStickersArray.getJSONObject(i);
+                        String stickerOrder = stickerObject.getString("stickerOrder");
+                        String stickerSetId = stickerObject.getString("stickerSetId");
+                        String stickerUrl = stickerObject.getString("stickerUrl");
+                        String stickerSetName = stickerObject.getString("stickerSetName");
+                        String stickerName = stickerObject.getString("stickerName");
+                        Sticker sticker = new Sticker(stickerName, stickerUrl, stickerSetName);
+                        stickers.add(sticker);
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        HashMap<String,List<Sticker>> stickerMap = new HashMap();
+        for (int i=0;i<stickers.size()-1;i++) {
+            if (stickerMap.containsKey(stickers.get(i).getSetName())) {
+                stickerMap.get(stickers.get(i).getSetName()).add(stickers.get(i));
+            } else {
+                List<Sticker> list = new ArrayList<>();
+                list.add(stickers.get(i));
+                stickerMap.put(stickers.get(i).getSetName(),list);
+            }
+        }
+        return stickerMap;
+    }
+
+
+//    public static List<Sticker> extractStickersFromJSON(JSONObject jsonObject) {
+//        List<Sticker> stickers = new ArrayList<>();
+//        if (jsonObject != null) {
+//            try {
+//                JSONObject dataObject = jsonObject.getJSONObject("data");
+//                JSONArray defaultStickersArray = dataObject.getJSONArray("defaultStickers");
+//                Log.d(TAG, "getStickersList: defaultStickersArray "+defaultStickersArray.length());
+//                for (int i = 0; i < defaultStickersArray.length(); i++) {
+//                    JSONObject stickerObject = defaultStickersArray.getJSONObject(i);
+//                    String stickerOrder = stickerObject.getString("stickerOrder");
+//                    String stickerSetId = stickerObject.getString("stickerSetId");
+//                    String stickerUrl = stickerObject.getString("stickerUrl");
+//                    String stickerSetName = stickerObject.getString("stickerSetName");
+//                    String stickerName = stickerObject.getString("stickerName");
+//                    Sticker default_sticker = new Sticker(stickerName,stickerUrl,stickerSetName);
+//                    stickers.add(default_sticker);
+//                }
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return stickers;
+//    }
 }

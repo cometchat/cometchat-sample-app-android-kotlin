@@ -1,8 +1,5 @@
 package utils;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -12,58 +9,43 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.provider.Settings;
-import android.text.Spannable;
-import android.text.TextPaint;
 import android.text.format.DateFormat;
-import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.databinding.BindingAdapter;
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
-import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.Logger;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.BaseMessage;
-import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -74,18 +56,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import adapter.MessageAdapter;
-import constant.StringContract;
 import kotlin.ranges.RangesKt;
 
 public class Utils {
@@ -97,7 +75,7 @@ public class Utils {
                 addPattern(Pattern.compile("(^|[\\s.:;?\\-\\]<\\(])" +
                                 "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
                                 "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"),
-                        context.getResources().getColor(StringContract.HyperLink.urlColor),
+                        context.getResources().getColor(UISettings.getUrlColor()),
                         new PatternBuilder.SpannableClickedListener() {
                             @Override
                             public void onSpanClicked(String text) {
@@ -110,7 +88,7 @@ public class Utils {
                             }
                         }).into(txtMessage);
         new PatternBuilder().
-                addPattern(Patterns.PHONE, context.getResources().getColor(StringContract.HyperLink.phoneColor),
+                addPattern(Patterns.PHONE, context.getResources().getColor(UISettings.getPhoneColor()),
                         new PatternBuilder.SpannableClickedListener() {
                             @Override
                             public void onSpanClicked(String text) {
@@ -121,7 +99,7 @@ public class Utils {
                         }).into(txtMessage);
         new PatternBuilder().
                 addPattern(Pattern.compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}"),
-                        context.getResources().getColor(StringContract.HyperLink.emailColor),
+                        context.getResources().getColor(UISettings.getEmailColor()),
                         new PatternBuilder.SpannableClickedListener() {
                             @Override
                             public void onSpanClicked(String text) {
@@ -723,5 +701,14 @@ public class Utils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void hideKeyBoard(Context context,View mainLayout) {
+        InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mainLayout.getWindowToken(), 0);
+    }
+    public static void showKeyBoard(Context context,View mainLayout) {
+        InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInputFromWindow(mainLayout.getWindowToken(),InputMethodManager.SHOW_FORCED, 0);
     }
 }

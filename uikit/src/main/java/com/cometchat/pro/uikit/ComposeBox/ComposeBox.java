@@ -2,10 +2,10 @@ package com.cometchat.pro.uikit.ComposeBox;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -20,19 +20,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 import android.widget.Chronometer;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.os.BuildCompat;
-import androidx.core.view.inputmethod.EditorInfoCompat;
-import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 import androidx.fragment.app.FragmentManager;
 
@@ -47,6 +41,7 @@ import java.util.TimerTask;
 import constant.StringContract;
 import listeners.ComposeActionListener;
 import utils.AudioVisualizer.AudioRecordView;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 public class ComposeBox extends RelativeLayout implements View.OnClickListener {
@@ -95,10 +90,12 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
     private int color;
 
+    public ImageView liveReactionBtn;
+
     private Bundle bundle = new Bundle();
 
     public boolean isGalleryVisible = true,isAudioVisible = true,isCameraVisible = true,
-            isFileVisible = true,isLocationVisible = true,isPollVisible = true;
+            isFileVisible = true,isLocationVisible = true,isPollVisible = true,isStickerVisible = true;
 
     public ComposeBox(Context context) {
         super(context);
@@ -153,6 +150,8 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
                 }
             }, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         }
+
+        liveReactionBtn = view.findViewById(R.id.live_reaction_btn);
         composeBox=this.findViewById(R.id.message_box);
         flBox=this.findViewById(R.id.flBox);
         ivMic=this.findViewById(R.id.ivMic);
@@ -215,6 +214,9 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
             @Override
             public void onPollClick() { composeActionListener.onPollActionClicked(); }
+
+            @Override
+            public void onStickerClick() { composeActionListener.onStickerClicked(); }
         });
         etComposeBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -272,6 +274,30 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             ivArrow.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.grey)));
             ivCamera.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
             ivFile.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        }
+        if (UISettings.getColor()!=null) {
+            int settingsColor = Color.parseColor(UISettings.getColor());
+            ivSend.setImageTintList(ColorStateList.valueOf(settingsColor));
+        }
+        isPollVisible = UISettings.isSendPolls();
+        isFileVisible = UISettings.isSendFiles();
+        isGalleryVisible = UISettings.isSendPhotosVideo();
+        isCameraVisible = UISettings.isSendPhotosVideo();
+        isAudioVisible = UISettings.isSendVoiceNotes();
+        isLocationVisible = UISettings.isShareLocation();
+        isStickerVisible = UISettings.isStickerVisible();
+        if (UISettings.isSendVoiceNotes()) {
+            ivMic.setVisibility(View.VISIBLE);
+        } else {
+            ivMic.setVisibility(GONE);
+        }
+        if (!UISettings.isSendPolls() &&
+                !UISettings.isSendFiles() &&
+                !UISettings.isSendPhotosVideo() &&
+                !UISettings.isSendVoiceNotes() &&
+                !UISettings.isShareLocation() &&
+                !UISettings.isStickerVisible()) {
+            ivArrow.setVisibility(GONE);
         }
         a.recycle();
     }
@@ -356,6 +382,9 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             bundle.putBoolean("isFileVisible",isFileVisible);
             bundle.putBoolean("isAudioVisible",isAudioVisible);
             bundle.putBoolean("isLocationVisible",isLocationVisible);
+            if (CometChat.isExtensionEnabled("stickers")) {
+                bundle.putBoolean("isStickerVisible",isStickerVisible);
+            }
             if (CometChat.isExtensionEnabled("polls"))
                 bundle.putBoolean("isPollsVisible",isPollVisible);
             composeBoxActionFragment.setArguments(bundle);

@@ -53,7 +53,13 @@
                     tools:visibility="visible"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-
+                <include android:id="@+id/vwStickerMessage"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    layout="@layout/message_right_sticker_item"/>
                 <include android:id="@+id/vwImageMessage"
                     android:layout_width="match_parent"
                     android:layout_centerVertical="true"

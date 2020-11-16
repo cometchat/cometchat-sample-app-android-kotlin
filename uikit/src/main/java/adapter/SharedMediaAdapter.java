@@ -74,7 +74,7 @@ public class SharedMediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     /**
-     * It is constructor which takes userArrayList as parameter and bind it with userArrayList in adapter.
+     * It is constructor which takes messageArrayList as parameter and bind it with messageArrayList in adapter.
      *
      * @param context          is a object of Context.
      * @param messageArrayList is a list of messages used in this adapter.

@@ -83,7 +83,6 @@ public class BlockedListAdapter extends RecyclerView.Adapter<BlockedListAdapter.
             blockedViewHolder.userListRowBinding.tvSeprator.setVisibility(View.VISIBLE);
         }
         blockedViewHolder.userListRowBinding.txtUserName.setText(user.getName());
-        blockedViewHolder.userListRowBinding.avUser.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
         blockedViewHolder.userListRowBinding.getRoot().setTag(R.string.user, user);
         blockedViewHolder.userListRowBinding.txtUserScope.setVisibility(View.GONE);
         blockedViewHolder.userListRowBinding.unblockUser.setVisibility(View.VISIBLE);
