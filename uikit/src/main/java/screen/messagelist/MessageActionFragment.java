@@ -8,17 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Reaction.model.Reaction;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import screen.messagelist.CometChatMessageListActivity;
+import adapter.ReactionListAdapter;
+import listeners.ClickListener;
+import listeners.RecyclerTouchListener;
 import screen.threadconversation.CometChatThreadMessageActivity;
+import utils.Extensions;
 
 public class MessageActionFragment extends BottomSheetDialogFragment {
 
@@ -31,6 +37,11 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
     private TextView messageInfo;
     private TextView shareMessage;
 
+
+    private RecyclerView reactionsList;
+    private ReactionListAdapter reactionAdapter;
+    private ImageView showReactionDialog;
+
     private boolean isShareVisible;
     private boolean isThreadVisible;
     private boolean isCopyVisible;
@@ -39,6 +50,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
     private boolean isForwardVisible;
     private boolean isReplyVisible;
     private boolean isMessageInfoVisible;
+    private boolean isReactionsVisible;
 
     private MessageActionListener messageActionListener;
 
@@ -60,6 +72,7 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
             isForwardVisible = getArguments().getBoolean("forwardVisible");
             isShareVisible = getArguments().getBoolean("shareVisible");
             isMessageInfoVisible = getArguments().getBoolean("messageInfoVisible");
+            isReactionsVisible = getArguments().getBoolean("isReactionVisible");
             type = getArguments().getString("type");
         }
     }
@@ -81,6 +94,29 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
                 behavior.setPeekHeight(0);
             }
         });
+        reactionsList = view.findViewById(R.id.reactions);
+        reactionAdapter = new ReactionListAdapter(getContext(), Extensions.getRandomEmojis(15));
+        reactionsList.setAdapter(reactionAdapter);
+
+        reactionsList.addOnItemTouchListener(new RecyclerTouchListener(getContext(), reactionsList, new ClickListener() {
+            @Override
+            public void onClick(View var1, int var2) {
+                Reaction reaction = (Reaction)var1.getTag(R.string.reaction);
+                if (messageActionListener != null)
+                    messageActionListener.onReactionClick(reaction);
+                dismiss();
+            }
+        }));
+//        showReactionDialog = view.findViewById(R.id.show_reaction_dialog);
+//        showReactionDialog.setVisibility(View.GONE);
+//        showReactionDialog.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (messageActionListener!=null)
+//                    messageActionListener.onReactionClick(new Reaction("add_emoji","add_emoji"));
+//                dismiss();
+//            }
+//        });
         threadMessage = view.findViewById(R.id.start_thread);
         editMessage = view.findViewById(R.id.edit_message);
         replyMessage = view.findViewById(R.id.reply_message);
@@ -90,6 +126,10 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
         shareMessage = view.findViewById(R.id.share_message);
         messageInfo = view.findViewById(R.id.message_info);
 
+        if (isReactionsVisible)
+            reactionsList.setVisibility(View.VISIBLE);
+        else
+            reactionsList.setVisibility(View.GONE);
         if (isThreadVisible)
             threadMessage.setVisibility(View.VISIBLE);
         else
@@ -210,6 +250,8 @@ public class MessageActionFragment extends BottomSheetDialogFragment {
         void onCopyMessageClick();
         void onShareMessageClick();
         void onMessageInfoClick();
+
+        void onReactionClick(Reaction reaction);
     }
 
     @Override

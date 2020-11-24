@@ -246,6 +246,7 @@
     <string name="delete_group">Delete Group</string>
     <string name="send_sticker">Send Stickers</string>
     <string name="shared_a_sticker">Shared a Sticker</string>
+    <string name="reaction">reaction</string>
     <array name="groupType">
         <item>Public Group</item>
         <item>Private Group</item>

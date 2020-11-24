@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class ReactionListener implements View.OnTouchListener {
+public class LiveReactionListener implements View.OnTouchListener {
 
     private Handler handler = new Handler();
 
@@ -28,8 +28,8 @@ public class ReactionListener implements View.OnTouchListener {
     };
 
 
-    public ReactionListener(int initialInterval, int normalInterval,
-                            ReactionClickListener clickListener) {
+    public LiveReactionListener(int initialInterval, int normalInterval,
+                                ReactionClickListener clickListener) {
         if (clickListener == null)
             throw new IllegalArgumentException("null runnable");
         if (initialInterval < 0 || normalInterval < 0)

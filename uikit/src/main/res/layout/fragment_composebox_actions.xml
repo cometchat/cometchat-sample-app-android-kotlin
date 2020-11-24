@@ -5,7 +5,8 @@
     android:elevation="4dp"
     android:padding="8dp"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <TextView
         android:id="@+id/polls_message"
         android:clickable="true"

@@ -112,6 +112,8 @@ public class StringContract {
 
         public static final String STICKERS = "Sticker";
 
+        public static final String REACTION_INFO = "reaction_info";
+
         public static String POLL_QUESTION = "poll_question";
 
         public static String POLL_OPTION = "poll_option";
@@ -154,7 +156,7 @@ public class StringContract {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX";
     }
 
 

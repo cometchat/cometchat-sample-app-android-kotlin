@@ -52,6 +52,8 @@ public class UISettings {
     protected static boolean enableCallSounds = true;
     protected static boolean hideGroupNotification = false;
     protected static boolean hideCallNotification = false;
+    protected static boolean liveReaction = true;
+    protected static boolean allowReactionOnMessage = true;
     protected static int emailColor = R.color.primaryTextColor;
     protected static int phoneColor = R.color.purple;
     protected static int urlColor = R.color.dark_blue;
@@ -234,5 +236,13 @@ public class UISettings {
 
     public static int getUrlColor() {
         return urlColor;
+    }
+
+    public static boolean showLiveReaction() {
+        return liveReaction;
+    }
+
+    public static boolean isReactionVisible() {
+        return allowReactionOnMessage;
     }
 }

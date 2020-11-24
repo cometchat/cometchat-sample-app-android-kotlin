@@ -1,6 +1,10 @@
 package screen.threadconversation;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -10,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,17 +23,21 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
@@ -67,6 +76,8 @@ import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.Avatar;
 import com.cometchat.pro.uikit.ComposeBox.ComposeBox;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Reaction.model.Reaction;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.cometchat.pro.uikit.SmartReplyList;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -89,9 +100,11 @@ import java.util.TimerTask;
 import adapter.ThreadAdapter;
 import constant.StringContract;
 import listeners.ComposeActionListener;
+import listeners.LiveReactionListener;
 import listeners.MessageActionCloseListener;
 import listeners.OnItemClickListener;
 import listeners.OnMessageLongClick;
+import listeners.ReactionClickListener;
 import listeners.StickyHeaderDecoration;
 import screen.CometChatForwardMessageScreenActivity;
 import screen.CometChatGroupDetailScreenActivity;
@@ -236,6 +249,10 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private TextView totalCount;
     private int voteCount;
     private MessageActionFragment messageActionFragment;
+
+    private ImageView imageView;
+    private FrameLayout container;
+    public ObjectAnimator animation;
 
     public CometChatThreadMessageScreen() {
         // Required empty public constructor
@@ -448,7 +465,55 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         composeBox.isPollVisible = false;
         composeBox.isStickerVisible = false;
         composeBox.ivMic.setVisibility(GONE);
-        composeBox.ivSend.setVisibility(VISIBLE);
+        if (UISettings.isEnableSendingMessage())
+           composeBox.ivSend.setVisibility(VISIBLE);
+
+        container = view.findViewById(R.id.reactions_container);
+        composeBox.liveReactionBtn.setOnTouchListener(new LiveReactionListener(700, 1000, new ReactionClickListener() {
+            @Override
+            public void onClick(View var1) {
+                container.setAlpha(1.0f);
+                sendLiveReaction();
+            }
+
+            @Override
+            public void onCancel(View var1) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (imageView!=null && animation!=null && animation.isRunning()) {
+                            ObjectAnimator animator = ObjectAnimator.ofFloat(container,"alpha",0.2f);
+                            animator.setDuration(700);
+                            animator.start();
+                            animator.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    if (imageView!=null)
+                                        imageView.clearAnimation();
+                                    container.removeAllViews();
+                                    if (typingTimer!=null)
+                                        typingTimer.schedule(new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                JSONObject metaData = new JSONObject();
+                                                try {
+                                                    metaData.put("reaction", "heart");
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                TypingIndicator typingIndicator = new TypingIndicator(Id, type, metaData);
+                                                CometChat.endTyping(typingIndicator);
+                                            }
+                                        },2000);
+                                }
+                            });
+                        }
+                    }
+                },1400);
+            }
+        }));
+
         setComposeBoxListener();
 
         rvSmartReply = view.findViewById(R.id.rv_smartReply);
@@ -1535,6 +1600,7 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     }
 
     private void onMessageReceived(BaseMessage message) {
+        noReplyMessages.setVisibility(GONE);
         MediaUtils.playSendSound(context,R.raw.incoming_message);
         if (message.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
             if (Id != null && Id.equalsIgnoreCase(message.getSender().getUid())) {
@@ -1610,16 +1676,43 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
     private void typingIndicator(TypingIndicator typingIndicator, boolean show) {
         if (messageAdapter != null) {
             if (show) {
-                if (typingIndicator.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER))
-                    tvTypingIndicator.setText("is Typing...");
-                else
-                    tvTypingIndicator.setText(typingIndicator.getSender().getName() + " is Typing...");
+                if (typingIndicator.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                    if (typingIndicator.getMetadata() == null) {
+                        if (UISettings.isShowTypingIndicators())
+                            tvTypingIndicator.setText("is Typing...");
+                    }
+                    else
+                        setLiveReaction();
+                } else {
+                    if (typingIndicator.getMetadata() == null) {
+                        if (UISettings.isShowTypingIndicators())
+                            tvTypingIndicator.setText(typingIndicator.getSender().getName() + " is Typing...");
+                    }
+                    else
+                        setLiveReaction();
+                }
             } else {
-                tvTypingIndicator.setVisibility(GONE);
+                if (typingIndicator.getMetadata() == null)
+                    tvTypingIndicator.setVisibility(GONE);
+                else {
+                    ObjectAnimator animator = ObjectAnimator.ofFloat(container,"alpha",0.2f);
+                    animator.setDuration(700);
+                    animator.start();
+                    animator.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                if (imageView!=null)
+                                    imageView.clearAnimation();
+                                container.removeAllViews();
+                            }
+                        });
+                }
             }
-
         }
+
     }
+
 
     /**
      * This method is used to remove message listener
@@ -1772,13 +1865,13 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         messageActionFragment = new MessageActionFragment();
         replyMessageLayout.setVisibility(GONE);
         editMessageLayout.setVisibility(GONE);
-        boolean copyVisible = true;
-        boolean threadVisible = true;
+        boolean copyVisible = UISettings.isEnableShareCopyForward();
+        boolean threadVisible = false;
         boolean replyVisible = false;
-        boolean editVisible = true;
-        boolean deleteVisible = true;
-        boolean forwardVisible = true;
-        boolean mapVisible = true;
+        boolean editVisible = UISettings.isEnableEditingMessage();
+        boolean deleteVisible = UISettings.isEnableDeleteMessage();
+        boolean forwardVisible = UISettings.isEnableShareCopyForward();
+        boolean reactionVisible = true;
         List<BaseMessage> textMessageList = new ArrayList<>();
         List<BaseMessage> mediaMessageList = new ArrayList<>();
         List<BaseMessage> locationMessageList = new ArrayList<>();
@@ -1802,7 +1895,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                 if (!(basemessage instanceof Action) && basemessage.getDeletedAt() == 0) {
                     baseMessage = basemessage;
                     threadVisible = false;
-                    mapVisible = false;
                     if (basemessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
                         deleteVisible = true;
                         editVisible = true;
@@ -1827,7 +1919,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     baseMessage = basemessage;
                     copyVisible = false;
                     threadVisible = false;
-                    mapVisible = false;
                     if (basemessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
                         deleteVisible = true;
                         editVisible = false;
@@ -1854,7 +1945,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     replyVisible = false;
                     forwardVisible = true;
                     if (basemessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
-                        mapVisible = true;
                         deleteVisible = true;
                         editVisible = false;
                     } else {
@@ -1863,7 +1953,6 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                         } else {
                             deleteVisible = false;
                         }
-                        mapVisible = true;
                         editVisible = false;
                     }
                 }
@@ -1877,7 +1966,8 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
         bundle.putBoolean("deleteVisible",deleteVisible);
         bundle.putBoolean("replyVisible",replyVisible);
         bundle.putBoolean("forwardVisible",forwardVisible);
-        bundle.putBoolean("mapVisible",mapVisible);
+        if (CometChat.isExtensionEnabled("reactions"))
+            bundle.putBoolean("isReactionVisible",reactionVisible);
         if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP) &&
                 baseMessage.getSender().getUid().equals(loggedInUser.getUid()))
             bundle.putBoolean("messageInfoVisible",true);
@@ -1983,6 +2073,36 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
                     }
                 }
                 context.startActivity(intent);
+            }
+
+            @Override
+            public void onReactionClick(Reaction reaction) {
+                if (reaction.getCode().equals("add_emoji")) {
+//                    showReactionDialog(baseMessage.getId());
+                } else {
+                    JSONObject body = new JSONObject();
+                    try {
+                        body.put("msgId", baseMessage.getId());
+                        body.put("emoji", reaction.getCode());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    CometChat.callExtension("reactions", "POST", "/v1/react", body,
+                            new CometChat.CallbackListener<JSONObject>() {
+                                @Override
+                                public void onSuccess(JSONObject responseObject) {
+                                    Log.e(TAG, "onSuccess: " + responseObject.toString());
+                                    // ReactionModel added successfully.
+                                }
+
+                                @Override
+                                public void onError(CometChatException e) {
+                                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Log.e(TAG, "onError: " + e.getCode() + e.getMessage() + e.getDetails());
+                                }
+                            });
+                }
             }
         });
     }
@@ -2139,6 +2259,48 @@ public class CometChatThreadMessageScreen extends Fragment implements View.OnCli
             }
         }
     }
+
+    //Live Reactions
+    private void sendLiveReaction() {
+        try {
+            JSONObject metaData = new JSONObject();
+            metaData.put("reaction", "heart");
+            TypingIndicator typingIndicator = new TypingIndicator(Id, type, metaData);
+            CometChat.startTyping(typingIndicator);
+            setLiveReaction();
+        } catch (Exception e) {
+            Log.e(TAG, "sendLiveReaction: "+e.getMessage());
+        }
+    }
+
+    private void setLiveReaction() {
+        if (UISettings.showLiveReaction()) {
+            container.setAlpha(1.0f);
+            flyEmoji(R.drawable.heart_reaction);
+        }
+    }
+
+    private void flyEmoji(final int resId) {
+        imageView = new ImageView(getContext());
+
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.BOTTOM|Gravity.END;
+        layoutParams.rightMargin = 16;
+        imageView.setLayoutParams(layoutParams);
+        container.addView(imageView);
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
+        if (bitmap!=null) {
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * 0.2f), (int) (bitmap.getHeight() * 0.2f), false);
+            imageView.setImageBitmap(scaledBitmap);
+        }
+
+        animation = ObjectAnimator.ofFloat(imageView, "translationY", -700f);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setRepeatCount(ValueAnimator.INFINITE);
+        animation.setDuration(700);
+        animation.start();
+    }
+
 
     @Override
     public void handleDialogClose(DialogInterface dialog) {

@@ -42,20 +42,23 @@
     </RelativeLayout>
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_marginBottom="16dp"
         android:layout_width="wrap_content"
         android:layout_below="@+id/cv_message_container"
         android:layout_alignEnd="@+id/cv_message_container"
         android:layout_height="wrap_content">
-        <LinearLayout
+        <com.google.android.material.chip.ChipGroup
             android:layout_gravity="center_vertical"
             android:visibility="gone"
             android:orientation="horizontal"
-            android:id="@+id/reply_avatar_layout"
+            android:id="@+id/reactions_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView
             android:clickable="true"
+            android:layout_gravity="end"
+            android:gravity="end"
             android:foreground="?selectableItemBackground"
             android:id="@+id/thread_reply_count"
             android:textColor="@color/colorPrimary"

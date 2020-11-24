@@ -211,6 +211,16 @@
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
             </RelativeLayout>
+            <com.google.android.material.chip.ChipGroup
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp"
+                android:layout_below="@id/message_layout"
+                tools:visibility="visible"
+                android:orientation="horizontal"
+                android:id="@+id/reactions_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <RelativeLayout
                 android:padding="8dp"
                 android:layout_margin="8dp"
@@ -289,6 +299,10 @@
     <include layout="@layout/edit_message_layout"/>
 
     <include layout="@layout/reply_message_layout"/>
+    <FrameLayout
+        android:id="@+id/reactions_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <RelativeLayout
         android:id="@+id/bottom_layout"
         android:layout_alignParentBottom="true"

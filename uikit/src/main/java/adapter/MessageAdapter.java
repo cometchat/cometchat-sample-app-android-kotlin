@@ -52,6 +52,8 @@ import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.Settings.UISettings;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +66,7 @@ import java.util.List;
 import constant.StringContract;
 import listeners.StickyHeaderAdapter;
 import screen.CometChatMediaViewActivity;
+import screen.CometChatReactionInfoScreenActivity;
 import screen.messagelist.CometChatMessageListActivity;
 import screen.threadconversation.CometChatThreadMessageActivity;
 import utils.Extensions;
@@ -661,6 +664,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return true;
             }
         });
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -800,6 +805,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         });
 
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
     /**
@@ -838,7 +845,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
-                viewHolder.lvReplyAvatar.setVisibility(View.GONE);
                 viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
             }
             viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -905,6 +911,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     return true;
                 }
             });
+            viewHolder.reactionLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage,viewHolder.reactionLayout);
         }
     }
 
@@ -949,12 +957,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
               viewHolder.fileSize.setText(Utils.getFileSize(fileSize));
 
-              viewHolder.lvReplyAvatar.setVisibility(View.GONE);
               if (baseMessage.getReplyCount()!=0 && UISettings.isEnableThreadedReplies()) {
                   viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                   viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
               } else {
-                  viewHolder.lvReplyAvatar.setVisibility(View.GONE);
                   viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
               }
               viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -1017,6 +1023,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                   }
               });
           }
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -1077,7 +1086,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
-            viewHolder.lvReplyAvatar.setVisibility(View.GONE);
             viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
         }
         viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -1155,6 +1163,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return true;
             }
         });
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -1290,6 +1301,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return true;
             }
         });
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -1320,7 +1334,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
             viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
         } else {
-            viewHolder.lvReplyAvatar.setVisibility(View.GONE);
             viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
         }
         viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -1383,6 +1396,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 openMediaViewActivity(baseMessage);
             }
         });
+
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -1414,7 +1431,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         if (baseMessage.getDeletedAt()!=0) {
             viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
-            viewHolder.lvReplyAvatar.setVisibility(View.GONE);
             viewHolder.txtMessage.setText(R.string.message_deleted);
             viewHolder.txtMessage.setTextColor(context.getResources().getColor(R.color.secondaryTextColor));
             viewHolder.txtMessage.setTypeface(null, Typeface.ITALIC);
@@ -1521,10 +1537,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             setStatusIcon(((AudioMessageViewHolder)viewHolder).txtTime, baseMessage);
         } else if (viewHolder instanceof LocationMessageViewHolder){
             setStatusIcon(((LocationMessageViewHolder) viewHolder).txtTime, baseMessage);
-        } else if (viewHolder instanceof  PollMessageViewHolder) {
-            setStatusIcon(((PollMessageViewHolder) viewHolder).txtTime, baseMessage);
-        } else if (viewHolder instanceof StickerMessageViewHolder) {
-            setStatusIcon(((StickerMessageViewHolder) viewHolder).txtTime,baseMessage);
         }
 
     }
@@ -1683,7 +1695,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
-                viewHolder.lvReplyAvatar.setVisibility(View.GONE);
                 viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
             }
             viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -1793,10 +1804,63 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //                         return true;
 //                 }
 //             });
+
+            viewHolder.reactionLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage,viewHolder.reactionLayout);
              viewHolder.itemView.setTag(R.string.message, baseMessage);
          }
     }
 
+    private void setReactionSupport(BaseMessage baseMessage, ChipGroup reactionLayout) {
+        HashMap<String,String> reactionOnMessage = Extensions.getReactionsOnMessage(baseMessage);
+        if (reactionOnMessage!=null && reactionOnMessage.size()>0) {
+            reactionLayout.setVisibility(View.VISIBLE);
+            reactionLayout.removeAllViews();
+            for (String str : reactionOnMessage.keySet()) {
+//                if (reactionLayout.getChildCount()<reactionOnMessage.size()) {
+                    Chip chip = new Chip(context);
+                    chip.setChipStrokeWidth(2f);
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(android.R.color.transparent)));
+                    chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+                    chip.setText(str + " " + reactionOnMessage.get(str));
+                    reactionLayout.addView(chip);
+                    chip.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View view) {
+                            Intent intent = new Intent(context, CometChatReactionInfoScreenActivity.class);
+                            intent.putExtra(StringContract.IntentStrings.REACTION_INFO,baseMessage.getMetadata().toString());
+                            context.startActivity(intent);
+                            return true;
+                        }
+                    });
+                    chip.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            JSONObject body=new JSONObject();
+                            try {
+                                body.put("msgId", baseMessage.getId());
+                                body.put("emoji", str);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            CometChat.callExtension("reactions", "POST", "/v1/react", body,
+                                    new CometChat.CallbackListener<JSONObject>() {
+                                        @Override
+                                        public void onSuccess(JSONObject responseObject) {
+                                            // ReactionModel added successfully.
+                                        }
+
+                                        @Override
+                                        public void onError(CometChatException e) {
+                                            // Some error occured.
+                                        }
+                                    });
+                        }
+                    });
+//                }
+            }
+        }
+    }
 
 
     private void setCustomData(CustomMessageViewHolder viewHolder, int i) {
@@ -1856,7 +1920,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if (baseMessage.getSender().equals(CometChat.getLoggedInUser())) {
                 if (view instanceof CardView) {
                     ((CardView)view).setCardBackgroundColor(Color.parseColor(UISettings.getColor()));
-                } else {
+                } e,lse {
                     if (Build.VERSION.SDK_INT >= 29) {
                         view.getBackground().setColorFilter(new PorterDuffColorFilter(Color.parseColor(UISettings.getColor()), PorterDuff.Mode.SRC_ATOP));
                     } else {
@@ -1953,7 +2017,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.tvThreadReplyCount.setVisibility(View.VISIBLE);
                 viewHolder.tvThreadReplyCount.setText(baseMessage.getReplyCount()+" Replies");
             } else {
-                viewHolder.lvReplyAvatar.setVisibility(View.GONE);
                 viewHolder.tvThreadReplyCount.setVisibility(View.GONE);
             }
             viewHolder.tvThreadReplyCount.setOnClickListener(view -> {
@@ -2038,6 +2101,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     return true;
                 }
             });
+            viewHolder.reactionLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage,viewHolder.reactionLayout);
             viewHolder.itemView.setTag(R.string.message, baseMessage);
         }
     }
@@ -2330,9 +2395,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView txtTime,tvUser;
         private RelativeLayout rlMessageBubble;
         private TextView tvThreadReplyCount;
-        private LinearLayout lvReplyAvatar;
 
         private RelativeLayout sensitiveLayout;
+        private ChipGroup reactionLayout;
 
         public ImageMessageViewHolder(@NonNull View view) {
             super(view);
@@ -2345,8 +2410,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
             tvThreadReplyCount = view.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = view.findViewById(R.id.reply_avatar_layout);
             sensitiveLayout = view.findViewById(R.id.sensitive_layout);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
         }
     }
 
@@ -2371,7 +2436,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView txtTime,tvUser;
         private RelativeLayout rlMessageBubble;
         private TextView tvThreadReplyCount;
-        private LinearLayout lvReplyAvatar;
+        private ChipGroup reactionLayout;
 
         public VideoMessageViewHolder(@NonNull View view) {
             super(view);
@@ -2385,7 +2450,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
             tvThreadReplyCount = view.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = view.findViewById(R.id.reply_avatar_layout);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
         }
     }
 
@@ -2401,7 +2466,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private RelativeLayout cvMessageView;
         private RelativeLayout rlMessageBubble;
         private TextView tvThreadReplyCount;
-        private LinearLayout lvReplyAvatar;
+        private ChipGroup reactionLayout;
 
         FileMessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -2414,7 +2479,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             cvMessageView = itemView.findViewById(R.id.cv_message_container);
             rlMessageBubble = itemView.findViewById(R.id.rl_message);
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = itemView.findViewById(R.id.reply_avatar_layout);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
         }
     }
@@ -2444,7 +2509,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
             tvThreadReplyCount = view.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = view.findViewById(R.id.reply_avatar_layout);
             this.view = view;
         }
     }
@@ -2472,7 +2536,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private RelativeLayout replyLayout;     //reply message layout
         private TextView replyUser;             //reply message sender name
         private TextView replyMessage;          //reply message text
-        private LinearLayout lvReplyAvatar;
+
+        private ChipGroup reactionLayout;
 
         TextMessageViewHolder(@NonNull View view) {
             super(view);
@@ -2489,9 +2554,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             replyUser = view.findViewById(R.id.reply_user);
             replyMessage = view.findViewById(R.id.reply_message);
             tvThreadReplyCount = view.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = view.findViewById(R.id.reply_avatar_layout);
             sentimentVw = view.findViewById(R.id.sentiment_layout);
             viewSentimentMessage = view.findViewById(R.id.view_sentiment);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
             this.view = view;
 
         }
@@ -2531,6 +2596,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView txtTime;
         public TextView tvUser;
         public Avatar ivUser;
+        private ChipGroup reactionLayout;
 
         public int type;
         public View view;
@@ -2545,7 +2611,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = itemView.findViewById(R.id.iv_user);
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
             txtTime = itemView.findViewById(R.id.txt_time);
-
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
 
         }
@@ -2567,6 +2633,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView tvUser;
         public Avatar ivUser;
 
+        private ChipGroup reactionLayout;
+
         public LocationMessageViewHolder(View itemView) {
             super(itemView);
 
@@ -2582,6 +2650,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
             senderTxt = itemView.findViewById(R.id.sender_location_txt);
             navigateBtn = itemView.findViewById(R.id.navigate_btn);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
         }
     }
@@ -2602,6 +2671,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView tvUser;
         public Avatar ivUser;
 
+        private ChipGroup reactionLayout;
+
         public PollMessageViewHolder(View itemView) {
             super(itemView);
 
@@ -2617,6 +2688,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = itemView.findViewById(R.id.iv_user);
             loadingProgress = itemView.findViewById(R.id.loading_progressBar);
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
         }
     }
@@ -2631,7 +2703,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private RelativeLayout rlMessageBubble;
         private TextView txtTime;
         private TextView tvThreadReplyCount;
-        private LinearLayout lvReplyAvatar;
+        private ChipGroup reactionLayout;
         public AudioMessageViewHolder(@NonNull View itemView) {
             super(itemView);
             type = (int)itemView.getTag();
@@ -2642,7 +2714,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = itemView.findViewById(R.id.iv_user);
             txtTime = itemView.findViewById(R.id.txt_time);
             tvThreadReplyCount = itemView.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = itemView.findViewById(R.id.reply_avatar_layout);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
         }
     }
     public class LinkMessageViewHolder extends RecyclerView.ViewHolder {
@@ -2662,7 +2734,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private Avatar ivUser;
         private RelativeLayout rlMessageBubble;
         private TextView tvThreadReplyCount;
-        private LinearLayout lvReplyAvatar;
+
+        private ChipGroup reactionLayout;
 
         LinkMessageViewHolder(@NonNull View view) {
             super(view);
@@ -2681,7 +2754,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
             tvThreadReplyCount = view.findViewById(R.id.thread_reply_count);
-            lvReplyAvatar = view.findViewById(R.id.reply_avatar_layout);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
             this.view = view;
         }
     }

@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.text.Spannable;
@@ -33,11 +34,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.CustomMessage;
@@ -47,7 +50,10 @@ import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.Avatar;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +66,8 @@ import java.util.List;
 
 import constant.StringContract;
 import listeners.StickyHeaderAdapter;
+import screen.CometChatMediaViewActivity;
+import screen.CometChatReactionInfoScreenActivity;
 import screen.threadconversation.CometChatThreadMessageActivity;
 import utils.Extensions;
 import utils.FontUtils;
@@ -372,6 +380,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
         });
 
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
+
     }
 
     private void setLocationData(BaseMessage baseMessage, TextView tvAddress, ImageView ivMap) {
@@ -447,6 +458,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     return true;
                 }
             });
+
+            viewHolder.reactionLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage,viewHolder.reactionLayout);
         }
     }
 
@@ -507,6 +521,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                       return true;
                   }
               });
+
+              viewHolder.reactionLayout.setVisibility(View.GONE);
+              setReactionSupport(baseMessage,viewHolder.reactionLayout);
           }
     }
 
@@ -533,25 +550,16 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String smallUrl = Extensions.getThumbnailGeneration(context,baseMessage);
         viewHolder.imageView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_defaulf_image));
         if (smallUrl!=null) {
-            Glide.with(context).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).load(smallUrl).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    if (isImageNotSafe)
-                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
-                    else
-                        viewHolder.imageView.setImageBitmap(resource);
-                }
-            });
+            if (((MediaMessage)baseMessage).getAttachment().getFileExtension().equalsIgnoreCase(".gif")) {
+                setImageDrawable(viewHolder,smallUrl,true,false);
+            } else {
+                setImageDrawable(viewHolder,smallUrl,false,isImageNotSafe);
+            }
         } else {
-            Glide.with(context).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).load(((MediaMessage)baseMessage).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    if (isImageNotSafe)
-                        viewHolder.imageView.setImageBitmap(Utils.blur(context,resource));
-                    else
-                        viewHolder.imageView.setImageBitmap(resource);
-                }
-            });
+            if (((MediaMessage)baseMessage).getAttachment().getFileExtension().equalsIgnoreCase(".gif"))
+                setImageDrawable(viewHolder,((MediaMessage)baseMessage).getAttachment().getFileUrl(),true,false);
+            else
+                setImageDrawable(viewHolder,((MediaMessage)baseMessage).getAttachment().getFileUrl(),false,isImageNotSafe);
         }
         if (isImageNotSafe) {
             viewHolder.sensitiveLayout.setVisibility(View.VISIBLE);
@@ -588,7 +596,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             } else {
                 setSelectedMessage(baseMessage.getId());
                 notifyDataSetChanged();
-                MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(), context);
+                openMediaViewActivity(baseMessage);
             }
 
         });
@@ -604,22 +612,44 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 return true;
             }
         });
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
-    private void displayImage(BaseMessage baseMessage) {
-        Dialog imageDialog = new Dialog(context);
-        View messageVw = LayoutInflater.from(context).inflate(R.layout.image_dialog_view, null);
-        ZoomIv imageView = messageVw.findViewById(R.id.imageView);
-        Glide.with(context).asBitmap().load(((MediaMessage) baseMessage).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                imageView.setImageBitmap(resource);
-            }
-        });
-        imageDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        imageDialog.setContentView(messageVw);
-        imageDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        imageDialog.show();
+    private void setImageDrawable(ImageMessageViewHolder viewHolder, String url, boolean gif, boolean isImageNotSafe) {
+        if (gif) {
+            Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).load(url).into(viewHolder.imageView);
+        } else {
+            Glide.with(context).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).load(url).into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    if (isImageNotSafe)
+                        viewHolder.imageView.setImageBitmap(Utils.blur(context, resource));
+                    else
+                        viewHolder.imageView.setImageBitmap(resource);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
+            });
+        }
+
+    }
+
+    private void openMediaViewActivity(BaseMessage baseMessage) {
+        Intent intent = new Intent(context, CometChatMediaViewActivity.class);
+        intent.putExtra(StringContract.IntentStrings.NAME,baseMessage.getSender().getName());
+        intent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getUid());
+        intent.putExtra(StringContract.IntentStrings.SENTAT,baseMessage.getSentAt());
+        intent.putExtra(StringContract.IntentStrings.INTENT_MEDIA_MESSAGE,
+                ((MediaMessage)baseMessage).getAttachment().getFileUrl());
+        intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,baseMessage.getType());
+        context.startActivity(intent);
     }
 
 
@@ -665,6 +695,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 MediaUtils.openFile(((MediaMessage)baseMessage).getAttachment().getFileUrl(),context);
             }
         });
+
+        viewHolder.reactionLayout.setVisibility(View.GONE);
+        setReactionSupport(baseMessage,viewHolder.reactionLayout);
     }
 
 
@@ -862,6 +895,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     return true;
                 }
             });
+
+            viewHolder.reactionLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage,viewHolder.reactionLayout);
             viewHolder.itemView.setTag(R.string.message, baseMessage);
         }
     }
@@ -894,6 +930,57 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             });
             viewHolder.itemView.setTag(R.string.message, baseMessage);
+        }
+    }
+
+    private void setReactionSupport(BaseMessage baseMessage, ChipGroup reactionLayout) {
+        HashMap<String,String> reactionOnMessage = Extensions.getReactionsOnMessage(baseMessage);
+        if (reactionOnMessage!=null && reactionOnMessage.size()>0) {
+            reactionLayout.setVisibility(View.VISIBLE);
+            reactionLayout.removeAllViews();
+            for (String str : reactionOnMessage.keySet()) {
+//                if (reactionLayout.getChildCount()<reactionOnMessage.size()) {
+                Chip chip = new Chip(context);
+                chip.setChipStrokeWidth(2f);
+                chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(android.R.color.transparent)));
+                chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+                chip.setText(str + " " + reactionOnMessage.get(str));
+                reactionLayout.addView(chip);
+                chip.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Intent intent = new Intent(context, CometChatReactionInfoScreenActivity.class);
+                        intent.putExtra(StringContract.IntentStrings.REACTION_INFO,baseMessage.getMetadata().toString());
+                        context.startActivity(intent);
+                        return true;
+                    }
+                });
+                chip.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        JSONObject body=new JSONObject();
+                        try {
+                            body.put("msgId", baseMessage.getId());
+                            body.put("emoji", str);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        CometChat.callExtension("reactions", "POST", "/v1/react", body,
+                                new CometChat.CallbackListener<JSONObject>() {
+                                    @Override
+                                    public void onSuccess(JSONObject responseObject) {
+                                        // ReactionModel added successfully.
+                                    }
+
+                                    @Override
+                                    public void onError(CometChatException e) {
+                                        // Some error occured.
+                                    }
+                                });
+                    }
+                });
+//                }
+            }
         }
     }
 
@@ -1245,7 +1332,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public TextView txtTime,tvUser;
         private RelativeLayout rlMessageBubble;
 
+        private ChipGroup reactionLayout;
         private RelativeLayout sensitiveLayout;
+
         public ImageMessageViewHolder(@NonNull View view) {
             super(view);
             int type = (int) view.getTag();
@@ -1257,6 +1346,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ivUser = view.findViewById(R.id.iv_user);
             sensitiveLayout = view.findViewById(R.id.sensitive_layout);
             rlMessageBubble = view.findViewById(R.id.rl_message);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
         }
     }
 
@@ -1280,6 +1370,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         private Avatar ivUser;
         public TextView txtTime,tvUser;
         private RelativeLayout rlMessageBubble;
+        private ChipGroup reactionLayout;
 
         public VideoMessageViewHolder(@NonNull View view) {
             super(view);
@@ -1292,6 +1383,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtTime = view.findViewById(R.id.txt_time);
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
         }
     }
 
@@ -1305,6 +1397,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         private View view;
         private Avatar ivUser;
         private RelativeLayout rlMessageBubble;
+        private ChipGroup reactionLayout;
 
         FileMessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -1315,6 +1408,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtTime = itemView.findViewById(R.id.txt_time);
             fileName = itemView.findViewById(R.id.tvFileName);
             rlMessageBubble = itemView.findViewById(R.id.rl_message);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
         }
     }
@@ -1361,6 +1455,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         private TextView replyMessage;
         private RelativeLayout sentimentVw;
         private TextView viewSentimentMessage;
+        private ChipGroup reactionLayout;
 
         TextMessageViewHolder(@NonNull View view) {
             super(view);
@@ -1378,6 +1473,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             replyMessage = view.findViewById(R.id.reply_message);
             sentimentVw = view.findViewById(R.id.sentiment_layout);
             viewSentimentMessage = view.findViewById(R.id.view_sentiment);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
             this.view = view;
 
         }
@@ -1425,7 +1521,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public TextView txtTime;
         public TextView tvUser;
         public Avatar ivUser;
-
+        public ChipGroup reactionLayout;
 
         public LocationMessageViewHolder(View itemView) {
             super(itemView);
@@ -1440,6 +1536,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ivUser = itemView.findViewById(R.id.iv_user);
             senderTxt = itemView.findViewById(R.id.sender_location_txt);
             navigateBtn = itemView.findViewById(R.id.navigate_btn);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
             this.view = itemView;
         }
     }
@@ -1453,6 +1550,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         private Avatar ivUser;
         private RelativeLayout rlMessageBubble;
         private TextView txtTime;
+        private ChipGroup reactionLayout;
         public AudioMessageViewHolder(@NonNull View itemView) {
             super(itemView);
             type = (int)itemView.getTag();
@@ -1462,6 +1560,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             tvUser = itemView.findViewById(R.id.tv_user);
             ivUser = itemView.findViewById(R.id.iv_user);
             txtTime = itemView.findViewById(R.id.txt_time);
+            reactionLayout = itemView.findViewById(R.id.reactions_layout);
         }
     }
     public class LinkMessageViewHolder extends RecyclerView.ViewHolder {
@@ -1480,6 +1579,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         private TextView tvUser;
         private Avatar ivUser;
         private RelativeLayout rlMessageBubble;
+        private ChipGroup reactionLayout;
 
         LinkMessageViewHolder(@NonNull View view) {
             super(view);
@@ -1497,6 +1597,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             imgStatus = view.findViewById(R.id.img_pending);
             ivUser = view.findViewById(R.id.iv_user);
             rlMessageBubble = view.findViewById(R.id.rl_message);
+            reactionLayout = view.findViewById(R.id.reactions_layout);
             this.view = view;
         }
     }

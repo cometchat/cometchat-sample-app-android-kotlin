@@ -46,19 +46,20 @@
                 android:padding="10dp"
                 android:maxEms="12"
                 android:textColor="@color/textColorWhite"
-                tools:text="@tools:sample/lorem/random" />
+                tools:text="@tools:sample/lorem" />
         </RelativeLayout>
         <LinearLayout
             android:layout_marginBottom="16dp"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_alignEnd="@+id/cv_message_container"
             android:layout_below="@+id/cv_message_container"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
                 android:layout_gravity="center_vertical"
                 android:visibility="gone"
                 android:orientation="horizontal"
-                android:id="@+id/reply_avatar_layout"
+                android:id="@+id/reactions_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView

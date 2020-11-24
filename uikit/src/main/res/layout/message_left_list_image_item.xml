@@ -108,16 +108,17 @@
             tools:visibility="visible" />
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_alignStart="@+id/cv_image_message_container"
             android:layout_below="@+id/cv_image_message_container"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
                 android:layout_gravity="center_vertical"
                 android:visibility="gone"
                 android:orientation="horizontal"
-                android:id="@+id/reply_avatar_layout"
+                android:id="@+id/reactions_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView

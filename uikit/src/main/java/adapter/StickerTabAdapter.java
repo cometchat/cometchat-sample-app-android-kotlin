@@ -55,31 +55,7 @@ public class StickerTabAdapter extends FragmentStatePagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        sb = new SpannableStringBuilder(""); // space added before text for convenience
-//        myDrawable = context.getResources().getDrawable(R.drawable.default_sticker);
-//        myDrawable.setBounds(5, 15, myDrawable.getIntrinsicWidth(), myDrawable.getIntrinsicHeight());
-//        ImageSpan span = new ImageSpan(myDrawable, DynamicDrawableSpan.ALIGN_BASELINE);
-//        sb.setSpan(span, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//        Glide.with(context).load(mFragmentIconList.get(position)).into(new CustomTarget<Drawable>() {
-//            @Override
-//            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-//                myDrawable = resource;
-//                try {
-//                    sb = new SpannableStringBuilder(" ");
-//                    myDrawable.setBounds(5, 5, myDrawable.getIntrinsicWidth(), myDrawable.getIntrinsicHeight());
-//                    ImageSpan span = new ImageSpan(myDrawable, DynamicDrawableSpan.ALIGN_BASELINE);
-//                    sb.setSpan(span, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                } catch (Exception e) {
-//                    Log.e("Icon: ", e.getMessage());
-//                }
-//            }
-//
-//            @Override
-//            public void onLoadCleared(@Nullable Drawable placeholder) {
-//
-//            }
-//        });
-
+        sb = new SpannableStringBuilder("");
         return sb;
     }
     @Override

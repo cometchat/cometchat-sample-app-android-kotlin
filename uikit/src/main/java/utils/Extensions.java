@@ -15,9 +15,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import listeners.ExtensionResponseListener;
+
+import com.cometchat.pro.uikit.Reaction.model.Reaction;
 import com.cometchat.pro.uikit.Sticker.model.Sticker;
 
 public class Extensions {
@@ -125,6 +128,9 @@ public class Extensions {
                     }
                     if (extensionsObject!=null && extensionsObject.has("polls")) {
                         extensionMap.put("polls",extensionsObject.getJSONObject("polls"));
+                    }
+                    if (extensionsObject!=null && extensionsObject.has("reactions")) {
+                        extensionMap.put("reactions",extensionsObject.getJSONObject("reactions"));
                     }
                 }
                 return extensionMap;
@@ -284,9 +290,9 @@ public class Extensions {
                 }
                 if (dataObject.has("customStickers")) {
                     JSONArray customSticker = dataObject.getJSONArray("customStickers");
-                    Log.d(TAG, "getStickersList: customStickersArray " + customSticker.length());
+                    Log.d(TAG, "getStickersList: customStickersArray " + customSticker.toString() );
                     for (int i = 0; i < customSticker.length(); i++) {
-                        JSONObject stickerObject = defaultStickersArray.getJSONObject(i);
+                        JSONObject stickerObject = customSticker.getJSONObject(i);
                         String stickerOrder = stickerObject.getString("stickerOrder");
                         String stickerSetId = stickerObject.getString("stickerSetId");
                         String stickerUrl = stickerObject.getString("stickerUrl");
@@ -303,7 +309,7 @@ public class Extensions {
         }
 
         HashMap<String,List<Sticker>> stickerMap = new HashMap();
-        for (int i=0;i<stickers.size()-1;i++) {
+        for (int i=0;i<stickers.size();i++) {
             if (stickerMap.containsKey(stickers.get(i).getSetName())) {
                 stickerMap.get(stickers.get(i).getSetName()).add(stickers.get(i));
             } else {
@@ -315,6 +321,67 @@ public class Extensions {
         return stickerMap;
     }
 
+    public static List<Reaction> getRandomEmojis(int i) {
+        List<Reaction> randomReaction = new ArrayList<>();
+        List<Reaction> fetchedReaction = ReactionUtils.getFeelList();
+        for (int k=0;k<i;k++) {
+            Reaction reaction = fetchedReaction.get(k);
+            randomReaction.add(reaction);
+        }
+        return randomReaction;
+    }
+
+    public static HashMap<String, String> getReactionsOnMessage(BaseMessage baseMessage) {
+        HashMap<String,String> result = new HashMap<>();
+        HashMap<String,JSONObject> extensionList = Extensions.extensionCheck(baseMessage);
+        if (extensionList!=null) {
+            try {
+                if (extensionList.containsKey("reactions")) {
+                    JSONObject data = extensionList.get("reactions");
+                    Iterator<String> keys= data.keys();
+                    while (keys.hasNext())
+                    {
+                        String keyValue = (String)keys.next();
+                        JSONObject react = data.getJSONObject(keyValue);
+                        String reactCount = react.length()+"";
+                        result.put(keyValue,reactCount);
+                        Log.e(TAG, "getReactionsOnMessage: "+keyValue+"="+reactCount);
+                    }
+                }
+            }catch (Exception e) { e.printStackTrace(); }
+        }
+        return result;
+    }
+
+    public static HashMap<String, List<String>> getReactionsInfo(JSONObject jsonObject) {
+        HashMap<String,List<String>> result = new HashMap<>();
+        if (jsonObject!=null) {
+            try {
+                JSONObject injectedObject = jsonObject.getJSONObject("@injected");
+                if (injectedObject != null && injectedObject.has("extensions")) {
+                    JSONObject extensionsObject = injectedObject.getJSONObject("extensions");
+                    if (extensionsObject.has("reactions")) {
+                        JSONObject data = extensionsObject.getJSONObject("reactions");
+                        Iterator<String> keys = data.keys();
+                        while (keys.hasNext()) {
+                            List<String> reactionUser = new ArrayList<>();
+                            String keyValue = (String) keys.next();
+                            JSONObject react = data.getJSONObject(keyValue);
+                            Iterator<String> uids = react.keys();
+                            while (uids.hasNext()) {
+                                String uid = (String) uids.next();
+                                JSONObject user = react.getJSONObject(uid);
+                                reactionUser.add(user.getString("name"));
+                                Log.e(TAG, "getReactionsOnMessage: " + keyValue + "=" + user.getString("name"));
+                            }
+                            result.put(keyValue, reactionUser);
+                        }
+                    }
+                }
+            }catch (Exception e) { e.printStackTrace(); }
+        }
+        return result;
+    }
 
 //    public static List<Sticker> extractStickersFromJSON(JSONObject jsonObject) {
 //        List<Sticker> stickers = new ArrayList<>();

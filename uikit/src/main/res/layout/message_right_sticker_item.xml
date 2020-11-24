@@ -35,16 +35,17 @@
             tools:visibility="visible"
             android:visibility="gone" />
         <LinearLayout
+            android:orientation="vertical"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_alignEnd="@+id/sticker_view"
             android:layout_below="@+id/sticker_view"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
                 android:layout_gravity="center_vertical"
                 android:visibility="gone"
                 android:orientation="horizontal"
-                android:id="@+id/reply_avatar_layout"
+                android:id="@+id/reactions_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView

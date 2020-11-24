@@ -69,10 +69,10 @@ public class SmartReplyListAdapter extends RecyclerView.Adapter<SmartReplyListAd
     }
 
     /**
-     * This method is used to bind the UserViewHolder contents with user at given
-     * position. It set username userAvatar in respective UserViewHolder content.
+     * This method is used to bind the ReactionViewHolder contents with user at given
+     * position. It set username userAvatar in respective ReactionViewHolder content.
      *
-     * @param smartReplyViewHolder is a object of UserViewHolder.
+     * @param smartReplyViewHolder is a object of ReactionViewHolder.
      * @param i is a position of item in recyclerView.
      * @see User
      *

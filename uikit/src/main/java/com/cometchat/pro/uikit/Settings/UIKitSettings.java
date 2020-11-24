@@ -46,6 +46,9 @@ public class UIKitSettings {
         UISettings.enableCallSounds = isEnable;
     }
 
+    public static void enableLiveReaction(boolean isEnable) {
+        UISettings.liveReaction = isEnable;
+    }
     public static void setHyperLinkEmailColor(int color) {
         UISettings.emailColor = color;
     }
