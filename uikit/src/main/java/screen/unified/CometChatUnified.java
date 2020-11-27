@@ -76,7 +76,7 @@ public class CometChatUnified extends AppCompatActivity implements
     private static final String TAG = CometChatUnified.class.getSimpleName();
 
     //Stores the count of user whose messages are unread.
-    private List<String> unreadCount = new ArrayList<>();
+    private final List<String> unreadCount = new ArrayList<>();
 
     private BadgeDrawable badgeDrawable;
 
@@ -88,7 +88,7 @@ public class CometChatUnified extends AppCompatActivity implements
 
     private Group group;
 
-    private Fragment active = new CometChatConversationListScreen();
+    private final Fragment active = new CometChatConversationListScreen();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,8 +166,8 @@ public class CometChatUnified extends AppCompatActivity implements
      */
     private void initViewComponent() {
 
-        if (!Utils.hasPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE})) {
+        if (!Utils.hasPermissions(this, Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,
                                 Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -275,11 +275,7 @@ public class CometChatUnified extends AppCompatActivity implements
                 unreadCount.addAll(stringHashMapHashMap.get("user").keySet());    //Add users whose messages are unread.
                 unreadCount.addAll(stringHashMapHashMap.get("group").keySet());    //Add groups whose messages are unread.
 
-                if (unreadCount.size() == 0) {
-                    badgeDrawable.setVisible(false);
-                } else {
-                    badgeDrawable.setVisible(true);
-                }
+                badgeDrawable.setVisible(unreadCount.size() != 0);
                 if (unreadCount.size() != 0) {
                     badgeDrawable.setNumber(unreadCount.size());  //add total count of users and groups whose messages are unread in BadgeDrawable
                 }
@@ -318,10 +314,7 @@ public class CometChatUnified extends AppCompatActivity implements
      * Updating BadgeDrawable set on conversation menu in BottomNavigationBar
      */
     private void setBadge(){
-        if (unreadCount.size()==0){
-            badgeDrawable.setVisible(false);
-        } else
-            badgeDrawable.setVisible(true);
+        badgeDrawable.setVisible(unreadCount.size() != 0);
         badgeDrawable.setNumber(badgeDrawable.getNumber() + 1);
     }
 
@@ -388,7 +381,7 @@ public class CometChatUnified extends AppCompatActivity implements
 
     /**
      * Open various screen on fragment based on item selected from BottomNavigationBar
-     * @param item
+     * @param item CometChatMenuItem
      * @return true if fragment is not null.
      * @see CometChatUserListScreen
      * @see CometChatGroupListScreen
@@ -416,7 +409,7 @@ public class CometChatUnified extends AppCompatActivity implements
 
     @Override
     public void onButtonClick(AlertDialog alertDialog, View v, int which, int popupId) {
-        EditText groupPasswordInput = (EditText) v.findViewById(R.id.edittextDialogueInput);
+        EditText groupPasswordInput = v.findViewById(R.id.edittextDialogueInput);
         if (which == DialogInterface.BUTTON_NEGATIVE) { // Cancel
             alertDialog.dismiss();
         } else if (which == DialogInterface.BUTTON_POSITIVE) { // Join

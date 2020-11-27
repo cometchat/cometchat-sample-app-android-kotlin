@@ -79,7 +79,7 @@ class ConversationListViewFragment : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                Log.e("onError: ", e.message)
+                Log.e("onError: ", e.message.toString())
             }
         })
     }
