@@ -1920,7 +1920,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if (baseMessage.getSender().equals(CometChat.getLoggedInUser())) {
                 if (view instanceof CardView) {
                     ((CardView)view).setCardBackgroundColor(Color.parseColor(UISettings.getColor()));
-                } e,lse {
+                } else {
                     if (Build.VERSION.SDK_INT >= 29) {
                         view.getBackground().setColorFilter(new PorterDuffColorFilter(Color.parseColor(UISettings.getColor()), PorterDuff.Mode.SRC_ATOP));
                     } else {

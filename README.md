@@ -18,14 +18,14 @@ CometChat Kitchen Sink Sample App (built using <b>CometChat UIKit</b>) is a full
 
 # Installation
 
-1. Simply clone the project from [android-chat-ui-kit-app](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/archive/master.zip) repository. After cloning the repository:
+1. Simply clone the project from [android-kotlin-chat-app](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/archive/master.zip) repository. After cloning the repository:
 
 
 # Running the sample app
 
 To Run to sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** and  **REGION_CODE**
 
-   You can obtain your  *APP_ID*, *API_KEY* and *REGION_CODE* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
+   You can obtain your  *APP_ID*, *API_KEY* and *REGION_CODE* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
 
    - Open the project in Android Studio.
 
