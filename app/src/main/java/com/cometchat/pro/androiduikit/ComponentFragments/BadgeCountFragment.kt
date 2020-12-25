@@ -1,24 +1,25 @@
 package com.cometchat.pro.androiduikit.ComponentFragments
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
-import android.widget.Toast
-
 import androidx.fragment.app.Fragment
-
 import com.cometchat.pro.androiduikit.R
 import com.cometchat.pro.uikit.BadgeCount
-import com.cometchat.pro.uikit.StatusIndicator
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import utils.Utils
 
 class BadgeCountFragment : Fragment() {
-
     private var count = 1
+    private var badgeCountLayout: TextInputLayout? = null
+    private var badgeCountSizeLayout: TextInputLayout? = null
+    private var badgeCountEdt: TextInputEditText? = null
+    private var countSize: TextInputEditText? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -27,44 +28,33 @@ class BadgeCountFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_badge_count, container, false)
-        val badgeCount = view.findViewById<BadgeCount>(R.id.badgeCount)
-        val badgecountedt = view.findViewById<TextInputEditText>(R.id.badgeCount_edt)
-        val countSize = view.findViewById<TextInputEditText>(R.id.countSize)
-        countSize.setText(12.toString())
-        badgecountedt.setText(1.toString())
-        badgecountedt.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-
-            }
-
+        val badgeCount: BadgeCount = view.findViewById(R.id.badgeCount)
+        badgeCountLayout = view.findViewById(R.id.badgeCount_layout)
+        badgeCountSizeLayout = view.findViewById(R.id.badgeCountSize_layout)
+        badgeCountEdt = view.findViewById(R.id.badgeCount_edt)
+        countSize = view.findViewById(R.id.countSize)
+        countSize!!.setText(12.toString())
+        badgeCountEdt!!.setText(1.toString())
+        badgeCountEdt!!.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 if (charSequence.length > 0 && charSequence.length < 7) {
-                    count = Integer.parseInt(charSequence.toString())
-                    badgeCount.setCount(Integer.parseInt(charSequence.toString()))
+                    count = charSequence.toString().toInt()
+                    badgeCount.setCount(charSequence.toString().toInt())
                 }
-
             }
 
-            override fun afterTextChanged(editable: Editable) {
-
-            }
+            override fun afterTextChanged(editable: Editable) {}
         })
-        countSize.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-
-            }
-
+        countSize!!.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 0 && Integer.parseInt(charSequence.toString()) < 32)
-                    badgeCount.setCountSize(java.lang.Float.parseFloat(charSequence.toString()))
-                else if (charSequence.length == 0) {
+                if (charSequence.length > 0 && charSequence.toString().toInt() < 32) badgeCount.setCountSize(charSequence.toString().toFloat()) else if (charSequence.length == 0) {
                     badgeCount.setCountSize(12f)
                 }
             }
 
-            override fun afterTextChanged(editable: Editable) {
-
-            }
+            override fun afterTextChanged(editable: Editable) {}
         })
         view.findViewById<View>(R.id.bd_red).setOnClickListener {
             badgeCount.setCountBackground(resources.getColor(R.color.red))
@@ -91,8 +81,7 @@ class BadgeCountFragment : Fragment() {
             refreshbadgeCount(badgeCount)
         }
 
-        /**/
-        view.findViewById<View>(R.id.count_red).setOnClickListener {
+        /**/view.findViewById<View>(R.id.count_red).setOnClickListener {
             badgeCount.setCountColor(resources.getColor(R.color.red))
             refreshbadgeCount(badgeCount)
         }
@@ -116,7 +105,26 @@ class BadgeCountFragment : Fragment() {
             badgeCount.setCountColor(resources.getColor(R.color.violet))
             refreshbadgeCount(badgeCount)
         }
+        checkDarkMode()
         return view
+    }
+
+    private fun checkDarkMode() {
+        if (Utils.isDarkMode(context!!)) {
+            badgeCountLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            badgeCountLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            badgeCountLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            badgeCountSizeLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            badgeCountSizeLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            badgeCountSizeLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+        } else {
+            badgeCountLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            badgeCountLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            badgeCountLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            badgeCountSizeLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            badgeCountSizeLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            badgeCountSizeLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+        }
     }
 
     private fun refreshbadgeCount(badgeCount: BadgeCount) {

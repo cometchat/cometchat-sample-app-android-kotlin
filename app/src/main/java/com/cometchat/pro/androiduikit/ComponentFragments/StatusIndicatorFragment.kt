@@ -1,21 +1,15 @@
 package com.cometchat.pro.androiduikit.ComponentFragments
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-
-import androidx.fragment.app.Fragment
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
-
+import androidx.fragment.app.Fragment
 import com.cometchat.pro.androiduikit.R
 import com.cometchat.pro.uikit.StatusIndicator
 
 class StatusIndicatorFragment : Fragment() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -24,7 +18,7 @@ class StatusIndicatorFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_status_indicator, container, false)
-        val statusIndicator = view.findViewById<StatusIndicator>(R.id.statusIndicator)
+        val statusIndicator: StatusIndicator = view.findViewById(R.id.statusIndicator)
         val statusChangeGroup = view.findViewById<RadioGroup>(R.id.statusChange)
         statusIndicator.setUserStatus("online")
         statusChangeGroup.setOnCheckedChangeListener { radioGroup, i ->

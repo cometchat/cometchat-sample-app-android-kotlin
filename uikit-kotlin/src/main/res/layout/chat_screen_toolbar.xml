@@ -1,0 +1,80 @@
+<androidx.appcompat.widget.Toolbar android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:stateListAnimator="@animator/toolbar_elevation"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            tools:visibility="visible"
+            android:tint="@color/colorPrimary"
+            android:visibility="gone"
+            android:id="@+id/iv_close_message_action"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_close_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            tools:visibility="visible"
+            android:tint="@color/colorPrimary"
+            android:visibility="gone"
+            android:id="@+id/iv_copy_message_action"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_content_copy_black_24dp"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"/>
+
+        <com.cometchat.pro.uikit.Avatar
+            android:id="@+id/iv_chat_avatar"
+            android:layout_width="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="visible"
+            android:src="@drawable/ic_account"
+            android:layout_height="40dp"/>
+        <RelativeLayout
+            android:layout_toEndOf="@id/iv_close_message_action"
+            android:layout_toStartOf="@id/iv_chat_avatar"
+            android:layout_alignTop="@id/iv_chat_avatar"
+            android:layout_centerInParent="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/tv_name"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:layout_centerHorizontal="true"
+                tools:text="@tools:sample/full_names"
+                android:layout_width="wrap_content"
+                android:textColor="@color/primaryTextColor"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_below="@id/tv_name"
+                android:layout_marginStart="16dp"
+                android:layout_centerHorizontal="true"
+                android:textSize="12sp"
+                tools:text="online"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:maxWidth="200dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+
+</androidx.appcompat.widget.Toolbar>

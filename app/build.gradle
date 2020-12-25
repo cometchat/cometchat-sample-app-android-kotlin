@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
-
+apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 29
     defaultConfig {
@@ -18,7 +17,7 @@ android {
         manifestPlaceholders = [file_provider: "com.cometchat.pro.androiduikit"]
 
         ndk {
-            abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            abiFilters "armeabi-v7a", "x86"
         }
     }
     dataBinding {
@@ -38,8 +37,8 @@ android {
     }
     lintOptions {
         checkReleaseBuilds false
-            // Or, if you prefer, you can continue to check for errors in release builds,
-           // but continue the build even when errors are found:
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
         abortOnError false
     }
 }
@@ -57,14 +56,13 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-    implementation project(path: ':uikit')
-
-    kapt 'com.android.databinding:compiler:2.3.1'
+    implementation project(path: ':uikit-kotlin')
 
     implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
-
+//
     implementation 'com.cometchat:pro-android-chat-sdk:2.1.4'
 
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0'
 }
-

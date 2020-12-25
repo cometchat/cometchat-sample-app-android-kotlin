@@ -42,6 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:id="@+id/borderWidth_layout"
                 android:hint="Border Width"
                 android:textColorHint="@color/secondaryTextColor"
                 app:boxCornerRadiusBottomEnd="24dp"
@@ -57,7 +58,8 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:maxLines="1"
-                    android:imeOptions="actionGo" />
+                    android:imeOptions="actionGo"
+                    android:textColor="@color/primaryTextColor" />
             </com.google.android.material.textfield.TextInputLayout>
             <RadioGroup
                 android:id="@+id/shapeGroup"

@@ -58,7 +58,7 @@
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="8dp"
             android:textSize="18sp"
-            android:text="Login with one of our sample users"/>
+            android:text="Login with one of our sample users" />
 
         <GridLayout
             android:id="@+id/grid"

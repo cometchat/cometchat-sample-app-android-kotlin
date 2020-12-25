@@ -22,6 +22,7 @@
             android:layout_marginTop="16dp"
             android:padding="4dp"
             android:text="SignUp"
+            android:textColor="@color/primaryTextColor"
             android:textSize="40sp"
             android:textStyle="bold" />
 
@@ -45,6 +46,7 @@
             android:layout_marginStart="16dp"
             android:padding="4dp"
             android:text="Please Enter below details to continue"
+            android:textColor="@color/primaryTextColor"
             android:textSize="24sp"
             android:textStyle="bold" />
 

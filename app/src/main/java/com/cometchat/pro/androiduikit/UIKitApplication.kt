@@ -1,32 +1,32 @@
 package com.cometchat.pro.androiduikit
 
+import android.app.AlertDialog
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.os.StrictMode
 import android.util.Log
 import android.widget.Toast
-import com.cometchat.pro.core.AppSettings
-import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.androiduikit.constants.AppConfig
-import com.cometchat.pro.uikit.Settings.UIKitSettings
-
-import listeners.CometChatCallListener
+import com.cometchat.pro.core.AppSettings.AppSettingsBuilder
+import com.cometchat.pro.core.CometChat
+import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.exceptions.CometChatException
+import com.cometchat.pro.helpers.Logger
+import constant.StringContract
+import listeners.CometChatCallListener.addCallListener
+import listeners.CometChatCallListener.removeCallListener
+import utils.PreferenceUtil
 
 class UIKitApplication : Application() {
-
     override fun onCreate() {
-
         super.onCreate()
-        Log.d(TAG, "onCreate: " + this.packageName)
-
-        val appSettings = AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build()
-        CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, object : CometChat.CallbackListener<String>() {
+        val appSettings = AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build()
+        CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, object : CallbackListener<String>() {
             override fun onSuccess(s: String) {
-                UIKitSettings.setAppID(AppConfig.AppDetails.APP_ID)
-                UIKitSettings.setAPIKey(AppConfig.AppDetails.API_KEY)
-                CometChat.setSource("ui-kit","android","java")
+                StringContract.AppInfo.AUTH_KEY = AppConfig.AppDetails.AUTH_KEY
+                CometChat.setSource("ui-kit", "android", "kotlin")
                 Log.d(TAG, "onSuccess: $s")
             }
 
@@ -34,15 +34,33 @@ class UIKitApplication : Application() {
                 Toast.makeText(this@UIKitApplication, e.message, Toast.LENGTH_SHORT).show()
             }
         })
-        CometChatCallListener.addCallListener(TAG, this)
+        addConnectionListener(TAG)
+        addCallListener(TAG, this)
         createNotificationChannel()
+    }
+
+    private fun addConnectionListener(tag: String) {
+        CometChat.addConnectionListener(tag, object : CometChat.ConnectionListener {
+            override fun onConnected() {
+                Toast.makeText(baseContext, "Connected", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onConnecting() {}
+            override fun onDisconnected() {
+                Toast.makeText(baseContext,"You connection has been broken with server." +
+                        "Please wait for a minute or else restart the app.",Toast.LENGTH_LONG).show()
+            }
+            override fun onFeatureThrottled() {
+
+            }
+        })
     }
 
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.app_name)
+            val name: CharSequence = getString(R.string.app_name)
             val description = getString(R.string.channel_description)
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel("2", name, importance)
@@ -50,18 +68,17 @@ class UIKitApplication : Application() {
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager!!.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel)
         }
-
     }
 
     override fun onTerminate() {
         super.onTerminate()
-        CometChatCallListener.removeCallListener(TAG)
+        removeCallListener(TAG)
+        CometChat.removeConnectionListener(TAG)
     }
 
     companion object {
-
-        private val TAG = "UIKitApplication"
+        private const val TAG = "UIKitApplication"
     }
 }

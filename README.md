@@ -9,7 +9,7 @@ CometChat Kitchen Sink Sample App (built using <b>CometChat UIKit</b>) is a full
 
 1. [Installation](#installation)
 
-2. [Running the sample app](rRunning-the-sample-app)
+2. [Running the sample app](#running-the-sample-app)
 
 3. [Learn more about UI-Kit](#learn-more-about-ui-kit)
 
@@ -18,23 +18,23 @@ CometChat Kitchen Sink Sample App (built using <b>CometChat UIKit</b>) is a full
 
 # Installation
 
-1. Simply clone the project from [android-kotlin-chat-app](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/archive/master.zip) repository. After cloning the repository:
+1. Simply clone the project from [android-chat-ui-kit-app](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/archive/master.zip) repository. After cloning the repository:
 
 
 # Running the sample app
 
-To Run to sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** and  **REGION_CODE**
+To Run to sample app you have to do the following changes by Adding **APP_ID**, **AUTH_KEY** and  **REGION**
 
-   You can obtain your  *APP_ID*, *API_KEY* and *REGION_CODE* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
+   You can obtain your  *APP_ID*, *AUTH_KEY* and *REGION* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
 
    - Open the project in Android Studio.
 
-   - Modify `APP_ID` and `API_KEY` and `REGION` with your own .
+   - Modify `APP_ID` and `AUTH_KEY` and `REGION` with your own .
 
    -  Select demo users or enter the **UID** at the time of login once the app is launched.
 
 <img align="center" width="100%" height="auto"
-src="https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/Screenshot/Screen%20Shot%202020-01-30%20at%206.39.08%20PM.png">
+src="https://github.com/cometchat-pro-samples/android-kotlin-chat-app/blob/master/Screenshot/credentialss.png">
 
 Build and run the Sample App.
 

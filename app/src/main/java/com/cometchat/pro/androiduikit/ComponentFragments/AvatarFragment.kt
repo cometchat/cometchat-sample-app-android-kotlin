@@ -1,23 +1,26 @@
 package com.cometchat.pro.androiduikit.ComponentFragments
 
-
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
-import androidx.fragment.app.Fragment
-
 import com.cometchat.pro.androiduikit.R
 import com.cometchat.pro.core.CometChat
+import android.text.TextWatcher
+import android.text.Editable
+import android.widget.RadioGroup
+import android.content.res.ColorStateList
+import android.view.View
+import androidx.fragment.app.Fragment
+import com.cometchat.pro.androiduikit.ColorPickerDialog
 import com.cometchat.pro.uikit.Avatar
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import utils.Utils
 
-class AvatarFragment : Fragment() {
-
+class AvatarFragment : Fragment(), ColorPickerDialog.OnColorChangedListener {
+    private var c: Context? = null
+    private var borderWidthLayout: TextInputLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -26,23 +29,18 @@ class AvatarFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_avatar, container, false)
-        val avatar = view.findViewById<Avatar>(R.id.avataricon)
+        val avatar: Avatar = view.findViewById(R.id.avataricon)
         avatar.setBorderColor(resources.getColor(R.color.colorPrimaryDark))
         avatar.setAvatar(CometChat.getLoggedInUser().avatar)
-        val borderWidth = view.findViewById<TextInputEditText>(R.id.borderWidth)
+        val borderWidth: TextInputEditText = view.findViewById(R.id.borderWidth)
+        borderWidthLayout = view.findViewById(R.id.borderWidth_layout)
         borderWidth.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-
-            }
-
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 0)
-                    avatar.setBorderWidth(Integer.parseInt(charSequence.toString()))
+                if (charSequence.length > 0) avatar.setBorderWidth(charSequence.toString().toInt())
             }
 
-            override fun afterTextChanged(editable: Editable) {
-
-            }
+            override fun afterTextChanged(editable: Editable) {}
         })
         val shapegroup = view.findViewById<RadioGroup>(R.id.shapeGroup)
         shapegroup.setOnCheckedChangeListener { radioGroup, i ->
@@ -78,15 +76,29 @@ class AvatarFragment : Fragment() {
             avatar.setBorderColor(resources.getColor(R.color.violet))
             refreshAvatar(avatar)
         }
-
+        checkDarkMode()
         return view
     }
 
+    private fun checkDarkMode() {
+        if (Utils.isDarkMode(context!!)) {
+            borderWidthLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            borderWidthLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            borderWidthLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+        } else {
+            borderWidthLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            borderWidthLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            borderWidthLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+        }
+    }
+
+    override fun colorChanged(key: String?, color: Int) {}
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        this.c = context
     }
 
     fun refreshAvatar(avatar: Avatar) {
         avatar.setAvatar(CometChat.getLoggedInUser())
     }
-}// Required empty public constructor
+}
