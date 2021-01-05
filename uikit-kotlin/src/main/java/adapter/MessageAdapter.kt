@@ -4,6 +4,7 @@ import adapter.MessageAdapter.DateItemHolder
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -30,13 +31,19 @@ import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
+import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.Avatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.*
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import constant.StringContract
 import listeners.StickyHeaderAdapter
 import org.json.JSONException
+import org.json.JSONObject
+import screen.CometChatReactionInfoScreenActivity
 import screen.messagelist.CometChatMessageListActivity
 import screen.threadconversation.CometChatThreadMessageActivity
 import utils.*
@@ -423,6 +430,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
                     try {
@@ -462,7 +470,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 })
-
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
 
             }
             else{
@@ -486,6 +495,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage.sender.avatar)
                     intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
@@ -526,6 +536,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 })
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
         }
     }
@@ -565,6 +577,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
                     try {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.LOCATION)
@@ -624,6 +637,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 })
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
             else {
                 viewHolder = view as RightLocationMessageViewHolder
@@ -658,6 +673,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     try {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.LOCATION)
                         intent.putExtra(StringContract.IntentStrings.LOCATION_LATITUDE,
@@ -715,6 +731,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 })
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
         }
     }
@@ -775,6 +793,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
@@ -821,6 +840,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             } else{
                 viewHolder = view as RightAudioMessageViewHolder
                 showMessageTime(viewHolder, baseMessage)
@@ -844,6 +865,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
@@ -890,6 +912,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
 
         }
@@ -954,6 +978,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.getSender().name)
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
@@ -987,6 +1012,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             } else {
                 viewHolder = view as RightFileMessageViewHolder
                 viewHolder.view.tvFileName.text = (baseMessage as MediaMessage).attachment.fileName
@@ -1014,6 +1041,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
@@ -1046,6 +1074,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
         }
     }
@@ -1110,6 +1140,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 intent.putExtra(StringContract.IntentStrings.UID, baseMessage.getSender().name)
                 intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                 intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
@@ -1138,6 +1169,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
+            viewHolder.view.reactionsLayout.setVisibility(View.GONE)
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         } else {
             viewHolder = view as RightImageMessageViewHolder
             viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
@@ -1165,6 +1198,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
                 intent.putExtra(StringContract.IntentStrings.UID, baseMessage.getSender().name)
                 intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
+                intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
                 intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
@@ -1194,6 +1228,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
+            viewHolder.view.reactionsLayout.setVisibility(View.GONE);
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout);
         }
     }
 
@@ -1253,6 +1289,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 intent.putExtra(StringContract.IntentStrings.UID, baseMessage.getSender().name)
                 intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                 intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
@@ -1281,6 +1318,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 true
             }
             viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage.attachment.fileUrl, context) }
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         } else {
             viewHolder = view as RightVideoMessageViewHolder
             if ((baseMessage as MediaMessage).attachment != null) Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goVideoMessage)
@@ -1306,6 +1345,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
                 intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
+                intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
@@ -1333,6 +1373,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 true
             }
             viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage.attachment.fileUrl, context) }
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         }
     }
 
@@ -1590,6 +1632,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.getSender().name)
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
                     intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
@@ -1617,6 +1660,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         }
                     }
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+                viewHolder.itemView.setTag(R.string.message, baseMessage)
             } else {
                 viewHolder = view as RightTextMessageViewHolder
                 viewHolder.view.textMessage = baseMessage as TextMessage
@@ -1703,6 +1749,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.getId())
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, baseMessage.text)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                     intent.putExtra(StringContract.IntentStrings.TYPE, baseMessage.getReceiverType())
@@ -1728,6 +1775,50 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 24f)
                         }
                     }
+                }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+                viewHolder.itemView.setTag(R.string.message, baseMessage)
+            }
+        }
+    }
+
+    private fun setReactionSupport(baseMessage: BaseMessage, reactionsLayout: ChipGroup) {
+        val reactionsOnMessage: HashMap<String, String> = Extensions.getReactionsOnMessage(baseMessage)
+        if (reactionsOnMessage.size > 0) {
+            reactionsLayout.visibility = View.VISIBLE
+            reactionsLayout.removeAllViews()
+            for ((k, v) in reactionsOnMessage) {
+                val chip = Chip(context)
+                chip.chipStrokeWidth = 2f
+                chip.chipBackgroundColor = ColorStateList.valueOf(context.resources.getColor(android.R.color.transparent))
+                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
+                chip.text = k + " " + reactionsOnMessage[k]
+                reactionsLayout.addView(chip)
+                chip.setOnLongClickListener {
+                    val intent = Intent(context, CometChatReactionInfoScreenActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
+                    context.startActivity(intent)
+                    true
+                }
+                chip.setOnClickListener {
+                    val body = JSONObject()
+                    try {
+                        body.put("msgId", baseMessage.id)
+                        body.put("emoji", k)
+                    } catch (e: java.lang.Exception) {
+                        e.printStackTrace()
+                    }
+                    CometChat.callExtension("reactions", "POST", "/v1/react", body,
+                            object : CallbackListener<JSONObject?>() {
+                                override fun onSuccess(responseObject: JSONObject?) {
+                                    // ReactionModel added successfully.
+                                }
+
+                                override fun onError(e: CometChatException) {
+                                    // Some error occured.
+                                }
+                            })
                 }
             }
         }
@@ -1870,6 +1961,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
                     if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
@@ -1922,6 +2014,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
             } else {
                 viewHolder = view as RightLinkMessageViewHolder
@@ -1976,6 +2070,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
                     if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
@@ -2026,6 +2121,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
+                viewHolder.view.reactionsLayout.setVisibility(View.GONE)
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
             }
         }

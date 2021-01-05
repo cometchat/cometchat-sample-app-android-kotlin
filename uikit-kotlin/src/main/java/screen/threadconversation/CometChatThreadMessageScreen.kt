@@ -49,11 +49,16 @@ import com.cometchat.pro.uikit.Avatar
 import com.cometchat.pro.uikit.ComposeBox.ComposeBox
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.SmartReplyList
+import com.cometchat.pro.uikit.reaction.OnEmojiClickListener
+import com.cometchat.pro.uikit.reaction.ReactionDialog
+import com.cometchat.pro.uikit.reaction.model.Reaction
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.snackbar.Snackbar
 import constant.StringContract
 import listeners.*
@@ -69,9 +74,13 @@ import utils.MediaUtils
 import utils.Utils
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessageLongClick, MessageActionCloseListener{
+    private lateinit var reactionLayout: ChipGroup
+    private lateinit var addReaction: ImageView
+    private lateinit var reactionInfo: HashMap<String, String>
     private var fontUtils: FontUtils? = null
 
     private var messageSentAt: Long = 0
@@ -213,6 +222,8 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                 messageSize = arguments!!.getInt(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, 0)
                 messageMimeType = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE)
             }
+                reactionInfo = (arguments!!.getSerializable(StringContract.IntentStrings.REACTION_INFO)) as HashMap<String, String>
+
         }
     }
 
@@ -325,6 +336,41 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                 }, 1000)
             }
         }) {})
+
+        addReaction = view.findViewById(R.id.add_reaction)
+        reactionLayout = view.findViewById(R.id.reactions_layout)
+        if (reactionInfo.size > 0) reactionLayout.visibility = View.VISIBLE
+        setReactionForParentMessage()
+        addReaction.setOnClickListener {
+            val reactionDialog = ReactionDialog()
+            reactionDialog.setOnEmojiClick(object : OnEmojiClickListener {
+                override fun onEmojiClicked(emojicon: Reaction) {
+                    val body = JSONObject()
+                    try {
+                        body.put("msgId", parentId)
+                        body.put("emoji", emojicon.name)
+                    } catch (e: java.lang.Exception) {
+                        e.printStackTrace()
+                    }
+                    callExtension("reactions", "POST", "/v1/react", body,
+                            object : CallbackListener<JSONObject>() {
+                                override fun onSuccess(responseObject: JSONObject) {
+                                    reactionLayout.visibility = View.VISIBLE
+                                    reactionDialog.dismiss()
+                                    Log.e(CometChatThreadMessageScreen.TAG, "onSuccess: $responseObject")
+                                    // ReactionModel added successfully.
+                                }
+
+                                override fun onError(e: CometChatException) {
+                                    // Some error occured.
+                                }
+                            })
+                }
+            })
+            reactionDialog.show(fragmentManager!!, "ReactionThreadDialog")
+        }
+
+
         setComposeBoxListener()
 
         rvSmartReply = view.findViewById(R.id.rv_smartReply)
@@ -432,6 +478,37 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         onGoingCallClose = view.findViewById<ImageView>(R.id.close_ongoing_view)
         onGoingCallTxt = view.findViewById<TextView>(R.id.ongoing_call)
         checkOnGoingCall()
+    }
+
+    private fun setReactionForParentMessage() {
+        for ((k, v) in reactionInfo!!) {
+            val chip = Chip(context)
+            chip.chipStrokeWidth = 2f
+            chip.chipBackgroundColor = ColorStateList.valueOf(context!!.resources.getColor(android.R.color.transparent))
+            chip.chipStrokeColor = ColorStateList.valueOf(context!!.resources.getColor(R.color.colorPrimaryDark))
+            chip.text = k + " " + reactionInfo!![k]
+            reactionLayout.addView(chip)
+            chip.setOnClickListener {
+                val body = JSONObject()
+                try {
+                    body.put("msgId", parentId)
+                    body.put("emoji", k)
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+                callExtension("reactions", "POST", "/v1/react", body,
+                        object : CallbackListener<JSONObject>() {
+                            override fun onSuccess(responseObject: JSONObject) {
+                                Log.e(CometChatThreadMessageScreen.TAG, "onSuccess: $responseObject")
+                                // ReactionModel added successfully.
+                            }
+
+                            override fun onError(e: CometChatException) {
+                                // Some error occured.
+                            }
+                        })
+            }
+        }
     }
 
     private fun sendLiveReaction() {
@@ -1119,7 +1196,13 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
 
             override fun onMessageEdited(message: BaseMessage) {
                 Log.d(CometChatThreadMessageScreen.TAG, "onMessageEdited: $message")
-                updateMessage(message)
+                if (parentId != message.getId())
+                    updateMessage(message)
+                else {
+                    reactionInfo = Extensions.getReactionsOnMessage(message)
+                    reactionLayout.removeAllViews()
+                    setReactionForParentMessage()
+                }
             }
 
             override fun onMessageDeleted(message: BaseMessage) {
@@ -1341,6 +1424,7 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         var deleteVisible = true
         var forwardVisible = true
         var mapVisible = true
+        var reactionVisible = true
         val textMessageList: MutableList<BaseMessage> = ArrayList()
         val mediaMessageList: MutableList<BaseMessage> = ArrayList()
         val locationMessageList: MutableList<BaseMessage> = ArrayList()
@@ -1422,6 +1506,8 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         bundle.putBoolean("replyVisible", replyVisible)
         bundle.putBoolean("forwardVisible", forwardVisible)
         bundle.putBoolean("mapVisible", mapVisible)
+        if (isExtensionEnabled("reactions"))
+            bundle.putBoolean("reactionVisible", reactionVisible)
         if (baseMessage!!.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.getSender().getUid() == loggedInUser.uid) bundle.putBoolean("messageInfoVisible", true)
         bundle.putString("type", CometChatThreadMessageActivity::class.java.name)
         messageActionFragment.arguments = bundle
@@ -1503,7 +1589,45 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                 }
                 context!!.startActivity(intent)
             }
+
+            override fun onReactionClick(reaction: Reaction) {
+                if (reaction.name == "add_reaction") {
+                    val reactionDialog = ReactionDialog()
+                    reactionDialog.setOnEmojiClick(object : OnEmojiClickListener {
+                        override fun onEmojiClicked(emojicon: Reaction) {
+                            sendReaction(emojicon)
+                            reactionDialog.dismiss()
+                        }
+                    })
+                    reactionDialog.show(fragmentManager!!, "ReactionDialog")
+                } else {
+                    sendReaction(reaction)
+                }
+            }
         })
+    }
+
+    private fun sendReaction(reaction: Reaction) {
+        val body = JSONObject()
+        try {
+            body.put("msgId", baseMessage!!.id)
+            body.put("emoji", reaction.name)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+        callExtension("reactions", "POST", "/v1/react", body,
+                object : CallbackListener<JSONObject>() {
+                    override fun onSuccess(responseObject: JSONObject) {
+                        Log.e(CometChatThreadMessageScreen.TAG, "onSuccess: $responseObject")
+                        // ReactionModel added successfully.
+                    }
+
+                    override fun onError(e: CometChatException) {
+                        Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                        Log.e(CometChatThreadMessageScreen.TAG, "onError: " + e.code + e.message + e.details)
+                    }
+                })
     }
 
     private fun editParentMessage() {

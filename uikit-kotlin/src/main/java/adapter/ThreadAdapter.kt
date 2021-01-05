@@ -3,6 +3,7 @@ package adapter
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.media.MediaPlayer
@@ -20,13 +21,18 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
+import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.Avatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.*
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import constant.StringContract
 import org.json.JSONException
 import org.json.JSONObject
+import screen.CometChatReactionInfoScreenActivity
 import screen.threadconversation.CometChatThreadMessageActivity
 import utils.Extensions
 import utils.FontUtils
@@ -67,7 +73,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
     private var fontUtils: FontUtils? = null
 
-    private var mediaPlayer: MediaPlayer? = null
+    private var mediaPlayer: MediaPlayer = MediaPlayer()
 
     private var messagePosition = 0
 
@@ -241,6 +247,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             }
             true
         })
+        viewHolder.view.reactionsLayout.visibility = View.GONE
+        setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
     }
 
     private fun setLocationData(baseMessage: BaseMessage, tvAddress: TextView, ivMap: ImageView) {
@@ -314,6 +322,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 }
                 true
             })
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         }
     }
 
@@ -351,15 +361,17 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             }
             true
         })
+        viewHolder.view.reactionsLayout.visibility = View.GONE
+        setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         viewHolder.view.playBtn.setOnClickListener(View.OnClickListener { MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context!!) })
     }
 
     private fun setAudioData(viewHolder: AudioMessageViewHolder, i: Int) {
         val baseMessage = messageList[i]
         if (baseMessage != null && baseMessage.deletedAt == 0L) {
-            viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(context!!.resources.getColor(R.color.textColorWhite)))
+            viewHolder.view.playBtn.imageTintList = ColorStateList.valueOf(context.resources.getColor(R.color.textColorWhite))
             setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-            viewHolder.view.tvUser.setText(baseMessage.sender.name)
+            viewHolder.view.tvUser.text = baseMessage.sender.name
             showMessageTime(viewHolder, baseMessage)
             //            if (selectedItemList.contains(baseMessage.getId()))
 //                viewHolder.txtTime.setVisibility(View.VISIBLE);
@@ -368,23 +380,23 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             viewHolder.view.audiolengthTv.setText(Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize))
             viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
             viewHolder.view.playBtn.setOnClickListener(View.OnClickListener { //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
-                mediaPlayer!!.reset()
+                mediaPlayer.reset()
                 if (messagePosition != i) {
                     notifyItemChanged(messagePosition)
                     messagePosition = i
                 }
                 try {
-                    mediaPlayer!!.setDataSource(baseMessage.attachment.fileUrl)
-                    mediaPlayer!!.prepare()
-                    mediaPlayer!!.setOnCompletionListener { viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
+                    mediaPlayer.setDataSource(baseMessage.attachment.fileUrl)
+                    mediaPlayer.prepare()
+                    mediaPlayer.setOnCompletionListener { viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
                 } catch (e: java.lang.Exception) {
                     Log.e(TAG, "MediaPlayerError: " + e.message)
                 }
-                if (!mediaPlayer!!.isPlaying) {
-                    mediaPlayer!!.start()
+                if (!mediaPlayer.isPlaying) {
+                    mediaPlayer.start()
                     viewHolder.view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
                 } else {
-                    mediaPlayer!!.pause()
+                    mediaPlayer.pause()
                     viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                 }
             })
@@ -397,6 +409,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 }
                 true
             })
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         }
     }
 
@@ -405,7 +419,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         val baseMessage = messageList[i]
 
         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-        viewHolder.view.tvUser.setText(baseMessage.sender.name)
+        viewHolder.view.tvUser.text = baseMessage.sender.name
 
 //        val isImageNotSafe: Boolean = Extensions.getImageModeration(context, baseMessage)
 //        val smallUrl: String = Extensions.getThumbnailGeneration(context, baseMessage)
@@ -470,6 +484,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             }
             true
         })
+        viewHolder.view.reactionsLayout.visibility = View.GONE
+        setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
     }
 
     private fun setLinkData(viewHolder: LinkMessageViewHolder, i: Int) {
@@ -479,7 +495,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
         if (baseMessage != null) {
             setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-            viewHolder.view.tvUser.setText(baseMessage.sender.name)
+            viewHolder.view.tvUser.text = baseMessage.sender.name
             if (baseMessage.deletedAt == 0L) {
                 val extensionList: HashMap<String, JSONObject> = Extensions.extensionCheck(baseMessage)!!
                 if (extensionList != null) {
@@ -487,27 +503,27 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                         val linkPreviewJsonObject = extensionList["linkPreview"]
                         try {
                             val description = linkPreviewJsonObject!!.getString("description")
-                            val image = linkPreviewJsonObject!!.getString("image")
-                            val title = linkPreviewJsonObject!!.getString("title")
-                            url = linkPreviewJsonObject!!.getString("url")
+                            val image = linkPreviewJsonObject.getString("image")
+                            val title = linkPreviewJsonObject.getString("title")
+                            url = linkPreviewJsonObject.getString("url")
                             Log.e("setLinkData: ", """$baseMessage $url $description $image """.trimIndent())
-                            viewHolder.view.linkTitle.setText(title)
-                            viewHolder.view.linkSubtitle.setText(description)
-                            Glide.with(context!!).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
+                            viewHolder.view.linkTitle.text = title
+                            viewHolder.view.linkSubtitle.text = description
+                            Glide.with(context).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
                             if (url.contains("youtu.be") || url.contains("youtube")) {
-                                viewHolder.view.videoLink.setVisibility(View.VISIBLE)
-                                viewHolder.view.visitLink.setText(context!!.resources.getString(R.string.view_on_youtube))
+                                viewHolder.view.videoLink.visibility = View.VISIBLE
+                                viewHolder.view.visitLink.text = context.resources.getString(R.string.view_on_youtube)
                             } else {
-                                viewHolder.view.videoLink.setVisibility(View.GONE)
-                                viewHolder.view.visitLink.setText(context!!.resources.getString(R.string.visit))
+                                viewHolder.view.videoLink.visibility = View.GONE
+                                viewHolder.view.visitLink.text = context.resources.getString(R.string.visit)
                             }
                             val messageStr = (baseMessage as TextMessage).text
                             if ((baseMessage as TextMessage).text == url || (baseMessage as TextMessage).text == "$url/") {
-                                viewHolder.view.message.setVisibility(View.GONE)
+                                viewHolder.view.message.visibility = View.GONE
                             } else {
-                                viewHolder.view.message.setVisibility(View.VISIBLE)
+                                viewHolder.view.message.visibility = View.VISIBLE
                             }
-                            viewHolder.view.message.setText(messageStr)
+                            viewHolder.view.message.text = messageStr
                         } catch (e: java.lang.Exception) {
                             Log.e("setLinkData: ", e.message)
                         }
@@ -551,6 +567,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 }
                 true
             })
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             viewHolder.itemView.setTag(R.string.message, baseMessage)
         }
     }
@@ -630,9 +648,53 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 }
                 true
             })
+            viewHolder.view.reactionsLayout.visibility = View.GONE
+            setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             viewHolder.itemView.setTag(R.string.message, baseMessage)
         }
     }
+
+    private fun setReactionSupport(baseMessage: BaseMessage, reactionLayout: ChipGroup) {
+        val reactionOnMessage = Extensions.getReactionsOnMessage(baseMessage)
+        if (reactionOnMessage.size > 0) {
+            reactionLayout.setVisibility(View.VISIBLE)
+            reactionLayout.removeAllViews()
+            for ((k,v) in reactionOnMessage) {
+                val chip = Chip(context)
+                chip.chipStrokeWidth = 2f
+                chip.chipBackgroundColor = ColorStateList.valueOf(context.resources.getColor(android.R.color.transparent))
+                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
+                chip.text = k + " " + reactionOnMessage[k]
+                reactionLayout.addView(chip)
+                chip.setOnLongClickListener {
+                    val intent = Intent(context, CometChatReactionInfoScreenActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
+                    context.startActivity(intent)
+                    true
+                }
+                chip.setOnClickListener {
+                    val body = JSONObject()
+                    try {
+                        body.put("msgId", baseMessage.id)
+                        body.put("emoji", k)
+                    } catch (e: java.lang.Exception) {
+                        e.printStackTrace()
+                    }
+                    CometChat.callExtension("reactions", "POST", "/v1/react", body,
+                            object : CallbackListener<JSONObject?>() {
+                                override fun onSuccess(responseObject: JSONObject?) {
+                                    // ReactionModel added successfully.
+                                }
+
+                                override fun onError(e: CometChatException) {
+                                    // Some error occured.
+                                }
+                            })
+                }
+            }
+        }
+    }
+
     private fun setColorFilter(baseMessage: BaseMessage, view: View) {
         if (!longselectedItemList.contains(baseMessage)) {
             view.background.setColorFilter(context!!.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
@@ -785,7 +847,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
     }
 
     fun stopPlayingAudio() {
-        mediaPlayer?.stop()
+        mediaPlayer.stop()
     }
 
     //delete

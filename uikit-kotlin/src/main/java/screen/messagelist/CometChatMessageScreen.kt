@@ -50,6 +50,9 @@ import com.cometchat.pro.uikit.Avatar
 import com.cometchat.pro.uikit.ComposeBox.ComposeBox
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.SmartReplyList
+import com.cometchat.pro.uikit.reaction.OnEmojiClickListener
+import com.cometchat.pro.uikit.reaction.ReactionDialog
+import com.cometchat.pro.uikit.reaction.model.Reaction
 import com.cometchat.pro.uikit.sticker.StickerView
 import com.cometchat.pro.uikit.sticker.listener.StickerClickListener
 import com.cometchat.pro.uikit.sticker.model.Sticker
@@ -1721,6 +1724,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         var editVisible = true
         var deleteVisible = true
         var forwardVisible = true
+        var reactionVisible = true
         val textMessageList: MutableList<BaseMessage> = ArrayList()
         val mediaMessageList: MutableList<BaseMessage> = ArrayList()
         val locationMessageList: MutableList<BaseMessage> = ArrayList()
@@ -1839,13 +1843,15 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         bundle.putBoolean("deleteVisible", deleteVisible)
         bundle.putBoolean("replyVisible", replyVisible)
         bundle.putBoolean("forwardVisible", forwardVisible)
+        if (isExtensionEnabled("reactions"))
+            bundle.putBoolean("reactionVisible", reactionVisible)
         if (baseMessage!!.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.sender.uid == loggedInUser.uid) bundle.putBoolean("messageInfoVisible", true)
         bundle.putString("type", CometChatMessageListActivity::class.java.name)
 
-        messageActionFragment?.setArguments(bundle)
+        messageActionFragment?.arguments = bundle
         if (editVisible || copyVisible || threadVisible || shareVisible || deleteVisible
-                || replyVisible || forwardVisible)
-            messageActionFragment?.show(fragmentManager!!, messageActionFragment?.getTag())
+                || replyVisible || forwardVisible || reactionVisible)
+            messageActionFragment?.show(fragmentManager!!, messageActionFragment?.tag)
         messageActionFragment?.setMessageActionListener(object : MessageActionFragment.MessageActionListener {
 
             override fun onEditMessageClick() {
@@ -1936,6 +1942,21 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 }
                 context!!.startActivity(intent)
             }
+
+            override fun onReactionClick(reaction: Reaction) {
+                if (reaction.name == "add_reaction") {
+                    val reactionDialog = ReactionDialog()
+                    reactionDialog.setOnEmojiClick(object : OnEmojiClickListener {
+                        override fun onEmojiClicked(emojicon: Reaction) {
+                            sendReaction(emojicon)
+                            reactionDialog.dismiss()
+                        }
+                    })
+                    reactionDialog.show(fragmentManager!!, "ReactionDialog")
+                } else {
+                    sendReaction(reaction)
+                }
+            }
         })
 
 
@@ -2014,19 +2035,61 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
 //        baseMessages = baseMessagesList
     }
 
+    private fun sendReaction(reaction: Reaction) {
+        val body = JSONObject()
+        try {
+            body.put("msgId", baseMessage!!.id)
+            body.put("emoji", reaction.name)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+        callExtension("reactions", "POST", "/v1/react", body,
+                object : CallbackListener<JSONObject>() {
+                    override fun onSuccess(responseObject: JSONObject) {
+                        Log.e(TAG, "onSuccess: $responseObject")
+                        // ReactionModel added successfully.
+                    }
+
+                    override fun onError(e: CometChatException) {
+                        Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                        Log.e(TAG, "onError: " + e.code + e.message + e.details)
+                    }
+                })
+//        var body = JSONObject()
+//        try {
+//            body.put("msgId", baseMessage!!.id)
+//            body.put("emoji", reaction.name)
+//        } catch (e: Exception){
+//            e.printStackTrace()
+//        }
+//
+//        callExtension("reactions", "POST", "/v1/react", body, object : CallbackListener<JSONObject>() {
+//            override fun onSuccess(p0: JSONObject?) {
+//                Log.e(TAG, "onSuccess: " + p0.toString())
+//            }
+//
+//            override fun onError(e: CometChatException?) {
+//                Toast.makeText(context, e!!.message, Toast.LENGTH_LONG).show()
+//                Log.e(TAG, "onError: " + e.code + e.message + e.details)
+//            }
+//
+//        })
+    }
+
     private fun startThreadActivity() {
         val intent = Intent(context, CometChatThreadMessageActivity::class.java)
         intent.putExtra(StringContract.IntentStrings.CONVERSATION_NAME, name)
-        intent.putExtra(StringContract.IntentStrings.NAME, baseMessage!!.sender.name)
-        intent.putExtra(StringContract.IntentStrings.UID, baseMessage!!.sender.name)
-        intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage!!.sender.avatar)
-        intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage!!.id)
-        intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage!!.replyCount)
-        intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage!!.sentAt)
-
-        if (baseMessage!!.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
-            intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage!!.type)
-            if (baseMessage!!.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
+        intent.putExtra(StringContract.IntentStrings.NAME, baseMessage?.sender?.name)
+        intent.putExtra(StringContract.IntentStrings.UID, baseMessage?.sender?.name)
+        intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage?.sender?.avatar)
+        intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage?.id)
+        intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage?.replyCount)
+        intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage?.sentAt)
+        intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage!!))
+        if (baseMessage?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
+            intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage?.type)
+            if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, (baseMessage as MediaMessage).attachment.fileExtension)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, (baseMessage as MediaMessage).attachment.fileUrl)
@@ -2035,13 +2098,13 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
             }
         } else {
             try {
-                if (baseMessage!!.type == StringContract.IntentStrings.LOCATION) {
+                if (baseMessage?.type == StringContract.IntentStrings.LOCATION) {
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.LOCATION)
                     intent.putExtra(StringContract.IntentStrings.LOCATION_LATITUDE,
                             (baseMessage as CustomMessage).customData.getDouble("latitude"))
                     intent.putExtra(StringContract.IntentStrings.LOCATION_LONGITUDE,
                             (baseMessage as CustomMessage).customData.getDouble("longitude"))
-                } else if (baseMessage!!.type == StringContract.IntentStrings.STICKERS) {
+                } else if (baseMessage?.type == StringContract.IntentStrings.STICKERS) {
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, (baseMessage as CustomMessage).customData.getString("url"))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
@@ -2050,7 +2113,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 Log.e(TAG, "startThreadActivityError: " + e.message)
             }
         }
-        intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage!!.category)
+        intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage?.category)
         intent.putExtra(StringContract.IntentStrings.TYPE, type)
         if (type == CometChatConstants.CONVERSATION_TYPE_GROUP) {
             intent.putExtra(StringContract.IntentStrings.GUID, Id)

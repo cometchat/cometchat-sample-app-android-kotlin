@@ -81,7 +81,7 @@ Contact us via real time support present in [CometChat Dashboard](https://app.co
 
 ## License
 
-This project uses the following license: [License](https://github.com/cometchat-pro/.github/blob/master/LICENSE).
+This project uses the following license: [License](https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/LICENSE).
 
 
 

@@ -1,112 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/message_actions"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:elevation="4dp"
     android:orientation="vertical"
-    android:id="@+id/message_actions"
-    android:padding="8dp"
-    android:elevation="4dp">
+    android:padding="8dp">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/initial_reactions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <TextView
         android:id="@+id/message_info"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:drawablePadding="16dp"
-        android:gravity="center_vertical"
-        android:drawableStart="@drawable/ic_info"
-        android:textStyle="bold"
-        android:text="@string/message_info"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_info"
+        android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/message_info"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/start_thread"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:textStyle="bold"
-        android:text="@string/reply_thread"
         android:drawableStart="@drawable/ic_thread_24dp"
         android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:text="@string/reply_thread"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/reply_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
         android:drawableStart="@drawable/ic_reply"
         android:drawablePadding="16dp"
-        android:gravity="center_vertical"
         android:foreground="?attr/selectableItemBackground"
-        android:textStyle="bold"
-        android:text="@string/reply"
+        android:gravity="center_vertical"
         android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:text="@string/reply"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/forward_message"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:drawablePadding="16dp"
-        android:gravity="center_vertical"
-        android:drawableStart="@drawable/ic_forward"
-        android:textStyle="bold"
-        android:text="@string/forward"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_forward"
+        android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/forward"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/copy_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:textStyle="bold"
-        android:text="@string/copy_message"
         android:drawableStart="@drawable/ic_content_copy_black_24dp"
         android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:text="@string/copy_message"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/share_message"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:drawablePadding="16dp"
-        android:gravity="center_vertical"
-        android:drawableStart="@drawable/ic_share_24dp"
-        android:textStyle="bold"
-        android:text="@string/share_message"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_share_24dp"
+        android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/share_message"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/edit_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:textStyle="bold"
-        android:text="@string/edit"
         android:drawableStart="@drawable/ic_baseline_edit_24"
         android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:text="@string/edit"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/delete_message"
-        android:drawableStart="@drawable/ic_delete_24dp"
-        android:drawableTint="@color/red"
-        android:drawablePadding="16dp"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:textColor="@color/red"
-        android:foreground="?attr/selectableItemBackground"
-        android:textStyle="bold"
-        android:text="@string/delete"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_delete_24dp"
+        android:drawablePadding="16dp"
+        android:drawableTint="@color/red"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/delete"
+        android:textColor="@color/red"
+        android:textStyle="bold" />
 
 
 </LinearLayout>

@@ -55,11 +55,27 @@
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
                     android:layout_height="wrap_content" />
             </RelativeLayout>
+            <HorizontalScrollView
+                android:layout_alignEnd="@+id/cv_message_container"
+                android:layout_below="@+id/cv_message_container"
+                android:id="@+id/reaction_group"
+                android:scrollbars="none"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <com.google.android.material.chip.ChipGroup
+                    android:layout_gravity="end"
+                    android:visibility="gone"
+                    app:singleLine="true"
+                    android:orientation="horizontal"
+                    android:id="@+id/reactions_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </HorizontalScrollView>
             <LinearLayout
                 android:layout_marginBottom="16dp"
                 android:layout_width="wrap_content"
                 android:layout_alignEnd="@+id/cv_message_container"
-                android:layout_below="@+id/cv_message_container"
+                android:layout_below="@+id/reaction_group"
                 android:layout_height="wrap_content">
                 <LinearLayout
                     android:layout_gravity="center_vertical"

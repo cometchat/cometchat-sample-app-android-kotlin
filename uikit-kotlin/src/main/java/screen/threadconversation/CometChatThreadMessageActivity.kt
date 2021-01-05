@@ -13,6 +13,7 @@ import com.cometchat.pro.uikit.R
 import constant.StringContract
 import listeners.MessageActionCloseListener
 import listeners.OnMessageLongClick
+import java.util.*
 
 class CometChatThreadMessageActivity : AppCompatActivity(), ThreadAdapter.OnMessageLongClick {
     var fragment: Fragment = CometChatThreadMessageScreen()
@@ -36,6 +37,7 @@ class CometChatThreadMessageActivity : AppCompatActivity(), ThreadAdapter.OnMess
     private var replyCount = 0
     private var conversationName: String? = null
     private val baseMessage: String? = null
+    private lateinit var reactionInfo: HashMap<String, String>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +81,13 @@ class CometChatThreadMessageActivity : AppCompatActivity(), ThreadAdapter.OnMess
             bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE, messageType)
             bundle.putString(StringContract.IntentStrings.UID, uid)
             bundle.putLong(StringContract.IntentStrings.SENTAT, sentAt)
-            if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) bundle.putString(StringContract.IntentStrings.TEXTMESSAGE, message) else if (messageType == StringContract.IntentStrings.LOCATION) {
+            if (intent.hasExtra(StringContract.IntentStrings.REACTION_INFO)) {
+                reactionInfo = intent.getSerializableExtra(StringContract.IntentStrings.REACTION_INFO) as HashMap<String, String>
+                bundle.putSerializable(StringContract.IntentStrings.REACTION_INFO, reactionInfo)
+            }
+            if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT)
+                bundle.putString(StringContract.IntentStrings.TEXTMESSAGE, message)
+            else if (messageType == StringContract.IntentStrings.LOCATION) {
                 bundle.putDouble(StringContract.IntentStrings.LOCATION_LATITUDE, latitude)
                 bundle.putDouble(StringContract.IntentStrings.LOCATION_LONGITUDE, longitude)
             } else if (messageType == StringContract.IntentStrings.STICKERS) {

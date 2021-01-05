@@ -91,19 +91,54 @@
             android:textStyle="bold"
             tools:visibility="visible"
             android:visibility="gone"/>
-        <TextView
-            android:layout_below="@id/cv_message_container"
+        <HorizontalScrollView
             android:layout_alignEnd="@id/cv_message_container"
-            android:layout_marginBottom="16dp"
-            android:clickable="true"
-            android:foreground="?selectableItemBackground"
-            android:id="@+id/thread_reply_count"
-            android:textColor="@color/colorPrimary"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
-            tools:text="2 replies"
+            android:layout_below="@+id/cv_message_container"
+            android:id="@+id/reaction_group"
+            android:scrollbars="none"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.chip.ChipGroup
+                android:layout_gravity="end"
+                android:visibility="gone"
+                app:singleLine="true"
+                android:orientation="horizontal"
+                android:id="@+id/reactions_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </HorizontalScrollView>
+        <LinearLayout
+            android:gravity="end"
+            android:orientation="vertical"
+            android:layout_below="@id/reaction_group"
+            android:layout_alignEnd="@id/cv_message_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:foreground="?selectableItemBackground"
+                android:id="@+id/thread_reply_count"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                tools:text="2 replies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+<!--        <TextView-->
+<!--            android:layout_below="@id/reaction_group"-->
+<!--            android:layout_alignEnd="@id/cv_message_container"-->
+<!--            android:layout_marginBottom="16dp"-->
+<!--            android:clickable="true"-->
+<!--            android:foreground="?selectableItemBackground"-->
+<!--            android:id="@+id/thread_reply_count"-->
+<!--            android:textColor="@color/colorPrimary"-->
+<!--            android:layout_marginLeft="8dp"-->
+<!--            android:layout_marginRight="16dp"-->
+<!--            tools:text="2 replies"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
     </RelativeLayout>
 </LinearLayout>
 </layout>

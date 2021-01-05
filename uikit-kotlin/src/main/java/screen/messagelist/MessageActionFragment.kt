@@ -6,24 +6,29 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.core.content.ContextCompat
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.reaction.model.Reaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import screen.threadconversation.CometChatThreadMessageActivity
+import utils.Extensions
+import utils.Utils
 
 class MessageActionFragment : BottomSheetDialogFragment() {
 
-    private var threadMessage: TextView? = null
-    private var editMessage: TextView? = null
-    private var replyMessage: TextView? = null
-    private var forwardMessage: TextView? = null
-    private var deleteMessage: TextView? = null
-    private var copyMessage: TextView? = null
-    private var messageInfo: TextView? = null
-    private var shareMessage: TextView? = null
+    private val INITIAL_REACTION_COUNT = 5
+    private lateinit var threadMessage: TextView
+    private lateinit var editMessage: TextView
+    private lateinit var replyMessage: TextView
+    private lateinit var forwardMessage: TextView
+    private lateinit var deleteMessage: TextView
+    private lateinit var copyMessage: TextView
+    private lateinit var messageInfo: TextView
+    private lateinit var shareMessage: TextView
+    private lateinit var initialReactionLayout: LinearLayout
 
     private var isShareVisible = false
     private var isThreadVisible = false
@@ -33,6 +38,7 @@ class MessageActionFragment : BottomSheetDialogFragment() {
     private var isForwardVisible = false
     private var isReplyVisible = false
     private var isMessageInfoVisible = false
+    private var isReactionVisible = false
 
     private var messageActionListener: MessageActionListener? = null
 
@@ -53,6 +59,7 @@ class MessageActionFragment : BottomSheetDialogFragment() {
             isForwardVisible = arguments!!.getBoolean("forwardVisible")
             isShareVisible = arguments!!.getBoolean("shareVisible")
             isMessageInfoVisible = arguments!!.getBoolean("messageInfoVisible")
+            isReactionVisible = arguments!!.getBoolean("reactionVisible")
             type = arguments!!.getString("type")
         }
     }
@@ -69,53 +76,89 @@ class MessageActionFragment : BottomSheetDialogFragment() {
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.peekHeight = 0
         }
-        threadMessage = views!!.findViewById(R.id.start_thread)
-        editMessage = views!!.findViewById(R.id.edit_message)
-        replyMessage = views!!.findViewById(R.id.reply_message)
-        forwardMessage = views!!.findViewById(R.id.forward_message)
-        deleteMessage = views!!.findViewById(R.id.delete_message)
-        copyMessage = views!!.findViewById(R.id.copy_message)
-        shareMessage = views!!.findViewById(R.id.share_message)
-        messageInfo = views!!.findViewById(R.id.message_info)
+        threadMessage = views.findViewById(R.id.start_thread)
+        editMessage = views.findViewById(R.id.edit_message)
+        replyMessage = views.findViewById(R.id.reply_message)
+        forwardMessage = views.findViewById(R.id.forward_message)
+        deleteMessage = views.findViewById(R.id.delete_message)
+        copyMessage = views.findViewById(R.id.copy_message)
+        shareMessage = views.findViewById(R.id.share_message)
+        messageInfo = views.findViewById(R.id.message_info)
+        initialReactionLayout = views.findViewById(R.id.initial_reactions)
 
-        if (isThreadVisible) threadMessage!!.setVisibility(View.VISIBLE) else threadMessage!!.setVisibility(View.GONE)
-        if (isCopyVisible) copyMessage!!.setVisibility(View.VISIBLE) else copyMessage!!.setVisibility(View.GONE)
-        if (isEditVisible) editMessage!!.setVisibility(View.VISIBLE) else editMessage!!.setVisibility(View.GONE)
-        if (isDeleteVisible) deleteMessage!!.setVisibility(View.VISIBLE) else deleteMessage!!.setVisibility(View.GONE)
-        if (isReplyVisible) replyMessage!!.setVisibility(View.VISIBLE) else replyMessage!!.setVisibility(View.GONE)
-        if (isForwardVisible) forwardMessage!!.setVisibility(View.VISIBLE) else forwardMessage!!.setVisibility(View.GONE)
-        if (isShareVisible) shareMessage!!.setVisibility(View.VISIBLE) else shareMessage!!.setVisibility(View.GONE)
-        if (isMessageInfoVisible) messageInfo!!.setVisibility(View.VISIBLE) else messageInfo!!.setVisibility(View.GONE)
+        if (isThreadVisible) threadMessage.visibility = View.VISIBLE else threadMessage.visibility = View.GONE
+        if (isCopyVisible) copyMessage.visibility = View.VISIBLE else copyMessage.visibility = View.GONE
+        if (isEditVisible) editMessage.visibility = View.VISIBLE else editMessage.visibility = View.GONE
+        if (isDeleteVisible) deleteMessage.visibility = View.VISIBLE else deleteMessage.visibility = View.GONE
+        if (isReplyVisible) replyMessage.visibility = View.VISIBLE else replyMessage.visibility = View.GONE
+        if (isForwardVisible) forwardMessage.visibility = View.VISIBLE else forwardMessage.visibility = View.GONE
+        if (isShareVisible) shareMessage.visibility = View.VISIBLE else shareMessage.visibility = View.GONE
+        if (isMessageInfoVisible) messageInfo.visibility = View.VISIBLE else messageInfo.visibility = View.GONE
+        if (isReactionVisible) initialReactionLayout.visibility = View.VISIBLE else initialReactionLayout.visibility = View.GONE
 
-        threadMessage!!.setOnClickListener {
+        val initialReactionList = Extensions.getInitialReactions(INITIAL_REACTION_COUNT)
+        for (reaction in initialReactionList){
+            val vw: View = LayoutInflater.from(context).inflate(R.layout.reaction_list_row, null)
+            val tvReaction: TextView = vw.findViewById(R.id.tv_reaction)
+            val layoutParam: LinearLayout.LayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParam.rightMargin = 16
+            layoutParam.leftMargin = 16
+            layoutParam.topMargin = 8
+            layoutParam.bottomMargin = 8
+            tvReaction.layoutParams = layoutParam
+            tvReaction.text = reaction.name
+            initialReactionLayout.addView(vw)
+            tvReaction.setOnClickListener(View.OnClickListener {
+                if (messageActionListener != null) messageActionListener!!.onReactionClick(reaction)
+                dismiss()
+            })
+        }
+
+        val imageView = ImageView(context)
+        imageView.setImageDrawable(ContextCompat.getDrawable(context!!,R.drawable.add_reaction))
+        imageView.setColorFilter(R.color.primaryTextColor)
+        val layoutParam: LinearLayout.LayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context!!,34f).toInt(),Utils.dpToPx(context!!,34f).toInt())
+        layoutParam.topMargin = 8
+        layoutParam.leftMargin = 16
+        imageView.layoutParams = layoutParam
+        initialReactionLayout.addView(imageView)
+        imageView.setOnClickListener(View.OnClickListener {
+//            Toast.makeText(context,"clicked",Toast.LENGTH_LONG).show()
+            if (messageActionListener != null) messageActionListener!!.onReactionClick(Reaction("add_reaction", 0))
+            dismiss()
+        })
+
+
+
+        threadMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onThreadMessageClick()
             dismiss()
         }
-        copyMessage!!.setOnClickListener {
+        copyMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onCopyMessageClick()
             dismiss()
         }
-        editMessage!!.setOnClickListener {
+        editMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onEditMessageClick()
             dismiss()
         }
-        deleteMessage!!.setOnClickListener {
+        deleteMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onDeleteMessageClick()
             dismiss()
         }
-        forwardMessage!!.setOnClickListener {
+        forwardMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onForwardMessageClick()
             dismiss()
         }
-        replyMessage!!.setOnClickListener {
+        replyMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onReplyMessageClick()
             dismiss()
         }
-        shareMessage!!.setOnClickListener {
+        shareMessage.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onShareMessageClick()
             dismiss()
         }
-        messageInfo!!.setOnClickListener {
+        messageInfo.setOnClickListener {
             if (messageActionListener != null) messageActionListener!!.onMessageInfoClick()
             dismiss()
         }
@@ -135,6 +178,7 @@ class MessageActionFragment : BottomSheetDialogFragment() {
         fun onCopyMessageClick()
         fun onShareMessageClick()
         fun onMessageInfoClick()
+        fun onReactionClick(reaction: Reaction)
     }
 
     override fun onDismiss(dialog: DialogInterface) {

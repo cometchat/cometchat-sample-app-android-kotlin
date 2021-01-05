@@ -7,6 +7,7 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.BaseMessage
+import com.cometchat.pro.uikit.reaction.model.Reaction
 import com.cometchat.pro.uikit.sticker.model.Sticker
 import listeners.ExtensionResponseListener
 import org.json.JSONException
@@ -39,6 +40,9 @@ public class Extensions {
                         }
                         if (extensionsObject != null && extensionsObject.has("thumbnail-generation")){
                             extensionMap["thumbnailGeneration"] = extensionsObject.getJSONObject("thumbnail-generation")
+                        }
+                        if (extensionsObject != null && extensionsObject.has("reactions")){
+                            extensionMap["reactions"] = extensionsObject.getJSONObject("reactions")
                         }
                     }
                     extensionMap
@@ -150,6 +154,70 @@ public class Extensions {
                 Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
             }
             return urlSmall
+        }
+
+        fun getInitialReactions(i: Int): MutableList<Reaction> {
+            var resultReaction: MutableList<Reaction> = ArrayList()
+            var feelReactionList = ReactionUtils.getFeelList()
+            for (j in 0..i){
+                var reaction:Reaction = feelReactionList[j]
+                resultReaction.add(reaction)
+            }
+            return resultReaction
+        }
+
+        fun getReactionsOnMessage(baseMessage: BaseMessage): HashMap<String, String> {
+            val resultReactions: HashMap<String, String> = HashMap()
+            try {
+                var extensionList = extensionCheck(baseMessage)
+                if (extensionList != null && extensionList.containsKey("reactions")) {
+                    val reactionObject = extensionList["reactions"]
+                    var keys: Iterator<String> = reactionObject!!.keys()
+                    while (keys.hasNext()){
+                        var keyValue :String = keys.next()
+                        var reaction : JSONObject = reactionObject.getJSONObject(keyValue)
+                        var reactionCount: String = reaction.length().toString()
+                        resultReactions[keyValue] = reactionCount
+                        Log.e(TAG, "getReactionsOnMessage: $keyValue=$reactionCount")
+                    }
+                }
+            }
+            catch (e: Exception){
+                e.printStackTrace()
+            }
+            return resultReactions
+        }
+
+        fun getReactionsInfo(jsonObject: JSONObject): HashMap<String, List<String>> {
+            val result = HashMap<String, List<String>>()
+            if (jsonObject != null) {
+                try {
+                    val injectedObject = jsonObject.getJSONObject("@injected")
+                    if (injectedObject != null && injectedObject.has("extensions")) {
+                        val extensionsObject = injectedObject.getJSONObject("extensions")
+                        if (extensionsObject.has("reactions")) {
+                            val data = extensionsObject.getJSONObject("reactions")
+                            val keys = data.keys()
+                            while (keys.hasNext()) {
+                                val reactionUser: MutableList<String> = ArrayList()
+                                val keyValue = keys.next() as String
+                                val react = data.getJSONObject(keyValue)
+                                val uids = react.keys()
+                                while (uids.hasNext()) {
+                                    val uid = uids.next() as String
+                                    val user = react.getJSONObject(uid)
+                                    reactionUser.add(user.getString("name"))
+                                    Log.e(TAG, "getReactionsOnMessage: " + keyValue + "=" + user.getString("name"))
+                                }
+                                result[keyValue] = reactionUser
+                            }
+                        }
+                    }
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return result
         }
 
 

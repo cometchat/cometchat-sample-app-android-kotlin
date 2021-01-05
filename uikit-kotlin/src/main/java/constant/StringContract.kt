@@ -62,6 +62,7 @@ class StringContract {
         const val CONVERSATION_NAME = "conversation_name"
 
         const val STICKERS = "Sticker"
+        const val REACTION_INFO = "reaction_info"
     }
 
     object Tab {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_people"
+        android:icon="@drawable/feel"
+        android:title="People"/>
+
+    <item
+        android:id="@+id/menu_places"
+        android:icon="@drawable/ic_places_24dp"
+        android:title="Places"/>
+
+    <item
+        android:icon="@drawable/ic_nature_24dp"
+        android:id="@+id/menu_nature"
+        android:title="Nature"/>
+
+    <item
+        android:title="Object"
+        android:icon="@drawable/ic_object_24dp"
+        android:id="@+id/menu_object"/>
+
+</menu>

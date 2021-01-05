@@ -4,7 +4,7 @@
     package="com.cometchat.pro.uikit">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -18,14 +18,16 @@
         android:usesCleartextTraffic="true"
         tools:node="merge"
         tools:targetApi="m">
-        <activity android:name="screen.CometChatMessageInfoScreenActivity"/>
+        <activity android:name="screen.CometChatReactionInfoScreenActivity"></activity>
+        <activity android:name="screen.CometChatMessageInfoScreenActivity" />
         <activity android:name="screen.banmembers.CometChatBanMemberScreenActivity" />
         <activity
             android:name="screen.CometChatCallActivity"
             android:screenOrientation="portrait"
             android:theme="@style/TransparentCompat" />
-        <activity android:name="screen.threadconversation.CometChatThreadMessageActivity"
-            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name="screen.threadconversation.CometChatThreadMessageActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name="screen.CometChatUserCallListScreenActivity"
             android:screenOrientation="portrait" />
