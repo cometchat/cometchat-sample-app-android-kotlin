@@ -92,5 +92,33 @@
         android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/whiteboard_message"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:drawableStart="@drawable/ic_whiteboard_24dp"
+        android:drawableTint="@color/grey"
+        android:textStyle="bold"
+        android:textColor="@color/grey"
+        android:text="@string/share_whiteboard"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/writeboard_message"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:drawableStart="@drawable/ic_writeboard_24dp"
+        android:drawableTint="@color/grey"
+        android:textStyle="bold"
+        android:textColor="@color/grey"
+        android:text="@string/share_writeboard"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

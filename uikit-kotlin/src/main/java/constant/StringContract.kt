@@ -63,6 +63,10 @@ class StringContract {
 
         const val STICKERS = "Sticker"
         const val REACTION_INFO = "reaction_info"
+
+        const val WHITEBOARD = "extension_whiteboard"
+        const val WRITEBOARD = "extension_document"
+        const val URL = "url"
     }
 
     object Tab {
@@ -99,7 +103,9 @@ class StringContract {
                 CometChatConstants.MESSAGE_TYPE_FILE,
                 //Custom Messages
                 IntentStrings.LOCATION,
-                IntentStrings.STICKERS
+                IntentStrings.STICKERS,
+                IntentStrings.WHITEBOARD,
+                IntentStrings.WRITEBOARD
         ))
         var messageTypesForGroup: List<String> = ArrayList(Arrays.asList(
                 CometChatConstants.MESSAGE_TYPE_CUSTOM,
@@ -112,7 +118,9 @@ class StringContract {
                 CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER,
                 //Custom Messages
                 IntentStrings.LOCATION,
-                IntentStrings.STICKERS
+                IntentStrings.STICKERS,
+                IntentStrings.WHITEBOARD,
+                IntentStrings.WRITEBOARD
         ))
 
         var messageCategoriesForGroup: List<String> = ArrayList(Arrays.asList(

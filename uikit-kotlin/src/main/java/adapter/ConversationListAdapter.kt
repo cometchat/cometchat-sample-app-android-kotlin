@@ -3,6 +3,7 @@ package adapter
 import adapter.ConversationListAdapter.ConversationViewHolder
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -92,7 +93,7 @@ class ConversationListAdapter(context: Context?) : RecyclerView.Adapter<Conversa
             setStatusIcon(conversationViewHolder.conversationListRowBinding.messageTime, baseMessage)
             conversationViewHolder.conversationListRowBinding.messageTime.visibility = View.VISIBLE
             conversationViewHolder.conversationListRowBinding.messageTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
-            lastMessageText = Utils.getLastMessage(baseMessage)
+            lastMessageText = Utils.getLastMessage(context!!, baseMessage)
         } else {
             lastMessageText = context!!.resources.getString(R.string.tap_to_start_conversation)
             conversationViewHolder.conversationListRowBinding.txtUserMessage.marqueeRepeatLimit = 100

@@ -93,6 +93,8 @@ class CometChatThreadMessageActivity : AppCompatActivity(), ThreadAdapter.OnMess
             } else if (messageType == StringContract.IntentStrings.STICKERS) {
                 bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, mediaUrl)
                 bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, messagefileName)
+            } else if (messageType == StringContract.IntentStrings.WHITEBOARD || messageType == StringContract.IntentStrings.WRITEBOARD) {
+                bundle.putString(StringContract.IntentStrings.TEXTMESSAGE, message)
             }
             else {
                 bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, mediaUrl)

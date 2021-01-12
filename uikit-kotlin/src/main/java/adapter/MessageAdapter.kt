@@ -32,6 +32,7 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.isExtensionEnabled
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.Avatar
@@ -103,6 +104,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         private const val RIGHT_LOCATION_CUSTOM_MESSAGE = 32
         private const val RIGHT_STICKER_MESSAGE = 21
         private const val LEFT_STICKER_MESSAGE = 22
+        private const val LEFT_WHITEBOARD_MESSAGE = 7
+        private const val RIGHT_WHITEBOARD_MESSAGE = 8
+        private const val LEFT_WRITEBOARD_MESSAGE = 9
+        private const val RIGHT_WRITEBOARD_MESSAGE = 10
 
         var LATITUDE = 0.0
         var LONGITUDE = 0.0
@@ -309,6 +314,30 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 messageStickerItemBinding.root.tag = RIGHT_STICKER_MESSAGE
                 RightStickerMessageViewHolder(messageStickerItemBinding)
             }
+            LEFT_WHITEBOARD_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageWhiteBoardItemBinding: MessageLeftWhiteboardItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_left_whiteboard_item, parent, false)
+                messageWhiteBoardItemBinding.root.tag = LEFT_WHITEBOARD_MESSAGE
+                LeftWhiteBoardMessageViewHolder(messageWhiteBoardItemBinding)
+            }
+            RIGHT_WHITEBOARD_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageWhiteBoardItemBinding: MessageRightWhiteboardItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_right_whiteboard_item, parent, false)
+                messageWhiteBoardItemBinding.root.tag = RIGHT_WHITEBOARD_MESSAGE
+                RightWhiteBoardMessageViewHolder(messageWhiteBoardItemBinding)
+            }
+            LEFT_WRITEBOARD_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageWriteBoardItemBinding: MessageLeftWriteboardItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_left_writeboard_item, parent, false)
+                messageWriteBoardItemBinding.root.tag = LEFT_WRITEBOARD_MESSAGE
+                LeftWriteBoardMessageViewHolder(messageWriteBoardItemBinding)
+            }
+            RIGHT_WRITEBOARD_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageWriteBoardItemBinding: MessageRightWriteboardItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_right_writeboard_item, parent, false)
+                messageWriteBoardItemBinding.root.tag = RIGHT_WRITEBOARD_MESSAGE
+                RightWriteBoardMessageViewHolder(messageWriteBoardItemBinding)
+            }
             else -> {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val actionMessageItemBinding : CometchatActionMessageBinding = DataBindingUtil.inflate(layoutInflater, R.layout.cometchat_action_message, parent, false)
@@ -317,6 +346,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             }
         }
     }
+
+
+
 
     /**
      * This method is used to bind the various ViewHolder content with their respective view types.
@@ -386,6 +418,285 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             RIGHT_LOCATION_CUSTOM_MESSAGE -> setLocationData(viewHolder as RightLocationMessageViewHolder, i)
             LEFT_STICKER_MESSAGE -> setStickerData(viewHolder as LeftStickerMessageViewHolder, i)
             RIGHT_STICKER_MESSAGE -> setStickerData(viewHolder as RightStickerMessageViewHolder, i)
+            LEFT_WHITEBOARD_MESSAGE -> setWhiteBoardData(viewHolder as LeftWhiteBoardMessageViewHolder, i)
+            RIGHT_WHITEBOARD_MESSAGE -> setWhiteBoardData(viewHolder as RightWhiteBoardMessageViewHolder, i)
+            LEFT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as LeftWriteBoardMessageViewHolder, i)
+            RIGHT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as RightWriteBoardMessageViewHolder, i)
+        }
+    }
+
+    private fun setWriteBoardData(viewHolder: RecyclerView.ViewHolder, i: Int) {
+        val baseMessage = messageList[i]
+        if (baseMessage != null && baseMessage.deletedAt == 0L) {
+            if (viewHolder is LeftWriteBoardMessageViewHolder) {
+                if (baseMessage.sender.uid != loggedInUser.uid) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                        viewHolder.view.tvUser.visibility = View.GONE
+                        viewHolder.view.ivUser.visibility = View.GONE
+                    } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        if (isUserDetailVisible) {
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
+                        } else {
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        }
+                        setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
+                    }
+                    viewHolder.view.writeboardMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_shared_document)
+                }
+                viewHolder.view.joinWriteboard.setOnClickListener(View.OnClickListener { Extensions.openWriteBoard(baseMessage, context) })
+                if (baseMessage.replyCount != 0) {
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                } else {
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
+                    val intent = Intent(context, CometChatThreadMessageActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(StringContract.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(StringContract.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(StringContract.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+
+                showMessageTime(viewHolder, baseMessage)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+
+
+            } else {
+                viewHolder as RightWriteBoardMessageViewHolder
+                viewHolder.view.writeboardMessage.text = context.getString(R.string.you_created_document)
+                viewHolder.view.joinWriteboard.setOnClickListener(View.OnClickListener { Extensions.openWriteBoard(baseMessage, context) })
+                 if (baseMessage.replyCount !=0) {
+                     viewHolder.view.threadReplyCount.visibility = View.VISIBLE;
+                     viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() +" Replies"
+                 } else {
+                     viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener {
+                    val intent = Intent(context, CometChatThreadMessageActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(StringContract.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(StringContract.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(StringContract.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+                showMessageTime(viewHolder, baseMessage)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+
+            }
+        }
+    }
+
+    private fun setWhiteBoardData(viewHolder: RecyclerView.ViewHolder, i: Int) {
+        val baseMessage = messageList[i]
+        if (baseMessage != null && baseMessage.deletedAt == 0L){
+            if (viewHolder is LeftWhiteBoardMessageViewHolder) {
+                if (baseMessage.sender.uid != loggedInUser.uid) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                        viewHolder.view.tvUser.visibility = View.GONE
+                        viewHolder.view.ivUser.visibility = View.GONE
+                    } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        if (isUserDetailVisible) {
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
+                        } else {
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        }
+                        setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
+                    }
+                    viewHolder.view.whiteboardMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_shared_whiteboard)
+                }
+                viewHolder.view.joinWhiteboard.setOnClickListener(View.OnClickListener {
+                    Extensions.openWhiteBoard(baseMessage, context)
+                })
+                if (baseMessage.replyCount != 0) {
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                } else {
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
+                    val intent = Intent(context, CometChatThreadMessageActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(StringContract.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(StringContract.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(StringContract.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+
+                showMessageTime(viewHolder, baseMessage)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+
+            } else {
+                viewHolder as RightWhiteBoardMessageViewHolder
+                viewHolder.view.whiteboardMessage.text = context.getString(R.string.you_created_whiteboard)
+                viewHolder.view.joinWhiteboard.setOnClickListener(View.OnClickListener { Extensions.openWhiteBoard(baseMessage, context) })
+                if (baseMessage.replyCount != 0) {
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                } else {
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
+                    val intent = Intent(context, CometChatThreadMessageActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(StringContract.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(StringContract.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(StringContract.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(StringContract.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(StringContract.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(StringContract.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+
+                showMessageTime(viewHolder, baseMessage)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+
+            }
         }
     }
 
@@ -396,18 +707,18 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             if (viewHolder is LeftStickerMessageViewHolder){
                 if (baseMessage.sender.uid != loggedInUser.uid) {
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
-                        viewHolder.view.tvUser.setVisibility(View.GONE)
-                        viewHolder.view.ivUser.setVisibility(View.GONE)
+                        viewHolder.view.tvUser.visibility = View.GONE
+                        viewHolder.view.ivUser.visibility = View.GONE
                     } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
                         if (isUserDetailVisible) {
-                            viewHolder.view.tvUser.setVisibility(View.VISIBLE)
-                            viewHolder.view.ivUser.setVisibility(View.VISIBLE)
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
                         } else {
-                            viewHolder.view.tvUser.setVisibility(View.GONE)
-                            viewHolder.view.ivUser.setVisibility(View.INVISIBLE)
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
                         }
                         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-                        viewHolder.view.tvUser.setText(baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
                     }
                 }
                 viewHolder.view.stickerView.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
@@ -417,10 +728,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     e.printStackTrace()
                 }
                 if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
                 } else {
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener {
                     val intent = Intent(context, CometChatThreadMessageActivity::class.java)
@@ -454,7 +765,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 showMessageTime(viewHolder, baseMessage)
 //        if (selectedItemList.contains(baseMessage.getId()))
                 //        if (selectedItemList.contains(baseMessage.getId()))
-                viewHolder.view.txtTime.setVisibility(View.VISIBLE)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
 //        else
 //            viewHolder.txtTime.setVisibility(View.GONE);
 
@@ -483,10 +794,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     e.printStackTrace()
                 }
                 if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
                 } else {
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener {
                     val intent = Intent(context, CometChatThreadMessageActivity::class.java)
@@ -520,7 +831,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 showMessageTime(viewHolder, baseMessage)
 //        if (selectedItemList.contains(baseMessage.getId()))
                 //        if (selectedItemList.contains(baseMessage.getId()))
-                viewHolder.view.txtTime.setVisibility(View.VISIBLE)
+                viewHolder.view.txtTime.visibility = View.VISIBLE
 //        else
 //            viewHolder.txtTime.setVisibility(View.GONE);
 
@@ -1461,6 +1772,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         } else if (viewHolder is LeftCustomMessageViewHolder) {
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is LeftWhiteBoardMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is LeftWriteBoardMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
         }
 
 
@@ -1479,6 +1794,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         } else if (viewHolder is RightLocationMessageViewHolder){
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         } else if (viewHolder is RightCustomMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is RightWhiteBoardMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is RightWriteBoardMessageViewHolder) {
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         }
     }
@@ -1550,7 +1869,13 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.tvUser.text = baseMessage.sender.name
                 }
 
-                viewHolder.view.goTxtMessage.text = (baseMessage as TextMessage).text.trim { it <= ' ' }
+//                var textMessage = (baseMessage as TextMessage).text.trim()
+                val txtMessage = baseMessage.text.trim { it <= ' ' }
+                var message = txtMessage
+                if (isExtensionEnabled("profanity-filter"))
+                    message = Extensions.getProfanityFilter(baseMessage)
+
+                viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
                 if (baseMessage.getSender().uid == loggedInUser.uid) viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.textColorWhite)) else viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
                 showMessageTime(viewHolder, baseMessage)
@@ -1611,6 +1936,12 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         } else if (messageType == StringContract.IntentStrings.STICKERS) {
                             viewHolder.view.replyItem.replyMessage.setText(String.format(context.getString(R.string.shared_a_sticker)))
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
+                        } else if (messageType == StringContract.IntentStrings.WHITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_whiteboard))
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0)
+                        } else if (messageType == StringContract.IntentStrings.WRITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_writeboard))
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0)
                         }
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "setTextData: " + e.message)
@@ -1644,7 +1975,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     context.startActivity(intent)
                 })
-                val txtMessage = baseMessage.text.trim { it <= ' ' }
+//                val txtMessage = baseMessage.text.trim { it <= ' ' }
                 viewHolder.view.goTxtMessage.textSize = 16f
                 var count = 0
                 val processed = EmojiCompat.get().process(txtMessage, 0,
@@ -1666,7 +1997,12 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             } else {
                 viewHolder = view as RightTextMessageViewHolder
                 viewHolder.view.textMessage = baseMessage as TextMessage
-                viewHolder.view.goTxtMessage.text = (baseMessage as TextMessage).text.trim { it <= ' ' }
+                var textMessage = (baseMessage as TextMessage).text.trim()
+                var message = textMessage
+                if (isExtensionEnabled("profanity-filter"))
+                    message = Extensions.getProfanityFilter(baseMessage)
+
+                viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
                 if (baseMessage.getSender().uid == loggedInUser.uid) viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.textColorWhite)) else viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
                 showMessageTime(viewHolder, baseMessage)
@@ -1726,6 +2062,12 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         } else if (messageType == StringContract.IntentStrings.STICKERS) {
                             viewHolder.view.replyItem.replyMessage.setText(String.format(context.getString(R.string.shared_a_sticker)))
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
+                        } else if (messageType.equals(StringContract.IntentStrings.WHITEBOARD)) {
+                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_whiteboard));
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp,0,0,0);
+                        } else if (messageType.equals(StringContract.IntentStrings.WRITEBOARD)) {
+                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_writeboard));
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp,0,0,0);
                         }
 
                     } catch (e: java.lang.Exception) {
@@ -2237,20 +2579,22 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     return CALL_MESSAGE
                 } else if (baseMessage.category == CometChatConstants.CATEGORY_CUSTOM) {
                     if (baseMessage.sender.uid == loggedInUser.uid) {
-                        return if (baseMessage.type.equals(StringContract.IntentStrings.LOCATION, ignoreCase = true))
-                            RIGHT_LOCATION_CUSTOM_MESSAGE
-                        else if (baseMessage.type.equals(StringContract.IntentStrings.STICKERS, ignoreCase = true))
-                            RIGHT_STICKER_MESSAGE
-                        else
-                            RIGHT_CUSTOM_MESSAGE
+                        return when (baseMessage.type){
+                            StringContract.IntentStrings.LOCATION -> RIGHT_LOCATION_CUSTOM_MESSAGE
+                            StringContract.IntentStrings.STICKERS -> RIGHT_STICKER_MESSAGE
+                            StringContract.IntentStrings.WHITEBOARD -> RIGHT_WHITEBOARD_MESSAGE
+                            StringContract.IntentStrings.WRITEBOARD -> RIGHT_WRITEBOARD_MESSAGE
+                            else -> RIGHT_CUSTOM_MESSAGE
+                        }
                     }
                     else {
-                        return if (baseMessage.type.equals(StringContract.IntentStrings.LOCATION, ignoreCase = true))
-                            LEFT_LOCATION_CUSTOM_MESSAGE
-                        else if (baseMessage.type.equals(StringContract.IntentStrings.STICKERS, ignoreCase = true))
-                            LEFT_STICKER_MESSAGE
-                        else
-                            LEFT_CUSTOM_MESSAGE
+                        return when (baseMessage.type){
+                            StringContract.IntentStrings.LOCATION -> LEFT_LOCATION_CUSTOM_MESSAGE
+                            StringContract.IntentStrings.STICKERS -> LEFT_STICKER_MESSAGE
+                            StringContract.IntentStrings.WHITEBOARD -> LEFT_WHITEBOARD_MESSAGE
+                            StringContract.IntentStrings.WRITEBOARD -> LEFT_WRITEBOARD_MESSAGE
+                            else -> LEFT_CUSTOM_MESSAGE
+                        }
                     }
                 }
             }
@@ -2413,6 +2757,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     inner class LeftStickerMessageViewHolder(val view: MessageLeftStickerItemBinding): RecyclerView.ViewHolder(view.root)
 
     inner class RightStickerMessageViewHolder(val view: MessageRightStickerItemBinding): RecyclerView.ViewHolder(view.root)
+
+    //WhiteBoard
+    inner class LeftWhiteBoardMessageViewHolder(val view: MessageLeftWhiteboardItemBinding): RecyclerView.ViewHolder(view.root)
+
+    inner class RightWhiteBoardMessageViewHolder(val view: MessageRightWhiteboardItemBinding) : RecyclerView.ViewHolder(view.root)
+
+    //WriteBoard
+    inner class LeftWriteBoardMessageViewHolder(val view: MessageLeftWriteboardItemBinding) : RecyclerView.ViewHolder(view.root)
+
+    inner class RightWriteBoardMessageViewHolder(val view: MessageRightWriteboardItemBinding) : RecyclerView.ViewHolder(view.root)
+
+
+
+
+//    class WhiteBoardMessageViewHolder(val view: RecyclerView.ViewHolder)
 
 //    inner class CustomMessageViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {
 //        val txtMessage: TextView

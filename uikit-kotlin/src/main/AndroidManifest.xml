@@ -18,7 +18,8 @@
         android:usesCleartextTraffic="true"
         tools:node="merge"
         tools:targetApi="m">
-        <activity android:name="screen.CometChatReactionInfoScreenActivity"></activity>
+        <activity android:name="screen.CometChatWebViewActivity"></activity>
+        <activity android:name="screen.CometChatReactionInfoScreenActivity" />
         <activity android:name="screen.CometChatMessageInfoScreenActivity" />
         <activity android:name="screen.banmembers.CometChatBanMemberScreenActivity" />
         <activity

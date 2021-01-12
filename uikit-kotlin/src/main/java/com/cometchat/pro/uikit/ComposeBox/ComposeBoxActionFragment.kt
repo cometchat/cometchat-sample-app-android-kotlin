@@ -13,12 +13,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class ComposeBoxActionFragment : BottomSheetDialogFragment() {
 
-    private var galleryMessage: TextView? = null
-    private var cameraMessage: TextView? = null
-    private var fileMessage: TextView? = null
-    private var audioMessage: TextView? = null
-    private var locationMessage: TextView? = null
-    private var stickerMessage: TextView? = null
+    private lateinit var galleryMessage: TextView
+    private lateinit var cameraMessage: TextView
+    private lateinit var fileMessage: TextView
+    private lateinit var audioMessage: TextView
+    private lateinit var locationMessage: TextView
+    private lateinit var stickerMessage: TextView
+    private lateinit var whiteBoardMessage: TextView
+    private lateinit var writeBoardMessage: TextView
 
     private var isGalleryVisible = false
     private var isCameraVisible = false
@@ -26,6 +28,9 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
     private var isFileVisible = false
     private var isLocationVisible = false
     private var isStickerVisible = false
+    private var isWhiteBoardVisible = false
+    private var isWriteBoardVisible = false
+
 
     private var composeBoxActionListener: ComposeBoxActionListener? = null
 
@@ -39,6 +44,8 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         isAudioVisible = arguments!!.getBoolean("isAudioVisible")
         isLocationVisible = arguments!!.getBoolean("isLocationVisible")
         isStickerVisible = arguments!!.getBoolean("isStickerVisible")
+        isWhiteBoardVisible = arguments!!.getBoolean("isWhiteBoardVisible")
+        isWriteBoardVisible = arguments!!.getBoolean("isWriteBoardVisible")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -61,38 +68,50 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         audioMessage = view.findViewById(R.id.audio_message)
         locationMessage = view.findViewById(R.id.location_message)
         stickerMessage = view.findViewById(R.id.sticker_message)
+        whiteBoardMessage = view.findViewById(R.id.whiteboard_message)
+        writeBoardMessage = view.findViewById(R.id.writeboard_message)
 
-        if (isGalleryVisible) galleryMessage!!.setVisibility(View.VISIBLE) else galleryMessage!!.setVisibility(View.GONE)
-        if (isCameraVisible) cameraMessage!!.setVisibility(View.VISIBLE) else cameraMessage!!.setVisibility(View.GONE)
-        if (isFileVisible) fileMessage!!.setVisibility(View.VISIBLE) else fileMessage!!.setVisibility(View.GONE)
-        if (isAudioVisible) audioMessage!!.setVisibility(View.VISIBLE) else audioMessage!!.setVisibility(View.GONE)
-        if (isLocationVisible) locationMessage!!.setVisibility(View.VISIBLE) else locationMessage!!.setVisibility(View.GONE)
-        if (isStickerVisible) stickerMessage!!.visibility = View.VISIBLE else stickerMessage!!.visibility = View.GONE
+        if (isGalleryVisible) galleryMessage.visibility = View.VISIBLE else galleryMessage.visibility = View.GONE
+        if (isCameraVisible) cameraMessage.visibility = View.VISIBLE else cameraMessage.visibility = View.GONE
+        if (isFileVisible) fileMessage.visibility = View.VISIBLE else fileMessage.visibility = View.GONE
+        if (isAudioVisible) audioMessage.visibility = View.VISIBLE else audioMessage.visibility = View.GONE
+        if (isLocationVisible) locationMessage.visibility = View.VISIBLE else locationMessage.visibility = View.GONE
+        if (isStickerVisible) stickerMessage.visibility = View.VISIBLE else stickerMessage.visibility = View.GONE
+        if (isWhiteBoardVisible) whiteBoardMessage.visibility = View.VISIBLE else whiteBoardMessage.visibility = View.GONE
+        if (isWriteBoardVisible) writeBoardMessage.visibility = View.VISIBLE else writeBoardMessage.visibility = View.GONE
 
-        galleryMessage!!.setOnClickListener {
+        galleryMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onGalleryClick()
             dismiss()
         }
-        cameraMessage!!.setOnClickListener {
+        cameraMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onCameraClick()
             dismiss()
         }
-        fileMessage!!.setOnClickListener {
+        fileMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onFileClick()
             dismiss()
         }
-        audioMessage!!.setOnClickListener {
+        audioMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onAudioClick()
             dismiss()
         }
-        locationMessage!!.setOnClickListener {
+        locationMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onLocationClick()
             dismiss()
         }
-        stickerMessage!!.setOnClickListener {
+        stickerMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onStickerClick()
             dismiss()
         }
+        whiteBoardMessage.setOnClickListener(View.OnClickListener {
+            if (composeBoxActionListener != null) composeBoxActionListener!!.onWhiteBoardClick()
+            dismiss()
+        })
+        writeBoardMessage.setOnClickListener(View.OnClickListener {
+            if (composeBoxActionListener != null) composeBoxActionListener!!.onWriteBoardClick()
+            dismiss()
+        })
 
         return view
     }
@@ -108,5 +127,7 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         fun onAudioClick()
         fun onLocationClick()
         fun onStickerClick()
+        fun onWhiteBoardClick()
+        fun onWriteBoardClick()
     }
 }

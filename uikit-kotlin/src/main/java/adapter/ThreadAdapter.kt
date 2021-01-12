@@ -22,6 +22,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.isExtensionEnabled
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.Avatar
@@ -618,9 +619,12 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 ////                    }
 ////                }
 //            }
-            viewHolder.view.goTxtMessage.setText(txtMessage)
-//            val profanityFilter: String = Extensions.checkProfanityMessage(baseMessage)
-//            viewHolder.view.goTxtMessage.setText(profanityFilter)
+
+            var message = txtMessage
+            if (isExtensionEnabled("profanity-filter"))
+                message = Extensions.getProfanityFilter(baseMessage)
+
+            viewHolder.view.goTxtMessage.setText(message)
             viewHolder.view.goTxtMessage.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoRegular))
             viewHolder.view.goTxtMessage.setTextColor(context!!.resources.getColor(R.color.primaryTextColor))
 //            Utils.setHyperLinkSupport(context, viewHolder.txtMessage)

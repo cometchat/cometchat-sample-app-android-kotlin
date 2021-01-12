@@ -32,8 +32,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.core.CometChat.OngoingCallListener
+import com.cometchat.pro.core.CometChat.*
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
@@ -171,20 +170,26 @@ public class Utils {
             }
         }
 
-        fun getLastMessage(lastMessage: BaseMessage): String? {
+        fun getLastMessage(context: Context, lastMessage: BaseMessage): String? {
             var message: String? = null
-            when (lastMessage.category) {
-                CometChatConstants.CATEGORY_MESSAGE -> if (lastMessage is TextMessage) {
-                    message = if (Utils.isLoggedInUser(lastMessage.getSender())) "You: " + lastMessage.text else lastMessage.getSender().name + ": " + lastMessage.text
-                } else if (lastMessage is MediaMessage) {
-                    message = if (Utils.isLoggedInUser(lastMessage.getSender())) "You sent a " + lastMessage.getType() else "You received a " + lastMessage.getType()
+            if (lastMessage.deletedAt == 0L) {
+                when (lastMessage.category) {
+                    CometChatConstants.CATEGORY_MESSAGE -> if (lastMessage is TextMessage) {
+                        message = lastMessage.text
+                        if (isLoggedInUser(lastMessage.getSender()))
+                            if (isExtensionEnabled("profanity-filter")) message = "You: " + Extensions.getProfanityFilter(lastMessage) else "You: " + message
+                        else if (isExtensionEnabled("profanity-filter")) message = lastMessage.sender.name + ": " + Extensions.getProfanityFilter(lastMessage) else lastMessage.sender.name + ": " + message
+
+                    } else if (lastMessage is MediaMessage) {
+                        message = if (isLoggedInUser(lastMessage.getSender())) "You sent a " + lastMessage.getType() else "You received a " + lastMessage.getType()
+                    }
+                    CometChatConstants.CATEGORY_CUSTOM -> message = if (isLoggedInUser(lastMessage.sender)) "You sent a " + lastMessage.type else "You received a " + lastMessage.type
+                    CometChatConstants.CATEGORY_ACTION -> message = (lastMessage as Action).message
+                    CometChatConstants.CATEGORY_CALL -> message = "Call Message"
+                    else -> message = "Tap to start conversation"
                 }
-                CometChatConstants.CATEGORY_CUSTOM -> message = if (Utils.isLoggedInUser(lastMessage.sender)) "You sent a " + lastMessage.type else "You received a " + lastMessage.type
-                CometChatConstants.CATEGORY_ACTION -> message = (lastMessage as Action).message
-                CometChatConstants.CATEGORY_CALL -> message = "Call Message"
-                else -> message = "Tap to start conversation"
-            }
-            return message
+                return message
+            } else return context.getString(R.string.message_deleted)
         }
 
         fun isLoggedInUser(user: User): Boolean {

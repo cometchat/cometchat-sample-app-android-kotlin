@@ -62,7 +62,6 @@
                     android:textColor="@color/primaryTextColor"
                     android:focusable="true"
                     android:padding="10dp"
-                    android:text="@{textMessage.text}"
                     android:layout_marginStart="10dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginEnd="10dp"

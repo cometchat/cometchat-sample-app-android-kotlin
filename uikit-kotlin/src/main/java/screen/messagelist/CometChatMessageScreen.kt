@@ -119,14 +119,14 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
     private var userAvatar: Avatar? = null
     private var tvName: TextView? = null
     private var tvStatus: TextView? = null
-    private var Id: String? = null
+    private lateinit var Id: String
     private var c: Context? = null
     private var blockUserLayout: LinearLayout? = null
     private var blockedUserName: TextView? = null
     private var stickyHeaderDecoration: StickyHeaderDecoration? = null
     private var avatarUrl: String? = null
     private var toolbar: Toolbar? = null
-    private var type: String? = null
+    private lateinit var type: String
     private var groupType: String? = null
     private var isBlockedByMe = false
     private var loggedInUserScope: String? = null
@@ -195,13 +195,13 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
      */
     private fun handleArguments() {
         if (arguments != null) {
-            Id = arguments!!.getString(StringContract.IntentStrings.UID)
+            Id = arguments!!.getString(StringContract.IntentStrings.UID).toString()
             avatarUrl = arguments!!.getString(StringContract.IntentStrings.AVATAR)
             status = arguments!!.getString(StringContract.IntentStrings.STATUS)
             name = arguments!!.getString(StringContract.IntentStrings.NAME)
-            type = arguments!!.getString(StringContract.IntentStrings.TYPE)
+            type = arguments!!.getString(StringContract.IntentStrings.TYPE).toString()
             if (type != null && type == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                Id = arguments!!.getString(StringContract.IntentStrings.GUID)
+                Id = arguments!!.getString(StringContract.IntentStrings.GUID).toString()
                 memberCount = arguments!!.getInt(StringContract.IntentStrings.MEMBER_COUNT)
                 groupDesc = arguments!!.getString(StringContract.IntentStrings.GROUP_DESC)
                 groupPassword = arguments!!.getString(StringContract.IntentStrings.GROUP_PASSWORD)
@@ -612,6 +612,31 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
 
                     })
                 }
+            }
+
+            override fun onWhiteBoardClicked() {
+                Extensions.callExtensions("whiteboard", Id, type, object : ExtensionResponseListener<Any>() {
+                    override fun onResponseSuccess(vararg: Any?) {
+                        var jasonObject: JSONObject = vararg as JSONObject
+                    }
+
+                    override fun onResponseFailed(e: CometChatException?) {
+                        Snackbar.make(rvChatListView!!, e!!.details, Snackbar.LENGTH_LONG).show()
+                    }
+                })
+
+            }
+
+            override fun onWriteBoardClicked() {
+                Extensions.callExtensions("document", Id, type, object : ExtensionResponseListener<Any>() {
+                    override fun onResponseSuccess(vararg: Any?) {
+                        var jasonObject: JSONObject = vararg as JSONObject
+                    }
+
+                    override fun onResponseFailed(e: CometChatException?) {
+                        Snackbar.make(rvChatListView!!, e!!.details, Snackbar.LENGTH_LONG).show()
+                    }
+                })
             }
         })
     }
@@ -1207,6 +1232,12 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
             } else if (baseMessage.type == StringContract.IntentStrings.STICKERS) {
                 replyObject.put("type", StringContract.IntentStrings.STICKERS)
                 replyObject.put("message", "Sticker")
+            } else if (baseMessage.type == StringContract.IntentStrings.WHITEBOARD) {
+                replyObject.put("type", StringContract.IntentStrings.WHITEBOARD)
+                replyObject.put("message", "whiteBoard")
+            } else if (baseMessage.type == StringContract.IntentStrings.WRITEBOARD) {
+                replyObject.put("type", StringContract.IntentStrings.WRITEBOARD)
+                replyObject.put("message", "writeboard")
             }
             replyObject.put("name", baseMessage.sender.name)
             replyObject.put("avatar", baseMessage.sender.avatar)
@@ -1729,6 +1760,8 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         val mediaMessageList: MutableList<BaseMessage> = ArrayList()
         val locationMessageList: MutableList<BaseMessage> = ArrayList()
         val stickerMessageList: MutableList<BaseMessage> = ArrayList()
+        val whiteBoardMessageList: MutableList<BaseMessage> = ArrayList()
+        val writeBoardMessageList: MutableList<BaseMessage> = ArrayList()
         for (baseMessage in baseMessagesList!!) {
             if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) {
                 textMessageList.add(baseMessage)
@@ -1738,6 +1771,10 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 locationMessageList.add(baseMessage)
             } else if (baseMessage.type == StringContract.IntentStrings.STICKERS) {
                 stickerMessageList.add(baseMessage)
+            } else if (baseMessage.type == StringContract.IntentStrings.WHITEBOARD) {
+                whiteBoardMessageList.add(baseMessage)
+            } else if (baseMessage.type == StringContract.IntentStrings.WRITEBOARD) {
+                writeBoardMessageList.add(baseMessage)
             }
         }
         if (textMessageList.size == 1) {
@@ -1833,6 +1870,58 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
 
         }
 
+        if (whiteBoardMessageList.size == 1) {
+            forwardVisible = false
+            copyVisible = false
+            editVisible = false
+            shareVisible = false
+            val basemessage = whiteBoardMessageList[0]
+            if (basemessage != null && basemessage.sender != null) {
+                if (basemessage.deletedAt == 0L) {
+                    baseMessage = basemessage
+                    if (basemessage.replyCount > 0)
+                        threadVisible = false
+                    else
+                        threadVisible = true
+                    if (basemessage.sender.uid == getLoggedInUser().uid)
+                        deleteVisible = true
+                    else {
+                        if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN|| loggedInUserScope == CometChatConstants.SCOPE_MODERATOR)) {
+                            deleteVisible = true
+                        } else {
+                            deleteVisible = false
+                        }
+                    }
+                }
+            }
+        }
+
+        if (writeBoardMessageList.size == 1) {
+            forwardVisible = false
+            copyVisible = false
+            editVisible = false
+            shareVisible = false
+            val basemessage = writeBoardMessageList[0]
+            if (basemessage != null && basemessage.sender != null) {
+                if (basemessage.deletedAt == 0L) {
+                    baseMessage = basemessage
+                    if (basemessage.replyCount > 0)
+                        threadVisible = false
+                    else
+                        threadVisible = true
+                    if (basemessage.sender.uid == getLoggedInUser().uid)
+                        deleteVisible = true
+                    else {
+                        if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN || loggedInUserScope == CometChatConstants.SCOPE_MODERATOR)) {
+                            deleteVisible = true
+                        } else {
+                            deleteVisible = false
+                        }
+                    }
+                }
+            }
+        }
+
 
         baseMessages = baseMessagesList
         val bundle = Bundle()
@@ -1845,7 +1934,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         bundle.putBoolean("forwardVisible", forwardVisible)
         if (isExtensionEnabled("reactions"))
             bundle.putBoolean("reactionVisible", reactionVisible)
-        if (baseMessage!!.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.sender.uid == loggedInUser.uid) bundle.putBoolean("messageInfoVisible", true)
+        if (baseMessage!!.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.sender.uid == loggedInUser.uid && baseMessage!!.type != StringContract.IntentStrings.WHITEBOARD && baseMessage!!.type != StringContract.IntentStrings.WRITEBOARD) bundle.putBoolean("messageInfoVisible", true) else bundle.putBoolean("messageInfoVisible", false)
         bundle.putString("type", CometChatMessageListActivity::class.java.name)
 
         messageActionFragment?.arguments = bundle
@@ -1919,7 +2008,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage!!.type)
                 intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage!!.sentAt)
                 if (baseMessage!!.type == CometChatConstants.MESSAGE_TYPE_TEXT) {
-                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text.toString())
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getProfanityFilter(baseMessage!!))
                 } else if (baseMessage!!.category == CometChatConstants.CATEGORY_CUSTOM) {
                     intent.putExtra(StringContract.IntentStrings.CUSTOM_MESSAGE,
                             (baseMessage as CustomMessage).customData.toString())
@@ -1928,6 +2017,14 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                                 StringContract.IntentStrings.LOCATION)
                     } else if (baseMessage?.getType() == StringContract.IntentStrings.STICKERS) {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
+                    } else if (baseMessage?.getType() == StringContract.IntentStrings.WHITEBOARD) {
+                        intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
+                                StringContract.IntentStrings.WHITEBOARD)
+                        intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage!!))
+                    } else if (baseMessage?.getType() == StringContract.IntentStrings.WRITEBOARD) {
+                        intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
+                                StringContract.IntentStrings.WRITEBOARD)
+                        intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage!!))
                     }
                 } else {
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,
@@ -2089,7 +2186,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         intent.putExtra(StringContract.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage!!))
         if (baseMessage?.category.equals(CometChatConstants.CATEGORY_MESSAGE, ignoreCase = true)) {
             intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage?.type)
-            if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
+            if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getProfanityFilter(baseMessage!!)) else {
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, (baseMessage as MediaMessage).attachment.fileExtension)
                 intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, (baseMessage as MediaMessage).attachment.fileUrl)
@@ -2108,6 +2205,12 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL, (baseMessage as CustomMessage).customData.getString("url"))
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
+                } else if (baseMessage!!.type == StringContract.IntentStrings.WHITEBOARD) {
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage!!))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.WHITEBOARD)
+                } else if (baseMessage!!.type == StringContract.IntentStrings.WRITEBOARD) {
+                    intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage!!))
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.WRITEBOARD)
                 }
             } catch (e: java.lang.Exception) {
                 Log.e(TAG, "startThreadActivityError: " + e.message)
@@ -2234,6 +2337,12 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
+            } else if (baseMessage!!.type == StringContract.IntentStrings.WHITEBOARD) {
+                replyMessage!!.text = getString(R.string.shared_a_whiteboard)
+                replyMessage!!.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0)
+            } else if (baseMessage!!.type == StringContract.IntentStrings.WRITEBOARD) {
+                replyMessage!!.text = getString(R.string.shared_a_writeboard)
+                replyMessage!!.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0)
             }
             composeBox!!.ivMic!!.visibility = View.GONE
             composeBox!!.ivSend!!.visibility = View.VISIBLE

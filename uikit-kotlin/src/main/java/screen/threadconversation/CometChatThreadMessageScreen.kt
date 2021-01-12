@@ -66,6 +66,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import screen.CometChatForwardMessageScreenActivity
 import screen.CometChatMessageInfoScreenActivity
+import screen.CometChatWebViewActivity
 import screen.messagelist.MessageActionFragment
 import screen.messagelist.MessageActionFragment.MessageActionListener
 import utils.Extensions
@@ -74,7 +75,6 @@ import utils.MediaUtils
 import utils.Utils
 import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessageLongClick, MessageActionCloseListener{
@@ -189,6 +189,15 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
     private var imageToFly: ImageView? = null
     private var liveReactionLayout: FrameLayout? = null
 
+    private var whiteboardMessage: RelativeLayout? = null
+    private var writeboardMessage: RelativeLayout? = null
+
+
+    private lateinit var whiteBoardTxt: TextView
+    private lateinit var writeBoardTxt: TextView
+    private lateinit var joinWhiteBoard: MaterialButton
+    private lateinit var joinWriteBoard: MaterialButton
+
 //    private var view: View? = null
 
 
@@ -215,7 +224,14 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
             } else if (messageType == StringContract.IntentStrings.LOCATION) {
                 parentMessageLatitude = arguments!!.getDouble(StringContract.IntentStrings.LOCATION_LATITUDE)
                 parentMessageLongitude = arguments!!.getDouble(StringContract.IntentStrings.LOCATION_LONGITUDE)
-            } else {
+            } else if (messageType == StringContract.IntentStrings.STICKERS) {
+                message = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
+                messageFileName = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)
+            }
+            else if (messageType == StringContract.IntentStrings.WHITEBOARD || messageType == StringContract.IntentStrings.WRITEBOARD) {
+                message = arguments!!.getString(StringContract.IntentStrings.TEXTMESSAGE)
+            }
+            else {
                 message = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
                 messageFileName = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)
                 messageExtension = arguments!!.getString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)
@@ -257,6 +273,13 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         fileExtension = view.findViewById<TextView>(R.id.tvFileExtension)
         stickerMessage = view.findViewById(R.id.iv_stickerMessage)
 
+        whiteboardMessage = view.findViewById(R.id.whiteboard_vw)
+        whiteBoardTxt = view.findViewById(R.id.whiteboard_message)
+        joinWhiteBoard = view.findViewById(R.id.join_whiteboard)
+        writeboardMessage = view.findViewById(R.id.writeboard_vw)
+        writeBoardTxt = view.findViewById(R.id.writeboard_message)
+        joinWriteBoard = view.findViewById(R.id.join_whiteboard)
+
         if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
             imageMessage!!.setVisibility(View.VISIBLE)
             Glide.with(context!!).load(message).into(imageMessage!!)
@@ -278,10 +301,31 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
             ivForwardMessage!!.visibility = View.GONE
             stickerMessage?.setVisibility(View.VISIBLE)
             Glide.with(context!!).load(message).into(stickerMessage!!)
-        } else if (messageType == StringContract.IntentStrings.LOCATION) {
+        } else if (messageType == StringContract.IntentStrings.WHITEBOARD) {
+            ivForwardMessage?.visibility = View.GONE
+            whiteboardMessage?.visibility = View.VISIBLE
+            if (name == loggedInUser.name) whiteBoardTxt.text = getString(R.string.you_created_whiteboard) else whiteBoardTxt.text = name + " " + getString(R.string.has_shared_whiteboard)
+            joinWhiteBoard.setOnClickListener {
+                val boardUrl = message!!
+                val intent = Intent(context, CometChatWebViewActivity::class.java)
+                intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                startActivity(intent)
+            }
+        } else if (messageType == StringContract.IntentStrings.WRITEBOARD) {
+            ivForwardMessage?.visibility = View.GONE
+            writeboardMessage?.visibility = View.VISIBLE
+            if (name == loggedInUser.name) writeBoardTxt.text = getString(R.string.you_created_document) else writeBoardTxt.text = name + " " + getString(R.string.has_shared_document)
+            joinWriteBoard.setOnClickListener {
+                val boardUrl = message!!
+                val intent = Intent(context, CometChatWebViewActivity::class.java)
+                intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                startActivity(intent)
+            }
+        }
+        else if (messageType == StringContract.IntentStrings.LOCATION) {
             initLocation()
-            locationMessage!!.setVisibility(View.VISIBLE)
-            addressView!!.setText(Utils.getAddress(context, parentMessageLatitude, parentMessageLongitude))
+            locationMessage!!.visibility = View.VISIBLE
+            addressView!!.text = Utils.getAddress(context, parentMessageLatitude, parentMessageLongitude)
             val mapUrl = StringContract.MapUrl.MAPS_URL + parentMessageLatitude + "," + parentMessageLongitude + "&key=" + StringContract.MapUrl.MAP_ACCESS_KEY
             Glide.with(context!!)
                     .load(mapUrl)
@@ -291,10 +335,12 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         bottomLayout = view.findViewById(R.id.bottom_layout)
         composeBox = view.findViewById(R.id.message_box)
         messageShimmer = view.findViewById(R.id.shimmer_layout)
-        composeBox!!.usedIn(CometChatThreadMessageActivity::class.java.name)
-        composeBox!!.isStickerVisible = false
-        composeBox!!.ivMic!!.setVisibility(View.GONE)
-        composeBox!!.ivSend!!.setVisibility(View.VISIBLE)
+        composeBox?.usedIn(CometChatThreadMessageActivity::class.java.name)
+        composeBox?.isStickerVisible = false
+        composeBox?.isWhiteBoardVisible = false
+        composeBox?.isWriteBoardVisible = false
+        composeBox?.ivMic!!.visibility = View.GONE
+        composeBox?.ivSend!!.visibility = View.VISIBLE
 
         liveReactionLayout = view.findViewById(R.id.live_reactions_layout)
         composeBox!!.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
@@ -1565,13 +1611,13 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                 val intent = Intent(context, CometChatMessageInfoScreenActivity::class.java)
                 if (isParent) {
                 } else {
-                    intent.putExtra(StringContract.IntentStrings.ID, baseMessage!!.getId())
-                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage!!.getType())
-                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage!!.getSentAt())
-                    if (baseMessage!!.getType() == CometChatConstants.MESSAGE_TYPE_TEXT) {
+                    intent.putExtra(StringContract.IntentStrings.ID, baseMessage!!.id)
+                    intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, baseMessage!!.type)
+                    intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage!!.sentAt)
+                    if (baseMessage!!.type == CometChatConstants.MESSAGE_TYPE_TEXT) {
                         intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE,
-                                (baseMessage as TextMessage).text.toString())
-                    } else if (baseMessage!!.getCategory() == CometChatConstants.CATEGORY_CUSTOM) {
+                                Extensions.getProfanityFilter(baseMessage!!))
+                    } else if (baseMessage!!.category == CometChatConstants.CATEGORY_CUSTOM) {
                         intent.putExtra(StringContract.IntentStrings.CUSTOM_MESSAGE,
                                 (baseMessage as CustomMessage).customData.toString())
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,

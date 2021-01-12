@@ -45,7 +45,6 @@
                     tools:text="message"
                     android:textColor="@color/textColorWhite"
                     android:focusable="true"
-                    android:text="@{textMessage.text}"
                     android:padding="10dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginLeft="10dp"

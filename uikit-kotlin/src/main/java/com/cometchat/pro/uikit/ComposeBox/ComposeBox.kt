@@ -58,7 +58,7 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
     private var voiceMessageLayout: RelativeLayout? = null
     private var rlActionContainer: RelativeLayout? = null
     private val hasFocus = false
-    private var composeActionListener: ComposeActionListener? = null
+    private lateinit var composeActionListener: ComposeActionListener
     private var c: Context? = null
     private var color = 0
     private var composeBoxActionFragment: ComposeBoxActionFragment? = null
@@ -70,6 +70,8 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
     var isFileVisible = true
     var isLocationVisible = true
     var isStickerVisible = true
+    var isWhiteBoardVisible = true
+    var isWriteBoardVisible = true
 
     constructor(context: Context) : super(context) {
         initViewComponent(context, null, -1, -1)
@@ -152,53 +154,61 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
         composeBoxActionFragment = ComposeBoxActionFragment()
         composeBoxActionFragment!!.setComposeBoxActionListener(object : ComposeBoxActionListener {
             override fun onGalleryClick() {
-                composeActionListener!!.onGalleryActionClicked()
+                composeActionListener.onGalleryActionClicked()
             }
 
             override fun onCameraClick() {
-                composeActionListener!!.onCameraActionClicked()
+                composeActionListener.onCameraActionClicked()
             }
 
             override fun onFileClick() {
-                composeActionListener!!.onFileActionClicked()
+                composeActionListener.onFileActionClicked()
             }
 
             override fun onAudioClick() {
-                composeActionListener!!.onAudioActionClicked()
+                composeActionListener.onAudioActionClicked()
             }
 
             override fun onLocationClick() {
-                composeActionListener!!.onLocationActionClicked()
+                composeActionListener.onLocationActionClicked()
             }
 
             override fun onStickerClick() {
-                composeActionListener!!.onStickerActionClicked()
+                composeActionListener.onStickerActionClicked()
+            }
+
+            override fun onWhiteBoardClick() {
+                composeActionListener.onWhiteBoardClicked()
+            }
+
+            override fun onWriteBoardClick() {
+                composeActionListener.onWriteBoardClicked()
             }
         })
 
         etComposeBox!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 if (composeActionListener != null) {
-                    composeActionListener!!.beforeTextChanged(charSequence, i, i1, i2)
+                    composeActionListener.beforeTextChanged(charSequence, i, i1, i2)
                 }
             }
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 if (composeActionListener != null) {
-                    composeActionListener!!.onTextChanged(charSequence, i, i1, i2)
+                    composeActionListener.onTextChanged(charSequence, i, i1, i2)
                 }
             }
 
             override fun afterTextChanged(editable: Editable) {
                 if (composeActionListener != null) {
-                    composeActionListener!!.afterTextChanged(editable)
+                    composeActionListener.afterTextChanged(editable)
                 }
             }
         })
 
         etComposeBox!!.setMediaSelected(object : OnEditTextMediaListener {
             override fun OnMediaSelected(i: InputContentInfoCompat?) {
-                composeActionListener!!.onEditTextMediaSelected(i)
+                composeActionListener.onEditTextMediaSelected(i)
             }
         })
         if (Utils.isDarkMode(context)) {
@@ -239,11 +249,11 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
         ivArrow!!.imageTintList = ColorStateList.valueOf(color)
     }
 
-    fun setComposeBoxListener(composeActionListener: ComposeActionListener?) {
+    fun setComposeBoxListener(composeActionListener: ComposeActionListener) {
         this.composeActionListener = composeActionListener
-        this.composeActionListener!!.getCameraActionView(ivCamera!!)
-        this.composeActionListener!!.getGalleryActionView(ivGallery!!)
-        this.composeActionListener!!.getFileActionView(ivFile!!)
+        this.composeActionListener.getCameraActionView(ivCamera!!)
+        this.composeActionListener.getGalleryActionView(ivGallery!!)
+        this.composeActionListener.getFileActionView(ivFile!!)
     }
 
     override fun onClick(view: View) {
@@ -269,9 +279,9 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
         }
         if (view.id == R.id.ivSend) {
             if (!voiceMessage) {
-                composeActionListener!!.onSendActionClicked(etComposeBox)
+                composeActionListener.onSendActionClicked(etComposeBox)
             } else {
-                composeActionListener!!.onVoiceNoteComplete(audioFileNameWithPath)
+                composeActionListener.onVoiceNoteComplete(audioFileNameWithPath)
                 audioFileNameWithPath = ""
                 voiceMessageLayout!!.visibility = View.GONE
                 etComposeBox!!.visibility = View.VISIBLE
@@ -312,9 +322,12 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
             bundle.putBoolean("isFileVisible", isFileVisible)
             bundle.putBoolean("isAudioVisible", isAudioVisible)
             bundle.putBoolean("isLocationVisible", isLocationVisible)
-            if (CometChat.isExtensionEnabled("stickers")){
+            if (CometChat.isExtensionEnabled("stickers"))
                 bundle.putBoolean("isStickerVisible", isStickerVisible)
-            }
+            if (CometChat.isExtensionEnabled("whiteboard"))
+                bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
+            if (CometChat.isExtensionEnabled("document"))
+                bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
             composeBoxActionFragment!!.arguments = bundle
             composeBoxActionFragment!!.show(fm, composeBoxActionFragment!!.tag)
         }

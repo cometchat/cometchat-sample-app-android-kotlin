@@ -226,5 +226,15 @@
     <string name="send_sticker">Send Stickers</string>
     <string name="shared_a_sticker">Shared a Sticker</string>
 
+    <string name="share_whiteboard">Share WhiteBoard</string>
+    <string name="shared_a_whiteboard">Shared a WhiteBoard</string>
+    <string name="share_writeboard">Share WriteBoard</string>
+    <string name="shared_a_writeboard">Shared a WriteBoard</string>
+    <string name="launch">Launch</string>
+    <string name="you_created_whiteboard">You’ve created a new collaborative whiteboard.</string>
+    <string name="has_shared_whiteboard">has shared a collaborative whiteboard.</string>
+    <string name="you_created_document">You’ve created a new collaborative document.</string>
+    <string name="has_shared_document">has shared a collaborative document.</string>
+
 
 </resources>

@@ -1,17 +1,21 @@
 package utils
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.BaseMessage
+import com.cometchat.pro.models.TextMessage
 import com.cometchat.pro.uikit.reaction.model.Reaction
 import com.cometchat.pro.uikit.sticker.model.Sticker
+import constant.StringContract
 import listeners.ExtensionResponseListener
 import org.json.JSONException
 import org.json.JSONObject
+import screen.CometChatWebViewActivity
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -43,6 +47,15 @@ public class Extensions {
                         }
                         if (extensionsObject != null && extensionsObject.has("reactions")){
                             extensionMap["reactions"] = extensionsObject.getJSONObject("reactions")
+                        }
+                        if (extensionsObject != null && extensionsObject.has("profanity-filter")){
+                            extensionMap["profanityFilter"] = extensionsObject.getJSONObject("profanity-filter")
+                        }
+                        if (extensionsObject != null && extensionsObject.has("whiteboard")){
+                            extensionMap["whiteboard"] = extensionsObject.getJSONObject("whiteboard")
+                        }
+                        if (extensionsObject != null && extensionsObject.has("document")){
+                            extensionMap["document"] = extensionsObject.getJSONObject("document")
                         }
                     }
                     extensionMap
@@ -218,6 +231,122 @@ public class Extensions {
                 }
             }
             return result
+        }
+
+        fun getProfanityFilter(baseMessage: BaseMessage): String {
+            var result = (baseMessage as TextMessage).text
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                try {
+                    if (extensionList.containsKey("profanityFilter")) {
+                        val profanityFilter = extensionList["profanityFilter"]
+                        val profanity = profanityFilter?.getString("profanity")
+                        val cleanMessage = profanityFilter?.getString("message_clean")
+                        if (profanity == "no")
+                            result = (baseMessage as TextMessage).text
+                        else
+                            result = cleanMessage
+                    } else {
+                        result = (baseMessage as TextMessage).text.trim()
+                    }
+                } catch (e: java.lang.Exception) {
+                    Log.e(TAG, "checkProfanityMessage:Error: " + e.message)
+                }
+            }
+            return result
+        }
+
+        fun callExtensions(slug: String, id: String, type: String, extensionResponseListener: ExtensionResponseListener<Any>) {
+            var body = JSONObject()
+            body.put("receiverType", type)
+            body.put("receiver", id)
+            CometChat.callExtension(slug, "POST", "/v1/create", body, object : CallbackListener<JSONObject>() {
+                override fun onSuccess(p0: JSONObject?) {
+                    extensionResponseListener.onResponseSuccess(p0)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    extensionResponseListener.onResponseFailed(p0)
+                }
+
+            })
+        }
+
+        fun openWhiteBoard(baseMessage: BaseMessage, context: Context) {
+            var boardUrl = ""
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                try {
+                    if (extensionList.containsKey("whiteboard")) {
+                        val whiteBoardObject = extensionList["whiteboard"]
+                        if (whiteBoardObject != null && whiteBoardObject.has("board_url")) {
+                            boardUrl = whiteBoardObject.getString("board_url")
+                            var username = CometChat.getLoggedInUser().name.replace(" ", "_")
+                            boardUrl = "$boardUrl&username=$username"
+                            val intent = Intent(context, CometChatWebViewActivity::class.java)
+                            intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                            context.startActivity(intent)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        fun getWhiteBoardUrl(baseMessage: BaseMessage): String? {
+            var boardUrl = ""
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                if (extensionList.containsKey("whiteboard")) {
+                    val whiteBoardObject = extensionList["whiteboard"]
+                    if (whiteBoardObject != null && whiteBoardObject.has("board_url")) {
+                        try {
+                            boardUrl = whiteBoardObject.getString("board_url")
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+            return boardUrl
+        }
+
+        fun openWriteBoard(baseMessage: BaseMessage, context: Context) {
+            try {
+                var boardUrl = ""
+                val extensionList = extensionCheck(baseMessage)
+                if (extensionList != null && extensionList.containsKey("document")) {
+                    val writeBoardObject = extensionList["document"]
+                    if (writeBoardObject != null && writeBoardObject.has("document_url")) {
+                        boardUrl = writeBoardObject.getString("document_url")
+                        val intent = Intent(context, CometChatWebViewActivity::class.java)
+                        intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                        context.startActivity(intent)
+                    }
+                }
+            } catch (e: java.lang.Exception) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        fun getWriteBoardUrl(baseMessage: BaseMessage): String? {
+            var documentUrl = ""
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                if (extensionList.containsKey("document")) {
+                    val writeBoardObject = extensionList["document"]
+                    if (writeBoardObject != null && writeBoardObject.has("document_url")) {
+                        try {
+                            documentUrl = writeBoardObject.getString("document_url")
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+            return documentUrl
+
         }
 
 
