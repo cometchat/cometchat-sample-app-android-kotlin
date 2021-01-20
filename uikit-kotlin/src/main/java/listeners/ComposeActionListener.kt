@@ -38,4 +38,5 @@ abstract class ComposeActionListener {
 
     open fun onWhiteBoardClicked() {}
     open fun onWriteBoardClicked() {}
+    open fun onStartCallClicked() {}
 }

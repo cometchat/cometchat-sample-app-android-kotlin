@@ -42,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar
 import constant.StringContract
 import org.json.JSONObject
 import screen.CometChatCallActivity
+import screen.CometChatStartCallActivity
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -748,6 +749,13 @@ public class Utils {
                 e.printStackTrace()
             }
             return null
+        }
+
+        fun startVideoCallIntent(context: Context, sessionId: String?) {
+            val intent = Intent(context, CometChatStartCallActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.putExtra(StringContract.IntentStrings.SESSION_ID, sessionId)
+            context.startActivity(intent)
         }
     }
 }

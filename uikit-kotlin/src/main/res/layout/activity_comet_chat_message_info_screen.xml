@@ -101,6 +101,22 @@
                     tools:visibility="visible"
                     layout="@layout/right_location_message_item"
                     android:visibility="gone"/>
+                <include
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    android:id="@+id/vw_whiteboard_message"
+                    layout="@layout/message_right_whiteboard_item"/>
+                <include
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    android:id="@+id/vw_writeboard_message"
+                    layout="@layout/message_right_writeboard_item"/>
             </RelativeLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

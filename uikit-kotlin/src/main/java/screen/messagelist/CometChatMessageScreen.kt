@@ -65,10 +65,7 @@ import constant.StringContract
 import listeners.*
 import org.json.JSONException
 import org.json.JSONObject
-import screen.CometChatForwardMessageScreenActivity
-import screen.CometChatGroupDetailScreenActivity
-import screen.CometChatMessageInfoScreenActivity
-import screen.CometChatUserDetailScreenActivity
+import screen.*
 import screen.threadconversation.CometChatThreadMessageActivity
 import utils.*
 import java.io.File
@@ -227,6 +224,8 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         if (messageActionFragment != null) messageActionFragment!!.dismiss()
 
         composeBox = view!!.findViewById(R.id.message_box)
+        if (type == CometChatConstants.RECEIVER_TYPE_USER)
+            composeBox?.isStartVideoCall = false
         liveReactionLayout = view.findViewById(R.id.live_reactions_layout)
         composeBox!!.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
             override fun onClick(var1: View?) {
@@ -270,6 +269,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         messageShimmer = view.findViewById(R.id.shimmer_layout)
 //        composeBox = view.findViewById(R.id.message_box)
         setComposeBoxListener()
+
         rvSmartReply = view.findViewById(R.id.rv_smartReply)
 //        rlMessageAction = view.findViewById(R.id.message_actions)
         ivCloseMessageAction = view.findViewById(R.id.iv_close_message_action)
@@ -603,7 +603,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                     Extensions.fetchStickers(object : ExtensionResponseListener<Any>() {
                         override fun onResponseSuccess(vararg: Any?) {
                             val stickersJSON = vararg as JSONObject
-                            stickersView?.setData(Id!!, type!!, Extensions.extractStickersFromJSON(stickersJSON))
+                            stickersView?.setData(Id, type, Extensions.extractStickersFromJSON(stickersJSON))
                         }
 
                         override fun onResponseFailed(e: CometChatException?) {
@@ -637,6 +637,12 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                         Snackbar.make(rvChatListView!!, e!!.details, Snackbar.LENGTH_LONG).show()
                     }
                 })
+            }
+
+            override fun onStartCallClicked() {
+                val body = JSONObject()
+                body.put("sessionID", Id)
+                sendCustomMessage(StringContract.IntentStrings.MEETING, body)
             }
         })
     }
@@ -692,6 +698,8 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 if (messageAdapter != null) {
                     messageAdapter!!.addMessage(customMessage)
                     scrollToBottom()
+                    if (customMessage.customData.has("sessionID"))
+                        Utils.startVideoCallIntent(context!!, customMessage.customData.getString("sessionID"))
                 }
             }
 
@@ -1762,6 +1770,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         val stickerMessageList: MutableList<BaseMessage> = ArrayList()
         val whiteBoardMessageList: MutableList<BaseMessage> = ArrayList()
         val writeBoardMessageList: MutableList<BaseMessage> = ArrayList()
+        val directCallMessageList: MutableList<BaseMessage> = ArrayList()
         for (baseMessage in baseMessagesList!!) {
             if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) {
                 textMessageList.add(baseMessage)
@@ -1775,6 +1784,8 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 whiteBoardMessageList.add(baseMessage)
             } else if (baseMessage.type == StringContract.IntentStrings.WRITEBOARD) {
                 writeBoardMessageList.add(baseMessage)
+            } else if (baseMessage.type == StringContract.IntentStrings.MEETING) {
+                directCallMessageList.add(baseMessage)
             }
         }
         if (textMessageList.size == 1) {
@@ -1922,6 +1933,30 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
             }
         }
 
+        if (directCallMessageList.size == 1) {
+            forwardVisible = false
+            copyVisible = false
+            editVisible = false
+            shareVisible = false
+            replyVisible = false
+            threadVisible = false
+            val basemessage = directCallMessageList[0]
+            if (basemessage != null && basemessage.sender != null) {
+                if (basemessage.deletedAt == 0L) {
+                    baseMessage = basemessage
+                    if (basemessage.sender.uid == getLoggedInUser().uid)
+                        deleteVisible = true
+                    else {
+                        if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN || loggedInUserScope == CometChatConstants.SCOPE_MODERATOR)) {
+                            deleteVisible = true
+                        } else {
+                            deleteVisible = false
+                        }
+                    }
+                }
+            }
+        }
+
 
         baseMessages = baseMessagesList
         val bundle = Bundle()
@@ -1934,7 +1969,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
         bundle.putBoolean("forwardVisible", forwardVisible)
         if (isExtensionEnabled("reactions"))
             bundle.putBoolean("reactionVisible", reactionVisible)
-        if (baseMessage!!.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.sender.uid == loggedInUser.uid && baseMessage!!.type != StringContract.IntentStrings.WHITEBOARD && baseMessage!!.type != StringContract.IntentStrings.WRITEBOARD) bundle.putBoolean("messageInfoVisible", true) else bundle.putBoolean("messageInfoVisible", false)
+        if (baseMessage!!.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP && baseMessage!!.sender.uid == loggedInUser.uid && baseMessage!!.type != StringContract.IntentStrings.MEETING) bundle.putBoolean("messageInfoVisible", true)
         bundle.putString("type", CometChatMessageListActivity::class.java.name)
 
         messageActionFragment?.arguments = bundle
@@ -2010,18 +2045,19 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                 if (baseMessage!!.type == CometChatConstants.MESSAGE_TYPE_TEXT) {
                     intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getProfanityFilter(baseMessage!!))
                 } else if (baseMessage!!.category == CometChatConstants.CATEGORY_CUSTOM) {
-                    intent.putExtra(StringContract.IntentStrings.CUSTOM_MESSAGE,
-                            (baseMessage as CustomMessage).customData.toString())
-                    if (baseMessage!!.getType() == StringContract.IntentStrings.LOCATION) {
+                    if ((baseMessage as CustomMessage).customData != null)
+                        intent.putExtra(StringContract.IntentStrings.CUSTOM_MESSAGE,
+                                (baseMessage as CustomMessage).customData.toString())
+                    if (baseMessage!!.type == StringContract.IntentStrings.LOCATION) {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
                                 StringContract.IntentStrings.LOCATION)
-                    } else if (baseMessage?.getType() == StringContract.IntentStrings.STICKERS) {
+                    } else if (baseMessage?.type == StringContract.IntentStrings.STICKERS) {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE, StringContract.IntentStrings.STICKERS)
-                    } else if (baseMessage?.getType() == StringContract.IntentStrings.WHITEBOARD) {
+                    } else if (baseMessage?.type == StringContract.IntentStrings.WHITEBOARD) {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
                                 StringContract.IntentStrings.WHITEBOARD)
                         intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage!!))
-                    } else if (baseMessage?.getType() == StringContract.IntentStrings.WRITEBOARD) {
+                    } else if (baseMessage?.type == StringContract.IntentStrings.WRITEBOARD) {
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
                                 StringContract.IntentStrings.WRITEBOARD)
                         intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage!!))

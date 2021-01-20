@@ -67,6 +67,8 @@ class StringContract {
         const val WHITEBOARD = "extension_whiteboard"
         const val WRITEBOARD = "extension_document"
         const val URL = "url"
+
+        const val MEETING = "meeting"
     }
 
     object Tab {
@@ -120,7 +122,8 @@ class StringContract {
                 IntentStrings.LOCATION,
                 IntentStrings.STICKERS,
                 IntentStrings.WHITEBOARD,
-                IntentStrings.WRITEBOARD
+                IntentStrings.WRITEBOARD,
+                IntentStrings.MEETING
         ))
 
         var messageCategoriesForGroup: List<String> = ArrayList(Arrays.asList(

@@ -21,6 +21,7 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
     private lateinit var stickerMessage: TextView
     private lateinit var whiteBoardMessage: TextView
     private lateinit var writeBoardMessage: TextView
+    private lateinit var startVideoCall: TextView
 
     private var isGalleryVisible = false
     private var isCameraVisible = false
@@ -30,6 +31,7 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
     private var isStickerVisible = false
     private var isWhiteBoardVisible = false
     private var isWriteBoardVisible = false
+    private var isStartVideoCall = false
 
 
     private var composeBoxActionListener: ComposeBoxActionListener? = null
@@ -46,6 +48,7 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         isStickerVisible = arguments!!.getBoolean("isStickerVisible")
         isWhiteBoardVisible = arguments!!.getBoolean("isWhiteBoardVisible")
         isWriteBoardVisible = arguments!!.getBoolean("isWriteBoardVisible")
+        isStartVideoCall = arguments!!.getBoolean("isStartVideoCall")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -70,6 +73,7 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         stickerMessage = view.findViewById(R.id.sticker_message)
         whiteBoardMessage = view.findViewById(R.id.whiteboard_message)
         writeBoardMessage = view.findViewById(R.id.writeboard_message)
+        startVideoCall = view.findViewById(R.id.start_call)
 
         if (isGalleryVisible) galleryMessage.visibility = View.VISIBLE else galleryMessage.visibility = View.GONE
         if (isCameraVisible) cameraMessage.visibility = View.VISIBLE else cameraMessage.visibility = View.GONE
@@ -79,7 +83,12 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         if (isStickerVisible) stickerMessage.visibility = View.VISIBLE else stickerMessage.visibility = View.GONE
         if (isWhiteBoardVisible) whiteBoardMessage.visibility = View.VISIBLE else whiteBoardMessage.visibility = View.GONE
         if (isWriteBoardVisible) writeBoardMessage.visibility = View.VISIBLE else writeBoardMessage.visibility = View.GONE
+        if (isStartVideoCall) startVideoCall.visibility = View.VISIBLE else startVideoCall.visibility = View.GONE
 
+        startVideoCall.setOnClickListener(View.OnClickListener {
+            if (composeBoxActionListener != null) composeBoxActionListener!!.onStartCallClick()
+            dismiss()
+        })
         galleryMessage.setOnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onGalleryClick()
             dismiss()
@@ -129,5 +138,6 @@ class ComposeBoxActionFragment : BottomSheetDialogFragment() {
         fun onStickerClick()
         fun onWhiteBoardClick()
         fun onWriteBoardClick()
+        fun onStartCallClick()
     }
 }

@@ -3,7 +3,6 @@ package adapter
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.media.MediaPlayer
@@ -602,9 +601,9 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 //                viewHolder.sentimentVw.setVisibility(View.GONE)
 //            }
             setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-            viewHolder.view.tvUser.setText(baseMessage.sender.name)
+            viewHolder.view.tvUser.text = baseMessage.sender.name
             val txtMessage = (baseMessage as TextMessage).text.trim { it <= ' ' }
-            viewHolder.view.goTxtMessage.setTextSize(16f)
+            viewHolder.view.goTxtMessage.textSize = 16f
 //            var count = 0
 //            val processed = EmojiCompat.get().process(txtMessage, 0,
 //                    txtMessage.length - 1, Int.MAX_VALUE, EmojiCompat.REPLACE_STRATEGY_ALL)
@@ -623,17 +622,19 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             var message = txtMessage
             if (isExtensionEnabled("profanity-filter"))
                 message = Extensions.getProfanityFilter(baseMessage)
+            if (isExtensionEnabled("data-masking"))
+                message = Extensions.checkDataMasking(baseMessage)
 
-            viewHolder.view.goTxtMessage.setText(message)
-            viewHolder.view.goTxtMessage.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoRegular))
-            viewHolder.view.goTxtMessage.setTextColor(context!!.resources.getColor(R.color.primaryTextColor))
+            viewHolder.view.goTxtMessage.text = message
+            viewHolder.view.goTxtMessage.typeface = fontUtils!!.getTypeFace(FontUtils.robotoRegular)
+            viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
 //            Utils.setHyperLinkSupport(context, viewHolder.txtMessage)
             showMessageTime(viewHolder, baseMessage)
             if (messageList[messageList.size - 1] == baseMessage) {
                 selectedItemList.add(baseMessage.getId())
             }
             setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
-            viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
+            viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener {
                 if (isLongClickEnabled && !isImageMessageClick) {
                     setLongClickSelectedItem(baseMessage)
                     messageLongClick!!.setLongMessageClick(longselectedItemList)
@@ -661,9 +662,9 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
     private fun setReactionSupport(baseMessage: BaseMessage, reactionLayout: ChipGroup) {
         val reactionOnMessage = Extensions.getReactionsOnMessage(baseMessage)
         if (reactionOnMessage.size > 0) {
-            reactionLayout.setVisibility(View.VISIBLE)
+            reactionLayout.visibility = View.VISIBLE
             reactionLayout.removeAllViews()
-            for ((k,v) in reactionOnMessage) {
+            for ((k, v) in reactionOnMessage) {
                 val chip = Chip(context)
                 chip.chipStrokeWidth = 2f
                 chip.chipBackgroundColor = ColorStateList.valueOf(context.resources.getColor(android.R.color.transparent))
@@ -701,9 +702,9 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
     private fun setColorFilter(baseMessage: BaseMessage, view: View) {
         if (!longselectedItemList.contains(baseMessage)) {
-            view.background.setColorFilter(context!!.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
+            view.background.setColorFilter(context.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
         } else {
-            view.background.setColorFilter(context!!.resources.getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP)
+            view.background.setColorFilter(context.resources.getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP)
         }
     }
 
@@ -711,11 +712,11 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         val baseMessage = messageList[i]
 
         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-        viewHolder.view.tvUser.setText(baseMessage.sender.name)
+        viewHolder.view.tvUser.text = baseMessage.sender.name
 
         if (baseMessage.deletedAt != 0L) {
             viewHolder.view.goTxtMessage.setText(R.string.message_deleted)
-            viewHolder.view.goTxtMessage.setTextColor(context!!.resources.getColor(R.color.secondaryTextColor))
+            viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.secondaryTextColor))
             viewHolder.view.goTxtMessage.setTypeface(null, Typeface.ITALIC)
         }
         showMessageTime(viewHolder, baseMessage)
@@ -761,7 +762,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
     }
 
     private fun setAvatar(avatar: Avatar, avatarUrl: String?, name: String?) {
-        if (avatarUrl != null && avatarUrl.isNotEmpty()) Glide.with(context!!).load(avatarUrl).into(avatar) else avatar.setInitials(name!!)
+        if (avatarUrl != null && avatarUrl.isNotEmpty()) Glide.with(context).load(avatarUrl).into(avatar) else avatar.setInitials(name!!)
     }
 
     override fun getItemCount(): Int {

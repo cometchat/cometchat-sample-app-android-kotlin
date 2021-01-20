@@ -72,6 +72,7 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
     var isStickerVisible = true
     var isWhiteBoardVisible = true
     var isWriteBoardVisible = true
+    var isStartVideoCall = true
 
     constructor(context: Context) : super(context) {
         initViewComponent(context, null, -1, -1)
@@ -183,6 +184,10 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
 
             override fun onWriteBoardClick() {
                 composeActionListener.onWriteBoardClicked()
+            }
+
+            override fun onStartCallClick() {
+                composeActionListener.onStartCallClicked()
             }
         })
 
@@ -322,6 +327,7 @@ class ComposeBox : RelativeLayout, View.OnClickListener {
             bundle.putBoolean("isFileVisible", isFileVisible)
             bundle.putBoolean("isAudioVisible", isAudioVisible)
             bundle.putBoolean("isLocationVisible", isLocationVisible)
+            bundle.putBoolean("isStartVideoCall", isStartVideoCall)
             if (CometChat.isExtensionEnabled("stickers"))
                 bundle.putBoolean("isStickerVisible", isStickerVisible)
             if (CometChat.isExtensionEnabled("whiteboard"))

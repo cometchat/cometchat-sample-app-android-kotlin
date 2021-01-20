@@ -109,6 +109,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         private const val LEFT_WRITEBOARD_MESSAGE = 9
         private const val RIGHT_WRITEBOARD_MESSAGE = 10
 
+        private const val LEFT_CONFERENCE_CALL_MESSAGE = 51
+        private const val RIGHT_CONFERENCE_CALL_MESSAGE = 52
+
         var LATITUDE = 0.0
         var LONGITUDE = 0.0
 
@@ -338,6 +341,18 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 messageWriteBoardItemBinding.root.tag = RIGHT_WRITEBOARD_MESSAGE
                 RightWriteBoardMessageViewHolder(messageWriteBoardItemBinding)
             }
+            LEFT_CONFERENCE_CALL_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageConferenceCallItemBinding: MessageLeftConferenceCallItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_left_conference_call_item, parent, false)
+                messageConferenceCallItemBinding.root.tag = LEFT_CONFERENCE_CALL_MESSAGE
+                LeftConferenceCallMessageViewHolder(messageConferenceCallItemBinding)
+            }
+            RIGHT_CONFERENCE_CALL_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messageConferenceCallItemBinding: MessageRightConferenceCallItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_right_conference_call_item, parent, false)
+                messageConferenceCallItemBinding.root.tag = RIGHT_CONFERENCE_CALL_MESSAGE
+                RightConferenceCallMessageViewHolder(messageConferenceCallItemBinding)
+            }
             else -> {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val actionMessageItemBinding : CometchatActionMessageBinding = DataBindingUtil.inflate(layoutInflater, R.layout.cometchat_action_message, parent, false)
@@ -422,6 +437,84 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             RIGHT_WHITEBOARD_MESSAGE -> setWhiteBoardData(viewHolder as RightWhiteBoardMessageViewHolder, i)
             LEFT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as LeftWriteBoardMessageViewHolder, i)
             RIGHT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as RightWriteBoardMessageViewHolder, i)
+
+            LEFT_CONFERENCE_CALL_MESSAGE -> setMeetingData(viewHolder as LeftConferenceCallMessageViewHolder, i)
+            RIGHT_CONFERENCE_CALL_MESSAGE -> setMeetingData(viewHolder as RightConferenceCallMessageViewHolder, i)
+        }
+    }
+
+    private fun setMeetingData(viewHolder: RecyclerView.ViewHolder, i: Int) {
+        val baseMessage = messageList[i]
+        if (baseMessage != null && baseMessage.deletedAt == 0L) {
+            if (viewHolder is LeftConferenceCallMessageViewHolder) {
+                if (baseMessage.sender.uid != loggedInUser.uid) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                        viewHolder.view.tvUser.visibility = View.GONE
+                        viewHolder.view.ivUser.visibility = View.GONE
+                    } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        if (isUserDetailVisible) {
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
+                        } else {
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        }
+                        setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
+                    }
+                    viewHolder.view.callMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_initiated_group_call)
+                }
+                viewHolder.view.joinCall.setOnClickListener(View.OnClickListener {
+                    Utils.startVideoCallIntent(context, (baseMessage as CustomMessage).customData.getString("sessionID"))
+                })
+
+                viewHolder.view.cvMessageContainer.setOnClickListener(View.OnClickListener {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+                viewHolder.view.cvMessageContainer.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+            } else {
+                viewHolder as RightConferenceCallMessageViewHolder
+                viewHolder.view.callMessage.text = context.getString(R.string.you_have_initiated_group_call)
+                viewHolder.view.joinCall.setOnClickListener(View.OnClickListener {
+                    Utils.startVideoCallIntent(context, (baseMessage as CustomMessage).customData.getString("sessionID"))
+                })
+                viewHolder.view.cvMessageContainer.setOnClickListener(View.OnClickListener {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (isLongClickEnabled && !isImageMessageClick) {
+                            setLongClickSelectedItem(baseMessage)
+                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        } else {
+                            setSelectedMessage(baseMessage.id)
+                        }
+                        notifyDataSetChanged()
+                    }
+                })
+                viewHolder.view.cvMessageContainer.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        notifyDataSetChanged()
+                    }
+                    true
+                })
+            }
         }
     }
 
@@ -1874,6 +1967,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 var message = txtMessage
                 if (isExtensionEnabled("profanity-filter"))
                     message = Extensions.getProfanityFilter(baseMessage)
+                if (isExtensionEnabled("data-masking"))
+                    message = Extensions.checkDataMasking(baseMessage)
 
                 viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
@@ -2001,6 +2096,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 var message = textMessage
                 if (isExtensionEnabled("profanity-filter"))
                     message = Extensions.getProfanityFilter(baseMessage)
+                if (isExtensionEnabled("data-masking"))
+                    message = Extensions.checkDataMasking(baseMessage)
 
                 viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
@@ -2064,10 +2161,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
                         } else if (messageType.equals(StringContract.IntentStrings.WHITEBOARD)) {
                             viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_whiteboard));
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp,0,0,0);
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0);
                         } else if (messageType.equals(StringContract.IntentStrings.WRITEBOARD)) {
                             viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_writeboard));
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp,0,0,0);
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0);
                         }
 
                     } catch (e: java.lang.Exception) {
@@ -2584,6 +2681,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             StringContract.IntentStrings.STICKERS -> RIGHT_STICKER_MESSAGE
                             StringContract.IntentStrings.WHITEBOARD -> RIGHT_WHITEBOARD_MESSAGE
                             StringContract.IntentStrings.WRITEBOARD -> RIGHT_WRITEBOARD_MESSAGE
+                            StringContract.IntentStrings.MEETING -> RIGHT_CONFERENCE_CALL_MESSAGE
                             else -> RIGHT_CUSTOM_MESSAGE
                         }
                     }
@@ -2593,6 +2691,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             StringContract.IntentStrings.STICKERS -> LEFT_STICKER_MESSAGE
                             StringContract.IntentStrings.WHITEBOARD -> LEFT_WHITEBOARD_MESSAGE
                             StringContract.IntentStrings.WRITEBOARD -> LEFT_WRITEBOARD_MESSAGE
+                            StringContract.IntentStrings.MEETING -> LEFT_CONFERENCE_CALL_MESSAGE
                             else -> LEFT_CUSTOM_MESSAGE
                         }
                     }
@@ -2767,6 +2866,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     inner class LeftWriteBoardMessageViewHolder(val view: MessageLeftWriteboardItemBinding) : RecyclerView.ViewHolder(view.root)
 
     inner class RightWriteBoardMessageViewHolder(val view: MessageRightWriteboardItemBinding) : RecyclerView.ViewHolder(view.root)
+
+
+    inner class LeftConferenceCallMessageViewHolder(val view: MessageLeftConferenceCallItemBinding) :RecyclerView.ViewHolder(view.root)
+
+    inner class RightConferenceCallMessageViewHolder(val view: MessageRightConferenceCallItemBinding) :RecyclerView.ViewHolder(view.root)
 
 
 

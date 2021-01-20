@@ -57,6 +57,9 @@ public class Extensions {
                         if (extensionsObject != null && extensionsObject.has("document")){
                             extensionMap["document"] = extensionsObject.getJSONObject("document")
                         }
+                        if (extensionsObject != null && extensionsObject.has("data-masking")) {
+                            extensionMap["dataMasking"] = extensionsObject.getJSONObject("data-masking")
+                        }
                     }
                     extensionMap
                 } else null
@@ -347,6 +350,35 @@ public class Extensions {
             }
             return documentUrl
 
+        }
+
+        fun checkDataMasking(baseMessage: BaseMessage): String {
+            var result = (baseMessage as TextMessage).text
+            val sensitiveData: String
+            val messageMasked: String
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                try {
+                    if (extensionList.containsKey("dataMasking")) {
+                        val dataMasking = extensionList["dataMasking"]
+                        if (dataMasking != null && dataMasking.has("data")) {
+                            val dataObject = dataMasking.getJSONObject("data")
+                            if (dataObject.has("sensitive_data") && dataObject.has("message_masked")) {
+                                sensitiveData = dataObject.getString("sensitive_data")
+                                messageMasked = dataObject.getString("message_masked")
+                                result = if (sensitiveData == "no") baseMessage.text else messageMasked
+                            } else if (dataObject.has("action") && dataObject.has("message")) {
+                                result = dataObject.getString("message")
+                            }
+                        }
+                    } else {
+                        result = baseMessage.text
+                    }
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }
+            return result
         }
 
 

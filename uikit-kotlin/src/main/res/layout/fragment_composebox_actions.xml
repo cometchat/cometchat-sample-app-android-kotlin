@@ -9,6 +9,21 @@
     android:padding="8dp">
 
     <TextView
+        android:id="@+id/start_call"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:textStyle="bold"
+        android:text="@string/start_call"
+        android:drawableStart="@drawable/ic_videocam_24dp"
+        android:drawableTint="@color/grey"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/grey"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
         android:id="@+id/gallery_message"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"

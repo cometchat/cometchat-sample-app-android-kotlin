@@ -1,5 +1,6 @@
 package screen
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -15,6 +16,7 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.MessageReceipt
 import com.cometchat.pro.uikit.CometChatReceiptsList
 import com.cometchat.pro.uikit.R
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import constant.StringContract
 import org.json.JSONException
@@ -30,6 +32,8 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     private val videoMessage: View? = null
     private var stickerMessage: View? = null
     private var locationMessage: View? = null
+    private lateinit var whiteBoardMessage: View
+    private lateinit var writeBoardMessage: View
 
     private var ivMap: ImageView? = null
     private var tvPlaceName: TextView? = null
@@ -40,6 +44,10 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     private var messageSticker: ImageView? = null
     private var txtTime: TextView? = null
 //    private val sensitiveLayout: RelativeLayout? = null
+    private lateinit var whiteBoardText: TextView
+    private lateinit var writeBoardText: TextView
+    private lateinit var joinWhiteBoard: MaterialButton
+    private lateinit var joinWriteBoard: MaterialButton
 
     private var audioFileSize: TextView? = null
 
@@ -76,6 +84,12 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         stickerMessage = findViewById(R.id.vw_sticker_message)
         messageSticker = findViewById(R.id.sticker_view)
         locationMessage = findViewById(R.id.vwLocationMessage)
+        whiteBoardMessage = findViewById(R.id.vw_whiteboard_message)
+        writeBoardMessage = findViewById(R.id.vw_writeboard_message)
+        whiteBoardText = findViewById(R.id.whiteboard_message)
+        writeBoardText = findViewById(R.id.writeboard_message)
+        joinWhiteBoard = findViewById(R.id.join_whiteboard)
+        joinWriteBoard = findViewById(R.id.join_writeboard)
 
         messageText = findViewById(R.id.go_txt_message)
         txtTime = findViewById(R.id.txt_time)
@@ -161,6 +175,24 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
+            } else if (messageType == StringContract.IntentStrings.WHITEBOARD) {
+                whiteBoardMessage.visibility = View.VISIBLE
+                whiteBoardText.text = getString(R.string.you_created_whiteboard)
+                joinWhiteBoard.setOnClickListener(View.OnClickListener {
+                    val boardUrl = intent.getStringExtra(StringContract.IntentStrings.TEXTMESSAGE)
+                    val intent = Intent(this@CometChatMessageInfoScreenActivity, CometChatWebViewActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                    startActivity(intent)
+                })
+            } else if (messageType == StringContract.IntentStrings.WRITEBOARD) {
+                writeBoardMessage.visibility = View.VISIBLE
+                writeBoardText.text = getString(R.string.you_created_document)
+                joinWriteBoard.setOnClickListener(View.OnClickListener {
+                    val boardUrl = intent.getStringExtra(StringContract.IntentStrings.TEXTMESSAGE)
+                    val intent = Intent(this@CometChatMessageInfoScreenActivity, CometChatWebViewActivity::class.java)
+                    intent.putExtra(StringContract.IntentStrings.URL, boardUrl)
+                    startActivity(intent)
+                })
             }
             else if (messageType == StringContract.IntentStrings.LOCATION) {
                 try {

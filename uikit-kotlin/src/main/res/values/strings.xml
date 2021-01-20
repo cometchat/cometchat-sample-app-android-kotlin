@@ -235,6 +235,10 @@
     <string name="has_shared_whiteboard">has shared a collaborative whiteboard.</string>
     <string name="you_created_document">You’ve created a new collaborative document.</string>
     <string name="has_shared_document">has shared a collaborative document.</string>
+    <string name="start_call">Start a call</string>
+    <string name="connecting_to_call">Connecting to call</string>
+    <string name="has_initiated_group_call">has initiated a group call</string>
+    <string name="you_have_initiated_group_call">You\'ve initiated a group call</string>
 
 
 </resources>

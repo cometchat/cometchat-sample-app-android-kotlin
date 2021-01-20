@@ -278,28 +278,28 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         joinWhiteBoard = view.findViewById(R.id.join_whiteboard)
         writeboardMessage = view.findViewById(R.id.writeboard_vw)
         writeBoardTxt = view.findViewById(R.id.writeboard_message)
-        joinWriteBoard = view.findViewById(R.id.join_whiteboard)
+        joinWriteBoard = view.findViewById(R.id.join_writeboard)
 
         if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-            imageMessage!!.setVisibility(View.VISIBLE)
+            imageMessage!!.visibility = View.VISIBLE
             Glide.with(context!!).load(message).into(imageMessage!!)
         } else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-            videoMessage!!.setVisibility(View.VISIBLE)
+            videoMessage!!.visibility = View.VISIBLE
             val mediacontroller = MediaController(context)
             mediacontroller.setAnchorView(videoMessage)
             videoMessage!!.setMediaController(mediacontroller)
             videoMessage!!.setVideoURI(Uri.parse(message))
         } else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE || messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-            fileMessage!!.setVisibility(View.VISIBLE)
-            if (messageFileName != null) fileName!!.setText(messageFileName)
-            if (messageExtension != null) fileExtension!!.setText(messageExtension)
-            fileSize!!.setText(Utils.getFileSize(messageSize))
+            fileMessage!!.visibility = View.VISIBLE
+            if (messageFileName != null) fileName!!.text = messageFileName
+            if (messageExtension != null) fileExtension!!.text = messageExtension
+            fileSize!!.text = Utils.getFileSize(messageSize)
         } else if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
-            textMessage!!.setVisibility(View.VISIBLE)
-            textMessage!!.setText(message)
+            textMessage!!.visibility = View.VISIBLE
+            textMessage!!.text = message
         } else if (messageType == StringContract.IntentStrings.STICKERS) {
             ivForwardMessage!!.visibility = View.GONE
-            stickerMessage?.setVisibility(View.VISIBLE)
+            stickerMessage?.visibility = View.VISIBLE
             Glide.with(context!!).load(message).into(stickerMessage!!)
         } else if (messageType == StringContract.IntentStrings.WHITEBOARD) {
             ivForwardMessage?.visibility = View.GONE
@@ -339,6 +339,7 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
         composeBox?.isStickerVisible = false
         composeBox?.isWhiteBoardVisible = false
         composeBox?.isWriteBoardVisible = false
+        composeBox?.isStartVideoCall = false
         composeBox?.ivMic!!.visibility = View.GONE
         composeBox?.ivSend!!.visibility = View.VISIBLE
 

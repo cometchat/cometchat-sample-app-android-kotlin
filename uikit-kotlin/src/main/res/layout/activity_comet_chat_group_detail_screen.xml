@@ -66,6 +66,7 @@
                         tools:visibility="visible" />
                 </LinearLayout>
                 <ImageView
+                    android:visibility="gone"
                     android:padding="8dp"
                     android:clickable="true"
                     android:foreground="?attr/selectableItemBackground"
@@ -78,6 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <ImageView
+                    android:visibility="gone"
                     android:padding="8dp"
                     android:clickable="true"
                     android:foreground="?attr/selectableItemBackground"

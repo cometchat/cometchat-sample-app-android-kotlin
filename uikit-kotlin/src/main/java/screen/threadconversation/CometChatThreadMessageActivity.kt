@@ -103,7 +103,7 @@ class CometChatThreadMessageActivity : AppCompatActivity(), ThreadAdapter.OnMess
                 bundle.putInt(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, mediaSize)
                 bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE, mediaMime)
             }
-            fragment.setArguments(bundle)
+            fragment.arguments = bundle
             supportFragmentManager.beginTransaction().replace(R.id.ChatFragment, fragment).commit()
         }
     }
