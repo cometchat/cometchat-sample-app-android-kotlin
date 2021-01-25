@@ -60,6 +60,9 @@ public class Extensions {
                         if (extensionsObject != null && extensionsObject.has("data-masking")) {
                             extensionMap["dataMasking"] = extensionsObject.getJSONObject("data-masking")
                         }
+                        if (extensionsObject != null && extensionsObject.has("image-moderation")) {
+                            extensionMap["imageModeration"] = extensionsObject.getJSONObject("image-moderation")
+                        }
                     }
                     extensionMap
                 } else null
@@ -381,6 +384,20 @@ public class Extensions {
             return result
         }
 
+        fun getImageModeration(context: Context?, baseMessage: BaseMessage?): Boolean {
+            var result = false
+            try {
+                val extensionList = extensionCheck(baseMessage!!)
+                if (extensionList != null && extensionList.containsKey("imageModeration")) {
+                    val imageModeration = extensionList["imageModeration"]
+                    val confidence = imageModeration!!.getInt("confidence")
+                    result = confidence > 50
+                }
+            } catch (e: java.lang.Exception) {
+                Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
+            }
+            return result
+        }
 
     }
 

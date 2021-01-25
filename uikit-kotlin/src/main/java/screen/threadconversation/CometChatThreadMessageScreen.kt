@@ -1624,6 +1624,7 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE,
                                 CometChatConstants.CATEGORY_CUSTOM)
                     } else {
+                        val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,
                                 (baseMessage as MediaMessage).attachment.fileUrl)
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,
@@ -1632,6 +1633,7 @@ class CometChatThreadMessageScreen : Fragment(), View.OnClickListener,  OnMessag
                                 (baseMessage as MediaMessage).attachment.fileSize)
                         intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION,
                                 (baseMessage as MediaMessage).attachment.fileExtension)
+                        intent.putExtra(StringContract.IntentStrings.IMAGE_MODERATION, isImageNotSafe)
                     }
                 }
                 context!!.startActivity(intent)

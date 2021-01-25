@@ -56,23 +56,6 @@ class SharedImagesFragment : Fragment() {
         Id = this.arguments!!.getString("Id")
         type = this.arguments!!.getString("type")
         fetchMessage()
-        rvFiles!!.addOnItemTouchListener(RecyclerTouchListener(context, rvFiles!!, object : ClickListener() {
-            override fun onClick(var1: View, var2: Int) {
-                val message = var1.getTag(R.string.baseMessage) as BaseMessage
-                val imageDialog = Dialog(context!!)
-                val messageVw = LayoutInflater.from(context).inflate(R.layout.image_dialog_view, null)
-                val imageView: ZoomIv = messageVw.findViewById(R.id.imageView)
-                Glide.with(context!!).asBitmap().load((message as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
-                        imageView.setImageBitmap(resource)
-                    }
-                })
-                imageDialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                imageDialog.setContentView(messageVw)
-                imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                imageDialog.show()
-            }
-        }))
         rvFiles!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (!recyclerView.canScrollVertically(1)) {

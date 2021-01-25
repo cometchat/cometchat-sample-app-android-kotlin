@@ -69,6 +69,8 @@ class StringContract {
         const val URL = "url"
 
         const val MEETING = "meeting"
+
+        const val IMAGE_MODERATION = "image_moderation"
     }
 
     object Tab {

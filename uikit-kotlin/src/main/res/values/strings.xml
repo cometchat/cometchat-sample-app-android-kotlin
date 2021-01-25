@@ -239,6 +239,7 @@
     <string name="connecting_to_call">Connecting to call</string>
     <string name="has_initiated_group_call">has initiated a group call</string>
     <string name="you_have_initiated_group_call">You\'ve initiated a group call</string>
+    <string name="sensitive_content">Unsafe Content</string>
 
 
 </resources>

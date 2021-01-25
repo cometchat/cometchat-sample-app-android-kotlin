@@ -65,7 +65,10 @@ import constant.StringContract
 import listeners.*
 import org.json.JSONException
 import org.json.JSONObject
-import screen.*
+import screen.CometChatForwardMessageScreenActivity
+import screen.CometChatGroupDetailScreenActivity
+import screen.CometChatMessageInfoScreenActivity
+import screen.CometChatUserDetailScreenActivity
 import screen.threadconversation.CometChatThreadMessageActivity
 import utils.*
 import java.io.File
@@ -2063,6 +2066,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                         intent.putExtra(StringContract.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage!!))
                     }
                 } else {
+                    val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,
                             (baseMessage as MediaMessage).attachment.fileUrl)
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,
@@ -2072,6 +2076,7 @@ class CometChatMessageScreen : Fragment(), View.OnClickListener, OnMessageLongCl
                     intent.putExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION,
                             (baseMessage as MediaMessage).attachment.fileExtension)
                     intent.putExtra(StringContract.IntentStrings.SENTAT, baseMessage!!.sentAt)
+                    intent.putExtra(StringContract.IntentStrings.IMAGE_MODERATION, isImageNotSafe)
                 }
                 context!!.startActivity(intent)
             }

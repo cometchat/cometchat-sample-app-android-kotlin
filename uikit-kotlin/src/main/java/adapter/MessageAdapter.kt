@@ -1,6 +1,7 @@
 package adapter
 
 import adapter.MessageAdapter.DateItemHolder
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
 import android.text.Spannable
@@ -26,6 +28,7 @@ import androidx.emoji.text.EmojiSpan
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
@@ -1515,13 +1518,32 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
                 viewHolder.view.tvUser.text = baseMessage.sender.name
             }
-            viewHolder.view.goImgMessage.setImageDrawable(context!!.resources.getDrawable(R.drawable.ic_defaulf_image))
+            viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
+            val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
             var thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
-            if (thumbnailUrl != null)
-                Glide.with(context).load(thumbnailUrl).into(viewHolder.view.goImgMessage)
-            else {
-                if ((baseMessage as MediaMessage).attachment != null)
-                    Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)}
+
+//            if (thumbnailUrl != null)
+//                Glide.with(context).asBitmap().load(thumbnailUrl).into(viewHolder.view.goImgMessage)
+//            else {
+//                if ((baseMessage as MediaMessage).attachment != null)
+//                    Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)}
+
+            if (thumbnailUrl != null) {
+                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
+                    setImageDrawable(viewHolder, thumbnailUrl, true, false)
+                else
+                    setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
+            } else {
+                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
+                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
+                else
+                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+            }
+            if (isImageNotSafe) {
+                viewHolder.view.sensitiveLayout.visibility = View.VISIBLE
+            } else {
+                viewHolder.view.sensitiveLayout.visibility = View.GONE
+            }
             showMessageTime(viewHolder, baseMessage)
 //            if (selectedItemList.contains(baseMessage.getId()))
             viewHolder.view.txtTime.visibility = View.VISIBLE
@@ -1560,9 +1582,19 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 context.startActivity(intent)
             })
             viewHolder.view.cvImageMessageContainer.setOnClickListener { view: View? ->
-                displayImage(baseMessage)
-                setSelectedMessage(baseMessage.getId())
-                notifyDataSetChanged()
+                if (isImageNotSafe) {
+                    val alert = AlertDialog.Builder(context)
+                    alert.setTitle("Unsafe Content")
+                    alert.setIcon(R.drawable.ic_hand)
+                    alert.setMessage("Are you surely want to see this unsafe content")
+                    alert.setPositiveButton("Yes") { dialog, which -> MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context) }
+                    alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
+                    alert.create().show()
+                } else {
+                    Utils.displayImage(context, baseMessage)
+                    setSelectedMessage(baseMessage.getId())
+                    notifyDataSetChanged()
+                }
             }
             viewHolder.view.cvImageMessageContainer.setOnLongClickListener {
                 if (!isLongClickEnabled && !isTextMessageClick) {
@@ -1573,26 +1605,44 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
-            viewHolder.view.reactionsLayout.setVisibility(View.GONE)
+            viewHolder.view.reactionsLayout.visibility = View.GONE
             setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         } else {
             viewHolder = view as RightImageMessageViewHolder
             viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
+            val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
             var thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
-            if (thumbnailUrl != null)
-                Glide.with(context).load(thumbnailUrl).into(viewHolder.view.goImgMessage)
-            else if ((baseMessage as MediaMessage).attachment != null) Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)
+//            if (thumbnailUrl != null)
+//                Glide.with(context).load(thumbnailUrl).into(viewHolder.view.goImgMessage)
+//            else if ((baseMessage as MediaMessage).attachment != null) Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)
+
+            if (thumbnailUrl != null) {
+                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
+                    setImageDrawable(viewHolder, thumbnailUrl, true, false)
+                else
+                    setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
+            } else {
+                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
+                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
+                else
+                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+            }
+            if (isImageNotSafe) {
+                viewHolder.view.sensitiveLayout.visibility = View.VISIBLE
+            } else {
+                viewHolder.view.sensitiveLayout.visibility = View.GONE
+            }
             showMessageTime(viewHolder, baseMessage)
 //            if (selectedItemList.contains(baseMessage.getId()))
             viewHolder.view.txtTime.visibility = View.VISIBLE
 //            else viewHolder.view.txtTime.visibility = View.GONE
             //
-            if (baseMessage.getReplyCount() != 0) {
-                viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+            if (baseMessage.replyCount != 0) {
+                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
             } else {
-                viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                viewHolder.view.threadReplyCount.visibility = View.GONE
             }
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageActivity::class.java)
@@ -1619,9 +1669,19 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 context.startActivity(intent)
             })
             viewHolder.view.cvImageMessageContainer.setOnClickListener { view: View? ->
-                displayImage(baseMessage)
-                setSelectedMessage(baseMessage.getId())
-                notifyDataSetChanged()
+                if (isImageNotSafe) {
+                    val alert = AlertDialog.Builder(context)
+                    alert.setTitle("Unsafe Content")
+                    alert.setIcon(R.drawable.ic_hand)
+                    alert.setMessage("Are you surely want to see this unsafe content")
+                    alert.setPositiveButton("Yes") { dialog, which -> MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context) }
+                    alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
+                    alert.create().show()
+                } else {
+                    Utils.displayImage(context, baseMessage)
+                    setSelectedMessage(baseMessage.getId())
+                    notifyDataSetChanged()
+                }
             }
             viewHolder.view.cvImageMessageContainer.setOnLongClickListener {
                 if (!isLongClickEnabled && !isTextMessageClick) {
@@ -1632,25 +1692,69 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
-            viewHolder.view.reactionsLayout.setVisibility(View.GONE);
+            viewHolder.view.reactionsLayout.visibility = View.GONE;
             setReactionSupport(baseMessage, viewHolder.view.reactionsLayout);
         }
     }
 
-    private fun displayImage(baseMessage: BaseMessage) {
-        val imageDialog = Dialog(context)
-        val messageVw = LayoutInflater.from(context).inflate(R.layout.image_dialog_view, null)
-        val imageView: ZoomIv = messageVw.findViewById(R.id.imageView)
-        Glide.with(context).asBitmap().load((baseMessage as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
-            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
-                imageView.setImageBitmap(resource)
+    private fun setImageDrawable(viewHolder: RecyclerView.ViewHolder, url: String, isGif: Boolean, isImageNotSafe: Boolean) {
+        if (viewHolder is LeftImageMessageViewHolder) {
+            if (isGif) {
+                Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true).load(url).into(viewHolder.view.goImgMessage)
+            } else {
+                Glide.with(context).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        if (isImageNotSafe)
+                            viewHolder.view.goImgMessage.setImageBitmap(Utils.blur(context, resource))
+                        else
+                            viewHolder.view.goImgMessage.setImageBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+
+                    }
+
+                })
             }
-        })
-        imageDialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        imageDialog.setContentView(messageVw)
-        imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        imageDialog.show()
+        }
+        else {
+            viewHolder as RightImageMessageViewHolder
+            if (isGif) {
+                Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true).load(url).into(viewHolder.view.goImgMessage)
+            } else {
+                Glide.with(context).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        if (isImageNotSafe)
+                            viewHolder.view.goImgMessage.setImageBitmap(Utils.blur(context, resource))
+                        else
+                            viewHolder.view.goImgMessage.setImageBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+
+                    }
+
+                })
+            }
+        }
     }
+
+//    private fun displayImage(baseMessage: BaseMessage) {
+//        val imageDialog = Dialog(context)
+//        val messageVw = LayoutInflater.from(context).inflate(R.layout.image_dialog_view, null)
+//        val imageView: ZoomIv = messageVw.findViewById(R.id.imageView)
+//        Glide.with(context).asBitmap().load((baseMessage as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
+//            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
+//                imageView.setImageBitmap(resource)
+//            }
+//        })
+//        imageDialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+//        imageDialog.setContentView(messageVw)
+//        imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//        imageDialog.show()
+//    }
 
     private fun setVideoData(view: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]

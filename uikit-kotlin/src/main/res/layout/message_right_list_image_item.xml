@@ -42,6 +42,32 @@
                     android:adjustViewBounds="true" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:id="@+id/sensitive_layout"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:background="@color/grey"
+                android:layout_width="200dp"
+                android:gravity="center"
+                android:layout_height="200dp">
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_centerInParent="true"
+                    android:tint="@color/textColorWhite"
+                    app:srcCompat="@drawable/ic_hand"
+                    android:layout_width="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_above="@+id/sensitive_desc"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/sensitive_desc"
+                    android:layout_centerInParent="true"
+                    android:textSize="12dp"
+                    android:textColor="@color/textColorWhite"
+                    android:text="@string/sensitive_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
             <ProgressBar
                 android:id="@+id/img_progress_bar"
                 android:layout_width="50dp"
@@ -62,7 +88,6 @@
             tools:drawableEnd="@drawable/ic_double_tick"
             android:layout_alignBottom="@+id/cv_image_message_container"
             android:layout_toLeftOf="@+id/cv_image_message_container"
-            android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"
             android:visibility="gone" />

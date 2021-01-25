@@ -1,6 +1,7 @@
 package utils
 
 import android.app.Activity
+import android.app.Dialog
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.ContentUris
@@ -12,6 +13,8 @@ import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.location.Geocoder
 import android.media.AudioManager
 import android.media.RingtoneManager
@@ -24,11 +27,20 @@ import android.provider.OpenableColumns
 import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.renderscript.Allocation
+import androidx.renderscript.Element
+import androidx.renderscript.RenderScript
+import androidx.renderscript.ScriptIntrinsicBlur
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
@@ -49,6 +61,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.math.roundToInt
 
 public class Utils {
     companion object{
@@ -756,6 +769,37 @@ public class Utils {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.putExtra(StringContract.IntentStrings.SESSION_ID, sessionId)
             context.startActivity(intent)
+        }
+
+        fun blur(context: Context?, image: Bitmap): Bitmap? {
+            val width = (image.width * 0.6f).roundToInt()
+            val height = (image.height * 0.6f).roundToInt()
+            val inputBitmap = Bitmap.createScaledBitmap(image, width, height, false)
+            val outputBitmap = Bitmap.createBitmap(inputBitmap)
+            val rs = RenderScript.create(context)
+            val intrinsicBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs))
+            val tmpIn = Allocation.createFromBitmap(rs, inputBitmap)
+            val tmpOut = Allocation.createFromBitmap(rs, outputBitmap)
+            intrinsicBlur.setRadius(15f)
+            intrinsicBlur.setInput(tmpIn)
+            intrinsicBlur.forEach(tmpOut)
+            tmpOut.copyTo(outputBitmap)
+            return outputBitmap
+        }
+
+        fun displayImage(context: Context, baseMessage: BaseMessage) {
+            val imageDialog = Dialog(context)
+            val messageVw = LayoutInflater.from(context).inflate(R.layout.image_dialog_view, null)
+            val imageView: ZoomIv = messageVw.findViewById(R.id.imageView)
+            Glide.with(context).asBitmap().load((baseMessage as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
+                    imageView.setImageBitmap(resource)
+                }
+            })
+            imageDialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            imageDialog.setContentView(messageVw)
+            imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            imageDialog.show()
         }
     }
 }

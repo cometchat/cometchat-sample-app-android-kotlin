@@ -1,10 +1,13 @@
 package adapter
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
@@ -18,6 +21,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
@@ -421,15 +426,29 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
         viewHolder.view.tvUser.text = baseMessage.sender.name
 
-//        val isImageNotSafe: Boolean = Extensions.getImageModeration(context, baseMessage)
-//        val smallUrl: String = Extensions.getThumbnailGeneration(context, baseMessage)
         viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
+        val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
         val thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
-        if (thumbnailUrl != null)
-            Glide.with(context).asBitmap().load(thumbnailUrl).into(viewHolder.view.goImgMessage)
+        if (thumbnailUrl != null) {
+//            Glide.with(context).asBitmap().load(thumbnailUrl).into(viewHolder.view.goImgMessage)
+            if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true)) {
+                setImageDrawable(viewHolder, thumbnailUrl, true, false)
+            } else {
+                setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
+            }
+        }
         else {
-            if ((baseMessage as MediaMessage).attachment != null)
-                Glide.with(context).asBitmap().load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)
+//            if ((baseMessage as MediaMessage).attachment != null)
+//                Glide.with(context).asBitmap().load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)
+            if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
+                setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
+            else
+                setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+        }
+        if (isImageNotSafe) {
+            viewHolder.view.sensitiveLayout.setVisibility(View.VISIBLE)
+        } else {
+            viewHolder.view.sensitiveLayout.setVisibility(View.GONE)
         }
 //        if (smallUrl != null) {
 //            Glide.with(context!!).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).load(smallUrl).into(object : SimpleTarget<Bitmap?>() {
@@ -461,19 +480,19 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 //        else
 //            viewHolder.txtTime.setVisibility(View.GONE);
         viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
-//            if (isImageNotSafe) {
-//                val alert = AlertDialog.Builder(context)
-//                alert.setTitle("Unsafe Content")
-//                alert.setIcon(R.drawable.ic_hand)
-//                alert.setMessage("Are you surely want to see this unsafe content")
-//                alert.setPositiveButton("Yes") { dialog, which -> MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context) }
-//                alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
-//                alert.create().show()
-//            } else {
+            if (isImageNotSafe) {
+                val alert = AlertDialog.Builder(context)
+                alert.setTitle("Unsafe Content")
+                alert.setIcon(R.drawable.ic_hand)
+                alert.setMessage("Are you surely want to see this unsafe content")
+                alert.setPositiveButton("Yes") { dialog, which -> MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context) }
+                alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
+                alert.create().show()
+            } else {
             setSelectedMessage(baseMessage.id)
             notifyDataSetChanged()
             MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context!!)
-//            }
+            }
         })
         viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
             if (!isLongClickEnabled && !isTextMessageClick) {
@@ -486,6 +505,22 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         })
         viewHolder.view.reactionsLayout.visibility = View.GONE
         setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+    }
+
+    private fun setImageDrawable(viewHolder: ImageMessageViewHolder, url: String, gif: Boolean, isImageNotSafe: Boolean) {
+        if (gif) {
+            Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).load(url).into(viewHolder.view.goImgMessage)
+        } else {
+            Glide.with(context).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).load(url).into(object : CustomTarget<Bitmap?>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
+                            if (isImageNotSafe) viewHolder.view.goImgMessage.setImageBitmap(Utils.blur(context, resource)) else viewHolder.view.goImgMessage.setImageBitmap(resource)
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
+        }
     }
 
     private fun setLinkData(viewHolder: LinkMessageViewHolder, i: Int) {

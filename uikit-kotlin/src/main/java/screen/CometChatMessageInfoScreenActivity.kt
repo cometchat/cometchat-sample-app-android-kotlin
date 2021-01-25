@@ -54,6 +54,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     private var fileName: TextView? = null
     private var fileExtension: TextView? = null
     private var fileSize: TextView? = null
+    private lateinit var sensitiveLayout: RelativeLayout
 
     private var id = 0
     private var message: String? = null
@@ -90,6 +91,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         writeBoardText = findViewById(R.id.writeboard_message)
         joinWhiteBoard = findViewById(R.id.join_whiteboard)
         joinWriteBoard = findViewById(R.id.join_writeboard)
+        sensitiveLayout = findViewById(R.id.sensitive_layout)
 
         messageText = findViewById(R.id.go_txt_message)
         txtTime = findViewById(R.id.txt_time)
@@ -145,6 +147,11 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         if (intent.hasExtra(StringContract.IntentStrings.SENTAT)) {
             txtTime!!.text = Utils.getHeaderDate(intent
                     .getLongExtra(StringContract.IntentStrings.SENTAT, 0) * 1000)
+        }
+        if (intent.hasExtra(StringContract.IntentStrings.IMAGE_MODERATION)) {
+            val isImageNotSafe = intent
+                    .getBooleanExtra(StringContract.IntentStrings.IMAGE_MODERATION, true)
+            if (isImageNotSafe) sensitiveLayout.setVisibility(View.VISIBLE) else sensitiveLayout.setVisibility(View.GONE)
         }
         if (intent.hasExtra(StringContract.IntentStrings.CUSTOM_MESSAGE)) {
             message = intent.getStringExtra(StringContract.IntentStrings.CUSTOM_MESSAGE)

@@ -1,10 +1,13 @@
 package adapter
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -12,9 +15,11 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.uikit.R
+import constant.StringContract
 import utils.Extensions
 import utils.FontUtils
 import utils.MediaUtils
+import utils.Utils
 import java.util.*
 
 /**
@@ -122,11 +127,33 @@ class SharedMediaAdapter(context: Context, messageArrayList: List<BaseMessage>) 
 
     private fun setImageData(viewHolder: ImageViewHolder, i: Int) {
         val message = messageArrayList[i]
+        val isImageNotSafe = Extensions.getImageModeration(context, message)
         var thumbnailUrl = Extensions.getThumbnailGeneration(context, message)
         if (thumbnailUrl != null)
             Glide.with(context).load(thumbnailUrl).into(viewHolder.imageView)
         else {
             Glide.with(context).load((message as MediaMessage).attachment.fileUrl).into(viewHolder.imageView)
+        }
+        if (isImageNotSafe) {
+            viewHolder.imageView.alpha = 0.3f
+            viewHolder.sensitiveLayout.visibility = View.VISIBLE
+        } else {
+            viewHolder.imageView.alpha = 1f
+            viewHolder.sensitiveLayout.visibility = View.GONE
+        }
+        viewHolder.imageView.setOnClickListener { view: View? ->
+            if (isImageNotSafe) {
+                val alert = AlertDialog.Builder(context)
+                alert.setTitle("Unsafe Content")
+                alert.setIcon(R.drawable.ic_hand)
+                alert.setMessage("Are you surely want to see this unsafe content")
+                alert.setPositiveButton("Yes") { dialog, which -> MediaUtils.openFile((message as MediaMessage).attachment.fileUrl, context) }
+                alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
+                alert.create().show()
+            }
+//            else {
+//                Utils.displayImage(context, message)
+//            }
         }
         viewHolder.itemView.setTag(R.string.baseMessage, message)
     }
@@ -141,9 +168,11 @@ class SharedMediaAdapter(context: Context, messageArrayList: List<BaseMessage>) 
 
     internal inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView
+        val sensitiveLayout: RelativeLayout
 
         init {
             imageView = itemView.findViewById(R.id.imageView)
+            sensitiveLayout = itemView.findViewById(R.id.sensitive_layout)
         }
     }
 
