@@ -102,7 +102,7 @@
             </LinearLayout>
 
         </com.facebook.shimmer.ShimmerFrameLayout>
-        <com.cometchat.pro.uikit.CometChatGroupList
+        <com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroups
             android:id="@+id/cometchatGroupList"
             android:layout_width="match_parent"
             app:grouplist="@{groupList}"

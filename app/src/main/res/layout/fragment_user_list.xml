@@ -104,7 +104,7 @@
                 </LinearLayout>
 
             </com.facebook.shimmer.ShimmerFrameLayout>
-            <com.cometchat.pro.uikit.CometChatUserList
+            <com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
                 android:id="@+id/cometchatUserList"
                 android:layout_width="match_parent"
                 app:userlist="@{userList}"

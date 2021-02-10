@@ -11,11 +11,11 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
+import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUnified
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
-import listeners.CometChatCallListener.makeCall
-import screen.unified.CometChatUnified
-import utils.Utils
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.makeCall
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class SelectActivity : AppCompatActivity() {
     private var screenGroup: RadioGroup? = null

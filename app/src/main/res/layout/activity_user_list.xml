@@ -10,7 +10,7 @@
     <fragment
         android:id="@+id/groupList"
         android:layout_width="match_parent"
-        class="screen.CometChatUserInfoScreen"
+        class="com.cometchat.pro.uikit.ui_components.userProfile.CometChatUserProfile"
         android:layout_height="match_parent"/>
 
 

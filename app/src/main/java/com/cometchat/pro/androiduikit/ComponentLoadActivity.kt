@@ -19,16 +19,16 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.Conversation
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
-import constant.StringContract
-import listeners.CustomAlertDialogHelper
-import listeners.OnAlertDialogButtonClickListener
-import listeners.OnItemClickListener
-import screen.CometChatConversationListScreen
-import screen.CometChatGroupListScreen
-import screen.CometChatUserInfoScreen
-import screen.CometChatUserListScreen
-import screen.call.CometChatCallListScreen
-import screen.messagelist.CometChatMessageListActivity
+import com.cometchat.pro.uikit.ui_components.calls.call_list.CometChatCallList
+import com.cometchat.pro.uikit.ui_components.chats.CometChatConversationList
+import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
+import com.cometchat.pro.uikit.ui_components.users.user_list.CometChatUserList
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.CustomAlertDialogHelper
+import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.OnAlertDialogButtonClickListener
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
+import com.cometchat.pro.uikit.ui_components.groups.group_list.CometChatGroupList
+import com.cometchat.pro.uikit.ui_components.userProfile.CometChatUserProfile
 
 class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListener {
     private var progressDialog: ProgressDialog? = null
@@ -39,15 +39,15 @@ class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListe
         setContentView(R.layout.activity_load_fragment)
         val id = intent.getIntExtra("screen", 0)
         if (id == R.id.users) {
-            loadFragment(CometChatUserListScreen())
+            loadFragment(CometChatUserList())
         } else if (id == R.id.calls) {
-            loadFragment(CometChatCallListScreen())
+            loadFragment(CometChatCallList())
         } else if (id == R.id.groups) {
-            loadFragment(CometChatGroupListScreen())
+            loadFragment(CometChatGroupList())
         } else if (id == R.id.conversations) {
-            loadFragment(CometChatConversationListScreen())
+            loadFragment(CometChatConversationList())
         } else if (id == R.id.moreinfo) {
-            loadFragment(CometChatUserInfoScreen())
+            loadFragment(CometChatUserProfile())
         } else if (id == R.id.cometchat_avatar) {
             loadFragment(AvatarFragment())
         } else if (id == R.id.cometchat_status_indicator) {
@@ -63,12 +63,12 @@ class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListe
         } else if (id == R.id.cometchat_callList) {
             loadFragment(CallListViewFragment())
         }
-        CometChatUserListScreen.setItemClickListener(object : OnItemClickListener<Any>() {
+        CometChatUserList.setItemClickListener(object : OnItemClickListener<Any>() {
             override fun OnItemClick(t: Any, position: Int) {
                 userIntent(t as User)
             }
         })
-        CometChatGroupListScreen.setItemClickListener(object : OnItemClickListener<Any>() {
+        CometChatGroupList.setItemClickListener(object : OnItemClickListener<Any>() {
             override fun OnItemClick(t: Any, position: Int) {
                 group = t as Group
                 if (group!!.isJoined) {
@@ -86,7 +86,7 @@ class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListe
                 }
             }
         })
-        CometChatConversationListScreen.setItemClickListener(object : OnItemClickListener<Any>() {
+        CometChatConversationList.setItemClickListener(object : OnItemClickListener<Any>() {
             override fun OnItemClick(t: Any, position: Int) {
                 val conversation = t as Conversation
                 if (conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP) {
@@ -107,25 +107,25 @@ class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListe
 
     fun userIntent(user: User) {
         val intent = Intent(this@ComponentLoadActivity, CometChatMessageListActivity::class.java)
-        intent.putExtra(StringContract.IntentStrings.UID, user.uid)
-        intent.putExtra(StringContract.IntentStrings.AVATAR, user.avatar)
-        intent.putExtra(StringContract.IntentStrings.STATUS, user.status)
-        intent.putExtra(StringContract.IntentStrings.NAME, user.name)
-        intent.putExtra(StringContract.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
+        intent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
+        intent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
+        intent.putExtra(UIKitContracts.IntentStrings.STATUS, user.status)
+        intent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
+        intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
         startActivity(intent)
     }
 
     private fun startGroupIntent(group: Group?) {
         val intent = Intent(this@ComponentLoadActivity, CometChatMessageListActivity::class.java)
-        intent.putExtra(StringContract.IntentStrings.GUID, group!!.guid)
-        intent.putExtra(StringContract.IntentStrings.GROUP_OWNER, group.owner)
-        intent.putExtra(StringContract.IntentStrings.AVATAR, group.icon)
-        intent.putExtra(StringContract.IntentStrings.NAME, group.name)
-        intent.putExtra(StringContract.IntentStrings.GROUP_TYPE, group.groupType)
-        intent.putExtra(StringContract.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-        intent.putExtra(StringContract.IntentStrings.MEMBER_COUNT, group.membersCount)
-        intent.putExtra(StringContract.IntentStrings.GROUP_DESC, group.description)
-        intent.putExtra(StringContract.IntentStrings.GROUP_PASSWORD, group.password)
+        intent.putExtra(UIKitContracts.IntentStrings.GUID, group!!.guid)
+        intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
+        intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
+        intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
+        intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
+        intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+        intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
+        intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
+        intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
         startActivity(intent)
     }
 

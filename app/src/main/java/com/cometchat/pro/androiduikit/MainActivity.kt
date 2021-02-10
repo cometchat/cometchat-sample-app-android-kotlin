@@ -3,21 +3,18 @@ package com.cometchat.pro.androiduikit
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import android.os.Bundle
-import com.cometchat.pro.androiduikit.R
 import android.content.Intent
-import com.cometchat.pro.androiduikit.LoginActivity
 import android.content.res.ColorStateList
 import android.view.View
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.androiduikit.constants.AppConfig
 import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.androiduikit.SelectActivity
 import com.cometchat.pro.exceptions.CometChatException
 import android.widget.Toast
 import com.cometchat.pro.models.User
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {

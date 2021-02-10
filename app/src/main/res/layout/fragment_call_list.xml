@@ -90,7 +90,7 @@
             </LinearLayout>
 
         </com.facebook.shimmer.ShimmerFrameLayout>
-    <com.cometchat.pro.uikit.CometChatCallList
+    <com.cometchat.pro.uikit.ui_components.shared.cometchatCalls.CometChatCalls
         android:layout_width="match_parent"
         android:id="@+id/callList_rv"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

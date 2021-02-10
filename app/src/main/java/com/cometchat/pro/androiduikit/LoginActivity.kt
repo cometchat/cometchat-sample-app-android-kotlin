@@ -18,7 +18,7 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class LoginActivity : AppCompatActivity() {
     private var inputLayout: TextInputLayout? = null

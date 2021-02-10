@@ -9,10 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.androiduikit.R
-import com.cometchat.pro.uikit.BadgeCount
+import com.cometchat.pro.uikit.ui_components.shared.cometchatBadgeCount.CometChatBadgeCount
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class BadgeCountFragment : Fragment() {
     private var count = 1
@@ -28,7 +28,7 @@ class BadgeCountFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_badge_count, container, false)
-        val badgeCount: BadgeCount = view.findViewById(R.id.badgeCount)
+        val badgeCount: CometChatBadgeCount = view.findViewById(R.id.badgeCount)
         badgeCountLayout = view.findViewById(R.id.badgeCount_layout)
         badgeCountSizeLayout = view.findViewById(R.id.badgeCountSize_layout)
         badgeCountEdt = view.findViewById(R.id.badgeCount_edt)
@@ -127,7 +127,7 @@ class BadgeCountFragment : Fragment() {
         }
     }
 
-    private fun refreshbadgeCount(badgeCount: BadgeCount) {
+    private fun refreshbadgeCount(badgeCount: CometChatBadgeCount) {
         badgeCount.setCount(count)
     }
 }

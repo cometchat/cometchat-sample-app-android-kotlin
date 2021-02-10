@@ -9,7 +9,7 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <com.cometchat.pro.uikit.Avatar
+    <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
         android:id="@+id/imageViewUserAvatar"
         android:layout_width="45dp"
         android:layout_height="45dp"

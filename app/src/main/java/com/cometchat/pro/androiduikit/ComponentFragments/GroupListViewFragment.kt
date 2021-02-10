@@ -17,31 +17,31 @@ import com.cometchat.pro.core.GroupsRequest
 import com.cometchat.pro.core.GroupsRequest.GroupsRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.Group
-import constant.StringContract
-import listeners.OnItemClickListener
-import screen.messagelist.CometChatMessageListActivity
+import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 
 class GroupListViewFragment : Fragment() {
     var groupBinding: FragmentGroupListBinding? = null
     var grouplist = ObservableArrayList<Group>()
     var groupsRequest: GroupsRequest? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        groupBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_group_list, container, false)
+        groupBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_cometchat_group_list, container, false)
         groups
         groupBinding!!.setGroupList(grouplist)
         groupBinding!!.cometchatGroupList.setItemClickListener(object : OnItemClickListener<Group?>() {
             override fun OnItemClick(t: Any, position: Int) {
                 val group = t as Group
                 val intent = Intent(context, CometChatMessageListActivity::class.java)
-                intent.putExtra(StringContract.IntentStrings.NAME, group.name)
-                intent.putExtra(StringContract.IntentStrings.GROUP_OWNER, group.owner)
-                intent.putExtra(StringContract.IntentStrings.GUID, group.guid)
-                intent.putExtra(StringContract.IntentStrings.AVATAR, group.icon)
-                intent.putExtra(StringContract.IntentStrings.GROUP_TYPE, group.groupType)
-                intent.putExtra(StringContract.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-                intent.putExtra(StringContract.IntentStrings.MEMBER_COUNT, group.membersCount)
-                intent.putExtra(StringContract.IntentStrings.GROUP_DESC, group.description)
-                intent.putExtra(StringContract.IntentStrings.GROUP_PASSWORD, group.password)
+                intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
+                intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
+                intent.putExtra(UIKitContracts.IntentStrings.GUID, group.guid)
+                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
+                intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
+                intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+                intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
+                intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
+                intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
                 startActivity(intent)
             }
         })

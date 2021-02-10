@@ -30,7 +30,7 @@
                 android:text="@string/badgeCount_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-            <com.cometchat.pro.uikit.BadgeCount
+            <com.cometchat.pro.uikit.ui_components.shared.cometchatBadgeCount.CometChatBadgeCount
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 app:count="1"

@@ -37,6 +37,13 @@ android {
         }
     }
     buildToolsVersion = '28.0.3'
+    sourceSets {
+        main {
+            res {
+                srcDirs 'src\\main\\res', 'src\\main\\res\\layouts\\calls', 'src\\main\\res\\layouts\\chats', 'src\\main\\res\\layouts\\cometchat_ui', 'src\\main\\res\\layouts\\groups', 'src\\main\\res\\layouts\\messages', 'src\\main\\res\\layouts\\shared', 'src\\main\\res\\layouts\\user_profile', 'src\\main\\res\\layouts\\users', 'src\\main\\res\\layouts\\ui_resources', 'src\\main\\res\\layouts\\messagebubbles', 'src\\main\\res\\layouts\\others'
+            }
+        }
+    }
 
 }
 

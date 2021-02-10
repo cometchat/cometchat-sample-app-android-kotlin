@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fillViewport="true"
-    tools:context="screen.CometChatGroupListScreen">
+    tools:context="com.cometchat.pro.uikit.ui_components.groups.group_list.CometChatGroupList">
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -16,10 +16,10 @@ import com.cometchat.pro.core.UsersRequest
 import com.cometchat.pro.core.UsersRequest.UsersRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
+import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
 import com.facebook.shimmer.ShimmerFrameLayout
-import constant.StringContract
-import listeners.OnItemClickListener
-import screen.messagelist.CometChatMessageListActivity
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 
 class UserListViewFragment : Fragment() {
     var usersRequest: UsersRequest? = null
@@ -40,11 +40,11 @@ class UserListViewFragment : Fragment() {
             override fun OnItemClick(t: Any, position: Int) {
                 val user = t as User
                 val intent = Intent(context, CometChatMessageListActivity::class.java)
-                intent.putExtra(StringContract.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
-                intent.putExtra(StringContract.IntentStrings.NAME, user.name)
-                intent.putExtra(StringContract.IntentStrings.UID, user.uid)
-                intent.putExtra(StringContract.IntentStrings.AVATAR, user.avatar)
-                intent.putExtra(StringContract.IntentStrings.STATUS, user.status)
+                intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
+                intent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
+                intent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
+                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
+                intent.putExtra(UIKitContracts.IntentStrings.STATUS, user.status)
                 startActivity(intent)
             }
         })

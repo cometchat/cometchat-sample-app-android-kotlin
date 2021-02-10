@@ -102,7 +102,7 @@
                 </LinearLayout>
 
             </com.facebook.shimmer.ShimmerFrameLayout>
-            <com.cometchat.pro.uikit.CometChatConversationList
+            <com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
                 android:id="@+id/cometchatConversationList"
                 android:layout_width="match_parent"
                 app:conversationlist="@{conversationList}"

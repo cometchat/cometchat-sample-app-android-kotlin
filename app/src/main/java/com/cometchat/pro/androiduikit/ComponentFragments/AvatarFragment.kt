@@ -13,10 +13,10 @@ import android.content.res.ColorStateList
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.androiduikit.ColorPickerDialog
-import com.cometchat.pro.uikit.Avatar
+import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class AvatarFragment : Fragment(), ColorPickerDialog.OnColorChangedListener {
     private var c: Context? = null
@@ -29,7 +29,7 @@ class AvatarFragment : Fragment(), ColorPickerDialog.OnColorChangedListener {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_avatar, container, false)
-        val avatar: Avatar = view.findViewById(R.id.avataricon)
+        val avatar: CometChatAvatar = view.findViewById(R.id.avataricon)
         avatar.setBorderColor(resources.getColor(R.color.colorPrimaryDark))
         avatar.setAvatar(CometChat.getLoggedInUser().avatar)
         val borderWidth: TextInputEditText = view.findViewById(R.id.borderWidth)
@@ -98,7 +98,7 @@ class AvatarFragment : Fragment(), ColorPickerDialog.OnColorChangedListener {
         this.c = context
     }
 
-    fun refreshAvatar(avatar: Avatar) {
+    fun refreshAvatar(avatar: CometChatAvatar) {
         avatar.setAvatar(CometChat.getLoggedInUser())
     }
 }
