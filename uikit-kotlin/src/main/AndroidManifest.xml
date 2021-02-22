@@ -64,7 +64,7 @@
             android:name=".ui_components.groups.group_members.CometChatGroupMemberListActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui_components.cometchat_ui.CometChatUnified"
+            android:name=".ui_components.cometchat_ui.CometChatUI"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -73,7 +73,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui_components.messages.message_list.CometChatMessageListActivity"
-            android:parentActivityName=".ui_components.cometchat_ui.CometChatUnified"
+            android:parentActivityName=".ui_components.cometchat_ui.CometChatUI"
             android:screenOrientation="portrait" />
 
         <provider

@@ -11,7 +11,7 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUnified
+import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.makeCall
@@ -49,7 +49,7 @@ class SelectActivity : AppCompatActivity() {
             logout!!.setBackgroundColor(resources.getColor(R.color.textColorWhite))
         }
         unifiedLaunch!!.setOnClickListener(View.OnClickListener {
-            startActivity(Intent(this@SelectActivity, CometChatUnified::class.java))
+            startActivity(Intent(this@SelectActivity, CometChatUI::class.java))
             overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)
         })
         componentLaunch!!.setOnClickListener(View.OnClickListener {
