@@ -30,7 +30,7 @@ import com.cometchat.pro.uikit.ui_components.groups.group_members.CometChatGroup
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
@@ -70,10 +70,10 @@ class CometChatAdminModeratorList : Fragment() {
 
     private fun handleArguments() {
         if (arguments != null) {
-            guid = arguments!!.getString(UIKitContracts.IntentStrings.GUID)
-            loggedInUserScope = arguments!!.getString(UIKitContracts.IntentStrings.MEMBER_SCOPE)
-            ownerId = arguments!!.getString(UIKitContracts.IntentStrings.GROUP_OWNER)
-            showModerators = arguments!!.getBoolean(UIKitContracts.IntentStrings.SHOW_MODERATORLIST)
+            guid = arguments!!.getString(UIKitConstants.IntentStrings.GUID)
+            loggedInUserScope = arguments!!.getString(UIKitConstants.IntentStrings.MEMBER_SCOPE)
+            ownerId = arguments!!.getString(UIKitConstants.IntentStrings.GROUP_OWNER)
+            showModerators = arguments!!.getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
         }
     }
 
@@ -89,13 +89,13 @@ class CometChatAdminModeratorList : Fragment() {
         setToolbar(toolbar)
         if (showModerators) {
             toolbar.title = resources.getString(R.string.moderators)
-            addAs!!.setText(resources.getString(R.string.add_as_moderator))
+            addAs!!.text = resources.getString(R.string.add_as_moderator)
         } else {
             toolbar.title = resources.getString(R.string.administrators)
-            addAs!!.setText(resources.getString(R.string.add_as_admin))
+            addAs!!.text = resources.getString(R.string.add_as_admin)
         }
         adapter = GroupMemberAdapter(context!!, members, null)
-        adminList!!.setAdapter(adapter)
+        adminList!!.adapter = adapter
         if (loggedInUserScope != null && loggedInUserScope == CometChatConstants.SCOPE_ADMIN) {
             rlAddMember.visibility = View.VISIBLE
         }
@@ -106,8 +106,8 @@ class CometChatAdminModeratorList : Fragment() {
         }
         rlAddMember.setOnClickListener { view1: View? ->
             val intent = Intent(context, CometChatGroupMemberListActivity::class.java)
-            intent.putExtra(UIKitContracts.IntentStrings.GUID, guid)
-            intent.putExtra(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, showModerators)
+            intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+            intent.putExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
             startActivity(intent)
         }
         adminList!!.addOnItemTouchListener(RecyclerTouchListener(context, adminList!!, object : ClickListener() {
@@ -116,13 +116,13 @@ class CometChatAdminModeratorList : Fragment() {
                 if (showModerators) {
                     if (loggedInUserScope == CometChatConstants.SCOPE_ADMIN && groupMember.uid != loggedInUser.uid) {
                         if (activity != null) {
-                            val alert_dialog = MaterialAlertDialogBuilder(activity)
-                            alert_dialog.setTitle(resources.getString(R.string.remove))
-                            alert_dialog.setMessage(String.format(resources.getString(R.string.remove_from_moderator), groupMember.name))
-                            alert_dialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
-                            alert_dialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
-                            alert_dialog.create()
-                            alert_dialog.show()
+                            val alertDialog = MaterialAlertDialogBuilder(activity)
+                            alertDialog.setTitle(resources.getString(R.string.remove))
+                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_from_moderator), groupMember.name))
+                            alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
+                            alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
+                            alertDialog.create()
+                            alertDialog.show()
                         }
                     } else {
                         val message: String
@@ -132,13 +132,13 @@ class CometChatAdminModeratorList : Fragment() {
                 } else {
                     if (ownerId != null && loggedInUser.uid == ownerId && loggedInUserScope == CometChatConstants.SCOPE_ADMIN && groupMember.uid != loggedInUser.uid) {
                         if (activity != null) {
-                            val alert_dialog = MaterialAlertDialogBuilder(activity)
-                            alert_dialog.setTitle(resources.getString(R.string.remove))
-                            alert_dialog.setMessage(String.format(resources.getString(R.string.remove_from_admin), groupMember.name))
-                            alert_dialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
-                            alert_dialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
-                            alert_dialog.create()
-                            alert_dialog.show()
+                            val alertDialog = MaterialAlertDialogBuilder(activity)
+                            alertDialog.setTitle(resources.getString(R.string.remove))
+                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_from_admin), groupMember.name))
+                            alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
+                            alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
+                            alertDialog.create()
+                            alertDialog.show()
                         }
                     } else {
                         val message: String
@@ -184,7 +184,8 @@ class CometChatAdminModeratorList : Fragment() {
 
                     override fun onError(e: CometChatException) {
                         if (activity != null) {
-                            Toast.makeText(activity, resources.getString(R.string.update_group_member_error), Toast.LENGTH_LONG).show()
+//                            Toast.makeText(activity, resources.getString(R.string.update_group_member_error), Toast.LENGTH_LONG).show()
+                            context?.let { Utils.showDialog(it, e) }
                             Log.e(TAG, "onError: " + e.message)
                         }
                     }
@@ -199,7 +200,7 @@ class CometChatAdminModeratorList : Fragment() {
     private fun getAdminList(groupId: String?) {
         if (groupMembersRequest == null) {
             groupMembersRequest = GroupMembersRequestBuilder(groupId)
-                    .setScopes(Arrays.asList(CometChatConstants.SCOPE_ADMIN)).setLimit(100).build()
+                    .setScopes(listOf(CometChatConstants.SCOPE_ADMIN)).setLimit(100).build()
         }
         groupMembersRequest!!.fetchNext(object : CallbackListener<List<GroupMember>>() {
             override fun onSuccess(groupMembers: List<GroupMember>) {
@@ -221,7 +222,7 @@ class CometChatAdminModeratorList : Fragment() {
     private fun getModeratorList(groupId: String?) {
         if (groupMembersRequest == null) {
             groupMembersRequest = GroupMembersRequestBuilder(groupId)
-                    .setScopes(Arrays.asList(CometChatConstants.SCOPE_MODERATOR)).setLimit(100).build()
+                    .setScopes(listOf(CometChatConstants.SCOPE_MODERATOR)).setLimit(100).build()
         }
         groupMembersRequest!!.fetchNext(object : CallbackListener<List<GroupMember>>() {
             override fun onSuccess(groupMembers: List<GroupMember>) {

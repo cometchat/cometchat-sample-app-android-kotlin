@@ -27,7 +27,7 @@ import com.cometchat.pro.uikit.databinding.ActivityCometchatUnifiedBinding
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.CustomAlertDialogHelper
 import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.OnAlertDialogButtonClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
@@ -245,11 +245,11 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
      */
     private fun startUserIntent(user: User) {
         val intent = Intent(this@CometChatUI, CometChatMessageListActivity::class.java)
-        intent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
-        intent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
-        intent.putExtra(UIKitContracts.IntentStrings.STATUS, user.status)
-        intent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
-        intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
+        intent.putExtra(UIKitConstants.IntentStrings.UID, user.uid)
+        intent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.avatar)
+        intent.putExtra(UIKitConstants.IntentStrings.STATUS, user.status)
+        intent.putExtra(UIKitConstants.IntentStrings.NAME, user.name)
+        intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
         startActivity(intent)
     }
 
@@ -261,15 +261,15 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
      */
     private fun startGroupIntent(group: Group?) {
         val intent = Intent(this@CometChatUI, CometChatMessageListActivity::class.java)
-        intent.putExtra(UIKitContracts.IntentStrings.GUID, group!!.guid)
-        intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
-        intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
-        intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-        intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
+        intent.putExtra(UIKitConstants.IntentStrings.GUID, group!!.guid)
+        intent.putExtra(UIKitConstants.IntentStrings.AVATAR, group.icon)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, group.owner)
+        intent.putExtra(UIKitConstants.IntentStrings.NAME, group.name)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE, group.groupType)
+        intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+        intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, group.membersCount)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, group.description)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, group.password)
         startActivity(intent)
     }
 

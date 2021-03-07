@@ -117,6 +117,21 @@
                     tools:visibility="visible"
                     android:id="@+id/vw_writeboard_message"
                     layout="@layout/message_right_writeboard_item"/>
+                <include android:id="@+id/vw_meeting_message"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:layout_height="220dp"
+                    layout="@layout/message_right_group_call_item"/>
+                <include
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    tools:visibility="visible"
+                    android:id="@+id/vw_polls_message"
+                    layout="@layout/message_right_polls_item"/>
             </RelativeLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

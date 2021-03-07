@@ -26,15 +26,15 @@ import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.core.CometChat.isExtensionEnabled
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.*
+import com.cometchat.pro.uikit.ui_components.messages.extensions.ExtensionResponseListener
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import org.json.JSONException
 import org.json.JSONObject
 import com.cometchat.pro.uikit.ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity
@@ -260,7 +260,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             LATITUDE = (baseMessage as CustomMessage).customData.getDouble("latitude")
             LONGITUDE = baseMessage.customData.getDouble("longitude")
             tvAddress.text = Utils.getAddress(context, LATITUDE, LONGITUDE)
-            val mapUrl = UIKitContracts.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitContracts.MapUrl.MAP_ACCESS_KEY
+            val mapUrl = UIKitConstants.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitConstants.MapUrl.MAP_ACCESS_KEY
             Glide.with(context!!)
                     .load(mapUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -654,10 +654,19 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 //            }
 
             var message = txtMessage
-            if (isExtensionEnabled("profanity-filter"))
-                message = Extensions.getProfanityFilter(baseMessage)
-            if (isExtensionEnabled("data-masking"))
+//            if (isExtensionEnabled("profanity-filter"))
+//                message = Extensions.getProfanityFilter(baseMessage)
+//            if (isExtensionEnabled("data-masking"))
+//                message = Extensions.checkDataMasking(baseMessage)
+
+            if (Extensions.checkExtensionEnabled("data-masking")) {
                 message = Extensions.checkDataMasking(baseMessage)
+            }
+            if (Extensions.checkExtensionEnabled("profanity-filter")) {
+                message = Extensions.getProfanityFilter(baseMessage)
+            }
+
+//
 
             viewHolder.view.goTxtMessage.text = message
             viewHolder.view.goTxtMessage.typeface = fontUtils!!.getTypeFace(FontUtils.robotoRegular)
@@ -707,7 +716,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 reactionLayout.addView(chip)
                 chip.setOnLongClickListener {
                     val intent = Intent(context, CometChatReactionInfoActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
                     context.startActivity(intent)
                     true
                 }

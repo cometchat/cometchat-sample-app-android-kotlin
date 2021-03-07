@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 
 class CometChatCollaborativeActivity : AppCompatActivity() {
 
@@ -15,8 +15,8 @@ class CometChatCollaborativeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cometchat_webview)
         webView = findViewById(R.id.webview)
-        if (intent.hasExtra(UIKitContracts.IntentStrings.URL)) {
-            url = intent.getStringExtra(UIKitContracts.IntentStrings.URL)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.URL)) {
+            url = intent.getStringExtra(UIKitConstants.IntentStrings.URL)
         }
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true

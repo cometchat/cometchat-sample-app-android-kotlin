@@ -17,7 +17,8 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.uikit.R
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 
@@ -57,9 +58,9 @@ class CometChatBanMembers : Fragment() {
 
     fun handleArguments() {
         if (arguments != null) {
-            guid = arguments!!.getString(UIKitContracts.IntentStrings.GUID)
-            gName = arguments!!.getString(UIKitContracts.IntentStrings.GROUP_NAME)
-            loggedInUserScope = arguments!!.getString(UIKitContracts.IntentStrings.MEMBER_SCOPE)
+            guid = arguments!!.getString(UIKitConstants.IntentStrings.GUID)
+            gName = arguments!!.getString(UIKitConstants.IntentStrings.GROUP_NAME)
+            loggedInUserScope = arguments!!.getString(UIKitConstants.IntentStrings.MEMBER_SCOPE)
         }
     }
 
@@ -113,7 +114,8 @@ class CometChatBanMembers : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                if (bannedMemberRv != null) Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.unban_error), groupMember!!.name), Snackbar.LENGTH_LONG).show()
+//                if (bannedMemberRv != null) Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.unban_error), groupMember!!.name), Snackbar.LENGTH_LONG).show()
+                context?.let { Utils.showDialog(it, e) }
             }
         })
     }

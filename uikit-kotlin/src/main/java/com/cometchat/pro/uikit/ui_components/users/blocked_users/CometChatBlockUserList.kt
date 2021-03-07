@@ -106,7 +106,8 @@ class CometChatBlockUserList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(var1, resources.getString(R.string.unblock_user_error), Snackbar.LENGTH_SHORT).show()
+                context?.let { Utils.showDialog(it, e) }
+//                Snackbar.make(var1, resources.getString(R.string.unblock_user_error), Snackbar.LENGTH_SHORT).show()
                 Log.e(TAG, "onError: " + e.message)
             }
         })

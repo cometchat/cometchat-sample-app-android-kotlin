@@ -11,7 +11,7 @@ import com.cometchat.pro.core.AppSettings.AppSettingsBuilder
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.addCallListener
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.removeCallListener
 
@@ -21,13 +21,12 @@ class UIKitApplication : Application() {
         val appSettings = AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build()
         CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, object : CallbackListener<String>() {
             override fun onSuccess(s: String) {
-                UIKitContracts.AppInfo.AUTH_KEY = AppConfig.AppDetails.AUTH_KEY
+                UIKitConstants.AppInfo.AUTH_KEY = AppConfig.AppDetails.AUTH_KEY
                 CometChat.setSource("ui-kit", "android", "kotlin")
                 Log.d(TAG, "onSuccess: $s")
             }
 
             override fun onError(e: CometChatException) {
-                Toast.makeText(this@UIKitApplication, e.message, Toast.LENGTH_SHORT).show()
             }
         })
         addConnectionListener(TAG)

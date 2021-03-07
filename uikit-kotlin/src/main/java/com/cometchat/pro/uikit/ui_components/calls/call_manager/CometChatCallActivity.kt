@@ -23,7 +23,7 @@ import com.cometchat.pro.uikit.ui_components.calls.call_manager.helper.OutgoingA
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.AnimUtil
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
@@ -80,25 +80,25 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
      */
     private fun handleIntent() {
         val intent = intent
-        if (intent.hasExtra(UIKitContracts.IntentStrings.JOIN_ONGOING)) {
-            isOngoing = intent.getBooleanExtra(UIKitContracts.IntentStrings.JOIN_ONGOING, false)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.JOIN_ONGOING)) {
+            isOngoing = intent.getBooleanExtra(UIKitConstants.IntentStrings.JOIN_ONGOING, false)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.ID)) {
-            val id = intent.getStringExtra(UIKitContracts.IntentStrings.ID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.ID)) {
+            val id = intent.getStringExtra(UIKitConstants.IntentStrings.ID)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.SESSION_ID)) {
-            sessionId = intent.getStringExtra(UIKitContracts.IntentStrings.SESSION_ID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.SESSION_ID)) {
+            sessionId = intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.AVATAR)) {
-            avatar = intent.getStringExtra(UIKitContracts.IntentStrings.AVATAR)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.AVATAR)) {
+            avatar = intent.getStringExtra(UIKitConstants.IntentStrings.AVATAR)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.NAME)) {
-            name = intent.getStringExtra(UIKitContracts.IntentStrings.NAME)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.NAME)) {
+            name = intent.getStringExtra(UIKitConstants.IntentStrings.NAME)
         }
         if (!isOngoing) {
             try {
                 isVideo = intent.action == CometChatConstants.CALL_TYPE_VIDEO
-                isIncoming = intent.type == UIKitContracts.IntentStrings.INCOMING
+                isIncoming = intent.type == UIKitConstants.IntentStrings.INCOMING
                 if (isIncoming) setTheme(R.style.TransparentCompat) else setTheme(R.style.AppTheme)
             } catch (e: NullPointerException) {
                 e.printStackTrace()
@@ -125,7 +125,7 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
         hangUp = findViewById(R.id.call_hang_btn)
         tvDots = findViewById(R.id.tv_dots)
         hangUp!!.setOnClickListener(this)
-        hangUp!!.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(R.color.red_600)))
+        hangUp!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.red_600))
         mainView = findViewById(R.id.main_view)
         cometChatAudioHelper = CometChatAudioHelper(this)
         cometChatAudioHelper!!.initAudio()
@@ -229,7 +229,8 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
             override fun onError(e: CometChatException) {
                 finish()
                 Log.e(TAG, "onErrorReject: " + e.message + " " + e.code)
-                Toast.makeText(this@CometChatCallActivity, "Unable to end call", Toast.LENGTH_LONG).show()
+//                Toast.makeText(this@CometChatCallActivity, "Unable to end call", Toast.LENGTH_LONG).show()
+                Utils.showDialog(this@CometChatCallActivity, e)
             }
         })
     }
@@ -252,8 +253,10 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             override fun onError(e: CometChatException) {
+                Utils.showDialog(this@CometChatCallActivity, e)
                 finish()
                 Log.e(TAG, "onErrorAccept: " + e.message + " " + e.code)
+
             }
         })
     }

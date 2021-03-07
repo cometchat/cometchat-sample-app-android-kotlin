@@ -1,9 +1,12 @@
 package com.cometchat.pro.uikit.ui_components.messages.message_information
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,15 +17,15 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.MessageReceipt
-import com.cometchat.pro.uikit.ui_components.messages.message_information.message_receipts.CometChatReceiptsList
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity
+import com.cometchat.pro.uikit.ui_components.messages.message_information.message_receipts.CometChatReceiptsList
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
 import org.json.JSONException
 import org.json.JSONObject
-import com.cometchat.pro.uikit.ui_resources.utils.Utils
-import com.cometchat.pro.uikit.ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity
 
 class CometChatMessageInfoScreenActivity : AppCompatActivity() {
 
@@ -35,6 +38,12 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     private var locationMessage: View? = null
     private lateinit var whiteBoardMessage: View
     private lateinit var writeBoardMessage: View
+    private var pollsMessage: View? = null
+    private lateinit var meetingMessage: View
+    private var joinMeetingBtn: MaterialButton? = null
+
+    private var question: TextView? = null
+    private var optionGroup: LinearLayout? = null
 
     private var ivMap: ImageView? = null
     private var tvPlaceName: TextView? = null
@@ -93,10 +102,16 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         joinWhiteBoard = findViewById(R.id.join_whiteboard)
         joinWriteBoard = findViewById(R.id.join_writeboard)
         sensitiveLayout = findViewById(R.id.sensitive_layout)
+        meetingMessage = findViewById(R.id.vw_meeting_message)
+
+        joinMeetingBtn = findViewById<MaterialButton>(R.id.join_call)
+        pollsMessage = findViewById(R.id.vw_polls_message)
+        question = findViewById(R.id.tv_question)
+        optionGroup = findViewById(R.id.options_group)
 
         messageText = findViewById(R.id.go_txt_message)
         txtTime = findViewById(R.id.txt_time)
-        txtTime!!.setVisibility(View.VISIBLE)
+        txtTime!!.visibility = View.VISIBLE
         messageImage = findViewById(R.id.go_img_message)
         messageVideo = findViewById(R.id.go_video_message)
 
@@ -127,35 +142,38 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        if (intent.hasExtra(UIKitContracts.IntentStrings.ID)) {
-            id = intent.getIntExtra(UIKitContracts.IntentStrings.ID, 0)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.ID)) {
+            id = intent.getIntExtra(UIKitConstants.IntentStrings.ID, 0)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.TEXTMESSAGE)) {
-            message = intent.getStringExtra(UIKitContracts.IntentStrings.TEXTMESSAGE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.TEXTMESSAGE)) {
+            message = intent.getStringExtra(UIKitConstants.IntentStrings.TEXTMESSAGE)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL)) {
-            message = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)) {
+            message = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE)) {
-            messageType = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE)) {
+            messageType = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)) {
-            messageExtension = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)) {
+            messageExtension = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE)) {
-            messageSize = intent.getIntExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, 0)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE)) {
+            messageSize = intent.getIntExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, 0)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.SENTAT)) {
+        if (intent.hasExtra(UIKitConstants.IntentStrings.SENTAT)) {
             txtTime!!.text = Utils.getHeaderDate(intent
-                    .getLongExtra(UIKitContracts.IntentStrings.SENTAT, 0) * 1000)
+                    .getLongExtra(UIKitConstants.IntentStrings.SENTAT, 0) * 1000)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.IMAGE_MODERATION)) {
+        if (intent.hasExtra(UIKitConstants.IntentStrings.IMAGE_MODERATION)) {
             val isImageNotSafe = intent
-                    .getBooleanExtra(UIKitContracts.IntentStrings.IMAGE_MODERATION, true)
-            if (isImageNotSafe) sensitiveLayout.setVisibility(View.VISIBLE) else sensitiveLayout.setVisibility(View.GONE)
+                    .getBooleanExtra(UIKitConstants.IntentStrings.IMAGE_MODERATION, true)
+            if (isImageNotSafe) sensitiveLayout.visibility = View.VISIBLE else sensitiveLayout.visibility = View.GONE
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.CUSTOM_MESSAGE)) {
-            message = intent.getStringExtra(UIKitContracts.IntentStrings.CUSTOM_MESSAGE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.CUSTOM_MESSAGE)) {
+            message = intent.getStringExtra(UIKitConstants.IntentStrings.CUSTOM_MESSAGE)
+        }
+        if (intent.hasExtra(UIKitConstants.IntentStrings.POLL_RESULT)) {
+            percentage = intent.getIntExtra(UIKitConstants.IntentStrings.POLL_RESULT, 0)
         }
         if (messageType != null) {
             if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
@@ -175,7 +193,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
             } else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
                 audioMessage!!.visibility = View.VISIBLE
                 audioFileSize!!.text = Utils.getFileSize(messageSize)
-            } else if (messageType == UIKitContracts.IntentStrings.STICKERS) {
+            } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
                 stickerMessage?.visibility = View.VISIBLE
                 try {
                     val jsonObject = JSONObject(message)
@@ -183,36 +201,78 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
-            } else if (messageType == UIKitContracts.IntentStrings.WHITEBOARD) {
+            } else if (messageType == UIKitConstants.IntentStrings.WHITEBOARD) {
                 whiteBoardMessage.visibility = View.VISIBLE
                 whiteBoardText.text = getString(R.string.you_created_whiteboard)
                 joinWhiteBoard.setOnClickListener(View.OnClickListener {
-                    val boardUrl = intent.getStringExtra(UIKitContracts.IntentStrings.TEXTMESSAGE)
+                    val boardUrl = intent.getStringExtra(UIKitConstants.IntentStrings.TEXTMESSAGE)
                     val intent = Intent(this@CometChatMessageInfoScreenActivity, CometChatCollaborativeActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.URL, boardUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl)
                     startActivity(intent)
                 })
-            } else if (messageType == UIKitContracts.IntentStrings.WRITEBOARD) {
+            } else if (messageType == UIKitConstants.IntentStrings.WRITEBOARD) {
                 writeBoardMessage.visibility = View.VISIBLE
                 writeBoardText.text = getString(R.string.you_created_document)
                 joinWriteBoard.setOnClickListener(View.OnClickListener {
-                    val boardUrl = intent.getStringExtra(UIKitContracts.IntentStrings.TEXTMESSAGE)
+                    val boardUrl = intent.getStringExtra(UIKitConstants.IntentStrings.TEXTMESSAGE)
                     val intent = Intent(this@CometChatMessageInfoScreenActivity, CometChatCollaborativeActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.URL, boardUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl)
                     startActivity(intent)
                 })
             }
-            else if (messageType == UIKitContracts.IntentStrings.LOCATION) {
+            else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
                 try {
                     locationMessage!!.visibility = View.VISIBLE
                     val jsonObject = JSONObject(message)
                     val LATITUDE = jsonObject.getDouble("latitude")
                     val LONGITUDE = jsonObject.getDouble("longitude")
-                    tvPlaceName!!.setVisibility(View.GONE)
-                    val mapUrl: String = UIKitContracts.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitContracts.MapUrl.MAP_ACCESS_KEY
+                    tvPlaceName!!.visibility = View.GONE
+                    val mapUrl: String = UIKitConstants.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitConstants.MapUrl.MAP_ACCESS_KEY
                     Glide.with(this)
                             .load(mapUrl)
                             .into(ivMap!!)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            } else if (messageType.equals(UIKitConstants.IntentStrings.MEETING)) {
+                meetingMessage.visibility = View.VISIBLE
+                joinMeetingBtn?.isEnabled = false
+            }
+            else if (messageType == UIKitConstants.IntentStrings.POLLS) {
+                pollsMessage!!.visibility = View.VISIBLE
+                try {
+                    val jsonObject = JSONObject(message)
+                    val questionStr = jsonObject.getString("question")
+                    question!!.text = questionStr
+                    val options = jsonObject.getJSONObject("options")
+                    for (i in 0 until options.length()) {
+                        val linearLayout = LinearLayout(this)
+                        val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT)
+                        layoutParams.bottomMargin = Utils.dpToPx(this, 8F).toInt()
+                        linearLayout.layoutParams = layoutParams
+                        linearLayout.setPadding(8, 8, 8, 8)
+                        linearLayout.background = resources
+                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.backgroundTintList = ColorStateList.valueOf(resources
+                                .getColor(R.color.textColorWhite))
+                        val textViewPercentage = TextView(this)
+                        val textViewOption = TextView(this)
+                        textViewPercentage.setPadding(16, 4, 0, 4)
+                        textViewOption.setPadding(16, 4, 0, 4)
+                        textViewOption.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextColor(resources.getColor(R.color.primaryTextColor))
+                        textViewOption.setTextColor(resources.getColor(R.color.primaryTextColor))
+                        val optionStr = options.getString((i + 1).toString())
+                        textViewOption.text = optionStr
+                        if (percentage > 0) textViewPercentage.text = "$percentage% "
+                        if (optionGroup!!.childCount != options.length()) {
+                            linearLayout.addView(textViewPercentage)
+                            linearLayout.addView(textViewOption)
+                            optionGroup!!.addView(linearLayout)
+                        }
+                    }
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }

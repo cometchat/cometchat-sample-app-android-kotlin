@@ -25,7 +25,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.security.SecureRandom
 
@@ -159,21 +159,22 @@ class CometChatCreateGroup : Fragment() {
         CometChat.createGroup(group, object : CallbackListener<Group>() {
             override fun onSuccess(group: Group) {
                 val intent = Intent(activity, CometChatMessageListActivity::class.java)
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
-                intent.putExtra(UIKitContracts.IntentStrings.GUID, group.guid)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-                intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, group.name)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, group.owner)
+                intent.putExtra(UIKitConstants.IntentStrings.GUID, group.guid)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, group.icon)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE, group.groupType)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+                intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, group.membersCount)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, group.description)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, group.password)
                 if (activity != null) activity!!.finish()
                 startActivity(intent)
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(etGroupName!!.rootView, resources.getString(R.string.create_group_error), Snackbar.LENGTH_LONG).show()
+//                Snackbar.make(etGroupName!!.rootView, resources.getString(R.string.create_group_error), Snackbar.LENGTH_LONG).show()
+                context?.let { Utils.showDialog(it, e) }
                 Log.e(TAG, "onError: " + e.message)
             }
         })

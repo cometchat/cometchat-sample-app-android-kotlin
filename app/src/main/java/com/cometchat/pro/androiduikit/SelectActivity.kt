@@ -69,7 +69,7 @@ class SelectActivity : AppCompatActivity() {
         callGroup!!.setOnCheckedChangeListener(callListener)
         screenLaunch!!.setOnClickListener(View.OnClickListener { view ->
             val id1 = screenGroup!!.checkedRadioButtonId
-            val id2 = callGroup!!.getCheckedRadioButtonId()
+            val id2 = callGroup!!.checkedRadioButtonId
             if (id1 < 0 && id2 < 0) {
                 Snackbar.make(view, "Select any one screen.", Snackbar.LENGTH_LONG).show()
             } else if (id2 < 0) {
@@ -79,7 +79,7 @@ class SelectActivity : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)
             } else if (id1 < 0) {
                 val type: String
-                type = if (audioCallRb!!.isChecked()) {
+                type = if (audioCallRb!!.isChecked) {
                     CometChatConstants.CALL_TYPE_AUDIO
                 } else {
                     CometChatConstants.CALL_TYPE_VIDEO
@@ -171,7 +171,8 @@ class SelectActivity : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(view, "Login Error:" + e.code, Snackbar.LENGTH_LONG).show()
+//                Snackbar.make(view, "Login Error:" + e.code, Snackbar.LENGTH_LONG).show()
+                ShowErrorMessageUtils.showDialog(this@SelectActivity, e)
             }
         })
     }

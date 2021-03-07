@@ -25,7 +25,7 @@ import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.google.android.material.appbar.MaterialToolbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderDecoration
@@ -105,15 +105,15 @@ class CometChatAddMembers : Fragment() {
                 val user = var1.getTag(R.string.user) as User
                 if (activity != null) {
                     val intent = Intent(activity, CometChatUserDetailScreenActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.STATUS, user.status)
-                    intent.putExtra(UIKitContracts.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, guid)
-                    intent.putExtra(UIKitContracts.IntentStrings.IS_ADD_MEMBER, true)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_NAME, groupName)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, user.uid)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, user.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.STATUS, user.status)
+                    intent.putExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+                    intent.putExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, true)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_NAME, groupName)
                     activity!!.finish()
                     startActivity(intent)
                 }
@@ -141,9 +141,9 @@ class CometChatAddMembers : Fragment() {
 
     private fun handleArguments() {
         if (arguments != null) {
-            guid = arguments!!.getString(UIKitContracts.IntentStrings.GUID)
-            groupName = arguments!!.getString(UIKitContracts.IntentStrings.GROUP_NAME)
-            groupMembersUids = arguments!!.getStringArrayList(UIKitContracts.IntentStrings.GROUP_MEMBER)
+            guid = arguments!!.getString(UIKitConstants.IntentStrings.GUID)
+            groupName = arguments!!.getString(UIKitConstants.IntentStrings.GROUP_NAME)
+            groupMembersUids = arguments!!.getStringArrayList(UIKitConstants.IntentStrings.GROUP_MEMBER)
         }
     }
 

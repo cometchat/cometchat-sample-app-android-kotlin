@@ -7,7 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.uikit.R
 import com.google.android.material.appbar.MaterialToolbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 
 class CometChatBanMembersActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -22,23 +22,23 @@ class CometChatBanMembersActivity : AppCompatActivity() {
         handleIntent()
         val banFragment = CometChatBanMembers()
         val bundle = Bundle()
-        bundle.putString(UIKitContracts.IntentStrings.GUID, guid)
-        bundle.putString(UIKitContracts.IntentStrings.GROUP_NAME, gName)
-        bundle.putString(UIKitContracts.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
+        bundle.putString(UIKitConstants.IntentStrings.GUID, guid)
+        bundle.putString(UIKitConstants.IntentStrings.GROUP_NAME, gName)
+        bundle.putString(UIKitConstants.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
         banFragment.arguments = bundle
         supportFragmentManager.beginTransaction().add(R.id.ban_member_frame, banFragment).commit()
     }
 
     private fun handleIntent() {
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GUID)) {
-            guid = intent.getStringExtra(UIKitContracts.IntentStrings.GUID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GUID)) {
+            guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_NAME)) {
-            gName = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_NAME)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_NAME)) {
+            gName = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_NAME)
             banToolbar!!.title = String.format(resources.getString(R.string.ban_member_of_group), gName)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)) {
-            loggedInUserScope = intent.getStringExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)) {
+            loggedInUserScope = intent.getStringExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)
         }
     }
 

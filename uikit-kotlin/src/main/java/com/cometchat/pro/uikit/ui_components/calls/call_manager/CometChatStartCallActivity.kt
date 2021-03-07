@@ -16,7 +16,8 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class CometChatStartCallActivity : AppCompatActivity() {
 
@@ -35,7 +36,7 @@ class CometChatStartCallActivity : AppCompatActivity() {
         activity = this
         mainView = findViewById(R.id.call_view)
         if (intent != null)
-            sessionID = intent.getStringExtra(UIKitContracts.IntentStrings.SESSION_ID)
+            sessionID = intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID)
 
 
         callSettings = CallSettingsBuilder(this, mainView)
@@ -51,9 +52,10 @@ class CometChatStartCallActivity : AppCompatActivity() {
                 Log.e("onUserLeft: ", p0?.uid)
             }
 
-            override fun onError(p0: CometChatException?) {
+            override fun onError(p0: CometChatException) {
                 Log.e("onstartcallError: ", p0?.message)
-                Toast.makeText(this@CometChatStartCallActivity, p0?.message, Toast.LENGTH_LONG).show()
+//                Toast.makeText(this@CometChatStartCallActivity, p0?.message, Toast.LENGTH_LONG).show()
+                Utils.showDialog(this@CometChatStartCallActivity, p0)
             }
 
             override fun onCallEnded(p0: Call?) {

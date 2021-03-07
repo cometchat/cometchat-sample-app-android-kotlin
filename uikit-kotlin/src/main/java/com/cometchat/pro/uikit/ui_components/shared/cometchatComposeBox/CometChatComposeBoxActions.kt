@@ -22,6 +22,7 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
     private lateinit var whiteBoardMessage: TextView
     private lateinit var writeBoardMessage: TextView
     private lateinit var startVideoCall: TextView
+    private lateinit var pollMessage: TextView
 
     private var isGalleryVisible = false
     private var isCameraVisible = false
@@ -32,6 +33,7 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
     private var isWhiteBoardVisible = false
     private var isWriteBoardVisible = false
     private var isStartVideoCall = false
+    private var isPollVisible = false
 
 
     private var composeBoxActionListener: ComposeBoxActionListener? = null
@@ -49,6 +51,7 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
         isWhiteBoardVisible = arguments!!.getBoolean("isWhiteBoardVisible")
         isWriteBoardVisible = arguments!!.getBoolean("isWriteBoardVisible")
         isStartVideoCall = arguments!!.getBoolean("isStartVideoCall")
+        isPollVisible = arguments!!.getBoolean("isPollVisible")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -74,6 +77,8 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
         whiteBoardMessage = view.findViewById(R.id.whiteboard_message)
         writeBoardMessage = view.findViewById(R.id.writeboard_message)
         startVideoCall = view.findViewById(R.id.start_call)
+        pollMessage = view.findViewById(R.id.poll_message)
+
 
         if (isGalleryVisible) galleryMessage.visibility = View.VISIBLE else galleryMessage.visibility = View.GONE
         if (isCameraVisible) cameraMessage.visibility = View.VISIBLE else cameraMessage.visibility = View.GONE
@@ -84,7 +89,12 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
         if (isWhiteBoardVisible) whiteBoardMessage.visibility = View.VISIBLE else whiteBoardMessage.visibility = View.GONE
         if (isWriteBoardVisible) writeBoardMessage.visibility = View.VISIBLE else writeBoardMessage.visibility = View.GONE
         if (isStartVideoCall) startVideoCall.visibility = View.VISIBLE else startVideoCall.visibility = View.GONE
+        if (isPollVisible) pollMessage.visibility = View.VISIBLE else pollMessage.visibility = View.GONE
 
+        pollMessage.setOnClickListener(View.OnClickListener {
+            if (composeBoxActionListener != null) composeBoxActionListener!!.onPollClick()
+            dismiss()
+        })
         startVideoCall.setOnClickListener(View.OnClickListener {
             if (composeBoxActionListener != null) composeBoxActionListener!!.onStartCallClick()
             dismiss()
@@ -139,5 +149,6 @@ class CometChatComposeBoxActions : BottomSheetDialogFragment() {
         fun onWhiteBoardClick()
         fun onWriteBoardClick()
         fun onStartCallClick()
+        fun onPollClick()
     }
 }

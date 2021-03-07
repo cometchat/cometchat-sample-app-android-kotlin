@@ -28,9 +28,12 @@ import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -52,10 +55,11 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import org.json.JSONObject
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity
+import com.cometchat.pro.uikit.ui_components.messages.extensions.ExtensionResponseListener
 import com.cometchat.pro.uikit.ui_resources.utils.zoom_imageView.ZoomImageView
 import java.io.*
 import java.net.HttpURLConnection
@@ -192,9 +196,25 @@ public class Utils {
                 when (lastMessage.category) {
                     CometChatConstants.CATEGORY_MESSAGE -> if (lastMessage is TextMessage) {
                         message = lastMessage.text
-                        if (isLoggedInUser(lastMessage.getSender()))
-                            if (isExtensionEnabled("profanity-filter")) message = "You: " + Extensions.getProfanityFilter(lastMessage) else "You: " + message
-                        else if (isExtensionEnabled("profanity-filter")) message = lastMessage.sender.name + ": " + Extensions.getProfanityFilter(lastMessage) else lastMessage.sender.name + ": " + message
+                        if (isLoggedInUser(lastMessage.getSender())) {
+//                            if (isExtensionEnabled("profanity-filter"))
+//                                message = "You: " + Extensions.getProfanityFilter(lastMessage) else "You: " + message
+
+                            if (Extensions.checkExtensionEnabled("profanity-filter")) {
+                                message = "You: " + Extensions.getProfanityFilter(lastMessage)
+                            } else "You: $message"
+
+                        }
+                        else {
+                            if (Extensions.checkExtensionEnabled("profanity-filter")) {
+                                message = lastMessage.sender.name  + Extensions.getProfanityFilter(lastMessage)
+                            }
+                            else lastMessage.sender.name + ": " + message
+
+                        }
+//                        else if (isExtensionEnabled("profanity-filter"))
+//                            message = lastMessage.sender.name + ": " + Extensions.getProfanityFilter(lastMessage)
+//                        else lastMessage.sender.name + ": " + message
 
                     } else if (lastMessage is MediaMessage) {
                         message = if (isLoggedInUser(lastMessage.getSender())) "You sent a " + lastMessage.getType() else "You received a " + lastMessage.getType()
@@ -616,10 +636,10 @@ public class Utils {
         fun startCallIntent(context: Context, user: User, type: String?,
                             isOutgoing: Boolean, sessionId: String) {
             val videoCallIntent = Intent(context, CometChatCallActivity::class.java)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.SESSION_ID, sessionId)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.NAME, user.name)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.UID, user.uid)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, sessionId)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.avatar)
             videoCallIntent.action = type
             videoCallIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             if (isOutgoing) {
@@ -633,10 +653,10 @@ public class Utils {
         fun startGroupCallIntent(context: Context, group: Group, type: String?,
                                  isOutgoing: Boolean, sessionId: String) {
             val videoCallIntent = Intent(context, CometChatCallActivity::class.java)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.UID, group.guid)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.SESSION_ID, sessionId)
-            videoCallIntent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.NAME, group.name)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.UID, group.guid)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, sessionId)
+            videoCallIntent.putExtra(UIKitConstants.IntentStrings.AVATAR, group.icon)
             videoCallIntent.action = type
             videoCallIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             if (isOutgoing) {
@@ -697,10 +717,10 @@ public class Utils {
                     }
                     val callIntent: Intent
                     callIntent = Intent(context, CometChatCallActivity::class.java)
-                    callIntent.putExtra(UIKitContracts.IntentStrings.NAME, receiverName)
-                    callIntent.putExtra(UIKitContracts.IntentStrings.UID, receiverUid)
-                    callIntent.putExtra(UIKitContracts.IntentStrings.SESSION_ID, call.sessionId)
-                    callIntent.putExtra(UIKitContracts.IntentStrings.AVATAR, receiverAvatar)
+                    callIntent.putExtra(UIKitConstants.IntentStrings.NAME, receiverName)
+                    callIntent.putExtra(UIKitConstants.IntentStrings.UID, receiverUid)
+                    callIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.sessionId)
+                    callIntent.putExtra(UIKitConstants.IntentStrings.AVATAR, receiverAvatar)
                     callIntent.action = call.type
                     callIntent.type = "incoming"
                     val builder = NotificationCompat.Builder(context, "2")
@@ -738,6 +758,7 @@ public class Utils {
 
                 override fun onError(e: CometChatException) {
                     Log.e("onError: ", e.message)
+                    showDialog(activity, e)
                 }
 
                 override fun onCallEnded(call: Call) {
@@ -749,7 +770,7 @@ public class Utils {
 
         fun joinOnGoingCall(context: Context) {
             val intent = Intent(context, CometChatCallActivity::class.java)
-            intent.putExtra(UIKitContracts.IntentStrings.JOIN_ONGOING, true)
+            intent.putExtra(UIKitConstants.IntentStrings.JOIN_ONGOING, true)
             context.startActivity(intent)
         }
 
@@ -769,7 +790,7 @@ public class Utils {
         fun startVideoCallIntent(context: Context, sessionId: String?) {
             val intent = Intent(context, CometChatStartCallActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.putExtra(UIKitContracts.IntentStrings.SESSION_ID, sessionId)
+            intent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, sessionId)
             context.startActivity(intent)
         }
 
@@ -802,6 +823,20 @@ public class Utils {
             imageDialog.setContentView(messageVw)
             imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             imageDialog.show()
+        }
+
+        public fun showDialog(context : Context, e: CometChatException) {
+
+            val builder = AlertDialog.Builder(context)
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.cometchat_error_message_view, null, false)
+            builder.setView(dialogView)
+            dialogView.findViewById<TextView>(R.id.tv_error_message).text = e.message
+            val alertDialog = builder.create()
+            alertDialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
+            dialogView.findViewById<ImageView>(R.id.iv_error_close).setOnClickListener(View.OnClickListener {
+                alertDialog.dismiss()
+            })
+            alertDialog.show()
         }
     }
 }

@@ -41,7 +41,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import org.json.JSONException
 import org.json.JSONObject
@@ -99,7 +99,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     fun handleSendImage(intent: Intent) {
         val imageUri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
         if (imageUri != null) {
-            messageType = UIKitContracts.IntentStrings.INTENT_MEDIA_MESSAGE
+            messageType = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE
             mediaMessageUrl = imageUri.toString()
             Log.e(TAG, "handleSendImage: $mediaMessageUrl")
         }
@@ -123,38 +123,38 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
             }
         }
 
-        if (intent.hasExtra(UIKitContracts.IntentStrings.TYPE)) {
-            messageType = intent.getStringExtra(UIKitContracts.IntentStrings.TYPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.TYPE)) {
+            messageType = intent.getStringExtra(UIKitConstants.IntentStrings.TYPE)
         }
         if (intent.hasExtra(CometChatConstants.MESSAGE_TYPE_TEXT)) {
             textMessage = intent.getStringExtra(CometChatConstants.MESSAGE_TYPE_TEXT)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL)) {
-            mediaMessageUrl = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)) {
+            mediaMessageUrl = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE)) {
-            mediaMessageSize = intent.getIntExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, 0)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE)) {
+            mediaMessageSize = intent.getIntExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, 0)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)) {
-            mediaMessageExtension = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)) {
+            mediaMessageExtension = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)) {
-            mediaMessageName = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)) {
+            mediaMessageName = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE)) {
-            mediaMessageMime = intent.getStringExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE)) {
+            mediaMessageMime = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.ID)) {
-            id = intent.getIntExtra(UIKitContracts.IntentStrings.ID, 0)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.ID)) {
+            id = intent.getIntExtra(UIKitConstants.IntentStrings.ID, 0)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.LOCATION_LATITUDE)) {
-            lat = getIntent().getDoubleExtra(UIKitContracts.IntentStrings.LOCATION_LATITUDE, 0.0)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.LOCATION_LATITUDE)) {
+            lat = getIntent().getDoubleExtra(UIKitConstants.IntentStrings.LOCATION_LATITUDE, 0.0)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.LOCATION_LONGITUDE)) {
-            lon = getIntent().getDoubleExtra(UIKitContracts.IntentStrings.LOCATION_LONGITUDE, 0.0)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.LOCATION_LONGITUDE)) {
+            lon = getIntent().getDoubleExtra(UIKitConstants.IntentStrings.LOCATION_LONGITUDE, 0.0)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY)) {
-            messageCategory = getIntent().getStringExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY)) {
+            messageCategory = getIntent().getStringExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY)
         }
     }
 
@@ -271,7 +271,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                             }
                         }
                     }).start()
-                } else if (messageType != null && messageType != UIKitContracts.IntentStrings.INTENT_MEDIA_MESSAGE) {
+                } else if (messageType != null && messageType != UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE) {
                     Thread(Runnable {
                         for (i in 0 until userList!!.size) {
                             val conversation = ArrayList(userList.values)[i]
@@ -339,7 +339,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                     }.start()
                 }
             } else {
-                if (messageType != null && messageType.equals(UIKitContracts.IntentStrings.LOCATION, ignoreCase = true)) {
+                if (messageType != null && messageType.equals(UIKitConstants.IntentStrings.LOCATION, ignoreCase = true)) {
                     Thread {
                         for (i in 0 until userList!!.size) {
                             val conversation = ArrayList(userList!!.values)[i]
@@ -362,7 +362,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                             } catch (e: JSONException) {
                                 e.printStackTrace()
                             }
-                            message = CustomMessage(uid, type, UIKitContracts.IntentStrings.LOCATION, customData)
+                            message = CustomMessage(uid, type, UIKitConstants.IntentStrings.LOCATION, customData)
                             sendLocationMessage(message)
                             if (i == userList!!.size - 1) {
                                 val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)

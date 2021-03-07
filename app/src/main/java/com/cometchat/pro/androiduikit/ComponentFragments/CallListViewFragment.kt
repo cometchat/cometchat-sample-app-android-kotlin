@@ -24,7 +24,7 @@ import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.ui_components.shared.cometchatCalls.CometChatCalls
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_components.groups.group_detail.CometChatGroupDetailActivity
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
@@ -56,26 +56,26 @@ class CallListViewFragment : Fragment() {
                         `var`.sender
                     }
                     val intent = Intent(context, CometChatUserDetailScreenActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, user.uid)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, user.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, user.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.STATUS, user.status)
-                    intent.putExtra(UIKitContracts.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe)
-                    intent.putExtra(UIKitContracts.IntentStrings.FROM_CALL_LIST, true)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, user.uid)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, user.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.STATUS, user.status)
+                    intent.putExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe)
+                    intent.putExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST, true)
                     startActivity(intent)
                 } else {
                     val group: Group
                     group = `var`.callReceiver as Group
                     val intent = Intent(context, CometChatGroupDetailActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, group.guid)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
-                    intent.putExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE, group.scope)
-                    intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, group.guid)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, group.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, group.icon)
+                    intent.putExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE, group.scope)
+                    intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, group.membersCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, group.owner)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, group.description)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, group.password)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE, group.groupType)
                     startActivity(intent)
                 }
             }

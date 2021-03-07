@@ -38,11 +38,11 @@ class LoginActivity : AppCompatActivity() {
         inputLayout = findViewById(R.id.inputUID)
         uid!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView?, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_DONE) {
-                if (uid!!.getText().toString().isEmpty()) {
+                if (uid!!.text.toString().isEmpty()) {
                     Toast.makeText(this@LoginActivity, "Fill Username field", Toast.LENGTH_LONG).show()
                 } else {
-                    progressBar!!.setVisibility(View.VISIBLE)
-                    inputLayout!!.setEndIconVisible(false)
+                    progressBar!!.visibility = View.VISIBLE
+                    inputLayout!!.isEndIconVisible = false
                     login(uid!!.getText().toString())
                 }
             }
@@ -53,8 +53,8 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Fill Username field", Toast.LENGTH_LONG).show()
             } else {
                 findViewById<View>(R.id.loginProgress).visibility = View.VISIBLE
-                inputLayout!!.setEndIconVisible(false)
-                login(uid!!.getText().toString())
+                inputLayout!!.isEndIconVisible = false
+                login(uid!!.text.toString())
             }
         })
         checkDarkMode()
@@ -93,7 +93,7 @@ class LoginActivity : AppCompatActivity() {
             override fun onError(e: CometChatException) {
                 inputLayout!!.isEndIconVisible = true
                 findViewById<View>(R.id.loginProgress).visibility = View.GONE
-                Toast.makeText(this@LoginActivity, e.message, Toast.LENGTH_SHORT).show()
+                ShowErrorMessageUtils.showDialog(this@LoginActivity, e)
             }
         })
     }

@@ -1,21 +1,21 @@
 package com.cometchat.pro.androiduikit
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageView
-import android.os.Bundle
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Bundle
 import android.view.View
-import com.cometchat.pro.core.CometChat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import com.cometchat.pro.androiduikit.constants.AppConfig
+import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
-import android.widget.Toast
 import com.cometchat.pro.models.User
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import kotlin.system.exitProcess
+
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -52,9 +52,9 @@ class MainActivity : AppCompatActivity() {
             login("superhero4")
         })
         if (Utils.isDarkMode(this)) {
-            ivLogo!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+            ivLogo!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
         } else {
-            ivLogo!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor)))
+            ivLogo!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
         }
     }
 
@@ -69,10 +69,12 @@ class MainActivity : AppCompatActivity() {
                 val str = uid + "_progressbar"
                 val id = resources.getIdentifier(str, "id", packageName)
                 findViewById<View>(id).visibility = View.GONE
-                Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_SHORT).show()
+                ShowErrorMessageUtils.showDialog(this@MainActivity, e)
             }
         })
     }
+
+
 
     override fun onBackPressed() {
         super.onBackPressed()

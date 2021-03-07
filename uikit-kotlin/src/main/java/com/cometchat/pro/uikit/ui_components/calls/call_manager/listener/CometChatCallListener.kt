@@ -37,7 +37,10 @@ object CometChatCallListener {
                     CometChat.rejectCall(call.sessionId, CometChatConstants.CALL_STATUS_BUSY, object : CallbackListener<Call?>() {
                         override fun onSuccess(call: Call?) {}
                         override fun onError(e: CometChatException) {
-                            Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
+//                            Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
+                            if (context != null) {
+                                Utils.showDialog(context, e)
+                            }
                         }
                     })
                 }

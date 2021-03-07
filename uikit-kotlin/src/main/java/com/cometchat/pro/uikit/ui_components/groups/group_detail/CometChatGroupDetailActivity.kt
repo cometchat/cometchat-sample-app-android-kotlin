@@ -43,11 +43,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import okhttp3.internal.Util
 import java.util.*
 
 class CometChatGroupDetailActivity() : AppCompatActivity() {
@@ -305,11 +306,11 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      * This method is used to handle the intent passed to this activity.
      */
     private fun handleIntent() {
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GUID)) {
-            guid = intent.getStringExtra(UIKitContracts.IntentStrings.GUID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GUID)) {
+            guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)) {
-            loggedInUserScope = intent.getStringExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)) {
+            loggedInUserScope = intent.getStringExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)
             if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN)) {
                 rlAddMemberView!!.visibility = View.VISIBLE
                 rlBanMembers!!.visibility = View.VISIBLE
@@ -318,30 +319,30 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
                 rlBanMembers!!.visibility = View.VISIBLE
             }
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.NAME)) {
-            gName = intent.getStringExtra(UIKitContracts.IntentStrings.NAME)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.NAME)) {
+            gName = intent.getStringExtra(UIKitConstants.IntentStrings.NAME)
             tvGroupName!!.text = gName
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.AVATAR)) {
-            val avatar = intent.getStringExtra(UIKitContracts.IntentStrings.AVATAR)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.AVATAR)) {
+            val avatar = intent.getStringExtra(UIKitConstants.IntentStrings.AVATAR)
             if (avatar != null && !avatar.isEmpty()) groupIcon!!.setAvatar(avatar) else groupIcon!!.setInitials((gName)!!)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_DESC)) {
-            gDesc = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_DESC)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_DESC)) {
+            gDesc = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_DESC)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD)) {
-            gPassword = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD)) {
+            gPassword = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_OWNER)) {
-            ownerId = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_OWNER)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_OWNER)) {
+            ownerId = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_OWNER)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MEMBER_COUNT)) {
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MEMBER_COUNT)) {
             tvMemberCount!!.visibility = View.VISIBLE
-            groupMemberCount = intent.getIntExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, 0)
+            groupMemberCount = intent.getIntExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, 0)
             tvMemberCount!!.text = (groupMemberCount).toString() + " Members"
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_TYPE)) {
-            groupType = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_TYPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_TYPE)) {
+            groupType = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_TYPE)
         }
     }
 
@@ -353,9 +354,9 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      */
     private fun openBanMemberListScreen() {
         val intent = Intent(this, CometChatBanMembersActivity::class.java)
-        intent.putExtra(UIKitContracts.IntentStrings.GUID, guid)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_NAME, gName)
-        intent.putExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
+        intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_NAME, gName)
+        intent.putExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
         startActivity(intent)
     }
 
@@ -367,10 +368,10 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      */
     fun openAdminListScreen(showModerators: Boolean) {
         val intent = Intent(this, CometChatAdminModeratorListActivity::class.java)
-        intent.putExtra(UIKitContracts.IntentStrings.GUID, guid)
-        intent.putExtra(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, showModerators)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, ownerId)
-        intent.putExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
+        intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+        intent.putExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, ownerId)
+        intent.putExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
         startActivity(intent)
     }
 
@@ -382,11 +383,11 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      */
     fun addMembers() {
         val intent = Intent(this, CometChatAddMembersActivity::class.java)
-        intent.putExtra(UIKitContracts.IntentStrings.GUID, guid)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_MEMBER, groupMemberUids)
-        intent.putExtra(UIKitContracts.IntentStrings.GROUP_NAME, gName)
-        intent.putExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
-        intent.putExtra(UIKitContracts.IntentStrings.IS_ADD_MEMBER, true)
+        intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_MEMBER, groupMemberUids)
+        intent.putExtra(UIKitConstants.IntentStrings.GROUP_NAME, gName)
+        intent.putExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
+        intent.putExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, true)
         startActivity(intent)
     }
 
@@ -400,7 +401,8 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make((rvMemberList)!!, resources.getString(R.string.group_delete_error), Snackbar.LENGTH_SHORT).show()
+//                Snackbar.make((rvMemberList)!!, resources.getString(R.string.group_delete_error), Snackbar.LENGTH_SHORT).show()
+                Utils.showDialog(this@CometChatGroupDetailActivity, e)
                 Log.e(TAG, "onError: " + e.message)
             }
         })
@@ -428,7 +430,8 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make((rvMemberList)!!, String.format(resources.getString(R.string.cannot_remove_member), groupMember!!.name), Snackbar.LENGTH_SHORT).show()
+//                Snackbar.make((rvMemberList)!!, String.format(resources.getString(R.string.cannot_remove_member), groupMember!!.name), Snackbar.LENGTH_SHORT).show()
+                Utils.showDialog(this@CometChatGroupDetailActivity, e)
                 Log.e(TAG, "onError: " + e.message)
             }
         })
@@ -451,7 +454,8 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make((rvMemberList)!!, String.format(resources.getString(R.string.cannot_remove_member), groupMember!!.name), Snackbar.LENGTH_SHORT).show()
+//                Snackbar.make((rvMemberList)!!, String.format(resources.getString(R.string.cannot_remove_member), groupMember!!.name), Snackbar.LENGTH_SHORT).show()
+                Utils.showDialog(this@CometChatGroupDetailActivity, e)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

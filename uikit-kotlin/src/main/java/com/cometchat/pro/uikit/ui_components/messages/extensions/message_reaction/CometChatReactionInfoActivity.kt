@@ -8,7 +8,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import org.json.JSONException
 import org.json.JSONObject
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
@@ -27,9 +27,9 @@ class CometChatReactionInfoActivity : AppCompatActivity() {
         reactionInfoLayout = findViewById(R.id.reaction_info_layout)
         closeBtn = findViewById(R.id.close_btn)
         closeBtn.setOnClickListener { view: View? -> onBackPressed() }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.REACTION_INFO)) {
+        if (intent.hasExtra(UIKitConstants.IntentStrings.REACTION_INFO)) {
             try {
-                jsonObject = JSONObject(intent.getStringExtra(UIKitContracts.IntentStrings.REACTION_INFO))
+                jsonObject = JSONObject(intent.getStringExtra(UIKitConstants.IntentStrings.REACTION_INFO))
             } catch (e: JSONException) {
                 e.printStackTrace()
             }

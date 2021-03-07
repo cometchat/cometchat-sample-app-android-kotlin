@@ -97,7 +97,7 @@
     <string name="block_user_error">Unable to Block %1$s</string>
     <string name="exit_group_title">Exit Group</string>
     <string name="exit_group_message">Exit from group ?</string>
-    <string name="exit">Exit</string>
+    <string name="exit">Leave Group</string>
     <string name="delete_group_title">Delete Group</string>
     <string name="delete_group_message">Delete the group</string>
     <string name="group_delete_error">Group Deletion Failed</string>
@@ -195,7 +195,7 @@
     <string name="copy_message">Copy Message</string>
     <string name="share_message">Share a message</string>
     <string name="edit">Edit Message</string>
-    <string name="delete">Delete Message</string>
+    <string name="delete">Delete Group</string>
 
     <string name="send_audio_files">Send Audio Files</string>
     <string name="send_files_from_gallery">Photo &amp; Video Gallery</string>
@@ -226,9 +226,9 @@
     <string name="send_sticker">Send Stickers</string>
     <string name="shared_a_sticker">Shared a Sticker</string>
 
-    <string name="share_whiteboard">Share WhiteBoard</string>
+    <string name="share_whiteboard">Collaborative Whiteboard</string>
     <string name="shared_a_whiteboard">Shared a WhiteBoard</string>
-    <string name="share_writeboard">Share WriteBoard</string>
+    <string name="share_writeboard">Collaborative Document</string>
     <string name="shared_a_writeboard">Shared a WriteBoard</string>
     <string name="launch">Launch</string>
     <string name="you_created_whiteboard">You’ve created a new collaborative whiteboard.</string>
@@ -240,6 +240,13 @@
     <string name="has_initiated_group_call">has initiated a group call</string>
     <string name="you_have_initiated_group_call">You\'ve initiated a group call</string>
     <string name="sensitive_content">Unsafe Content</string>
+    <string name="create_poll">Create a Poll</string>
+    <string name="question">Question</string>
+    <string name="enter_your_question">Enter your Question</string>
+    <string name="option">Option</string>
+    <string name="enter_your_option">Enter your option</string>
+    <string name="add_a_new_option">Add a New Option</string>
+    <string name="shared_a_polls">Shared a Polls : \n %1$s</string>
 
 
 </resources>

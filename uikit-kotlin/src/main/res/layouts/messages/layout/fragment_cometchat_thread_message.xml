@@ -168,7 +168,7 @@
                     android:layout_below="@+id/iv_user"
                     android:background="@drawable/cc_message_bubble_left"
                     android:orientation="vertical"
-                    android:id="@+id/poll_message"
+                    android:id="@+id/polls_message"
                     android:layout_width="250dp"
                     android:layout_height="wrap_content">
 

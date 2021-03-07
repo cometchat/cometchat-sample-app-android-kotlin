@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/btn_create_poll">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/heading">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_poll"
+                    android:padding="16dp"
+                    android:textStyle="bold"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"/>
+                <ImageView
+                    android:id="@+id/cancel_poll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_close_24dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_centerVertical="true"/>
+            </RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/grey"
+                android:alpha="0.5"
+                android:layout_marginBottom="8dp"
+                android:id="@+id/divider" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:id="@+id/poll_layout">
+
+                <TextView
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:textStyle="bold"
+                    android:textColor="@color/primaryTextColor"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/question"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:layout_marginStart="8dp"
+                    android:padding="8dp"
+                    android:textColor="@color/primaryTextColor"
+                    android:textColorHint="@color/secondaryTextColor"
+                    android:background="@android:color/transparent"
+                    android:id="@+id/et_question"
+                    android:layout_width="match_parent"
+                    android:hint="@string/enter_your_question"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/primaryTextColor"
+                    android:layout_marginStart="8dp"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:textStyle="bold"
+                    android:text="@string/option"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <LinearLayout
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/options_layout"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <include android:id="@+id/option_1"
+                        layout="@layout/poll_option"/>
+                    <include android:id="@+id/option_2"
+                        layout="@layout/poll_option"/>
+                </LinearLayout>
+
+            </GridLayout>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/textColorWhite"
+                android:id="@+id/add_options"
+                app:rippleColor="@color/light_grey"
+                android:layout_margin="8dp"
+                android:clickable="true"
+                android:layout_height="wrap_content"
+                android:focusable="true">
+
+                <RelativeLayout
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:textColor="@color/colorPrimary"
+                        android:layout_centerInParent="true"
+                        android:text="@string/add_a_new_option"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_add_circle_grey_32dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"/>
+                </RelativeLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+        android:id="@+id/btn_create_poll"
+        android:layout_margin="8dp"
+        android:textColor="@color/textColorWhite"
+        app:backgroundTint="@color/colorPrimary"
+        android:text="@string/create_poll"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

@@ -6,7 +6,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 
 class CometChatAdminModeratorListActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -20,24 +20,24 @@ class CometChatAdminModeratorListActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        if (intent.hasExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)) {
-            loggedInUserScope = intent.getStringExtra(UIKitContracts.IntentStrings.MEMBER_SCOPE)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)) {
+            loggedInUserScope = intent.getStringExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GUID)) {
-            guid = intent.getStringExtra(UIKitContracts.IntentStrings.GUID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GUID)) {
+            guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.GROUP_OWNER)) {
-            ownerId = intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_OWNER)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_OWNER)) {
+            ownerId = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_OWNER)
         }
-        if (intent.hasExtra(UIKitContracts.IntentStrings.SHOW_MODERATORLIST)) {
-            showModerator = intent.getBooleanExtra(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, false)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)) {
+            showModerator = intent.getBooleanExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, false)
         }
         val fragment: Fragment = CometChatAdminModeratorList()
         val bundle = Bundle()
-        bundle.putString(UIKitContracts.IntentStrings.GUID, guid)
-        bundle.putString(UIKitContracts.IntentStrings.GROUP_OWNER, ownerId)
-        bundle.putString(UIKitContracts.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
-        bundle.putBoolean(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, showModerator)
+        bundle.putString(UIKitConstants.IntentStrings.GUID, guid)
+        bundle.putString(UIKitConstants.IntentStrings.GROUP_OWNER, ownerId)
+        bundle.putString(UIKitConstants.IntentStrings.MEMBER_SCOPE, loggedInUserScope)
+        bundle.putBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerator)
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction().replace(R.id.frame_fragment, fragment).commit()
     }

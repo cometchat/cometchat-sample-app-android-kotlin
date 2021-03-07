@@ -6,7 +6,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 
 class CometChatGroupMemberListActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -14,12 +14,12 @@ class CometChatGroupMemberListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen)
-        guid = intent.getStringExtra(UIKitContracts.IntentStrings.GUID)
-        showModerators = intent.getBooleanExtra(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, showModerators)
+        guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
+        showModerators = intent.getBooleanExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
         val fragment: Fragment = CometChatGroupMemberList()
         val bundle = Bundle()
-        bundle.putString(UIKitContracts.IntentStrings.GUID, guid)
-        bundle.putBoolean(UIKitContracts.IntentStrings.SHOW_MODERATORLIST, showModerators)
+        bundle.putString(UIKitConstants.IntentStrings.GUID, guid)
+        bundle.putBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction().replace(R.id.frame_fragment, fragment).commit()
     }

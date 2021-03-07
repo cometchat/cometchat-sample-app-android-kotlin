@@ -30,7 +30,7 @@ import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMess
 import com.cometchat.pro.uikit.ui_components.users.user_details.callHistory.CallHistoryAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
@@ -109,11 +109,11 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         tvSendMessage!!.setOnClickListener(View.OnClickListener { view: View? ->
             if (isAddMember || fromCallList) {
                 val intent: Intent = Intent(this@CometChatUserDetailScreenActivity, CometChatMessageListActivity::class.java)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
-                intent.putExtra(UIKitContracts.IntentStrings.UID, uid)
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, name)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, avatar)
-                intent.putExtra(UIKitContracts.IntentStrings.STATUS, CometChatConstants.USER_STATUS_OFFLINE)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
+                intent.putExtra(UIKitConstants.IntentStrings.UID, uid)
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, name)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.STATUS, CometChatConstants.USER_STATUS_OFFLINE)
                 startActivity(intent)
             } else onBackPressed()
         })
@@ -132,20 +132,20 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
 
     private fun checkDarkMode() {
         if (Utils.isDarkMode(this)) {
-            userName!!.setTextColor(getResources().getColor(R.color.textColorWhite))
-            divider1!!.setBackgroundColor(getResources().getColor(R.color.grey))
-            divider2!!.setBackgroundColor(getResources().getColor(R.color.grey))
-            divider3!!.setBackgroundColor(getResources().getColor(R.color.grey))
+            userName!!.setTextColor(resources.getColor(R.color.textColorWhite))
+            divider1!!.setBackgroundColor(resources.getColor(R.color.grey))
+            divider2!!.setBackgroundColor(resources.getColor(R.color.grey))
+            divider3!!.setBackgroundColor(resources.getColor(R.color.grey))
         } else {
-            userName!!.setTextColor(getResources().getColor(R.color.primaryTextColor))
-            divider1!!.setBackgroundColor(getResources().getColor(R.color.light_grey))
-            divider2!!.setBackgroundColor(getResources().getColor(R.color.light_grey))
-            divider3!!.setBackgroundColor(getResources().getColor(R.color.light_grey))
+            userName!!.setTextColor(resources.getColor(R.color.primaryTextColor))
+            divider1!!.setBackgroundColor(resources.getColor(R.color.light_grey))
+            divider2!!.setBackgroundColor(resources.getColor(R.color.light_grey))
+            divider3!!.setBackgroundColor(resources.getColor(R.color.light_grey))
         }
     }
 
     private fun checkOnGoingCall(callType: String) {
-        if ((CometChat.getActiveCall() != null) && (CometChat.getActiveCall().getCallStatus() == CometChatConstants.CALL_STATUS_ONGOING) && (CometChat.getActiveCall().getSessionId() != null)) {
+        if ((CometChat.getActiveCall() != null) && (CometChat.getActiveCall().callStatus == CometChatConstants.CALL_STATUS_ONGOING) && (CometChat.getActiveCall().sessionId != null)) {
             val alert: AlertDialog.Builder = AlertDialog.Builder(this)
             alert.setTitle(getResources().getString(R.string.ongoing_call))
                     .setMessage(getResources().getString(R.string.ongoing_call_message))
@@ -155,8 +155,8 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
                         }
                     }).setNegativeButton(getResources().getString(R.string.cancel), object : DialogInterface.OnClickListener {
                         public override fun onClick(dialog: DialogInterface, which: Int) {
-                            callBtn!!.setEnabled(true)
-                            vidoeCallBtn!!.setEnabled(true)
+                            callBtn!!.isEnabled = true
+                            vidoeCallBtn!!.isEnabled = true
                             dialog.dismiss()
                         }
                     }).create().show()
@@ -166,46 +166,46 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.IS_ADD_MEMBER)) {
-            isAddMember = getIntent().getBooleanExtra(UIKitContracts.IntentStrings.IS_ADD_MEMBER, false)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER)) {
+            isAddMember = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, false)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.FROM_CALL_LIST)) {
-            fromCallList = getIntent().getBooleanExtra(UIKitContracts.IntentStrings.FROM_CALL_LIST, false)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST)) {
+            fromCallList = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST, false)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.IS_BLOCKED_BY_ME)) {
-            isBlocked = getIntent().getBooleanExtra(UIKitContracts.IntentStrings.IS_BLOCKED_BY_ME, false)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME)) {
+            isBlocked = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, false)
             setBlockUnblock()
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.GUID)) {
-            guid = getIntent().getStringExtra(UIKitContracts.IntentStrings.GUID)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.GUID)) {
+            guid = getIntent().getStringExtra(UIKitConstants.IntentStrings.GUID)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.UID)) {
-            uid = getIntent().getStringExtra(UIKitContracts.IntentStrings.UID)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.UID)) {
+            uid = getIntent().getStringExtra(UIKitConstants.IntentStrings.UID)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.GROUP_NAME)) {
-            groupName = getIntent().getStringExtra(UIKitContracts.IntentStrings.GROUP_NAME)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.GROUP_NAME)) {
+            groupName = getIntent().getStringExtra(UIKitConstants.IntentStrings.GROUP_NAME)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.NAME)) {
-            name = getIntent().getStringExtra(UIKitContracts.IntentStrings.NAME)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.NAME)) {
+            name = getIntent().getStringExtra(UIKitConstants.IntentStrings.NAME)
             userName!!.setText(name)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.AVATAR)) {
-            avatar = getIntent().getStringExtra(UIKitContracts.IntentStrings.AVATAR)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.AVATAR)) {
+            avatar = getIntent().getStringExtra(UIKitConstants.IntentStrings.AVATAR)
         }
-        if (getIntent().hasExtra(UIKitContracts.IntentStrings.STATUS)) {
-            val status: String? = getIntent().getStringExtra(UIKitContracts.IntentStrings.STATUS)
+        if (getIntent().hasExtra(UIKitConstants.IntentStrings.STATUS)) {
+            val status: String? = getIntent().getStringExtra(UIKitConstants.IntentStrings.STATUS)
             if (status != null && (status == CometChatConstants.USER_STATUS_ONLINE)) userStatus!!.setTextColor(getResources().getColor(R.color.colorPrimary))
             userStatus!!.setText(status)
         }
-        if (avatar != null && !avatar!!.isEmpty()) userAvatar!!.setAvatar(avatar!!) else {
-            if (name != null && !name!!.isEmpty()) userAvatar!!.setInitials(name!!) else userAvatar!!.setInitials("Unknown")
+        if (avatar != null && avatar!!.isNotEmpty()) userAvatar!!.setAvatar(avatar!!) else {
+            if (name != null && name!!.isNotEmpty()) userAvatar!!.setInitials(name!!) else userAvatar!!.setInitials("Unknown")
         }
         if (isAddMember) {
-            addBtn!!.setText(String.format(getResources().getString(R.string.add_user_to_group), name, groupName))
-            historyView!!.setVisibility(View.GONE)
+            addBtn!!.text = String.format(resources.getString(R.string.add_user_to_group), name, groupName)
+            historyView!!.visibility = View.GONE
         } else {
             fetchCallHistory()
-            addBtn!!.setVisibility(View.GONE)
+            addBtn!!.visibility = View.GONE
         }
     }
 
@@ -215,11 +215,11 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         }
         messageRequest!!.fetchPrevious(object : CallbackListener<List<BaseMessage>>() {
             public override fun onSuccess(messageList: List<BaseMessage>) {
-                if (messageList.size != 0) {
+                if (messageList.isNotEmpty()) {
                     callList.addAll(messageList)
                     setCallHistoryAdapter(messageList)
                 }
-                if (callList.size != 0) historyView!!.setVisibility(View.VISIBLE) else historyView!!.setVisibility(View.GONE)
+                if (callList.size != 0) historyView!!.visibility = View.VISIBLE else historyView!!.visibility = View.GONE
             }
 
             public override fun onError(e: CometChatException) {}
@@ -230,18 +230,18 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         if (callHistoryAdapter == null) {
             callHistoryAdapter = CallHistoryAdapter(this@CometChatUserDetailScreenActivity, messageList)
             val linearLayoutManager: LinearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true)
-            historyRv!!.setLayoutManager(linearLayoutManager)
-            historyRv!!.setAdapter(callHistoryAdapter)
+            historyRv!!.layoutManager = linearLayoutManager
+            historyRv!!.adapter = callHistoryAdapter
         } else callHistoryAdapter!!.updateList(messageList)
     }
 
     private fun setBlockUnblock() {
         if (isBlocked) {
-            tvBlockUser!!.setTextColor(getResources().getColor(R.color.online_green))
-            tvBlockUser!!.setText(getResources().getString(R.string.unblock_user))
+            tvBlockUser!!.setTextColor(resources.getColor(R.color.online_green))
+            tvBlockUser!!.text = resources.getString(R.string.unblock_user)
         } else {
-            tvBlockUser!!.setText(getResources().getString(R.string.block_user))
-            tvBlockUser!!.setTextColor(getResources().getColor(R.color.red))
+            tvBlockUser!!.text = resources.getString(R.string.block_user)
+            tvBlockUser!!.setTextColor(resources.getColor(R.color.red))
         }
     }
 
@@ -250,7 +250,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.getItemId() == android.R.id.home) {
+        if (item.itemId == android.R.id.home) {
             onBackPressed()
         }
         return super.onOptionsItemSelected(item)
@@ -263,7 +263,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
             public override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
                 Log.e(TAG, "onSuccess: " + uid + "Group" + guid)
                 if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_added_to_group), userName!!.getText().toString(), groupName), Snackbar.LENGTH_LONG).show()
-                addBtn!!.setText(String.format(getResources().getString(R.string.remove_from_group), groupName))
+                addBtn!!.text = String.format(resources.getString(R.string.remove_from_group), groupName)
                 isAlreadyAdded = true
             }
 
@@ -276,9 +276,9 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     private fun kickGroupMember() {
         CometChat.kickGroupMember((uid)!!, (guid)!!, object : CallbackListener<String?>() {
             public override fun onSuccess(s: String?) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_removed_from_group), userName!!.getText().toString(), groupName), Snackbar.LENGTH_LONG).show()
-                addBtn!!.setText(String.format(getResources().getString(R.string.add_in_group), groupName))
-                addBtn!!.setVisibility(View.VISIBLE)
+                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_removed_from_group), userName!!.text.toString(), groupName), Snackbar.LENGTH_LONG).show()
+                addBtn!!.text = String.format(resources.getString(R.string.add_in_group), groupName)
+                addBtn!!.visibility = View.VISIBLE
                 isAlreadyAdded = false
             }
 
@@ -310,13 +310,14 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         uids.add(uid)
         CometChat.blockUsers(uids, object : CallbackListener<HashMap<String?, String?>?>() {
             public override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_is_blocked), userName!!.getText().toString()), Snackbar.LENGTH_SHORT).show()
+                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.user_is_blocked), userName!!.text.toString()), Snackbar.LENGTH_SHORT).show()
                 isBlocked = true
                 setBlockUnblock()
             }
 
             public override fun onError(e: CometChatException) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.block_user_error), userName!!.getText().toString()), Snackbar.LENGTH_SHORT).show()
+//                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.block_user_error), userName!!.text.toString()), Snackbar.LENGTH_SHORT).show()
+                Utils.showDialog(this@CometChatUserDetailScreenActivity, e)
                 Log.d(TAG, "onError: " + e.message)
             }
         })
@@ -353,6 +354,6 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     }
 
     private fun updateBtn(user: User, resource_string: Int) {
-        if ((user.getUid() == uid)) addBtn!!.setText(String.format(getResources().getString(resource_string), groupName))
+        if ((user.uid == uid)) addBtn!!.text = String.format(resources.getString(resource_string), groupName)
     }
 }

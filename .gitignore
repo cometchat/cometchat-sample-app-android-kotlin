@@ -58,6 +58,17 @@ captures/
 .idea/markdown-navigator-enh.xml
 .idea/markdown-navigator.xml
 
+.idea/.name
+.idea/caches/build_file_checksums.ser
+.idea/codeStyles/Project.xml
+.idea/cometchat-pro-kotlin-ui-kit.iml
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/runConfigurations.xml
+.idea/vcs.xml
+
+
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.

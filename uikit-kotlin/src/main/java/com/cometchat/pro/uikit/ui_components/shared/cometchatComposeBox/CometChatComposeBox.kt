@@ -18,11 +18,13 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.inputmethod.InputContentInfoCompat
 import com.cometchat.pro.core.CometChat
+import com.cometchat.pro.core.CometChat.isExtensionEnabled
+import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.uikit.ui_resources.utils.audio_visualizer.AudioRecordView
 import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatEditText.OnEditTextMediaListener
 import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatComposeBoxActions.ComposeBoxActionListener
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.listener.ComposeActionListener
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.io.File
@@ -73,6 +75,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     var isWhiteBoardVisible = true
     var isWriteBoardVisible = true
     var isStartVideoCall = true
+    var isPollVisible = true
 
     constructor(context: Context) : super(context) {
         initViewComponent(context, null, -1, -1)
@@ -189,6 +192,10 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             override fun onStartCallClick() {
                 composeActionListener.onStartCallClicked()
             }
+
+            override fun onPollClick() {
+                composeActionListener.onPollActionClicked()
+            }
         })
 
         etComposeBox!!.addTextChangedListener(object : TextWatcher {
@@ -218,26 +225,26 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         })
         if (Utils.isDarkMode(context)) {
             composeBox!!.setBackgroundColor(resources.getColor(R.color.darkModeBackground))
-            ivAudio!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+            ivAudio!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_white_24dp))
-            flBox!!.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+            flBox!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             etComposeBox!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            ivArrow!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
-            ivSend!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
-            ivCamera!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
-            ivGallery!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
-            ivFile!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            ivCamera!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            ivGallery!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
         } else {
             composeBox!!.setBackgroundColor(resources.getColor(R.color.textColorWhite))
-            ivAudio!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.colorPrimary)))
+            ivAudio!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_grey_24dp))
             etComposeBox!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            ivSend!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.colorPrimary)))
-            flBox!!.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(R.color.grey)))
-            ivArrow!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.grey)))
-            ivCamera!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.colorPrimary)))
-            ivFile!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.colorPrimary)))
-            ivFile!!.setImageTintList(ColorStateList.valueOf(resources.getColor(R.color.colorPrimary)))
+            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+            flBox!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
+            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
+            ivCamera!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+            ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+            ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
         }
         a.recycle()
     }
@@ -328,12 +335,57 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             bundle.putBoolean("isAudioVisible", isAudioVisible)
             bundle.putBoolean("isLocationVisible", isLocationVisible)
             bundle.putBoolean("isStartVideoCall", isStartVideoCall)
-            if (CometChat.isExtensionEnabled("stickers"))
-                bundle.putBoolean("isStickerVisible", isStickerVisible)
-            if (CometChat.isExtensionEnabled("whiteboard"))
-                bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
-            if (CometChat.isExtensionEnabled("document"))
-                bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
+//            if (CometChat.isExtensionEnabled("stickers"))
+//                bundle.putBoolean("isStickerVisible", isStickerVisible)
+//            if (CometChat.isExtensionEnabled("whiteboard"))
+//                bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
+//            if (CometChat.isExtensionEnabled("document"))
+//                bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
+//            if (CometChat.isExtensionEnabled("polls"))
+//                bundle.putBoolean("isPollVisible", isPollVisible)
+
+            isExtensionEnabled("stickers", object : CometChat.CallbackListener<Boolean>(){
+                override fun onSuccess(p0: Boolean?) {
+                    if (p0 as Boolean) bundle.putBoolean("isStickerVisible", isStickerVisible)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
+            isExtensionEnabled("whiteboard", object : CometChat.CallbackListener<Boolean>(){
+                override fun onSuccess(p0: Boolean?) {
+                    if (p0 as Boolean) bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
+                }
+
+            })
+            isExtensionEnabled("document", object : CometChat.CallbackListener<Boolean>(){
+                override fun onSuccess(p0: Boolean?) {
+                    if (p0 as Boolean) bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
+                }
+
+            })
+            isExtensionEnabled("polls", object : CometChat.CallbackListener<Boolean>(){
+                override fun onSuccess(p0: Boolean?) {
+                    if (p0 as Boolean) bundle.putBoolean("isPollVisible", isPollVisible)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
             cometChatComposeBoxActions!!.arguments = bundle
             cometChatComposeBoxActions!!.show(fm, cometChatComposeBoxActions!!.tag)
         }
@@ -363,12 +415,12 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                     ivDelete!!.visibility = View.VISIBLE
                     voiceSeekbar!!.visibility = View.VISIBLE
                     voiceMessage = true
-                    if (audioFileNameWithPath != null) startPlayingAudio(audioFileNameWithPath!!) else Toast.makeText(getContext(), "No File Found. Please", Toast.LENGTH_LONG).show()
+                    if (audioFileNameWithPath != null) startPlayingAudio(audioFileNameWithPath!!) else Toast.makeText(context, "No File Found. Please", Toast.LENGTH_LONG).show()
                 }
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     (context as Activity).requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            UIKitContracts.RequestCode.RECORD)
+                            UIKitConstants.RequestCode.RECORD)
                 }
             }
         }
@@ -404,7 +456,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 mediaPlayer!!.start()
             } else {
                 (context as Activity?)!!.requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        UIKitContracts.RequestCode.READ_STORAGE)
+                        UIKitConstants.RequestCode.READ_STORAGE)
             }
             val duration = mediaPlayer!!.duration
             voiceSeekbar!!.max = duration

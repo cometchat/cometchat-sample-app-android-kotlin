@@ -20,7 +20,7 @@ import com.cometchat.pro.models.Conversation
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 
 class ConversationListViewFragment : Fragment() {
@@ -41,21 +41,21 @@ class ConversationListViewFragment : Fragment() {
             override fun OnItemClick(t: Any, position: Int) {
                 val conversation = t as Conversation
                 val intent = Intent(context, CometChatMessageListActivity::class.java)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, conversation.conversationType)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, conversation.conversationType)
                 if (conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP) {
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, (conversation.conversationWith as Group).name)
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, (conversation.conversationWith as Group).guid)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, (conversation.conversationWith as Group).owner)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, (conversation.conversationWith as Group).icon)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, (conversation.conversationWith as Group).groupType)
-                    intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, (conversation.conversationWith as Group).membersCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, (conversation.conversationWith as Group).description)
-                    intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, (conversation.conversationWith as Group).password)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, (conversation.conversationWith as Group).name)
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, (conversation.conversationWith as Group).guid)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, (conversation.conversationWith as Group).owner)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, (conversation.conversationWith as Group).icon)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE, (conversation.conversationWith as Group).groupType)
+                    intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, (conversation.conversationWith as Group).membersCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, (conversation.conversationWith as Group).description)
+                    intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, (conversation.conversationWith as Group).password)
                 } else {
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, (conversation.conversationWith as User).name)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, (conversation.conversationWith as User).uid)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, (conversation.conversationWith as User).avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.STATUS, (conversation.conversationWith as User).status)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, (conversation.conversationWith as User).name)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, (conversation.conversationWith as User).uid)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, (conversation.conversationWith as User).avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.STATUS, (conversation.conversationWith as User).status)
                 }
                 startActivity(intent)
             }

@@ -3,7 +3,7 @@ package com.cometchat.pro.uikit.ui_resources.constants
 import com.cometchat.pro.constants.CometChatConstants
 import java.util.*
 
-class UIKitContracts {
+class UIKitConstants {
     object Sounds {
         var enableMessageSounds = true
 
@@ -71,6 +71,13 @@ class UIKitContracts {
         const val MEETING = "meeting"
 
         const val IMAGE_MODERATION = "image_moderation"
+
+        const val POLLS = "extension_poll"
+        const val POLL_QUESTION = "poll_question"
+        const val POLL_OPTION = "poll_option"
+        const val POLL_RESULT = "poll_result"
+        const val POLL_ID = "poll_id"
+        const val POLL_VOTE_COUNT = "poll_vote_count"
     }
 
     object Tab {
@@ -109,7 +116,8 @@ class UIKitContracts {
                 IntentStrings.LOCATION,
                 IntentStrings.STICKERS,
                 IntentStrings.WHITEBOARD,
-                IntentStrings.WRITEBOARD
+                IntentStrings.WRITEBOARD,
+                IntentStrings.POLLS
         ))
         var messageTypesForGroup: List<String> = ArrayList(Arrays.asList(
                 CometChatConstants.MESSAGE_TYPE_CUSTOM,
@@ -125,7 +133,8 @@ class UIKitContracts {
                 IntentStrings.STICKERS,
                 IntentStrings.WHITEBOARD,
                 IntentStrings.WRITEBOARD,
-                IntentStrings.MEETING
+                IntentStrings.MEETING,
+                IntentStrings.POLLS
         ))
 
         var messageCategoriesForGroup: List<String> = ArrayList(Arrays.asList(

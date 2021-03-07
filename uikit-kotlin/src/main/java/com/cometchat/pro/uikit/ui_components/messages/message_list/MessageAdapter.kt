@@ -1,6 +1,5 @@
 package com.cometchat.pro.uikit.ui_components.messages.message_list
 
-import com.cometchat.pro.uikit.ui_components.messages.message_list.MessageAdapter.DateItemHolder
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -18,7 +17,9 @@ import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.EmojiSpan
@@ -31,25 +32,26 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.core.CometChat.isExtensionEnabled
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
-import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.*
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
-import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderAdapter
-import org.json.JSONException
-import org.json.JSONObject
-import com.cometchat.pro.uikit.ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity
-import com.cometchat.pro.uikit.ui_components.messages.threaded_message_list.CometChatThreadMessageListActivity
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
+import com.cometchat.pro.uikit.ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity
+import com.cometchat.pro.uikit.ui_components.messages.message_list.MessageAdapter.DateItemHolder
+import com.cometchat.pro.uikit.ui_components.messages.threaded_message_list.CometChatThreadMessageListActivity
+import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderAdapter
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
+import kotlin.math.roundToInt
 
 /**
  * Purpose - MessageAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -109,12 +111,14 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         private const val RIGHT_WHITEBOARD_MESSAGE = 8
         private const val LEFT_WRITEBOARD_MESSAGE = 9
         private const val RIGHT_WRITEBOARD_MESSAGE = 10
-
         private const val LEFT_CONFERENCE_CALL_MESSAGE = 51
         private const val RIGHT_CONFERENCE_CALL_MESSAGE = 52
+        private const val RIGHT_POLLS_CUSTOM_MESSAGE = 14
+        private const val LEFT_POLLS_CUSTOM_MESSAGE = 15
 
         var LATITUDE = 0.0
         var LONGITUDE = 0.0
+        private lateinit var textMessage :String
 
     }
     /**
@@ -354,6 +358,18 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 messageConferenceCallItemBinding.root.tag = RIGHT_CONFERENCE_CALL_MESSAGE
                 RightConferenceCallMessageViewHolder(messageConferenceCallItemBinding)
             }
+            LEFT_POLLS_CUSTOM_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messagePollsItemBinding: MessageLeftPollsItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_left_polls_item, parent, false)
+                messagePollsItemBinding.root.tag = LEFT_POLLS_CUSTOM_MESSAGE
+                LeftPollsMessageViewHolder(messagePollsItemBinding)
+            }
+            RIGHT_POLLS_CUSTOM_MESSAGE -> {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val messagePollsItemBinding: MessageRightPollsItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_right_polls_item, parent, false)
+                messagePollsItemBinding.root.tag = RIGHT_POLLS_CUSTOM_MESSAGE
+                RightPollsMessageViewHolder(messagePollsItemBinding)
+            }
             else -> {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val actionMessageItemBinding : MessageActionItemBinding = DataBindingUtil.inflate(layoutInflater, R.layout.message_action_item, parent, false)
@@ -438,9 +454,311 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             RIGHT_WHITEBOARD_MESSAGE -> setWhiteBoardData(viewHolder as RightWhiteBoardMessageViewHolder, i)
             LEFT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as LeftWriteBoardMessageViewHolder, i)
             RIGHT_WRITEBOARD_MESSAGE -> setWriteBoardData(viewHolder as RightWriteBoardMessageViewHolder, i)
-
             LEFT_CONFERENCE_CALL_MESSAGE -> setMeetingData(viewHolder as LeftConferenceCallMessageViewHolder, i)
             RIGHT_CONFERENCE_CALL_MESSAGE -> setMeetingData(viewHolder as RightConferenceCallMessageViewHolder, i)
+            LEFT_POLLS_CUSTOM_MESSAGE -> setPollsData(viewHolder as LeftPollsMessageViewHolder, i)
+            RIGHT_POLLS_CUSTOM_MESSAGE -> setPollsData(viewHolder as RightPollsMessageViewHolder, i)
+        }
+    }
+
+    private fun setPollsData(viewHolder: RecyclerView.ViewHolder, i: Int) {
+        val baseMessage = messageList[i]
+        if (baseMessage != null && baseMessage.deletedAt == 0L) {
+            if (viewHolder is LeftPollsMessageViewHolder) {
+                if (baseMessage.sender.uid != loggedInUser.uid) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                        viewHolder.view.tvUser.visibility = View.GONE
+                        viewHolder.view.ivUser.visibility = View.GONE
+                    } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        if (isUserDetailVisible) {
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
+                        } else {
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        }
+                        setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
+                    }
+                }
+                if (baseMessage.replyCount != 0) {
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                } else {
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
+                    val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
+//            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    try {
+                        val option = (baseMessage as CustomMessage).customData.getJSONObject("options")
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.POLLS)
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_QUESTION,
+                                baseMessage.customData.getString("question"))
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_OPTION, option.toString())
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_VOTE_COUNT, Extensions.getVoteCount(baseMessage))
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_RESULT, Extensions.getVoterInfo(baseMessage, option.length()))
+                    } catch (e: java.lang.Exception) {
+                        Log.e(TAG, "startThreadActivityError: " + e.message)
+                    }
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+
+                viewHolder.view.optionsGroup.removeAllViews()
+                viewHolder.view.totalVotes.text = "0 Votes"
+                val optionList = ArrayList<String>()
+                try {
+                    val jsonObject = (baseMessage as CustomMessage).customData
+                    val options = jsonObject.getJSONObject("options")
+                    val voterInfo = Extensions.getVoterInfo(baseMessage, options.length())
+                    viewHolder.view.tvQuestion.text = jsonObject.getString("question")
+                    for (k in 0 until options.length()) {
+                        var voteText = Extensions.getVoteCount(baseMessage).toString() + " Votes"
+                        viewHolder.view.totalVotes.text = voteText
+                        val linearLayout = LinearLayout(context)
+                        val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT)
+                        linearLayout.setPadding(8, 8, 8, 8)
+                        linearLayout.background = context.resources
+                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
+                                .getColor(R.color.textColorWhite))
+                        layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
+                        linearLayout.layoutParams = layoutParams
+                        val textViewPercentage = TextView(context)
+                        val textViewOption = TextView(context)
+                        textViewPercentage.setPadding(16, 4, 0, 4)
+                        textViewOption.setPadding(16, 4, 0, 4)
+                        textViewOption.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
+                        textViewOption.setTextColor(context.resources.getColor(R.color.primaryTextColor))
+                        val optionStr = options.getString((k + 1).toString())
+                        textViewOption.text = optionStr
+                        val voteCount = Extensions.getVoteCount(baseMessage)!!
+                        if (voteCount > 0) {
+                            val percentage = (voterInfo!![k].toInt() * 100 /
+                                    voteCount.toFloat()).roundToInt()
+                            if (percentage > 0) textViewPercentage.text = "$percentage% "
+                        }
+                        if (k + 1 == Extensions.userVotedOn(baseMessage, optionList.size + 1, loggedInUser.uid)) {
+                            textViewPercentage.compoundDrawablePadding = 8
+                            textViewPercentage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_circle_24, 0, 0, 0)
+                        }
+                        if (viewHolder.view.optionsGroup.childCount != options.length()) {
+                            viewHolder.view.loadingProgressBar.visibility = View.GONE
+                            linearLayout.addView(textViewPercentage)
+                            linearLayout.addView(textViewOption)
+                            viewHolder.view.optionsGroup.addView(linearLayout)
+                        }
+                        linearLayout.setOnClickListener {
+                            try {
+                                var pollsId: String? = null
+                                pollsId = if (jsonObject.has("id")) jsonObject.getString("id") else baseMessage.getId().toString() + ""
+                                val pollsJsonObject = JSONObject()
+                                pollsJsonObject.put("vote", k + 1)
+                                pollsJsonObject.put("id", pollsId)
+                                CometChat.callExtension("polls", "POST", "/v2/vote",
+                                        pollsJsonObject, object : CallbackListener<JSONObject>() {
+                                    override fun onSuccess(jsonObject: JSONObject) {
+                                        // Voted successfully
+                                        viewHolder.view.loadingProgressBar.visibility = View.VISIBLE
+                                        viewHolder.view.totalVotes.text = "0 Votes"
+                                        Log.e(TAG, "onSuccess: $jsonObject")
+                                        Toast.makeText(context, "Voted Successfully", Toast.LENGTH_LONG).show()
+                                    }
+
+                                    override fun onError(e: CometChatException) {
+                                        // Some error occured
+                                        Log.e(TAG, "onErrorExtension: ${e.message}${e.code}".trimIndent())
+                                    }
+                                })
+                            } catch (e: Exception) {
+                                Log.e(TAG, "onError: " + e.message)
+                            }
+                        }
+                        optionList.add(options.getString((k + 1).toString()))
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "setPollsData: ${e.message}${viewHolder.view.totalVotes.text}".trimIndent())
+                }
+                showMessageTime(viewHolder, baseMessage)
+                //        if (messageList.get(messageList.size()-1).equals(baseMessage))
+//        {
+//            selectedItemList.add(baseMessage.getId());
+//        }
+//        if (selectedItemList.contains(baseMessage.getId()))
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                //        else
+//            viewHolder.txtTime.setVisibility(View.GONE);
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        isLocationMessageClick = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    }
+                    true
+                })
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+
+            } else {
+                viewHolder as RightPollsMessageViewHolder
+                if (baseMessage.replyCount != 0) {
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                } else {
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
+                }
+                viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
+                    val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
+//            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    try {
+                        val option = (baseMessage as CustomMessage).customData.getJSONObject("options")
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.POLLS)
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_QUESTION,
+                                baseMessage.customData.getString("question"))
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_OPTION, option.toString())
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_VOTE_COUNT, Extensions.getVoteCount(baseMessage))
+                        intent.putExtra(UIKitConstants.IntentStrings.POLL_RESULT, Extensions.getVoterInfo(baseMessage, option.length()))
+                    } catch (e: java.lang.Exception) {
+                        Log.e(TAG, "startThreadActivityError: " + e.message)
+                    }
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
+                    } else {
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
+                    }
+                    context.startActivity(intent)
+                })
+
+
+                viewHolder.view.optionsGroup.removeAllViews()
+                viewHolder.view.totalVotes.text = "0 Votes"
+                val optionList = ArrayList<String>()
+                try {
+                    val jsonObject = (baseMessage as CustomMessage).customData
+                    val options = jsonObject.getJSONObject("options")
+                    val voterInfo = Extensions.getVoterInfo(baseMessage, options.length())
+                    viewHolder.view.tvQuestion.text = jsonObject.getString("question")
+                    for (k in 0 until options.length()) {
+                        viewHolder.view.totalVotes.text = Extensions.getVoteCount(baseMessage).toString() + " Votes"
+                        val linearLayout = LinearLayout(context)
+                        val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT)
+                        linearLayout.setPadding(8, 8, 8, 8)
+                        linearLayout.background = context!!.resources
+                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
+                                .getColor(R.color.textColorWhite))
+                        layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
+                        linearLayout.layoutParams = layoutParams
+                        val textViewPercentage = TextView(context)
+                        val textViewOption = TextView(context)
+                        textViewPercentage.setPadding(16, 4, 0, 4)
+                        textViewOption.setPadding(16, 4, 0, 4)
+                        textViewOption.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
+                        textViewOption.setTextColor(context.resources.getColor(R.color.primaryTextColor))
+                        val optionStr = options.getString((k + 1).toString())
+                        textViewOption.text = optionStr
+                        val voteCount = Extensions.getVoteCount(baseMessage)!!
+                        if (voteCount > 0) {
+                            val percentage = (voterInfo!![k].toInt() * 100 /
+                                    voteCount.toFloat()).roundToInt()
+                            if (percentage > 0) textViewPercentage.text = "$percentage% "
+                        }
+                        if (k + 1 == Extensions.userVotedOn(baseMessage, optionList.size + 1, loggedInUser.uid)) {
+                            textViewPercentage.compoundDrawablePadding = 8
+                            textViewPercentage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_check_circle_24, 0, 0, 0)
+                        }
+                        if (viewHolder.view.optionsGroup.childCount != options.length()) {
+                            viewHolder.view.loadingProgressBar.visibility = View.GONE
+                            linearLayout.addView(textViewPercentage)
+                            linearLayout.addView(textViewOption)
+                            viewHolder.view.optionsGroup.addView(linearLayout)
+                        }
+                        linearLayout.setOnClickListener {
+                            try {
+                                var pollsId: String? = null
+                                pollsId = if (jsonObject.has("id")) jsonObject.getString("id") else baseMessage.getId().toString() + ""
+                                val pollsJsonObject = JSONObject()
+                                pollsJsonObject.put("vote", k + 1)
+                                pollsJsonObject.put("id", pollsId)
+                                CometChat.callExtension("polls", "POST", "/v2/vote",
+                                        pollsJsonObject, object : CallbackListener<JSONObject>() {
+                                    override fun onSuccess(jsonObject: JSONObject) {
+                                        // Voted successfully
+                                        viewHolder.view.loadingProgressBar.visibility = View.VISIBLE
+                                        viewHolder.view.totalVotes.text = "0 Votes"
+                                        Log.e(TAG, "onSuccess: $jsonObject")
+                                        Toast.makeText(context, "Voted Successfully", Toast.LENGTH_LONG).show()
+                                    }
+
+                                    override fun onError(e: CometChatException) {
+                                        // Some error occured
+                                        Log.e(TAG, "onErrorExtension: ${e.message}${e.code}".trimIndent())
+                                    }
+                                })
+                            } catch (e: Exception) {
+                                Log.e(TAG, "onError: " + e.message)
+                            }
+                        }
+                        optionList.add(options.getString((k + 1).toString()))
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "setPollsData: ${e.message}${viewHolder.view.totalVotes.text}".trimIndent())
+                }
+                showMessageTime(viewHolder, baseMessage)
+                //        if (messageList.get(messageList.size()-1).equals(baseMessage))
+//        {
+//            selectedItemList.add(baseMessage.getId());
+//        }
+//        if (selectedItemList.contains(baseMessage.getId()))
+                viewHolder.view.txtTime.visibility = View.VISIBLE
+                //        else
+//            viewHolder.txtTime.setVisibility(View.GONE);
+                setColorFilter(baseMessage, viewHolder.view.cvMessageContainer)
+                viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
+                    if (!isImageMessageClick && !isTextMessageClick) {
+                        isLongClickEnabled = true
+                        isLocationMessageClick = true
+                        setLongClickSelectedItem(baseMessage)
+                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    }
+                    true
+                })
+                viewHolder.view.reactionsLayout.visibility = View.GONE
+                setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
+            }
         }
     }
 
@@ -549,21 +867,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -607,21 +925,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener {
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, Extensions.getWriteBoardUrl(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -687,21 +1005,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -745,21 +1063,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, Extensions.getWhiteBoardUrl(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -830,26 +1148,26 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener {
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, UIKitContracts.IntentStrings.STICKERS)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.STICKERS)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
                     try {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.customData.getString("url"))
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.customData.getString("url"))
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 }
@@ -896,26 +1214,26 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener {
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, UIKitContracts.IntentStrings.STICKERS)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.STICKERS)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
                     try {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.customData.getString("url"))
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as CustomMessage).customData.getString("name"))
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.customData.getString("url"))
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 }
@@ -976,29 +1294,29 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
                     try {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, UIKitContracts.IntentStrings.LOCATION)
-                        intent.putExtra(UIKitContracts.IntentStrings.LOCATION_LATITUDE,
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.LOCATION)
+                        intent.putExtra(UIKitConstants.IntentStrings.LOCATION_LATITUDE,
                                 (baseMessage as CustomMessage).customData.getDouble("latitude"))
-                        intent.putExtra(UIKitContracts.IntentStrings.LOCATION_LONGITUDE,
+                        intent.putExtra(UIKitConstants.IntentStrings.LOCATION_LONGITUDE,
                                 baseMessage.customData.getDouble("longitude"))
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "startThreadActivityError: " + e.message)
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -1071,29 +1389,29 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
                     try {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, UIKitContracts.IntentStrings.LOCATION)
-                        intent.putExtra(UIKitContracts.IntentStrings.LOCATION_LATITUDE,
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, UIKitConstants.IntentStrings.LOCATION)
+                        intent.putExtra(UIKitConstants.IntentStrings.LOCATION_LATITUDE,
                                 (baseMessage as CustomMessage).customData.getDouble("latitude"))
-                        intent.putExtra(UIKitContracts.IntentStrings.LOCATION_LONGITUDE,
+                        intent.putExtra(UIKitConstants.IntentStrings.LOCATION_LONGITUDE,
                                 baseMessage.customData.getDouble("longitude"))
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "startThreadActivityError: " + e.message)
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -1146,7 +1464,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             LATITUDE = (baseMessage as CustomMessage).customData.getDouble("latitude")
             LONGITUDE = baseMessage.customData.getDouble("longitude")
             tvAddress.text = Utils.getAddress(context, LATITUDE, LONGITUDE)
-            val mapUrl = UIKitContracts.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitContracts.MapUrl.MAP_ACCESS_KEY
+            val mapUrl = UIKitConstants.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitConstants.MapUrl.MAP_ACCESS_KEY
             Glide.with(context)
                     .load(mapUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -1191,24 +1509,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -1263,24 +1581,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -1377,24 +1695,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                  intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -1439,24 +1757,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                  intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -1558,24 +1876,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                 if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                 } else {
-                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                 }
                 context.startActivity(intent)
             })
@@ -1645,24 +1963,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                 if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                 } else {
-                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                 }
                 context.startActivity(intent)
             })
@@ -1789,24 +2107,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                 if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                 } else {
-                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                 }
                 context.startActivity(intent)
             })
@@ -1844,24 +2162,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //            intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
-                intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, baseMessage.attachment.fileName)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
+                intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
                 if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                    intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                    intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                 } else {
-                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                    if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                 }
                 context.startActivity(intent)
             })
@@ -1971,6 +2289,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         } else if (viewHolder is LeftWriteBoardMessageViewHolder) {
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is LeftConferenceCallMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is LeftPollsMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
         }
 
 
@@ -1993,6 +2315,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         } else if (viewHolder is RightWhiteBoardMessageViewHolder) {
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         } else if (viewHolder is RightWriteBoardMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is RightConferenceCallMessageViewHolder) {
+            setStatusIcon(viewHolder.view.txtTime, baseMessage)
+        } else if (viewHolder is RightPollsMessageViewHolder) {
             setStatusIcon(viewHolder.view.txtTime, baseMessage)
         }
     }
@@ -2048,7 +2374,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             var viewHolder: RecyclerView.ViewHolder
             if (view is LeftTextMessageViewHolder) {
                 val viewHolder = view as LeftTextMessageViewHolder
-                viewHolder.view.textMessage = baseMessage as TextMessage
+//                viewHolder.view.textMessage = baseMessage as TextMessage
                 if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     viewHolder.view.tvUser.visibility = View.GONE
                     viewHolder.view.ivUser.visibility = View.GONE
@@ -2064,13 +2390,21 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.tvUser.text = baseMessage.sender.name
                 }
 
-//                var textMessage = (baseMessage as TextMessage).text.trim()
-                val txtMessage = baseMessage.text.trim { it <= ' ' }
+                var txtMessage = (baseMessage as TextMessage).text.trim()
+//                val txtMessage = baseMessage.text.trim { it <= ' ' }
                 var message = txtMessage
-                if (isExtensionEnabled("profanity-filter"))
-                    message = Extensions.getProfanityFilter(baseMessage)
-                if (isExtensionEnabled("data-masking"))
+//                if (isExtensionEnabled("profanity-filter"))
+//                    message = Extensions.getProfanityFilter(baseMessage)
+//                if (isExtensionEnabled("data-masking"))
+//                    message = Extensions.checkDataMasking(baseMessage)
+
+                if(Extensions.checkExtensionEnabled("data-masking")) {
                     message = Extensions.checkDataMasking(baseMessage)
+                }
+
+                if(Extensions.checkExtensionEnabled("profanity-filter")) {
+                    message = Extensions.getProfanityFilter(baseMessage)
+                }
 
                 viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
@@ -2110,65 +2444,68 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         val metaData = baseMessage.getMetadata().getJSONObject("reply")
                         val messageType = metaData.getString("type")
                         val message = metaData.getString("message")
-                        viewHolder.view.replyItem.replyLayout.setVisibility(View.VISIBLE)
-                        viewHolder.view.replyItem.replyUser.setText(metaData.getString("name"))
+                        viewHolder.view.replyItem.replyLayout.visibility = View.VISIBLE
+                        viewHolder.view.replyItem.replyUser.text = metaData.getString("name")
                         if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
-                            viewHolder.view.replyItem.replyMessage.setText(message)
+                            viewHolder.view.replyItem.replyMessage.text = message
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.resources.getString(R.string.shared_a_image))
+                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_image)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_photo, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_a_audio), ""))
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_audio), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_library_music_24dp, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.resources.getString(R.string.shared_a_video))
+                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_video)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_videocam_24dp, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_a_file), ""))
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' })
+                        } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' }
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.STICKERS) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.getString(R.string.shared_a_sticker)))
+                        } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.WHITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_whiteboard))
+                        } else if (messageType == UIKitConstants.IntentStrings.WHITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_whiteboard)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.WRITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_writeboard))
+                        } else if (messageType == UIKitConstants.IntentStrings.WRITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_writeboard)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0)
+                        } else if (messageType == UIKitConstants.IntentStrings.POLLS) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_polls), message)
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_outline_poll_24, 0, 0, 0)
                         }
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "setTextData: " + e.message)
                     }
                 }
                 if (baseMessage.getReplyCount() != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -2194,12 +2531,20 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             } else {
                 viewHolder = view as RightTextMessageViewHolder
                 viewHolder.view.textMessage = baseMessage as TextMessage
-                var textMessage = (baseMessage as TextMessage).text.trim()
-                var message = textMessage
-                if (isExtensionEnabled("profanity-filter"))
-                    message = Extensions.getProfanityFilter(baseMessage)
-                if (isExtensionEnabled("data-masking"))
+                var txtMsg = (baseMessage as TextMessage).text.trim()
+                var message = txtMsg
+//                if (isExtensionEnabled("profanity-filter"))
+//                    message = Extensions.getProfanityFilter(baseMessage)
+//                if (isExtensionEnabled("data-masking"))
+//                    message = Extensions.checkDataMasking(baseMessage)
+
+                if(Extensions.checkExtensionEnabled("data-masking")) {
                     message = Extensions.checkDataMasking(baseMessage)
+                }
+
+                if(Extensions.checkExtensionEnabled("profanity-filter")) {
+                    message = Extensions.getProfanityFilter(baseMessage)
+                }
 
                 viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
@@ -2238,35 +2583,38 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         val metaData = baseMessage.getMetadata().getJSONObject("reply")
                         val messageType = metaData.getString("type")
                         val message = metaData.getString("message")
-                        viewHolder.view.replyItem.replyLayout.setVisibility(View.VISIBLE)
-                        viewHolder.view.replyItem.replyUser.setText(metaData.getString("name"))
+                        viewHolder.view.replyItem.replyLayout.visibility = View.VISIBLE
+                        viewHolder.view.replyItem.replyUser.text = metaData.getString("name")
                         if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
-                            viewHolder.view.replyItem.replyMessage.setText(message)
+                            viewHolder.view.replyItem.replyMessage.text = message
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.resources.getString(R.string.shared_a_image))
+                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_image)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_photo, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_a_audio), ""))
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_audio), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_library_music_24dp, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.resources.getString(R.string.shared_a_video))
+                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_video)
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_videocam_24dp, 0, 0, 0)
                         } else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_a_file), ""))
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' })
+                        } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' }
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitContracts.IntentStrings.STICKERS) {
-                            viewHolder.view.replyItem.replyMessage.setText(String.format(context.getString(R.string.shared_a_sticker)))
+                        } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
-                        } else if (messageType.equals(UIKitContracts.IntentStrings.WHITEBOARD)) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_whiteboard));
+                        } else if (messageType == UIKitConstants.IntentStrings.WHITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_whiteboard);
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0);
-                        } else if (messageType.equals(UIKitContracts.IntentStrings.WRITEBOARD)) {
-                            viewHolder.view.replyItem.replyMessage.setText(context.getString(R.string.shared_a_writeboard));
+                        } else if (messageType == UIKitConstants.IntentStrings.WRITEBOARD) {
+                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_writeboard);
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0);
+                        } else if (messageType == UIKitConstants.IntentStrings.POLLS) {
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_polls), message)
+                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_outline_poll_24, 0, 0, 0)
                         }
 
                     } catch (e: java.lang.Exception) {
@@ -2274,30 +2622,30 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                 }
                 if (baseMessage.getReplyCount() != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.getSender().avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.getId())
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.getSentAt())
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, baseMessage.text)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.getReceiverType())
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.getSender().avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.getReplyCount())
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.getId())
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.getType())
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.getSentAt())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, baseMessage.text)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.getCategory())
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType())
                     if (baseMessage.getReceiverType() == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.getReceiverUid())
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.getReceiverUid())
                     } else {
-                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.getReceiverUid())
+                        if (baseMessage.getReceiverUid() == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getSender().uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.getReceiverUid())
                     }
                     context.startActivity(intent)
                 })
@@ -2338,7 +2686,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 reactionsLayout.addView(chip)
                 chip.setOnLongClickListener {
                     val intent = Intent(context, CometChatReactionInfoActivity::class.java)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, baseMessage.metadata.toString())
                     context.startActivity(intent)
                     true
                 }
@@ -2496,26 +2844,26 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -2595,35 +2943,35 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                 }
                 if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
 //                intent.putExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage.toString());
-                    intent.putExtra(UIKitContracts.IntentStrings.NAME, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.AVATAR, baseMessage.sender.avatar)
-                    intent.putExtra(UIKitContracts.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
-                    intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.name)
-                    intent.putExtra(UIKitContracts.IntentStrings.PARENT_ID, baseMessage.id)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE, baseMessage.type)
-                    intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
-                    intent.putExtra(UIKitContracts.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
-                    intent.putExtra(UIKitContracts.IntentStrings.SENTAT, baseMessage.sentAt)
-                    if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(UIKitContracts.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
-                        intent.putExtra(UIKitContracts.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
+                    intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage.sender.avatar)
+                    intent.putExtra(UIKitConstants.IntentStrings.REPLY_COUNT, baseMessage.replyCount)
+                    intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.name)
+                    intent.putExtra(UIKitConstants.IntentStrings.PARENT_ID, baseMessage.id)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE, baseMessage.type)
+                    intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY, baseMessage.category)
+                    intent.putExtra(UIKitConstants.IntentStrings.REACTION_INFO, Extensions.getReactionsOnMessage(baseMessage))
+                    intent.putExtra(UIKitConstants.IntentStrings.SENTAT, baseMessage.sentAt)
+                    if (baseMessage.type == CometChatConstants.MESSAGE_TYPE_TEXT) intent.putExtra(UIKitConstants.IntentStrings.TEXTMESSAGE, (baseMessage as TextMessage).text) else {
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_NAME, (baseMessage as MediaMessage).attachment.fileName)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_EXTENSION, baseMessage.attachment.fileExtension)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL, baseMessage.attachment.fileUrl)
+                        intent.putExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_SIZE, baseMessage.attachment.fileSize)
                     }
-                    intent.putExtra(UIKitContracts.IntentStrings.TYPE, baseMessage.receiverType)
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.receiverType)
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                        intent.putExtra(UIKitContracts.IntentStrings.GUID, baseMessage.receiverUid)
+                        intent.putExtra(UIKitConstants.IntentStrings.GUID, baseMessage.receiverUid)
                     } else {
-                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitContracts.IntentStrings.UID, baseMessage.receiverUid)
+                        if (baseMessage.receiverUid == loggedInUser.uid) intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.sender.uid) else intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage.receiverUid)
                     }
                     context.startActivity(intent)
                 })
@@ -2662,7 +3010,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     true
                 }
-                viewHolder.view.reactionsLayout.setVisibility(View.GONE)
+                viewHolder.view.reactionsLayout.visibility = View.GONE
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
             }
@@ -2779,21 +3127,24 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 } else if (baseMessage.category == CometChatConstants.CATEGORY_CUSTOM) {
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         return when (baseMessage.type){
-                            UIKitContracts.IntentStrings.LOCATION -> RIGHT_LOCATION_CUSTOM_MESSAGE
-                            UIKitContracts.IntentStrings.STICKERS -> RIGHT_STICKER_MESSAGE
-                            UIKitContracts.IntentStrings.WHITEBOARD -> RIGHT_WHITEBOARD_MESSAGE
-                            UIKitContracts.IntentStrings.WRITEBOARD -> RIGHT_WRITEBOARD_MESSAGE
-                            UIKitContracts.IntentStrings.MEETING -> RIGHT_CONFERENCE_CALL_MESSAGE
+                            UIKitConstants.IntentStrings.LOCATION -> RIGHT_LOCATION_CUSTOM_MESSAGE
+                            UIKitConstants.IntentStrings.STICKERS -> RIGHT_STICKER_MESSAGE
+                            UIKitConstants.IntentStrings.WHITEBOARD -> RIGHT_WHITEBOARD_MESSAGE
+                            UIKitConstants.IntentStrings.WRITEBOARD -> RIGHT_WRITEBOARD_MESSAGE
+                            UIKitConstants.IntentStrings.MEETING -> RIGHT_CONFERENCE_CALL_MESSAGE
+                            UIKitConstants.IntentStrings.POLLS -> RIGHT_POLLS_CUSTOM_MESSAGE
                             else -> RIGHT_CUSTOM_MESSAGE
                         }
                     }
                     else {
                         return when (baseMessage.type){
-                            UIKitContracts.IntentStrings.LOCATION -> LEFT_LOCATION_CUSTOM_MESSAGE
-                            UIKitContracts.IntentStrings.STICKERS -> LEFT_STICKER_MESSAGE
-                            UIKitContracts.IntentStrings.WHITEBOARD -> LEFT_WHITEBOARD_MESSAGE
-                            UIKitContracts.IntentStrings.WRITEBOARD -> LEFT_WRITEBOARD_MESSAGE
-                            UIKitContracts.IntentStrings.MEETING -> LEFT_CONFERENCE_CALL_MESSAGE
+                            UIKitConstants.IntentStrings.LOCATION -> LEFT_LOCATION_CUSTOM_MESSAGE
+                            UIKitConstants.IntentStrings.STICKERS -> LEFT_STICKER_MESSAGE
+                            UIKitConstants.IntentStrings.WHITEBOARD -> LEFT_WHITEBOARD_MESSAGE
+                            UIKitConstants.IntentStrings.WRITEBOARD -> LEFT_WRITEBOARD_MESSAGE
+                            UIKitConstants.IntentStrings.MEETING -> LEFT_CONFERENCE_CALL_MESSAGE
+                            UIKitConstants.IntentStrings.POLLS -> LEFT_POLLS_CUSTOM_MESSAGE
+
                             else -> LEFT_CUSTOM_MESSAGE
                         }
                     }
@@ -2969,11 +3320,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 
     inner class RightWriteBoardMessageViewHolder(val view: MessageRightWriteboardItemBinding) : RecyclerView.ViewHolder(view.root)
 
-
+    //GroupCall
     inner class LeftConferenceCallMessageViewHolder(val view: MessageLeftGroupCallItemBinding) :RecyclerView.ViewHolder(view.root)
 
     inner class RightConferenceCallMessageViewHolder(val view: MessageRightGroupCallItemBinding) :RecyclerView.ViewHolder(view.root)
 
+    //Poll
+    inner class LeftPollsMessageViewHolder(val view: MessageLeftPollsItemBinding) : RecyclerView.ViewHolder(view.root)
+
+    inner class RightPollsMessageViewHolder(val view: MessageRightPollsItemBinding): RecyclerView.ViewHolder(view.root)
 
 
 

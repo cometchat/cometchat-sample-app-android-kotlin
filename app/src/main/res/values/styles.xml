@@ -37,6 +37,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/animate_slides_down</item>
+        <item name="android:windowExitAnimation">@anim/animate_slides_up</item>
+    </style>
+
 
 
 

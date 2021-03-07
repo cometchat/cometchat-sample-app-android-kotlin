@@ -18,7 +18,7 @@ import com.cometchat.pro.core.GroupsRequest.GroupsRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 
 class GroupListViewFragment : Fragment() {
@@ -33,15 +33,15 @@ class GroupListViewFragment : Fragment() {
             override fun OnItemClick(t: Any, position: Int) {
                 val group = t as Group
                 val intent = Intent(context, CometChatMessageListActivity::class.java)
-                intent.putExtra(UIKitContracts.IntentStrings.NAME, group.name)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_OWNER, group.owner)
-                intent.putExtra(UIKitContracts.IntentStrings.GUID, group.guid)
-                intent.putExtra(UIKitContracts.IntentStrings.AVATAR, group.icon)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_TYPE, group.groupType)
-                intent.putExtra(UIKitContracts.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
-                intent.putExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, group.membersCount)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_DESC, group.description)
-                intent.putExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD, group.password)
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, group.name)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER, group.owner)
+                intent.putExtra(UIKitConstants.IntentStrings.GUID, group.guid)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, group.icon)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE, group.groupType)
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP)
+                intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, group.membersCount)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, group.description)
+                intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, group.password)
                 startActivity(intent)
             }
         })

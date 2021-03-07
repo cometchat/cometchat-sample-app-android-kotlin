@@ -44,19 +44,20 @@ class CreateUserActivity : AppCompatActivity() {
         createUserBtn!!.setTextColor(resources.getColor(R.color.textColorWhite))
         createUserBtn!!.setOnClickListener(View.OnClickListener {
             if (uid!!.text.toString().isEmpty()) uid!!.error = resources.getString(R.string.fill_this_field) else if (name!!.text.toString().isEmpty()) name!!.error = resources.getString(R.string.fill_this_field) else {
-                progressBar!!.setVisibility(View.VISIBLE)
-                createUserBtn!!.setClickable(false)
+                progressBar!!.visibility = View.VISIBLE
+                createUserBtn!!.isClickable = false
                 val user = User()
-                user.uid = uid!!.getText().toString()
-                user.name = name!!.getText().toString()
+                user.uid = uid!!.text.toString()
+                user.name = name!!.text.toString()
                 CometChat.createUser(user, AppConfig.AppDetails.AUTH_KEY, object : CallbackListener<User>() {
                     override fun onSuccess(user: User) {
                         login(user)
                     }
 
                     override fun onError(e: CometChatException) {
-                        createUserBtn!!.setClickable(true)
-                        Toast.makeText(this@CreateUserActivity, "Failed to create user", Toast.LENGTH_LONG).show()
+                        createUserBtn!!.isClickable = true
+//                        Toast.makeText(this@CreateUserActivity, "Failed to create user", Toast.LENGTH_LONG).show()
+                        ShowErrorMessageUtils.showDialog(this@CreateUserActivity, e)
                     }
                 })
             }
@@ -98,6 +99,7 @@ class CreateUserActivity : AppCompatActivity() {
 
             override fun onError(e: CometChatException) {
                 if (uid != null) Snackbar.make(uid!!.rootView, "Unable to login", Snackbar.LENGTH_INDEFINITE).setAction("Try Again") { startActivity(Intent(this@CreateUserActivity, LoginActivity::class.java)) }.show()
+                else ShowErrorMessageUtils.showDialog(this@CreateUserActivity, e)
             }
         })
     }

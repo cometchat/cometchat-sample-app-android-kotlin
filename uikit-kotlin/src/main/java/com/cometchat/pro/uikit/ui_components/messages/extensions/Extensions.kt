@@ -6,23 +6,23 @@ import android.util.Log
 import android.widget.Toast
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.isExtensionEnabled
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.TextMessage
+import com.cometchat.pro.uikit.ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity
+import com.cometchat.pro.uikit.ui_components.shared.cometchatReaction.ReactionUtils
 import com.cometchat.pro.uikit.ui_components.shared.cometchatReaction.model.Reaction
 import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.model.Sticker
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
-import com.cometchat.pro.uikit.ui_components.shared.cometchatReaction.ReactionUtils
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import org.json.JSONException
 import org.json.JSONObject
-import com.cometchat.pro.uikit.ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity
-import java.util.*
-import kotlin.collections.HashMap
 
 public class Extensions {
 
     companion object{
         private const val TAG = "Extensions"
+        var isEnabled :Boolean = true
 
         fun extensionCheck(baseMessage: BaseMessage): HashMap<String, JSONObject>? {
             val metadata = baseMessage.metadata
@@ -62,6 +62,9 @@ public class Extensions {
                         }
                         if (extensionsObject != null && extensionsObject.has("image-moderation")) {
                             extensionMap["imageModeration"] = extensionsObject.getJSONObject("image-moderation")
+                        }
+                        if (extensionsObject != null && extensionsObject.has("polls")) {
+                            extensionMap["polls"] = extensionsObject.getJSONObject("polls")
                         }
                     }
                     extensionMap
@@ -290,7 +293,7 @@ public class Extensions {
                             var username = CometChat.getLoggedInUser().name.replace(" ", "_")
                             boardUrl = "$boardUrl&username=$username"
                             val intent = Intent(context, CometChatCollaborativeActivity::class.java)
-                            intent.putExtra(UIKitContracts.IntentStrings.URL, boardUrl)
+                            intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl)
                             context.startActivity(intent)
                         }
                     }
@@ -327,7 +330,7 @@ public class Extensions {
                     if (writeBoardObject != null && writeBoardObject.has("document_url")) {
                         boardUrl = writeBoardObject.getString("document_url")
                         val intent = Intent(context, CometChatCollaborativeActivity::class.java)
-                        intent.putExtra(UIKitContracts.IntentStrings.URL, boardUrl)
+                        intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl)
                         context.startActivity(intent)
                     }
                 }
@@ -397,6 +400,110 @@ public class Extensions {
                 Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
             }
             return result
+        }
+
+        fun getVoteCount(baseMessage: BaseMessage): Int {
+            var voteCount = 0
+            val result: JSONObject = getPollsResult(baseMessage)
+            try {
+                if (result.has("total")) {
+                    voteCount = result.getInt("total")
+                }
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "getVoteCount: " + e.message)
+            }
+            Log.e(TAG, "getVoteCount: $voteCount")
+            return voteCount
+        }
+
+        private fun getPollsResult(baseMessage: BaseMessage): JSONObject {
+            var result = JSONObject()
+            val extensionList = extensionCheck(baseMessage)
+            if (extensionList != null) {
+                try {
+                    if (extensionList.containsKey("polls")) {
+                        val polls = extensionList["polls"]
+                        if (polls!!.has("results")) {
+                            result = polls.getJSONObject("results")
+                        }
+                    }
+                } catch (e: java.lang.Exception) {
+                    Log.e(TAG, "getPollsResult: " + e.message)
+                }
+            }
+            return result
+        }
+
+        fun getVoterInfo(baseMessage: BaseMessage, length: Int): ArrayList<String>? {
+            val votes = ArrayList<String>()
+            val result = getPollsResult(baseMessage)
+            try {
+                if (result.has("options")) {
+                    val options = result.getJSONObject("options")
+                    for (k in 0 until length) {
+                        val optionK = options.getJSONObject((k + 1).toString())
+                        votes.add(optionK.getString("count"))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "getVoterInfo:Error: " + e.message)
+            }
+            return votes
+        }
+
+        fun userVotedOn(baseMessage: BaseMessage, totalOptions: Int, uid: String?): Int {
+            var result = 0
+            val resultJson = getPollsResult(baseMessage)
+            try {
+                if (resultJson.has("options")) {
+                    val options = resultJson.getJSONObject("options")
+                    for (k in 0 until totalOptions) {
+                        val option = options.getJSONObject((k + 1).toString())
+                        if (option.has("voters") && option["voters"] is JSONObject) {
+                            val voterList = option.getJSONObject("voters")
+                            if (voterList.has(uid)) {
+                                result = k + 1
+                            }
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "userVotedOn: " + e.message)
+            }
+            return result
+        }
+
+//        fun checkExtensionEnabled(extensionId: String, extensionResponseListener: ExtensionResponseListener<Any>) {
+//            isExtensionEnabled(extensionId, object : CallbackListener<Boolean>() {
+//                override fun onSuccess(p0: Boolean?) {
+//                    Log.e(TAG, "onSuccess:checkExtensionEnabled " + extensionId + " " + p0)
+//                    extensionResponseListener.onResponseSuccess(p0)
+//                }
+//
+//                override fun onError(p0: CometChatException?) {
+//                    extensionResponseListener.onResponseFailed(p0)
+//                }
+//
+//            })
+//        }
+
+        fun checkExtensionEnabled(extensionId: String) :Boolean {
+            isExtensionEnabled(extensionId, object : CallbackListener<Boolean>() {
+                override fun onSuccess(p0: Boolean) {
+
+                    Log.e(TAG, "onSuccess: " + extensionId + " - " + p0)
+                    isEnabled = p0
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    Log.e(TAG, "onError: "+p0?.message)
+                }
+
+            })
+
+
+            return isEnabled
+
         }
 
     }

@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.MessageActionCloseListener
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.OnMessageLongClick
 
@@ -43,19 +43,19 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
         if (intent != null) {
             val bundle = Bundle()
-            bundle.putString(UIKitContracts.IntentStrings.AVATAR, intent.getStringExtra(UIKitContracts.IntentStrings.AVATAR))
-            bundle.putString(UIKitContracts.IntentStrings.NAME, intent.getStringExtra(UIKitContracts.IntentStrings.NAME))
-            bundle.putString(UIKitContracts.IntentStrings.TYPE, intent.getStringExtra(UIKitContracts.IntentStrings.TYPE))
-            if (intent.hasExtra(UIKitContracts.IntentStrings.TYPE) && intent.getStringExtra(UIKitContracts.IntentStrings.TYPE) == CometChatConstants.RECEIVER_TYPE_USER) {
-                bundle.putString(UIKitContracts.IntentStrings.UID, intent.getStringExtra(UIKitContracts.IntentStrings.UID))
-                bundle.putString(UIKitContracts.IntentStrings.STATUS, intent.getStringExtra(UIKitContracts.IntentStrings.STATUS))
+            bundle.putString(UIKitConstants.IntentStrings.AVATAR, intent.getStringExtra(UIKitConstants.IntentStrings.AVATAR))
+            bundle.putString(UIKitConstants.IntentStrings.NAME, intent.getStringExtra(UIKitConstants.IntentStrings.NAME))
+            bundle.putString(UIKitConstants.IntentStrings.TYPE, intent.getStringExtra(UIKitConstants.IntentStrings.TYPE))
+            if (intent.hasExtra(UIKitConstants.IntentStrings.TYPE) && intent.getStringExtra(UIKitConstants.IntentStrings.TYPE) == CometChatConstants.RECEIVER_TYPE_USER) {
+                bundle.putString(UIKitConstants.IntentStrings.UID, intent.getStringExtra(UIKitConstants.IntentStrings.UID))
+                bundle.putString(UIKitConstants.IntentStrings.STATUS, intent.getStringExtra(UIKitConstants.IntentStrings.STATUS))
             } else {
-                bundle.putString(UIKitContracts.IntentStrings.GUID, intent.getStringExtra(UIKitContracts.IntentStrings.GUID))
-                bundle.putString(UIKitContracts.IntentStrings.GROUP_OWNER, intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_OWNER))
-                bundle.putInt(UIKitContracts.IntentStrings.MEMBER_COUNT, intent.getIntExtra(UIKitContracts.IntentStrings.MEMBER_COUNT, 0))
-                bundle.putString(UIKitContracts.IntentStrings.GROUP_TYPE, intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_TYPE))
-                bundle.putString(UIKitContracts.IntentStrings.GROUP_DESC, intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_DESC))
-                bundle.putString(UIKitContracts.IntentStrings.GROUP_PASSWORD, intent.getStringExtra(UIKitContracts.IntentStrings.GROUP_PASSWORD))
+                bundle.putString(UIKitConstants.IntentStrings.GUID, intent.getStringExtra(UIKitConstants.IntentStrings.GUID))
+                bundle.putString(UIKitConstants.IntentStrings.GROUP_OWNER, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_OWNER))
+                bundle.putInt(UIKitConstants.IntentStrings.MEMBER_COUNT, intent.getIntExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, 0))
+                bundle.putString(UIKitConstants.IntentStrings.GROUP_TYPE, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_TYPE))
+                bundle.putString(UIKitConstants.IntentStrings.GROUP_DESC, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_DESC))
+                bundle.putString(UIKitConstants.IntentStrings.GROUP_PASSWORD, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD))
             }
             fragment!!.arguments = bundle
             supportFragmentManager.beginTransaction().replace(R.id.ChatFragment, fragment!!).commit()

@@ -65,7 +65,7 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
                 }
 
                 public override fun onError(e: CometChatException) {
-                    Snackbar.make((tvBlockUserCount)!!, getResources().getString(R.string.blocked_list_error), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make((tvBlockUserCount)!!, resources.getString(R.string.blocked_list_error), Snackbar.LENGTH_SHORT).show()
                     Toast.makeText(this@CometChatMorePrivacyActivity, e.message, Toast.LENGTH_SHORT).show()
                 }
             })

@@ -23,7 +23,7 @@ import com.cometchat.pro.uikit.databinding.FragmentCometchatUserProfileBinding
 import com.cometchat.pro.uikit.ui_components.userProfile.privacy_and_security.CometChatMorePrivacyActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitContracts
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
@@ -115,15 +115,17 @@ class CometChatUserProfile constructor() : Fragment() {
     }
 
     private fun updateUser(user: User) {
-        val authkey = UIKitContracts.AppInfo.AUTH_KEY;
+        val authkey = UIKitConstants.AppInfo.AUTH_KEY;
         CometChat.updateUser(user, authkey, object : CallbackListener<User?>() {
             public override fun onSuccess(user: User?) {
-                if (getContext() != null) Toast.makeText(getContext(), "Updated User Successfull", Toast.LENGTH_LONG).show()
+                if (context != null) Toast.makeText(context, "Updated User Successfull", Toast.LENGTH_LONG).show()
                 moreInfoScreenBinding!!.setUser(user)
             }
 
             public override fun onError(e: CometChatException) {
-                if (getContext() != null) Toast.makeText(getContext(), e.message, Toast.LENGTH_LONG).show()
+                if (context != null)
+                    context?.let { Utils.showDialog(it, e) }
+//                    Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             }
         })
     }
