@@ -28,10 +28,10 @@
     <string name="conversationlist_description">This component will be the class of RecyclerView which is customizable to display list of recent conversation</string>
     <string name="copyright">\u00A9 2019 CometChat Inc.</string>
     <string name="channel_description">channel_description</string>
-    <string name="cometchat_unified_description" tools:ignore="ExtraTranslation">UI Unified directly launches a fully function chat experience within your app. It contains all the features a standard chat application has and reduces the development time and effort considerably.</string>
-    <string name="cometchat_screen_description" tools:ignore="ExtraTranslation">UI Screens are individual screens that can be used independently within your app to suit your requirements. These screens are fully function stand-alone screens which can be used to achieve specific use cases and reduce the development efforts considerably.</string>
+    <string name="cometchat_unified_description" tools:ignore="ExtraTranslation">CometChat UI directly launches a fully function chat experience within your app. It contains all the features a standard chat application has and reduces the development time and effort considerably.</string>
+    <string name="cometchat_screen_description" tools:ignore="ExtraTranslation">UI Components are individual screens that can be used independently within your app to suit your requirements. These components are fully function which can be used to achieve specific use cases and reduce the development efforts considerably.</string>
     <string name="circle" tools:ignore="ExtraTranslation">circle</string>
-    <string name="uicomponent_description" tools:ignore="ExtraTranslation">It show\'s list of component which users can use at their end to create thier own chat app within minutes.</string>
+    <string name="uicomponent_description" tools:ignore="ExtraTranslation">It show\'s list of core component which users can use at their end to create their own chat app within minutes.</string>
     <string name="callList_description">This component will be the class of RecyclerView which is customizable to display list of calls.</string>
     <string name="sharedMediaVw_description"><![CDATA[This component is a custom component it includes three tabs which show images,videos & files.]]></string>
 

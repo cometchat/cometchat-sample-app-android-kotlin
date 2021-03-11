@@ -37,7 +37,7 @@
                         android:drawablePadding="10dp"
                         android:layout_marginTop="16dp"
                         android:layout_gravity="center_horizontal"
-                        android:text="UI Unified"
+                        android:text="CometChat UI"
                         style="@style/TextAppearance.MaterialComponents.Headline5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -90,7 +90,7 @@
                     style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_marginTop="16dp"
                     android:layout_gravity="center_horizontal"
-                    android:text="UI Screens"
+                    android:text="UI Components"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <TextView
@@ -233,7 +233,7 @@
                     android:drawablePadding="10dp"
                     android:layout_marginTop="16dp"
                     android:layout_gravity="center_horizontal"
-                    android:text="UI Components"
+                    android:text="Shared"
                     style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
