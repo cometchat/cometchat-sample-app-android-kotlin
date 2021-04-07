@@ -933,7 +933,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         unblockUsers(uids, object : CallbackListener<HashMap<String?, String?>?>() {
             override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
                 Snackbar.make(rvChatListView!!, String.format(resources.getString(R.string.user_unblocked), name), Snackbar.LENGTH_LONG).show()
-                blockUserLayout!!.setVisibility(View.GONE)
+                blockUserLayout!!.visibility = View.GONE
                 isBlockedByMe = false
                 messagesRequest = null
             }
@@ -953,12 +953,14 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                 isInProgress = false
                 val filteredMessageList: List<BaseMessage> = filterBaseMessages(baseMessages)
                 initMessageAdapter(filteredMessageList)
-                if (baseMessages.size != 0) {
+                if (baseMessages.isNotEmpty()) {
                     stopHideShimmer()
                     val baseMessage = baseMessages[baseMessages.size - 1]
-                    markMessageAsRead(baseMessage)
+                    if (baseMessage != null) {
+                        markMessageAsRead(baseMessage)
+                    }
                 }
-                if (baseMessages.size == 0) {
+                if (baseMessages.isEmpty()) {
                     stopHideShimmer()
                     isNoMoreMessages = true
                 }
@@ -1293,8 +1295,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         }
     }
 
-    private fun markMessageAsRead(baseMessage: BaseMessage?) {
-        if (type == CometChatConstants.RECEIVER_TYPE_USER) markAsRead(baseMessage!!.id, baseMessage.sender.uid, baseMessage.receiverType) else markAsRead(baseMessage!!.id, baseMessage.receiverUid, baseMessage.receiverType)
+    private fun markMessageAsRead(baseMessage: BaseMessage) {
+        if (type == CometChatConstants.RECEIVER_TYPE_USER) markAsRead(baseMessage) else markAsRead(baseMessage)
     }
 
     private fun addMessageListener() {
@@ -1399,7 +1401,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
             messageAdapter!!.addMessage(message)
             checkSmartReply(message)
             markMessageAsRead(message)
-            if (messageAdapter!!.getItemCount() - 1 - (rvChatListView!!.getLayoutManager() as LinearLayoutManager).findLastVisibleItemPosition() < 5) scrollToBottom()
+            if (messageAdapter!!.itemCount - 1 - (rvChatListView!!.layoutManager as LinearLayoutManager).findLastVisibleItemPosition() < 5) scrollToBottom()
         } else {
             messageList.add(message)
             initMessageAdapter(messageList)
@@ -1407,8 +1409,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
     }
 
     private fun setReply() {
-        replyCount = replyCount + 1
-        if (replyCount == 1) tvReplyCount!!.setText("$replyCount Reply") else tvReplyCount!!.setText("$replyCount Replies")
+        replyCount += 1
+        if (replyCount == 1) tvReplyCount!!.text = "$replyCount Reply" else tvReplyCount!!.text = "$replyCount Replies"
     }
 
     private fun checkSmartReply(lastMessage: BaseMessage?) {
@@ -1424,18 +1426,18 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
             if (show) {
                 if (typingIndicator.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     if (typingIndicator.metadata == null)
-                        tvTypingIndicator!!.setText("is Typing...")
+                        tvTypingIndicator!!.text = "is Typing..."
                     else
                         setLiveReaction()
                 }
                 else {
                     if (typingIndicator.metadata == null)
-                        tvTypingIndicator!!.setText(typingIndicator.sender.name + " is Typing...")
+                        tvTypingIndicator!!.text = typingIndicator.sender.name + " is Typing..."
                     else
                         setLiveReaction()
                 }
             } else {
-                tvTypingIndicator!!.setVisibility(View.GONE)
+                tvTypingIndicator!!.visibility = View.GONE
             }
         }
     }
@@ -1476,7 +1478,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
 
 
     override fun onAttach(context: Context) {
-        super.onAttach(context!!)
+        super.onAttach(context)
         this.contxt = context
     }
 
@@ -1515,7 +1517,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
             }
             isEdit = false
             baseMessage = null
-            editMessageLayout!!.setVisibility(View.GONE)
+            editMessageLayout!!.visibility = View.GONE
         } else if (id == R.id.iv_reply_close) {
             if (messageAdapter != null) {
                 messageAdapter!!.clearLongClickSelectedItem()
@@ -1523,7 +1525,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
             }
             isReply = false
             baseMessage = null
-            replyMessageLayout!!.setVisibility(View.GONE)
+            replyMessageLayout!!.visibility = View.GONE
         } else if (id == R.id.btn_unblock_user) {
             unblockUser()
         }
@@ -1555,8 +1557,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         isEdit = false
         isParent = false
         val messageActionFragment = CometChatMessageActions()
-        replyMessageLayout!!.setVisibility(View.GONE)
-        editMessageLayout!!.setVisibility(View.GONE)
+        replyMessageLayout!!.visibility = View.GONE
+        editMessageLayout!!.visibility = View.GONE
         var copyVisible = true
         var threadVisible = true
         var replyVisible = false

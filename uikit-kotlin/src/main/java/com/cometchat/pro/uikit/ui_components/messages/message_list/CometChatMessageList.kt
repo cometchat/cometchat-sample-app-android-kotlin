@@ -1498,7 +1498,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
      * @param baseMessage is object of BaseMessage.class. It is message which is been marked as read.
      */
     private fun markMessageAsRead(baseMessage: BaseMessage) {
-        if (type == CometChatConstants.RECEIVER_TYPE_USER) markAsRead(baseMessage.id, baseMessage.sender.uid, baseMessage.receiverType) else markAsRead(baseMessage.id, baseMessage.receiverUid, baseMessage.receiverType)
+        if (type == CometChatConstants.RECEIVER_TYPE_USER) markAsRead(baseMessage.id, baseMessage.sender.uid, baseMessage.receiverType, baseMessage.sender.name) else markAsRead(baseMessage.id, baseMessage.receiverUid, baseMessage.receiverType, baseMessage.sender.name)
     }
 
     /**

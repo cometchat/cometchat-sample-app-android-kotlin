@@ -27,6 +27,7 @@ import android.provider.OpenableColumns
 import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
+import com.cometchat.pro.core.CallSettings
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.*
 import com.cometchat.pro.exceptions.CometChatException
@@ -746,7 +748,12 @@ public class Utils {
         }
 
         fun startCall(activity: Activity, call: Call, mainView: RelativeLayout?) {
-            CometChat.startCall(activity, call.sessionId, mainView!!, object : OngoingCallListener {
+            val callSettings = CallSettings.CallSettingsBuilder(activity, mainView)
+                    .setSessionId(call.sessionId)
+                    .startWithAudioMuted(true)
+                    .startWithVideoMuted(true)
+                    .build()
+            CometChat.startCall(callSettings, object : OngoingCallListener {
                 override fun onUserJoined(user: User) {
                     Log.e("onUserJoined: ", user.uid)
                 }
@@ -764,6 +771,10 @@ public class Utils {
                 override fun onCallEnded(call: Call) {
                     Log.e(TAG, "onCallEnded: $call")
                     activity.finish()
+                }
+
+                override fun onUserListUpdated(p0: MutableList<User>?) {
+                    Log.e(TAG, "onUserListUpdated: "+p0.toString())
                 }
             })
         }
@@ -832,6 +843,7 @@ public class Utils {
             builder.setView(dialogView)
             dialogView.findViewById<TextView>(R.id.tv_error_message).text = e.message
             val alertDialog = builder.create()
+            alertDialog.window?.setGravity(Gravity.TOP)
             alertDialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
             dialogView.findViewById<ImageView>(R.id.iv_error_close).setOnClickListener(View.OnClickListener {
                 alertDialog.dismiss()

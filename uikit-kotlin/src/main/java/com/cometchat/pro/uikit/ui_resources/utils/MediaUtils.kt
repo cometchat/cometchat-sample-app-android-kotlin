@@ -19,8 +19,8 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
-import androidx.databinding.library.baseAdapters.BuildConfig
 import androidx.loader.content.CursorLoader
+import com.cometchat.pro.uikit.BuildConfig
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.generateFileName
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.getDocumentCacheDir
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.getFileName

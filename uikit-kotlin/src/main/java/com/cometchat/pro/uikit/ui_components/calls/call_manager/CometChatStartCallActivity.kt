@@ -41,6 +41,8 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
         callSettings = CallSettingsBuilder(this, mainView)
                 .setSessionId(sessionID)
+                .startWithVideoMuted(true)
+                .startWithAudioMuted(true)
                 .build()
 
         CometChat.startCall(callSettings, object : CometChat.OngoingCallListener {
@@ -62,6 +64,10 @@ class CometChatStartCallActivity : AppCompatActivity() {
                 Log.e("TAG", "onCallEnded: ")
                 showToast()
                 finish()
+            }
+
+            override fun onUserListUpdated(p0: MutableList<User>?) {
+                Log.e("TAG", "onUserListUpdated: "+p0.toString())
             }
 
         })
