@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".UserListActivity"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <import type="java.util.List"/>
+        <import type="com.cometchat.pro.models.User"/>
+
+        <variable
+            name="ItemClicklistener"
+            type="android.content.Context" />
+
+        <variable
+            name="userList"
+            type="List&lt;User&gt;" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:layout_above="@id/bottom_navigation"
+            android:id="@+id/frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:elevation="8dp"
+            android:layout_alignParentBottom="true"
+            app:labelVisibilityMode="unlabeled"
+            app:itemIconSize="@dimen/bottom_nav_icon_size"
+            app:menu="@menu/cometchat_navigation_bottom" />
+
+    </RelativeLayout>
+</layout>

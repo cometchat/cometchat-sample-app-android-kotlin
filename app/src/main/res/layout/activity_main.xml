@@ -1,58 +1,311 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:id="@+id/main_frame"
-    android:layout_height="match_parent">
-
-
-    <RelativeLayout
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".MainActivity">
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        android:layout_marginBottom="16dp"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:textSize="32sp"
-            tools:text="TITLE"
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="56dp"
+            android:src="@drawable/cometchat_white" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvComet"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ivLogo"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:text="CometChat"
+            android:textSize="32sp"
+            android:textStyle="bold" />
 
-    </androidx.appcompat.widget.Toolbar>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvKS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvComet"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:text="Kitchen Sink App"
+            android:textColor="@color/colorPrimary"
+            android:textSize="42sp"
+            android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/tvSL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvKS"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="18sp"
+            android:text="Login with one of our sample users" />
 
+        <GridLayout
+            android:id="@+id/grid"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvSL"
+            android:layout_centerHorizontal="true"
+            android:columnCount="2">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                app:cardCornerRadius="12dp"
+                android:paddingStart="8dp"
+                android:id="@+id/superhero1"
+                android:layout_weight="1"
+                android:layout_margin="8dp"
+                app:rippleColor="@color/light_grey"
+                android:clickable="true"
+                android:paddingEnd="8dp"
+                android:backgroundTint="@color/primaryTextColor"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content">
+                    <RelativeLayout
+                        android:id="@+id/superhero1_avatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <ProgressBar
+                            android:id="@+id/superhero1_progressbar"
+                            android:visibility="gone"
+                            android:layout_centerInParent="true"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"/>
+                        <ImageView
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/ironman"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"/>
+                    </RelativeLayout>
+                    <TextView
+                        android:textSize="16sp"
+                        android:layout_marginLeft="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textAllCaps="true"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/textColorWhite"
+                        android:layout_toRightOf="@+id/superhero1_avatar"
+                        android:text="superhero1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                app:cardCornerRadius="12dp"
+                android:paddingStart="8dp"
+                android:id="@+id/superhero2"
+                android:layout_weight="1"
+                android:layout_margin="8dp"
+                app:rippleColor="@color/light_grey"
+                android:clickable="true"
+                android:paddingEnd="8dp"
+                android:layout_gravity="center"
+                android:backgroundTint="@color/primaryTextColor"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content">
+                    <RelativeLayout
+                        android:id="@+id/superhero2_avatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <ProgressBar
+                            android:id="@+id/superhero2_progressbar"
+                            android:visibility="gone"
+                            android:layout_centerInParent="true"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"/>
+                        <ImageView
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/captainamerica"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"/>
+                    </RelativeLayout>
+                    <TextView
+                        android:textSize="16sp"
+                        android:layout_marginLeft="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textAllCaps="true"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/textColorWhite"
+                        android:layout_toRightOf="@+id/superhero2_avatar"
+                        android:text="superhero2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                app:cardCornerRadius="12dp"
+                android:id="@+id/superhero3"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                app:rippleColor="@color/light_grey"
+                android:clickable="true"
+                android:paddingEnd="8dp"
+                android:layout_gravity="center"
+                android:backgroundTint="@color/primaryTextColor"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content">
+                    <RelativeLayout
+                        android:id="@+id/superhero3_avatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <ProgressBar
+                            android:visibility="gone"
+                            android:id="@+id/superhero3_progressbar"
+                            android:layout_centerInParent="true"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"/>
+                        <ImageView
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/spiderman"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"/>
+                    </RelativeLayout>
+                    <TextView
+                        android:textSize="16sp"
+                        android:layout_marginLeft="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textAllCaps="true"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/textColorWhite"
+                        android:layout_toRightOf="@+id/superhero3_avatar"
+                        android:text="superhero3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                app:cardCornerRadius="12dp"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:id="@+id/superhero4"
+                app:rippleColor="@color/light_grey"
+                android:clickable="true"
+                android:paddingEnd="8dp"
+                android:layout_gravity="center"
+                android:backgroundTint="@color/primaryTextColor"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content">
+                    <RelativeLayout
+                        android:id="@+id/woleverine_avatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <ProgressBar
+                            android:visibility="gone"
+                            android:id="@+id/superhero4_progressbar"
+                            android:layout_centerInParent="true"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"/>
+                        <ImageView
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/wolverine"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"/>
+                    </RelativeLayout>
+                    <TextView
+                        android:textSize="16sp"
+                        android:layout_marginLeft="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textAllCaps="true"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/textColorWhite"
+                        android:layout_toRightOf="@+id/woleverine_avatar"
+                        android:text="superhero4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="-2dp"
-        android:layout_marginEnd="-2dp"
-        android:layout_marginBottom="-2dp"
-        app:elevation="8dp"
-        android:background="@color/bottom_bar"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/navigation_menu" />
+        </GridLayout>
 
+        <TextView
+            android:textSize="16sp"
+            android:id="@+id/tvSignIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/grid"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="32dp"
+            android:text="or else login continue with" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:layout_below="@id/tvSignIn"
+            android:backgroundTint="@color/primaryTextColor"
+            android:padding="8dp"
+            android:text="Login using uid"
+            android:textAllCaps="true"
+            android:textColor="@color/textColorWhite"
+            android:textSize="16sp"
+            app:rippleColor="@color/light_grey" />
+        <TextView
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp"
+            android:text="@string/copyright"
+            android:textSize="@dimen/twelve"
+            android:letterSpacing="0.1"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-    <FrameLayout
-        android:layout_above="@id/navigation"
-        android:layout_below="@id/toolbar"
-        android:id="@+id/frame_container"
-        android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        </RelativeLayout>
 
-    </RelativeLayout>
-</FrameLayout>
+    </LinearLayout>
+
+</ScrollView>

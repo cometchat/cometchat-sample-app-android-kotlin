@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:padding="16dp"
+    android:layout_marginLeft="8dp"
+    android:visibility="gone"
+    tools:visibility="visible"
+    android:background="@drawable/left_border"
+    android:id="@+id/editMessageLayout"
+    android:layout_above="@+id/bottom_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <LinearLayout
+        android:layout_centerVertical="true"
+        android:layout_marginStart="8dp"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tv_message_layout_title"
+            tools:text="Edit Message"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tv_message_layout_subtitle"
+            tools:text="Perfect! I've been waiting to go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <ImageView
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:id="@+id/iv_message_close"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_close_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</RelativeLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="MissingDefaultResource">
+    <item
+        android:drawable="@drawable/border_selectedstate"
+        android:state_pressed="true" />
+    <item
+        android:drawable="@drawable/border_selectedstate"
+        android:state_checked="true" />
+    <item
+        android:state_checked="false"
+        android:drawable="@drawable/regularstate" />
+</selector>

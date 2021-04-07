@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="mediaMessage"
+            type="com.cometchat.pro.models.MediaMessage"/>
+    </data>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <RelativeLayout
+        android:id="@+id/rl_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+            android:id="@+id/iv_user"
+            android:layout_width="24dp"
+            app:avatar="@{mediaMessage.sender.avatar}"
+            android:layout_height="24dp"
+            android:layout_alignTop="@id/cv_image_message_container"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:text="@{mediaMessage.sender.name}"
+            android:id="@+id/tv_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@+id/iv_user"
+            android:textSize="12sp"
+            tools:text="Iron Man" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_image_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_user"
+            android:layout_margin="10dp"
+            android:layout_toEndOf="@+id/iv_user"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="10dp">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/go_img_message"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:adjustViewBounds="true"
+                    android:background="@color/textColorWhite"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_defaulf_image" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/sensitive_layout"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:gravity="center"
+                android:background="@color/grey"
+                android:layout_width="200dp"
+                android:layout_height="200dp">
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_centerInParent="true"
+                    android:tint="@color/textColorWhite"
+                    app:srcCompat="@drawable/ic_hand"
+                    android:layout_width="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_above="@+id/sensitive_desc"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/sensitive_desc"
+                    android:layout_centerInParent="true"
+                    android:textSize="16dp"
+                    android:textColor="@color/textColorWhite"
+                    android:text="@string/sensitive_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/img_progress_bar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:indeterminateDrawable="@drawable/cc_progress_drawable"
+                android:visibility="gone" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/cv_image_message_container"
+            android:layout_alignBottom="@id/cv_image_message_container"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="11:00 PM"
+            tools:visibility="visible" />
+        <HorizontalScrollView
+            android:layout_alignStart="@id/cv_image_message_container"
+            android:layout_below="@+id/cv_image_message_container"
+            android:id="@+id/reaction_group"
+            android:scrollbars="none"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.chip.ChipGroup
+                android:layout_gravity="start"
+                android:visibility="gone"
+                app:singleLine="true"
+                android:orientation="horizontal"
+                android:id="@+id/reactions_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_alignStart="@+id/cv_image_message_container"
+            android:layout_below="@+id/reaction_group"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                android:id="@+id/reply_avatar_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:clickable="true"
+                android:foreground="?selectableItemBackground"
+                android:id="@+id/thread_reply_count"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                tools:text="2 replies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+
+</LinearLayout>
+</layout>

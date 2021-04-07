@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:id="@+id/group_linear"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <import type="androidx.databinding.ObservableList"/>
+        <import type="com.cometchat.pro.models.Group"/>
 
+        <variable
+            name="groupList"
+            type="ObservableList&lt;Group&gt;" />
 
-    <EditText
-        android:id="@+id/etSearch"
+    </data>
+    <LinearLayout
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:hint="Search"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_height="40dp" />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/group_Card"
-        android:layout_below="@id/etSearch"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="-8dp"
         android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/group_recycler"
-            android:overScrollMode="never"
-            android:layout_margin="8dp"
+        <TextView
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:text="GroupList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/grouplist_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/contact_item" />
-
+            android:layout_height="match_parent">
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/contact_shimmer"
             android:layout_width="match_parent"
@@ -42,49 +42,72 @@
             android:layout_height="match_parent"
             android:visibility="visible">
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
 
-                <include layout="@layout/group_placeholder" />
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
+
+                <include layout="@layout/contact_placeholder" />
 
             </LinearLayout>
 
         </com.facebook.shimmer.ShimmerFrameLayout>
-
-    </androidx.cardview.widget.CardView>
-
-
-</RelativeLayout>
+        <com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroups
+            android:id="@+id/cometchatGroupList"
+            android:layout_width="match_parent"
+            app:grouplist="@{groupList}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_height="match_parent" />
+        </RelativeLayout>
+    </LinearLayout>
+</layout>

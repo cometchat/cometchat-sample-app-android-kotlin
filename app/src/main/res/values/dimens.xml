@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="title_size">16sp</dimen>
-    <dimen name="small_text">12sp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
+    <dimen name="nav_header_height">176dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="app_bar_height">200dp</dimen>
-    <dimen name="item_width">200dp</dimen>
-    <dimen name="text_margin">16dp</dimen>
-    <dimen name="para_size">14sp</dimen>
+    <dimen name="shr_product_grid_reveal_height">200dp</dimen>
+    <dimen name="color_min">24dp</dimen>
+    <dimen name="label_size">14dp</dimen>
+    <dimen name="small_text">12sp</dimen>
 </resources>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="Avatar">
+        <attr name="avatar_shape" format="string" />
+        <attr name="avatar" format="reference" />
+        <attr name="avatar_initials" format="string" />
+        <attr name="border_color" format="color" />
+        <attr name="border_width" format="dimension" />
+
+
+    </declare-styleable>
+
+    <declare-styleable name="StatusIndicator">
+        <attr name="user_status" format="string" />
+
+    </declare-styleable>
+
+    <declare-styleable name="CometChatUserList">
+        <attr name="userlist" format="reference" />
+        <attr name="headers" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CometChatReceiptsList">
+        <attr name="receiptlist" format="reference" />
+        <attr name="showDeliveryReceipt" format="boolean"/>
+        <attr name="showReadReceipt" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CometChatConversationList">
+        <attr name="conversationlist" format="reference" />
+
+    </declare-styleable>
+    <declare-styleable name="CometChatGroupList">
+        <attr name="grouplist" format="reference" />
+
+    </declare-styleable>
+
+    <declare-styleable name="SmartReplyList">
+        <attr name="replylist" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="SharedMediaView">
+        <attr name="reciever_id" format="string"/>
+        <attr name="reciever_type" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="BadgeCount">
+        <attr name="count" format="integer" />
+        <attr name="count_size" format="dimension" />
+        <attr name="count_color" format="color" />
+        <attr name="count_background_color" format="color" />
+
+    </declare-styleable>
+
+    <declare-styleable name="ComposeBox">
+        <attr name="color" format="color"/>
+    </declare-styleable>
+
+
+
+
+
+    <declare-styleable name="SwipeRevealLayout">
+        <attr name="dragEdge">
+            <flag name="left" value="1" />
+            <flag name="right" value="2" />
+            <flag name="top" value="4" />
+            <flag name="bottom" value="8" />
+        </attr>
+
+        <attr name="mode">
+            <enum name="normal" value="0" />
+            <enum name="same_level"   value="1" />
+        </attr>
+
+        <attr name="flingVelocity" format="integer" />
+
+        <attr name="minDistRequestDisallowParent" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="RecordAudio">
+        <attr name="slide_to_cancel_text" format="string" />
+        <attr name="slide_to_cancel_arrow" format="reference" />
+        <attr name="slide_to_cancel_margin_right" format="dimension" />
+        <attr name="slide_to_cancel_bounds" format="dimension" />
+        <attr name="slide_to_cancel_arrow_color" format="color" />
+        <attr name="counter_time_color" format="color" />
+
+    </declare-styleable>
+
+    <declare-styleable name="RecordMic">
+
+        <attr name="mic_icon" format="reference" />
+
+    </declare-styleable>
+
+    <declare-styleable name="AudioRecordView">
+
+        <attr name="chunkWidth" format="dimension" />
+        <attr name="chunkMaxHeight" format="dimension" />
+        <attr name="chunkMinHeight" format="dimension" />
+        <attr name="chunkSpace" format="dimension" />
+        <attr name="chunkColor" format="color" />
+        <attr name="chunkRoundedCorners" format="boolean" />
+        <attr name="chunkAlignTo" format="enum">
+            <enum name="center" value="1" />
+            <enum name="bottom" value="2" />
+        </attr>
+        <attr name="chunkSoftTransition" format="boolean" />
+    </declare-styleable>
+
+</resources>

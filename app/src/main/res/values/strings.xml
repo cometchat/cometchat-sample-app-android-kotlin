@@ -1,86 +1,38 @@
-<resources>
-    <string name="app_name">CometChat Pro</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Android UI Kit</string>
+    <string name="title_activity_screen">ScreenActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
 
-
-    <string name="title_item_list">Items</string>
-    <string name="title_item_detail">Item Detail</string>
-    <string name="type_your_message">Type your message</string>
-
-
-    <string-array name="group_type">
-        <item>Select Group Type</item>
-        <item>public</item>
-        <item>private</item>
-        <item>password</item>
-    </string-array>
-
-
-    <string name="today_last_seen">Last seen today at </string>
-    <string name="slide_to_cancel">Slide to cancel</string>
-    <string name="password">password</string>
-    <string name="deleted">message deleted</string>
-    <string name="group">group</string>
-    <string name="image">image</string>
-    <string name="type_video">video</string>
-    <string name="type_image">image</string>
-    <string name="yesterday_last_seen">Last seen yesterday at </string>
-    <string name="popup_gallary">Gallary</string>
-    <string name="popup_camera">Camera</string>
-    <string name="popup_audio">Audio</string>
-    <string name="popup_document">Document</string>
-    <string name="user">user</string>
-    <string name="joining">Joining</string>
-    <string name="group_password">Group Password*</string>
-    <string name="cancel">Cancel</string>
-    <string name="accept">Ok</string>
-    <string name="enter">Enter</string>
-    <string name="warning">Can Not Join Group No Internet</string>
-    <string name="incorrect_password">Incorrect Password</string>
-    <string name="members">Members</string>
-    <string name="ban_members">Ban Members</string>
-    <string name="title_activity_location">Map</string>
-    <string name="group_member">Group Members</string>
-    <string name="group_detail">Group Details</string>
-    <string name="users">Users</string>
-    <string name="groups">Groups</string>
-    <string name="conversations">Conversations</string>
-    <string name="guid">GUID*</string>
-    <string name="group_name">Group Name*</string>
-    <string name="group_description">Group Description</string>
-    <string name="group_type">Group Type*</string>
-    <string name="you">You</string>
-    <string name="photo">Photo</string>
-    <string name="video">Video</string>
-    <string name="audio_message">Audio Message</string>
-    <string name="file_message">File Message</string>
-    <string name="incoming_call">Incoming call...</string>
-    <string name="ringing">Ringing...</string>
-    <string name="voice_call_warning">Voice call will behave inappropriately</string>
-    <string name="video_call_warning">Video call will behave inappropriately</string>
-    <string name="create_group">Create Group</string>
-    <string name="guid_empty_warning">GUID can\'t be empty</string>
-    <string name="password_is_mandatory">Password is mandatory</string>
-    <string name="select_group_type">Select Group Type</string>
-    <string name="please_select_group_type">Please select group type</string>
-    <string name="leave_group_waring">Are you sure want to leave ?</string>
-    <string name="delete_group_warning">Are you sure want to delete ?</string>
-    <string name="delete_group">Delete Group</string>
-    <string name="group_details">Group Details</string>
-    <string name="view_members">View Members</string>
-    <string name="unban_members">Unban Members</string>
-    <string name="leave_group">Leave Group</string>
-    <string name="yes">Yes</string>
-    <string name="location_permission">Location permission denied, can\'t fetch location</string>
-    <string name="please_wait">Please Wait</string>
-    <string name="online">online</string>
-    <string name="haven_t_created_a_user_yet_select_one_of_our_default_users_for_testing">Haven\'t created a user yet? Select one of our default users for testing:</string>
-    <string name="add_members">Add Members</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="user_list">User List</string>
-    <string name="banned_members">Banned Members</string>
-    <string name="group_members">Group Members</string>
-    <string name="channel_description">Notification Channel</string>
+    <string name="avatar_description">This component will be the class of AppCompatImageView which is customizable to display Avatar</string>
+    <string name="statusIndicator_description">This component will be the class of View which is customizable to display status of the user</string>
+    <string name="badgeCount_description">This component will be the class of LinearLayout which is customizable to display the unread count of the messages in conversations.</string>
+    <string name="settings_bg_color_confirm">Background Confirm</string>
+    <string name="settings_default_color_confirm">Default Confirm</string>
+    <string name="settings_bg_color_dialog">Background Color</string>
+    <string name="userlist_description">This component will be the class of RecyclerView which is customizable to display list of users</string>
+    <string name="grouplist_description">This component will be the class of RecyclerView which is customizable to display list of groups</string>
+    <string name="conversationlist_description">This component will be the class of RecyclerView which is customizable to display list of recent conversation</string>
+    <string name="copyright">\u00A9 2019 CometChat Inc.</string>
+    <string name="channel_description">channel_description</string>
+    <string name="cometchat_unified_description" tools:ignore="ExtraTranslation">CometChat UI directly launches a fully function chat experience within your app. It contains all the features a standard chat application has and reduces the development time and effort considerably.</string>
+    <string name="cometchat_screen_description" tools:ignore="ExtraTranslation">UI Components are individual screens that can be used independently within your app to suit your requirements. These components are fully function which can be used to achieve specific use cases and reduce the development efforts considerably.</string>
+    <string name="circle" tools:ignore="ExtraTranslation">circle</string>
+    <string name="uicomponent_description" tools:ignore="ExtraTranslation">It show\'s list of core component which users can use at their end to create their own chat app within minutes.</string>
+    <string name="callList_description">This component will be the class of RecyclerView which is customizable to display list of calls.</string>
+    <string name="sharedMediaVw_description"><![CDATA[This component is a custom component it includes three tabs which show images,videos & files.]]></string>
 
 </resources>

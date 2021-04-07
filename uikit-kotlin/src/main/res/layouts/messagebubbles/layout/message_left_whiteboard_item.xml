@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="whiteBoardMessages"
+            type="com.cometchat.pro.models.CustomMessage" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/rl_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+                android:id="@+id/iv_user"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_toEndOf="@+id/iv_user"
+                android:textSize="12sp"
+                tools:text="Iron Man" />
+
+            <RelativeLayout
+                android:id="@+id/cv_message_container"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_user"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="1dp"
+                android:layout_toEndOf="@id/iv_user"
+                android:background="@drawable/cc_message_bubble_left">
+
+                <RelativeLayout
+                    android:id="@+id/top_message_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_whiteboard_24dp"
+                        android:tint="@color/grey_200" />
+
+                    <TextView
+                        android:id="@+id/whiteboard_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_toRightOf="@+id/icon"
+                        android:padding="10dp"
+                        tools:text="Someone has shared whiteboard. Click below join button to check whiteboard" />
+                </RelativeLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/join_whiteboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/top_message_layout"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/join"
+                    android:textColor="@color/primaryTextColor"
+                    app:backgroundTint="@color/textColorWhite"
+                    app:cornerRadius="8dp" />
+            </RelativeLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/reaction_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cv_message_container"
+                android:layout_alignStart="@id/cv_message_container"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/reactions_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    app:singleLine="true" />
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/reaction_group"
+                android:layout_alignStart="@+id/cv_message_container"
+                android:layout_marginBottom="16dp"
+                android:gravity="start"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/thread_reply_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="16dp"
+                    android:clickable="true"
+                    android:foreground="?selectableItemBackground"
+                    android:textColor="@color/colorPrimary"
+                    tools:text="2 replies" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txt_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/cv_message_container"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:layout_toRightOf="@id/cv_message_container"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="11:00 PM"
+                tools:visibility="visible" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</layout>

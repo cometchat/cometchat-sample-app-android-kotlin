@@ -1,128 +1,119 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-
-    <data>
-        <import type="android.view.View"/>
-        <import type="android.widget.EditText"/>
-        <variable
-            name="login"
-            type="com.inscripts.cometchatpulse.Activities.LoginActivity"/>
-    </data>
-
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fillViewport="true"
+    tools:context="com.cometchat.pro.uikit.ui_components.groups.group_list.CometChatGroupList">
 
     <RelativeLayout
-        android:id="@+id/rl_back"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_marginTop="40dp"
-            android:layout_centerHorizontal="true"
-            android:layout_width="100dp"
-            android:src="@drawable/login"
-            android:layout_height="100dp" />
-
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:cardCornerRadius="16dp"
-        android:layout_marginTop="25dp"
-        android:layout_below="@id/logo"
-        app:cardUseCompatPadding="true"
-        android:layout_marginBottom="-32dp"
-        app:cardElevation="8dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:orientation="vertical">
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:padding="4dp"
+            android:text="SignIn"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="40sp"
+            android:textStyle="bold" />
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTitle"
+            android:id="@+id/tvDes1"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Welcome to CometChat"
+            android:textColor="@color/colorPrimary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
 
-            <ProgressBar
-                android:id="@+id/progress_horizontal"
-                android:layout_width="match_parent"
-                android:indeterminate="true"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:indeterminateBehavior="repeat"
-                android:visibility="gone"
-                android:indeterminateDuration="2000"
-                android:layout_height="10dp" />
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvDes1"
+            android:id="@+id/tvDes2"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Please Enter UID to Continue"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-
-            <LinearLayout
-                android:id="@+id/ll_editText"
+        <RelativeLayout
+            android:animateLayoutChanges="true"
+            android:layout_below="@id/tvDes2"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputUID"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="30dp"
-                android:layout_marginBottom="32dp"
-                android:background="@drawable/edit_background"
-                android:clipToPadding="false"
-                android:elevation="8dp">
+                android:hint="Enter UID"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp"
+                app:endIconDrawable="@drawable/ic_arrow_right_24dp"
+                app:endIconMode="custom"
+                app:endIconTint="@color/primaryTextColor">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_text_uid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:drawableStart="@drawable/ic_perm_24dp"
-                    android:drawablePadding="16dp"
-                    android:hint="UID"
-                    android:inputType="text"
-                    android:imeOptions="actionDone"
-                    android:maxLength="30"
-                    android:maxLines="1"
-                    android:padding="12dp" />
-
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/bt_login"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etUID"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginStart="30dp"
-                android:layout_marginEnd="30dp"
-                android:layout_marginBottom="32dp"
-                android:background="@drawable/login_button"
-                android:elevation="8dp"
-                android:text="Login"
-                android:onClick="@{()->login.onLoginClick(editTextUid.getText().toString())}"
-                android:textColor="@color/primaryColor"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <ProgressBar
+                android:id="@+id/loginProgress"
+                android:visibility="gone"
+                android:indeterminateTint="@color/primaryTextColor"
+                android:layout_alignEnd="@+id/inputUID"
+                android:layout_alignBottom="@+id/inputUID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_marginStart="30dp"
-                android:layout_marginEnd="30dp"
-                android:layout_marginBottom="16dp"
-                android:textColor="@color/primaryTextColor"
-                android:text="@string/haven_t_created_a_user_yet_select_one_of_our_default_users_for_testing"
-                android:layout_height="wrap_content" />
-
-            <GridView
-                android:id="@+id/sample_list"
-                android:layout_width="match_parent"
-                android:numColumns="2"
-                android:visibility="visible"
-                android:overScrollMode="never"
-                android:scrollbars="none"
-                android:layout_height="match_parent"/>
-
-
-
+        </RelativeLayout>
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content">
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:text="Don't have any users?"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:onClick="createUser"
+                android:text="Create Now"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
-
-
-    </androidx.cardview.widget.CardView>
-
     </RelativeLayout>
 
-</layout>
+
+</ScrollView>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_border"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+        android:id="@+id/ivAvatar"
+        android:layout_below="@+id/tvName"
+        tools:src="@tools:sample/avatars"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"/>
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        android:id="@+id/tvName"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        tools:text="@tools:sample/full_names"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:drawableStart="@drawable/ic_done_all_black_24dp"
+        android:drawableTint="@color/grey"
+        android:drawablePadding="4dp"
+        android:layout_alignTop="@id/ivAvatar"
+        android:text="Delivered"
+        android:layout_toEndOf="@+id/ivAvatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_double_tick"
+        android:layout_alignBottom="@id/ivAvatar"
+        android:text="Read"
+        android:layout_toEndOf="@+id/ivAvatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_alignParentRight="true"
+        android:id="@+id/tvDelivery"
+        android:layout_alignTop="@id/ivAvatar"
+        android:text="- -"
+        android:layout_marginRight="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_marginRight="16dp"
+        android:id="@+id/tvRead"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/ivAvatar"
+        android:text="- -"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

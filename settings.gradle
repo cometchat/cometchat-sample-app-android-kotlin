@@ -1,1 +1,2 @@
-include ':app', ':pro-android-chat-sdk (1)', ':pro-android-chat-sdk'
+include ':app','uikit-kotlin'
+rootProject.name='Android UI Kit'

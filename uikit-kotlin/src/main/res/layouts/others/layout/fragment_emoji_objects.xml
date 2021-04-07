@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Emoji_GridView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@android:color/transparent"
+    android:cacheColorHint="@android:color/transparent"
+    android:horizontalSpacing="0dip"
+    android:numColumns="5"
+    android:scrollbars="vertical"
+    android:verticalSpacing="0dip" />

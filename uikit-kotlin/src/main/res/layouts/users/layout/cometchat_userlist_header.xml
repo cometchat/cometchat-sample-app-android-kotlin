@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:padding="6dp"
+        android:gravity="start"
+        android:layout_marginStart="16dp"
+        android:maxLines="1"
+        android:textAllCaps="true"
+        android:ellipsize="end"
+        android:textStyle="bold"
+        tools:text="W"
+        android:id="@+id/text_char"/>
+
+</RelativeLayout>

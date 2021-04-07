@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.cometchat.pro.uikit">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:hardwareAccelerated="true"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
+        tools:node="merge"
+        tools:targetApi="m">
+        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity"></activity>
+        <activity android:name=".ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity" />
+        <activity android:name=".ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity" />
+        <activity android:name=".ui_components.messages.message_information.CometChatMessageInfoScreenActivity" />
+        <activity android:name=".ui_components.groups.banned_members.CometChatBanMembersActivity" />
+        <activity
+            android:name=".ui_components.calls.call_manager.CometChatCallActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/TransparentCompat" />
+        <activity
+            android:name=".ui_components.messages.threaded_message_list.CometChatThreadMessageListActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui_components.calls.call_list.CometChatNewCallList"
+            android:screenOrientation="portrait" />
+
+        <meta-data
+            android:name="com.cometchat.pro.uikit"
+            android:value="${file_provider}" />
+
+        <activity
+            android:name=".ui_components.groups.create_group.CometChatCreateGroupActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ui_components.userProfile.privacy_and_security.CometChatMorePrivacyActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.users.blocked_users.CometChatBlockUserListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.groups.group_detail.CometChatGroupDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.groups.add_members.CometChatAddMembersActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.groups.admin_moderator_list.CometChatAdminModeratorListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.messages.forward_message.CometChatForwardMessageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.groups.group_members.CometChatGroupMemberListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui_components.cometchat_ui.CometChatUI"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui_components.users.user_details.CometChatUserDetailScreenActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui_components.messages.message_list.CometChatMessageListActivity"
+            android:parentActivityName=".ui_components.cometchat_ui.CometChatUI"
+            android:screenOrientation="portrait" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${file_provider}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_path" />
+        </provider>
+    </application>
+
+</manifest>
