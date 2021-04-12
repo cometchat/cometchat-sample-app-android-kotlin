@@ -31,10 +31,12 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import okhttp3.internal.Util
 import java.util.*
 
 /**
@@ -75,7 +77,7 @@ class CometChatGroupMemberList : Fragment() {
         etSearch!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 0) clearSearch!!.setVisibility(View.VISIBLE)
+                if (charSequence.length > 0) clearSearch!!.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {}
@@ -83,18 +85,18 @@ class CometChatGroupMemberList : Fragment() {
         etSearch!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
                 searchUser(textView.text.toString())
-                clearSearch!!.setVisibility(View.VISIBLE)
+                clearSearch!!.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
         clearSearch!!.setOnClickListener(View.OnClickListener { view1: View? ->
             etSearch!!.setText("")
-            clearSearch!!.setVisibility(View.GONE)
-            searchUser(etSearch!!.getText().toString())
+            clearSearch!!.visibility = View.GONE
+            searchUser(etSearch!!.text.toString())
             if (activity != null) {
                 val inputMethodManager = (activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                inputMethodManager.hideSoftInputFromWindow(etSearch!!.getWindowToken(), 0)
+                inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
             }
         })
         rvUserList!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -112,7 +114,7 @@ class CometChatGroupMemberList : Fragment() {
                 if (showModerators) {
                     if (activity != null) {
                         val alertDialog = MaterialAlertDialogBuilder(activity)
-                        alertDialog.setTitle(resources.getString(R.string.make_moderator))
+                        alertDialog.setTitle(resources.getString(R.string.make_group_moderator))
                         alertDialog.setMessage(String.format(resources.getString(R.string.make_moderator_question), groupMember.name))
                         alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface: DialogInterface?, i: Int -> updateAsModeratorScope(groupMember) }
                         alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface: DialogInterface, i: Int -> dialogInterface.dismiss() }
@@ -122,7 +124,7 @@ class CometChatGroupMemberList : Fragment() {
                 } else {
                     if (activity != null) {
                         val alertDialog = MaterialAlertDialogBuilder(activity)
-                        alertDialog.setTitle(resources.getString(R.string.make_admin))
+                        alertDialog.setTitle(resources.getString(R.string.make_group_admin))
                         alertDialog.setMessage(String.format(resources.getString(R.string.make_admin_question), groupMember.name))
                         alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface: DialogInterface?, i: Int -> updateAsAdminScope(groupMember) }
                         alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface: DialogInterface, i: Int -> dialogInterface.dismiss() }
@@ -151,13 +153,13 @@ class CometChatGroupMemberList : Fragment() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
                 groupMemberListAdapter!!.removeGroupMember(groupMember)
-                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.user_is_admin), groupMember.name), Snackbar.LENGTH_LONG).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_admin), groupMember.name), UIKitConstants.ErrorTypes.INFO)
+//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.is_now_admin), groupMember.name), Snackbar.LENGTH_LONG).show()
             }
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.update_scope_error), groupMember.name), Snackbar.LENGTH_SHORT).show()
-                context?.let { Utils.showDialog(it, e) }
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.update_scope_error),UIKitConstants.ErrorTypes.ERROR)
             }
         })
     }
@@ -167,13 +169,13 @@ class CometChatGroupMemberList : Fragment() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
                 groupMemberListAdapter!!.removeGroupMember(groupMember)
-                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.user_is_moderator), groupMember.name), Snackbar.LENGTH_LONG).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_moderator), groupMember.name), UIKitConstants.ErrorTypes.INFO)
+//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.is_now_moderator), groupMember.name), Snackbar.LENGTH_LONG).show()
             }
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.update_scope_error), groupMember.name), Snackbar.LENGTH_SHORT).show()
-                context?.let { Utils.showDialog(it, e) }
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.update_scope_error),UIKitConstants.ErrorTypes.ERROR)
             }
         })
     }
@@ -206,8 +208,7 @@ class CometChatGroupMemberList : Fragment() {
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                Snackbar.make(rvUserList!!, resources.getString(R.string.group_member_list_error), Snackbar.LENGTH_LONG).show()
-                //                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.group_member_list_error),UIKitConstants.ErrorTypes.ERROR)
             }
         })
     }
@@ -235,6 +236,7 @@ class CometChatGroupMemberList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

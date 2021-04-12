@@ -25,6 +25,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.AnimUtil
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 /**
@@ -229,8 +230,7 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
             override fun onError(e: CometChatException) {
                 finish()
                 Log.e(TAG, "onErrorReject: " + e.message + " " + e.code)
-//                Toast.makeText(this@CometChatCallActivity, "Unable to end call", Toast.LENGTH_LONG).show()
-                Utils.showDialog(this@CometChatCallActivity, e)
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatCallActivity, e.code)
             }
         })
     }
@@ -253,7 +253,7 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             override fun onError(e: CometChatException) {
-                Utils.showDialog(this@CometChatCallActivity, e)
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatCallActivity, e.code)
                 finish()
                 Log.e(TAG, "onErrorAccept: " + e.message + " " + e.code)
 

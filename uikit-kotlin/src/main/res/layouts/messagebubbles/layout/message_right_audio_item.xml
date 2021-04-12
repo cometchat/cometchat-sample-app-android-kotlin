@@ -25,7 +25,7 @@
             android:textColor="@color/textColorWhite"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:text="Audio File"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageView
             android:padding="8dp"
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_below="@+id/title"
             android:textColor="@color/textColorWhite"
             android:id="@+id/audiolength_tv"
@@ -81,8 +81,8 @@
             android:id="@+id/thread_reply_count"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:foreground="?selectableItemBackground"
             android:textColor="@color/colorPrimary"
@@ -99,7 +99,7 @@
         android:layout_marginBottom="8dp"
         android:layout_alignBottom="@id/cv_message_container"
         android:layout_gravity="center"
-        android:layout_toLeftOf="@id/cv_message_container"
+        android:layout_toStartOf="@id/cv_message_container"
         android:textStyle="bold"
         tools:visibility="visible"
         android:visibility="gone" />

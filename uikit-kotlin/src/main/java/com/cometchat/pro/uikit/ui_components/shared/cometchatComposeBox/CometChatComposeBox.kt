@@ -344,8 +344,9 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 //            if (CometChat.isExtensionEnabled("polls"))
 //                bundle.putBoolean("isPollVisible", isPollVisible)
 
-            isExtensionEnabled("stickers", object : CometChat.CallbackListener<Boolean>(){
+            isExtensionEnabled("stickers", object : CometChat.CallbackListener<Boolean>() {
                 override fun onSuccess(p0: Boolean?) {
+                    Log.e("TAG", "onSuccess: sticker "+p0 )
                     if (p0 as Boolean) bundle.putBoolean("isStickerVisible", isStickerVisible)
                 }
 
@@ -357,6 +358,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 
             isExtensionEnabled("whiteboard", object : CometChat.CallbackListener<Boolean>(){
                 override fun onSuccess(p0: Boolean?) {
+                    Log.e("TAG", "onSuccess: whiteboard "+p0 )
                     if (p0 as Boolean) bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
                 }
 
@@ -367,6 +369,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             })
             isExtensionEnabled("document", object : CometChat.CallbackListener<Boolean>(){
                 override fun onSuccess(p0: Boolean?) {
+                    Log.e("TAG", "onSuccess: document "+p0 )
                     if (p0 as Boolean) bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
                 }
 

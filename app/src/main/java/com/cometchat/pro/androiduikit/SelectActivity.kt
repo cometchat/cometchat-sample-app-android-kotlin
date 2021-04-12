@@ -15,6 +15,7 @@ import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.makeCall
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class SelectActivity : AppCompatActivity() {
@@ -171,8 +172,7 @@ class SelectActivity : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-//                Snackbar.make(view, "Login Error:" + e.code, Snackbar.LENGTH_LONG).show()
-                ShowErrorMessageUtils.showDialog(this@SelectActivity, e)
+                ErrorMessagesUtils.cometChatErrorMessage(this@SelectActivity, e.code)
             }
         })
     }

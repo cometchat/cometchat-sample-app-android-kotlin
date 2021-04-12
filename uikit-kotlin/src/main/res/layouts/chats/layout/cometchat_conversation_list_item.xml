@@ -40,36 +40,41 @@
                     android:id="@+id/user_status"
                     android:layout_height="16dp" />
 
-                <TextView
-                    android:ellipsize="end"
-                    android:id="@+id/txt_user_name"
+                <RelativeLayout
+                    android:id="@+id/rl_name_and_status_layout"
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_alignTop="@id/av_user"
-                    android:layout_toStartOf="@+id/messageTime"
-                    android:layout_marginStart="8dp"
                     android:layout_toEndOf="@id/av_user"
-                    android:layout_height="wrap_content"
-                    tools:text="@tools:sample/full_names"
-                    android:layout_marginEnd="16dp"
-                    android:textSize="@dimen/name"
-                    android:maxLines="1"
-                    android:textStyle="bold" />
+                    android:layout_marginEnd="55dp">
 
-                <TextView
-                    android:gravity="center_vertical"
-                    android:id="@+id/txt_user_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:textSize="@dimen/fourteen"
-                    android:layout_marginStart="8dp"
-                    android:layout_below="@id/txt_user_name"
-                    android:layout_toEndOf="@id/av_user"
-                    android:maxLines="1"
-                    android:layout_marginRight="8dp"
-                    android:layout_toStartOf="@+id/messageTime"
-                    tools:text="@string/online"
-                    android:visibility="visible" />
+                    <TextView
+                        android:ellipsize="end"
+                        android:id="@+id/txt_user_name"
+                        android:layout_width="wrap_content"
+
+                        android:layout_marginStart="8dp"
+
+                        android:layout_height="wrap_content"
+                        tools:text="@tools:sample/full_names"
+                        android:layout_marginEnd="16dp"
+                        android:textSize="@dimen/name"
+                        android:maxLines="1"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_user_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:textSize="@dimen/fourteen"
+                        android:layout_marginStart="8dp"
+                        android:layout_below="@id/txt_user_name"
+                        android:ellipsize="marquee"
+                        tools:text="@string/online"
+                        android:visibility="visible"
+                        android:singleLine="true" />
+                </RelativeLayout>
 
 
                 <TextView
@@ -88,7 +93,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="16dp"
                     android:textSize="12sp"
-                    android:layout_alignTop="@id/txt_user_name"
+                    android:layout_alignTop="@id/rl_name_and_status_layout"
                     tools:text="11:50"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>

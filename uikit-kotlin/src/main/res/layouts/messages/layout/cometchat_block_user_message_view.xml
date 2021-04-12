@@ -25,7 +25,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@color/secondaryTextColor"
-        android:text="@string/you_won_t_be_able_send_or_receive_messages"
+        android:text="@string/you_wont_be_able_send_or_receive_messages"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <com.google.android.material.button.MaterialButton

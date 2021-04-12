@@ -31,10 +31,12 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import okhttp3.internal.Util
 import java.util.*
 
 /**
@@ -89,10 +91,11 @@ class CometChatAdminModeratorList : Fragment() {
         setToolbar(toolbar)
         if (showModerators) {
             toolbar.title = resources.getString(R.string.moderators)
-            addAs!!.text = resources.getString(R.string.add_as_moderator)
+            addAs!!.text = resources.getString(R.string.assign_as_moderator)
+//            addAs!!.text = resources.getString(R.string.add_as_moderator)
         } else {
             toolbar.title = resources.getString(R.string.administrators)
-            addAs!!.text = resources.getString(R.string.add_as_admin)
+            addAs!!.text = resources.getString(R.string.assign_as_admin)
         }
         adapter = GroupMemberAdapter(context!!, members, null)
         adminList!!.adapter = adapter
@@ -118,7 +121,7 @@ class CometChatAdminModeratorList : Fragment() {
                         if (activity != null) {
                             val alertDialog = MaterialAlertDialogBuilder(activity)
                             alertDialog.setTitle(resources.getString(R.string.remove))
-                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_from_moderator), groupMember.name))
+                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_as_moderator), groupMember.name))
                             alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
                             alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
                             alertDialog.create()
@@ -127,14 +130,14 @@ class CometChatAdminModeratorList : Fragment() {
                     } else {
                         val message: String
                         message = if (groupMember.uid == loggedInUser.uid) resources.getString(R.string.you_cannot_perform_action) else resources.getString(R.string.only_admin_removes_moderator)
-                        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show()
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, message,UIKitConstants.ErrorTypes.WARNING)
                     }
                 } else {
                     if (ownerId != null && loggedInUser.uid == ownerId && loggedInUserScope == CometChatConstants.SCOPE_ADMIN && groupMember.uid != loggedInUser.uid) {
                         if (activity != null) {
                             val alertDialog = MaterialAlertDialogBuilder(activity)
                             alertDialog.setTitle(resources.getString(R.string.remove))
-                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_from_admin), groupMember.name))
+                            alertDialog.setMessage(String.format(resources.getString(R.string.remove_as_admin), groupMember.name))
                             alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface, i -> updateMemberScope(groupMember, var1) }
                             alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, i -> dialogInterface.dismiss() }
                             alertDialog.create()
@@ -143,7 +146,7 @@ class CometChatAdminModeratorList : Fragment() {
                     } else {
                         val message: String
                         message = if (groupMember.uid == loggedInUser.uid) resources.getString(R.string.you_cannot_perform_action) else resources.getString(R.string.only_group_owner_removes_admin)
-                        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show()
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, message, UIKitConstants.ErrorTypes.WARNING)
                     }
                 }
             }
@@ -174,18 +177,15 @@ class CometChatAdminModeratorList : Fragment() {
                     override fun onSuccess(s: String?) {
                         if (adapter != null) adapter!!.removeGroupMember(groupMember)
                         if (showModerators) {
-                            Snackbar.make(view, String.format(resources.getString(R.string.removed_from_moderator), groupMember.name),
-                                    Snackbar.LENGTH_LONG).show()
+                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.remove_from_moderator_privilege), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
                         } else {
-                            Snackbar.make(view, String.format(resources.getString(R.string.removed_from_admin), groupMember.name),
-                                    Snackbar.LENGTH_LONG).show()
+                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.removed_from_admin), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
                         }
                     }
 
                     override fun onError(e: CometChatException) {
                         if (activity != null) {
-//                            Toast.makeText(activity, resources.getString(R.string.update_group_member_error), Toast.LENGTH_LONG).show()
-                            context?.let { Utils.showDialog(it, e) }
+                            ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                             Log.e(TAG, "onError: " + e.message)
                         }
                     }
@@ -208,7 +208,7 @@ class CometChatAdminModeratorList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(adminList!!, resources.getString(R.string.admin_list_retrieve_error), Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.admin_list_retrieve_error),UIKitConstants.ErrorTypes.ERROR)
                 Log.e(TAG, "onError: " + e.message)
             }
         })
@@ -230,7 +230,7 @@ class CometChatAdminModeratorList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(adminList!!, resources.getString(R.string.modertor_list_retrieve_error), Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.moderator_list_retrieve_error),UIKitConstants.ErrorTypes.ERROR)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

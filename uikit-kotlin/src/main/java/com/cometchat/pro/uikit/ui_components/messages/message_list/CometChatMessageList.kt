@@ -70,6 +70,7 @@ import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.listener.S
 import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.model.Sticker
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
@@ -526,8 +527,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
                     override fun onError(e: CometChatException) {
                         if (activity != null) {
-//                            Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
-                            context?.let { Utils.showDialog(it, e) }
+                            ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                         }
                     }
                 })
@@ -619,21 +619,6 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
             override fun onStickerActionClicked() {
                 stickerLayout?.visibility = View.VISIBLE
-//                if (isExtensionEnabled("stickers")) {
-//                    Extensions.fetchStickers(object : ExtensionResponseListener<Any>() {
-//                        override fun onResponseSuccess(vararg: Any?) {
-//                            val stickersJSON = vararg as JSONObject
-//                            stickersView?.setData(Id, type, Extensions.extractStickersFromJSON(stickersJSON))
-//                        }
-//
-//                        override fun onResponseFailed(e: CometChatException?) {
-//                            Toast.makeText(context, "Error:" + e?.code, Toast.LENGTH_SHORT).show()
-//                        }
-//
-//                    })
-//                }
-
-
                 isExtensionEnabled("stickers", object : CallbackListener<Boolean>(){
                     override fun onSuccess(p0: Boolean) {
                         if (p0) {
@@ -644,14 +629,14 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                                 }
 
                                 override fun onResponseFailed(e: CometChatException?) {
-                                    Toast.makeText(context, "Error:" + e?.code, Toast.LENGTH_SHORT).show()
+                                    ErrorMessagesUtils.cometChatErrorMessage(context, e?.code)
                                 }
 
                              })
                         }
                     }
-
                     override fun onError(p0: CometChatException?) {
+                        ErrorMessagesUtils.cometChatErrorMessage(context, p0?.code)
                     }
 
                 })
@@ -665,7 +650,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                     }
 
                     override fun onResponseFailed(e: CometChatException?) {
-                        Snackbar.make(rvChatListView!!, e!!.details, Snackbar.LENGTH_LONG).show()
+                        ErrorMessagesUtils.cometChatErrorMessage(context, e?.code)
                     }
                 })
 
@@ -678,7 +663,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                     }
 
                     override fun onResponseFailed(e: CometChatException?) {
-                        Snackbar.make(rvChatListView!!, e!!.details, Snackbar.LENGTH_LONG).show()
+                        ErrorMessagesUtils.cometChatErrorMessage(context, e?.code)
                     }
                 })
             }
@@ -824,7 +809,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             override fun onError(e: CometChatException) {
                 if (activity != null) {
 //                    Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
-                    context?.let { Utils.showDialog(it, e) }
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             }
         })
@@ -876,7 +861,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     private fun showSnackBar(view: View, message: String) {
-        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
+        ErrorMessagesUtils.showCometChatErrorDialog(context, message ,UIKitConstants.ErrorTypes.WARNING)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -933,15 +918,14 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         uids.add(Id)
         unblockUsers(uids, object : CallbackListener<HashMap<String?, String?>?>() {
             override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
-                Snackbar.make(rvChatListView!!, String.format(resources.getString(R.string.user_unblocked), name), Snackbar.LENGTH_LONG).show()
+                Snackbar.make(rvChatListView!!, String.format(resources.getString(R.string.unblocked_successfully), name), Snackbar.LENGTH_LONG).show()
                 blockUserLayout!!.visibility = View.GONE
                 isBlockedByMe = false
                 messagesRequest = null
             }
 
             override fun onError(e: CometChatException) {
-//                Toast.makeText(getContext(), e.message, Toast.LENGTH_LONG).show()
-                context?.let { Utils.showDialog(it, e) }
+               ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -1171,7 +1155,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 progressDialog.dismiss()
                 if (activity != null) {
 //                    Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
-                    context?.let { Utils.showDialog(it, e) }
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             }
         })
@@ -1184,7 +1168,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
      */
     private val user: Unit
         private get() {
-            getUser(Id!!, object : CallbackListener<User>() {
+            getUser(Id, object : CallbackListener<User>() {
                 override fun onSuccess(user: User) {
                     if (activity != null) {
                         if (user.isBlockedByMe) {
@@ -1212,7 +1196,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
                 override fun onError(e: CometChatException) {
 //                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                    context?.let { Utils.showDialog(it, e) }
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             })
         }
@@ -1243,7 +1227,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 }
 
                 override fun onError(e: CometChatException) {
-                    context?.let { Utils.showDialog(it, e) }
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             })
         }
@@ -1273,7 +1257,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
             override fun onError(e: CometChatException) {
                 Log.d(TAG, "onError: " + e.message)
-                context?.let { Utils.showDialog(it, e) }
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -1294,7 +1278,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
             override fun onError(e: CometChatException) {
                 Log.d(TAG, "onError: " + e.message)
-                context?.let { Utils.showDialog(it, e) }
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -2192,7 +2176,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 val clipboardManager = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clipData = ClipData.newPlainText("MessageAdapter", message)
                 clipboardManager.setPrimaryClip(clipData)
-                Toast.makeText(context, resources.getString(R.string.text_copied_clipboard), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(R.string.text_copied), Toast.LENGTH_LONG).show()
                 if (messageAdapter != null) {
                     messageAdapter!!.clearLongClickSelectedItem()
                     messageAdapter!!.notifyDataSetChanged()
@@ -2538,7 +2522,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             else if (baseMessage!!.type == UIKitConstants.IntentStrings.LOCATION) {
                 try {
                     val jsonObject = (baseMessage as CustomMessage).customData
-                    val messageStr = java.lang.String.format(getString(R.string.shared_location_address),
+                    val messageStr = java.lang.String.format(getString(R.string.shared_location),
                             Utils.getAddress(context, jsonObject.getDouble("latitude"),
                                     jsonObject.getDouble("longitude")))
                     replyMessage!!.text = messageStr

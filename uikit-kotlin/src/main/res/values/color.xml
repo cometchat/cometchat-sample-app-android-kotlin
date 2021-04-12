@@ -26,4 +26,7 @@
     <color name="darkModeBackground">#202124</color>
     <color name="grey_100">#C4C4C4</color>
     <color name="grey_200">#9E9C9C</color>
+    <color name="blue_100">#87ceeb</color>
+    <color name="orange_200">#FFA500</color>
+    <color name="green">#43FA36</color>
 </resources>

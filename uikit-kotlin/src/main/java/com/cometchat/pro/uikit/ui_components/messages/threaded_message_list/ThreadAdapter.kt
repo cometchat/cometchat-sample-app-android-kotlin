@@ -758,7 +758,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         viewHolder.view.tvUser.text = baseMessage.sender.name
 
         if (baseMessage.deletedAt != 0L) {
-            viewHolder.view.goTxtMessage.setText(R.string.message_deleted)
+            viewHolder.view.goTxtMessage.setText(R.string.this_message_deleted)
             viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.secondaryTextColor))
             viewHolder.view.goTxtMessage.setTypeface(null, Typeface.ITALIC)
         }

@@ -241,14 +241,18 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
      * @see Conversation
      */
     fun update(conversation: Conversation) {
+        Log.e("TAG", "update: "+ conversation.lastMessage.toString())
+        Log.e("TAG", "update: unreadcount "+conversation.unreadMessageCount.toString() )
         if (filterConversationList!!.contains(conversation)) {
             val oldConversation = filterConversationList!![filterConversationList!!.indexOf(conversation)]
             filterConversationList!!.remove(oldConversation)
-            if (conversation.lastMessage.category != CometChatConstants.CATEGORY_CUSTOM && conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L) {
+            if (conversation.lastMessage.category != CometChatConstants.CATEGORY_CUSTOM && conversation.lastMessage.category != CometChatConstants.CATEGORY_ACTION && conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L) {
                 conversation.unreadMessageCount = oldConversation.unreadMessageCount + 1
+                Log.e("TAG", "update: unreadcount not action "+conversation.unreadMessageCount.toString() )
             }
             else {
                 conversation.unreadMessageCount = oldConversation.unreadMessageCount
+                Log.e("TAG", "update: unreadcount is action "+conversation.unreadMessageCount.toString() )
             }
             filterConversationList!!.add(0, conversation)
         } else {

@@ -3,6 +3,7 @@ package com.cometchat.pro.androiduikit
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
@@ -11,6 +12,7 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -69,7 +71,8 @@ class MainActivity : AppCompatActivity() {
                 val str = uid + "_progressbar"
                 val id = resources.getIdentifier(str, "id", packageName)
                 findViewById<View>(id).visibility = View.GONE
-                ShowErrorMessageUtils.showDialog(this@MainActivity, e)
+                Log.e(TAG, "onError: " +e.code +": "+e.message)
+                ErrorMessagesUtils.cometChatErrorMessage(this@MainActivity, e.message)
             }
         })
     }

@@ -37,7 +37,7 @@ class CallHistoryAdapter(context: Context, callList: List<BaseMessage>): Recycle
      * @param callList is list of calls used in this adapter.
      */
     init {
-        updateList(callList!!)
+        updateList(callList)
         this.context = context
         fontUtils = FontUtils.getInstance(context)
     }
@@ -182,7 +182,7 @@ class CallHistoryAdapter(context: Context, callList: List<BaseMessage>): Recycle
      */
     fun remove(call: Call?) {
         val position:Int  = callList!!.indexOf(call!!)
-        callList!!.remove(call)
+        callList.remove(call)
         notifyItemRemoved(position)
     }
 

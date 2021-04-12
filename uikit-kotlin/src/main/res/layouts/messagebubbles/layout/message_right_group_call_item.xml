@@ -10,7 +10,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:gravity="end"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp">
@@ -22,7 +22,7 @@
             <RelativeLayout
                 android:background="@drawable/cc_message_bubble_right"
                 android:backgroundTint="@color/colorPrimary"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:id="@+id/cv_message_container"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content">
@@ -40,7 +40,7 @@
                         android:src="@drawable/ic_videocam_24dp"
                         android:tint="@color/textColorWhite" />
                     <TextView
-                        android:layout_toRightOf="@+id/icon"
+                        android:layout_toEndOf="@+id/icon"
                         android:id="@+id/call_message"
                         android:textSize="16sp"
                         android:textColor="@color/textColorWhite"
@@ -70,8 +70,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="11:00 PM"
-                android:layout_marginRight="8dp"
-                android:layout_toLeftOf="@+id/cv_message_container"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@+id/cv_message_container"
                 android:layout_alignBottom="@+id/cv_message_container"
                 android:layout_marginBottom="8dp"
                 android:textSize="12sp"
@@ -107,8 +107,8 @@
                     android:foreground="?selectableItemBackground"
                     android:id="@+id/thread_reply_count"
                     android:textColor="@color/colorPrimary"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     tools:text="2 replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>

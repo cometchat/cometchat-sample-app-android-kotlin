@@ -34,7 +34,7 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
             android:padding="8dp"
-            android:hint="@string/enter_groupicon_url"
+            android:hint="@string/enter_group_icon_url"
             android:id="@+id/groupicon_url_tl"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_height="wrap_content">

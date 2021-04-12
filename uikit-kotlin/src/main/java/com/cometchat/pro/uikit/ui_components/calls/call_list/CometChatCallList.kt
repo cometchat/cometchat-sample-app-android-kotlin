@@ -46,10 +46,10 @@ class CometChatCallList constructor() : Fragment() {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_cometchat_calls, container, false)
         tvTitle = v!!.findViewById(R.id.tv_title)
-        phoneAddIv = v!!.findViewById(R.id.add_phone_iv)
+        phoneAddIv = v.findViewById(R.id.add_phone_iv)
         phoneAddIv!!.setOnClickListener(View.OnClickListener { openUserListScreen() })
-        viewPager = v!!.findViewById(R.id.viewPager)
-        tabLayout = v!!.findViewById(R.id.tabLayout)
+        viewPager = v.findViewById(R.id.viewPager)
+        tabLayout = v.findViewById(R.id.tabLayout)
         if (activity != null) {
             tabAdapter = TabAdapter(activity!!.supportFragmentManager)
             tabAdapter!!.addFragment(AllCall(), context!!.resources.getString(R.string.all))

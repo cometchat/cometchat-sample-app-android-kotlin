@@ -31,7 +31,7 @@
                 tools:text="Iron Man"
                 android:textSize="12sp"
                 android:text="@{customMessage.sender.name}"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_toEndOf="@+id/iv_user"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -52,7 +52,6 @@
                     android:padding="10dp"
                     android:text="@string/custom_message"
                     android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
                     android:layout_marginEnd="10dp"
                     android:maxWidth="250dp"
                     android:focusableInTouchMode="true"
@@ -69,8 +68,7 @@
                 android:layout_marginStart="-5dp"
                 android:layout_marginEnd="5dp"
                 android:layout_toEndOf="@+id/cv_message_container"
-                android:visibility="visible"
-                android:contentDescription="@string/user_avatar" />
+                android:visibility="visible" />
 
             <LinearLayout
                 android:layout_marginBottom="16dp"
@@ -90,8 +88,8 @@
                     android:foreground="?selectableItemBackground"
                     android:id="@+id/thread_reply_count"
                     android:textColor="@color/colorPrimary"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     tools:text="2 replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>

@@ -20,15 +20,14 @@
             android:layout_height="wrap_content">
 
             <RelativeLayout
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:id="@+id/cv_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:padding="8dp"
-                android:background="@drawable/cc_message_bubble_right"
-                android:layout_marginLeft="8dp">
+                android:background="@drawable/cc_message_bubble_right">
                 <TextView
                     android:id="@+id/tvFileName"
                     android:layout_width="wrap_content"
@@ -61,7 +60,7 @@
                     android:backgroundTint="@color/colorPrimaryDark"
                     android:padding="5dp"
                     android:gravity="center_horizontal"
-                    android:layout_toRightOf="@+id/tvFileName"
+                    android:layout_toEndOf="@+id/tvFileName"
                     android:orientation="vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
@@ -119,8 +118,8 @@
                     android:foreground="?selectableItemBackground"
                     android:id="@+id/thread_reply_count"
                     android:textColor="@color/colorPrimary"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     tools:text="2 replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
@@ -132,7 +131,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="11:00 PM"
-                android:layout_toLeftOf="@+id/cv_message_container"
+                android:layout_toStartOf="@+id/cv_message_container"
                 android:layout_alignBottom="@+id/cv_message_container"
                 android:layout_marginBottom="8dp"
                 android:textSize="12sp"

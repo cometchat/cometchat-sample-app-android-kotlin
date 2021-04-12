@@ -10,7 +10,7 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_blocked_user"
         android:layout_width="match_parent"
-        app:title="@string/blocked_user"
+        app:title="@string/blocked_users"
         android:layout_height="wrap_content"/>
     <RelativeLayout
         android:layout_marginTop="16dp"

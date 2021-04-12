@@ -45,7 +45,7 @@ class CometChatSmartReply : RecyclerView {
     }
 
     private fun getAttributes(attributeSet: AttributeSet?) {
-        val a = getContext().theme.obtainStyledAttributes(attributeSet, R.styleable.SmartReplyList, 0, 0)
+        val a = context.theme.obtainStyledAttributes(attributeSet, R.styleable.SmartReplyList, 0, 0)
     }
 
     private fun setContext(context: Context) {
@@ -76,12 +76,12 @@ class CometChatSmartReply : RecyclerView {
         addOnItemTouchListener(RecyclerTouchListener(context, this, object : ClickListener() {
             override fun onClick(var1: View, var2: Int) {
                 val reply = var1.getTag(R.string.replyTxt) as String
-                if (itemClickListener != null) itemClickListener.OnItemClick(reply, var2) else throw NullPointerException(resources.getString(R.string.smart_reply_itemclick_error))
+                if (itemClickListener != null) itemClickListener.OnItemClick(reply, var2) else throw NullPointerException("Smart Reply : OnItemClickListener<String> is null")
             }
 
             override fun onLongClick(var1: View, var2: Int) {
                 val reply = var1.getTag(R.string.replyTxt) as String
-                if (itemClickListener != null) itemClickListener.OnItemLongClick(reply, var2) else throw NullPointerException(resources.getString(R.string.smart_reply_itemclick_error))
+                if (itemClickListener != null) itemClickListener.OnItemLongClick(reply, var2) else throw NullPointerException("Smart Reply : OnItemClickListener<String> is null")
             }
         }))
     }

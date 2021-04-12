@@ -53,7 +53,7 @@ class GroupMemberAdapter : RecyclerView.Adapter<GroupMemberViewHolder> {
 
 
     init {
-        updateGroupMembers(groupMemberList!!)
+        updateGroupMembers(groupMemberList)
 //        this.groupOwnerId = groupOwnerId
 //        this.context = context
 //        fontUtils = FontUtils.getInstance(context)
@@ -91,7 +91,9 @@ class GroupMemberAdapter : RecyclerView.Adapter<GroupMemberViewHolder> {
         }
         groupMemberViewHolder.userListRowBinding.txtUserName.typeface = fontUtils.getTypeFace(FontUtils.robotoMedium)
         if (groupMember.avatar == null || groupMember.avatar.isEmpty()) groupMemberViewHolder.userListRowBinding.avUser.setInitials(groupMember.name) else groupMemberViewHolder.userListRowBinding.avUser.setAvatar(groupMember.avatar)
-        if (groupMember.status.equals(CometChatConstants.USER_STATUS_ONLINE, ignoreCase = true)) groupMemberViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
+        if (groupMember.status.equals(CometChatConstants.USER_STATUS_ONLINE, ignoreCase = true))
+            groupMemberViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
+        else groupMemberViewHolder.userListRowBinding.statusIndicator.visibility = View.GONE
 
         groupMemberViewHolder.userListRowBinding.statusIndicator.setUserStatus(groupMember.status)
 

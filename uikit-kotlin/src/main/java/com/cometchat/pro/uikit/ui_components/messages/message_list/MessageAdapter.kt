@@ -781,7 +781,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
                         viewHolder.view.tvUser.text = baseMessage.sender.name
                     }
-                    viewHolder.view.callMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_initiated_group_call)
+                    viewHolder.view.callMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_shared_group_call)
                 }
                 viewHolder.view.joinCall.setOnClickListener(View.OnClickListener {
                     Utils.startVideoCallIntent(context, (baseMessage as CustomMessage).customData.getString("sessionID"))
@@ -809,7 +809,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 })
             } else {
                 viewHolder as RightConferenceCallMessageViewHolder
-                viewHolder.view.callMessage.text = context.getString(R.string.you_have_initiated_group_call)
+                viewHolder.view.callMessage.text = context.getString(R.string.you_created_group_call)
                 viewHolder.view.joinCall.setOnClickListener(View.OnClickListener {
                     Utils.startVideoCallIntent(context, (baseMessage as CustomMessage).customData.getString("sessionID"))
                 })
@@ -1686,8 +1686,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.txtTime.visibility = View.VISIBLE
 //                else viewHolder.view.txtTime.visibility = View.GONE
                 if (baseMessage.getReplyCount() != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
                 } else {
                     viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
                     viewHolder.view.threadReplyCount.setVisibility(View.GONE)
@@ -2251,9 +2251,64 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         val viewHolder = view as ActionMessageViewHolder
         if (Utils.isDarkMode(context)) viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.textColorWhite)) else viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
         viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoMedium)
-        if (baseMessage is Action) viewHolder.view.goTxtMessage.text = baseMessage.message else if (baseMessage is Call) {
+        if (baseMessage is Action) {
+            var actionMessage: String? = ""
+            if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_JOINED)
+                actionMessage = (baseMessage.actioBy as User).name + " " + context.getString(R.string.joined)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_MEMBER_ADDED) actionMessage = ((baseMessage.actioBy as User).name + " "
+                    + context.getString(R.string.added) + " " + (baseMessage.actionOn as User).name)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_KICKED) actionMessage = ((baseMessage.actioBy as User).name + " "
+                    + context.getString(R.string.kicked_by) + " " + (baseMessage.actionOn as User).name)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_BANNED) actionMessage = ((baseMessage.actioBy as User).name + " "
+                    + context.getString(R.string.ban) + " " + (baseMessage.actionOn as User).name)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_UNBANNED) actionMessage = ((baseMessage.actioBy as User).name + " "
+                    + context.getString(R.string.unban) + " " + (baseMessage.actionOn as User).name)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_LEFT) actionMessage = (baseMessage.actioBy as User).name + " " + context.getString(R.string.left)
+            else if (baseMessage.action == CometChatConstants.ActionKeys.ACTION_SCOPE_CHANGED)
+                actionMessage = if (baseMessage.newScope == CometChatConstants.SCOPE_MODERATOR) {
+                ((baseMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                        + (baseMessage.actionOn as User).name + " " + context.getString(R.string.moderator))
+            } else if (baseMessage.newScope == CometChatConstants.SCOPE_ADMIN) {
+                ((baseMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                        + (baseMessage.actionOn as User).name + " " + context.getString(R.string.admin))
+            } else if (baseMessage.newScope == CometChatConstants.SCOPE_PARTICIPANT) {
+                ((baseMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                        + (baseMessage.actionOn as User).name + " " + context.getString(R.string.participant))
+            } else baseMessage.message
+            viewHolder.view.goTxtMessage.text = actionMessage
+        }
+        else if (baseMessage is Call) {
+//            val call = baseMessage
+//            if (call.callStatus == CometChatConstants.CALL_STATUS_INITIATED) viewHolder.view.goTxtMessage.text = call.sender.name + " " + call.callStatus + " " + call.type + " " + context.resources.getString(R.string.call).toLowerCase() else viewHolder.view.goTxtMessage.text = context.resources.getString(R.string.call) + " " + baseMessage.callStatus
+
             val call = baseMessage
-            if (call.callStatus == CometChatConstants.CALL_STATUS_INITIATED) viewHolder.view.goTxtMessage.text = call.sender.name + " " + call.callStatus + " " + call.type + " " + context.resources.getString(R.string.call).toLowerCase() else viewHolder.view.goTxtMessage.text = context.resources.getString(R.string.call) + " " + baseMessage.callStatus
+            var callMessageText = ""
+            var isMissed = false
+            var isIncoming = false
+            var isVideo = false
+            if (call.callStatus == CometChatConstants.CALL_STATUS_INITIATED) {
+                callMessageText = call.sender.name + " " + context.getString(R.string.initiated)
+            } else if (call.callStatus == CometChatConstants.CALL_STATUS_UNANSWERED || call.callStatus == CometChatConstants.CALL_STATUS_CANCELLED) {
+                callMessageText = context.resources.getString(R.string.missed_call)
+                isMissed = true
+            } else if (call.callStatus == CometChatConstants.CALL_STATUS_REJECTED) {
+                callMessageText = context.resources.getString(R.string.rejected_call)
+            } else if (call.callStatus == CometChatConstants.CALL_STATUS_ONGOING) {
+                callMessageText = context.getString(R.string.ongoing)
+            } else if (call.callStatus == CometChatConstants.CALL_STATUS_ENDED) {
+                callMessageText = context.getString(R.string.ended)
+            } else {
+                callMessageText = call.callStatus
+            }
+
+            if (call.type == CometChatConstants.CALL_TYPE_VIDEO) {
+                callMessageText = callMessageText + " " + context.resources.getString(R.string.video_call)
+                isVideo = true
+            } else {
+                callMessageText = callMessageText + " " + context.resources.getString(R.string.audio_call)
+                isVideo = false
+            }
+            viewHolder.view.goTxtMessage.text = callMessageText
         }
     }
 
@@ -2398,13 +2453,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                if (isExtensionEnabled("data-masking"))
 //                    message = Extensions.checkDataMasking(baseMessage)
 
+                if(Extensions.checkExtensionEnabled("profanity-filter")) {
+                    message = Extensions.getProfanityFilter(baseMessage)
+                }
+
                 if(Extensions.checkExtensionEnabled("data-masking")) {
                     message = Extensions.checkDataMasking(baseMessage)
                 }
 
-                if(Extensions.checkExtensionEnabled("profanity-filter")) {
-                    message = Extensions.getProfanityFilter(baseMessage)
-                }
+
 
                 viewHolder.view.goTxtMessage.text = message
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
@@ -2462,7 +2519,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
                         } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' }
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location), "").trim { it <= ' ' }
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
                         } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
                             viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))
@@ -2538,12 +2595,12 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                if (isExtensionEnabled("data-masking"))
 //                    message = Extensions.checkDataMasking(baseMessage)
 
-                if(Extensions.checkExtensionEnabled("data-masking")) {
-                    message = Extensions.checkDataMasking(baseMessage)
-                }
-
                 if(Extensions.checkExtensionEnabled("profanity-filter")) {
                     message = Extensions.getProfanityFilter(baseMessage)
+                }
+
+                if(Extensions.checkExtensionEnabled("data-masking")) {
+                    message = Extensions.checkDataMasking(baseMessage)
                 }
 
                 viewHolder.view.goTxtMessage.text = message
@@ -2601,7 +2658,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                             viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
                         } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location_address), "").trim { it <= ' ' }
+                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location), "").trim { it <= ' ' }
                             viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
                         } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
                             viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))

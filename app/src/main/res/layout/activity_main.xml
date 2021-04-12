@@ -105,12 +105,12 @@
                     </RelativeLayout>
                     <TextView
                         android:textSize="16sp"
-                        android:layout_marginLeft="4dp"
+                        android:layout_marginStart="4dp"
                         android:fontFamily="sans-serif-medium"
                         android:textAllCaps="true"
                         android:layout_centerVertical="true"
                         android:textColor="@color/textColorWhite"
-                        android:layout_toRightOf="@+id/superhero1_avatar"
+                        android:layout_toEndOf="@+id/superhero1_avatar"
                         android:text="superhero1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -154,12 +154,12 @@
                     </RelativeLayout>
                     <TextView
                         android:textSize="16sp"
-                        android:layout_marginLeft="4dp"
+                        android:layout_marginStart="4dp"
                         android:fontFamily="sans-serif-medium"
                         android:textAllCaps="true"
                         android:layout_centerVertical="true"
                         android:textColor="@color/textColorWhite"
-                        android:layout_toRightOf="@+id/superhero2_avatar"
+                        android:layout_toEndOf="@+id/superhero2_avatar"
                         android:text="superhero2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -203,12 +203,12 @@
                     </RelativeLayout>
                     <TextView
                         android:textSize="16sp"
-                        android:layout_marginLeft="4dp"
+                        android:layout_marginStart="4dp"
                         android:fontFamily="sans-serif-medium"
                         android:textAllCaps="true"
                         android:layout_centerVertical="true"
                         android:textColor="@color/textColorWhite"
-                        android:layout_toRightOf="@+id/superhero3_avatar"
+                        android:layout_toEndOf="@+id/superhero3_avatar"
                         android:text="superhero3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -252,12 +252,12 @@
                     </RelativeLayout>
                     <TextView
                         android:textSize="16sp"
-                        android:layout_marginLeft="4dp"
+                        android:layout_marginStart="4dp"
                         android:fontFamily="sans-serif-medium"
                         android:textAllCaps="true"
                         android:layout_centerVertical="true"
                         android:textColor="@color/textColorWhite"
-                        android:layout_toRightOf="@+id/woleverine_avatar"
+                        android:layout_toEndOf="@+id/woleverine_avatar"
                         android:text="superhero4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -269,7 +269,7 @@
         <TextView
             android:textSize="16sp"
             android:id="@+id/tvSignIn"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/grid"
             android:layout_marginStart="32dp"

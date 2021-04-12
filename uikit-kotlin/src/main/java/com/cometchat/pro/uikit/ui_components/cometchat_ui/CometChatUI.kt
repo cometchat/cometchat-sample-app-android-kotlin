@@ -33,6 +33,8 @@ import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.OnAlertDial
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_components.groups.group_list.CometChatGroupList
 import com.cometchat.pro.uikit.ui_components.userProfile.CometChatUserProfile
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
 /**
@@ -120,7 +122,8 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
     private fun initViewComponent() {
         badgeDrawable = activityCometChatUnifiedBinding!!.bottomNavigation.getOrCreateBadge(R.id.menu_conversation)
         activityCometChatUnifiedBinding!!.bottomNavigation.setOnNavigationItemSelectedListener(this)
-        badgeDrawable!!.setVisible(false)
+        badgeDrawable!!.isVisible = false
+        activityCometChatUnifiedBinding!!.bottomNavigation.id = R.id.menu_conversation
         loadFragment(CometChatConversationList())
     }
 
@@ -143,8 +146,9 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
 
             override fun onError(e: CometChatException) {
                 if (progressDialog != null) progressDialog!!.dismiss()
-                Snackbar.make(activityCometChatUnifiedBinding!!.bottomNavigation, resources.getString(R.string.unabl_to_join_message) + e.message,
-                        Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatUI, e.code)
+//                Snackbar.make(activityCometChatUnifiedBinding!!.bottomNavigation, resources.getString(R.string.unable_to_join_message) + e.message,
+//                        Snackbar.LENGTH_SHORT).show()
             }
         })
     }

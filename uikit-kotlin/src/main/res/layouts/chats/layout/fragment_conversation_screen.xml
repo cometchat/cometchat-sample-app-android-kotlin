@@ -16,7 +16,7 @@
         android:focusableInTouchMode="true">
 
         <TextView
-            android:text="Conversations"
+            android:text="@string/conversation"
             android:textSize="22sp"
             android:visibility="gone"
             tools:visibility="visible"
@@ -48,7 +48,17 @@
                 android:background="@drawable/search_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
+            <ImageView
+                android:visibility="gone"
+                android:clickable="true"
+                android:layout_marginEnd="8sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/clear_search"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_close_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </RelativeLayout>
 
         <LinearLayout
