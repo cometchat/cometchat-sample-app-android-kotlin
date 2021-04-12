@@ -24,6 +24,7 @@ import com.cometchat.pro.uikit.ui_components.userProfile.privacy_and_security.Co
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
@@ -86,10 +87,10 @@ class CometChatUserProfile constructor() : Fragment() {
             public override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             public override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             public override fun afterTextChanged(s: Editable) {
-                if (!s.toString().isEmpty()) {
-                    avatar.setVisibility(View.VISIBLE)
-                    Glide.with((getContext())!!).load(s.toString()).into(avatar)
-                } else avatar.setVisibility(View.GONE)
+                if (s.toString().isNotEmpty()) {
+                    avatar.visibility = View.VISIBLE
+                    Glide.with((context)!!).load(s.toString()).into(avatar)
+                } else avatar.visibility = View.GONE
             }
         })
         val alertDialog: AlertDialog = dialog!!.create()
@@ -97,20 +98,16 @@ class CometChatUserProfile constructor() : Fragment() {
         updateUserBtn.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 val user: User = User()
-                if (username.getText().toString().isEmpty()) username.setError(getString(R.string.fill_this_field)) else {
-                    user.setName(username.getText().toString())
-                    user.setUid(CometChat.getLoggedInUser().getUid())
-                    user.setAvatar(avatar_url.getText().toString())
+                if (username.text.toString().isEmpty()) username.error = getString(R.string.fill_this_field) else {
+                    user.name = username.text.toString()
+                    user.uid = CometChat.getLoggedInUser().uid
+                    user.avatar = avatar_url.text.toString()
                     updateUser(user)
                     alertDialog.dismiss()
                 }
             }
         })
-        cancelBtn.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(v: View) {
-                alertDialog.dismiss()
-            }
-        })
+        cancelBtn.setOnClickListener { alertDialog.dismiss() }
         alertDialog.show()
     }
 
@@ -118,13 +115,13 @@ class CometChatUserProfile constructor() : Fragment() {
         val authkey = UIKitConstants.AppInfo.AUTH_KEY;
         CometChat.updateUser(user, authkey, object : CallbackListener<User?>() {
             public override fun onSuccess(user: User?) {
-                if (context != null) Toast.makeText(context, "Updated User Successfull", Toast.LENGTH_LONG).show()
-                moreInfoScreenBinding!!.setUser(user)
+                if (context != null) Toast.makeText(context, "Updated User Successfully", Toast.LENGTH_LONG).show()
+                moreInfoScreenBinding!!.user = user
             }
 
             public override fun onError(e: CometChatException) {
                 if (context != null)
-                    context?.let { Utils.showDialog(it, e) }
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
 //                    Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             }
         })

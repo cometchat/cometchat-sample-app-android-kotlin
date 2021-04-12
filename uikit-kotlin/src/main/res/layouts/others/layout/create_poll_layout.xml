@@ -22,6 +22,7 @@
                     android:text="@string/create_poll"
                     android:padding="16dp"
                     android:textStyle="bold"
+                    android:textColor="@color/primaryTextColor"
                     style="@style/TextAppearance.MaterialComponents.Headline5"/>
                 <ImageView
                     android:id="@+id/cancel_poll"

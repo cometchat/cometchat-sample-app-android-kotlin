@@ -18,6 +18,7 @@ import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.uikit.R
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
@@ -74,7 +75,8 @@ class CometChatBanMembers : Fragment() {
                 }
 
                 override fun onError(e: CometChatException) {
-                    if (bannedMemberRv != null) Snackbar.make(bannedMemberRv!!, resources.getString(R.string.ban_list_fetch_error), Snackbar.LENGTH_LONG).show()
+                    if (bannedMemberRv != null)
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.ban_list_fetch_error), UIKitConstants.ErrorTypes.ERROR)
                 }
             })
         }
@@ -92,10 +94,10 @@ class CometChatBanMembers : Fragment() {
         if (activity != null) {
             val menuInflater = activity!!.menuInflater
             menuInflater.inflate(R.menu.group_action_menu, menu)
-            menu.findItem(R.id.item_ban).title = "Unban"
+            menu.findItem(R.id.item_ban).title = context?.getString(R.string.unban)
             menu.findItem(R.id.item_remove).isVisible = false
             menu.findItem(R.id.item_make_admin).isVisible = false
-            menu.setHeaderTitle("Member Action")
+            menu.setHeaderTitle(getString(R.string.actions))
         }
     }
 
@@ -109,13 +111,15 @@ class CometChatBanMembers : Fragment() {
     private fun unBanMember() {
         CometChat.unbanGroupMember(groupMember!!.uid, guid!!, object : CallbackListener<String?>() {
             override fun onSuccess(s: String?) {
-                if (bannedMemberRv != null) Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.member_unbanned_success), groupMember!!.name, gName), Snackbar.LENGTH_LONG).show()
+                if (bannedMemberRv != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.unbanned_successfully), groupMember!!.name, gName), UIKitConstants.ErrorTypes.SUCCESS)
+//                    Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.unbanned_successfully), groupMember!!.name, gName), Snackbar.LENGTH_LONG).show()
                 groupMemberAdapter!!.removeGroupMember(groupMember)
             }
 
             override fun onError(e: CometChatException) {
-//                if (bannedMemberRv != null) Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.unban_error), groupMember!!.name), Snackbar.LENGTH_LONG).show()
-                context?.let { Utils.showDialog(it, e) }
+                if (bannedMemberRv != null)
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }

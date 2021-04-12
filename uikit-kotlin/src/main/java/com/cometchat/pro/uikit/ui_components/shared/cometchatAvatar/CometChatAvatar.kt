@@ -116,7 +116,7 @@ class CometChatAvatar : AppCompatImageView {
     }
 
     private fun getAttributes(attrs: AttributeSet) {
-        val a = getContext().theme.obtainStyledAttributes(
+        val a = context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.Avatar,
                 0, 0)
@@ -136,7 +136,7 @@ class CometChatAvatar : AppCompatImageView {
              * */if (avatarShape == null) {
                 shape = CIRCLE
             } else {
-                if (getContext().getString(R.string.rectangle).equals(avatarShape, ignoreCase = true)) {
+                if (("rectangle").equals(avatarShape, ignoreCase = true)) {
                     shape = RECTANGLE
                 } else {
                     shape = CIRCLE
@@ -152,7 +152,7 @@ class CometChatAvatar : AppCompatImageView {
     }
 
     override fun setScaleType(scaleType: ScaleType) {
-        require(scaleType == SCALE_TYPE) { String.format(resources.getString(R.string.scale_type_not_supported), scaleType) }
+        require(scaleType == SCALE_TYPE) { String.format("ScaleType %1\$s not supported.", scaleType) }
     }
 
     fun setShape(shapestr: String) {
@@ -169,7 +169,7 @@ class CometChatAvatar : AppCompatImageView {
     }
 
     override fun setAdjustViewBounds(adjustViewBounds: Boolean) {
-        require(!adjustViewBounds) { resources.getString(R.string.adjust_viewbound_not_supported) }
+        require(!adjustViewBounds) { "adjustViewBounds not supported." }
     }
 
     override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {

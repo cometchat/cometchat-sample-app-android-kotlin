@@ -25,6 +25,8 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
@@ -183,7 +185,7 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
             public override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
                 stopHideShimmer()
-                Toast.makeText(this@CometChatNewCallList, e.message, Toast.LENGTH_SHORT).show()
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatNewCallList, e.code)
             }
         })
     }
@@ -203,7 +205,8 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
             }
 
             public override fun onError(e: CometChatException) {
-                if (rvUserList != null) Snackbar.make(rvUserList!!, "Error " + e.message, Snackbar.LENGTH_LONG).show()
+                if (rvUserList != null)
+                    ErrorMessagesUtils.cometChatErrorMessage(this@CometChatNewCallList, e.code)
             }
         })
     }
@@ -217,7 +220,8 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
 
             public override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                if (rvUserList != null) Snackbar.make(rvUserList!!, getResources().getString(R.string.call_initiate_error) + ":" + e.message, Snackbar.LENGTH_LONG).show()
+                if (rvUserList != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatNewCallList, resources.getString(R.string.call_initiate_error),UIKitConstants.ErrorTypes.ERROR)
             }
         })
     }

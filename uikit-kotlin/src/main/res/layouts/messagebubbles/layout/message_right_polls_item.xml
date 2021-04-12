@@ -19,10 +19,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/rl_message">
             <LinearLayout
-                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/cc_message_bubble_right"
                 android:id="@+id/cv_message_container"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:orientation="vertical"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content">
@@ -30,7 +30,7 @@
                 <TextView
                     android:layout_gravity="center"
                     android:paddingTop="16dp"
-                    android:paddingLeft="8dp"
+                    android:paddingStart="8dp"
                     android:layout_marginRight="2dp"
                     android:maxWidth="240dp"
                     android:layout_marginLeft="2dp"
@@ -60,7 +60,7 @@
                 <TextView
                     android:text="0 Votes"
                     android:id="@+id/total_votes"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
                     android:layout_marginBottom="16dp"
                     android:textStyle="italic"
                     android:textColor="@color/textColorWhite"
@@ -74,11 +74,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="11:00 PM"
-                android:layout_toLeftOf="@+id/cv_message_container"
+                android:layout_toStartOf="@+id/cv_message_container"
                 android:layout_alignBottom="@+id/cv_message_container"
                 android:layout_marginBottom="8dp"
                 android:textSize="12sp"
-                android:textColor="@color/secondaryTextColor"
                 android:textStyle="bold"/>
             <HorizontalScrollView
                 android:layout_alignEnd="@id/cv_message_container"
@@ -109,8 +108,8 @@
                     android:foreground="?selectableItemBackground"
                     android:id="@+id/thread_reply_count"
                     android:textColor="@color/colorPrimary"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     tools:text="2 replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>

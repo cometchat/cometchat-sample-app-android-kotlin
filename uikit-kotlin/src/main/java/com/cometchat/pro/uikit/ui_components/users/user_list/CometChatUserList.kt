@@ -23,6 +23,7 @@ import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsersAdapter
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
@@ -80,23 +81,23 @@ class CometChatUserList constructor() : Fragment() {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_cometchat_userlist, container, false)
         title = view.findViewById(R.id.tv_title)
-        title!!.setTypeface(FontUtils.getInstance(getActivity()).getTypeFace(FontUtils.robotoMedium))
+        title!!.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         rvUserList = view.findViewById(R.id.rv_user_list)
         noUserLayout = view.findViewById(R.id.no_user_layout)
         etSearch = view.findViewById(R.id.search_bar)
         clearSearch = view.findViewById(R.id.clear_search)
         rlSearchBox = view.findViewById(R.id.rl_search_box)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
-        if (Utils.isDarkMode(getContext()!!)) {
-            title!!.setTextColor(getResources().getColor(R.color.textColorWhite))
+        if (Utils.isDarkMode(context!!)) {
+            title!!.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
-            title!!.setTextColor(getResources().getColor(R.color.primaryTextColor))
+            title!!.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
         etSearch!!.addTextChangedListener(object : TextWatcher {
             public override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             public override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             public override fun afterTextChanged(editable: Editable) {
-                if (editable.length == 0) {
+                if (editable.isEmpty()) {
                     // if etSearch is empty then fetch all users.
                     usersRequest = null
                     rvUserList!!.clear()
@@ -108,25 +109,23 @@ class CometChatUserList constructor() : Fragment() {
             }
         })
         etSearch!!.setOnEditorActionListener(object : OnEditorActionListener {
-            public override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {
+            public override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent?): Boolean {
                 if (i == EditorInfo.IME_ACTION_SEARCH) {
-                    searchUser(textView.getText().toString())
-                    clearSearch!!.setVisibility(View.VISIBLE)
+                    searchUser(textView.text.toString())
+                    clearSearch!!.visibility = View.VISIBLE
                     return true
                 }
                 return false
             }
         })
-        clearSearch!!.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                etSearch!!.setText("")
-                clearSearch!!.setVisibility(View.GONE)
-                searchUser(etSearch!!.getText().toString())
-                val inputMethodManager: InputMethodManager = getContext()!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                // Hide the soft keyboard
-                inputMethodManager.hideSoftInputFromWindow(etSearch!!.getWindowToken(), 0)
-            }
-        })
+        clearSearch!!.setOnClickListener {
+            etSearch!!.setText("")
+            clearSearch!!.visibility = View.GONE
+            searchUser(etSearch?.text.toString())
+            val inputMethodManager: InputMethodManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            // Hide the soft keyboard
+            inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
+        }
 
 
         // Uses to fetch next list of user if rvUserList (RecyclerView) is scrolled in upward direction.
@@ -149,9 +148,9 @@ class CometChatUserList constructor() : Fragment() {
 
     private fun stopHideShimmer() {
         shimmerFrameLayout!!.stopShimmer()
-        shimmerFrameLayout!!.setVisibility(View.GONE)
-        title!!.setVisibility(View.VISIBLE)
-        rlSearchBox!!.setVisibility(View.VISIBLE)
+        shimmerFrameLayout!!.visibility = View.GONE
+        title!!.visibility = View.VISIBLE
+        rlSearchBox!!.visibility = View.VISIBLE
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -177,18 +176,18 @@ class CometChatUserList constructor() : Fragment() {
                 stopHideShimmer()
                 rvUserList!!.setUserList(users) // set the users to rvUserList i.e CometChatUserList Component.
                 if (userList.size == 0) {
-                    noUserLayout!!.setVisibility(View.VISIBLE)
-                    rvUserList!!.setVisibility(View.GONE)
+                    noUserLayout!!.visibility = View.VISIBLE
+                    rvUserList!!.visibility = View.GONE
                 } else {
-                    rvUserList!!.setVisibility(View.VISIBLE)
-                    noUserLayout!!.setVisibility(View.GONE)
+                    rvUserList!!.visibility = View.VISIBLE
+                    noUserLayout!!.visibility = View.GONE
                 }
             }
 
             public override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
                 stopHideShimmer()
-                if (getActivity() != null) Toast.makeText(getActivity(), e.message, Toast.LENGTH_SHORT).show()
+                if (activity != null) ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -208,7 +207,7 @@ class CometChatUserList constructor() : Fragment() {
             }
 
             public override fun onError(e: CometChatException) {
-                Toast.makeText(context, "Error " + e.message, Toast.LENGTH_SHORT).show()
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }

@@ -30,6 +30,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderDecoration
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
@@ -72,7 +73,7 @@ class CometChatAddMembers : Fragment() {
         etSearch!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 0) clearSearch!!.setVisibility(View.VISIBLE)
+                if (charSequence.isNotEmpty()) clearSearch!!.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {}
@@ -80,18 +81,18 @@ class CometChatAddMembers : Fragment() {
         etSearch!!.setOnEditorActionListener(OnEditorActionListener { textView, i, keyEvent ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
                 searchUser(textView.text.toString())
-                clearSearch!!.setVisibility(View.VISIBLE)
+                clearSearch!!.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
         clearSearch!!.setOnClickListener(View.OnClickListener {
             etSearch!!.setText("")
-            clearSearch!!.setVisibility(View.GONE)
-            searchUser(etSearch!!.getText().toString())
+            clearSearch!!.visibility = View.GONE
+            searchUser(etSearch!!.text.toString())
             val inputMethodManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             // Hide the soft keyboard
-            inputMethodManager?.hideSoftInputFromWindow(etSearch!!.getWindowToken(), 0)
+            inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
         })
         rvUserList!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -174,6 +175,7 @@ class CometChatAddMembers : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.d(TAG, "onError: " + e.message)
             }
         })
@@ -182,7 +184,7 @@ class CometChatAddMembers : Fragment() {
     private fun makeUserRequest(usersRequest: UsersRequest?) {
         usersRequest!!.fetchNext(object : CallbackListener<List<User>>() {
             override fun onSuccess(users: List<User>) {
-                if (users.size > 0) {
+                if (users.isNotEmpty()) {
                     val userArrayList = ArrayList<User>()
                     for (user in users) {
                         if (!groupMembersUids!!.contains(user.uid)) {
@@ -194,6 +196,7 @@ class CometChatAddMembers : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

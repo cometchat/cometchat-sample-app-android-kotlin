@@ -27,14 +27,10 @@ import android.provider.OpenableColumns
 import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -49,20 +45,19 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CallSettings
 import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.core.CometChat.*
+import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.OngoingCallListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
-import org.json.JSONObject
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity
-import com.cometchat.pro.uikit.ui_components.messages.extensions.ExtensionResponseListener
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.zoom_imageView.ZoomImageView
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.snackbar.Snackbar
+import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -196,38 +191,62 @@ public class Utils {
             var message: String? = null
             if (lastMessage.deletedAt == 0L) {
                 when (lastMessage.category) {
-                    CometChatConstants.CATEGORY_MESSAGE -> if (lastMessage is TextMessage) {
-                        message = lastMessage.text
-                        if (isLoggedInUser(lastMessage.getSender())) {
-//                            if (isExtensionEnabled("profanity-filter"))
-//                                message = "You: " + Extensions.getProfanityFilter(lastMessage) else "You: " + message
+                    CometChatConstants.CATEGORY_MESSAGE ->
+                        if (lastMessage is TextMessage) {
+                            if (isLoggedInUser(lastMessage.getSender()))
+                                message = context.getString(R.string.you) + ": " + if (lastMessage.text == null) context.getString(R.string.this_message_deleted) else lastMessage.text
+                            else
+                                message = lastMessage.getSender().name + ": " + lastMessage.text
 
-                            if (Extensions.checkExtensionEnabled("profanity-filter")) {
-                                message = "You: " + Extensions.getProfanityFilter(lastMessage)
-                            } else "You: $message"
-
+                        } else if (lastMessage is MediaMessage) {
+                            if (lastMessage.getDeletedAt() == 0L) {
+                                if (lastMessage.getType() == CometChatConstants.MESSAGE_TYPE_IMAGE) message = context.getString(R.string.message_image) else if (lastMessage.getType() == CometChatConstants.MESSAGE_TYPE_VIDEO) message = context.getString(R.string.message_video) else if (lastMessage.getType() == CometChatConstants.MESSAGE_TYPE_FILE) message = context.getString(R.string.message_file) else if (lastMessage.getType() == CometChatConstants.MESSAGE_TYPE_AUDIO) message = context.getString(R.string.message_audio)
+                            } else message = context.getString(R.string.this_message_deleted)
                         }
-                        else {
-                            if (Extensions.checkExtensionEnabled("profanity-filter")) {
-                                message = lastMessage.sender.name  + Extensions.getProfanityFilter(lastMessage)
-                            }
-                            else lastMessage.sender.name + ": " + message
-
-                        }
-//                        else if (isExtensionEnabled("profanity-filter"))
-//                            message = lastMessage.sender.name + ": " + Extensions.getProfanityFilter(lastMessage)
-//                        else lastMessage.sender.name + ": " + message
-
-                    } else if (lastMessage is MediaMessage) {
-                        message = if (isLoggedInUser(lastMessage.getSender())) "You sent a " + lastMessage.getType() else "You received a " + lastMessage.getType()
+                    CometChatConstants.CATEGORY_CUSTOM ->
+                        message = if (lastMessage.deletedAt == 0L) {
+                            if (lastMessage.type == UIKitConstants.IntentStrings.LOCATION) context.getString(R.string.custom_message_location) else if (lastMessage.type == UIKitConstants.IntentStrings.POLLS) context.getString(R.string.custom_message_poll) else if (lastMessage.type.equals(UIKitConstants.IntentStrings.STICKERS, ignoreCase = true)) context.getString(R.string.custom_message_sticker) else if (lastMessage.type.equals(UIKitConstants.IntentStrings.WHITEBOARD, ignoreCase = true)) context.getString(R.string.custom_message_whiteboard) else if (lastMessage.type.equals(UIKitConstants.IntentStrings.WRITEBOARD, ignoreCase = true)) context.getString(R.string.custom_message_document) else if (lastMessage.type.equals(UIKitConstants.IntentStrings.MEETING, ignoreCase = true)) context.getString(R.string.custom_message_meeting) else String.format(context.getString(R.string.you_received), lastMessage.type)
+                        } else context.getString(R.string.this_message_deleted)
+//                    CometChatConstants.CATEGORY_ACTION -> message = (lastMessage as Action).message
+                    CometChatConstants.CATEGORY_ACTION -> if (lastMessage is Action) {
+                        if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_JOINED)
+                            message = (lastMessage.actioBy as User).name + " " + context.getString(R.string.joined)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_MEMBER_ADDED) message = ((lastMessage.actioBy as User).name + " "
+                                + context.getString(R.string.added) + " " + (lastMessage.actionOn as User).name)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_KICKED) message = ((lastMessage.actioBy as User).name + " "
+                                + context.getString(R.string.kicked_by) + " " + (lastMessage.actionOn as User).name)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_BANNED) message = ((lastMessage.actioBy as User).name + " "
+                                + context.getString(R.string.ban) + " " + (lastMessage.actionOn as User).name)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_UNBANNED) message = ((lastMessage.actioBy as User).name + " "
+                                + context.getString(R.string.unban) + " " + (lastMessage.actionOn as User).name)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_LEFT) message = (lastMessage.actioBy as User).name + " " + context.getString(R.string.left)
+                        else if (lastMessage.action == CometChatConstants.ActionKeys.ACTION_SCOPE_CHANGED)
+                            message = if (lastMessage.newScope == CometChatConstants.SCOPE_MODERATOR) {
+                                ((lastMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                                        + (lastMessage.actionOn as User).name + " " + context.getString(R.string.moderator))
+                            } else if (lastMessage.newScope == CometChatConstants.SCOPE_ADMIN) {
+                                ((lastMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                                        + (lastMessage.actionOn as User).name + " " + context.getString(R.string.admin))
+                            } else if (lastMessage.newScope == CometChatConstants.SCOPE_PARTICIPANT) {
+                                ((lastMessage.actioBy as User).name + " " + context.getString(R.string.made) + " "
+                                        + (lastMessage.actionOn as User).name + " " + context.getString(R.string.participant))
+                            } else lastMessage.message
                     }
-                    CometChatConstants.CATEGORY_CUSTOM -> message = if (isLoggedInUser(lastMessage.sender)) "You sent a " + lastMessage.type else "You received a " + lastMessage.type
-                    CometChatConstants.CATEGORY_ACTION -> message = (lastMessage as Action).message
-                    CometChatConstants.CATEGORY_CALL -> message = "Call Message"
-                    else -> message = "Tap to start conversation"
+                    CometChatConstants.CATEGORY_CALL ->
+                        message = if ((lastMessage as Call).callStatus.equals(CometChatConstants.CALL_STATUS_ENDED, ignoreCase = true) ||
+                        lastMessage.callStatus.equals(CometChatConstants.CALL_STATUS_CANCELLED, ignoreCase = true)) {
+                            if (lastMessage.getType().equals(CometChatConstants.CALL_TYPE_AUDIO, ignoreCase = true)) context.getString(R.string.incoming_audio_call) else context.getString(R.string.incoming_video_call)
+                            } else if (lastMessage.callStatus.equals(CometChatConstants.CALL_STATUS_ONGOING, ignoreCase = true)) {
+                                context.getString(R.string.ongoing_call)
+                            } else if (lastMessage.callStatus.equals(CometChatConstants.CALL_STATUS_CANCELLED, ignoreCase = true) ||
+                                    lastMessage.callStatus.equals(CometChatConstants.CALL_STATUS_UNANSWERED, ignoreCase = true) ||
+                                    lastMessage.callStatus.equals(CometChatConstants.CALL_STATUS_BUSY, ignoreCase = true)) {
+                                if (lastMessage.getType().equals(CometChatConstants.CALL_TYPE_AUDIO, ignoreCase = true)) context.getString(R.string.missed_voice_call) else context.getString(R.string.missed_video_call)
+                            } else lastMessage.callStatus + " " + lastMessage.getType() + " Call"
+                    else -> message = context.getString(R.string.tap_to_start_conversation)
                 }
                 return message
-            } else return context.getString(R.string.message_deleted)
+            } else return context.getString(R.string.this_message_deleted)
         }
 
         fun isLoggedInUser(user: User): Boolean {
@@ -765,7 +784,7 @@ public class Utils {
 
                 override fun onError(e: CometChatException) {
                     Log.e("onError: ", e.message)
-                    showDialog(activity, e)
+                    ErrorMessagesUtils.cometChatErrorMessage(activity, e.code)
                 }
 
                 override fun onCallEnded(call: Call) {
@@ -836,19 +855,5 @@ public class Utils {
             imageDialog.show()
         }
 
-        public fun showDialog(context : Context, e: CometChatException) {
-
-            val builder = AlertDialog.Builder(context)
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.cometchat_error_message_view, null, false)
-            builder.setView(dialogView)
-            dialogView.findViewById<TextView>(R.id.tv_error_message).text = e.message
-            val alertDialog = builder.create()
-            alertDialog.window?.setGravity(Gravity.TOP)
-            alertDialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
-            dialogView.findViewById<ImageView>(R.id.iv_error_close).setOnClickListener(View.OnClickListener {
-                alertDialog.dismiss()
-            })
-            alertDialog.show()
-        }
     }
 }

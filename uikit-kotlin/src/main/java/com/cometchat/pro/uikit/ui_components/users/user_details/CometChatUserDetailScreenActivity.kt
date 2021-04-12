@@ -31,6 +31,7 @@ import com.cometchat.pro.uikit.ui_components.users.user_details.callHistory.Call
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
@@ -88,7 +89,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         divider2 = findViewById(R.id.divider_2)
         divider3 = findViewById(R.id.divider_3)
         setSupportActionBar(toolbar)
-        getSupportActionBar()!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         addBtn!!.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoRegular))
         tvBlockUser = findViewById(R.id.tv_blockUser)
         tvBlockUser!!.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoMedium))
@@ -106,7 +107,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
                 }
             }
         })
-        tvSendMessage!!.setOnClickListener(View.OnClickListener { view: View? ->
+        tvSendMessage!!.setOnClickListener(View.OnClickListener {
             if (isAddMember || fromCallList) {
                 val intent: Intent = Intent(this@CometChatUserDetailScreenActivity, CometChatMessageListActivity::class.java)
                 intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
@@ -147,13 +148,13 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     private fun checkOnGoingCall(callType: String) {
         if ((CometChat.getActiveCall() != null) && (CometChat.getActiveCall().callStatus == CometChatConstants.CALL_STATUS_ONGOING) && (CometChat.getActiveCall().sessionId != null)) {
             val alert: AlertDialog.Builder = AlertDialog.Builder(this)
-            alert.setTitle(getResources().getString(R.string.ongoing_call))
-                    .setMessage(getResources().getString(R.string.ongoing_call_message))
-                    .setPositiveButton(getResources().getString(R.string.join), object : DialogInterface.OnClickListener {
+            alert.setTitle(resources.getString(R.string.ongoing_call))
+                    .setMessage(resources.getString(R.string.ongoing_call_message))
+                    .setPositiveButton(resources.getString(R.string.join), object : DialogInterface.OnClickListener {
                         public override fun onClick(dialog: DialogInterface, which: Int) {
                             Utils.joinOnGoingCall(this@CometChatUserDetailScreenActivity)
                         }
-                    }).setNegativeButton(getResources().getString(R.string.cancel), object : DialogInterface.OnClickListener {
+                    }).setNegativeButton(resources.getString(R.string.cancel), object : DialogInterface.OnClickListener {
                         public override fun onClick(dialog: DialogInterface, which: Int) {
                             callBtn!!.isEnabled = true
                             vidoeCallBtn!!.isEnabled = true
@@ -166,36 +167,36 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER)) {
-            isAddMember = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, false)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER)) {
+            isAddMember = intent.getBooleanExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, false)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST)) {
-            fromCallList = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST, false)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST)) {
+            fromCallList = intent.getBooleanExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST, false)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME)) {
-            isBlocked = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, false)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME)) {
+            isBlocked = intent.getBooleanExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, false)
             setBlockUnblock()
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.GUID)) {
-            guid = getIntent().getStringExtra(UIKitConstants.IntentStrings.GUID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GUID)) {
+            guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.UID)) {
-            uid = getIntent().getStringExtra(UIKitConstants.IntentStrings.UID)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.UID)) {
+            uid = intent.getStringExtra(UIKitConstants.IntentStrings.UID)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.GROUP_NAME)) {
-            groupName = getIntent().getStringExtra(UIKitConstants.IntentStrings.GROUP_NAME)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_NAME)) {
+            groupName = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_NAME)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.NAME)) {
-            name = getIntent().getStringExtra(UIKitConstants.IntentStrings.NAME)
-            userName!!.setText(name)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.NAME)) {
+            name = intent.getStringExtra(UIKitConstants.IntentStrings.NAME)
+            userName!!.text = name
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.AVATAR)) {
-            avatar = getIntent().getStringExtra(UIKitConstants.IntentStrings.AVATAR)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.AVATAR)) {
+            avatar = intent.getStringExtra(UIKitConstants.IntentStrings.AVATAR)
         }
-        if (getIntent().hasExtra(UIKitConstants.IntentStrings.STATUS)) {
-            val status: String? = getIntent().getStringExtra(UIKitConstants.IntentStrings.STATUS)
-            if (status != null && (status == CometChatConstants.USER_STATUS_ONLINE)) userStatus!!.setTextColor(getResources().getColor(R.color.colorPrimary))
-            userStatus!!.setText(status)
+        if (intent.hasExtra(UIKitConstants.IntentStrings.STATUS)) {
+            val status: String? = intent.getStringExtra(UIKitConstants.IntentStrings.STATUS)
+            if (status != null && (status == CometChatConstants.USER_STATUS_ONLINE)) userStatus!!.setTextColor(resources.getColor(R.color.colorPrimary))
+            userStatus!!.text = status
         }
         if (avatar != null && avatar!!.isNotEmpty()) userAvatar!!.setAvatar(avatar!!) else {
             if (name != null && name!!.isNotEmpty()) userAvatar!!.setInitials(name!!) else userAvatar!!.setInitials("Unknown")
@@ -211,7 +212,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
 
     private fun fetchCallHistory() {
         if (messageRequest == null) {
-            messageRequest = MessagesRequestBuilder().setUID((uid)!!).setCategory(CometChatConstants.CATEGORY_CALL).setLimit(30).build()
+            messageRequest = MessagesRequestBuilder().setUID((uid)!!).setCategories(listOf(CometChatConstants.CATEGORY_CALL)).setLimit(30).build()
         }
         messageRequest!!.fetchPrevious(object : CallbackListener<List<BaseMessage>>() {
             public override fun onSuccess(messageList: List<BaseMessage>) {
@@ -262,13 +263,15 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         CometChat.addMembersToGroup((guid)!!, userList, null, object : CallbackListener<HashMap<String?, String?>?>() {
             public override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
                 Log.e(TAG, "onSuccess: " + uid + "Group" + guid)
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_added_to_group), userName!!.getText().toString(), groupName), Snackbar.LENGTH_LONG).show()
+                if (tvBlockUser != null) 
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.user_added_to_group), userName!!.text.toString(), groupName), UIKitConstants.ErrorTypes.SUCCESS)
+//                    Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.user_added_to_group), userName!!.text.toString(), groupName), Snackbar.LENGTH_LONG).show()
                 addBtn!!.text = String.format(resources.getString(R.string.remove_from_group), groupName)
                 isAlreadyAdded = true
             }
 
             public override fun onError(e: CometChatException) {
-                Toast.makeText(this@CometChatUserDetailScreenActivity, e.message, Toast.LENGTH_LONG).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, resources.getString(R.string.add_member_to_group_failed),UIKitConstants.ErrorTypes.WARNING)
             }
         })
     }
@@ -276,14 +279,17 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     private fun kickGroupMember() {
         CometChat.kickGroupMember((uid)!!, (guid)!!, object : CallbackListener<String?>() {
             public override fun onSuccess(s: String?) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_removed_from_group), userName!!.text.toString(), groupName), Snackbar.LENGTH_LONG).show()
-                addBtn!!.text = String.format(resources.getString(R.string.add_in_group), groupName)
+                if (tvBlockUser != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.user_removed_from_group), userName!!.text.toString(), groupName), UIKitConstants.ErrorTypes.SUCCESS)
+//                    Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.user_removed_from_group), userName!!.text.toString(), groupName), Snackbar.LENGTH_LONG).show()
+                addBtn!!.text = String.format(resources.getString(R.string.add_in), groupName)
                 addBtn!!.visibility = View.VISIBLE
                 isAlreadyAdded = false
             }
 
             public override fun onError(e: CometChatException) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, getResources().getString(R.string.kicked_error), Snackbar.LENGTH_LONG).show()
+                if (tvBlockUser != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, resources.getString(R.string.kicked_error), UIKitConstants.ErrorTypes.WARNING)
             }
         })
     }
@@ -293,14 +299,16 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         uids.add(uid)
         CometChat.unblockUsers(uids, object : CallbackListener<HashMap<String?, String?>?>() {
             public override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(getResources().getString(R.string.user_unblocked), userName!!.getText().toString()), Snackbar.LENGTH_SHORT).show()
+                if (tvBlockUser != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.unblocked_successfully), userName!!.text.toString()),UIKitConstants.ErrorTypes.SUCCESS)
+//                    Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.unblocked_successfully), userName!!.getText().toString()), Snackbar.LENGTH_SHORT).show()
                 isBlocked = false
                 setBlockUnblock()
             }
 
             public override fun onError(e: CometChatException) {
                 Log.d(TAG, "onError: " + e.message)
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, getResources().getString(R.string.unblock_user_error), Snackbar.LENGTH_SHORT).show()
+                if (tvBlockUser != null) ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, resources.getString(R.string.unblock_user_error),UIKitConstants.ErrorTypes.WARNING)
             }
         })
     }
@@ -310,14 +318,16 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         uids.add(uid)
         CometChat.blockUsers(uids, object : CallbackListener<HashMap<String?, String?>?>() {
             public override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
-                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.user_is_blocked), userName!!.text.toString()), Snackbar.LENGTH_SHORT).show()
+                if (tvBlockUser != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.user_is_blocked), userName?.text.toString()),UIKitConstants.ErrorTypes.SUCCESS)
+//                    Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.user_is_blocked), userName!!.text.toString()), Snackbar.LENGTH_SHORT).show()
                 isBlocked = true
                 setBlockUnblock()
             }
 
             public override fun onError(e: CometChatException) {
-//                if (tvBlockUser != null) Snackbar.make(tvBlockUser!!, String.format(resources.getString(R.string.block_user_error), userName!!.text.toString()), Snackbar.LENGTH_SHORT).show()
-                Utils.showDialog(this@CometChatUserDetailScreenActivity, e)
+                if (tvBlockUser != null)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.block_user_error), userName?.text.toString()), UIKitConstants.ErrorTypes.WARNING)
                 Log.d(TAG, "onError: " + e.message)
             }
         })
@@ -340,11 +350,11 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
             }
 
             public override fun onGroupMemberLeft(action: Action, leftUser: User, leftGroup: Group) {
-                updateBtn(leftUser, R.string.add_in_group)
+                updateBtn(leftUser, R.string.add_in)
             }
 
             public override fun onGroupMemberKicked(action: Action, kickedUser: User, kickedBy: User, kickedFrom: Group) {
-                updateBtn(kickedUser, R.string.add_in_group)
+                updateBtn(kickedUser, R.string.add_in)
             }
 
             public override fun onMemberAddedToGroup(action: Action, addedby: User, userAdded: User, addedTo: Group) {

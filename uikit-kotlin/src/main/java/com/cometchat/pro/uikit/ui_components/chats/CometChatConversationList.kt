@@ -1,5 +1,6 @@
 package com.cometchat.pro.uikit.ui_components.chats
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import android.widget.TextView.OnEditorActionListener
 import androidx.fragment.app.Fragment
@@ -23,10 +25,12 @@ import com.cometchat.pro.helpers.CometChatHelper
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import okhttp3.internal.Util
 
 /*
 
@@ -45,6 +49,8 @@ class CometChatConversationList : Fragment(), TextWatcher {
             : ConversationsRequest? = null
     private var searchEdit //Uses to perform search operations.
             : EditText? = null
+    private var clearSearch //Use to clear the search operation performed on list.
+            : ImageView? = null
     private var tvTitle: TextView? = null
     private var conversationShimmer: ShimmerFrameLayout? = null
     private var rlSearchBox: RelativeLayout? = null
@@ -54,25 +60,34 @@ class CometChatConversationList : Fragment(), TextWatcher {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         vw = inflater.inflate(R.layout.fragment_conversation_screen, container, false)
-        rvConversation = vw!!.findViewById(R.id.rv_conversation_list)
-        noConversationView = vw!!.findViewById(R.id.no_conversation_view)
-        searchEdit = vw!!.findViewById(R.id.search_bar)
-        tvTitle = vw!!.findViewById(R.id.tv_title)
-        tvTitle!!.setTypeface(FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium))
-        rlSearchBox = vw!!.findViewById(R.id.rl_search_box)
-        conversationShimmer = vw!!.findViewById(R.id.shimmer_layout)
+        rvConversation = vw?.findViewById(R.id.rv_conversation_list)
+        noConversationView = vw?.findViewById(R.id.no_conversation_view)
+        searchEdit = vw?.findViewById(R.id.search_bar)
+        tvTitle = vw?.findViewById(R.id.tv_title)
+        tvTitle?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
+        rlSearchBox = vw?.findViewById(R.id.rl_search_box)
+        conversationShimmer = vw?.findViewById(R.id.shimmer_layout)
+        clearSearch = vw?.findViewById(R.id.clear_search)
         checkDarkMode()
-        searchEdit!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
+        searchEdit?.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
-                rvConversation!!.searchConversation(textView.text.toString())
+                rvConversation?.searchConversation(textView.text.toString())
+                clearSearch?.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
-
+        clearSearch?.setOnClickListener {
+            searchEdit?.setText("")
+            clearSearch!!.visibility = View.GONE
+            rvConversation?.searchConversation(searchEdit?.text.toString())
+            val inputMethodManager: InputMethodManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            // Hide the soft keyboard
+            inputMethodManager.hideSoftInputFromWindow(searchEdit?.windowToken, 0)
+        }
 
         // Uses to fetch next list of conversations if rvConversationList (RecyclerView) is scrolled in upward direction.
-        rvConversation!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        rvConversation?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (!recyclerView.canScrollVertically(1)) {
                     makeConversationList()
@@ -81,7 +96,7 @@ class CometChatConversationList : Fragment(), TextWatcher {
         })
 
         // Used to trigger event on click of conversation item in rvConversationList (RecyclerView)
-        rvConversation!!.setItemClickListener(object : OnItemClickListener<Conversation>() {
+        rvConversation?.setItemClickListener(object : OnItemClickListener<Conversation>() {
 
             override fun OnItemClick(t: Any, position: Int) {
                 if(events !=null)
@@ -111,7 +126,7 @@ class CometChatConversationList : Fragment(), TextWatcher {
         }
         conversationsRequest!!.fetchNext(object : CallbackListener<List<Conversation>>() {
             override fun onSuccess(conversations: List<Conversation>) {
-                if (conversations.size != 0) {
+                if (conversations.isNotEmpty()) {
                     stopHideShimmer()
                     noConversationView!!.visibility = View.GONE
                     rvConversation!!.setConversationList(conversations)
@@ -122,7 +137,8 @@ class CometChatConversationList : Fragment(), TextWatcher {
 
             override fun onError(e: CometChatException) {
                 stopHideShimmer()
-                if (activity != null) Toast.makeText(activity, "Unable to load conversations", Toast.LENGTH_LONG).show()
+                if (activity != null)
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.d(TAG, "onError: " + e.message)
             }
         })

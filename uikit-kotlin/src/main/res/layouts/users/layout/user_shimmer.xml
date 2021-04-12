@@ -23,7 +23,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:text="@string/users_title"
+                android:text="@string/users"
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

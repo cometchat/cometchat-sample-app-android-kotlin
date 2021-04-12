@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <RelativeLayout
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:id="@+id/cv_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,7 +37,6 @@
                     android:text="@string/custom_message"
                     android:padding="10dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
                     android:layout_marginEnd="10dp"
                     android:maxWidth="250dp"
                     android:focusableInTouchMode="true"
@@ -62,8 +61,8 @@
                     android:foreground="?selectableItemBackground"
                     android:id="@+id/thread_reply_count"
                     android:textColor="@color/colorPrimary"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
                     tools:text="2 replies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
@@ -76,7 +75,7 @@
                 android:textSize="12sp"
                 android:layout_marginBottom="8dp"
                 android:layout_alignBottom="@+id/cv_message_container"
-                android:layout_toLeftOf="@+id/cv_message_container"
+                android:layout_toStartOf="@+id/cv_message_container"
                 android:textStyle="bold"
                 android:visibility="gone"
                 tools:text="11:00 PM"

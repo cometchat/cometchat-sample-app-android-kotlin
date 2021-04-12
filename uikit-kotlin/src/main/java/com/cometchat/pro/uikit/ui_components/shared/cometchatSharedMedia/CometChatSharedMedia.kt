@@ -62,14 +62,14 @@ class CometChatSharedMedia : RelativeLayout {
             val files = CometChatSharedFiles()
             files.arguments = bundle
             adapter!!.addFragment(files, resources.getString(R.string.files))
-            viewPager!!.setAdapter(adapter)
-            viewPager!!.setOffscreenPageLimit(3)
+            viewPager!!.adapter = adapter
+            viewPager!!.offscreenPageLimit = 3
             tabLayout!!.setupWithViewPager(viewPager)
             if (Utils.isDarkMode(context)) {
-                tabLayout!!.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(R.color.grey)))
+                tabLayout!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
                 tabLayout!!.setTabTextColors(resources.getColor(R.color.light_grey), resources.getColor(R.color.textColorWhite))
             } else {
-                tabLayout!!.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(R.color.textColorWhite)))
+                tabLayout!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
                 tabLayout!!.setTabTextColors(resources.getColor(R.color.primaryTextColor), resources.getColor(R.color.textColorWhite))
             }
         }

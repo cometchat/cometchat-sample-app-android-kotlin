@@ -26,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.security.SecureRandom
 
@@ -148,7 +149,7 @@ class CometChatCreateGroup : Fragment() {
                 if (etGroupPassword!!.text.toString().isEmpty()) etGroupPassword!!.error = resources.getString(R.string.fill_this_field) else if (etGroupCnfPassword!!.text.toString().isEmpty()) etGroupCnfPassword!!.error = resources.getString(R.string.fill_this_field) else if (etGroupPassword!!.text.toString() == etGroupCnfPassword!!.text.toString()) {
                     val group = Group("group" + generateRandomString(95), etGroupName!!.text.toString(), groupType, etGroupPassword!!.text.toString())
                     createGroup(group)
-                } else if (etGroupPassword != null) Snackbar.make(etGroupCnfPassword!!.rootView, resources.getString(R.string.password_not_matched), Snackbar.LENGTH_LONG).show()
+                } else if (etGroupPassword != null) ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.password_not_matched),UIKitConstants.ErrorTypes.WARNING)
             }
         } else {
             etGroupName!!.error = resources.getString(R.string.fill_this_field)
@@ -174,7 +175,7 @@ class CometChatCreateGroup : Fragment() {
 
             override fun onError(e: CometChatException) {
 //                Snackbar.make(etGroupName!!.rootView, resources.getString(R.string.create_group_error), Snackbar.LENGTH_LONG).show()
-                context?.let { Utils.showDialog(it, e) }
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

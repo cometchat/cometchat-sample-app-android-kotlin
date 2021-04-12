@@ -21,9 +21,11 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity
 import com.cometchat.pro.uikit.ui_components.messages.message_information.message_receipts.CometChatReceiptsList
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import okhttp3.internal.Util
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -290,7 +292,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Snackbar.make(cometChatReceiptsList!!, e.message!!, Snackbar.LENGTH_LONG).show()
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatMessageInfoScreenActivity, e.code)
             }
         })
     }

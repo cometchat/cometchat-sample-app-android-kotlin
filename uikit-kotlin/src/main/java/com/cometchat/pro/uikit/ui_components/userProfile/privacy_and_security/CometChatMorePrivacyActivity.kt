@@ -14,6 +14,8 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.users.blocked_users.CometChatBlockUserListActivity
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
@@ -32,16 +34,16 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
         val toolbar: MaterialToolbar = findViewById(R.id.privacy_toolbar)
         divider = findViewById(R.id.divider)
         setSupportActionBar(toolbar)
-        if (getSupportActionBar() != null) getSupportActionBar()!!.setDisplayHomeAsUpEnabled(true)
+        if (supportActionBar != null) supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         if (Utils.changeToolbarFont(toolbar) != null) {
-            Utils.changeToolbarFont(toolbar)!!.setTypeface(FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium))
+            Utils.changeToolbarFont(toolbar)!!.typeface = FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium)
         }
         if (Utils.isDarkMode(this)) {
-            divider!!.setBackgroundColor(getResources().getColor(R.color.grey))
-            blockUserTv!!.setTextColor(getResources().getColor(R.color.textColorWhite))
+            divider!!.setBackgroundColor(resources.getColor(R.color.grey))
+            blockUserTv!!.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
-            divider!!.setBackgroundColor(getResources().getColor(R.color.light_grey))
-            blockUserTv!!.setTextColor(getResources().getColor(R.color.primaryTextColor))
+            divider!!.setBackgroundColor(resources.getColor(R.color.light_grey))
+            blockUserTv!!.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
         blockCount
     }
@@ -55,18 +57,17 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
             blockedUsersRequest = BlockedUsersRequestBuilder().setDirection(BlockedUsersRequest.DIRECTION_BLOCKED_BY_ME).setLimit(100).build()
             blockedUsersRequest!!.fetchNext(object : CallbackListener<List<User?>>() {
                 public override fun onSuccess(users: List<User?>) {
-                    if (users.size == 0) {
-                        tvBlockUserCount!!.setText("")
+                    if (users.isEmpty()) {
+                        tvBlockUserCount!!.text = ""
                     } else if (users.size < 2) {
-                        tvBlockUserCount!!.setText(users.size.toString() + " " + getResources().getString(R.string.user))
+                        tvBlockUserCount!!.text = users.size.toString() + " " + getResources().getString(R.string.user)
                     } else {
-                        tvBlockUserCount!!.setText(users.size.toString() + " " + getResources().getString(R.string.users))
+                        tvBlockUserCount!!.text = users.size.toString() + " " + getResources().getString(R.string.users)
                     }
                 }
 
                 public override fun onError(e: CometChatException) {
-                    Snackbar.make((tvBlockUserCount)!!, resources.getString(R.string.blocked_list_error), Snackbar.LENGTH_SHORT).show()
-                    Toast.makeText(this@CometChatMorePrivacyActivity, e.message, Toast.LENGTH_SHORT).show()
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatMorePrivacyActivity, resources.getString(R.string.block_user_list_error), UIKitConstants.ErrorTypes.ERROR)
                 }
             })
         }
@@ -78,7 +79,7 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.getItemId() == android.R.id.home) onBackPressed()
+        if (item.itemId == android.R.id.home) onBackPressed()
         return super.onOptionsItemSelected(item)
     }
 }

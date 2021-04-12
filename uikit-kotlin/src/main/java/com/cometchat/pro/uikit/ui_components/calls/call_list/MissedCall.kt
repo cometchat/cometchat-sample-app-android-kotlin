@@ -28,6 +28,7 @@ import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_components.groups.group_detail.CometChatGroupDetailActivity
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
@@ -128,7 +129,7 @@ class MissedCall : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                if (rvCallList != null) Snackbar.make(rvCallList!!, e.message!!, Snackbar.LENGTH_LONG).show()
+                if (rvCallList != null) ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -136,7 +137,7 @@ class MissedCall : Fragment() {
     private val callList: Unit
         private get() {
             if (messagesRequest == null) {
-                messagesRequest = MessagesRequestBuilder().setCategories(Arrays.asList(CometChatConstants.CATEGORY_CALL)).build()
+                messagesRequest = MessagesRequestBuilder().setCategories(listOf(CometChatConstants.CATEGORY_CALL)).build()
             }
             messagesRequest!!.fetchPrevious(object : CallbackListener<List<BaseMessage?>>() {
                 override fun onSuccess(baseMessages: List<BaseMessage?>) {
@@ -148,7 +149,8 @@ class MissedCall : Fragment() {
                 }
 
                 override fun onError(e: CometChatException) {
-                    if (rvCallList != null) Snackbar.make(rvCallList!!, R.string.call_list_error, Snackbar.LENGTH_LONG).show()
+                    if (rvCallList != null)
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.call_list_error),UIKitConstants.ErrorTypes.ERROR)
                 }
             })
         }

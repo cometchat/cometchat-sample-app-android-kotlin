@@ -244,7 +244,7 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
         if (filterConversationList!!.contains(conversation)) {
             val oldConversation = filterConversationList!![filterConversationList!!.indexOf(conversation)]
             filterConversationList!!.remove(oldConversation)
-            if (conversation.lastMessage.category != CometChatConstants.CATEGORY_CUSTOM && conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L) {
+            if (conversation.lastMessage.category != CometChatConstants.CATEGORY_CUSTOM && conversation.lastMessage.category != CometChatConstants.CATEGORY_ACTION && conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L) {
                 conversation.unreadMessageCount = oldConversation.unreadMessageCount + 1
             }
             else {

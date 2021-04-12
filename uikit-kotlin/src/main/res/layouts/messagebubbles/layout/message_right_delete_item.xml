@@ -37,7 +37,7 @@
                 tools:text="message"
                 android:textColor="@color/secondaryTextColor"
                 android:focusable="true"
-                android:text="@string/message_deleted"
+                android:text="@string/this_message_deleted"
                 android:padding="10dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"

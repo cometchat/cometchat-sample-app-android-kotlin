@@ -68,7 +68,7 @@ class StickerView : RelativeLayout, StickerClickListener {
             bundle.putString("type", type)
             val stickersFragment = StickerFragment()
             bundle.putParcelableArrayList("stickerList", stickerMap[str] as ArrayList<out Parcelable?>?)
-            stickersFragment.setArguments(bundle)
+            stickersFragment.arguments = bundle
             stickersFragment.setStickerClickListener(stickerClickListener)
             adapter?.addFragment(stickersFragment, str, stickerMap[str]!![0].url)
         }
@@ -76,7 +76,7 @@ class StickerView : RelativeLayout, StickerClickListener {
         tabLayout?.setupWithViewPager(viewPager)
 
         for (i in 0 until tabLayout!!.tabCount) {
-            tabLayout!!.getTabAt(i)?.setCustomView(createTabItemView(adapter?.getPageIcon(i)!!))
+            tabLayout!!.getTabAt(i)?.customView = createTabItemView(adapter?.getPageIcon(i)!!)
         }
 
         tabLayout!!.getTabAt(tabLayout!!.selectedTabPosition)!!.view.setBackgroundColor(resources.getColor(R.color.colorPrimary))

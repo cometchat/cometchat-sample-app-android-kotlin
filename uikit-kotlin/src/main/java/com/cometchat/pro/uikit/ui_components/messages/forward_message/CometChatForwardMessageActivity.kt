@@ -42,6 +42,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import org.json.JSONException
 import org.json.JSONObject
@@ -180,11 +181,11 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         etSearch!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 1) clearSearch!!.setVisibility(View.VISIBLE)
+                if (charSequence.length > 1) clearSearch!!.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {
-                if (editable.toString().length != 0) {
+                if (editable.toString().isNotEmpty()) {
                     if (cometChatConversationsAdapter != null) cometChatConversationsAdapter!!.filter.filter(editable.toString())
                 }
             }
@@ -192,17 +193,17 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         etSearch!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
                 if (cometChatConversationsAdapter != null) cometChatConversationsAdapter!!.filter.filter(textView.text.toString())
-                clearSearch!!.setVisibility(View.VISIBLE)
+                clearSearch!!.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
         clearSearch!!.setOnClickListener(View.OnClickListener { view1: View? ->
             etSearch!!.setText("")
-            clearSearch!!.setVisibility(View.GONE)
+            clearSearch!!.visibility = View.GONE
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             // Hide the soft keyboard
-            inputMethodManager.hideSoftInputFromWindow(etSearch!!.getWindowToken(), 0)
+            inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
         })
         rvConversation!!.setItemClickListener(object : OnItemClickListener<Conversation>() {
 //            override fun OnItemClick(conversation: Conversation, position: Int) {
@@ -238,7 +239,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                     }
                     checkUserList()
                 } else {
-                    Toast.makeText(this@CometChatForwardMessageActivity, "You cannot forward message to more than 5 members", Toast.LENGTH_LONG).show()
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatForwardMessageActivity, resources.getString(R.string.forward_to_5_at_a_time),UIKitConstants.ErrorTypes.ERROR)
                 }
             }
         })
@@ -457,7 +458,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
             }
 
             override fun onError(e: CometChatException) {
-                Toast.makeText(baseContext, e.message, Toast.LENGTH_SHORT).show()
+                ErrorMessagesUtils.cometChatErrorMessage(baseContext, e.code)
             }
         })
     }

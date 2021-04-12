@@ -6,6 +6,7 @@
     android:background="#000000">
 
     <LinearLayout
+        android:id="@+id/ll_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/red_600"
@@ -15,9 +16,10 @@
 
         <ImageView
             android:id="@+id/iv_error_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/error_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:tint="@color/textColorWhite"
+            android:src="@drawable/warning_icon"
             android:layout_margin="4dp"/>
 
         <TextView
@@ -26,7 +28,7 @@
             android:layout_height="wrap_content"
             tools:text="@tools:sample/lorem"
             android:textSize="18sp"
-            android:paddingStart="4dp"
+            android:textAlignment="center"
             android:textColor="@color/textColorWhite"
             android:layout_margin="4dp"/>
 

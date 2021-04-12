@@ -29,7 +29,7 @@
             android:id="@+id/tv_user"
             tools:text="Iron Man"
             android:textSize="12sp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_toEndOf="@+id/iv_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -57,7 +57,7 @@
                     android:layout_width="36dp"
                     android:layout_height="36dp"/>
                 <TextView
-                    android:layout_toRightOf="@+id/icon"
+                    android:layout_toEndOf="@+id/icon"
                     android:id="@+id/writeboard_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -108,8 +108,8 @@
                 android:foreground="?selectableItemBackground"
                 android:id="@+id/thread_reply_count"
                 android:textColor="@color/colorPrimary"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
                 tools:text="2 replies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -123,7 +123,7 @@
             android:layout_alignBottom="@+id/cv_message_container"
             android:layout_marginBottom="8dp"
             android:textSize="12sp"
-            android:layout_toRightOf="@id/cv_message_container"
+            android:layout_toEndOf="@id/cv_message_container"
             android:layout_gravity="center"
             android:textStyle="bold"
             tools:visibility="visible"

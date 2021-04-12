@@ -36,9 +36,9 @@
             android:layout_height="40dp"/>
         <TextView
             android:id="@+id/add_as_tv"
-            android:layout_toRightOf="@+id/ivNotification"
-            android:layout_marginLeft="16dp"
-            android:text="@string/add_as_admin"
+            android:layout_toEndOf="@+id/ivNotification"
+            android:layout_marginStart="16dp"
+            android:text="@string/assign_as_admin"
             android:layout_centerVertical="true"
             android:textColor="@color/colorPrimary"
             android:textSize="18sp"

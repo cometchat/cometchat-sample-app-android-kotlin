@@ -88,12 +88,12 @@ class CometChatConversation : RecyclerView {
         addOnItemTouchListener(RecyclerTouchListener(context, this, object : ClickListener() {
             override fun onClick(var1: View, var2: Int) {
                 val conversation = var1.getTag(R.string.conversation) as Conversation
-                if (onItemClickListener != null) onItemClickListener.OnItemClick(conversation, var2) else throw NullPointerException(resources.getString(R.string.conversation_itemclick_error))
+                if (onItemClickListener != null) onItemClickListener.OnItemClick(conversation, var2) else throw NullPointerException("OnItemClickListener<Conversation> is null")
             }
 
             override fun onLongClick(var1: View, var2: Int) {
                 val conversation = var1.getTag(R.string.conversation) as Conversation
-                if (onItemClickListener != null) onItemClickListener.OnItemLongClick(conversation, var2) else throw NullPointerException(resources.getString(R.string.conversation_itemclick_error))
+                if (onItemClickListener != null) onItemClickListener.OnItemLongClick(conversation, var2) else throw NullPointerException("OnItemClickListener<Conversation> is null")
             }
         }))
     }
