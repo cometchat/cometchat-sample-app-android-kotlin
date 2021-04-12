@@ -29,6 +29,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.OnAlertDial
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_components.groups.group_list.CometChatGroupList
 import com.cometchat.pro.uikit.ui_components.userProfile.CometChatUserProfile
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 
 class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListener {
     private var progressDialog: ProgressDialog? = null
@@ -144,8 +145,7 @@ class ComponentLoadActivity : AppCompatActivity(), OnAlertDialogButtonClickListe
                 if (progressDialog != null) {
                     progressDialog!!.dismiss()
                 }
-//                Toast.makeText(this@ComponentLoadActivity, e.message, Toast.LENGTH_SHORT).show()
-                ShowErrorMessageUtils.showDialog(this@ComponentLoadActivity, e)
+                ErrorMessagesUtils.cometChatErrorMessage(this@ComponentLoadActivity, e.code)
             }
         })
     }

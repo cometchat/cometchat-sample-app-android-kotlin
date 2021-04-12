@@ -23,7 +23,7 @@
         tools:text="Iron Man"
         android:textSize="12sp"
         android:layout_marginTop="8dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_toEndOf="@+id/iv_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/iv_user"
         android:background="@drawable/cc_message_bubble_left"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="10dp"
         android:padding="8dp"
         android:layout_marginBottom="1dp">
         <TextView
@@ -44,8 +44,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:text="Audio File"
             android:textColor="@color/primaryTextColor"
-            android:layout_toLeftOf="@+id/playBtn"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageView
             android:id="@+id/playBtn"
@@ -57,11 +56,11 @@
             android:layout_height="wrap_content"/>
         <TextView
             android:id="@+id/audiolength_tv"
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_below="@+id/title"
             tools:text="125 KB"
             android:textColor="@color/secondaryTextColor"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>
     <HorizontalScrollView
@@ -98,8 +97,8 @@
             android:foreground="?selectableItemBackground"
             android:id="@+id/thread_reply_count"
             android:textColor="@color/colorPrimary"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
             tools:text="2 replies"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -115,7 +114,7 @@
         android:textSize="12sp"
         android:layout_alignBottom="@id/cv_message_container"
         android:layout_gravity="center"
-        android:layout_toRightOf="@id/cv_message_container"
+        android:layout_toEndOf="@id/cv_message_container"
         android:textStyle="bold"
         tools:visibility="visible"
         android:visibility="gone" />

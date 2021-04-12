@@ -1,0 +1,535 @@
+<resources>
+    <string name="chats">دردشات</string>
+    <string name="users">المستخدمون</string>
+    <string name="calls">المكالمات</string>
+    <string name="conversation">المحادثات</string>
+    <string name="groups">المجموعات</string>
+    <string name="more">المزيد</string>
+    <string name="sending">إرسال...</string>
+    <string name="this_message_deleted">⚠️ تم حذف هذه الرسالة</string>
+    <string name="you_deleted_this_message">⚠️ قمت بحذف هذه الرسالة</string>
+    <string name="view_on_youtube">عرض على يوتيوب</string>
+    <string name="message_image">📷 صور</string>
+    <string name="message_video">📹 فيديو</string>
+    <string name="message_audio">🎵 الصوت</string>
+    <string name="message_file">📁 ملف</string>
+    <string name="custom_message">لديك رسالة</string>
+    <string name="missed_voice_call"> مكالمة صوتية غاب»</string>
+    <string name="missed_video_call"> مكالمة فيديو غاب</string>
+    <string name="custom_message_location">📍 الموقع</string>
+    <string name="custom_message_poll">📊 استطلاع للرأي</string>
+    <string name="custom_message_sticker">💟 ملصق</string>
+    <string name="custom_message_whiteboard">📝 السبورة</string>
+    <string name="custom_message_document">📃 وثيقة</string>
+    <string name="online">عبر الإنترنت</string>
+    <string name="offline">غير متصل</string>
+    <string name="you">أنت</string>
+    <string name="admin">مشرف</string>
+    <string name="moderator">مدير الجلسة</string>
+    <string name="participant">مشارك</string>
+
+    <string name="privacy_and_security">الخصوصية والأمان</string>
+    <string name="privacy">الخصوصية</string>
+    <string name="blocked_users">المستخدمون المحظورون</string>
+    <string name="everybody">الجميع</string>
+    <string name="preferences">التفضيلات</string>
+    <string name="you_ve_blocked">لقد حظرت</string>
+    <string name="members">الأعضاء</string>
+    <string name="back"> إلى الخلف</string>
+    <string name="cancel">إلغاء</string>
+    <string name="text_copied">نص تم نسخه إلى الحافظة</string>
+    <string name="today">اليوم</string>
+    <string name="yesterday">البارحة</string>
+    <string name="typing">كتابة...</string>
+    <string name="is_typing">هو كتابة...</string>
+    <string name="close">إغلاق</string>
+    <string name="enter_group_name">يرجى إدخال اسم المجموعة</string>
+    <string name="refreshing">منعش...</string>
+    <string name="unblock">إلغاء الحظر</string>
+    <string name="make_group_admin">جعل مشرف المجموعة</string>
+    <string name="make_group_moderator">جعل مشرف المجموعة</string>
+    <string name="administrators">الإداريون</string>
+    <string name="add_admin">إضافة مشرف</string>
+    <string name="add_moderator">إضافة مشرف</string>
+    <string name="owner">مالك</string>
+    <string name="assign_as_admin">تعيين كمشرف المجموعة</string>
+    <string name="remove_as_admin">إزالة كمشرف المجموعة</string>
+    <string name="assign_as_moderator">تعيين كمنسق للمجموعة</string>
+    <string name="remove_as_moderator">إزالة كمجموعة مشرف</string>
+    <string name="remove_from_admin_privilege">تتم إزالة كمشرف المجموعة</string>
+    <string name="remove_from_moderator_privilege">%1$s تتم إزالة كمشرف مجموعة</string>
+    <string name="is_now_admin">%1$s هو الآن المشرف</string>
+    <string name="is_now_moderator">%1$s هو الآن مشرف </string>
+    <string name="remove">⚠️ إزالة</string>
+    <string name="as_admin_from"> كمشرف من</string>
+    <string name="as_moderator_from">كمشرف من</string>
+    <string name="group">مجموعة؟</string>
+    <string name="add">✅ إضافة</string>
+    <string name="as_admin_in">كمشرف في</string>
+    <string name="as_moderator_in">كمشرف في</string>
+    <string name="ok">طيب</string>
+    <string name="as_a_moderator">كمشرف</string>
+    <string name="as_a_admin">كمشرف</string>
+    <string name="add_members">إضافة أعضاء</string>
+    <string name="actions">قضايا</string>
+    <string name="privacy_and_support">الخصوصية والدعم</string>
+    <string name="send_message">ارسل رسالة</string>
+    <string name="add_in">إضافة في</string>
+    <string name="unblock_user">إلغاء حظر المستخدم</string>
+    <string name="block_user">كتلة المستخدم</string>
+    <string name="added_successfully">تمت إضافتها بنجاح</string>
+    <string name="unblocked_successfully">تم إلغاء حظره بنجاح</string>
+    <string name="blocked_successfully"> تم حظره بنجاح</string>
+    <string name="delete_and_exit">حذف وخروج</string>
+    <string name="leave_group">ترك المجموعة</string>
+    <string name="from">من عند</string>
+    <string name="removed_successfully">تمت إزالتها بنجاح</string>
+    <string name="banned_successfully">حظرت بنجاح</string>
+    <string name="unbanned_successfully">غير محظورة بنجاح</string>
+    <string name="deleted_successfully">تم حذفها بنجاح</string>
+    <string name="you_left_from">لقد غادرت من</string>
+    <string name="remove_member">إزالة العضو</string>
+    <string name="ban_member">حظر عضو</string>
+    <string name="unban_member">عضوًا</string>
+    <string name="create_group">إنشاء مجموعة</string>
+    <string name="you_joined">إنضممت</string>
+    <string name="forward">إلى الأمام</string>
+    <string name="shared_media">وسائل الإعلام المشتركة</string>
+    <string name="unable_to_forward">غير قادر على إعادة توجيه الرسالة إلى</string>
+    <string name="forward_to_5_at_a_time">يمكنك إعادة توجيه الرسالة فقط إلى 5 مشاركين في كل مرة</string>
+    <string name="no_photos">لا توجد صور</string>
+    <string name="no_videos">لا توجد فيديوهات</string>
+    <string name="no_documents">لا توجد وثائق</string>
+    <string name="history">التاريخ</string>
+    <string name="video_call">مكالمة فيديو</string>
+    <string name="audio_call">مكالمة صوتية</string>
+    <string name="whiteboard">السبورة</string>
+    <string name="loading">التحميل...</string>
+    <string name="one_reply">1 الرد</string>
+    <string name="replies"> الردود</string>
+    <string name="launch">إطلاق</string>
+    <string name="join">انضم</string>
+    <string name="has_shared_whiteboard">وقد شارك خنزير أبيض تعاوني</string>
+    <string name="you_created_whiteboard">لقد قمت بإنشاء خنزير أبيض تعاوني جديد</string>
+    <string name="you_created_document">لقد قمت بإنشاء وثائقي تعاوني جديد</string>
+    <string name="photo_video_library">مكتبة الصور والفيديو</string>
+    <string name="take_a_photo">التقط صورة</string>
+    <string name="share_location">مشاركة الموقع</string>
+    <string name="edit_message">تحرير الرسالة</string>
+    <string name="delete_message">حذف الرسالة</string>
+    <string name="reply_message">رسالة الرد</string>
+    <string name="forward_message">رسالة إلى الأمام</string>
+    <string name="start_thread">بدء الموضوع</string>
+    <string name="share_message">مشاركة الرسالة</string>
+    <string name="message_information">معلومات الرسالة</string>
+    <string name="copy_message">نسخ الرسالة</string>
+    <string name="create_a_poll">إنشاء استطلاع للرأي</string>
+    <string name="send_sticker">إرسال ملصق</string>
+    <string name="sending_location">إرسال الموقع...</string>
+    <string name="location_sent_successfully">تم إرسال الموقع بنجاح</string>
+    <string name="search">البحث</string>
+    <string name="no_users_found">لم يتم العثور على المستخدمين</string>
+    <string name="error">خطأ</string>
+    <string name="no_groups_found">لم يتم العثور على مجموعات</string>
+    <string name="no_chats_found">لم يتم العثور على دردشات</string>
+    <string name="media_message">رسالة إعلامية</string>
+    <string name="incoming_audio_call">مكالمة صوتية واردة</string>
+    <string name="incoming_video_call">مكالمة فيديو واردة</string>
+    <string name="decline">انخفاض</string>
+    <string name="accept">قبول</string>
+    <string name="call_initiated">بدأ الاتصال</string>
+    <string name="outgoing_audio_call">مكالمة صوتية صادرة</string>
+    <string name="outgoing_video_call">مكالمة فيديو صادرة</string>
+    <string name="call_rejected">تم رفض المكالمة</string>
+    <string name="rejected_call">مكالمة مرفوضة</string>
+    <string name="call_accepted">تم قبول المكالمة</string>
+    <string name="joined">انضم</string>
+    <string name="left_the_call">ترك المكالمة</string>
+    <string name="unanswered_audio_call">مكالمة صوتية لم تتم الإجابة عليها</string>
+    <string name="unanswered_video_call">مكالمة فيديو لم تتم الإجابة عليها</string>
+    <string name="call_ended">انتهت المكالمة</string>
+    <string name="call_cancelled">تم إلغاء المكالمة</string>
+    <string name="call_busy">استدعاء مشغول</string>
+    <string name="calling">الدعوة...</string>
+    <string name="no_banned_members_found">لم يتم العثور على أعضاء محظورين</string>
+    <string name="banned_members">الأعضاء المحظورين</string>
+    <string name="name">اسم</string>
+    <string name="scope">النطاق</string>
+    <string name="unban">نبان</string>
+    <string name="select_group_type">تحديد نوع المجموعة</string>
+    <string name="enter_group_password">أدخل كلمة مرور المجموعة</string>
+    <string name="create">إنشاء</string>
+    <string name="create_poll">إنشاء استطلاع للرأي</string>
+    <string name="question">سؤال</string>
+    <string name="enter_your_question">أدخل سؤالك</string>
+    <string name="options">خيارات</string>
+    <string name="enter_your_option">أدخل الخيار الخاص بك</string>
+    <string name="add_new_option">إضافة خيار جديد</string>
+    <string name="view_members">عرض الأعضاء</string>
+    <string name="details">تفاصيل</string>
+    <string name="notifications">الإشعارات</string>
+    <string name="other">أخرى</string>
+    <string name="help">مساعدة</string>
+    <string name="report_problem">الإبلاغ عن مشكلة</string>
+    <string name="group_members">أعضاء المجموعة</string>
+    <string name="ban">بان</string>
+    <string name="kick">ركلة</string>
+    <string name="pick_your_emoji">اختيار الرموز التعبيرية الخاصة بك</string>
+    <string name="protected_group">المجموعة المحمية</string>
+    <string name="visit">زيارة</string>
+    <string name="emoji">رمز تعبيري</string>
+    <string name="no_messages_found">لم يتم العثور على رسائل</string>
+    <string name="thread">الموضوع</string>
+    <string name="collaborative_document">وثيقة تعاونية</string>
+    <string name="collaborative_whiteboard">السبورة التعاونية</string>
+    <string name="add_reaction">إضافة رد فعل</string>
+    <string name="no_stickers_found">لم يتم العثور على ملصقات</string>
+    <string name="reply_in_thread">الرد في موضوع</string>
+    <string name="sunday">الأحد</string>
+    <string name="monday">الاثنين</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="thursday">الخميس</string>
+    <string name="friday">الجمعة</string>
+    <string name="saturday">السبت</string>
+    <string name="message">اكتب رسالة</string>
+    <string name="block_user_list_error">فشل استرجاع المستخدم المحظور</string>
+    <string name="you_wont_be_able_send_or_receive_messages">لن تتمكن من إرسال الرسائل أو تلقيها</string>
+    <string name="unblock_user_error">فشل إلغاء حظر المستخدم</string>
+    <string name="unblock_user_question">هل ترغب في إلغاء حظر %1$s</string>
+    <string name="block_user_error">غير قادر على حظر %1$s</string>
+    <string name="kindly_enter_group_details_to_proceed">يرجى إدخال تفاصيل المجموعة للمتابعة</string>
+    <string name="unable_to_join_message">غير قادر على الانضمام إلى المجموعة</string>
+    <string name="make_admin_question">هل ترغب في جعل %1$s كمسؤول</string>
+    <string name="remove_from_group">⚠️ إزالة من %1$s</string>
+    <string name="add_user_to_group">إضافة %1$s إلى\» %2$s\»</string>
+    <string name="user_added_to_group">تمت إضافة %1$s إلى\» %2$s\»</string>
+    <string name="user_removed_from_group">تتم إزالة %1$s من\ "%2$s\»</string>
+    <string name="kicked_error">فشل عضو المجموعة</string>
+    <string name="leave_group_message">هل ترغب في الرحيل من المجموعة؟</string>
+    <string name="delete_group">حذف المجموعة</string>
+    <string name="delete_group_message">حذف المجموعة</string>
+    <string name="group_delete_error">فشل حذف المجموعة</string>
+    <string name="cannot_remove_member">لا يمكن إزالة %1$s</string>
+    <string name="leave_group_error">غير قادر على ترك المجموعة</string>
+    <string name="load_more">تحميل المزيد</string>
+    <string name="load_more_members">تحميل المزيد من الأعضاء %1$s</string>
+    <string name="group_list_error">غير قادر على جلب قائمة المجموعات</string>
+    <string name="password">كلمة المرور</string>
+    <string name="joining">الانضمام</string>
+    <string name="incorrect">غير صحيح</string>
+    <string name="ban_member_of_group">الأعضاء المحظورين من %1$s</string>
+    <string name="unban_error">غير قادر على إلغاء الحال %1$s</string>
+    <string name="enter_group_desc">أدخل وصف المجموعة</string>
+    <string name="enter_group_cnf_pwd">تأكيد كلمة المرور</string>
+    <string name="password_not_matched">كلمة المرور غير مطابقة</string>
+    <string name="enter_password_to_join">أدخل كلمة المرور للانضمام إلى %1$s</string>
+    <string name="no_ban_members">لا يوجد أعضاء محظورين</string>
+    <string name="moderators">المشرفين</string>
+    <string name="moderator_list_retrieve_error">غير قادر على استرداد قائمة المنسق.</string>
+    <string name="make_moderator_question">هل ترغب في جعل %1$s كمشرف</string>
+    <string name="only_admin_removes_moderator">المشرف فقط يمكن إزالة مشرف</string>
+    <string name="update_group">تحديث المجموعة</string>
+    <string name="enter_group_icon_url">أدخل رابط أيقونة المجموعة</string>
+    <string name="group_updated">تم تحديث المجموعة بنجاح</string>
+    <string name="group_update_failed">لم يتم تحديث المجموعة</string>
+    <string name="enter_old_group_pwd">أدخل كلمة المرور القديمة</string>
+    <string name="enter_new_password">أدخل كلمة مرور جديدة</string>
+    <string name="group_alert">تنبيه المجموعة</string>
+    <string name="transfer_ownership_message">أنت مالك المجموعة، نقل ملكية المجموعة إلى شخص آخر قبل مغادرة المجموعة.</string>
+    <string name="make_owner">جعل المالك</string>
+    <string name="make_owner_question">هل ترغب في جعل %1$s كمالك</string>
+    <string name="user_is_owner">%1$s هو الآن المالك</string>
+    <string name="not_a_member">أنت لست عضوًا في هذه المجموعة (%1$s)</string>
+    <string name="owner_alert">تنبيه المالك</string>
+    <string name="owner_alert_message">يرجى نقل ملكية المجموعة إلى عضو آخر قبل مغادرة المجموعة</string>
+    <string name="group_member_kicked_successfully">ركل عضو المجموعة بنجاح</string>
+    <string name="add_member_to_group_failed">فشل إضافة عضو إلى المجموعة</string>
+    <array name="groupType">
+        <item>عامة</item>
+        <item>خاص</item>
+        <item>محمية بكلمة مرور</item>
+    </array>
+    <string name="public_group">المجموعة العامة</string>
+    <string name="private_group">مجموعة خاصة</string>
+    <string name="password_protected_group">مجموعة محمية بكلمة مرور</string>
+    <string name="you_cannot_perform_action">لا يمكنك تنفيذ إجراء على نفسك</string>
+    <string name="only_group_owner_removes_admin">يمكن لمالك المجموعة فقط إزالة المشرف.</string>
+    <string name="removed_from_admin">تتم إزالة %1$s من امتياز المشرف</string>
+    <string name="update_group_member_error">غير قادر على تحديث عضو المجموعة</string>
+    <string name="admin_list_retrieve_error">>فشل استرداد قائمة المشرف</string>
+    <string name="create_group_error">غير قادر على إنشاء مجموعة</string>
+    <string name="update_scope_error">فشلت العملية على %1$s</string>
+    <string name="group_member_list_error">خطأ: غير قادر على تحميل قائمة أعضاء المجموعة</string>
+    <string name="ban_list_fetch_error">غير قادر على جلب قائمة الأعضاء المحظورين</string>
+    <string name="grant_camera_permission">يرجى منح إذن الكاميرا من إعداد التطبيق</string>
+    <string name="grant_storage_permission">يرجى منح إذن تخزين من إعداد التطبيق</string>
+    <string name="file_not_exist">الملف غير موجود</string>
+    <string name="call_list_error">غير قادر على جلب قائمة المكالمات</string>
+    <string name="no_call_message">أنت لم تقم بأي مكالمات</string>
+
+    <string name="call_initiate_error">غير قادر على بدء المكالمة</string>
+    <string name="outgoing">المنتهية ولايته</string>
+    <string name="incoming">واردة</string>
+    <string name="all">الكل</string>
+    <string name="missed">غاب</string>
+    <string name="new_call">مكالمة جديدة</string>
+    <string name="missed_call">غاب</string>
+    <string name="ongoing_call">المكالمة مستمرة</string>
+    <string name="ongoing_call_message">هناك بالفعل مكالمة مستمرة. هل ترغب في الانضمام؟</string>
+    <string name="tap_to_join_call">اضغط على للانضمام إلى المكالمة المستمرة</string>
+    <string name="no_media">لا تتوفر وسائل الإعلام</string>
+    <string name="images">الصور</string>
+    <string name="videos">فيديوهات</string>
+    <string name="files">ملفات</string>
+    <string name="no_conversations">ليس لديك أي محادثات</string>
+    <string name="no_user_available">لا يوجد مستخدمين</string>
+    <string name="no_group_available">لا توجد مجموعات متاحة</string>
+    <string name="no_block_users">لا مستخدمين كتلة</string>
+    <string name="no_missedcall_message">ليس لديك أي مكالمات غاب</string>
+    <string name="yes">نعم</string>
+    <string name="fill_this_field">املأ هذا الحقل</string>
+    <string name="send">إرسال</string>
+    <string name="privacy_support">الخصوصية والدعم</string>
+    <string name="user_title">المستخدم</string>
+    <string name="custom_message_not_supported">رسالة مخصصة غير معتمدة</string>
+    <string name="enter_avatar_url">أدخل عنوان ورل للصورة الرمزية</string>
+    <string name="enter_user_name">أدخل اسم المستخدم</string>
+    <string name="update_user">تحديث المستخدم</string>
+    <string name="shared_a_image">مشاركة صورة</string>
+    <string name="shared_a_audio">مشاركة ملف صوتي %1$s</string>
+    <string name="shared_a_video">مشاركة فيديو</string>
+    <string name="shared_a_file">مشاركة ملف %1$s</string>
+    <string name="shared_a_sticker">مشاركة ملصق</string>
+    <string name="shared_a_polls">مشاركة استطلاع للرأي:\ n%1$s</string>
+    <string name="share">مشاركة</string>
+    <string name="sensitive_content">محتوى غير آمن.</string>
+    <string name="sentiment_content">تتضمن الرسالة التالية محتوى يحتمل أن يكون حساسًا.</string>
+    <string name="view">عرض</string>
+    <string name="sentiment_alert">تنبيه المشاعر</string>
+    <string name="sentiment_alert_message">هل ترغب في عرض هذه الرسالة التي قد تحتوي على محتوى حساس.</string>
+    <string name="thread_in_name">مؤشر الترابط في %1$s</string>
+    <string name="sentattxt">تم إرساله في: %1$s</string>
+    <string name="connecting_to_call">الاتصال بالمكالمة</string>
+    <string name="read_at">القراءة في: %1$s</string>
+    <string name="delivered_at">تم تسليمها عند: %1$s</string>
+    <string name="navigate">التنقل</string>
+    <string name="grant_location_permission">يرجى السماح بإذن الموقع.</string>
+    <string name="send_audio_files">إرسال ملفات صوتية</string>
+    <string name="send_files">الملفات والمستندات</string>
+    <string name="shared_location">مشاركة موقع %1$s</string>
+    <string name="no">لا</string>
+    <string name="turn_on_gps">تشغيل نظام تحديد المواقع</string>
+    <string name="on">في</string>
+    <string name="gps_enabled">تمكين نظام تحديد المواقع</string>
+    <string name="gps_disabled">نظام تحديد المواقع تعطيل</string>
+    <string name="option">خيارات</string>
+    <string name="sending_media_message">إرسال رسالة الوسائط</string>
+    <string name="add_a_new_option">إضافة خيار جديد</string>
+    <string name="unable_to_get_location">غير قادر على الحصول على موقعك</string>
+    <string name="ended">انتهى</string>
+    <string name="ongoing">مستمر</string>
+    <string name="share_whiteboard">السبورة التعاونية</string>
+    <string name="shared_a_whiteboard">مشاركة لوح معلومات تعاوني</string>
+    <string name="share_writeboard">وثيقة تعاونية</string>
+    <string name="shared_a_writeboard">مشاركة وثيقة تعاونية</string>
+    <string name="you_sent">لقد أرسلت %1$s</string>
+    <string name="you_received">تلقيت %1$s</string>
+    <string name="initiate_a_call">بدء مكالمة</string>
+    <string name="tap_to_start_conversation">انقر لبدء المحادثة</string>
+    <string name="user_is_blocked">تم حظر٪ 1 $ s بنجاح</string>
+    <string name="has_shared_document">شارك مستندًا تعاونيًا.</string>
+    <string name="no_thread_message">لا رسائل الموضوع</string>
+    <string name="added">مضاف</string>
+    <string name="initiated">بدأت</string>
+    <string name="kicked_by">ركل</string>
+    <string name="made">مصنوع</string>
+    <string name="translate_message">ترجمة الرسالة</string>
+    <string name="no_translation_available">لا يوجد ترجمة متوفرة</string>
+    <string name="has_shared_group_call">شارك في مكالمة جماعية.</string>
+    <string name="custom_message_meeting">مكالمة جماعية 📹</string>
+    <string name="start_group_call">ابدأ مكالمة جماعية</string>
+    <string name="you_created_group_call">لقد قمت بإنشاء مكالمة جماعية.</string>
+    <string name="voted_success">تم التصويت على النجاح</string>
+    <string name="uploading">تحميل</string>
+    <string name="retry">أعد المحاولة</string>
+    <string name="updating">التحديث</string>
+    <string name="left">ليف</string>
+    <string name="extension_not_enabled">لم يتم تمكين التمديد</string>
+
+    <!--    SDK error message-->
+    <string name="ERROR_INIT_NOT_CALLED">مسمى ليس فيه</string>
+    <string name="ERROR_PASSWORD_MISSING_MESSAGE">كلمة المرور إلزامية لمجموعة محمية</string>
+    <string name="ERROR_LIMIT_EXCEEDED_MESSAGE">تجاوز الحد الحد الأقصى لـ %1$s</string>
+    <string name="ERROR_USER_NOT_LOGGED_IN_MESSAGE">يرجى تسجيل الدخول إلى CometChat قبل استدعاء هذه الطريقة</string>
+    <string name="ERROR_INVALID_GUID_MESSAGE">الرجاء تقديم GUID صالح</string>
+    <string name="ERROR_INVALID_UID_MESSAGE">الرجاء تقديم UID صالح</string>
+    <string name="ERROR_BLANK_UID_MESSAGE">لا يمكن أن يكون المعرف الفريد فارغًا. يرجى تقديم UID صالح</string>
+    <string name="ERROR_UID_WITH_SPACE_MESSAGE">لا يمكن أن يحتوي المعرف الفريد على مسافات. يرجى تقديم UID صالح</string>
+    <string name="ERROR_DEFAULT_MESSAGE">هناك خطأ ما</string>
+    <string name="ERROR_CALL_NOT_INITIATED_MESSAGE">لا يمكن إلغاء المكالمة دون بدء المكالمة</string>
+    <string name="ERROR_CALL_MESSAGE">حدث خطأ ما أثناء الاتصال</string>
+    <string name="ERROR_CALL_SESSION_MISMATCH_MESSAGE">عدم تطابق جلسة الاتصال. يرجى التحقق من معرف الجلسة</string>
+    <string name="ERROR_INIT_NOT_CALLED_MESSAGE">يرجى الاتصال بطريقة CometChat.init () ويفضل أن تكون في طريقة onCreate () لفئة التطبيق قبل استدعاء أي طرق أخرى متعلقة بـ CometChat</string>
+    <string name="ERROR_UID_GUID_NOT_SPECIFIED_MESSAGE">لم يتم تحديد كل من UID و GUID يرجى تحديد المعرف الفريد العمومي (UID) أو المعرف الفريد العمومي (GUID) التي تحتاج الرسالة إلى جلبها</string>
+    <string name="ERROR_INTERNET_UNAVAILABLE_MESSAGE">لا يوجد اتصال بالإنترنت الرجاء المحاولة مرة أخرى</string>
+    <string name="ERROR_REQUEST_IN_PROGRESS_MESSAGE">الطلب قيد التقدم بالفعل</string>
+    <string name="ERROR_FILTERS_MISSING_MESSAGE">الطابع الزمني "أو" MessageId "أو" updatedAfter "مطلوبان لاستخدام طريقة" fetchNext () "</string>
+    <string name="ERROR_BLANK_AUTHTOKEN_MESSAGE">Auth token لايمكن ان يكون فارغا يرجى تقديم ملف صالح auth token</string>
+    <string name="ERROR_EXTENSION_DISABLED_MESSAGE">التمديد معطل. يرجى تمكين الامتداد من CometChat Dashboard</string>
+    <string name="ERROR_INVALID_MESSAGEID_MESSAGE">معرف الرسالة المقدم غير صالح يرجى تقديم معرف رسالة صالح</string>
+    <string name="ERROR_INVALID_MESSAGE_TYPE_MESSAGE">يمكن تحرير TextMessage أو CustomMessage فقط. يرجى تقديم رسالة صالحة</string>
+    <string name="ERROR_LIST_EMPTY_MESSAGE">القائمة المقدمة فارغة. الرجاء تقديم قائمة صالحة</string>
+    <string name="ERROR_UPDATESONLY_WITHOUT_UPDATEDAFTER_MESSAGE">لا يمكن استخدام الطريقة \'updatesOnly()\' بدون الطريقة \'setUpdatedAfter()\'</string>
+    <string name="ERROR_JSON_MESSAGE">خطأ أثناء تحليل JSON</string>
+    <string name="ERROR_LOGOUT_FAIL_MESSAGE">خطأ أثناء تسجيل الخروج</string>
+    <string name="ERROR_EMPTY_APPID_MESSAGE">لا يمكن أن يكون معرف التطبيق فارغًا. الرجاء تحديد معرف تطبيق صالح</string>
+    <string name="ERROR_NON_POSITIVE_LIMIT_MESSSAGE">يجب أن يكون الحد المحدد رقمًا موجبًا</string>
+    <string name="ERROR_REGION_MISSING_MESSAGE">المنطقة غير محددة. يرجى تحديد المنطقة في فئة AppSettingsBuilder باستخدام طريقة \'setRegion()\'</string>
+    <string name="ERROR_APP_SETTING_NULL_MESSAGE">لا يمكن أن تكون AppSettings خالية</string>
+    <string name="ERROR_API_KEY_NOT_FOUND_MESSAGE">لا يمكن أن يكون ApiKey فارغًا أو فارغًا. يرجى تقديم مفتاح Api صالح</string>
+    <string name="ERROR_INVALID_SENDING_MESSAGE_TYPE_MESSAGE">نوع الرسالة الذي أدخلته غير صالح للإجراء التالي</string>
+    <string name="ERROR_MESSAGE_TEXT_EMPTY_MESSAGE">لا يمكن أن يكون نص الرسالة فارغًا</string>
+    <string name="ERROR_FILE_OBJECT_INVALID_MESSAGE">لا يمكن أن يكون كائن الملف فارغًا أو أن مسار الملف غير موجود</string>
+    <string name="ERROR_FILE_URL_EMPTY_MESSAGE">تم تعيين عنوان URL لرسالة الوسائط على أنه فارغ أو فارغ</string>
+    <string name="ERROR_EMPTY_CUSTOM_DATA_MESSAGE">لا يمكن أن يكون حقل البيانات المخصصة فارغًا أو فارغًا</string>
+    <string name="ERROR_EMPTY_GROUP_NAME_MESSAGE">لا يمكن أن يكون اسم المجموعة فارغًا أو فارغًا</string>
+    <string name="ERROR_EMPTY_GROUP_TYPE_MESSAGE">لا يمكن أن يكون نوع المجموعة فارغًا أو فارغًا</string>
+    <string name="ERROR_LOGIN_IN_PROGRESS_MESSAGE">تسجيل الدخول قيد التقدم. يرجى الانتظار حتى ينتهي طلب تسجيل الدخول</string>
+    <string name="ERROR_INVALID_MESSAGE_MESSAGE">لا يمكن أن تكون الرسالة فارغة. الرجاء تمرير كائن "BaseMessage" صالح</string>
+    <string name="ERROR_INVALID_GROUP_MESSAGE">لا يمكن أن تكون المجموعة فارغة. الرجاء تمرير كائن "Group" صالح</string>
+    <string name="ERROR_INVALID_CALL_MESSAGE">لا يمكن أن تكون المكالمة خالية. الرجاء تمرير كائن "Call" صالح</string>
+    <string name="ERROR_INVALID_CALL_TYPE_MESSAGE">نوع المكالمة غير صالح. يرجى تقديم نوع اتصال صالح</string>
+    <string name="ERROR_INVALID_RECEIVER_TYPE_MESSAGE">نوع جهاز الاستقبال غير صالح. يرجى تقديم نوع جهاز استقبال صالح</string>
+    <string name="ERROR_INVALID_SESSION_ID_MESSAGE">نوع معرف جلسة غير صالح. يرجى تقديم معرف جلسة صالح</string>
+    <string name="ERROR_ACTIVITY_NULL_MESSAGE">لا يمكن أن يكون النشاط المقدم فارغًا.</string>
+    <string name="ERROR_VIEW_NULL_MESSAGE">لا يمكن أن يكون مخطط RelativeLayout المقدم فارغًا</string>
+    <string name="ERROR_INVALID_FCM_TOKEN_MESSAGE">لا يمكن أن يكون رمز FCM المميز المقدم فارغًا أو فارغًا. يرجى تقديم رمز FCM مميز صالح</string>
+    <string name="ERROR_INVALID_GROUP_TYPE_MESSAGE">لا يمكن أن يكون نوع المجموعة المقدم فارغًا أو فارغًا</string>
+    <string name="ERROR_CALL_IN_PROGRESS_MESSAGE">الاتصال قيد التقدم. يرجى إنهاء المكالمة السابقة لإجراء هذه العملية</string>
+    <string name="ERROR_INCORRECT_INITIATOR_MESSAGE">لا يمكن إلغاء المكالمة التي بدأها شخص آخر. الرجاء استخدام الحالة "مرفوض" بدلاً من ذلك</string>
+    <string name="ERROR_INVALID_USER_NAME_MESSAGE">تم توفير اسم غير صالح للمستخدم. الرجاء إدخال اسم صالح</string>
+    <string name="ERROR_INVALID_USER_MESSAGE">لا يمكن أن يكون كائن المستخدم فارغًا. يرجى تقديم كائن مستخدم صالح</string>
+    <string name="ERROR_INVALID_GROUP_NAME_MESSAGE">لا يمكن أن يكون اسم المجموعة فارغًا. يرجى تقديم اسم مجموعة صالح</string>
+    <string name="ERROR_INVALID_TIMESTAMP_MESSAGE">يجب أن يكون الطابع الزمني موجبًا. يرجى تقديم طابع زمني صالح</string>
+    <string name="ERROR_INVALID_CATEGORY_MESSAGE">فئة غير صالحة. الرجاء تقديم فئة صالحة</string>
+    <string name="ERROR_EMPTY_ICON_MESSAGE">أيقونة فارغة. الرجاء تقديم رمز صالح</string>
+    <string name="ERROR_EMPTY_DESCRIPTION_MESSAGE">وصف فارغ. الرجاء تقديم وصف صحيح</string>
+    <string name="ERROR_EMPTY_METADATA_MESSAGE">البيانات الوصفية الفارغة. يرجى تقديم بيانات وصفية صالحة</string>
+    <string name="ERROR_EMPTY_SCOPE_MESSAGE">النطاق غير صالح. يرجى تقديم نطاق صالح</string>
+    <string name="ERROR_INVALID_SCOPE_MESSAGE">النطاق غير صالح. يرجى تقديم نطاق صالح</string>
+    <string name="ERROR_INVALID_CONVERSATION_WITH_MESSAGE">محادثة غير صحيحة مع. يرجى تقديم قيمة صالحة لـ ConversWith</string>
+    <string name="ERROR_INVALID_CONVERSATION_TYPE_MESSAGE">نوع محادثة غير صالح. يرجى تقديم قيمة صالحة لـ ConversWith</string>
+    <string name="ERROR_INVALID_MEDIA_MESSAGE_MESSAGE">رسالة وسائط غير صالحة. الرجاء توفير كائن ملف صالح أو تفاصيل المرفق.</string>
+    <string name="ERROR_INVALID_ATTACHMENT_MESSAGE">لا يمكن أن يكون المرفق فارغًا. يرجى تقديم تفاصيل صحيحة للمرفقات</string>
+    <string name="ERROR_INVALID_FILE_NAME_MESSAGE">اسم الملف غير صالح. الرجاء إدخال اسم ملف صالح</string>
+    <string name="ERROR_INVALID_FILE_EXTENSION_MESSAGE">ملحق الملف غير صالح. يرجى تقديم امتداد ملف صالح</string>
+    <string name="ERROR_INVALID_FILE_MIME_TYPE_MESSAGE">نوع ملف Mime غير صالح. الرجاء تقديم نوع ملف mime صالح</string>
+    <string name="ERROR_INVALID_FILE_URL_MESSAGE">URL ملف غير صالح. يرجى تقديم عنوان URL صالح للملف</string>
+    <string name="ERROR_CONVERSATION_NOT_FOUND_MESSAGE">لم يتم العثور على محادثة لـ  conversationWith %1$s  و ConverstionType %1$s</string>
+    <string name="ERROR_SETTINGS_NOT_FOUND_MESSAGE">الإعدادات غير موجودة.</string>
+    <string name="ERROR_INVALID_FEATURE_MESSAGE">لا يمكن أن يكون العنصر المقدم فارغًا أو فارغًا. الرجاء تقديم ميزة صالحة</string>
+    <string name="ERROR_INVALID_EXTENSION_MESSAGE">لا يمكن أن يكون الامتداد المقدم فارغًا أو فارغًا.</string>
+    <string name="ERROR_FEATURE_NOT_FOUND_MESSAGE">الميزة المقدمة غير موجودة.</string>
+    <string name="ERROR_EXTENSION_NOT_FOUND_MESSAGE">تعذر العثور على الامتداد المقدم.</string>
+    <!--  __________________ -->
+
+<!--    Api Error messages-->
+    <string name="auth_err_empty_appid">إبيد فارغة في الرؤوس</string>
+    <string name="auth_err_invalid_appid">معرف معرف غير صالح أو أنه غير موجود في منطقة</string>
+    <string name="auth_err_empty_apikey">مفتاح API فارغ في الرؤوس</string>
+    <string name="auth_err_apikey_not_found">مفتاح API غير صحيح في الرؤوس</string>
+    <string name="auth_err_no_access">لا يمكن استخدام مفتاح API في الرؤوس لتنفيذ الإجراء</string>
+    <string name="auth_err_empty_auth_token">رمز المصادقة الفارغ في الرؤوس</string>
+    <string name="auth_err_auth_token_not_found">رمز مصادقة غير صحيح</string>
+    <string name="err_apikey_not_found">مفتاح واجهة برمجة التطبيقات غير موجود</string>
+    <string name="err_apikey_no_self_action">مفتاح واجهة برمجة التطبيقات في الرؤوس هو نفس مفتاح API في المعلمة المسار ويقوم بإجراء على ذلك النفس</string>
+    <string name="err_auth_token_not_found">رمز المصادقة غير موجود</string>
+    <string name="err_auth_token_delete_failed">فشلت واجهة برمجة التطبيقات في حذف الرمز المميز للمصادقة</string>
+    <string name="err_auth_tokens_delete_failed">فشلت واجهة برمجة التطبيقات في حذف رموز المصادقة المرتبطة بـ UID</string>
+    <string name="err_authtoken_unavailable">يتم تعيين رمز المصادقة مع جهاز آخر</string>
+    <string name="err_authtoken_not_accessible">يتم تعيين رمز المصادقة مع مستخدم آخر</string>
+    <string name="err_plan_restriction">هذه الميزة غير متوفرة مع الخطة</string>
+    <string name="err_subscription_expired">انتهت صلاحية الاشتراك ويجب إعادة الاشتراك لمواصلة استخدام الخدمة</string>
+    <string name="err_plan_quota_restriction">تم الوصول إلى الحد المسموح به للميزة</string>
+    <string name="err_role_not_found">هذا الدور غير موجود</string>
+    <string name="err_role_delete_failed">فشلت واجهة برمجة التطبيقات في حذف الدور</string>
+    <string name="err_role_delete_denied"> لا يمكن لـ API حذف الدور لأنه لا يمكن حذف الدور الافتراضي</string>
+    <string name="err_uid_not_found">إيد غير موجود أو المستخدم هو لينة حذف</string>
+    <string name="err_uid_delete_failed">فشلت واجهة برمجة التطبيقات في حذف المستخدم</string>
+    <string name="err_guid_not_found">هذه المجموعة غير موجودة</string>
+    <string name="err_empty_group_pass">كلمة المرور مطلوبة للانضمام إلى مجموعة</string>
+    <string name="err_group_delete_failed">فشل حذف المجموعة</string>
+    <string name="err_not_a_member">المستخدم ليس عضوًا في المجموعة</string>
+    <string name="err_wrong_group_pass">كلمة المرور للمجموعة غير صحيحة</string>
+    <string name="err_already_joined">لقد انضممت بالفعل إلى المجموعة</string>
+    <string name="err_group_not_joined">يحاول المستخدم الوصول إلى ميزة المجموعة دون الانضمام إليها</string>
+    <string name="err_group_join_not_allowed">لا يمكن الانضمام إلى المجموعات الخاصة</string>
+    <string name="err_member_delete_failed">فشل إزالة مستخدم من المجموعة</string>
+    <string name="err_no_vacancy">المجموعة ممتلئة</string>
+    <string name="err_same_scope">النطاق الحالي والجديد متشابهان</string>
+    <string name="err_member_scope_change_failed">فشل تغيير النطاق</string>
+    <string name="err_not_a_banned_user">لا يحظر على العضو إلغاء الحظر</string>
+    <string name="err_banned_groupmember">غير مسموح للمستخدم المحظور بالوصول</string>
+    <string name="err_already_banned">عضو محظور بالفعل</string>
+    <string name="err_member_ban_failed">فشل حظر عضو المجموعة</string>
+    <string name="err_member_unban_failed">فشل عضو المجموعة في إلغاء الحظر</string>
+    <string name="err_group_no_clearance">ليس لدى المستخدم الإذن لتنفيذ الإجراء في المجموعة</string>
+    <string name="err_group_no_admin_scope">ليس لدى المستخدم نطاق المشرف في المجموعة</string>
+    <string name="err_group_no_moderator_scope">ليس لدى المستخدم نطاق مشرف في المجموعة</string>
+    <string name="err_group_no_scope_clearance">ليس لدى المستخدم الإذن بتغيير نطاق المستخدم الآخر</string>
+    <string name="err_group_no_self_action">غير مسموح للمستخدم بتغيير نطاقه الخاص</string>
+    <string name="err_empty_receiver">لا يمكن أن يكون جهاز الاستقبال فار</string>
+    <string name="err_invalid_receiver_type">نوع المتلقي غير صالح</string>
+    <string name="err_conversation_not_found">معرف المحادثة غير موجود</string>
+    <string name="err_conversation_not_accessible">معرّف المحادثة لا يمكن للمستخدم الوصول إليه</string>
+    <string name="err_user_message_delete_failed">فشلت واجهة برمجة التطبيقات في حذف رسالة من واحد إلى واحد</string>
+    <string name="err_message_id_not_found">الرسالة غير موجودة</string>
+    <string name="err_invalid_message_data">نص رسالة غير صالح</string>
+    <string name="err_empty_message_text">رسالة نصية فارغة لرسالة نصية</string>
+    <string name="err_invalid_message_text">يجب أن يكون نص الرسالة سلسلة</string>
+    <string name="err_empty_message_category">لا يمكن أن تكون فئة الرسالة فارغة.</string>
+    <string name="err_invalid_message_category">فئة رسالة غير صالحة</string>
+    <string name="err_empty_message_type">لا يمكن أن يكون نوع الرسالة فارغا</string>
+    <string name="err_empty_message_file">ملف فارغ لرسالة الوسائط</string>
+    <string name="err_message_not_a_sender">يمكن للمرسل فقط تحرير/حذف الرسالة</string>
+    <string name="err_message_no_access">ليس لدى المستخدم حق الوصول إلى الرسالة</string>
+    <string name="err_message_action_not_allowed">لا يمكن تحرير الرسالة أو حذفها</string>
+    <string name="err_empty_custom_data">\'data.customdata\' لا يمكن أن تكون فارغة لرسالة مخصصة</string>
+    <string name="err_invalid_media_message">رسالة وسائط غير صالحة</string>
+    <string name="err_invalid_custom_data">Data.CustomData غير صالحة. يجب أن تكون CustomData صالحة JSON</string>
+    <string name="err_invalid_metadata">بيانات وصفية غير صالحة. يجب أن تكون البيانات الوصفية JSON صالحة</string>
+    <string name="err_wrong_message_thread">عدم تطابق المحادثة للأهل ورسالة مترابطة جديدة</string>
+    <string name="err_message_thread_nesting">خيوط الرسائل المتداخلة</string>
+    <string name="err_wrong_message_thread_category">عدم تطابق المحادثة للأهل ورسالة مترابطة جديدة</string>
+    <string name="err_calling_self">المستخدم هو بدء مكالمة مع نفسه</string>
+    <string name="err_call_busy_self">البادئ من المكالمة هو مشارك في مكالمة مستمرة أخرى</string>
+    <string name="err_call_busy_group">هذه المجموعة لديها مكالمة مستمرة</string>
+    <string name="err_call_busy_user">مستلم المكالمة مشغول بالفعل في مكالمة أخرى</string>
+    <string name="err_empty_call_session_id">معرف جلسة العمل الفارغ</string>
+    <string name="err_call_session_not_found">المكالمة غير موجودة</string>
+    <string name="err_call_terminated">تم إنهاء المكالمة</string>
+    <string name="err_call_group_already_joined"> المستخدم هو بالفعل عضو في مكالمة المجموعة</string>
+    <string name="err_call_group_already_left">المستخدم الذي يحاول ترك مكالمة المجموعة قد ترك المكالمة بالفعل</string>
+    <string name="err_call_invalid_init">لا يمكن تحديث حالة الاتصال إلى \'استهدات\'</string>
+    <string name="err_call_user_already_joined">تم الانضمام إلى مكالمة واحدة بالفعل من قبل مستلم المكالمة</string>
+    <string name="err_call_group_invalid_status"> حالة استدعاء غير صالحة لاستدعاء مجموعة؛ لا يمكن أن يكون لاستدعاء المجموعة حالة مشغول</string>
+    <string name="err_call_ongoing_to_invalid">حالة غير صالحة لمكالمة مستمرة</string>
+    <string name="err_call_not_a_part">المستخدم ليس جزءًا من المكالمة</string>
+    <string name="err_call_empty_joined_at">مطلوب المعلمة هيئة \'Joinedat\' للانضمام إلى مجموعة</string>
+    <string name="err_call_not_started">لا يمكن تغيير حالة المكالمة من البدء إلى المنتهية مباشرة</string>
+    <string name="err_cannot_block_self">لا يمكن للمستخدم منع نفسه</string>
+    <string name="err_blocked_receiver">قام المستخدم بحظر جهاز استقبال الرسالة/المكالمة</string>
+    <string name="err_blocked_sender">تم حظر Iniator من المكالمة من قبل المستلم</string>
+    <string name="err_extension_not_found">التمديد غير موجود</string>
+    <string name="err_blocked_by_extension">تم حظر الرسالة بواسطة الإضافة</string>
+    <string name="err_invalid_api_version">إصدار API غير صالح</string>
+    <string name="err_api_not_found">نقطة نهاية API غير موجودة أو لا تستخدم نقطة النهاية طريقة طلب HTTP باستخدام API التي تسمى API</string>
+    <string name="err_mission_failed">خطأ فادح أو مهلة اتصال قاعدة البيانات</string>
+    <string name="err_bad_request">عمليات التحقق الفاشلة لمبارامز الجسم</string>
+    <string name="err_operation_failed">فشل عملية قاعدة البيانات</string>
+    <string name="err_exception">استثناء بشكل غير صحيح/سوء التعامل</string>
+    <string name="err_too_many_requests">الحد من معدل</string>
+    <string name="err_bad_error_response">استخدم مطور API رمز خطأ غير معروف أو لم يقوم مطور API بإعادة تعيين سمك القد الخطأ</string>
+<!--    ____________________________-->
+</resources>

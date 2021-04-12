@@ -17,6 +17,8 @@ import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -101,13 +103,13 @@ class CometChatBlockUserList : Fragment() {
             override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
                 if (userList.contains(user)) userList.remove(user)
                 blockedUserAdapter!!.removeUser(user)
-                Snackbar.make(var1, String.format(resources.getString(R.string.user_unblocked), user.name), Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.unblocked_successfully), UIKitConstants.ErrorTypes.SUCCESS)
+//                Snackbar.make(var1, String.format(resources.getString(R.string.unblocked_successfully), user.name), Snackbar.LENGTH_SHORT).show()
                 checkIfNoUserVisible()
             }
 
             override fun onError(e: CometChatException) {
-                context?.let { Utils.showDialog(it, e) }
-//                Snackbar.make(var1, resources.getString(R.string.unblock_user_error), Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })
@@ -125,7 +127,7 @@ class CometChatBlockUserList : Fragment() {
         blockedUserRequest!!.fetchNext(object : CallbackListener<List<User>>() {
             override fun onSuccess(users: List<User>) {
                 userList.addAll(users)
-                if (users.size > 0) {
+                if (users.isNotEmpty()) {
                     setAdapter(users)
                 }
                 checkIfNoUserVisible()
@@ -133,7 +135,7 @@ class CometChatBlockUserList : Fragment() {
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                Snackbar.make(rvUserList!!, resources.getString(R.string.block_user_list_error), Snackbar.LENGTH_SHORT).show()
+                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.block_user_list_error), UIKitConstants.ErrorTypes.ERROR)
             }
         })
     }

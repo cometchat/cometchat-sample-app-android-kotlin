@@ -17,10 +17,12 @@ import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.models.MediaMessage
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.shared.cometchatSharedMedia.adapter.CometChatSharedMediaAdapter
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
 /**
@@ -79,7 +81,7 @@ class CometChatSharedFiles : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                if (rvFiles != null) Snackbar.make(rvFiles!!, "Failed to load Files", Snackbar.LENGTH_LONG).show()
+                if (rvFiles != null) ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }

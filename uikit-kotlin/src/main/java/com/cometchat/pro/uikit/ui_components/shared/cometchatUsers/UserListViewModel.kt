@@ -57,7 +57,7 @@ class UserListViewModel(context: Context?, cometChatUserList: CometChatUsers, sh
     }
 
     fun setUsersList(usersList: List<User?>) {
-        adapter.updateList(usersList!!)
+        adapter.updateList(usersList)
     }
 
     fun update(index: Int, user: User?) {

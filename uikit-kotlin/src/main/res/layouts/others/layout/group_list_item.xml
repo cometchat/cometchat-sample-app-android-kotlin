@@ -51,7 +51,6 @@
                 android:layout_toEndOf="@id/av_group"
                 android:layout_alignTop="@id/av_group"
                 android:text="@{group.name}"
-                android:gravity="center"
                 android:maxLines="1"
                 android:textStyle="bold" />
 

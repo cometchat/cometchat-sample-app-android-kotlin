@@ -10,6 +10,7 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 /**
@@ -39,7 +40,7 @@ object CometChatCallListener {
                         override fun onError(e: CometChatException) {
 //                            Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
                             if (context != null) {
-                                Utils.showDialog(context, e)
+                                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                             }
                         }
                     })

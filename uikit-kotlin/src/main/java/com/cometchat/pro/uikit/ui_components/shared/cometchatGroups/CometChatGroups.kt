@@ -102,12 +102,12 @@ class CometChatGroups : RecyclerView {
         addOnItemTouchListener(RecyclerTouchListener(context, this, object : ClickListener() {
             override fun onClick(var1: View, var2: Int) {
                 val group = var1.getTag(R.string.group) as Group
-                if (onItemClickListener != null) onItemClickListener.OnItemClick(group, var2) else throw NullPointerException(resources.getString(R.string.group_itemclick_error))
+                if (onItemClickListener != null) onItemClickListener.OnItemClick(group, var2) else throw NullPointerException("OnItemClickListener<Group> is null")
             }
 
             override fun onLongClick(var1: View, var2: Int) {
                 val group = var1.getTag(R.string.group) as Group
-                if (onItemClickListener != null) onItemClickListener.OnItemLongClick(group, var2) else throw NullPointerException(resources.getString(R.string.group_itemclick_error))
+                if (onItemClickListener != null) onItemClickListener.OnItemLongClick(group, var2) else throw NullPointerException("OnItemClickListener<Group> is null")
             }
         }))
     }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
             name="customMessage"
             type="com.cometchat.pro.models.CustomMessage"/>
     </data>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
     android:orientation="vertical"
     android:gravity="end"
     android:layout_width="match_parent"
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/rl_message">
         <androidx.cardview.widget.CardView
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:id="@+id/cv_message_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,23 +47,25 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/tv_place_name"
-                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
                         android:textStyle="bold"
                         android:textSize="15sp"
                         android:padding="4dp"
                         android:maxWidth="240dp"
                         tools:text="Address"/>
+
                     <TextView
                         android:id="@+id/sender_location_txt"
-                        android:textColor="@color/textColorWhite"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="italic"
-                        android:layout_marginLeft="20dp"
-                        android:text="Shared Location"
                         android:layout_below="@+id/tv_place_name"
-                        android:paddingLeft="4dp"
-                        android:paddingBottom="4dp"/>
+                        android:layout_marginStart="20dp"
+                        android:paddingStart="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="Shared Location"
+                        android:textColor="@color/textColorWhite"
+                        android:textStyle="italic" />
                     <com.google.android.material.button.MaterialButton
                         android:layout_width="match_parent"
                         android:id="@+id/navigate_btn"
@@ -83,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="11:00 PM"
-            android:layout_toLeftOf="@+id/cv_message_container"
+            android:layout_toStartOf="@+id/cv_message_container"
             android:layout_alignBottom="@+id/cv_message_container"
             android:layout_marginBottom="8dp"
             android:textSize="12sp"
@@ -120,8 +122,8 @@
                 android:foreground="?selectableItemBackground"
                 android:id="@+id/thread_reply_count"
                 android:textColor="@color/colorPrimary"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
                 tools:text="2 replies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

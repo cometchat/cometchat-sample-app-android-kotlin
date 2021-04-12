@@ -145,7 +145,7 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
 
     override fun getHeaderId(var1: Int): Long {
         val user = userArrayList[var1]
-        val name = if (user.name != null && !user.name.isEmpty()) user.name.substring(0, 1).toUpperCase().toCharArray()[0] else '#'
+        val name = if (user.name != null && user.name.isNotEmpty()) user.name.substring(0, 1).toUpperCase().toCharArray()[0] else '#'
         return name.toLong()
     }
 
@@ -155,7 +155,7 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
 
     override fun onBindHeaderViewHolder(var1: Any, var2: Int, var3: Long) {
         val user = userArrayList[var2]
-        val name = if (user.name != null && !user.name.isEmpty()) user.name.substring(0, 1).toCharArray()[0] else '#'
+        val name = if (user.name != null && user.name.isNotEmpty()) user.name.substring(0, 1).toCharArray()[0] else '#'
         var initialHolder = var1 as InitialHolder;
         initialHolder.textView.text = name.toString()
     }

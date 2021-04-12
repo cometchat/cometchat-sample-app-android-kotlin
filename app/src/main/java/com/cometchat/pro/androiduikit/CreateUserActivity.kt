@@ -13,6 +13,7 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -56,8 +57,7 @@ class CreateUserActivity : AppCompatActivity() {
 
                     override fun onError(e: CometChatException) {
                         createUserBtn!!.isClickable = true
-//                        Toast.makeText(this@CreateUserActivity, "Failed to create user", Toast.LENGTH_LONG).show()
-                        ShowErrorMessageUtils.showDialog(this@CreateUserActivity, e)
+                        ErrorMessagesUtils.cometChatErrorMessage(this@CreateUserActivity, e.code)
                     }
                 })
             }
@@ -99,7 +99,7 @@ class CreateUserActivity : AppCompatActivity() {
 
             override fun onError(e: CometChatException) {
                 if (uid != null) Snackbar.make(uid!!.rootView, "Unable to login", Snackbar.LENGTH_INDEFINITE).setAction("Try Again") { startActivity(Intent(this@CreateUserActivity, LoginActivity::class.java)) }.show()
-                else ShowErrorMessageUtils.showDialog(this@CreateUserActivity, e)
+                else ErrorMessagesUtils.cometChatErrorMessage(this@CreateUserActivity, e.code)
             }
         })
     }

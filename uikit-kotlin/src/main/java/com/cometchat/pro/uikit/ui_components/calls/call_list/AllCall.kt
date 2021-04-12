@@ -28,6 +28,7 @@ import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_components.groups.group_detail.CometChatGroupDetailActivity
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
@@ -132,7 +133,8 @@ class AllCall : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                if (rvCallList != null) Snackbar.make(rvCallList!!, e.message!!, Snackbar.LENGTH_LONG).show()
+                if (rvCallList != null)
+                    ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -156,7 +158,8 @@ class AllCall : Fragment() {
 
                 override fun onError(e: CometChatException) {
                     Log.e("onError: ", e.message)
-                    if (rvCallList != null) Snackbar.make(rvCallList!!, R.string.call_list_error, Snackbar.LENGTH_LONG).show()
+                    if (rvCallList != null)
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.call_list_error),UIKitConstants.ErrorTypes.ERROR)
                 }
             })
         }

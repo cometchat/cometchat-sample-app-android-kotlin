@@ -17,6 +17,7 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class CometChatStartCallActivity : AppCompatActivity() {
@@ -41,8 +42,8 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
         callSettings = CallSettingsBuilder(this, mainView)
                 .setSessionId(sessionID)
-                .startWithVideoMuted(true)
                 .startWithAudioMuted(true)
+                .startWithVideoMuted(true)
                 .build()
 
         CometChat.startCall(callSettings, object : CometChat.OngoingCallListener {
@@ -56,8 +57,7 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
             override fun onError(p0: CometChatException) {
                 Log.e("onstartcallError: ", p0?.message)
-//                Toast.makeText(this@CometChatStartCallActivity, p0?.message, Toast.LENGTH_LONG).show()
-                Utils.showDialog(this@CometChatStartCallActivity, p0)
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatStartCallActivity, p0.code)
             }
 
             override fun onCallEnded(p0: Call?) {

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
             name="mediaMessage"
             type="com.cometchat.pro.models.MediaMessage"/>
     </data>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="end"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:gravity="end">
 
 
     <RelativeLayout
@@ -61,7 +61,7 @@
                 <TextView
                     android:id="@+id/sensitive_desc"
                     android:layout_centerInParent="true"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:textColor="@color/textColorWhite"
                     android:text="@string/sensitive_content"
                     android:layout_width="wrap_content"
@@ -77,20 +77,21 @@
                 android:indeterminateDrawable="@drawable/cc_progress_drawable" />
 
         </androidx.cardview.widget.CardView>
+
         <TextView
             android:id="@+id/txt_time"
-            android:layout_width="wrap_content"
+            android:layout_width="55dp"
             android:layout_height="wrap_content"
-            tools:text="11:00 PM"
-            android:layout_marginBottom="8dp"
-            android:textSize="12sp"
-            android:layout_gravity="center"
-            tools:drawableEnd="@drawable/ic_double_tick"
             android:layout_alignBottom="@+id/cv_image_message_container"
-            android:layout_toLeftOf="@+id/cv_image_message_container"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:layout_toStartOf="@+id/cv_image_message_container"
+            android:textSize="12sp"
             android:textStyle="bold"
-            tools:visibility="visible"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:drawableEnd="@drawable/ic_double_tick"
+            tools:text="11:00 PM"
+            tools:visibility="visible" />
         <HorizontalScrollView
             android:layout_alignEnd="@id/cv_image_message_container"
             android:layout_below="@+id/cv_image_message_container"
@@ -125,8 +126,8 @@
                 android:foreground="?selectableItemBackground"
                 android:id="@+id/thread_reply_count"
                 android:textColor="@color/colorPrimary"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
                 tools:text="2 replies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

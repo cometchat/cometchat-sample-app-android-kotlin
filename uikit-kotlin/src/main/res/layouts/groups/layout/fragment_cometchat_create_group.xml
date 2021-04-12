@@ -119,7 +119,7 @@
                 android:layout_height="wrap_content"
                 android:focusedByDefault="false"
                 android:layout_marginTop="16dp"
-                android:hint="@string/enter_group_pwd"
+                android:hint="@string/enter_group_password"
                 android:textColorHint="@color/secondaryTextColor"
                 app:boxCornerRadiusBottomEnd="24dp"
                 app:boxCornerRadiusBottomStart="24dp"
