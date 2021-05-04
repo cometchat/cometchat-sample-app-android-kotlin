@@ -83,5 +83,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:2.3.0'
+    compileOnly 'com.cometchat:pro-android-chat-sdk:2.3.1'
 }

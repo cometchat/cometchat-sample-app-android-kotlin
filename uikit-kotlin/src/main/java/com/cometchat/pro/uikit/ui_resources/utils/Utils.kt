@@ -50,6 +50,7 @@ import com.cometchat.pro.core.CometChat.OngoingCallListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
+import com.cometchat.pro.rtc.model.AudioMode
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity
@@ -794,6 +795,10 @@ public class Utils {
 
                 override fun onUserListUpdated(p0: MutableList<User>?) {
                     Log.e(TAG, "onUserListUpdated: "+p0.toString())
+                }
+
+                override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
+                    Log.e("TAG", "onAudioModesUpdated: "+p0.toString())
                 }
             })
         }
