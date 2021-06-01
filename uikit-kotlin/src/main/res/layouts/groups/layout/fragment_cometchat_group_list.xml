@@ -91,4 +91,6 @@
         tools:listitem="@layout/group_list_item"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+    <include layout="@layout/conversation_shimmer"/>
+
 </RelativeLayout>

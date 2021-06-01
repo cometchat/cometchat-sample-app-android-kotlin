@@ -4,12 +4,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
-import android.graphics.PorterDuff
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.text.Spannable
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +19,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.databinding.DataBindingUtil
 import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.EmojiSpan
@@ -46,6 +46,8 @@ import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderAdapter
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONException
@@ -65,6 +67,13 @@ import kotlin.math.roundToInt
  *
  */
 class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: String?) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), StickyHeaderAdapter<DateItemHolder?> {
+    private var isDataMasking: Boolean = false
+    private var isImageNotSafe: Boolean = false
+    private var isProfanityFilter: Boolean = false
+    private var isLinkPreview: Boolean = false
+    private var isThreadVisible: Boolean = false
+    private var thumbnailUrl : String? = null
+    var isReplyVisible: Boolean = false
     private val messageList: MutableList<BaseMessage> = ArrayList()
     var context: Context
     private val loggedInUser = CometChat.getLoggedInUser()
@@ -144,6 +153,23 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             mediaPlayer = MediaPlayer()
         }
         fontUtils = FontUtils.getInstance(context)
+
+        FeatureRestriction.isLinkPreviewEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isLinkPreview = p0
+            }
+        })
+        FeatureRestriction.isProfanityFilterEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isProfanityFilter = p0
+            }
+
+        })
+        FeatureRestriction.isDataMaskingEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isDataMasking = p0
+            }
+        })
     }
 
     /**
@@ -481,9 +507,16 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         viewHolder.view.tvUser.text = baseMessage.sender.name
                     }
                 }
+
                 if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -534,8 +567,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT)
                         linearLayout.setPadding(8, 8, 8, 8)
-                        linearLayout.background = context.resources
-                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.setBackgroundColor(Color.parseColor(UIKitSettings.color))
+//                        linearLayout.background = context.resources
+//                                .getDrawable(R.drawable.cc_message_bubble_right)
                         linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
                                 .getColor(R.color.textColorWhite))
                         layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
@@ -621,9 +655,16 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 
             } else {
                 viewHolder as RightPollsMessageViewHolder
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ){
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
+
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -674,8 +715,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT)
                         linearLayout.setPadding(8, 8, 8, 8)
-                        linearLayout.background = context!!.resources
-                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.setBackgroundColor(Color.parseColor(UIKitSettings.color))
+//                        linearLayout.background = context.resources
+//                                .getDrawable(R.drawable.cc_message_bubble_right)
                         linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
                                 .getColor(R.color.textColorWhite))
                         layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
@@ -859,9 +901,16 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.writeboardMessage.text = baseMessage.sender.name + " " + context.getString(R.string.has_shared_document)
                 }
                 viewHolder.view.joinWriteboard.setOnClickListener(View.OnClickListener { Extensions.openWriteBoard(baseMessage, context) })
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
+
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -997,9 +1046,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.joinWhiteboard.setOnClickListener(View.OnClickListener {
                     Extensions.openWhiteBoard(baseMessage, context)
                 })
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -1054,9 +1109,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder as RightWhiteBoardMessageViewHolder
                 viewHolder.view.whiteboardMessage.text = context.getString(R.string.you_created_whiteboard)
                 viewHolder.view.joinWhiteboard.setOnClickListener(View.OnClickListener { Extensions.openWhiteBoard(baseMessage, context) })
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -1140,8 +1201,14 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     e.printStackTrace()
                 }
                 if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -1205,9 +1272,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
@@ -1265,12 +1338,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         }
     }
 
-    private fun setLocationData(view: RecyclerView.ViewHolder, i: Int) {
+    private fun setLocationData(viewHolder: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]
         if (baseMessage != null && baseMessage.deletedAt == 0L) {
-            var viewHolder : RecyclerView.ViewHolder
-            if (view is LeftLocationMessageViewHolder){
-                viewHolder = view as LeftLocationMessageViewHolder
+            if (viewHolder is LeftLocationMessageViewHolder){
                 if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     viewHolder.view.tvUser.visibility = View.GONE
                     viewHolder.view.ivUser.visibility = View.GONE
@@ -1283,13 +1354,19 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         viewHolder.view.ivUser.visibility = View.INVISIBLE
                     }
                     setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-                    viewHolder.view.tvUser.setText(baseMessage.sender.name)
+                    viewHolder.view.tvUser.text = baseMessage.sender.name
                 }
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1364,7 +1441,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             }
             else {
-                viewHolder = view as RightLocationMessageViewHolder
+                viewHolder as RightLocationMessageViewHolder
 //                if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
 //                    viewHolder.view.tvUser.visibility = View.GONE
 //                    viewHolder.view.ivUser.visibility = View.GONE
@@ -1380,11 +1457,17 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                    viewHolder.view.tvUser.setText(baseMessage.sender.name)
 //                }
 
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                if (baseMessage.replyCount != 0 )  {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1416,7 +1499,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     context.startActivity(intent)
                 })
                 setLocationData(baseMessage, viewHolder.view.tvPlaceName, viewHolder.view.ivMap)
-                viewHolder.view.senderLocationTxt.setText(String.format(context.getString(R.string.shared_location), baseMessage.sender.name))
+                viewHolder.view.senderLocationTxt.text = String.format(context.getString(R.string.shared_location), baseMessage.sender.name)
                 viewHolder.view.navigateBtn.setOnClickListener(View.OnClickListener {
                     try {
                         val latitude = (baseMessage as CustomMessage).customData.getDouble("latitude")
@@ -1434,7 +1517,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                 })
                 showMessageTime(viewHolder, baseMessage)
-                viewHolder.view.txtTime.setVisibility(View.VISIBLE);
+                viewHolder.view.txtTime.visibility = View.VISIBLE;
                 viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
@@ -1474,12 +1557,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         }
     }
 
-    private fun setAudioData(view: RecyclerView.ViewHolder, i: Int) {
+    private fun setAudioData(viewHolder: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]
         if (baseMessage != null && baseMessage.deletedAt == 0L) {
-            var viewHolder : RecyclerView.ViewHolder
-            if (view is LeftAudioMessageViewHolder) {
-                viewHolder = view as LeftAudioMessageViewHolder;
+            if (viewHolder is LeftAudioMessageViewHolder) {
                 if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     viewHolder.view.tvUser.visibility = View.GONE
                     viewHolder.view.ivUser.visibility = View.GONE
@@ -1499,12 +1580,18 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.txtTime.visibility = View.VISIBLE
 //                    else viewHolder.view.txtTime.visibility = View.GONE
 
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
-                } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
+                }else {
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1530,8 +1617,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     context.startActivity(intent)
                 })
-                viewHolder.view.audiolengthTv.text = Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize)
+                if ((baseMessage as MediaMessage).attachment != null) {
+                    viewHolder.view.audiolengthTv.text = Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize)
+                    viewHolder.view.playBtn.visibility = View.VISIBLE
+                } else {
+                    viewHolder.view.audiolengthTv.text = "-"
+                    viewHolder.view.playBtn.visibility = View.GONE
+                }
                 viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(Color.parseColor(UIKitSettings.color)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
                     mediaPlayer!!.reset()
@@ -1566,17 +1660,23 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.reactionsLayout.visibility = View.GONE
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             } else{
-                viewHolder = view as RightAudioMessageViewHolder
+                viewHolder as RightAudioMessageViewHolder
                 showMessageTime(viewHolder, baseMessage)
 //                if (selectedItemList.contains(baseMessage.id))
                 viewHolder.view.txtTime.visibility = View.VISIBLE
 //                else viewHolder.view.txtTime.visibility = View.GONE
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1602,8 +1702,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     context.startActivity(intent)
                 })
-                viewHolder.view.audiolengthTv.text = Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize)
+                if ((baseMessage as MediaMessage).attachment != null) {
+                    viewHolder.view.audiolengthTv.text = Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize)
+                    viewHolder.view.playBtn.visibility = View.VISIBLE
+                } else {
+                    viewHolder.view.audiolengthTv.text = "-"
+                    viewHolder.view.playBtn.visibility = View.GONE
+                }
                 viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(context.resources.getColor(R.color.textColorWhite)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
                     mediaPlayer!!.reset()
@@ -1677,10 +1784,16 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
                     viewHolder.view.tvUser.text = baseMessage.sender.name
                 }
-                viewHolder.view.tvFileName.text = (baseMessage as MediaMessage).attachment.fileName
-                viewHolder.view.tvFileExtension.text = baseMessage.attachment.fileExtension
-                val fileSize = baseMessage.attachment.fileSize
-                viewHolder.view.tvFileSize.text = Utils.getFileSize(fileSize)
+                if ((baseMessage as MediaMessage).attachment != null) {
+                    viewHolder.view.tvFileName.text = baseMessage.attachment.fileName
+                    viewHolder.view.tvFileExtension.text = baseMessage.attachment.fileExtension
+                    val fileSize = baseMessage.attachment.fileSize
+                    viewHolder.view.tvFileSize.text = Utils.getFileSize(fileSize)
+                } else {
+                    viewHolder.view.tvFileName.text = context.getString(R.string.uploading)
+                    viewHolder.view.tvFileExtension.text = "-"
+                    viewHolder.view.tvFileSize.text = "-"
+                }
                 showMessageTime(viewHolder, baseMessage)
 //                if (selectedItemList.contains(baseMessage.getId()))
                 viewHolder.view.txtTime.visibility = View.VISIBLE
@@ -1689,8 +1802,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.threadReplyCount.visibility = View.VISIBLE
                     viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1739,20 +1852,26 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
             } else {
                 viewHolder = view as RightFileMessageViewHolder
-                viewHolder.view.tvFileName.text = (baseMessage as MediaMessage).attachment.fileName
-                viewHolder.view.tvFileExtension.text = baseMessage.attachment.fileExtension
-                val fileSize = baseMessage.attachment.fileSize
-                viewHolder.view.tvFileSize.text = Utils.getFileSize(fileSize)
+                if ((baseMessage as MediaMessage).attachment != null) {
+                    viewHolder.view.tvFileName.text = baseMessage.attachment.fileName
+                    viewHolder.view.tvFileExtension.text = baseMessage.attachment.fileExtension
+                    val fileSize = baseMessage.attachment.fileSize
+                    viewHolder.view.tvFileSize.text = Utils.getFileSize(fileSize)
+                } else {
+                    viewHolder.view.tvFileName.text = context.getString(R.string.uploading)
+                    viewHolder.view.tvFileExtension.text = "-"
+                    viewHolder.view.tvFileSize.text = "-"
+                }
                 showMessageTime(viewHolder, baseMessage)
 //                if (selectedItemList.contains(baseMessage.getId()))
                 viewHolder.view.txtTime.visibility = View.VISIBLE
 //                else viewHolder.view.txtTime.visibility = View.GONE
                 if (baseMessage.getReplyCount() != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                    viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -1835,25 +1954,37 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.tvUser.text = baseMessage.sender.name
             }
             viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
-            val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
-            var thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
 
+            FeatureRestriction.isImageModerationEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
+                }
+            })
+            FeatureRestriction.isThumbnailGenerationEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    if (p0)
+                        thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
+                }
+
+            })
 //            if (thumbnailUrl != null)
 //                Glide.with(context).asBitmap().load(thumbnailUrl).into(viewHolder.view.goImgMessage)
 //            else {
 //                if ((baseMessage as MediaMessage).attachment != null)
 //                    Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)}
 
-            if (thumbnailUrl != null) {
-                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
-                    setImageDrawable(viewHolder, thumbnailUrl, true, false)
-                else
-                    setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
-            } else {
-                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
-                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
-                else
-                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+            if ((baseMessage as MediaMessage).attachment != null) {
+                if (thumbnailUrl != null) {
+                    if (baseMessage.attachment.fileExtension.equals(".gif", ignoreCase = true))
+                        setImageDrawable(viewHolder, thumbnailUrl, true, false)
+                    else
+                        setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
+                } else {
+                    if (baseMessage.attachment.fileExtension.equals(".gif", ignoreCase = true))
+                        setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
+                    else
+                        setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+                }
             }
             if (isImageNotSafe) {
                 viewHolder.view.sensitiveLayout.visibility = View.VISIBLE
@@ -1926,22 +2057,37 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         } else {
             viewHolder = view as RightImageMessageViewHolder
             viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
-            val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
-            var thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
+
+//            if (FeatureRestriction.isImageModerationEnabled())
+//                isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
+            FeatureRestriction.isImageModerationEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
+                }
+            })
+            FeatureRestriction.isThumbnailGenerationEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    if (p0)
+                        thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
+                }
+            })
+
 //            if (thumbnailUrl != null)
 //                Glide.with(context).load(thumbnailUrl).into(viewHolder.view.goImgMessage)
 //            else if ((baseMessage as MediaMessage).attachment != null) Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goImgMessage)
 
-            if (thumbnailUrl != null) {
-                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
-                    setImageDrawable(viewHolder, thumbnailUrl, true, false)
-                else
-                    setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
-            } else {
-                if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true))
-                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
-                else
-                    setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+            if ((baseMessage as MediaMessage).attachment != null) {
+                if (thumbnailUrl != null) {
+                    if (baseMessage.attachment.fileExtension.equals(".gif", ignoreCase = true))
+                        setImageDrawable(viewHolder, thumbnailUrl, true, false)
+                    else
+                        setImageDrawable(viewHolder, thumbnailUrl, false, isImageNotSafe)
+                } else {
+                    if (baseMessage.attachment.fileExtension.equals(".gif", ignoreCase = true))
+                        setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, true, false)
+                    else
+                        setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
+                }
             }
             if (isImageNotSafe) {
                 viewHolder.view.sensitiveLayout.visibility = View.VISIBLE
@@ -1953,9 +2099,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             viewHolder.view.txtTime.visibility = View.VISIBLE
 //            else viewHolder.view.txtTime.visibility = View.GONE
             //
-            if (baseMessage.replyCount != 0) {
-                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
+            if (baseMessage.replyCount != 0 ) {
+                FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                    override fun onSuccess(p0: Boolean) {
+                        if (p0) {
+                            viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                            viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                        }
+                    }
+                })
             } else {
                 viewHolder.view.replyAvatarLayout.visibility = View.GONE
                 viewHolder.view.threadReplyCount.visibility = View.GONE
@@ -2013,7 +2165,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         }
     }
 
-    private fun setImageDrawable(viewHolder: RecyclerView.ViewHolder, url: String, isGif: Boolean, isImageNotSafe: Boolean) {
+    private fun setImageDrawable(viewHolder: RecyclerView.ViewHolder, url: String?, isGif: Boolean, isImageNotSafe: Boolean) {
         if (viewHolder is LeftImageMessageViewHolder) {
             if (isGif) {
                 Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -2153,11 +2305,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //            else viewHolder.view.txtTime.visibility = View.GONE
             //
             if (baseMessage.getReplyCount() != 0) {
-                viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
             } else {
-                viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                viewHolder.view.threadReplyCount.visibility = View.GONE
             }
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -2388,28 +2540,48 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
      * @see BaseMessage
      */
     private fun setStatusIcon(txtTime: TextView, baseMessage: BaseMessage) {
-        if (baseMessage.sender.uid == loggedInUser.uid) {
-            if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
-                if (baseMessage.readAt != 0L) {
-                    txtTime.text = Utils.getHeaderDate(baseMessage.readAt * 1000)
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0)
-                    txtTime.compoundDrawablePadding = 10
-                } else if (baseMessage.deliveredAt != 0L) {
-                    txtTime.text = Utils.getHeaderDate(baseMessage.deliveredAt * 1000)
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0)
-                    txtTime.compoundDrawablePadding = 10
-                } else {
-                    txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                    txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
-                    txtTime.compoundDrawablePadding = 10
+        FeatureRestriction.isDeliveryReceiptsEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                if (p0) {
+                    if (baseMessage.sender.uid == loggedInUser.uid) {
+                        if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                            if (baseMessage.readAt != 0L) {
+                                txtTime.text = Utils.getHeaderDate(baseMessage.readAt * 1000)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0)
+                                txtTime.compoundDrawablePadding = 10
+                            } else if (baseMessage.deliveredAt != 0L) {
+                                txtTime.text = Utils.getHeaderDate(baseMessage.deliveredAt * 1000)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0)
+                                txtTime.compoundDrawablePadding = 10
+                            } else if (baseMessage.sentAt > 0) {
+                                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+                                txtTime.compoundDrawablePadding = 10
+                            } else if (baseMessage.sentAt == -1L) {
+                                txtTime.text = ""
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_info_red, 0)
+                            } else {
+                                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+                                txtTime.compoundDrawablePadding = 10
+                            }
+                        } else {
+                            if (baseMessage.sentAt > 0) {
+                                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                            } else {
+                                txtTime.text = ""
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_baseline_waiting_24, 0)
+                                txtTime.compoundDrawablePadding = 10
+                            }
+                        }
+                    } else {
+                        txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                    }
                 }
-            } else {
-                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
             }
-        }
-        else {
-            txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-        }
+
+        })
     }
 
     /**
@@ -2423,44 +2595,41 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
      *
      * @see BaseMessage
      */
-    private fun setTextData(view: RecyclerView.ViewHolder, i: Int) {
+    private fun setTextData(viewHolder: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]
         if (baseMessage != null) {
-            var viewHolder: RecyclerView.ViewHolder
-            if (view is LeftTextMessageViewHolder) {
-                val viewHolder = view as LeftTextMessageViewHolder
+//            var viewHolder: RecyclerView.ViewHolder
+            if (viewHolder is LeftTextMessageViewHolder) {
+//                val viewHolder = view as LeftTextMessageViewHolder
 //                viewHolder.view.textMessage = baseMessage as TextMessage
-                if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
-                    viewHolder.view.tvUser.visibility = View.GONE
-                    viewHolder.view.ivUser.visibility = View.GONE
-                } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
-                    if (isUserDetailVisible) {
-                        viewHolder.view.tvUser.visibility = View.VISIBLE
-                        viewHolder.view.ivUser.visibility = View.VISIBLE
-                    } else {
+                if (baseMessage.sender.uid != loggedInUser.uid) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                         viewHolder.view.tvUser.visibility = View.GONE
-                        viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        viewHolder.view.ivUser.visibility = View.GONE
+                    } else if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                        if (isUserDetailVisible) {
+                            viewHolder.view.tvUser.visibility = View.VISIBLE
+                            viewHolder.view.ivUser.visibility = View.VISIBLE
+                        } else {
+                            viewHolder.view.tvUser.visibility = View.GONE
+                            viewHolder.view.ivUser.visibility = View.INVISIBLE
+                        }
+                        setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
+                        viewHolder.view.tvUser.text = baseMessage.sender.name
                     }
-                    setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-                    viewHolder.view.tvUser.text = baseMessage.sender.name
                 }
 
                 var txtMessage = (baseMessage as TextMessage).text.trim()
 //                val txtMessage = baseMessage.text.trim { it <= ' ' }
                 var message = txtMessage
-//                if (isExtensionEnabled("profanity-filter"))
-//                    message = Extensions.getProfanityFilter(baseMessage)
-//                if (isExtensionEnabled("data-masking"))
-//                    message = Extensions.checkDataMasking(baseMessage)
 
-                if(Extensions.checkExtensionEnabled("profanity-filter")) {
+                if(isProfanityFilter) {
                     message = Extensions.getProfanityFilter(baseMessage)
                 }
 
-                if(Extensions.checkExtensionEnabled("data-masking")) {
+                if(isDataMasking) {
                     message = Extensions.checkDataMasking(baseMessage)
                 }
-
 
 
                 viewHolder.view.goTxtMessage.text = message
@@ -2575,10 +2744,12 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     val spannable = processed
                     count = spannable.getSpans(0, spannable.length - 1, EmojiSpan::class.java).size
                     if (Utils.removeEmojiAndSymbol(txtMessage)!!.trim().length === 0) {
-                        if (count == 1) {
-                            viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 32f)
-                        } else if (count == 2) {
-                            viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 24f)
+                        if (FeatureRestriction.isLargerSizeEmojisEnabled()) {
+                            if (count == 1) {
+                                viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 32f)
+                            } else if (count == 2) {
+                                viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 24f)
+                            }
                         }
                     }
                 }
@@ -2586,7 +2757,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
                 viewHolder.itemView.setTag(R.string.message, baseMessage)
             } else {
-                viewHolder = view as RightTextMessageViewHolder
+                viewHolder as RightTextMessageViewHolder
                 viewHolder.view.textMessage = baseMessage as TextMessage
                 var txtMsg = (baseMessage as TextMessage).text.trim()
                 var message = txtMsg
@@ -2595,11 +2766,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                if (isExtensionEnabled("data-masking"))
 //                    message = Extensions.checkDataMasking(baseMessage)
 
-                if(Extensions.checkExtensionEnabled("profanity-filter")) {
+                if(isProfanityFilter) {
                     message = Extensions.getProfanityFilter(baseMessage)
                 }
 
-                if(Extensions.checkExtensionEnabled("data-masking")) {
+                if(isDataMasking) {
                     message = Extensions.checkDataMasking(baseMessage)
                 }
 
@@ -2738,7 +2909,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 val chip = Chip(context)
                 chip.chipStrokeWidth = 2f
                 chip.chipBackgroundColor = ColorStateList.valueOf(context.resources.getColor(android.R.color.transparent))
-                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
+//                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
+                chip.chipStrokeColor = ColorStateList.valueOf(Color.parseColor(UIKitSettings.color))
                 chip.text = k + " " + reactionsOnMessage[k]
                 reactionsLayout.addView(chip)
                 chip.setOnLongClickListener {
@@ -2828,20 +3000,60 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     }
 
     private fun setColorFilter(baseMessage: BaseMessage, view: View) {
+
         if (!longselectedItemList.contains(baseMessage)) {
-            if (baseMessage.sender == CometChat.getLoggedInUser()) view.background.setColorFilter(context.resources.getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
+            if (baseMessage.sender == CometChat.getLoggedInUser()) {
+                if (view is CardView) {
+                    view.setCardBackgroundColor(Color.parseColor(UIKitSettings.color))
+                } else {
+                    if (Build.VERSION.SDK_INT >= 29) {
+                        view.background.colorFilter = PorterDuffColorFilter(Color.parseColor(UIKitSettings.color), PorterDuff.Mode.SRC_ATOP)
+                    } else {
+                        view.background.setColorFilter(Color.parseColor(UIKitSettings.color), PorterDuff.Mode.SRC_ATOP)
+                    }
+                }
+            } else {
+                if (view !is CardView) {
+                    if (Build.VERSION.SDK_INT >= 29) view.background.colorFilter = PorterDuffColorFilter(context.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
+                }
+            }
         } else {
-            if (baseMessage.sender == CometChat.getLoggedInUser()) view.background.setColorFilter(context.resources.getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP)
+            if (baseMessage.sentAt > 0 && FeatureRestriction.isEditMessageEnabled() &&
+                    FeatureRestriction.isDeleteMessageEnabled() ||
+                    FeatureRestriction.isShareCopyForwardMessageEnabled() ||
+                    isReplyVisible ||
+                    isThreadVisible) {
+                if (baseMessage.sender == CometChat.getLoggedInUser()) view.background.setColorFilter(context.resources.getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP)
+            }
+
+            FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    if (p0) {
+                        isThreadVisible = p0
+                    }
+                }
+            })
+            FeatureRestriction.isMessageRepliesEnabled(object : FeatureRestriction.OnSuccessListener {
+                override fun onSuccess(p0: Boolean) {
+                    if (p0)
+                        isReplyVisible = p0
+                }
+
+            })
         }
+
+//        if (!longselectedItemList.contains(baseMessage)) {
+//            if (baseMessage.sender == CometChat.getLoggedInUser()) view.background.setColorFilter(context.resources.getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.message_bubble_grey), PorterDuff.Mode.SRC_ATOP)
+//        } else {
+//            if (baseMessage.sender == CometChat.getLoggedInUser()) view.background.setColorFilter(context.resources.getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_ATOP) else view.background.setColorFilter(context.resources.getColor(R.color.secondaryTextColor), PorterDuff.Mode.SRC_ATOP)
+//        }
     }
 
-    private fun setLinkData(view: RecyclerView.ViewHolder, i: Int) {
+    private fun setLinkData(viewHolder: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]
         var url: String? = null
         if (baseMessage != null) {
-            var viewHolder: RecyclerView.ViewHolder
-            if (view is LeftLinkMessageViewHolder) {
-                viewHolder = view as LeftLinkMessageViewHolder
+            if (viewHolder is LeftLinkMessageViewHolder) {
                 if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     viewHolder.view.tvUser.visibility = View.GONE
                     viewHolder.view.ivUser.visibility = View.GONE
@@ -2891,12 +3103,18 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         }
                     }
                 }
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                    viewHolder.view.threadReplyCount.setText(baseMessage.replyCount.toString() + " Replies")
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
-                    viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                    viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                    viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                    viewHolder.view.threadReplyCount.visibility = View.GONE
                 }
                 viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                     val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -2964,7 +3182,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
             } else {
-                viewHolder = view as RightLinkMessageViewHolder
+                viewHolder as RightLinkMessageViewHolder
                 if (baseMessage.deletedAt == 0L) {
                     val extensionList = Extensions.extensionCheck(baseMessage)
                     if (extensionList != null) {
@@ -2999,9 +3217,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         }
                     }
                 }
-                if (baseMessage.replyCount != 0) {
-                    viewHolder.view.threadReplyCount.visibility = View.VISIBLE
-                    viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                if (baseMessage.replyCount != 0 ) {
+                    FeatureRestriction.isThreadedMessagesEnabled(object : FeatureRestriction.OnSuccessListener {
+                        override fun onSuccess(p0: Boolean) {
+                            if (p0) {
+                                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                                viewHolder.view.threadReplyCount.text = baseMessage.replyCount.toString() + " Replies"
+                            }
+                        }
+                    })
                 } else {
                     viewHolder.view.replyAvatarLayout.visibility = View.GONE
                     viewHolder.view.threadReplyCount.visibility = View.GONE
@@ -3143,13 +3367,13 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             if (baseMessage.category == CometChatConstants.CATEGORY_MESSAGE) {
                 return when (baseMessage.type) {
                     CometChatConstants.MESSAGE_TYPE_TEXT -> if (baseMessage.sender.uid == loggedInUser.uid) {
-                        if (extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) RIGHT_LINK_MESSAGE
+                        if (isLinkPreview && extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) RIGHT_LINK_MESSAGE
                         else if (baseMessage.metadata != null && baseMessage.metadata.has("reply"))
                             return RIGHT_REPLY_TEXT_MESSAGE
                         else RIGHT_TEXT_MESSAGE
 
                     } else {
-                        if (extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) LEFT_LINK_MESSAGE
+                        if (isLinkPreview && extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) LEFT_LINK_MESSAGE
                         else if (baseMessage.metadata != null && baseMessage.metadata.has("reply"))
                             return LEFT_REPLY_TEXT_MESSAGE
                         else LEFT_TEXT_MESSAGE
@@ -3178,9 +3402,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
             } else {
                 if (baseMessage.category == CometChatConstants.CATEGORY_ACTION) {
-                    return ACTION_MESSAGE
+                    if (baseMessage is Action && FeatureRestriction.isGroupActionMessagesEnabled())
+                        return ACTION_MESSAGE
                 } else if (baseMessage.category == CometChatConstants.CATEGORY_CALL) {
-                    return CALL_MESSAGE
+                    if (baseMessage is Call && FeatureRestriction.isCallActionMessagesEnabled())
+                        return CALL_MESSAGE
                 } else if (baseMessage.category == CometChatConstants.CATEGORY_CUSTOM) {
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         return when (baseMessage.type){
@@ -3270,10 +3496,14 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
      * @see BaseMessage
      */
     fun addMessage(baseMessage: BaseMessage) { //        if (!messageList.contains(baseMessage)) {
+        Log.e(TAG, "addMessage: before " + messageList.size)
         messageList.add(baseMessage)
         selectedItemList.clear()
         //        }
-        notifyDataSetChanged()
+        Log.e(TAG, "addMessage: after " + messageList.size)
+//        notifyDataSetChanged()
+        //        }
+        notifyItemInserted(messageList.size - 1)
     }
 
     /**
@@ -3312,6 +3542,31 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     fun getPosition(baseMessage: BaseMessage?): Int {
         return messageList.indexOf(baseMessage)
     }
+
+    fun removeMessage(baseMessage: BaseMessage) {
+        if (messageList.contains(baseMessage)) {
+            val index = messageList.indexOf(baseMessage)
+            messageList.removeAt(index)
+            notifyItemRemoved(index)
+        }
+    }
+
+    fun updateSentMessage(baseMessage: BaseMessage?) {
+        for (i in messageList.indices.reversed()) {
+            val muid = messageList[i].muid
+            if (muid != null && muid == baseMessage?.muid) {
+                messageList.removeAt(i)
+                messageList.add(i, baseMessage)
+                notifyItemChanged(i)
+            }
+        }
+    }
+
+//    fun remove(basemessage: BaseMessage) {
+//        val index = messageList.indexOf(basemessage)
+//        messageList.remove(basemessage)
+//        notifyItemRemoved(index)
+//    }
 
 
     //delete

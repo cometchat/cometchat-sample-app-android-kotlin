@@ -2,22 +2,27 @@ package com.cometchat.pro.uikit.ui_components.calls.call_list
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.MessagesRequest
-import com.cometchat.pro.uikit.ui_components.shared.cometchatCalls.CometChatCalls
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.shared.cometchatCalls.CometChatCalls
+import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.tabs.TabLayout
-import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
-import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
 /**
@@ -34,7 +39,7 @@ class CometChatCallList constructor() : Fragment() {
     private val messageRequest //Uses to fetch Conversations.
             : MessagesRequest? = null
     private var tvTitle: TextView? = null
-    private val conversationShimmer: ShimmerFrameLayout? = null
+    private var conversationShimmer: ShimmerFrameLayout? = null
 //    private var v: View? = null
     private val callList: List<Call> = ArrayList()
     private var tabAdapter: TabAdapter? = null
@@ -45,8 +50,15 @@ class CometChatCallList constructor() : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_cometchat_calls, container, false)
-        tvTitle = v!!.findViewById(R.id.tv_title)
+        conversationShimmer = v?.findViewById(R.id.shimmer_layout)
+        tvTitle = v?.findViewById(R.id.tv_title)
+        tvTitle?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         phoneAddIv = v.findViewById(R.id.add_phone_iv)
+        FeatureRestriction.isOneOnOneAudioCallEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (!p0) phoneAddIv?.visibility = View.GONE
+            }
+        })
         phoneAddIv!!.setOnClickListener(View.OnClickListener { openUserListScreen() })
         viewPager = v.findViewById(R.id.viewPager)
         tabLayout = v.findViewById(R.id.tabLayout)
@@ -54,9 +66,39 @@ class CometChatCallList constructor() : Fragment() {
             tabAdapter = TabAdapter(activity!!.supportFragmentManager)
             tabAdapter!!.addFragment(AllCall(), context!!.resources.getString(R.string.all))
             tabAdapter!!.addFragment(MissedCall(), context!!.resources.getString(R.string.missed))
-            viewPager!!.setAdapter(tabAdapter)
+            viewPager!!.adapter = tabAdapter
         }
         tabLayout!!.setupWithViewPager(viewPager)
+
+        if (UIKitSettings.color != null) {
+            phoneAddIv?.imageTintList = ColorStateList.valueOf(Color.parseColor(UIKitSettings.color))
+            val wrappedDrawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.tab_layout_background_active))
+            DrawableCompat.setTint(wrappedDrawable, Color.parseColor(UIKitSettings.color))
+            tabLayout?.getTabAt(tabLayout!!.selectedTabPosition)!!.view.background = wrappedDrawable
+            tabLayout?.setSelectedTabIndicatorColor(Color.parseColor(UIKitSettings.color))
+        } else {
+            tabLayout?.getTabAt(tabLayout!!.selectedTabPosition)!!.view.setBackgroundColor(resources.getColor(R.color.colorPrimary))
+            tabLayout?.setSelectedTabIndicatorColor(resources.getColor(R.color.colorPrimary))
+        }
+
+        tabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                if (UIKitSettings.color != null) {
+                    val wrappedDrawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.tab_layout_background_active))
+                    DrawableCompat.setTint(wrappedDrawable, Color.parseColor(UIKitSettings.color))
+                    tab?.view?.background = wrappedDrawable
+                } else tab?.view?.setBackgroundColor(resources.getColor(R.color.colorPrimary))
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                tab?.view?.setBackgroundColor(resources.getColor(android.R.color.transparent))
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+
+            }
+
+        })
         checkDarkMode()
         return v
     }

@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.calls.call_list
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,7 +12,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -23,15 +27,16 @@ import com.cometchat.pro.core.UsersRequest
 import com.cometchat.pro.core.UsersRequest.UsersRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
-import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.facebook.shimmer.ShimmerFrameLayout
-import com.google.android.material.snackbar.Snackbar
-import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.facebook.shimmer.ShimmerFrameLayout
 
 /*
  * Copyright 2019 The Android Open Source Project
@@ -75,15 +80,20 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
         setContentView(R.layout.fragment_cometchat_userlist)
         title = findViewById(R.id.tv_title)
         val imageView: ImageView = ImageView(this)
-        imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_close_24dp))
-        imageView.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)))
-        imageView.setClickable(true)
+        imageView.setImageDrawable(resources.getDrawable(R.drawable.ic_close_24dp))
+        if (UIKitSettings.color != null) {
+            window.statusBarColor = Color.parseColor(UIKitSettings.color)
+            imageView.imageTintList = ColorStateList.valueOf(
+                    Color.parseColor(UIKitSettings.color))
+        } else imageView.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+
+        imageView.isClickable = true
         imageView.setPadding(8, 8, 8, 8)
         val layoutParams: RelativeLayout.LayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         layoutParams.addRule(RelativeLayout.ALIGN_START)
         layoutParams.setMargins(16, 32, 16, 16)
         layoutParams.addRule(RelativeLayout.CENTER_VERTICAL)
-        imageView.setLayoutParams(layoutParams)
+        imageView.layoutParams = layoutParams
         addContentView(imageView, layoutParams)
         imageView.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
@@ -215,13 +225,13 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
         val call: Call = Call((recieverID)!!, receiverType, callType)
         CometChat.initiateCall(call, object : CallbackListener<Call>() {
             public override fun onSuccess(call: Call) {
-                Utils.startCallIntent(this@CometChatNewCallList, (call.callReceiver as User), call.getType(), true, call.sessionId)
+                Utils.startCallIntent(this@CometChatNewCallList, (call.callReceiver as User), call.type, true, call.sessionId)
             }
 
             public override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
                 if (rvUserList != null)
-                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatNewCallList, resources.getString(R.string.call_initiate_error),UIKitConstants.ErrorTypes.ERROR)
+                    ErrorMessagesUtils.cometChatErrorMessage(this@CometChatNewCallList, e.code)
             }
         })
     }

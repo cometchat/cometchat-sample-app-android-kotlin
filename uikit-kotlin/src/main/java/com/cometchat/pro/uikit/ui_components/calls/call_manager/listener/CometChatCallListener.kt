@@ -36,7 +36,10 @@ object CometChatCallListener {
                     }
                 } else {
                     CometChat.rejectCall(call.sessionId, CometChatConstants.CALL_STATUS_BUSY, object : CallbackListener<Call?>() {
-                        override fun onSuccess(call: Call?) {}
+                        override fun onSuccess(call: Call?) {
+                            Toast.makeText(context, call?.sender?.name + " tried to call you", Toast.LENGTH_LONG).show()
+                        }
+
                         override fun onError(e: CometChatException) {
 //                            Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
                             if (context != null) {

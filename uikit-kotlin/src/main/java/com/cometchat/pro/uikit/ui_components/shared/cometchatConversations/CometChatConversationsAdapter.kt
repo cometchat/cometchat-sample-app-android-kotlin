@@ -1,8 +1,7 @@
 package com.cometchat.pro.uikit.ui_components.shared.cometchatConversations
 
-import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversationsAdapter.ConversationViewHolder
 import android.content.Context
-import android.os.Build
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,16 +13,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.CometchatConversationListItemBinding
-import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
+import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversationsAdapter.ConversationViewHolder
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
-import com.google.android.material.badge.BadgeDrawable
-import java.util.ArrayList
-import java.util.HashMap
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 /**
  * Purpose - ConversationListAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -36,6 +33,8 @@ import java.util.HashMap
  *
  */
 class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<ConversationViewHolder>(), Filterable {
+    private var unreadCountEnabled: Boolean = false
+    private var userPresenceEnabled: Boolean = false
     private var context: Context? = null
     /**
      * ConversationListAdapter maintains two arrayList i.e conversationList and filterConversationList.
@@ -56,10 +55,22 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
      * @param conversationList is list of conversations used in this adapter.
      */
     init {
-        updateList(conversationList!!)
+        updateList(conversationList)
         filterConversationList = conversationList
         this.context = context
         fontUtils = FontUtils.getInstance(context)
+        FeatureRestriction.isUnreadCountEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                unreadCountEnabled = p0
+                Log.e("unreadCountEnabled", "onSuccess: unreadCountEnabled"+unreadCountEnabled )
+            }
+        })
+        FeatureRestriction.isUserPresenceEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                userPresenceEnabled = p0
+            }
+
+        })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConversationViewHolder {
@@ -87,6 +98,7 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
         var status: String? = null
         var lastMessageText: String? = null
         val baseMessage = conversation.lastMessage
+
         conversationViewHolder.conversationListRowBinding.conversation = conversation
         conversationViewHolder.conversationListRowBinding.executePendingBindings()
         var type: String? = null
@@ -97,7 +109,10 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
             setStatusIcon(conversationViewHolder.conversationListRowBinding.messageTime, baseMessage)
             conversationViewHolder.conversationListRowBinding.messageTime.visibility = View.VISIBLE
             conversationViewHolder.conversationListRowBinding.messageTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
-            lastMessageText = Utils.getLastMessage(context!!, baseMessage)
+            if (baseMessage.deletedAt > 0L) {
+                if (FeatureRestriction.isHideDeletedMessagesEnabled())
+                    lastMessageText = ""
+            } else lastMessageText = Utils.getLastMessage(context!!, baseMessage)
         } else {
             lastMessageText = context!!.resources.getString(R.string.tap_to_start_conversation)
             conversationViewHolder.conversationListRowBinding.txtUserMessage.marqueeRepeatLimit = 100
@@ -114,19 +129,27 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
             avatar = (conversation.conversationWith as User).avatar
             status = (conversation.conversationWith as User).status
             if (status == CometChatConstants.USER_STATUS_ONLINE) {
-                conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
-                conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
+                if (userPresenceEnabled) {
+                    conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
+                    conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
+                }
             } else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
         } else {
             name = (conversation.conversationWith as Group).name
             avatar = (conversation.conversationWith as Group).icon
             conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
         }
-        conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.unreadMessageCount)
+        if (!unreadCountEnabled) {
+            conversationViewHolder.conversationListRowBinding.messageCount.visibility = View.GONE
+            conversationViewHolder.conversationListRowBinding.messageCount.setCount(0)
+        } else
+            conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.unreadMessageCount)
         conversationViewHolder.conversationListRowBinding.txtUserName.text = name
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(context!!.resources.getColor(R.color.colorPrimary, context!!.theme))
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(context!!.resources.getColor(R.color.colorPrimary, context!!.theme))
+            conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(Color.parseColor(UIKitSettings.color))
+            conversationViewHolder.conversationListRowBinding.messageCount.setCountBackground(Color.parseColor(UIKitSettings.color))
+//        }
         if (avatar!=null && avatar.isNotEmpty()) {
             conversationViewHolder.conversationListRowBinding.avUser.setAvatar(avatar)
         } else {
@@ -143,24 +166,30 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
     }
 
     private fun setStatusIcon(txtTime: TextView, baseMessage: BaseMessage) {
-        if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER && baseMessage.sender.uid == CometChat.getLoggedInUser().uid) {
-            if (baseMessage.readAt != 0L) {
-                txtTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
-                txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_double_tick, 0, 0, 0)
-                txtTime.compoundDrawablePadding = 10
-            } else if (baseMessage.deliveredAt != 0L) {
-                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_done_all_black_24dp, 0, 0, 0)
-                txtTime.compoundDrawablePadding = 10
-            } else {
-                txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_black_24dp, 0, 0, 0)
-                txtTime.compoundDrawablePadding = 10
+        FeatureRestriction.isDeliveryReceiptsEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0) {
+                    if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER && baseMessage.sender.uid == CometChat.getLoggedInUser().uid) {
+                        if (baseMessage.readAt != 0L) {
+                            txtTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_double_tick, 0, 0, 0)
+                            txtTime.compoundDrawablePadding = 10
+                        } else if (baseMessage.deliveredAt != 0L) {
+                            txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_done_all_black_24dp, 0, 0, 0)
+                            txtTime.compoundDrawablePadding = 10
+                        } else {
+                            txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_black_24dp, 0, 0, 0)
+                            txtTime.compoundDrawablePadding = 10
+                        }
+                    } else {
+                        txtTime.text = Utils.getHeaderDate(baseMessage.sentAt)
+                        txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                    }
+                }
             }
-        } else {
-            txtTime.text = Utils.getHeaderDate(baseMessage.sentAt)
-            txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-        }
+        })
     }
 
     override fun getItemCount(): Int {

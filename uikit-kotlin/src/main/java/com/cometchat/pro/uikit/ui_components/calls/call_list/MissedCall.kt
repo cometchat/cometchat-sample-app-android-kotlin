@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +30,9 @@ import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClick
 import com.cometchat.pro.uikit.ui_components.groups.group_detail.CometChatGroupDetailActivity
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
+import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
 /**
@@ -46,12 +49,17 @@ class MissedCall : Fragment() {
     private var messagesRequest: MessagesRequest? = null
     private var linearLayoutManager: LinearLayoutManager? = null
     private val loggedInUid = CometChat.getLoggedInUser().uid
+    private var conversationShimmer: ShimmerFrameLayout? = null
+    private var tvTitle: TextView? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_cometchat_missed_call, container, false)
         rvCallList = view.findViewById(R.id.callList_rv)
         linearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        rvCallList!!.setLayoutManager(linearLayoutManager)
+        rvCallList!!.layoutManager = linearLayoutManager
         noCallView = view.findViewById(R.id.no_call_vw)
+        conversationShimmer = view.findViewById(R.id.shimmer_layout)
+        tvTitle = view.findViewById(R.id.tv_title)
+        tvTitle?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         rvCallList!!.setItemClickListener(object : OnItemClickListener<Call?>() {
             override fun OnItemClick(t: Any, position: Int) {
                 var call = t as Call
@@ -141,6 +149,7 @@ class MissedCall : Fragment() {
             }
             messagesRequest!!.fetchPrevious(object : CallbackListener<List<BaseMessage?>>() {
                 override fun onSuccess(baseMessages: List<BaseMessage?>) {
+                    stopHideShimmer()
                     Collections.reverse(baseMessages)
                     rvCallList!!.setCallList(filteredMissedCall(baseMessages))
                     if (rvCallList!!.size() != 0) {
@@ -149,8 +158,9 @@ class MissedCall : Fragment() {
                 }
 
                 override fun onError(e: CometChatException) {
+                    stopHideShimmer()
                     if (rvCallList != null)
-                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.call_list_error),UIKitConstants.ErrorTypes.ERROR)
+                        ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             })
         }
@@ -173,6 +183,12 @@ class MissedCall : Fragment() {
         if (menuVisible) {
             callList
         }
+    }
+
+    private fun stopHideShimmer() {
+        conversationShimmer?.stopShimmer()
+        conversationShimmer?.visibility = View.GONE
+        tvTitle?.visibility = View.VISIBLE
     }
 
     override fun onResume() {

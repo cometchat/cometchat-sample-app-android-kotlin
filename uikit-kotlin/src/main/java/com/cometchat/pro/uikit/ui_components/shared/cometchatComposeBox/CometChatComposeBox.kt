@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -17,16 +18,15 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.inputmethod.InputContentInfoCompat
-import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.core.CometChat.isExtensionEnabled
-import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.uikit.ui_resources.utils.audio_visualizer.AudioRecordView
-import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatEditText.OnEditTextMediaListener
-import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatComposeBoxActions.ComposeBoxActionListener
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatComposeBoxActions.ComposeBoxActionListener
+import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.CometChatEditText.OnEditTextMediaListener
 import com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox.listener.ComposeActionListener
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.audio_visualizer.AudioRecordView
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -74,7 +74,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     var isStickerVisible = true
     var isWhiteBoardVisible = true
     var isWriteBoardVisible = true
-    var isStartVideoCall = true
+//    var isStartVideoCall = true
     var isPollVisible = true
 
     constructor(context: Context) : super(context) {
@@ -110,6 +110,11 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             }, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
         }
         btnLiveReaction = findViewById(R.id.btn_live_reaction)
+        FeatureRestriction.isLiveReactionsEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0) btnLiveReaction?.visibility = View.VISIBLE else btnLiveReaction?.visibility = View.GONE
+            }
+        })
         composeBox = findViewById(R.id.message_box)
         flBox = findViewById(R.id.flBox)
         ivMic = findViewById(R.id.ivMic)
@@ -127,11 +132,11 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         etComposeBox = findViewById(R.id.etComposeBox)
         rlActionContainer = findViewById(R.id.rlActionContainers)
 
-        ivArrow!!.setImageTintList(ColorStateList.valueOf(color))
-        ivCamera!!.setImageTintList(ColorStateList.valueOf(color))
-        ivGallery!!.setImageTintList(ColorStateList.valueOf(color))
-        ivFile!!.setImageTintList(ColorStateList.valueOf(color))
-        ivSend!!.setImageTintList(ColorStateList.valueOf(color))
+        ivArrow!!.imageTintList = ColorStateList.valueOf(color)
+        ivCamera!!.imageTintList = ColorStateList.valueOf(color)
+        ivGallery!!.imageTintList = ColorStateList.valueOf(color)
+        ivFile!!.imageTintList = ColorStateList.valueOf(color)
+        ivSend!!.imageTintList = ColorStateList.valueOf(color)
 
         ivAudio!!.setOnClickListener(this)
         ivArrow!!.setOnClickListener(this)
@@ -189,9 +194,9 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 composeActionListener.onWriteBoardClicked()
             }
 
-            override fun onStartCallClick() {
-                composeActionListener.onStartCallClicked()
-            }
+//            override fun onStartCallClick() {
+//                composeActionListener.onStartCallClicked()
+//            }
 
             override fun onPollClick() {
                 composeActionListener.onPollActionClicked()
@@ -245,6 +250,75 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             ivCamera!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+        }
+        if (UIKitSettings.color != null) {
+            val settingsColor = Color.parseColor(UIKitSettings.color)
+            ivSend!!.imageTintList = ColorStateList.valueOf(settingsColor)
+        }
+
+        isLocationVisible = FeatureRestriction.isLocationSharingEnabled()
+
+        FeatureRestriction.isCollaborativeWhiteBoardEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                Log.e("CometChatComposeBox", "onSuccess: "+p0.toString() )
+                isWhiteBoardVisible = p0
+                bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
+            }
+        })
+        FeatureRestriction.isCollaborativeDocumentEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isWriteBoardVisible = p0
+                bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
+            }
+        })
+//        FeatureRestriction.isGroupVideoCallEnabled(object : FeatureRestriction.OnSuccessListener{
+//            override fun onSuccess(p0: Boolean) {
+//                isStartVideoCall = p0
+//            }
+//
+//        })
+        FeatureRestriction.isPollsEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isPollVisible = p0
+                bundle.putBoolean("isPollVisible", isPollVisible)
+            }
+        })
+
+        FeatureRestriction.isVoiceNotesEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                if (p0) ivMic!!.visibility = VISIBLE else ivMic!!.visibility = GONE
+            }
+
+        })
+
+        FeatureRestriction.isStickersEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isStickerVisible = p0
+                bundle.putBoolean("isStickerVisible", isStickerVisible)
+            }
+        })
+
+        FeatureRestriction.isPhotosVideosEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                isGalleryVisible = p0
+                isCameraVisible = p0
+                bundle.putBoolean("isGalleryVisible", isGalleryVisible)
+                bundle.putBoolean("isCameraVisible", isCameraVisible)
+            }
+        })
+        FeatureRestriction.isFilesEnabled(object: FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isFileVisible = p0
+                isAudioVisible = p0
+                bundle.putBoolean("isFileVisible", isFileVisible)
+                bundle.putBoolean("isAudioVisible", isAudioVisible)
+            }
+
+        })
+
+
+        if (!isLocationVisible && !isWhiteBoardVisible && !isWriteBoardVisible && !isAudioVisible && !isFileVisible && !isCameraVisible && !isGalleryVisible && !isPollVisible && !isStickerVisible ){
+            ivArrow!!.visibility = GONE
         }
         a.recycle()
     }
@@ -329,65 +403,8 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 //            }
 
             var fm = (context as AppCompatActivity).supportFragmentManager
-            bundle.putBoolean("isGalleryVisible", isGalleryVisible)
-            bundle.putBoolean("isCameraVisible", isCameraVisible)
-            bundle.putBoolean("isFileVisible", isFileVisible)
-            bundle.putBoolean("isAudioVisible", isAudioVisible)
+
             bundle.putBoolean("isLocationVisible", isLocationVisible)
-            bundle.putBoolean("isStartVideoCall", isStartVideoCall)
-//            if (CometChat.isExtensionEnabled("stickers"))
-//                bundle.putBoolean("isStickerVisible", isStickerVisible)
-//            if (CometChat.isExtensionEnabled("whiteboard"))
-//                bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
-//            if (CometChat.isExtensionEnabled("document"))
-//                bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
-//            if (CometChat.isExtensionEnabled("polls"))
-//                bundle.putBoolean("isPollVisible", isPollVisible)
-
-            isExtensionEnabled("stickers", object : CometChat.CallbackListener<Boolean>() {
-                override fun onSuccess(p0: Boolean?) {
-                    Log.e("TAG", "onSuccess: sticker "+p0 )
-                    if (p0 as Boolean) bundle.putBoolean("isStickerVisible", isStickerVisible)
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
-                }
-
-            })
-
-            isExtensionEnabled("whiteboard", object : CometChat.CallbackListener<Boolean>(){
-                override fun onSuccess(p0: Boolean?) {
-                    Log.e("TAG", "onSuccess: whiteboard "+p0 )
-                    if (p0 as Boolean) bundle.putBoolean("isWhiteBoardVisible", isWhiteBoardVisible)
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
-                }
-
-            })
-            isExtensionEnabled("document", object : CometChat.CallbackListener<Boolean>(){
-                override fun onSuccess(p0: Boolean?) {
-                    Log.e("TAG", "onSuccess: document "+p0 )
-                    if (p0 as Boolean) bundle.putBoolean("isWriteBoardVisible", isWriteBoardVisible)
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
-                }
-
-            })
-            isExtensionEnabled("polls", object : CometChat.CallbackListener<Boolean>(){
-                override fun onSuccess(p0: Boolean?) {
-                    if (p0 as Boolean) bundle.putBoolean("isPollVisible", isPollVisible)
-                }
-
-                override fun onError(p0: CometChatException?) {
-                    Toast.makeText(context, "Error:" + p0?.message, Toast.LENGTH_SHORT).show()
-                }
-
-            })
 
             cometChatComposeBoxActions!!.arguments = bundle
             cometChatComposeBoxActions!!.show(fm, cometChatComposeBoxActions!!.tag)
@@ -544,5 +561,39 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun hidePollOption(b: Boolean) {
+        isPollVisible = !b
+    }
+
+    fun hideStickerOption(b: Boolean) {
+        isStickerVisible = !b
+    }
+
+    fun hideWriteBoardOption(b: Boolean) {
+        isWriteBoardVisible = !b
+    }
+
+    fun hideWhiteBoardOption(b: Boolean) {
+        isWhiteBoardVisible = !b
+    }
+
+//    fun hideGroupCallOption(b: Boolean) {
+//        isStartVideoCall = !b
+//    }
+
+    fun hideRecordOption(b: Boolean) {
+        if (b) {
+            ivMic?.visibility = View.GONE
+        } else {
+            ivMic?.visibility = View.VISIBLE
+        }
+    }
+
+    fun hideSendButton(b: Boolean) {
+        if (b) {
+            ivSend?.visibility = GONE
+        } else ivSend?.visibility = VISIBLE
     }
 }

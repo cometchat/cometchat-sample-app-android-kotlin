@@ -69,10 +69,10 @@ class CometChatBadgeCount : LinearLayout {
             View.VISIBLE
         }
         tvCount = view.findViewById(R.id.tvSetCount)
-        tvCount!!.setBackground(resources.getDrawable(R.drawable.count_background))
-        tvCount!!.setTextSize(countSize!!)
+        tvCount!!.background = resources.getDrawable(R.drawable.count_background)
+        tvCount!!.textSize = countSize!!
         tvCount!!.setTextColor(countColor!!)
-        tvCount!!.setText(count.toString())
+        tvCount!!.text = count.toString()
         setCountBackground(countBackgroundColor!!)
     }
 

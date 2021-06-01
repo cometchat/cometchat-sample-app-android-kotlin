@@ -17,6 +17,8 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**
@@ -29,9 +31,11 @@ import java.util.*
  *
  */
 class CometChatSharedMediaAdapter(context: Context, messageArrayList: List<BaseMessage>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var isImageNotSafe: Boolean = false
     private var context: Context
     private val messageArrayList: MutableList<BaseMessage> = ArrayList()
     private var fontUtils: FontUtils
+    var thumbnailUrl : String? = null
 
     companion object {
         private const val TAG = "SharedMediaAdapter"
@@ -124,8 +128,18 @@ class CometChatSharedMediaAdapter(context: Context, messageArrayList: List<BaseM
 
     private fun setImageData(viewHolder: ImageViewHolder, i: Int) {
         val message = messageArrayList[i]
-        val isImageNotSafe = Extensions.getImageModeration(context, message)
-        var thumbnailUrl = Extensions.getThumbnailGeneration(context, message)
+        FeatureRestriction.isImageModerationEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isImageNotSafe = Extensions.getImageModeration(context, message)
+            }
+        })
+
+        FeatureRestriction.isThumbnailGenerationEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0)
+                    thumbnailUrl = Extensions.getThumbnailGeneration(context, message)
+            }
+        })
         if (thumbnailUrl != null)
             Glide.with(context).load(thumbnailUrl).into(viewHolder.imageView)
         else {

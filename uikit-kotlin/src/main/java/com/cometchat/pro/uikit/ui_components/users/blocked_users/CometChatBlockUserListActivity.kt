@@ -1,11 +1,14 @@
 package com.cometchat.pro.uikit.ui_components.users.blocked_users
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 class CometChatBlockUserListActivity : AppCompatActivity() {
     private val fragment: Fragment? = null
@@ -16,6 +19,7 @@ class CometChatBlockUserListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_screen)
         val fragment: Fragment = CometChatBlockUserList()
         supportFragmentManager.beginTransaction().replace(R.id.frame_fragment, fragment).commit()
+        if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

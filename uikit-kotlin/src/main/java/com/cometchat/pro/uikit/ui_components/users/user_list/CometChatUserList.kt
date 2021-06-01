@@ -20,14 +20,16 @@ import com.cometchat.pro.core.UsersRequest
 import com.cometchat.pro.core.UsersRequest.UsersRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
-import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsersAdapter
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.facebook.shimmer.ShimmerFrameLayout
-import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
 /*
@@ -88,6 +90,16 @@ class CometChatUserList constructor() : Fragment() {
         clearSearch = view.findViewById(R.id.clear_search)
         rlSearchBox = view.findViewById(R.id.rl_search_box)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
+
+        FeatureRestriction.isUserSearchEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (!p0) {
+                    etSearch?.visibility = View.GONE
+                    clearSearch?.visibility = View.GONE
+                }
+            }
+
+        })
         if (Utils.isDarkMode(context!!)) {
             title!!.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
@@ -140,7 +152,7 @@ class CometChatUserList constructor() : Fragment() {
         // Used to trigger event on click of user item in rvUserList (RecyclerView)
         rvUserList!!.setItemClickListener(object : OnItemClickListener<User?>() {
             public override fun OnItemClick(t: Any, position: Int) {
-                if (events !=null ) events!!.OnItemClick(t as User, position)
+                if (events != null) events!!.OnItemClick(t as User, position)
             }
         })
         return view
@@ -166,8 +178,12 @@ class CometChatUserList constructor() : Fragment() {
      */
     private fun fetchUsers() {
         if (usersRequest == null) {
+            if (UIKitSettings.userListing.equals("friends", ignoreCase = true))
+                usersRequest = UsersRequestBuilder().setLimit(30)
+                        .friendsOnly(true).build()
+            else if (UIKitSettings.userListing.equals("all_users", ignoreCase = true))
+                usersRequest = UsersRequestBuilder().setLimit(30).build()
             Log.e(TAG, "newfetchUsers: ")
-            usersRequest = UsersRequestBuilder().setLimit(30).build()
         }
         usersRequest!!.fetchNext(object : CallbackListener<List<User>>() {
             public override fun onSuccess(users: List<User>) {

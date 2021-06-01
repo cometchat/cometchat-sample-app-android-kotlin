@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
@@ -27,6 +26,7 @@ import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.AnimUtil
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 
 /**
  * CometChatCallActivity.class is a activity class which is used to laod the incoming and outgoing
@@ -129,9 +129,11 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
         hangUp!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.red_600))
         mainView = findViewById(R.id.main_view)
         cometChatAudioHelper = CometChatAudioHelper(this)
-        cometChatAudioHelper!!.initAudio()
-        val packageName = packageName
-        notification = Uri.parse("android.resource://" + packageName + "/" + R.raw.incoming_call)
+        if (FeatureRestriction.isCallsSoundEnabled()) {
+            cometChatAudioHelper!!.initAudio()
+            val packageName = packageName
+            notification = Uri.parse("android.resource://" + packageName + "/" + R.raw.incoming_call)
+        }
         setCallType(isVideo, isIncoming)
         if (!Utils.hasPermissions(this, Manifest.permission.RECORD_AUDIO) && !Utils.hasPermissions(this, Manifest.permission.CAMERA)) {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA), REQUEST_PERMISSION)

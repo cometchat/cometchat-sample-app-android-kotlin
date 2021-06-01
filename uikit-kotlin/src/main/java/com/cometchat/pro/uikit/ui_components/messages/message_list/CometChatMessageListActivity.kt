@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.messages.message_list
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,9 +14,11 @@ import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.MessageActionCloseListener
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.OnMessageLongClick
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 /**
  *
@@ -38,6 +41,10 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cometchat_message_list)
 
+        if (UIKitSettings.color != null)
+            window.statusBarColor = Color.parseColor(UIKitSettings.color)
+
+
         val config: EmojiCompat.Config = BundledEmojiCompatConfig(this)
         EmojiCompat.init(config)
 
@@ -49,6 +56,7 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
             if (intent.hasExtra(UIKitConstants.IntentStrings.TYPE) && intent.getStringExtra(UIKitConstants.IntentStrings.TYPE) == CometChatConstants.RECEIVER_TYPE_USER) {
                 bundle.putString(UIKitConstants.IntentStrings.UID, intent.getStringExtra(UIKitConstants.IntentStrings.UID))
                 bundle.putString(UIKitConstants.IntentStrings.STATUS, intent.getStringExtra(UIKitConstants.IntentStrings.STATUS))
+                bundle.putString(UIKitConstants.IntentStrings.LINK, intent.getStringExtra(UIKitConstants.IntentStrings.LINK))
             } else {
                 bundle.putString(UIKitConstants.IntentStrings.GUID, intent.getStringExtra(UIKitConstants.IntentStrings.GUID))
                 bundle.putString(UIKitConstants.IntentStrings.GROUP_OWNER, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_OWNER))
@@ -64,7 +72,7 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d(TAG, "onActivityResult: ")
+        Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode + " " + data + " " + data?.data)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -78,6 +86,8 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
     override fun onBackPressed() {
         super.onBackPressed()
+        startActivity(Intent(this, CometChatUI::class.java))
+        finish()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

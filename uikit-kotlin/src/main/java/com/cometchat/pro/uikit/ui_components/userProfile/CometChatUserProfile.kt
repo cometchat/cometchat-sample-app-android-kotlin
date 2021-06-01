@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.userProfile
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -17,16 +19,18 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
-import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.FragmentCometchatUserProfileBinding
+import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.ui_components.userProfile.privacy_and_security.CometChatMorePrivacyActivity
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 
 class CometChatUserProfile constructor() : Fragment() {
     private val notificationIv: CometChatAvatar? = null
@@ -39,49 +43,56 @@ class CometChatUserProfile constructor() : Fragment() {
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                      savedInstanceState: Bundle?): View? {
         moreInfoScreenBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_cometchat_user_profile, container, false)
-        moreInfoScreenBinding!!.setUser(CometChat.getLoggedInUser())
-        moreInfoScreenBinding!!.ivUser.setAvatar(CometChat.getLoggedInUser())
-        moreInfoScreenBinding!!.tvTitle.setTypeface(FontUtils.getInstance(getActivity()).getTypeFace(FontUtils.robotoMedium))
+        moreInfoScreenBinding?.user = CometChat.getLoggedInUser()
+        moreInfoScreenBinding?.ivUser?.setAvatar(CometChat.getLoggedInUser())
+        moreInfoScreenBinding?.tvTitle?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         Log.e("onCreateView: ", CometChat.getLoggedInUser().toString())
-        moreInfoScreenBinding!!.privacyAndSecurity.setOnClickListener(object : View.OnClickListener {
+        moreInfoScreenBinding?.privacyAndSecurity?.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
-                startActivity(Intent(getContext(), CometChatMorePrivacyActivity::class.java))
+                startActivity(Intent(context, CometChatMorePrivacyActivity::class.java))
             }
         })
-        if (Utils.isDarkMode(getContext()!!)) {
-            moreInfoScreenBinding!!.tvTitle.setTextColor(getResources().getColor(R.color.textColorWhite))
-            moreInfoScreenBinding!!.tvSeperator.setBackgroundColor(getResources().getColor(R.color.grey))
-            moreInfoScreenBinding!!.tvSeperator1.setBackgroundColor(getResources().getColor(R.color.grey))
-        } else {
-            moreInfoScreenBinding!!.tvTitle.setTextColor(getResources().getColor(R.color.primaryTextColor))
-            moreInfoScreenBinding!!.tvSeperator.setBackgroundColor(getResources().getColor(R.color.light_grey))
-            moreInfoScreenBinding!!.tvSeperator1.setBackgroundColor(getResources().getColor(R.color.light_grey))
+        if (UIKitSettings.color != null) {
+            val widgetColor = Color.parseColor(UIKitSettings.color)
+            val wrappedDrawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.ic_security_24dp))
+            wrappedDrawable.setTint(widgetColor)
+            DrawableCompat.setTint(wrappedDrawable, widgetColor)
+            moreInfoScreenBinding?.ivSecurity?.setImageDrawable(wrappedDrawable)
         }
-        moreInfoScreenBinding!!.userContainer.setOnClickListener(object : View.OnClickListener {
+        if (Utils.isDarkMode(context!!)) {
+            moreInfoScreenBinding?.tvTitle?.setTextColor(resources.getColor(R.color.textColorWhite))
+            moreInfoScreenBinding?.tvSeperator?.setBackgroundColor(resources.getColor(R.color.grey))
+            moreInfoScreenBinding?.tvSeperator1?.setBackgroundColor(resources.getColor(R.color.grey))
+        } else {
+            moreInfoScreenBinding?.tvTitle?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            moreInfoScreenBinding?.tvSeperator?.setBackgroundColor(resources.getColor(R.color.light_grey))
+            moreInfoScreenBinding?.tvSeperator1?.setBackgroundColor(resources.getColor(R.color.light_grey))
+        }
+        moreInfoScreenBinding?.userContainer?.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 updateUserDialog()
             }
         })
-        return moreInfoScreenBinding!!.getRoot()
+        return moreInfoScreenBinding?.root
     }
 
     private fun updateUserDialog() {
-        dialog = AlertDialog.Builder(getContext())
-        val view: View = LayoutInflater.from(getContext()).inflate(R.layout.cometchat_update_user_dialog, null)
+        dialog = AlertDialog.Builder(context)
+        val view: View = LayoutInflater.from(context).inflate(R.layout.cometchat_update_user_dialog, null)
         val avatar: CometChatAvatar = view.findViewById(R.id.user_avatar)
         avatar.setAvatar(CometChat.getLoggedInUser())
         val avatar_url: TextInputEditText = view.findViewById(R.id.avatar_url_edt)
-        avatar_url.setText(CometChat.getLoggedInUser().getAvatar())
+        avatar_url.setText(CometChat.getLoggedInUser().avatar)
         val username: TextInputEditText = view.findViewById(R.id.username_edt)
-        username.setText(CometChat.getLoggedInUser().getName())
+        username.setText(CometChat.getLoggedInUser().name)
         val updateUserBtn: MaterialButton = view.findViewById(R.id.updateUserBtn)
         val cancelBtn: MaterialButton = view.findViewById(R.id.cancelBtn)
-        if (CometChat.getLoggedInUser().getAvatar() == null) {
-            avatar.setVisibility(View.GONE)
-            avatar_url.setVisibility(View.GONE)
+        if (CometChat.getLoggedInUser().avatar == null) {
+            avatar.visibility = View.GONE
+            avatar_url.visibility = View.GONE
         } else {
-            avatar.setVisibility(View.VISIBLE)
-            avatar_url.setVisibility(View.GONE)
+            avatar.visibility = View.VISIBLE
+            avatar_url.visibility = View.GONE
         }
         avatar_url.addTextChangedListener(object : TextWatcher {
             public override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -116,7 +127,7 @@ class CometChatUserProfile constructor() : Fragment() {
         CometChat.updateUser(user, authkey, object : CallbackListener<User?>() {
             public override fun onSuccess(user: User?) {
                 if (context != null) Toast.makeText(context, "Updated User Successfully", Toast.LENGTH_LONG).show()
-                moreInfoScreenBinding!!.user = user
+                moreInfoScreenBinding?.user = user
             }
 
             public override fun onError(e: CometChatException) {

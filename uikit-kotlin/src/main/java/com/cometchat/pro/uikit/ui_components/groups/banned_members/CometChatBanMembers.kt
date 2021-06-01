@@ -76,7 +76,7 @@ class CometChatBanMembers : Fragment() {
 
                 override fun onError(e: CometChatException) {
                     if (bannedMemberRv != null)
-                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.ban_list_fetch_error), UIKitConstants.ErrorTypes.ERROR)
+                        ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }
             })
         }
@@ -112,8 +112,7 @@ class CometChatBanMembers : Fragment() {
         CometChat.unbanGroupMember(groupMember!!.uid, guid!!, object : CallbackListener<String?>() {
             override fun onSuccess(s: String?) {
                 if (bannedMemberRv != null)
-                    ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.unbanned_successfully), groupMember!!.name, gName), UIKitConstants.ErrorTypes.SUCCESS)
-//                    Snackbar.make(bannedMemberRv!!, String.format(resources.getString(R.string.unbanned_successfully), groupMember!!.name, gName), Snackbar.LENGTH_LONG).show()
+//                    ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.unbanned_successfully), groupMember!!.name, gName), UIKitConstants.ErrorTypes.SUCCESS)
                 groupMemberAdapter!!.removeGroupMember(groupMember)
             }
 

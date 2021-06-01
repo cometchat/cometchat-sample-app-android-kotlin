@@ -28,6 +28,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import java.security.SecureRandom
 
 /**
@@ -59,13 +60,13 @@ class CometChatCreateGroup : Fragment() {
         etGroupDesc = view.findViewById(R.id.group_desc)
         etGroupPassword = view.findViewById(R.id.group_pwd)
         etGroupCnfPassword = view.findViewById(R.id.group_cnf_pwd)
-        etGroupCnfPassword!!.addTextChangedListener(object : TextWatcher {
+        etGroupCnfPassword?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                if (!etGroupPassword!!.getText().toString().isEmpty() && s.toString() == etGroupPassword!!.getText().toString()) {
-                    groupCnfPasswordLayout!!.endIconDrawable = resources.getDrawable(R.drawable.ic_check_black_24dp)
-                    groupCnfPasswordLayout!!.setEndIconTintList(ColorStateList.valueOf(resources.getColor(R.color.green_600)))
-                }
+                if (etGroupPassword?.text.toString().isNotEmpty() && s.toString() == etGroupPassword?.text.toString()) {
+                    groupCnfPasswordLayout?.endIconDrawable = resources.getDrawable(R.drawable.ic_check_black_24dp)
+                    groupCnfPasswordLayout?.setEndIconTintList(ColorStateList.valueOf(resources.getColor(R.color.green_600)))
+                } else ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.enter_the_correct_password))
             }
 
             override fun afterTextChanged(s: Editable) {}
@@ -77,82 +78,86 @@ class CometChatCreateGroup : Fragment() {
         groupPasswordLayout = view.findViewById(R.id.input_group_pwd)
         groupCnfPasswordLayout = view.findViewById(R.id.input_group_cnf_pwd)
         groupTypeSpinner = view.findViewById(R.id.grouptype_spinner)
-        groupTypeSpinner!!.setOnItemSelectedListener(object : OnItemSelectedListener {
+        groupTypeSpinner?.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-                if (position == 0) {
-                    groupType = CometChatConstants.GROUP_TYPE_PUBLIC
-                    groupPasswordLayout!!.setVisibility(View.GONE)
-                    groupCnfPasswordLayout!!.setVisibility(View.GONE)
-                } else if (position == 1) {
-                    groupType = CometChatConstants.GROUP_TYPE_PRIVATE
-                    groupPasswordLayout!!.setVisibility(View.GONE)
-                    groupCnfPasswordLayout!!.setVisibility(View.GONE)
-                } else if (position == 2) {
-                    groupType = CometChatConstants.GROUP_TYPE_PASSWORD
-                    groupPasswordLayout!!.setVisibility(View.VISIBLE)
-                    groupCnfPasswordLayout!!.setVisibility(View.VISIBLE)
+                when (position) {
+                    0 -> {
+                        groupType = CometChatConstants.GROUP_TYPE_PUBLIC
+                        groupPasswordLayout!!.visibility = View.GONE
+                        groupCnfPasswordLayout!!.visibility = View.GONE
+                    }
+                    1 -> {
+                        groupType = CometChatConstants.GROUP_TYPE_PRIVATE
+                        groupPasswordLayout!!.visibility = View.GONE
+                        groupCnfPasswordLayout!!.visibility = View.GONE
+                    }
+                    2 -> {
+                        groupType = CometChatConstants.GROUP_TYPE_PASSWORD
+                        groupPasswordLayout!!.visibility = View.VISIBLE
+                        groupCnfPasswordLayout!!.visibility = View.VISIBLE
+                    }
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-        })
+        }
         createGroupBtn = view.findViewById(R.id.btn_create_group)
-        createGroupBtn!!.setOnClickListener(View.OnClickListener { createGroup() })
+        createGroupBtn?.setOnClickListener(View.OnClickListener { createGroup() })
         checkDarkMode()
         return view
     }
 
     private fun checkDarkMode() {
         if (Utils.isDarkMode(context!!)) {
-            des1!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            des2!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            groupNameLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            groupNameLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
-            groupNameLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            etGroupName!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            groupDescLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            groupDescLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
-            groupDescLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            etGroupDesc!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            groupPasswordLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            groupPasswordLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
-            groupPasswordLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            etGroupPassword!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            groupCnfPasswordLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            groupCnfPasswordLayout!!.boxStrokeColor = resources.getColor(R.color.textColorWhite)
-            groupCnfPasswordLayout!!.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            etGroupCnfPassword!!.setTextColor(resources.getColor(R.color.textColorWhite))
+            des1?.setTextColor(resources.getColor(R.color.textColorWhite))
+            des2?.setTextColor(resources.getColor(R.color.textColorWhite))
+            groupNameLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            groupNameLayout?.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            groupNameLayout?.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            etGroupName?.setTextColor(resources.getColor(R.color.textColorWhite))
+            groupDescLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            groupDescLayout?.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            groupDescLayout?.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            etGroupDesc?.setTextColor(resources.getColor(R.color.textColorWhite))
+            groupPasswordLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            groupPasswordLayout?.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            groupPasswordLayout?.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            etGroupPassword?.setTextColor(resources.getColor(R.color.textColorWhite))
+            groupCnfPasswordLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            groupCnfPasswordLayout?.boxStrokeColor = resources.getColor(R.color.textColorWhite)
+            groupCnfPasswordLayout?.defaultHintTextColor = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+            etGroupCnfPassword?.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
-            des1!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            des2!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            groupNameLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
-            groupNameLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
-            etGroupName!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            groupDescLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
-            groupDescLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
-            etGroupDesc!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            groupPasswordLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
-            groupPasswordLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
-            etGroupPassword!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            groupCnfPasswordLayout!!.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
-            groupCnfPasswordLayout!!.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
-            etGroupCnfPassword!!.setTextColor(resources.getColor(R.color.primaryTextColor))
+            des1?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            des2?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            groupNameLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            groupNameLayout?.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            etGroupName?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            groupDescLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            groupDescLayout?.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            etGroupDesc?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            groupPasswordLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            groupPasswordLayout?.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            etGroupPassword?.setTextColor(resources.getColor(R.color.primaryTextColor))
+            groupCnfPasswordLayout?.hintTextColor = ColorStateList.valueOf(resources.getColor(R.color.primaryTextColor))
+            groupCnfPasswordLayout?.boxStrokeColor = resources.getColor(R.color.primaryTextColor)
+            etGroupCnfPassword?.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
     }
 
     private fun createGroup() {
-        if (!etGroupName!!.text.toString().isEmpty()) {
+        if (etGroupName?.text.toString().isNotEmpty()) {
             if (groupType == CometChatConstants.GROUP_TYPE_PUBLIC || groupType == CometChatConstants.GROUP_TYPE_PRIVATE) {
-                val group = Group("group" + generateRandomString(95), etGroupName!!.text.toString(), groupType, "")
+                val group = Group("group" + generateRandomString(95), etGroupName?.text.toString(), groupType, "")
                 createGroup(group)
             } else if (groupType == CometChatConstants.GROUP_TYPE_PASSWORD) {
-                if (etGroupPassword!!.text.toString().isEmpty()) etGroupPassword!!.error = resources.getString(R.string.fill_this_field) else if (etGroupCnfPassword!!.text.toString().isEmpty()) etGroupCnfPassword!!.error = resources.getString(R.string.fill_this_field) else if (etGroupPassword!!.text.toString() == etGroupCnfPassword!!.text.toString()) {
-                    val group = Group("group" + generateRandomString(95), etGroupName!!.text.toString(), groupType, etGroupPassword!!.text.toString())
+                if (etGroupPassword?.text.toString().isEmpty()) etGroupPassword?.error = resources.getString(R.string.fill_this_field) else if (etGroupCnfPassword?.text.toString().isEmpty()) etGroupCnfPassword?.error = resources.getString(R.string.fill_this_field) else if (etGroupPassword?.text.toString() == etGroupCnfPassword?.text.toString()) {
+                    val group = Group("group" + generateRandomString(95), etGroupName?.text.toString(), groupType, etGroupPassword?.text.toString())
                     createGroup(group)
-                } else if (etGroupPassword != null) ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.password_not_matched),UIKitConstants.ErrorTypes.WARNING)
+                } else if (etGroupPassword != null) ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.password_not_matched))
             }
         } else {
-            etGroupName!!.error = resources.getString(R.string.fill_this_field)
+            etGroupName?.error = resources.getString(R.string.fill_this_field)
         }
     }
 
@@ -169,12 +174,11 @@ class CometChatCreateGroup : Fragment() {
                 intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT, group.membersCount)
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC, group.description)
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD, group.password)
-                if (activity != null) activity!!.finish()
+                if (activity != null) activity?.finish()
                 startActivity(intent)
             }
 
             override fun onError(e: CometChatException) {
-//                Snackbar.make(etGroupName!!.rootView, resources.getString(R.string.create_group_error), Snackbar.LENGTH_LONG).show()
                 ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
