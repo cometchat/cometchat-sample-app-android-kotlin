@@ -16,6 +16,13 @@
         android:layout_marginTop="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <ProgressBar
+            android:id="@+id/progress_bar_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+            android:layout_centerInParent="true"
+            android:visibility="gone"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_blocked_user_list"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

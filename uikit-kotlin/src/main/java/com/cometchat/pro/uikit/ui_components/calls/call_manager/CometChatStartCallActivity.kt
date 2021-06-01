@@ -15,6 +15,7 @@ import com.cometchat.pro.core.CallSettings.CallSettingsBuilder
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.User
+import com.cometchat.pro.rtc.model.AudioMode
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
@@ -67,7 +68,11 @@ class CometChatStartCallActivity : AppCompatActivity() {
             }
 
             override fun onUserListUpdated(p0: MutableList<User>?) {
-                Log.e("TAG", "onUserListUpdated: "+p0.toString())
+                Log.e("TAG", "onUserListUpdated: " + p0.toString())
+            }
+
+            override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
+                Log.e("TAG", "onAudioModesUpdated: "+p0.toString() )
             }
 
         })

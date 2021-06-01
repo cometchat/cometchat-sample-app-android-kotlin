@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.messages.threaded_message_list
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +10,12 @@ import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.MessageActionCloseListener
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.OnMessageLongClick
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import java.util.*
 
 class CometChatThreadMessageListActivity : AppCompatActivity(), ThreadAdapter.OnMessageLongClick {
@@ -46,6 +50,9 @@ class CometChatThreadMessageListActivity : AppCompatActivity(), ThreadAdapter.On
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cometchat_message_list)
+
+        if (UIKitSettings.color != null)
+            window.statusBarColor = Color.parseColor(UIKitSettings.color)
 
         if (intent != null) {
             val bundle = Bundle()
@@ -138,6 +145,11 @@ class CometChatThreadMessageListActivity : AppCompatActivity(), ThreadAdapter.On
         dialog.dismiss()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        startActivity(Intent(this, CometChatUI::class.java))
+        finish()
+    }
     companion object{
         private const val TAG = "CometChatMessageListAct"
     }

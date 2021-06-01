@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -28,41 +29,47 @@ import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
-import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.*
-import com.cometchat.pro.uikit.ui_components.messages.extensions.ExtensionResponseListener
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
-import org.json.JSONException
-import org.json.JSONObject
-import com.cometchat.pro.uikit.ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions
+import com.cometchat.pro.uikit.ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity
+import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 
 class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: String) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object{
-        private val TAG = "MessageAdapter"
-        private val IMAGE_MESSAGE = 11
-        private val VIDEO_MESSAGE = 12
-        private val AUDIO_MESSAGE = 13
-        private val TEXT_MESSAGE = 14
-        private val REPLY_TEXT_MESSAGE = 15
-        private val FILE_MESSAGE = 16
-        private val LINK_MESSAGE = 17
-        private val DELETE_MESSAGE = 18
-        private val CUSTOM_MESSAGE = 19
-        private val LOCATION_CUSTOM_MESSAGE = 20
+        private const val TAG = "MessageAdapter"
+        private const val IMAGE_MESSAGE = 11
+        private const val VIDEO_MESSAGE = 12
+        private const val AUDIO_MESSAGE = 13
+        private const val TEXT_MESSAGE = 14
+        private const val REPLY_TEXT_MESSAGE = 15
+        private const val FILE_MESSAGE = 16
+        private const val LINK_MESSAGE = 17
+        private const val DELETE_MESSAGE = 18
+        private const val CUSTOM_MESSAGE = 19
+        private const val LOCATION_CUSTOM_MESSAGE = 20
         var LATITUDE = 0.0
         var LONGITUDE = 0.0
     }
 
+    private var isDataMasking: Boolean = false
+    private var isProfanityFilter: Boolean = false
+    private var isImageNotSafe: Boolean = false
     private val messageList: MutableList<BaseMessage> = ArrayList()
+    var thumbnailUrl : String? = null
 
 
     var context: Context
@@ -103,6 +110,17 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             e.printStackTrace()
         }
         fontUtils = FontUtils.getInstance(context)
+
+        FeatureRestriction.isProfanityFilterEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isProfanityFilter = p0
+            }
+        })
+        FeatureRestriction.isDataMaskingEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isDataMasking = p0
+            }
+        })
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -189,7 +207,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, i: Int) {
         val baseMessage = messageList[i]
-        when (viewHolder.getItemViewType()) {
+        when (viewHolder.itemViewType) {
             DELETE_MESSAGE -> setDeleteData(viewHolder as DeleteMessageViewHolder, i)
             TEXT_MESSAGE, REPLY_TEXT_MESSAGE -> setTextData(viewHolder as TextMessageViewHolder, i)
             LINK_MESSAGE -> setLinkData(viewHolder as LinkMessageViewHolder, i)
@@ -204,12 +222,12 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
     private fun setLocationData(viewHolder: LocationMessageViewHolder, i: Int) {
         val baseMessage = messageList[i]
-        viewHolder.view.tvUser.setVisibility(View.VISIBLE)
-        viewHolder.view.ivUser.setVisibility(View.VISIBLE)
+        viewHolder.view.tvUser.visibility = View.VISIBLE
+        viewHolder.view.ivUser.visibility = View.VISIBLE
         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-        viewHolder.view.tvUser.setText(baseMessage.sender.name)
+        viewHolder.view.tvUser.text = baseMessage.sender.name
         setLocationData(baseMessage, viewHolder.view.tvPlaceName, viewHolder.view.ivMap)
-        viewHolder.view.senderLocationTxt.setText(String.format(context!!.getString(R.string.shared_location), baseMessage.sender.name))
+        viewHolder.view.senderLocationTxt.text = String.format(context.getString(R.string.shared_location), baseMessage.sender.name)
         viewHolder.view.navigateBtn.setOnClickListener(View.OnClickListener {
             try {
                 val latitude = (baseMessage as CustomMessage).customData.getDouble("latitude")
@@ -221,7 +239,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 val uri = Uri.parse(uriString)
                 val mapIntent = Intent(Intent.ACTION_VIEW, uri)
                 //                    mapIntent.setPackage("com.google.android.apps.maps");
-                context!!.startActivity(mapIntent)
+                context.startActivity(mapIntent)
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -230,7 +248,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         if (messageList[messageList.size - 1] == baseMessage) {
             selectedItemList.add(baseMessage.id)
         }
-        if (selectedItemList.contains(baseMessage.id)) viewHolder.view.txtTime.setVisibility(View.VISIBLE) else viewHolder.view.txtTime.setVisibility(View.GONE)
+        if (selectedItemList.contains(baseMessage.id)) viewHolder.view.txtTime.visibility = View.VISIBLE else viewHolder.view.txtTime.visibility = View.GONE
 
         viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
             if (isLongClickEnabled && !isImageMessageClick) {
@@ -261,7 +279,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             LONGITUDE = baseMessage.customData.getDouble("longitude")
             tvAddress.text = Utils.getAddress(context, LATITUDE, LONGITUDE)
             val mapUrl = UIKitConstants.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitConstants.MapUrl.MAP_ACCESS_KEY
-            Glide.with(context!!)
+            Glide.with(context)
                     .load(mapUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(ivMap)
@@ -277,12 +295,12 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
             viewHolder.view.tvUser.setText(baseMessage.sender.name)
             viewHolder.view.goTxtMessage.setText(context!!.resources.getString(R.string.custom_message))
             viewHolder.view.goTxtMessage.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoLight))
-            viewHolder.view.goTxtMessage.setTextColor(context!!.resources.getColor(R.color.primaryTextColor))
+            viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
             showMessageTime(viewHolder, baseMessage)
             if (messageList[messageList.size - 1] == baseMessage) {
                 selectedItemList.add(baseMessage.id)
             }
-            if (selectedItemList.contains(baseMessage.id)) viewHolder.view.txtTime.setVisibility(View.VISIBLE) else viewHolder.view.txtTime.setVisibility(View.GONE)
+            if (selectedItemList.contains(baseMessage.id)) viewHolder.view.txtTime.visibility = View.VISIBLE else viewHolder.view.txtTime.visibility = View.GONE
             viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
                 setSelectedMessage(baseMessage.id)
                 notifyDataSetChanged()
@@ -296,11 +314,11 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 
         if (baseMessage != null && baseMessage.deletedAt == 0L) {
             setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
-            viewHolder.view.tvUser.setText(baseMessage.sender.name)
-            viewHolder.view.tvFileName.setText((baseMessage as MediaMessage).attachment.fileName)
-            viewHolder.view.tvFileExtension.setText(baseMessage.attachment.fileExtension)
+            viewHolder.view.tvUser.text = baseMessage.sender.name
+            viewHolder.view.tvFileName.text = (baseMessage as MediaMessage).attachment.fileName
+            viewHolder.view.tvFileExtension.text = baseMessage.attachment.fileExtension
             val fileSize = baseMessage.attachment.fileSize
-            viewHolder.view.tvFileSize.setText(Utils.getFileSize(fileSize))
+            viewHolder.view.tvFileSize.text = Utils.getFileSize(fileSize)
             showMessageTime(viewHolder, baseMessage)
 
 //              if (selectedItemList.contains(baseMessage.getId()))
@@ -316,7 +334,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 //                  }
                 notifyDataSetChanged()
             })
-            viewHolder.view.tvFileName.setOnClickListener(View.OnClickListener { view: View? -> MediaUtils.openFile(baseMessage.attachment.fileUrl, context!!) })
+            viewHolder.view.tvFileName.setOnClickListener(View.OnClickListener { view: View? -> MediaUtils.openFile(baseMessage.attachment.fileUrl, context) })
             viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
                 if (!isLongClickEnabled && !isTextMessageClick) {
                     isImageMessageClick = true
@@ -337,7 +355,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         setAvatar(viewHolder.view.ivUser, baseMessage.sender.avatar, baseMessage.sender.name)
         viewHolder.view.tvUser.setText(baseMessage.sender.name)
 
-        if ((baseMessage as MediaMessage).attachment != null) Glide.with(context!!).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goVideoMessage)
+        if ((baseMessage as MediaMessage).attachment != null) Glide.with(context).load(baseMessage.attachment.fileUrl).into(viewHolder.view.goVideoMessage)
 
         showMessageTime(viewHolder, baseMessage)
 //        if (selectedItemList.contains(baseMessage.getId()))
@@ -367,7 +385,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         })
         viewHolder.view.reactionsLayout.visibility = View.GONE
         setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
-        viewHolder.view.playBtn.setOnClickListener(View.OnClickListener { MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context!!) })
+        viewHolder.view.playBtn.setOnClickListener(View.OnClickListener { MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context) })
     }
 
     private fun setAudioData(viewHolder: AudioMessageViewHolder, i: Int) {
@@ -381,7 +399,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 //                viewHolder.txtTime.setVisibility(View.VISIBLE);
 //            else
 //                viewHolder.txtTime.setVisibility(View.GONE);
-            viewHolder.view.audiolengthTv.setText(Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize))
+            viewHolder.view.audiolengthTv.text = Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize)
             viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
             viewHolder.view.playBtn.setOnClickListener(View.OnClickListener { //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
                 mediaPlayer.reset()
@@ -426,8 +444,19 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         viewHolder.view.tvUser.text = baseMessage.sender.name
 
         viewHolder.view.goImgMessage.setImageDrawable(context.resources.getDrawable(R.drawable.ic_defaulf_image))
-        val isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
-        val thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
+
+        FeatureRestriction.isImageModerationEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                isImageNotSafe = Extensions.getImageModeration(context, baseMessage)
+            }
+        })
+        FeatureRestriction.isThumbnailGenerationEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0)
+                    thumbnailUrl = Extensions.getThumbnailGeneration(context, baseMessage)
+            }
+        })
+
         if (thumbnailUrl != null) {
 //            Glide.with(context).asBitmap().load(thumbnailUrl).into(viewHolder.view.goImgMessage)
             if ((baseMessage as MediaMessage).attachment.fileExtension.equals(".gif", ignoreCase = true)) {
@@ -445,9 +474,9 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 setImageDrawable(viewHolder, baseMessage.attachment.fileUrl, false, isImageNotSafe)
         }
         if (isImageNotSafe) {
-            viewHolder.view.sensitiveLayout.setVisibility(View.VISIBLE)
+            viewHolder.view.sensitiveLayout.visibility = View.VISIBLE
         } else {
-            viewHolder.view.sensitiveLayout.setVisibility(View.GONE)
+            viewHolder.view.sensitiveLayout.visibility = View.GONE
         }
 //        if (smallUrl != null) {
 //            Glide.with(context!!).asBitmap().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).load(smallUrl).into(object : SimpleTarget<Bitmap?>() {
@@ -488,9 +517,9 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 alert.setNegativeButton("No") { dialog, which -> dialog.dismiss() }
                 alert.create().show()
             } else {
-            setSelectedMessage(baseMessage.id)
-            notifyDataSetChanged()
-            MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context!!)
+                setSelectedMessage(baseMessage.id)
+                notifyDataSetChanged()
+                MediaUtils.openFile((baseMessage as MediaMessage).attachment.fileUrl, context!!)
             }
         })
         viewHolder.view.rlMessage.setOnLongClickListener(OnLongClickListener {
@@ -506,7 +535,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
         setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
     }
 
-    private fun setImageDrawable(viewHolder: ImageMessageViewHolder, url: String, gif: Boolean, isImageNotSafe: Boolean) {
+    private fun setImageDrawable(viewHolder: ImageMessageViewHolder, url: String?, gif: Boolean, isImageNotSafe: Boolean) {
         if (gif) {
             Glide.with(context).asGif().diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(true).load(url).into(viewHolder.view.goImgMessage)
@@ -659,10 +688,10 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
 //            if (isExtensionEnabled("data-masking"))
 //                message = Extensions.checkDataMasking(baseMessage)
 
-            if (Extensions.checkExtensionEnabled("data-masking")) {
+            if (isDataMasking) {
                 message = Extensions.checkDataMasking(baseMessage)
             }
-            if (Extensions.checkExtensionEnabled("profanity-filter")) {
+            if (isProfanityFilter) {
                 message = Extensions.getProfanityFilter(baseMessage)
             }
 
@@ -711,7 +740,8 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                 val chip = Chip(context)
                 chip.chipStrokeWidth = 2f
                 chip.chipBackgroundColor = ColorStateList.valueOf(context.resources.getColor(android.R.color.transparent))
-                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
+                chip.chipStrokeColor = ColorStateList.valueOf(Color.parseColor(UIKitSettings.color))
+//                chip.chipStrokeColor = ColorStateList.valueOf(context.resources.getColor(R.color.colorPrimaryDark))
                 chip.text = k + " " + reactionOnMessage[k]
                 reactionLayout.addView(chip)
                 chip.setOnLongClickListener {

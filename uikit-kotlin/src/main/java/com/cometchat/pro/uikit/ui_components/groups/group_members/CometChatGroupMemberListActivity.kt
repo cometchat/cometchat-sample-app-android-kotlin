@@ -1,5 +1,6 @@
 package com.cometchat.pro.uikit.ui_components.groups.group_members
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -7,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 class CometChatGroupMemberListActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -22,6 +25,7 @@ class CometChatGroupMemberListActivity : AppCompatActivity() {
         bundle.putBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction().replace(R.id.frame_fragment, fragment).commit()
+        if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

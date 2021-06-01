@@ -1,6 +1,5 @@
 package com.cometchat.pro.uikit.ui_components.groups.group_members
 
-import com.cometchat.pro.uikit.ui_components.groups.group_members.GroupMemberAdapter.GroupMemberViewHolder
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.models.GroupMember
+import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.CometchatUserListItemBinding
+import com.cometchat.pro.uikit.ui_components.groups.group_members.GroupMemberAdapter.GroupMemberViewHolder
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
@@ -201,6 +202,16 @@ class GroupMemberAdapter : RecyclerView.Adapter<GroupMemberViewHolder> {
             }
         }
         notifyDataSetChanged()
+    }
+
+    fun updateMemberByStatus(user: User) {
+        for (groupMember in groupMemberList) {
+            if (groupMember.uid.equals(user.uid, ignoreCase = true)) {
+                val index = groupMemberList.indexOf(groupMember)
+                groupMember.status = user.status
+                notifyItemChanged(index)
+            }
+        }
     }
 
     companion object {

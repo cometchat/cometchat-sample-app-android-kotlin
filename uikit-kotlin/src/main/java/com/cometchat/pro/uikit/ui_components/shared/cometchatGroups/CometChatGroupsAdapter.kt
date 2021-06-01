@@ -1,8 +1,8 @@
 package com.cometchat.pro.uikit.ui_components.shared.cometchatGroups
 
-import com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroupsAdapter.GroupViewHolder
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -11,8 +11,11 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.GroupListItemBinding
+import com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroupsAdapter.GroupViewHolder
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import java.util.*
 
 /**
@@ -68,7 +71,8 @@ class CometChatGroupsAdapter(context: Context) : RecyclerView.Adapter<GroupViewH
             else -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
         }
 
-        groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(context.resources.getColor(R.color.colorPrimary))
+        groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(Color.parseColor(UIKitSettings.color))
+//        groupViewHolder.groupListRowBinding.avGroup.setBackgroundColor(context.resources.getColor(R.color.colorPrimary))
         groupViewHolder.groupListRowBinding.root.setTag(R.string.group, group)
         groupViewHolder.groupListRowBinding.txtUserMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
         groupViewHolder.groupListRowBinding.txtUserName.typeface = fontUtils.getTypeFace(FontUtils.robotoMedium)

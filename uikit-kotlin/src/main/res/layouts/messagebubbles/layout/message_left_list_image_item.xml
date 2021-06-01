@@ -20,7 +20,6 @@
         <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
             android:id="@+id/iv_user"
             android:layout_width="24dp"
-            app:avatar="@{mediaMessage.sender.avatar}"
             android:layout_height="24dp"
             android:layout_alignTop="@id/cv_image_message_container"
             android:layout_marginStart="4dp"
@@ -28,7 +27,6 @@
             tools:src="@tools:sample/avatars" />
 
         <TextView
-            android:text="@{mediaMessage.sender.name}"
             android:id="@+id/tv_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -22,7 +22,6 @@
                 android:layout_width="24dp"
                 android:id="@+id/iv_user"
                 tools:src="@tools:sample/avatars"
-                app:avatar="@{customMessage.sender.avatar}"
                 android:layout_marginBottom="4dp"
                 android:layout_marginStart="4dp"
                 android:layout_height="24dp"/>
@@ -30,7 +29,6 @@
                 android:id="@+id/tv_user"
                 tools:text="Iron Man"
                 android:textSize="12sp"
-                android:text="@{customMessage.sender.name}"
                 android:layout_marginStart="10dp"
                 android:layout_toEndOf="@+id/iv_user"
                 android:layout_width="wrap_content"

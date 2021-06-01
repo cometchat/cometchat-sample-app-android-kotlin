@@ -36,7 +36,6 @@ import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
-import okhttp3.internal.Util
 import java.util.*
 
 /**
@@ -77,7 +76,7 @@ class CometChatGroupMemberList : Fragment() {
         etSearch!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 0) clearSearch!!.visibility = View.VISIBLE
+                if (charSequence.isNotEmpty()) clearSearch!!.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {}
@@ -153,13 +152,12 @@ class CometChatGroupMemberList : Fragment() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
                 groupMemberListAdapter!!.removeGroupMember(groupMember)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_admin), groupMember.name), UIKitConstants.ErrorTypes.INFO)
-//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.is_now_admin), groupMember.name), Snackbar.LENGTH_LONG).show()
+//                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_admin), groupMember.name), UIKitConstants.ErrorTypes.INFO)
             }
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.update_scope_error),UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -169,13 +167,12 @@ class CometChatGroupMemberList : Fragment() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
                 groupMemberListAdapter!!.removeGroupMember(groupMember)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_moderator), groupMember.name), UIKitConstants.ErrorTypes.INFO)
-//                Snackbar.make(rvUserList!!, String.format(resources.getString(R.string.is_now_moderator), groupMember.name), Snackbar.LENGTH_LONG).show()
+//                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_moderator), groupMember.name), UIKitConstants.ErrorTypes.INFO)
             }
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.update_scope_error),UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }
@@ -208,7 +205,7 @@ class CometChatGroupMemberList : Fragment() {
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.group_member_list_error),UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }

@@ -1,5 +1,6 @@
 package com.cometchat.pro.uikit.ui_components.groups.admin_moderator_list
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -7,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 class CometChatAdminModeratorListActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -17,6 +20,7 @@ class CometChatAdminModeratorListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen)
         handleIntent()
+        if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)
     }
 
     private fun handleIntent() {

@@ -17,6 +17,8 @@ import com.cometchat.pro.models.Group
 import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 
 @BindingMethods(value = [BindingMethod(type = CometChatAvatar::class, attribute = "app:avatar", method = "setAvatar"), BindingMethod(type = CometChatAvatar::class, attribute = "app:avatar_name", method = "setInitials")])
@@ -188,25 +190,27 @@ class CometChatAvatar : AppCompatImageView {
     protected fun init() {
         rectF = RectF()
         clipPath = Path()
-        rectF!!.set(calculateBounds())
+        rectF?.set(calculateBounds())
 
         //imageSize = getResources().getDimensionPixelSize(R.dimen.avatar_size);
         imageSize = height
         cornerRadius = Utils.dpToPixel(2f, resources).toInt()
         paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint!!.color = resources.getColor(R.color.colorPrimary)
+        if (UIKitSettings.color != null && UIKitSettings.color.isNotEmpty()) {
+            paint?.color = Color.parseColor(UIKitSettings.color)
+        } else paint?.color = resources.getColor(R.color.colorPrimary)
         textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-        textPaint!!.textSize = 16f * resources.displayMetrics.scaledDensity
-        textPaint!!.color = Color.WHITE
+        textPaint?.textSize = 16f * resources.displayMetrics.scaledDensity
+        textPaint?.color = Color.WHITE
         borderPaint = Paint()
-        borderPaint!!.setStyle(Paint.Style.STROKE)
-        borderPaint!!.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC_OVER))
+        borderPaint?.style = Paint.Style.STROKE
+        borderPaint?.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
         // borderPaint.setColor(ContextCompat.getColor(context, R.color.border_color));
         // borderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.border_width));
-        borderPaint!!.setColor(borderColor)
-        borderPaint!!.setAntiAlias(true)
-        borderPaint!!.setStrokeWidth(borderWidth)
-        color = resources.getColor(R.color.colorPrimary)
+        borderPaint?.color = borderColor
+        borderPaint?.isAntiAlias = true
+        borderPaint?.strokeWidth = borderWidth
+        color = if (UIKitSettings.color != null && UIKitSettings.color.isEmpty()) Color.parseColor(UIKitSettings.color) else resources.getColor(R.color.colorPrimary)
         outlineProvider = OutlineProvider()
     }
 
@@ -235,7 +239,7 @@ class CometChatAvatar : AppCompatImageView {
                     setValues()
                 }
             } else {
-                text = if (user.name != null && !user.name.isEmpty()) {
+                text = if (user.name != null && user.name.isNotEmpty()) {
                     if (user.name.length > 2) {
                         user.name.substring(0, 2)
                     } else {

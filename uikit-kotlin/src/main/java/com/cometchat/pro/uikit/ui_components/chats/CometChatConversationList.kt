@@ -5,32 +5,31 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import android.widget.TextView.OnEditorActionListener
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.core.CometChat.GroupListener
+import com.cometchat.pro.core.CometChat.*
 import com.cometchat.pro.core.ConversationsRequest
 import com.cometchat.pro.core.ConversationsRequest.ConversationsRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.CometChatHelper
 import com.cometchat.pro.models.*
-import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
-import okhttp3.internal.Util
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 /*
 
@@ -56,6 +55,9 @@ class CometChatConversationList : Fragment(), TextWatcher {
     private var rlSearchBox: RelativeLayout? = null
     private var noConversationView: LinearLayout? = null
     private var vw: View? = null
+    private var conversation : Conversation? = null
+    private var conversationList: MutableList<Conversation> = ArrayList()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -68,6 +70,10 @@ class CometChatConversationList : Fragment(), TextWatcher {
         rlSearchBox = vw?.findViewById(R.id.rl_search_box)
         conversationShimmer = vw?.findViewById(R.id.shimmer_layout)
         clearSearch = vw?.findViewById(R.id.clear_search)
+        if (!FeatureRestriction.isChatSearchEnabled()) {
+            searchEdit?.visibility = View.GONE
+            clearSearch?.visibility = View.GONE
+        }
         checkDarkMode()
         searchEdit?.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
@@ -79,9 +85,9 @@ class CometChatConversationList : Fragment(), TextWatcher {
         })
         clearSearch?.setOnClickListener {
             searchEdit?.setText("")
-            clearSearch!!.visibility = View.GONE
+            clearSearch?.visibility = View.GONE
             rvConversation?.searchConversation(searchEdit?.text.toString())
-            val inputMethodManager: InputMethodManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val inputMethodManager: InputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             // Hide the soft keyboard
             inputMethodManager.hideSoftInputFromWindow(searchEdit?.windowToken, 0)
         }
@@ -99,18 +105,68 @@ class CometChatConversationList : Fragment(), TextWatcher {
         rvConversation?.setItemClickListener(object : OnItemClickListener<Conversation>() {
 
             override fun OnItemClick(t: Any, position: Int) {
-                if(events !=null)
+                conversation = t as Conversation
+                if (events != null)
                     events.OnItemClick(t as Conversation, position)
             }
         })
         return vw
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        object : MySwipeHelper(requireContext(),rvConversation as RecyclerView,200){
+            override fun instantiateMyButton(
+                    viewHolder: RecyclerView.ViewHolder,
+                    buffer: MutableList<MyButton>
+            ) {
+                buffer.add(MyButton(object : MyButtonClickListener {
+                    override fun onClick(pos: Int) {
+                        var conversation : Conversation = conversationList[pos]
+                        deleteConversations(conversation)
+                    }
+                }))
+            }
+
+        }
+    }
+
+    private fun deleteConversations(conversation: Conversation) {
+        var entity = AppEntity()
+        if (conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER) {
+            entity = conversation.conversationWith as User
+            deleteConversation(entity.uid, conversation.conversationType, object : CallbackListener<String>(){
+                override fun onSuccess(p0: String?) {
+                    conversationList.remove(conversation)
+                    rvConversation?.remove(conversation)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    ErrorMessagesUtils.cometChatErrorMessage(context, p0?.code)
+                }
+
+            })
+        } else {
+            entity = conversation.conversationWith as Group
+            deleteConversation(entity.guid, conversation.conversationType, object : CallbackListener<String>(){
+                override fun onSuccess(p0: String?) {
+                    conversationList.remove(conversation)
+                    rvConversation?.remove(conversation)
+                }
+
+                override fun onError(p0: CometChatException?) {
+                    ErrorMessagesUtils.cometChatErrorMessage(context, p0?.code)
+                }
+
+            })
+        }
+    }
+
     private fun checkDarkMode() {
         if (Utils.isDarkMode(context!!)) {
-            tvTitle!!.setTextColor(resources.getColor(R.color.textColorWhite))
+            tvTitle?.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
-            tvTitle!!.setTextColor(resources.getColor(R.color.primaryTextColor))
+            tvTitle?.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
     }
 
@@ -122,14 +178,20 @@ class CometChatConversationList : Fragment(), TextWatcher {
      */
     private fun makeConversationList() {
         if (conversationsRequest == null) {
-            conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
+            when {
+                UIKitSettings.chatListMode -> conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
+                UIKitSettings.groupInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_GROUP).setLimit(50).build()
+                UIKitSettings.userInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_USER).setLimit(50).build()
+            }
+
         }
-        conversationsRequest!!.fetchNext(object : CallbackListener<List<Conversation>>() {
+        conversationsRequest?.fetchNext(object : CallbackListener<List<Conversation>>() {
             override fun onSuccess(conversations: List<Conversation>) {
                 if (conversations.isNotEmpty()) {
                     stopHideShimmer()
-                    noConversationView!!.visibility = View.GONE
-                    rvConversation!!.setConversationList(conversations)
+                    noConversationView?.visibility = View.GONE
+                    rvConversation?.setConversationList(conversations)
+                    conversationList = conversations as MutableList<Conversation>
                 } else {
                     checkNoConverstaion()
                 }
@@ -145,13 +207,13 @@ class CometChatConversationList : Fragment(), TextWatcher {
     }
 
     private fun checkNoConverstaion() {
-        if (rvConversation!!.size() == 0) {
+        if (rvConversation?.size() == 0) {
             stopHideShimmer()
-            noConversationView!!.visibility = View.VISIBLE
-            rvConversation!!.visibility = View.GONE
+            noConversationView?.visibility = View.VISIBLE
+            rvConversation?.visibility = View.GONE
         } else {
-            noConversationView!!.visibility = View.GONE
-            rvConversation!!.visibility = View.VISIBLE
+            noConversationView?.visibility = View.GONE
+            rvConversation?.visibility = View.VISIBLE
         }
     }
 
@@ -159,10 +221,10 @@ class CometChatConversationList : Fragment(), TextWatcher {
      * This method is used to hide shimmer effect if the list is loaded.
      */
     private fun stopHideShimmer() {
-        conversationShimmer!!.stopShimmer()
-        conversationShimmer!!.visibility = View.GONE
-        tvTitle!!.visibility = View.VISIBLE
-        rlSearchBox!!.visibility = View.VISIBLE
+        conversationShimmer?.stopShimmer()
+        conversationShimmer?.visibility = View.GONE
+        tvTitle?.visibility = View.VISIBLE
+        rlSearchBox?.visibility = View.VISIBLE
     }
 
     /**
@@ -174,39 +236,39 @@ class CometChatConversationList : Fragment(), TextWatcher {
         CometChat.addMessageListener(TAG, object : CometChat.MessageListener() {
             override fun onTextMessageReceived(message: TextMessage) {
                 if (rvConversation != null) {
-                    rvConversation!!.refreshConversation(message)
+                    rvConversation?.refreshConversation(message)
                     checkNoConverstaion()
                 }
             }
 
             override fun onMediaMessageReceived(message: MediaMessage) {
                 if (rvConversation != null) {
-                    rvConversation!!.refreshConversation(message)
+                    rvConversation?.refreshConversation(message)
                     checkNoConverstaion()
                 }
             }
 
             override fun onCustomMessageReceived(message: CustomMessage) {
                 if (rvConversation != null) {
-                    rvConversation!!.refreshConversation(message)
+                    rvConversation?.refreshConversation(message)
                     checkNoConverstaion()
                 }
             }
 
             override fun onMessagesDelivered(messageReceipt: MessageReceipt) {
-                if (rvConversation != null) rvConversation!!.setReciept(messageReceipt)
+                if (rvConversation != null) rvConversation?.setReciept(messageReceipt)
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt) {
-                if (rvConversation != null) rvConversation!!.setReciept(messageReceipt)
+                if (rvConversation != null) rvConversation?.setReciept(messageReceipt)
             }
 
             override fun onMessageEdited(message: BaseMessage) {
-                if (rvConversation != null) rvConversation!!.refreshConversation(message)
+                if (rvConversation != null) rvConversation?.refreshConversation(message)
             }
 
             override fun onMessageDeleted(message: BaseMessage) {
-                if (rvConversation != null) rvConversation!!.refreshConversation(message)
+                if (rvConversation != null) rvConversation?.refreshConversation(message)
             }
         })
         CometChat.addGroupListener(TAG, object : GroupListener() {
@@ -254,7 +316,12 @@ class CometChatConversationList : Fragment(), TextWatcher {
     private fun updateConversation(baseMessage: BaseMessage, isRemove: Boolean) {
         if (rvConversation != null) {
             val conversation = CometChatHelper.getConversationFromMessage(baseMessage)
-            if (isRemove) rvConversation!!.remove(conversation) else rvConversation!!.update(conversation)
+            if (isRemove) rvConversation?.remove(conversation)
+            else if (UIKitSettings.chatListMode) rvConversation?.update(conversation)
+            else if (UIKitSettings.groupInMode && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP)
+                rvConversation?.update(conversation)
+            else if (UIKitSettings.userInMode && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER)
+                rvConversation?.update(conversation)
             checkNoConverstaion()
         }
     }
@@ -271,8 +338,8 @@ class CometChatConversationList : Fragment(), TextWatcher {
         super.onResume()
         Log.d(TAG, "onResume: ")
         conversationsRequest = null
-        searchEdit!!.addTextChangedListener(this)
-        rvConversation!!.clearList()
+        searchEdit?.addTextChangedListener(this)
+        rvConversation?.clearList()
         makeConversationList()
         addConversationListener()
     }
@@ -285,7 +352,7 @@ class CometChatConversationList : Fragment(), TextWatcher {
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause: ")
-        searchEdit!!.removeTextChangedListener(this)
+        searchEdit?.removeTextChangedListener(this)
         removeConversationListener()
     }
 
@@ -297,14 +364,14 @@ class CometChatConversationList : Fragment(), TextWatcher {
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     override fun afterTextChanged(s: Editable) {
-        if (s.length == 0) {
+        if (s.isEmpty()) {
 //                    // if searchEdit is empty then fetch all conversations.
             conversationsRequest = null
-            rvConversation!!.clearList()
+            rvConversation?.clearList()
             makeConversationList()
         } else {
 //                    // Search conversation based on text in searchEdit field.
-            rvConversation!!.searchConversation(s.toString())
+            rvConversation?.searchConversation(s.toString())
         }
     }
 

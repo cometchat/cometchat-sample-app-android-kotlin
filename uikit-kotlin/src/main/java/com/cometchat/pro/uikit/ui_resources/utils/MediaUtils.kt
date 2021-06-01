@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
 import android.media.AudioManager
@@ -20,10 +21,13 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.loader.content.CursorLoader
+import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.uikit.BuildConfig
+import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.generateFileName
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.getDocumentCacheDir
 import com.cometchat.pro.uikit.ui_resources.utils.Utils.Companion.getFileName
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,6 +39,7 @@ public class MediaUtils {
         var pictureImagePath: String? = null
 
         var uri: Uri? = null
+        private var bitmap: Bitmap? = null
 
         fun getPickImageChooserIntent(a: Activity): Intent? {
             activity = a
@@ -528,15 +533,17 @@ public class MediaUtils {
         }
 
         fun playSendSound(context: Context?, ringId: Int) {
-            val mMediaPlayer = MediaPlayer.create(context, ringId)
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
-            mMediaPlayer.start()
-            mMediaPlayer.setOnCompletionListener { mediaPlayer ->
-                var mediaPlayer = mediaPlayer
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop()
-                    mediaPlayer.release()
-                    mediaPlayer = null
+            if (FeatureRestriction.isMessagesSoundEnabled()) {
+                val mMediaPlayer = MediaPlayer.create(context, ringId)
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                mMediaPlayer.start()
+                mMediaPlayer.setOnCompletionListener { mediaPlayer ->
+                    var mediaPlayer = mediaPlayer
+                    if (mediaPlayer != null) {
+                        mediaPlayer.stop()
+                        mediaPlayer.release()
+                        mediaPlayer = null
+                    }
                 }
             }
         }
@@ -545,5 +552,99 @@ public class MediaUtils {
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(100)
         }
+
+        fun saveFile(context: Context, imageUri: Uri, messageType: String, sendIntentType : String) :File? {
+            val var1 = Environment.getExternalStorageDirectory().toString() + "/" + context.resources.getString(R.string.app_name) + "/" + "sent/"
+            Utils.createDirectory(var1)
+            if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE)
+                return saveImageFile(context, var1, imageUri, sendIntentType)
+            else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO || messageType == CometChatConstants.MESSAGE_TYPE_AUDIO || messageType == CometChatConstants.MESSAGE_TYPE_FILE)
+                return saveAudioVideoDocumentFiles(context, var1, imageUri, messageType, sendIntentType)
+            return null
+        }
+
+        private fun saveAudioVideoDocumentFiles(context: Context, var1: String, imageUri: Uri, messageType: String, sendIntentExtensionType: String): File? {
+            var file : File? = null
+            var count : Int? = 0
+            val istream : InputStream? = context.contentResolver.openInputStream(imageUri)
+            if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
+                val videoPath = var1 + "/" +"video/"
+                Utils.createDirectory(videoPath)
+                val extension = filterExtension(imageUri, sendIntentExtensionType)
+                file = File(videoPath, extension)
+            }
+            else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
+                val audioPath = var1 + "/" +"audio/"
+                Utils.createDirectory(audioPath)
+                val extension = filterExtension(imageUri, sendIntentExtensionType)
+                file = File(audioPath, extension)
+            }
+            else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
+                val docPath = var1 + "/" +"document/"
+                Utils.createDirectory(docPath)
+                val extension = filterExtension(imageUri, sendIntentExtensionType)
+                file = File(docPath, extension)
+            }
+            val byte = ByteArray(4096)
+            val out: FileOutputStream = FileOutputStream(file)
+            while (istream?.read(byte).also({ count = it }) != -1) {
+                out.write(byte, 0, count!!)
+            }
+            Log.e("TAG", "saveVideoFile: " + file.toString())
+            // flushing output
+            out.flush()
+            // closing streams
+            out.close()
+            istream?.close()
+
+            return file
+        }
+
+        private fun filterExtension(uri: Uri, extensionType : String) : String? {
+            Log.e("TAG", "filterExtension: uri " + uri.toString())
+            val fileString = uri.toString() //this is your String representing the File
+            val lastDot = fileString.lastIndexOf('.')
+            Log.e("TAG", "filterExtension: lastdot "+lastDot.toString())
+            if (lastDot > 0) {
+                val extension = fileString.substring(lastDot)
+                Log.e("TAG", "filterExtension: " + extension)
+                if (extension.contains(".pdf") || extension.contains(".docx") || extension.contains(".msword") || extension.contains(".vnd.ms.excel") || extension.contains(".mspowerpoint") || extension.contains(".zip")) {
+                    return uri.lastPathSegment
+                } else if (extensionType == "vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                    return uri.lastPathSegment + ".docx"
+                } else if (extensionType == "vnd.openxmlformats-officedocument.presentationml.presentation") {
+                    return uri.lastPathSegment + ".pptx"
+                } else {
+                    return uri.lastPathSegment + "." + extensionType
+                }
+            } else return uri.lastPathSegment
+        }
+
+        private fun saveImageFile(context: Context, var1: String, imageUri: Uri, sendIntentType: String) : File {
+            var file :File? = null
+            var imagePath = var1 + "/" +"image/"
+            Utils.createDirectory(imagePath)
+            val istream = context.contentResolver.openInputStream(imageUri)
+            val extension = filterExtension(imageUri, sendIntentType)
+            file = File(imagePath, extension)
+
+            bitmap = BitmapFactory.decodeStream(istream)
+            val bytes = ByteArrayOutputStream()
+            bitmap?.compress(Bitmap.CompressFormat.PNG, 60, bytes)
+
+            var out: OutputStream = FileOutputStream(file)
+            out.write(bytes.toByteArray())
+            istream?.close()
+            out.flush()
+            out.close()
+            return file
+        }
+
+        fun getExtensionType(type: String): String {
+            val index = type.lastIndexOf('/')
+            val extension = type.substring(index + 1)
+            return extension
+        }
+
     }
 }

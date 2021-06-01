@@ -22,11 +22,25 @@
     </HorizontalScrollView>
 
     <TextView
+        android:id="@+id/send_message_privately"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_messageinprivate"
+        android:drawableTint="@color/primaryTextColor"
+        android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/send_message_privately"
+        android:textStyle="bold" />
+
+    <TextView
         android:id="@+id/message_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:drawableStart="@drawable/ic_info"
+        android:drawableStart="@drawable/ic_info_new"
         android:drawablePadding="16dp"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
@@ -39,8 +53,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:drawableStart="@drawable/ic_thread_24dp"
+        android:drawableStart="@drawable/start_thread"
         android:drawablePadding="16dp"
+        android:drawableTint="@color/primaryTextColor"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="16dp"

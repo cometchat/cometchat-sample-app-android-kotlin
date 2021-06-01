@@ -1,10 +1,12 @@
 package com.cometchat.pro.uikit.ui_components.messages.forward_message
 
-import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversationsAdapter
+import android.Manifest
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -20,7 +22,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -34,21 +35,22 @@ import com.cometchat.pro.core.ConversationsRequest
 import com.cometchat.pro.core.ConversationsRequest.ConversationsRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
-import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
+import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
+import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversationsAdapter
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
+import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
+import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
-import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import org.json.JSONException
 import org.json.JSONObject
-import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
-import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
-import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import java.util.*
 
 /**
@@ -81,12 +83,29 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     private var lat = 0.0
     private var lon = 0.0
     private var messageCategory = CometChatConstants.CATEGORY_MESSAGE
+
+    private var uri: Uri? = null
+    private var sendIntent : String? = null
+    private var sendIntentType: String? = null
+    var progressDialog: ProgressDialog? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cometchat_forward_message)
         fontUtils = FontUtils.getInstance(this)
+        checkPermissions()
         handleIntent()
         init()
+    }
+
+    private fun checkPermissions() {
+        if (!Utils.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        UIKitConstants.RequestCode.RECORD)
+            }
+        }
     }
 
     fun handleSendText(intent: Intent) {
@@ -100,11 +119,47 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     fun handleSendImage(intent: Intent) {
         val imageUri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
         if (imageUri != null) {
-            messageType = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE
-            mediaMessageUrl = imageUri.toString()
-            Log.e(TAG, "handleSendImage: $mediaMessageUrl")
+            sendIntent = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE // can be boolean
+            sendIntentType = MediaUtils.getExtensionType(intent.type!!)
+            messageType = CometChatConstants.MESSAGE_TYPE_IMAGE
+            uri = imageUri
+            Log.e(TAG, "handleSendImage: $uri")
         }
     }
+    fun handleSendVideo(intent: Intent) {
+        val imageUri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
+        if (imageUri != null) {
+            sendIntent = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE
+            sendIntentType = MediaUtils.getExtensionType(intent.type!!)
+            messageType = CometChatConstants.MESSAGE_TYPE_VIDEO
+            uri = imageUri
+//            Log.e(TAG, "handleSendVideo: $mediaMessageUrl")
+        }
+    }
+
+    fun handleSendAudio(intent: Intent) {
+        val imageUri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
+        if (imageUri != null) {
+            sendIntent = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE
+            sendIntentType = MediaUtils.getExtensionType(intent.type!!)
+            messageType = CometChatConstants.MESSAGE_TYPE_AUDIO
+            uri = imageUri
+//            Log.e(TAG, "handleSendAudio: $mediaMessageUrl")
+        }
+    }
+
+    fun handleFileIntent(intent: Intent) {
+        val imageUri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
+        if (imageUri != null) {
+            sendIntent = UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE
+            sendIntentType = MediaUtils.getExtensionType(intent.type!!)
+            messageType = CometChatConstants.MESSAGE_TYPE_FILE
+            uri = imageUri
+//            Log.e(TAG, "handleSendAudio: $mediaMessageUrl")
+        }
+    }
+
+
 
     /**
      * This method is used to handle parameter passed to this class.
@@ -116,11 +171,20 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         val action = intent.action
         val type = intent.type
 
+
+        Log.e(TAG, "handleIntent: " + intent.type)
+
         if (Intent.ACTION_SEND == action && type != null) {
             if ("text/plain" == type) {
                 handleSendText(intent) // Handle text being sent
             } else if (type.startsWith("image/")) {
                 handleSendImage(intent) // Handle single image being sent
+            } else if (type.startsWith("video/")) {
+                handleSendVideo(intent)
+            } else if (type.startsWith("audio/")) {
+                handleSendAudio(intent)
+            } else if (type.startsWith("application/")) {
+                handleFileIntent(intent)
             }
         }
 
@@ -166,9 +230,9 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         // Inflate the layout
         val toolbar = findViewById<MaterialToolbar>(R.id.forward_toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         if (Utils.changeToolbarFont(toolbar) != null) {
-            Utils.changeToolbarFont(toolbar)!!.setTypeface(fontUtils!!.getTypeFace(FontUtils.robotoMedium))
+            Utils.changeToolbarFont(toolbar)?.typeface = fontUtils?.getTypeFace(FontUtils.robotoMedium)
         }
         selectedUsers = findViewById(R.id.selected_user)
         forwardBtn = findViewById(R.id.btn_forward)
@@ -178,34 +242,34 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
 
         makeConversationList()
 
-        etSearch!!.addTextChangedListener(object : TextWatcher {
+        etSearch?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.length > 1) clearSearch!!.visibility = View.VISIBLE
+                if (charSequence.length > 1) clearSearch?.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {
                 if (editable.toString().isNotEmpty()) {
-                    if (cometChatConversationsAdapter != null) cometChatConversationsAdapter!!.filter.filter(editable.toString())
+                    if (cometChatConversationsAdapter != null) cometChatConversationsAdapter?.filter?.filter(editable.toString())
                 }
             }
         })
-        etSearch!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
+        etSearch?.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
-                if (cometChatConversationsAdapter != null) cometChatConversationsAdapter!!.filter.filter(textView.text.toString())
-                clearSearch!!.visibility = View.VISIBLE
+                if (cometChatConversationsAdapter != null) cometChatConversationsAdapter?.filter?.filter(textView.text.toString())
+                clearSearch?.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
-        clearSearch!!.setOnClickListener(View.OnClickListener { view1: View? ->
-            etSearch!!.setText("")
-            clearSearch!!.visibility = View.GONE
+        clearSearch?.setOnClickListener(View.OnClickListener { view1: View? ->
+            etSearch?.setText("")
+            clearSearch?.visibility = View.GONE
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             // Hide the soft keyboard
-            inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
+            inputMethodManager.hideSoftInputFromWindow(etSearch?.windowToken, 0)
         })
-        rvConversation!!.setItemClickListener(object : OnItemClickListener<Conversation>() {
+        rvConversation?.setItemClickListener(object : OnItemClickListener<Conversation>() {
 //            override fun OnItemClick(conversation: Conversation, position: Int) {
 //
 //            }
@@ -232,20 +296,21 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                         chip.isCloseIconVisible = true
                         chip.setOnCloseIconClickListener { vw ->
                             userList.remove(conversation.conversationId)
-                            selectedUsers!!.removeView(vw)
+                            selectedUsers?.removeView(vw)
                             checkUserList()
                         }
-                        selectedUsers!!.addView(chip, 0)
+                        selectedUsers?.addView(chip, 0)
                     }
                     checkUserList()
                 } else {
-                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatForwardMessageActivity, resources.getString(R.string.forward_to_5_at_a_time),UIKitConstants.ErrorTypes.ERROR)
+                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatForwardMessageActivity, resources.getString(R.string.something_went_wrong_please_try_again))
                 }
             }
         })
 
         //It sends message to selected users present in userList using thread. So UI thread doesn't get heavy.
-        forwardBtn!!.setOnClickListener(View.OnClickListener {
+        forwardBtn?.setOnClickListener(View.OnClickListener {
+            progressDialog = ProgressDialog.show(this, "", "Sending Media Message")
             if (messageCategory == CometChatConstants.CATEGORY_MESSAGE) {
                 if (messageType != null && messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
                     Thread(Runnable {
@@ -272,7 +337,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                             }
                         }
                     }).start()
-                } else if (messageType != null && messageType != UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE) {
+                } else if (messageType != null && sendIntent != UIKitConstants.IntentStrings.INTENT_MEDIA_MESSAGE) {
                     Thread(Runnable {
                         for (i in 0 until userList!!.size) {
                             val conversation = ArrayList(userList.values)[i]
@@ -309,7 +374,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                     Thread {
                         for (i in 0 until userList!!.size) {
                             val conversation = ArrayList(userList.values)[i]
-                            var message: MediaMessage
+                            var message: MediaMessage? = null
                             var uid: String?
                             var type: String
                             Log.e(TAG, "run: " + conversation.conversationId)
@@ -320,22 +385,33 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                                 uid = (conversation.conversationWith as Group).guid
                                 type = CometChatConstants.RECEIVER_TYPE_GROUP
                             }
-                            val file = MediaUtils.getRealPath(this@CometChatForwardMessageActivity, Uri.parse(mediaMessageUrl))
-                            message = MediaMessage(uid, file, CometChatConstants.MESSAGE_TYPE_IMAGE, type)
-                            try {
-                                val jsonObject = JSONObject()
-                                jsonObject.put("path", mediaMessageUrl)
-                                message.metadata = jsonObject
-                            } catch (e: Exception) {
-                                Log.e(TAG, "onError: " + e.message)
-                            }
-                            sendMediaMessage(message)
-                            if (i == userList!!.size - 1) {
-                                val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                startActivity(intent)
-                                finish()
-                            }
+//                            var file = MediaUtils.getRealPath(this@CometChatForwardMessageActivity, Uri.parse(mediaMessageUrl))
+                            val file = uri?.let { it1 -> messageType?.let { it2 -> sendIntentType?.let { it3 -> MediaUtils.saveFile(this, it1, it2, it3) } } }
+                            Log.e(TAG, "init: " + file.toString())
+                            if (file != null && messageType == CometChatConstants.MESSAGE_TYPE_IMAGE)
+                                message = MediaMessage(uid, file, messageType, type)
+                            else if (file != null && messageType == CometChatConstants.MESSAGE_TYPE_VIDEO)
+                                message = MediaMessage(uid, file, messageType, type)
+                            else if (file != null && messageType == CometChatConstants.MESSAGE_TYPE_AUDIO)
+                                message = MediaMessage(uid, file, messageType, type)
+                            else if (file != null && messageType == CometChatConstants.MESSAGE_TYPE_FILE)
+                                message = MediaMessage(uid, file, messageType, type)
+                            message?.let { it1 -> sendMediaMessage(it1) }
+//                            try {
+//                                val jsonObject = JSONObject()
+//                                jsonObject.put("path", mediaMessageUrl)
+////                                message.metadata = jsonObject
+//                            } catch (e: Exception) {
+//                                Log.e(TAG, "onError: " + e.message)
+//                            }
+
+//                            if (i == userList!!.size - 1) {
+//                                val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)
+//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//                                startActivity(intent)
+//                                finish()
+//                            }
+
                         }
                     }.start()
                 }
@@ -365,7 +441,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                             }
                             message = CustomMessage(uid, type, UIKitConstants.IntentStrings.LOCATION, customData)
                             sendLocationMessage(message)
-                            if (i == userList!!.size - 1) {
+                            if (i == userList.size - 1) {
                                 val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                                 startActivity(intent)
@@ -378,7 +454,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
 
         })
 
-        rvConversation!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        rvConversation?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (!recyclerView.canScrollVertically(1)) {
                     makeConversationList()
@@ -414,6 +490,11 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     private fun sendMediaMessage(mediaMessage: MediaMessage) {
         CometChat.sendMediaMessage(mediaMessage, object : CallbackListener<MediaMessage>() {
             override fun onSuccess(mediaMessage: MediaMessage) {
+                progressDialog?.dismiss()
+                val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+                finish()
                 Log.d(TAG, "sendMediaMessage onSuccess: $mediaMessage")
             }
 
@@ -437,9 +518,9 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     private fun checkUserList() {
         Log.e(TAG, "checkUserList: " + userList!!.size)
         if (userList.size > 0) {
-            forwardBtn!!.visibility = View.VISIBLE
+            forwardBtn?.visibility = View.VISIBLE
         } else {
-            forwardBtn!!.visibility = View.GONE
+            forwardBtn?.visibility = View.GONE
         }
     }
 
@@ -450,7 +531,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         if (conversationsRequest == null) {
             conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
         }
-        conversationsRequest!!.fetchNext(object : CallbackListener<List<Conversation>>() {
+        conversationsRequest?.fetchNext(object : CallbackListener<List<Conversation>>() {
             override fun onSuccess(conversationsList: List<Conversation>) {
                 if (conversationsList.isNotEmpty()) {
                     setAdapter(conversationsList)
@@ -466,9 +547,9 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     private fun setAdapter(conversations: List<Conversation>) {
         if (cometChatConversationsAdapter == null) {
             cometChatConversationsAdapter = CometChatConversationsAdapter(this)
-            rvConversation!!.adapter = cometChatConversationsAdapter
+            rvConversation?.adapter = cometChatConversationsAdapter
         } else {
-            cometChatConversationsAdapter!!.updateList(conversations)
+            cometChatConversationsAdapter?.updateList(conversations)
         }
     }
 
@@ -476,7 +557,10 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         super.onResume()
         Log.d(TAG, "onResume: ")
         conversationsRequest = null
-        cometChatConversationsAdapter = null
+        rvConversation?.clearList()
+        userList?.clear()
+        selectedUsers?.removeAllViews()
+        checkUserList()
         makeConversationList()
     }
 
@@ -484,7 +568,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
         Log.d(TAG, "onPause: ")
         super.onPause()
         CometChat.removeMessageListener(TAG)
-        userList!!.clear()
+        userList?.clear()
     }
 
     public override fun onStart() {

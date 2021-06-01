@@ -1,7 +1,10 @@
 package com.cometchat.pro.uikit.ui_components.shared.cometchatCalls
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +19,8 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.databinding.CometchatCallListItemBinding
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import java.util.*
 
 /**
@@ -149,6 +154,20 @@ class CometChatCallsAdapter(context: Context) : RecyclerView.Adapter<CometChatCa
         callViewHolder.callListRowBinding.calltimeTv.text = Utils.getLastMessageDate(call.initiatedAt)
         callViewHolder.callListRowBinding.callMessage.text = callMessageText
         callViewHolder.callListRowBinding.root.setTag(R.string.call, call)
+
+        FeatureRestriction.isOneOnOneAudioCallEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0) callViewHolder.callListRowBinding.callIv.visibility = View.VISIBLE else callViewHolder.callListRowBinding.callIv.visibility = View.GONE
+            }
+
+        })
+        FeatureRestriction.isOneOnOneVideoCallEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                if (p0) callViewHolder.callListRowBinding.callIv.visibility = View.VISIBLE else callViewHolder.callListRowBinding.callIv.visibility = View.GONE
+            }
+
+        })
+        callViewHolder.callListRowBinding.callIv.imageTintList = ColorStateList.valueOf(Color.parseColor(UIKitSettings.color))
     }
 
     override fun getItemCount(): Int {
@@ -187,7 +206,7 @@ class CometChatCallsAdapter(context: Context) : RecyclerView.Adapter<CometChatCa
      */
     fun remove(call: Call?) {
         val position = callList!!.indexOf(call!!)
-        callList!!.remove(call)
+        callList.remove(call)
         notifyItemRemoved(position)
     }
 
@@ -200,11 +219,11 @@ class CometChatCallsAdapter(context: Context) : RecyclerView.Adapter<CometChatCa
      */
     fun update(call: Call) {
         if (callList!!.contains(call)) {
-            val oldCall = callList!![callList!!.indexOf(call)] as Call
-            callList!!.remove(oldCall)
-            callList!!.add(0, call)
+            val oldCall = callList[callList.indexOf(call)] as Call
+            callList.remove(oldCall)
+            callList.add(0, call)
         } else {
-            callList!!.add(0, call)
+            callList.add(0, call)
         }
         notifyDataSetChanged()
     }
@@ -217,7 +236,7 @@ class CometChatCallsAdapter(context: Context) : RecyclerView.Adapter<CometChatCa
      * @see Call
      */
     fun add(call: Call) {
-        if (callList != null) callList!!.add(call)
+        if (callList != null) callList.add(call)
     }
 
     /**

@@ -1,11 +1,11 @@
 package com.cometchat.pro.uikit.ui_components.userProfile.privacy_and_security
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.core.BlockedUsersRequest
 import com.cometchat.pro.core.BlockedUsersRequest.BlockedUsersRequestBuilder
@@ -16,10 +16,11 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.users.blocked_users.CometChatBlockUserListActivity
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.google.android.material.appbar.MaterialToolbar
 
 class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
     private var tvBlockUserCount: TextView? = null
@@ -35,6 +36,7 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
         divider = findViewById(R.id.divider)
         setSupportActionBar(toolbar)
         if (supportActionBar != null) supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)
         if (Utils.changeToolbarFont(toolbar) != null) {
             Utils.changeToolbarFont(toolbar)!!.typeface = FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium)
         }
@@ -67,7 +69,7 @@ class CometChatMorePrivacyActivity constructor() : AppCompatActivity() {
                 }
 
                 public override fun onError(e: CometChatException) {
-                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatMorePrivacyActivity, resources.getString(R.string.block_user_list_error), UIKitConstants.ErrorTypes.ERROR)
+                    ErrorMessagesUtils.cometChatErrorMessage(this@CometChatMorePrivacyActivity, e.code)
                 }
             })
         }

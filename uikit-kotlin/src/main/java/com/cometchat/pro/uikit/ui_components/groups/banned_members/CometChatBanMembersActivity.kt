@@ -1,13 +1,16 @@
 package com.cometchat.pro.uikit.ui_components.groups.banned_members
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.pro.uikit.R
-import com.google.android.material.appbar.MaterialToolbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.google.android.material.appbar.MaterialToolbar
 
 class CometChatBanMembersActivity : AppCompatActivity() {
     private var guid: String? = null
@@ -20,6 +23,7 @@ class CometChatBanMembersActivity : AppCompatActivity() {
         banToolbar = findViewById(R.id.banToolbar)
         banToolbar!!.setNavigationOnClickListener(View.OnClickListener { onBackPressed() })
         handleIntent()
+        if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)
         val banFragment = CometChatBanMembers()
         val bundle = Bundle()
         bundle.putString(UIKitConstants.IntentStrings.GUID, guid)

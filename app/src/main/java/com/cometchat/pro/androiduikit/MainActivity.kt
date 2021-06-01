@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 val id = resources.getIdentifier(str, "id", packageName)
                 findViewById<View>(id).visibility = View.GONE
                 Log.e(TAG, "onError: " +e.code +": "+e.message)
-                ErrorMessagesUtils.cometChatErrorMessage(this@MainActivity, e.message)
+                ErrorMessagesUtils.cometChatErrorMessage(this@MainActivity, e.code)
             }
         })
     }
