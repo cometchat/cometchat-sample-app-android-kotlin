@@ -15,6 +15,7 @@ import com.cometchat.pro.uikit.ui_components.shared.cometchatReaction.ReactionUt
 import com.cometchat.pro.uikit.ui_components.shared.cometchatReaction.model.Reaction
 import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.model.Sticker
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -22,7 +23,7 @@ public class Extensions {
 
     companion object{
         private const val TAG = "Extensions"
-        var isEnabled :Boolean = true
+        var isEnabled = false
 
         fun extensionCheck(baseMessage: BaseMessage): HashMap<String, JSONObject>? {
             val metadata = baseMessage.metadata
@@ -244,24 +245,31 @@ public class Extensions {
 
         fun getProfanityFilter(baseMessage: BaseMessage): String {
             var result = (baseMessage as TextMessage).text
-            val extensionList = extensionCheck(baseMessage)
-            if (extensionList != null) {
-                try {
-                    if (extensionList.containsKey("profanityFilter")) {
-                        val profanityFilter = extensionList["profanityFilter"]
-                        val profanity = profanityFilter?.getString("profanity")
-                        val cleanMessage = profanityFilter?.getString("message_clean")
-                        if (profanity == "no")
-                            result = (baseMessage as TextMessage).text
-                        else
-                            result = cleanMessage
-                    } else {
-                        result = (baseMessage as TextMessage).text.trim()
+            FeatureRestriction.isProfanityFilterEnabled(object : FeatureRestriction.OnSuccessListener{
+                override fun onSuccess(p0: Boolean) {
+                    if (p0) {
+                        val extensionList = extensionCheck(baseMessage)
+                        if (extensionList != null) {
+                            try {
+                                if (extensionList.containsKey("profanityFilter")) {
+                                    val profanityFilter = extensionList["profanityFilter"]
+                                    val profanity = profanityFilter?.getString("profanity")
+                                    val cleanMessage = profanityFilter?.getString("message_clean")
+                                    if (profanity == "no")
+                                        result = (baseMessage as TextMessage).text
+                                    else
+                                        result = cleanMessage
+                                } else {
+                                    result = (baseMessage as TextMessage).text.trim()
+                                }
+                            } catch (e: java.lang.Exception) {
+                                Log.e(TAG, "checkProfanityMessage:Error: " + e.message)
+                            }
+                        }
                     }
-                } catch (e: java.lang.Exception) {
-                    Log.e(TAG, "checkProfanityMessage:Error: " + e.message)
                 }
-            }
+
+            })
             return result
         }
 
@@ -490,20 +498,15 @@ public class Extensions {
         fun checkExtensionEnabled(extensionId: String) :Boolean {
             isExtensionEnabled(extensionId, object : CallbackListener<Boolean>() {
                 override fun onSuccess(p0: Boolean) {
-
                     Log.e(TAG, "onSuccess: " + extensionId + " - " + p0)
                     isEnabled = p0
                 }
-
                 override fun onError(p0: CometChatException?) {
                     Log.e(TAG, "onError: "+p0?.message)
                 }
 
             })
-
-
             return isEnabled
-
         }
 
     }

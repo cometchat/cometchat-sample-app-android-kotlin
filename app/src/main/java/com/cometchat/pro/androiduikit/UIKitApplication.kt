@@ -10,10 +10,11 @@ import com.cometchat.pro.androiduikit.constants.AppConfig
 import com.cometchat.pro.core.AppSettings.AppSettingsBuilder
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.addConnectionListener
 import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.addCallListener
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.listener.CometChatCallListener.removeCallListener
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 class UIKitApplication : Application() {
     override fun onCreate() {
@@ -21,7 +22,8 @@ class UIKitApplication : Application() {
         val appSettings = AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build()
         CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, object : CallbackListener<String>() {
             override fun onSuccess(s: String) {
-                UIKitConstants.AppInfo.AUTH_KEY = AppConfig.AppDetails.AUTH_KEY
+                UIKitSettings.setAppID(AppConfig.AppDetails.APP_ID)
+                UIKitSettings.setAuthKey(AppConfig.AppDetails.AUTH_KEY)
                 CometChat.setSource("ui-kit", "android", "kotlin")
                 Log.d(TAG, "onSuccess: $s")
             }
@@ -29,27 +31,12 @@ class UIKitApplication : Application() {
             override fun onError(e: CometChatException) {
             }
         })
-        addConnectionListener(TAG)
+        val uiKitSettings = UIKitSettings(this)
+        uiKitSettings.addConnectionListener(TAG)
         addCallListener(TAG, this)
         createNotificationChannel()
     }
 
-    private fun addConnectionListener(tag: String) {
-        CometChat.addConnectionListener(tag, object : CometChat.ConnectionListener {
-            override fun onConnected() {
-                Toast.makeText(baseContext, "Connected", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onConnecting() {}
-            override fun onDisconnected() {
-                Toast.makeText(baseContext,"You connection has been broken with server." +
-                        "Please wait for a minute or else restart the app.",Toast.LENGTH_LONG).show()
-            }
-            override fun onFeatureThrottled() {
-
-            }
-        })
-    }
 
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because

@@ -794,12 +794,13 @@ public class Utils {
                 }
 
                 override fun onUserListUpdated(p0: MutableList<User>?) {
-                    Log.e(TAG, "onUserListUpdated: "+p0.toString())
+                    Log.e(TAG, "onUserListUpdated: " + p0.toString())
                 }
 
                 override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
-                    Log.e("TAG", "onAudioModesUpdated: "+p0.toString())
+                    Log.e(TAG, "onAudioModesUpdated: "+p0.toString())
                 }
+
             })
         }
 

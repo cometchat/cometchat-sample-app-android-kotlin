@@ -103,8 +103,7 @@ class CometChatBlockUserList : Fragment() {
             override fun onSuccess(stringStringHashMap: HashMap<String?, String?>?) {
                 if (userList.contains(user)) userList.remove(user)
                 blockedUserAdapter!!.removeUser(user)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.unblocked_successfully), UIKitConstants.ErrorTypes.SUCCESS)
-//                Snackbar.make(var1, String.format(resources.getString(R.string.unblocked_successfully), user.name), Snackbar.LENGTH_SHORT).show()
+//                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.unblocked_successfully), UIKitConstants.ErrorTypes.SUCCESS)
                 checkIfNoUserVisible()
             }
 
@@ -135,7 +134,7 @@ class CometChatBlockUserList : Fragment() {
 
             override fun onError(e: CometChatException) {
                 Log.e(TAG, "onError: " + e.message)
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.block_user_list_error), UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })
     }

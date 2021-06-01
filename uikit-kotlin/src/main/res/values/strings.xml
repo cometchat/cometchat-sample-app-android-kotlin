@@ -121,7 +121,7 @@
     <!--GroupErrors-->
     <!--Not available in iOS-->
     <string name="you_cannot_perform_action">You cannot perform action on yourself</string>
-    <string name="only_group_owner_removes_admin">Only group owner can remove admin.</string>
+    <string name="only_group_owner_removes_admin">You don\'t have permission to remove admin from the group..</string>
     <string name="removed_from_admin">%1$s is removed from admin privilege</string>
     <string name="update_group_member_error">Unable to update Group Member</string>
     <string name="admin_list_retrieve_error" >Admin list retrieval failed</string>
@@ -131,8 +131,8 @@
     <string name="ban_list_fetch_error">Unable to fetch Banned Members List</string>
 
     <!--Permission Error-->
-    <string name="grant_camera_permission">Please grant camera permission from app setting</string>
-    <string name="grant_storage_permission">Please grant storage permission from app setting</string>
+    <string name="grant_camera_permission">Please grant permission to access camera</string>
+    <string name="grant_storage_permission">Please grant permission to access storage</string>
     <string name="file_not_exist">File doesn\'t exists</string>
 
     <!--Calls-->
@@ -342,188 +342,25 @@
     <string name="extension_not_enabled">extension is not enabled.</string>
     <!--_______________________________-->
 
-<!--    SDK error message-->
-    <string name="ERROR_INIT_NOT_CALLED">INIT_NOT_CALLED</string>
-    <string name="ERROR_PASSWORD_MISSING_MESSAGE">Password is mandatory for a protected group</string>
-    <string name="ERROR_LIMIT_EXCEEDED_MESSAGE">Limit exceeded max limit of %1$s</string>
-    <string name="ERROR_USER_NOT_LOGGED_IN_MESSAGE">Please log in to CometChat before calling this method</string>
-    <string name="ERROR_INVALID_GUID_MESSAGE">Please provide a valid GUID</string>
-    <string name="ERROR_INVALID_UID_MESSAGE">Please provide a valid UID</string>
-    <string name="ERROR_BLANK_UID_MESSAGE">UID cannot be blank. Please provide a valid UID</string>
-    <string name="ERROR_UID_WITH_SPACE_MESSAGE">UID cannot contain spaces. Please provide a valid UID</string>
-    <string name="ERROR_DEFAULT_MESSAGE">Something went wrong</string>
-    <string name="ERROR_CALL_NOT_INITIATED_MESSAGE">Call cannot be cancelled without initiating a call</string>
-    <string name="ERROR_CALL_MESSAGE">Something went wrong while connecting</string>
-    <string name="ERROR_CALL_SESSION_MISMATCH_MESSAGE">Call session mismatch. Please check the session ID</string>
-    <string name="ERROR_INIT_NOT_CALLED_MESSAGE">Please call the CometChat.init() method preferably in the onCreate() method of the application class before calling any other methods related to CometChat</string>
-    <string name="ERROR_UID_GUID_NOT_SPECIFIED_MESSAGE">Both UID and GUID not specified. Please specify the UID or the GUID for which the messages need to be fetched</string>
-    <string name="ERROR_INTERNET_UNAVAILABLE_MESSAGE">No internet connection. Please try again later</string>
-    <string name="ERROR_REQUEST_IN_PROGRESS_MESSAGE">Request already in progress</string>
-    <string name="ERROR_FILTERS_MISSING_MESSAGE">\'Timestamp\' or \'MessageId\' or \'updatedAfter\' is required to use the \'fetchNext()\' method</string>
-    <string name="ERROR_BLANK_AUTHTOKEN_MESSAGE">Auth token cannot be empty. Please provide a valid auth token</string>
-    <string name="ERROR_EXTENSION_DISABLED_MESSAGE">The extension is disabled. Please enable the extension from CometChat Dashboard</string>
-    <string name="ERROR_INVALID_MESSAGEID_MESSAGE">The message ID provided is invalid. Please provide a valid Message ID</string>
-    <string name="ERROR_INVALID_MESSAGE_TYPE_MESSAGE">Only TextMessage or CustomMessage can be edited. Please provide a valid message</string>
-    <string name="ERROR_LIST_EMPTY_MESSAGE">The list provided is empty. Please provide a valid list</string>
-    <string name="ERROR_UPDATESONLY_WITHOUT_UPDATEDAFTER_MESSAGE">The \'updatesOnly()\' method cannot be used without the \'setUpdatedAfter()\' method</string>
-    <string name="ERROR_JSON_MESSAGE">Error while parsing JSON</string>
-    <string name="ERROR_LOGOUT_FAIL_MESSAGE">Error while logging out</string>
-    <string name="ERROR_EMPTY_APPID_MESSAGE">AppID cannot be empty. Please specify a valid appID</string>
-    <string name="ERROR_NON_POSITIVE_LIMIT_MESSSAGE">The limit specified must be a positive number</string>
-    <string name="ERROR_REGION_MISSING_MESSAGE">Region not specified. Please specify the region in the AppSettingsBuilder class using the \'setRegion()\' method</string>
-    <string name="ERROR_APP_SETTING_NULL_MESSAGE">The AppSettings cannot be null</string>
-    <string name="ERROR_API_KEY_NOT_FOUND_MESSAGE">ApiKey cannot be null or empty. Please provide a valid Api Key</string>
-    <string name="ERROR_INVALID_SENDING_MESSAGE_TYPE_MESSAGE">The Message type you have entered is invalid for following action</string>
-    <string name="ERROR_MESSAGE_TEXT_EMPTY_MESSAGE">Message text cannot be empty</string>
-    <string name="ERROR_FILE_OBJECT_INVALID_MESSAGE">File object cannot be null or File path doesn\'t exist</string>
-    <string name="ERROR_FILE_URL_EMPTY_MESSAGE">Media Message URL is set as null or blank</string>
-    <string name="ERROR_EMPTY_CUSTOM_DATA_MESSAGE">Custom data field cannot be null or empty</string>
-    <string name="ERROR_EMPTY_GROUP_NAME_MESSAGE">Group Name cannot be null or empty</string>
-    <string name="ERROR_EMPTY_GROUP_TYPE_MESSAGE">Group Type cannot be null or empty</string>
-    <string name="ERROR_LOGIN_IN_PROGRESS_MESSAGE">Login in progress. Please wait for the login request to finish</string>
-    <string name="ERROR_INVALID_MESSAGE_MESSAGE">Message cannot be null. Please pass a valid \'BaseMessage\' object</string>
-    <string name="ERROR_INVALID_GROUP_MESSAGE">Group cannot be null. Please pass a valid \'Group\' object</string>
-    <string name="ERROR_INVALID_CALL_MESSAGE">Call cannot be null. Please pass a valid \'Call\' object</string>
-    <string name="ERROR_INVALID_CALL_TYPE_MESSAGE">Invalid Call Type. Please provide a valid Call type</string>
-    <string name="ERROR_INVALID_RECEIVER_TYPE_MESSAGE">Invalid Receiver Type. Please provide a valid Receiver type</string>
-    <string name="ERROR_INVALID_SESSION_ID_MESSAGE">Invalid sessionId Type. Please provide a valid session id</string>
-    <string name="ERROR_ACTIVITY_NULL_MESSAGE">Provided Activity cannot be null.</string>
-    <string name="ERROR_VIEW_NULL_MESSAGE">Provided RelativeLayout cannot be null</string>
-    <string name="ERROR_INVALID_FCM_TOKEN_MESSAGE">The FCM token provided cannot be null or empty. Please provide a valid FCM token</string>
-    <string name="ERROR_INVALID_GROUP_TYPE_MESSAGE">The group type provided cannot be null or empty</string>
-    <string name="ERROR_CALL_IN_PROGRESS_MESSAGE">Call is in progress. Please end the previous call to perform this operation</string>
-    <string name="ERROR_INCORRECT_INITIATOR_MESSAGE">Cannot cancel call initiated by someone else. Please use status \'rejected\' instead</string>
-    <string name="ERROR_INVALID_USER_NAME_MESSAGE">Invalid name provided for the user. Please provide a valid name</string>
-    <string name="ERROR_INVALID_USER_MESSAGE">User object cannot be null. Please provide a valid user object</string>
-    <string name="ERROR_INVALID_GROUP_NAME_MESSAGE">Group name cannot be empty. Please provide a valid group name</string>
-    <string name="ERROR_INVALID_TIMESTAMP_MESSAGE">Timestamp has to be positive. Please provide a valid timestamp</string>
-    <string name="ERROR_INVALID_CATEGORY_MESSAGE">Invalid Category. Please provide a valid category</string>
-    <string name="ERROR_EMPTY_ICON_MESSAGE">Empty Icon. Please provide a valid icon//</string>
-    <string name="ERROR_EMPTY_DESCRIPTION_MESSAGE">Empty Description. Please provide a valid description</string>
-    <string name="ERROR_EMPTY_METADATA_MESSAGE">Empty Metatdata. Please provide a valid metadata</string>
-    <string name="ERROR_EMPTY_SCOPE_MESSAGE">Invalid Scope. Please provide a valid scope</string>
-    <string name="ERROR_INVALID_SCOPE_MESSAGE">Invalid Scope. Please provide a valid scope</string>
-    <string name="ERROR_INVALID_CONVERSATION_WITH_MESSAGE">Invalid conversationWith. Please provide a valid value for conversationWith</string>
-    <string name="ERROR_INVALID_CONVERSATION_TYPE_MESSAGE">Invalid conversationType. Please provide a valid value for conversationWith</string>
-    <string name="ERROR_INVALID_MEDIA_MESSAGE_MESSAGE">Invalid Media Message.Please provide a valid File object or Attachment details.</string>
-    <string name="ERROR_INVALID_ATTACHMENT_MESSAGE">Attachment cannot be null. Please provide valid attachment details</string>
-    <string name="ERROR_INVALID_FILE_NAME_MESSAGE">Invalid File Name. Please provide a valid file name</string>
-    <string name="ERROR_INVALID_FILE_EXTENSION_MESSAGE">Invalid File Extension. Please provide a valid file extension</string>
-    <string name="ERROR_INVALID_FILE_MIME_TYPE_MESSAGE">Invalid File Mime Type. Please provide a valid file mime type</string>
-    <string name="ERROR_INVALID_FILE_URL_MESSAGE">Invalid File URL. Please provide a valid file URL</string>
-    <string name="ERROR_CONVERSATION_NOT_FOUND_MESSAGE">Conversation not found for conversationWith %1$s and conversationType %1$s</string>
-    <string name="ERROR_SETTINGS_NOT_FOUND_MESSAGE">Settings not found.</string>
-    <string name="ERROR_INVALID_FEATURE_MESSAGE">Provided feature cannot be null or empty. Please provide a valid feature</string>
-    <string name="ERROR_INVALID_EXTENSION_MESSAGE">Provided extension cannot be null or empty.</string>
-    <string name="ERROR_FEATURE_NOT_FOUND_MESSAGE">Provided feature not found.</string>
-    <string name="ERROR_EXTENSION_NOT_FOUND_MESSAGE">The provided extension could not be found.</string>
-    <!--  __________________ -->
 
-    <!--    Api Error messages-->
-    <string name="auth_err_empty_appid">Empty appId in the headers</string>
-    <string name="auth_err_invalid_appid">Invalid appId or it does not exist in a region</string>
-    <string name="auth_err_empty_apikey">Empty API Key in the headers</string>
-    <string name="auth_err_apikey_not_found">Incorrect API Key in the headers</string>
-    <string name="auth_err_no_access">API Key in the headers can not be used to perform the action</string>
-    <string name="auth_err_empty_auth_token">Empty auth token in the headers</string>
-    <string name="auth_err_auth_token_not_found">Incorrect auth token</string>
-    <string name="err_apikey_not_found">API key does not exists</string>
-    <string name="err_apikey_no_self_action">API key in the headers is same as the API key in the path param and it is performing action on it self</string>
-    <string name="err_auth_token_not_found">Auth token does not exists</string>
-    <string name="err_auth_token_delete_failed">API failed to delete the auth token</string>
-    <string name="err_auth_tokens_delete_failed">API failed to delete the auth tokens associated with the UID</string>
-    <string name="err_authtoken_unavailable">Auth token is mapped with another device</string>
-    <string name="err_authtoken_not_accessible">Auth token is mapped with another user</string>
+    <string name="something_went_wrong_please_try_again">Something went wrong, please try again</string>
+    <string name="please_check_your_internet_connection">Please check your internet connection</string>
 
-    <string name="err_plan_restriction">This feature is not available with the plan</string>
-    <string name="err_subscription_expired">The subscription has expired and must resubscribe to continue using the service</string>
-    <string name="err_plan_quota_restriction">The allowed limit for the feature has reached</string>
-    <string name="err_role_not_found">This role does not exist</string>
-    <string name="err_role_delete_failed">API failed to delete the role</string>
-    <string name="err_role_delete_denied"> API cannot delete the role as the default role can not be deleted</string>
+    <string name="enter_the_correct_password">Please enter the correct password and try again</string>
+    <string name="enter_a_valid_name_for_the_user">Please enter a valid name for the user and try again</string>
+    <string name="enter_a_valid_name_for_the_group">Please enter a valid name for the group and try again</string>
+    <string name="enter_the_required_answer_before_creating_a_poll">Please enter the required answer before creating a poll</string>
+    <string name="enter_the_required_question_before_creating_a_poll">Please enter the required question before creating a poll</string>
+    <string name="enter_the_correct_uid_to_login">Please enter the correct UID to login</string>
+    <string name="grant_permission_to_access_camera">Please grant permission to access camera</string>
+    <string name="grant_permission_to_access_storage">Please grant permission to access storage</string>
+    <string name="you_cannot_perform_action_on_yourself">You cannot perform action on yourself</string>
+    <string name="do_not_have_permission_to_remove_admin_from_the_group">You don\'t have permission to remove admin from the group</string>
 
-    <string name="err_uid_not_found">UID does not exist OR User is soft deleted</string>
-    <string name="err_uid_delete_failed">API failed to delete the user</string>
 
-    <string name="err_guid_not_found">This group does not exist</string>
-    <string name="err_empty_group_pass">Password is required to join a group</string>
-    <string name="err_group_delete_failed">Failed to delete the group</string>
-    <string name="err_not_a_member">User is not a member of the group</string>
-    <string name="err_wrong_group_pass">Password for the group is incorrect</string>
-    <string name="err_already_joined">You have already joined the group</string>
-    <string name="err_group_not_joined">User is trying to access the group feature without joining it</string>
-    <string name="err_group_join_not_allowed">Private groups cannot be joined</string>
-    <string name="err_member_delete_failed">Failed to remove a user from the group</string>
-    <string name="err_no_vacancy">Group is full</string>
-    <string name="err_same_scope">Existing and new scope are same</string>
-    <string name="err_member_scope_change_failed">Failed to change the scope</string>
-    <string name="err_not_a_banned_user">Member is not banned to unban</string>
-    <string name="err_banned_groupmember">Banned user is not allowed access</string>
-    <string name="err_already_banned">Member already banned</string>
-    <string name="err_member_ban_failed">Banning group member failed</string>
-    <string name="err_member_unban_failed">Unbanning group member failed</string>
-    <string name="err_group_no_clearance">User does not have permission to perform the action in the group</string>
-    <string name="err_group_no_admin_scope">User does not have admin scope in the group</string>
-    <string name="err_group_no_moderator_scope">User does not have moderator scope in the group</string>
-    <string name="err_group_no_scope_clearance">User does not have permission to change scope of other user</string>
-    <string name="err_group_no_self_action">User is not allowed to change his own scope</string>
 
-    <string name="err_empty_receiver">Receiver cannot be empty</string>
-    <string name="err_invalid_receiver_type">Invalid receiver type</string>
-    <string name="err_conversation_not_found">Conversation id does not exists</string>
-    <string name="err_conversation_not_accessible">Conversation id not accessible to the user</string>
-    <string name="err_user_message_delete_failed">API has failed to delete a one-to-one message</string>
-    <string name="err_message_id_not_found">Message does not exist</string>
-    <string name="err_invalid_message_data">Invalid message body</string>
-    <string name="err_empty_message_text">Empty messages text for a text message</string>
-    <string name="err_invalid_message_text">Message text should be string</string>
-    <string name="err_empty_message_category">Message category cannot be empty.</string>
-    <string name="err_invalid_message_category">Invalid message category</string>
-    <string name="err_empty_message_type">Message type cannot be empty</string>
-    <string name="err_empty_message_file">Empty FILE for the media message</string>
-    <string name="err_message_not_a_sender">Only sender can edit/delete the message</string>
-    <string name="err_message_no_access">User does not have access to the message</string>
-    <string name="err_message_action_not_allowed">Message cannot be edited or deleted</string>
-    <string name="err_empty_custom_data">\'data.customData\' cannot be empty for custom message</string>
-    <string name="err_invalid_media_message">Invalid media message</string>
-    <string name="err_invalid_custom_data">Invalid data.customData. The customData should be valid JSON</string>
-    <string name="err_invalid_metadata">Invalid data.metadata. The metadata should be valid JSON</string>
-    <string name="err_wrong_message_thread">Conversation mismatch for parent and a new threaded message</string>
-    <string name="err_message_thread_nesting">Nested message threading</string>
-    <string name="err_wrong_message_thread_category">Conversation mismatch for parent and a new threaded message</string>
+    <string name="send_message_privately">Send Message Privately</string>
+    <string name="view_profile">View Profile</string>
 
-    <string name="err_calling_self">User is initiating call with himself</string>
-    <string name="err_call_busy_self">Initiator of the call is participant of another ongoing call</string>
-    <string name="err_call_busy_group">This group has an existing ongoing call</string>
-    <string name="err_call_busy_user">Recipient of the call is already busy on another call</string>
-    <string name="err_empty_call_session_id">Empty session id</string>
-    <string name="err_call_session_not_found">Call does not exist</string>
-    <string name="err_call_terminated">Call is terminated</string>
-    <string name="err_call_group_already_joined"> User is already a member of the group call</string>
-    <string name="err_call_group_already_left">User trying to leave the group call has already left the call</string>
-    <string name="err_call_invalid_init">Call status cannot be updated to \'initiated\'</string>
-    <string name="err_call_user_already_joined">one-to-one call was already joined by the recipient of the call</string>
-    <string name="err_call_group_invalid_status"> Invalid call status for a group call; group call cannot have a busy status</string>
-    <string name="err_call_ongoing_to_invalid">Invalid status for an ongoing call</string>
-    <string name="err_call_not_a_part">User is not part of the call</string>
-    <string name="err_call_empty_joined_at">The \'joinedAt\' body param is required to join a group</string>
-    <string name="err_call_not_started">Status of call cannot be changed from initiated to ended directly</string>
-
-    <string name="err_cannot_block_self">User cannot block himself</string>
-    <string name="err_blocked_receiver">User has blocked the receiver of the message/call</string>
-    <string name="err_blocked_sender">Iniator of the call is blocked by the recipient</string>
-
-    <string name="err_extension_not_found">Extension does not exist</string>
-    <string name="err_blocked_by_extension">Message is blocked by the extension</string>
-
-    <string name="err_invalid_api_version">Invalid API version</string>
-    <string name="err_api_not_found">API endpoint does not exist OR The endpoint does not use HTTP request method using which API is called</string>
-    <string name="err_mission_failed">Fatal error OR Database Connection Timeout</string>
-    <string name="err_bad_request">Failed validations for the body params</string>
-    <string name="err_operation_failed">Database operation failure</string>
-    <string name="err_exception">Incorrectly/poorly handled exception</string>
-    <string name="err_too_many_requests">Rate limiting</string>
-    <string name="err_bad_error_response">The API developer has used unknown error code OR The API developer hasn\'t reassigned the error cod</string>
-
-<!--    ______________-->
+    <!--    ______________-->
 </resources>

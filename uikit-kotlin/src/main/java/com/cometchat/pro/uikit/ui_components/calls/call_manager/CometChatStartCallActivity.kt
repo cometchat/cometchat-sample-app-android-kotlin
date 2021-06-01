@@ -72,7 +72,7 @@ class CometChatStartCallActivity : AppCompatActivity() {
             }
 
             override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
-                Log.e("TAG", "onAudioModesUpdated: "+p0.toString())
+                Log.e("TAG", "onAudioModesUpdated: "+p0.toString() )
             }
 
         })

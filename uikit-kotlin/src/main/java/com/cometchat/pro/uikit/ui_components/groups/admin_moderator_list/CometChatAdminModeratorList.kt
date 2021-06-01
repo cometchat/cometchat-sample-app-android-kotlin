@@ -130,7 +130,8 @@ class CometChatAdminModeratorList : Fragment() {
                     } else {
                         val message: String
                         message = if (groupMember.uid == loggedInUser.uid) resources.getString(R.string.you_cannot_perform_action) else resources.getString(R.string.only_admin_removes_moderator)
-                        ErrorMessagesUtils.showCometChatErrorDialog(context, message,UIKitConstants.ErrorTypes.WARNING)
+                        Log.e(TAG, "onClick:admin "+message )
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.something_went_wrong_please_try_again))
                     }
                 } else {
                     if (ownerId != null && loggedInUser.uid == ownerId && loggedInUserScope == CometChatConstants.SCOPE_ADMIN && groupMember.uid != loggedInUser.uid) {
@@ -146,7 +147,8 @@ class CometChatAdminModeratorList : Fragment() {
                     } else {
                         val message: String
                         message = if (groupMember.uid == loggedInUser.uid) resources.getString(R.string.you_cannot_perform_action) else resources.getString(R.string.only_group_owner_removes_admin)
-                        ErrorMessagesUtils.showCometChatErrorDialog(context, message, UIKitConstants.ErrorTypes.WARNING)
+                        Log.e(TAG, "onClick:admin "+message )
+                        ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.something_went_wrong_please_try_again))
                     }
                 }
             }
@@ -175,12 +177,12 @@ class CometChatAdminModeratorList : Fragment() {
         CometChat.updateGroupMemberScope(groupMember.uid, guid!!, CometChatConstants.SCOPE_PARTICIPANT,
                 object : CallbackListener<String?>() {
                     override fun onSuccess(s: String?) {
-                        if (adapter != null) adapter!!.removeGroupMember(groupMember)
-                        if (showModerators) {
-                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.remove_from_moderator_privilege), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
-                        } else {
-                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.removed_from_admin), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
-                        }
+                        if (adapter != null) adapter?.removeGroupMember(groupMember)
+//                        if (showModerators) {
+//                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.remove_from_moderator_privilege), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
+//                        } else {
+//                            ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.removed_from_admin), groupMember.name),UIKitConstants.ErrorTypes.SUCCESS)
+//                        }
                     }
 
                     override fun onError(e: CometChatException) {
@@ -208,7 +210,7 @@ class CometChatAdminModeratorList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.admin_list_retrieve_error),UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })
@@ -230,7 +232,7 @@ class CometChatAdminModeratorList : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                ErrorMessagesUtils.showCometChatErrorDialog(context, resources.getString(R.string.moderator_list_retrieve_error),UIKitConstants.ErrorTypes.ERROR)
+                ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 Log.e(TAG, "onError: " + e.message)
             }
         })

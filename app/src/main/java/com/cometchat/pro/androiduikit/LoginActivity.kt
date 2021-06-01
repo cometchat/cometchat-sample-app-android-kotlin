@@ -3,8 +3,11 @@ package com.cometchat.pro.androiduikit
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ProgressBar
@@ -39,10 +42,18 @@ class LoginActivity : AppCompatActivity() {
         uid = findViewById(R.id.etUID)
         progressBar = findViewById(R.id.loginProgress)
         inputLayout = findViewById(R.id.inputUID)
+        uid?.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                inputLayout?.endIconDrawable = getDrawable(R.drawable.ic_arrow_right_24dp)
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
         uid!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView?, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_DONE) {
                 if (uid!!.text.toString().isEmpty()) {
-                    ErrorMessagesUtils.showCometChatErrorDialog(this, "Fill Username field", UIKitConstants.ErrorTypes.WARNING)
+                    inputLayout?.endIconDrawable = null
+                    uid?.error = resources.getString(R.string.fill_this_field)
                 } else {
                     progressBar!!.visibility = View.VISIBLE
                     inputLayout!!.isEndIconVisible = false
@@ -53,7 +64,8 @@ class LoginActivity : AppCompatActivity() {
         })
         inputLayout!!.setEndIconOnClickListener(View.OnClickListener { view: View? ->
             if (uid!!.text.toString().isEmpty()) {
-                ErrorMessagesUtils.showCometChatErrorDialog(this, "Fill Username field", UIKitConstants.ErrorTypes.WARNING)
+                inputLayout?.endIconDrawable = null
+                uid?.error = resources.getString(R.string.fill_this_field)
             } else {
                 findViewById<View>(R.id.loginProgress).visibility = View.VISIBLE
                 inputLayout!!.isEndIconVisible = false

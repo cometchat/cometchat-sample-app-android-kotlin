@@ -1,80 +1,131 @@
-<androidx.appcompat.widget.Toolbar android:layout_width="match_parent"
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:stateListAnimator="@animator/toolbar_elevation"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:stateListAnimator="@animator/toolbar_elevation">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <ImageView
-            tools:visibility="visible"
-            android:tint="@color/colorPrimary"
-            android:visibility="gone"
             android:id="@+id/iv_close_message_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_close_24dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <ImageView
-            tools:visibility="visible"
             android:tint="@color/colorPrimary"
             android:visibility="gone"
-            android:id="@+id/iv_copy_message_action"
+            tools:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/iv_back_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/ic_content_copy_black_24dp"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/ic_arrow_back_24dp"
+            android:tint="@color/colorPrimary" />
 
         <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
             android:id="@+id/iv_chat_avatar"
             android:layout_width="40dp"
-            android:layout_marginStart="16dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
             android:layout_marginTop="8dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="8dp"
-            android:visibility="visible"
+            android:layout_toEndOf="@+id/iv_back_arrow"
             android:src="@drawable/ic_account"
-            android:layout_height="40dp"/>
+            android:visibility="visible" />
+
         <RelativeLayout
-            android:layout_toEndOf="@id/iv_close_message_action"
-            android:layout_toStartOf="@id/iv_chat_avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignTop="@id/iv_chat_avatar"
-            android:layout_centerInParent="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/ll_call_view"
+            android:layout_toEndOf="@+id/iv_chat_avatar">
+
             <TextView
                 android:id="@+id/tv_name"
-                android:textSize="16sp"
-                android:maxLines="1"
-                android:layout_centerHorizontal="true"
-                tools:text="@tools:sample/full_names"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:ellipsize="marquee"
+                android:maxWidth="150dp"
+                android:singleLine="true"
                 android:textColor="@color/primaryTextColor"
-                android:layout_height="wrap_content"/>
+                android:textSize="16sp"
+                tools:text="@tools:sample/full_names" />
+
+<!--            <ImageView-->
+<!--                android:id="@+id/iv_user_info"-->
+<!--                android:layout_width="20dp"-->
+<!--                android:layout_height="20dp"-->
+<!--                android:layout_alignBottom="@+id/tv_name"-->
+<!--                android:layout_toEndOf="@+id/tv_name"-->
+<!--                android:src="@drawable/ic_outline_info_24" />-->
 
             <TextView
                 android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/tv_name"
-                android:layout_marginStart="16dp"
-                android:layout_centerHorizontal="true"
-                android:textSize="12sp"
-                tools:text="online"
-                android:maxLines="1"
                 android:ellipsize="end"
                 android:maxWidth="200dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:maxLines="1"
+                android:textSize="12sp"
+                tools:text="online" />
         </RelativeLayout>
 
-    </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/ll_call_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/iv_chat_avatar"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="5dp"
+            android:orientation="horizontal">
 
+            <ImageView
+                android:id="@+id/iv_video_call_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="8dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_videocall"
+                android:tint="@color/colorPrimary" />
+
+            <ImageView
+                android:id="@+id/iv_audio_call_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="8dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_audiocall"
+
+                android:tint="@color/colorPrimary" />
+
+            <ImageView
+                android:id="@+id/iv_user_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:layout_gravity="center"
+                android:layout_alignBottom="@+id/tv_name"
+                android:layout_toEndOf="@+id/tv_name"
+                android:src="@drawable/ic_info_new"
+                android:tint="@color/colorPrimary"/>
+        </LinearLayout>
+
+    </RelativeLayout>
 
 
 </androidx.appcompat.widget.Toolbar>

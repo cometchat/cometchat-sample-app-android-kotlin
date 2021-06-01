@@ -16,6 +16,7 @@ import com.cometchat.pro.uikit.databinding.CometchatUserListItemBinding
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderAdapter
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import java.util.*
 
 /**
@@ -31,6 +32,7 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
     private var context: Context
     private var userArrayList: MutableList<User> = ArrayList()
     private var fontUtils: FontUtils
+    private var userPresenceEnabled: Boolean = false
 
     /**
      * It is constructor which takes userArrayList as parameter and bind it with userArrayList in adapter.
@@ -42,6 +44,11 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
         this.userArrayList = userArrayList
         this.context = context
         fontUtils = FontUtils.getInstance(context)
+        FeatureRestriction.isUserPresenceEnabled(object : FeatureRestriction.OnSuccessListener{
+            override fun onSuccess(p0: Boolean) {
+                userPresenceEnabled = p0
+            }
+        })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): UserViewHolder {
@@ -67,7 +74,8 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
             userViewHolder.userListRowBinding.tvSeprator.visibility = View.VISIBLE
         }
         if (user.status == CometChatConstants.USER_STATUS_ONLINE)
-            userViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
+            if (userPresenceEnabled)
+                userViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
 
         userViewHolder.userListRowBinding.statusIndicator.setUserStatus(user.status)
         userViewHolder.userListRowBinding.txtUserName.text = user.name
