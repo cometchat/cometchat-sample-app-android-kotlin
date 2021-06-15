@@ -32,6 +32,7 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
     private lateinit var shareMessage: TextView
     private lateinit var initialReactionLayout: LinearLayout
     private lateinit var sendMessagePrivately: TextView
+    private lateinit var replyPrivately: TextView
 
     private var isShareVisible = false
     private var isThreadVisible = false
@@ -43,6 +44,7 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
     private var isMessageInfoVisible = false
     private var isReactionVisible = false
     private var isSendMessagePrivatelyVisible = false
+    private var isReplyPrivatelyVisible = false
     private var metadata : JSONObject? =null
 
     private var messageActionListener: MessageActionListener? = null
@@ -66,6 +68,7 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
             isMessageInfoVisible = arguments!!.getBoolean("messageInfoVisible")
             isReactionVisible = arguments!!.getBoolean("reactionVisible")
             isSendMessagePrivatelyVisible = arguments!!.getBoolean("sendMessagePrivately")
+            isReplyPrivatelyVisible = arguments!!.getBoolean("replyPrivately")
             var string = arguments!!.getString("metadata")
             if (string != null)
                 metadata = JSONObject(string)
@@ -96,6 +99,7 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
         messageInfo = views.findViewById(R.id.message_info)
         initialReactionLayout = views.findViewById(R.id.initial_reactions)
         sendMessagePrivately = views.findViewById(R.id.send_message_privately)
+        replyPrivately = views.findViewById(R.id.reply_privately)
 
         if (isThreadVisible) threadMessage.visibility = View.VISIBLE else threadMessage.visibility = View.GONE
         if (isCopyVisible) copyMessage.visibility = View.VISIBLE else copyMessage.visibility = View.GONE
@@ -107,6 +111,7 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
         if (isMessageInfoVisible) messageInfo.visibility = View.VISIBLE else messageInfo.visibility = View.GONE
         if (isReactionVisible) initialReactionLayout.visibility = View.VISIBLE else initialReactionLayout.visibility = View.GONE
         if (isSendMessagePrivatelyVisible) sendMessagePrivately.visibility = View.VISIBLE else sendMessagePrivately.visibility = View.GONE
+        if (isReplyPrivatelyVisible) replyPrivately.visibility = View.VISIBLE else replyPrivately.visibility = View.GONE
 
         val initialReactionList = Extensions.getInitialReactions(INITIAL_REACTION_COUNT)
         for (reaction in initialReactionList){
@@ -175,7 +180,10 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
             dismiss()
         }
         sendMessagePrivately.setOnClickListener {
-            if (messageActionListener != null) messageActionListener?.onSendMessagePrivatelyClick(metadata)
+            if (messageActionListener != null) messageActionListener?.onSendMessagePrivatelyClick()
+        }
+        replyPrivately.setOnClickListener {
+            if (messageActionListener != null) messageActionListener?.onReplyPrivatelyClick()
         }
         return views
     }
@@ -194,7 +202,8 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
         fun onShareMessageClick()
         fun onMessageInfoClick()
         fun onReactionClick(reaction: Reaction)
-        fun onSendMessagePrivatelyClick(metadata : JSONObject?)
+        fun onSendMessagePrivatelyClick()
+        fun onReplyPrivatelyClick()
     }
 
     override fun onDismiss(dialog: DialogInterface) {

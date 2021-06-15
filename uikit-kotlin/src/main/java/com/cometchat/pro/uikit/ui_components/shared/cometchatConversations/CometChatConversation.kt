@@ -16,6 +16,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.ConversationMode
 
 /**
  * Purpose - CometChatConversationList class is a subclass of recyclerview and used as component by
@@ -119,11 +120,11 @@ class CometChatConversation : RecyclerView {
      */
     fun refreshConversation(message: BaseMessage?) {
         val newConversation = CometChatHelper.getConversationFromMessage(message)
-        if (UIKitSettings.chatListMode)
+        if (UIKitSettings.conversationInMode == ConversationMode.ALL_CHATS)
             update(newConversation)
-        else if (UIKitSettings.groupInMode && newConversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP)
+        else if (UIKitSettings.conversationInMode == ConversationMode.GROUP && newConversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP)
             update(newConversation)
-        else if (UIKitSettings.userInMode && newConversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER)
+        else if (UIKitSettings.conversationInMode == ConversationMode.USER && newConversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER)
             update(newConversation)
     }
 

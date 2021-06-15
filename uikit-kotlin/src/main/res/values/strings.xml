@@ -287,10 +287,10 @@
     <string name="unblocked_successfully">unblocked successfully</string>
     <string name="forward_to_5_at_a_time">You cannot forward message to more than 5 members</string>
     <string name="sending">Sending..</string>
-    <string name="message_audio">Audio</string>
-    <string name="message_image">Image</string>
-    <string name="message_video">Video</string>
-    <string name="message_file">File</string>
+    <string name="message_audio">🎵 Audio</string>
+    <string name="message_image">📷  Photo</string>
+    <string name="message_video">📹  Video</string>
+    <string name="message_file">📁  File</string>
     <string name="call_accepted">Call Accepted</string>
     <string name="call_busy">Call Busy</string>
     <string name="call_cancelled">Call Cancelled</string>
@@ -300,8 +300,8 @@
     <string name="custom_message_document">📃 Document</string>
     <string name="custom_message_location">📍 Location</string>
     <string name="custom_message_not_supported">Custom Message not supported</string>
-    <string name="custom_message_poll">"📊 Polls "</string>
-    <string name="custom_message_sticker">"💟 Sticker "</string>
+    <string name="custom_message_poll">📊 Polls</string>
+    <string name="custom_message_sticker">💟 Sticker</string>
     <string name="custom_message_whiteboard">📝 Whiteboard</string>
     <string name="delete_and_exit">Delete &amp; Exit</string>
     <string name="password_protected_group">Password Protected Group</string>
@@ -333,7 +333,7 @@
     <string name="no_translation_available">No translation available</string>
     <string name="has_shared_group_call">has shared a group call.</string>
     <string name="you_created_group_call">You\'ve created a group call.</string>
-    <string name="custom_message_meeting">"📹 Group Call "</string>
+    <string name="custom_message_meeting">📞  Group Call</string>
     <string name="start_group_call">Start a Group Call</string>
     <string name="retry">Retry</string>
     <string name="uploading">Uploading</string>
@@ -361,6 +361,8 @@
 
     <string name="send_message_privately">Send Message Privately</string>
     <string name="view_profile">View Profile</string>
+    <string name="reply_privately">Reply Privately</string>
+    <string name="share_location_alert">Are you sure you want to share your location?</string>
 
     <!--    ______________-->
 </resources>

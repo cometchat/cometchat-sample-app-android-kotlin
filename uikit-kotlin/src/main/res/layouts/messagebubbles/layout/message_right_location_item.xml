@@ -33,10 +33,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <ImageView
-                    tools:src="@tools:sample/avatars"
                     android:layout_width="250dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/iv_map"/>
+                    android:layout_height="160dp"
+                    android:id="@+id/iv_map"
+                    android:src="@drawable/location_map"
+                    android:scaleType="fitXY"/>
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="250dp"
@@ -58,7 +59,7 @@
                     <TextView
                         android:id="@+id/sender_location_txt"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="37dp"
                         android:layout_below="@+id/tv_place_name"
                         android:layout_marginStart="20dp"
                         android:paddingStart="4dp"
@@ -73,6 +74,7 @@
                         style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:text="@string/navigate"
                         app:cornerRadius="8dp"
+                        android:visibility="gone"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
             </RelativeLayout>

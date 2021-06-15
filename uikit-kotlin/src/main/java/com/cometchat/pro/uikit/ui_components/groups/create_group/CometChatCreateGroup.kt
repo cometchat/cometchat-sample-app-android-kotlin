@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -21,15 +22,15 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.Group
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.security.SecureRandom
+import java.util.*
 
 /**
  * Purpose - CometChatCreateGroup class is a fragment used to create a group. User just need to enter
@@ -51,6 +52,7 @@ class CometChatCreateGroup : Fragment() {
     private var createGroupBtn: MaterialButton? = null
     private var groupTypeSpinner: Spinner? = null
     private var groupType: String? = null
+    private val types = ArrayList<String>()
     var TAG = "CometChatCreateGroup"
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -73,6 +75,9 @@ class CometChatCreateGroup : Fragment() {
         })
         des1 = view.findViewById(R.id.tvDes1)
         des2 = view.findViewById(R.id.tvDes2)
+        types.add(getString(R.string.public_group))
+        types.add(getString(R.string.private_group))
+        types.add(getString(R.string.password_protected_group))
         groupNameLayout = view.findViewById(R.id.input_group_name)
         groupDescLayout = view.findViewById(R.id.input_group_desc)
         groupPasswordLayout = view.findViewById(R.id.input_group_pwd)
@@ -83,24 +88,56 @@ class CometChatCreateGroup : Fragment() {
                 when (position) {
                     0 -> {
                         groupType = CometChatConstants.GROUP_TYPE_PUBLIC
-                        groupPasswordLayout!!.visibility = View.GONE
-                        groupCnfPasswordLayout!!.visibility = View.GONE
+                        groupPasswordLayout?.visibility = View.GONE
+                        groupCnfPasswordLayout?.visibility = View.GONE
                     }
                     1 -> {
                         groupType = CometChatConstants.GROUP_TYPE_PRIVATE
-                        groupPasswordLayout!!.visibility = View.GONE
-                        groupCnfPasswordLayout!!.visibility = View.GONE
+                        groupPasswordLayout?.visibility = View.GONE
+                        groupCnfPasswordLayout?.visibility = View.GONE
                     }
                     2 -> {
                         groupType = CometChatConstants.GROUP_TYPE_PASSWORD
-                        groupPasswordLayout!!.visibility = View.VISIBLE
-                        groupCnfPasswordLayout!!.visibility = View.VISIBLE
+                        groupPasswordLayout?.visibility = View.VISIBLE
+                        groupCnfPasswordLayout?.visibility = View.VISIBLE
                     }
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        val adapter: ArrayAdapter<String>? = context?.let {
+            ArrayAdapter<String>(
+                    it, android.R.layout.simple_list_item_1, types)
+        }
+        FeatureRestriction.isPublicGroupEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                if (!p0) {
+                    types.remove(getString(R.string.public_group))
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+        })
+
+        FeatureRestriction.isPrivateGroupEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                if (!p0) {
+                    types.remove(getString(R.string.private_group))
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+        })
+
+        FeatureRestriction.isPasswordGroupEnabled(object : FeatureRestriction.OnSuccessListener {
+            override fun onSuccess(p0: Boolean) {
+                if (!p0) {
+                    types.remove(getString(R.string.password_protected_group))
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+        })
+        groupTypeSpinner?.adapter = adapter
         createGroupBtn = view.findViewById(R.id.btn_create_group)
         createGroupBtn?.setOnClickListener(View.OnClickListener { createGroup() })
         checkDarkMode()

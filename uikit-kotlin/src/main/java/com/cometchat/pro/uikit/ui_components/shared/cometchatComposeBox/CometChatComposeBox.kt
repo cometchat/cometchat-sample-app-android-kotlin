@@ -32,6 +32,7 @@ import java.io.IOException
 import java.util.*
 
 class CometChatComposeBox : RelativeLayout, View.OnClickListener {
+    private var type: String? = null
     public var btnLiveReaction: ImageView? = null
     private var audioRecordView: AudioRecordView? = null
     private var mediaRecorder: MediaRecorder? = null
@@ -286,7 +287,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 
         FeatureRestriction.isVoiceNotesEnabled(object : FeatureRestriction.OnSuccessListener {
             override fun onSuccess(p0: Boolean) {
-                if (p0) ivMic!!.visibility = VISIBLE else ivMic!!.visibility = GONE
+                if (p0 && type == null) ivMic!!.visibility = VISIBLE else ivMic!!.visibility = GONE
             }
 
         })
@@ -447,6 +448,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     }
 
     fun usedIn(className: String?) {
+        type = className
         bundle.putString("type", className)
     }
 
