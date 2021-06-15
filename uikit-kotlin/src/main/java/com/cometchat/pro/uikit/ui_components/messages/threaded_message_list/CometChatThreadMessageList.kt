@@ -1845,14 +1845,29 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                 }
             }
 
-            override fun onSendMessagePrivatelyClick(metadata: JSONObject?) {
+            override fun onSendMessagePrivatelyClick() {
                 val intent = Intent(context, CometChatMessageListActivity::class.java)
-                intent.putExtra(UIKitConstants.IntentStrings.UID, metadata?.getString("messageSenderUid"))
-                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, metadata?.getString("messageSenderAvatar"))
-                intent.putExtra(UIKitConstants.IntentStrings.STATUS, metadata?.getString("messageSenderStatus"))
-                intent.putExtra(UIKitConstants.IntentStrings.NAME, metadata?.getString("messageSenderName"))
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage?.sender?.uid)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage?.sender?.avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.STATUS, baseMessage?.sender?.status)
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage?.sender?.name)
                 intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
                 startActivity(intent)
+                activity?.finish()
+            }
+
+            override fun onReplyPrivatelyClick() {
+                val intent = Intent(context, CometChatMessageListActivity::class.java)
+                intent.putExtra(UIKitConstants.IntentStrings.UID, baseMessage?.sender?.uid)
+                intent.putExtra(UIKitConstants.IntentStrings.AVATAR, baseMessage?.sender?.avatar)
+                intent.putExtra(UIKitConstants.IntentStrings.STATUS,  baseMessage?.sender?.status)
+                intent.putExtra(UIKitConstants.IntentStrings.NAME, baseMessage?.sender?.name)
+                intent.putExtra("isReply", true)
+                intent.putExtra("baseMessageMetadata", baseMessage?.rawMessage.toString())
+
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_USER)
+                startActivity(intent)
+                activity?.finish()
             }
         })
     }

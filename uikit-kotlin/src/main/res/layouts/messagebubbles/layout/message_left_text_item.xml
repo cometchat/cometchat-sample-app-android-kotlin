@@ -44,11 +44,9 @@
 
                 <include
                     android:id="@+id/replyItem"
-                    android:layout_below="@+id/go_txt_message"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="8dp"
                     layout="@layout/message_left_reply_item"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -57,6 +55,7 @@
                     android:id="@+id/go_txt_message"
                     android:layout_width="wrap_content"
                     tools:text="message"
+                    android:layout_below="@+id/replyItem"
                     android:textColor="@color/primaryTextColor"
                     android:focusable="true"
                     android:padding="10dp"

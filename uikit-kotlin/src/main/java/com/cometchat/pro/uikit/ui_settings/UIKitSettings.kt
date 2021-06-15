@@ -12,8 +12,11 @@ import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.enum.ConversationMode
+import com.cometchat.pro.uikit.ui_settings.enum.GroupMode
+import com.cometchat.pro.uikit.ui_settings.enum.UserMode
 
-class UIKitSettings(context: Context) {
+open class UIKitSettings(context: Context) {
 
     public var context: Context
 
@@ -124,8 +127,8 @@ class UIKitSettings(context: Context) {
         var groupCreation = true
         var emailReplies = true
         var hideDeletedMessages = true
-        var groupInMode = true
-        var userInMode = true
+//        var groupInMode = true
+//        var userInMode = true
         var chatListMode = true
         var sendStickers = true
         var showReplyPrivately = false
@@ -134,6 +137,9 @@ class UIKitSettings(context: Context) {
         var phoneColor: Int = R.color.purple
         var urlColor: Int = R.color.dark_blue
 
+        var conversationInMode: ConversationMode = ConversationMode.ALL_CHATS
+        var groupInMode: GroupMode = GroupMode.ALL_GROUP
+        var userInMode: UserMode = UserMode.ALL_USER
 
 
         fun setAppID(appID: String) {
@@ -143,11 +149,11 @@ class UIKitSettings(context: Context) {
             UIKitConstants.AppInfo.AUTH_KEY = authKey
         }
 
-        fun sendMessageInOneOnOne(sendMessageInOneOnOne : Boolean) {
+        fun sendMessageInOneOnOne(sendMessageInOneOnOne: Boolean) {
             this.sendMessageInOneOnOne = sendMessageInOneOnOne
         }
 
-        fun sendMessageInGroup(sendMessageInGroup : Boolean) {
+        fun sendMessageInGroup(sendMessageInGroup: Boolean) {
             this.sendMessageInGroup  = sendMessageInGroup
         }
 
@@ -362,7 +368,7 @@ class UIKitSettings(context: Context) {
             this.banMember = allowBanKickMembers
         }
 
-        fun allowKickMembers(kickMember : Boolean) {
+        fun allowKickMembers(kickMember: Boolean) {
             this.kickMember = kickMember
         }
 
@@ -395,7 +401,7 @@ class UIKitSettings(context: Context) {
             this.groupVideoCall = groupVideoCall
         }
 
-        fun enableUserVideoCall(enableUserVideoCall : Boolean) {
+        fun enableUserVideoCall(enableUserVideoCall: Boolean) {
             this.userVideoCall = enableUserVideoCall
         }
 

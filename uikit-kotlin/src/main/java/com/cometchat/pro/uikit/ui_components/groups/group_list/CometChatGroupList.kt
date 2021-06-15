@@ -36,6 +36,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.GroupMode
 import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
@@ -207,13 +208,13 @@ class CometChatGroupList constructor() : Fragment() {
             if (group.isJoined) {
                 resultList.add(group)
             }
-            if (UIKitSettings.groupListing.equals("public_groups", ignoreCase = true) &&
+            if (UIKitSettings.groupInMode == GroupMode.PUBLIC_GROUP &&
                     group.groupType.equals(CometChatConstants.GROUP_TYPE_PUBLIC, ignoreCase = true)) {
                 resultList.add(group)
-            } else if (UIKitSettings.groupListing.equals("password_protected_groups", ignoreCase = true) &&
+            } else if (UIKitSettings.groupInMode == GroupMode.PASSWORD_GROUP &&
                     group.groupType.equals(CometChatConstants.GROUP_TYPE_PASSWORD, ignoreCase = true)) {
                 resultList.add(group)
-            }  else if (UIKitSettings.groupListing == "public_and_password_protected_groups") {
+            }  else if (UIKitSettings.groupInMode == GroupMode.ALL_GROUP) {
                 resultList.add(group)
             }
         }

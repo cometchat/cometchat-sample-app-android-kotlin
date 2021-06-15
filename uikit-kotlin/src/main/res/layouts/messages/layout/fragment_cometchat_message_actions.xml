@@ -36,6 +36,20 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/reply_privately"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_reply_in_private"
+        android:drawableTint="@color/primaryTextColor"
+        android:drawablePadding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="@string/reply_privately"
+        android:textStyle="bold" />
+
+    <TextView
         android:id="@+id/message_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

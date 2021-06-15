@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="message_corner_radius">24dp</dimen>
+    <dimen name="message_corner_radius">12dp</dimen>
     <dimen name="name">16sp</dimen>
     <dimen name="fourteen">14sp</dimen>
     <dimen name="twelve">12sp</dimen>

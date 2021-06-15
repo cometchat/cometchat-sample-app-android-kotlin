@@ -30,6 +30,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.ConversationMode
 
 /*
 
@@ -178,11 +179,13 @@ class CometChatConversationList : Fragment(), TextWatcher {
      */
     private fun makeConversationList() {
         if (conversationsRequest == null) {
-            when {
-                UIKitSettings.chatListMode -> conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
-                UIKitSettings.groupInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_GROUP).setLimit(50).build()
-                UIKitSettings.userInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_USER).setLimit(50).build()
-            }
+//            when {
+//                UIKitSettings.chatListMode -> conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
+//                UIKitSettings.groupInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_GROUP).setLimit(50).build()
+//                UIKitSettings.userInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_USER).setLimit(50).build()
+//            }
+
+            conversationsRequest = ConversationsRequestBuilder().setConversationType(UIKitSettings.conversationInMode.toString()).setLimit(50).build()
 
         }
         conversationsRequest?.fetchNext(object : CallbackListener<List<Conversation>>() {
@@ -317,10 +320,10 @@ class CometChatConversationList : Fragment(), TextWatcher {
         if (rvConversation != null) {
             val conversation = CometChatHelper.getConversationFromMessage(baseMessage)
             if (isRemove) rvConversation?.remove(conversation)
-            else if (UIKitSettings.chatListMode) rvConversation?.update(conversation)
-            else if (UIKitSettings.groupInMode && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP)
+            else if (UIKitSettings.conversationInMode == ConversationMode.ALL_CHATS) rvConversation?.update(conversation)
+            else if (UIKitSettings.conversationInMode == ConversationMode.GROUP && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP)
                 rvConversation?.update(conversation)
-            else if (UIKitSettings.userInMode && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER)
+            else if (UIKitSettings.conversationInMode == ConversationMode.USER && conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_USER)
                 rvConversation?.update(conversation)
             checkNoConverstaion()
         }

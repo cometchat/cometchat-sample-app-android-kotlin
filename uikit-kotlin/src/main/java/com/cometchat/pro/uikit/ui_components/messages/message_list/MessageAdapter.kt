@@ -646,7 +646,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isLocationMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     }
                     true
                 })
@@ -794,7 +794,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isLocationMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     }
                     true
                 })
@@ -833,7 +833,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -844,7 +844,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -859,7 +859,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -870,7 +870,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -942,7 +942,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -954,7 +954,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -999,7 +999,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -1011,7 +1011,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1086,7 +1086,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -1097,7 +1097,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1150,7 +1150,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLongClickEnabled && !isImageMessageClick) {
                             setLongClickSelectedItem(baseMessage)
-                            messageLongClick!!.setLongMessageClick(longselectedItemList)
+                            messageLongClick?.setLongMessageClick(longselectedItemList)
                         } else {
                             setSelectedMessage(baseMessage.id)
                         }
@@ -1162,7 +1162,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isImageMessageClick && !isTextMessageClick) {
                         isLongClickEnabled = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1255,7 +1255,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1327,7 +1327,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1399,8 +1399,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 })
 
                 setLocationData(baseMessage, viewHolder.view.tvPlaceName, viewHolder.view.ivMap)
-                viewHolder.view.senderLocationTxt.setText(String.format(context.getString(R.string.shared_location), baseMessage.sender.name))
-                viewHolder.view.navigateBtn.setOnClickListener(View.OnClickListener {
+                viewHolder.view.ivMap.setOnClickListener(View.OnClickListener {
                     try {
                         val latitude = (baseMessage as CustomMessage).customData.getDouble("latitude")
                         val longitude = (baseMessage as CustomMessage).customData.getDouble("longitude")
@@ -1417,11 +1416,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                 })
                 showMessageTime(viewHolder, baseMessage)
-                viewHolder.view.txtTime.setVisibility(View.VISIBLE);
+                viewHolder.view.txtTime.visibility = View.VISIBLE;
                 viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.id)
                     }
@@ -1432,7 +1431,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isLocationMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1499,8 +1498,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     context.startActivity(intent)
                 })
                 setLocationData(baseMessage, viewHolder.view.tvPlaceName, viewHolder.view.ivMap)
-                viewHolder.view.senderLocationTxt.text = String.format(context.getString(R.string.shared_location), baseMessage.sender.name)
-                viewHolder.view.navigateBtn.setOnClickListener(View.OnClickListener {
+                viewHolder.view.ivMap.setOnClickListener(View.OnClickListener {
                     try {
                         val latitude = (baseMessage as CustomMessage).customData.getDouble("latitude")
                         val longitude = (baseMessage as CustomMessage).customData.getDouble("longitude")
@@ -1521,7 +1519,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.rlMessage.setOnClickListener(View.OnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.id)
                     }
@@ -1532,7 +1530,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isLocationMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1550,6 +1548,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             val mapUrl = UIKitConstants.MapUrl.MAPS_URL + LATITUDE + "," + LONGITUDE + "&key=" + UIKitConstants.MapUrl.MAP_ACCESS_KEY
             Glide.with(context)
                     .load(mapUrl)
+                    .placeholder(R.drawable.location_map)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(ivMap)
         } catch (e: JSONException) {
@@ -1628,23 +1627,23 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(Color.parseColor(UIKitSettings.color)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
-                    mediaPlayer!!.reset()
+                    mediaPlayer?.reset()
                     if (messagePosition != i) {
                         notifyItemChanged(messagePosition)
                         messagePosition = i
                     }
                     try {
-                        mediaPlayer!!.setDataSource(baseMessage.attachment.fileUrl)
-                        mediaPlayer!!.prepare()
-                        mediaPlayer!!.setOnCompletionListener { (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
+                        mediaPlayer?.setDataSource(baseMessage.attachment.fileUrl)
+                        mediaPlayer?.prepare()
+                        mediaPlayer?.setOnCompletionListener { (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
                     } catch (e: Exception) {
                         Log.e(TAG, "MediaPlayerError: " + e.message)
                     }
                     if (!mediaPlayer!!.isPlaying) {
-                        mediaPlayer!!.start()
+                        mediaPlayer?.start()
                         (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
                     } else {
-                        mediaPlayer!!.pause()
+                        mediaPlayer?.pause()
                         (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                     }
                 }
@@ -1652,7 +1651,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1713,23 +1712,23 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(context.resources.getColor(R.color.textColorWhite)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
-                    mediaPlayer!!.reset()
+                    mediaPlayer?.reset()
                     if (messagePosition != i) {
                         notifyItemChanged(messagePosition)
                         messagePosition = i
                     }
                     try {
-                        mediaPlayer!!.setDataSource(baseMessage.attachment.fileUrl)
-                        mediaPlayer!!.prepare()
-                        mediaPlayer!!.setOnCompletionListener { (viewHolder as RightAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
+                        mediaPlayer?.setDataSource(baseMessage.attachment.fileUrl)
+                        mediaPlayer?.prepare()
+                        mediaPlayer?.setOnCompletionListener { (viewHolder as RightAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp) }
                     } catch (e: Exception) {
                         Log.e(TAG, "MediaPlayerError: " + e.message)
                     }
                     if (!mediaPlayer!!.isPlaying) {
-                        mediaPlayer!!.start()
+                        mediaPlayer?.start()
                         viewHolder.view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
                     } else {
-                        mediaPlayer!!.pause()
+                        mediaPlayer?.pause()
                         viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                     }
                 }
@@ -1737,7 +1736,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1750,7 +1749,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     }
 
     fun stopPlayingAudio() {
-        if (mediaPlayer != null) mediaPlayer!!.stop()
+        if (mediaPlayer != null) mediaPlayer?.stop()
     }
 
     /**
@@ -1843,7 +1842,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1911,7 +1910,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     if (!isLongClickEnabled && !isTextMessageClick) {
                         isImageMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -1998,11 +1997,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             //
 
             if (baseMessage.getReplyCount() != 0) {
-                viewHolder.view.threadReplyCount.setVisibility(View.VISIBLE)
-                viewHolder.view.threadReplyCount.setText(baseMessage.getReplyCount().toString() + " Replies")
+                viewHolder.view.threadReplyCount.visibility = View.VISIBLE
+                viewHolder.view.threadReplyCount.text = baseMessage.getReplyCount().toString() + " Replies"
             } else {
-                viewHolder.view.replyAvatarLayout.setVisibility(View.GONE)
-                viewHolder.view.threadReplyCount.setVisibility(View.GONE)
+                viewHolder.view.replyAvatarLayout.visibility = View.GONE
+                viewHolder.view.threadReplyCount.visibility = View.GONE
             }
             viewHolder.view.threadReplyCount.setOnClickListener(View.OnClickListener { view: View? ->
                 val intent = Intent(context, CometChatThreadMessageListActivity::class.java)
@@ -2047,7 +2046,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (!isLongClickEnabled && !isTextMessageClick) {
                     isImageMessageClick = true
                     setLongClickSelectedItem(baseMessage)
-                    messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    messageLongClick?.setLongMessageClick(longselectedItemList)
                     notifyDataSetChanged()
                 }
                 true
@@ -2155,7 +2154,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (!isLongClickEnabled && !isTextMessageClick) {
                     isImageMessageClick = true
                     setLongClickSelectedItem(baseMessage)
-                    messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    messageLongClick?.setLongMessageClick(longselectedItemList)
                     notifyDataSetChanged()
                 }
                 true
@@ -2218,9 +2217,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                imageView.setImageBitmap(resource)
 //            }
 //        })
-//        imageDialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+//        imageDialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 //        imageDialog.setContentView(messageVw)
-//        imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//        imageDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 //        imageDialog.show()
 //    }
 
@@ -2288,7 +2287,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (!isLongClickEnabled && !isTextMessageClick) {
                     isImageMessageClick = true
                     setLongClickSelectedItem(baseMessage)
-                    messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    messageLongClick?.setLongMessageClick(longselectedItemList)
                     notifyDataSetChanged()
                 }
                 true
@@ -2343,7 +2342,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (!isLongClickEnabled && !isTextMessageClick) {
                     isImageMessageClick = true
                     setLongClickSelectedItem(baseMessage)
-                    messageLongClick!!.setLongMessageClick(longselectedItemList)
+                    messageLongClick?.setLongMessageClick(longselectedItemList)
                     notifyDataSetChanged()
                 }
                 true
@@ -2647,7 +2646,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.rlMessage.setOnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.getId())
                     }
@@ -2658,50 +2657,74 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isTextMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-                if (baseMessage.getMetadata() != null && baseMessage.getMetadata().has("reply")) {
+                Log.e(TAG, "setTextData: left  raw "+baseMessage.rawMessage)
+                Log.e(TAG, "setTextData: left metadata "+baseMessage.metadata)
+                if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
-                        val metaData = baseMessage.getMetadata().getJSONObject("reply")
+                        var metaData = JSONObject()
+                        if (baseMessage.metadata.has("reply-message"))
+                            metaData = baseMessage.getMetadata().getJSONObject("reply-message")
+                        else if (baseMessage.metadata.has("replyToMessage"))
+                            metaData = baseMessage.getMetadata().getJSONObject("replyToMessage")
                         val messageType = metaData.getString("type")
-                        val message = metaData.getString("message")
+                        val data = metaData.getJSONObject("data")
+                        var replyMessage = ""
+                        if (data.has("text"))
+                            replyMessage = data.getString("text")
                         viewHolder.view.replyItem.replyLayout.visibility = View.VISIBLE
-                        viewHolder.view.replyItem.replyUser.text = metaData.getString("name")
-                        if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
-                            viewHolder.view.replyItem.replyMessage.text = message
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_image)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_photo, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_audio), "")
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_library_music_24dp, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_video)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_videocam_24dp, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location), "").trim { it <= ' ' }
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.WHITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_whiteboard)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.WRITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_writeboard)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.POLLS) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_polls), message)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_outline_poll_24, 0, 0, 0)
+                        viewHolder.view.replyItem.replyUser.text = Utils.getSenderName(data)
+                        when (messageType) {
+                            CometChatConstants.MESSAGE_TYPE_TEXT -> {
+                                viewHolder.view.replyItem.replyMessage.text = replyMessage
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_image)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_AUDIO -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_audio)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_video)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_FILE -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_file)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.LOCATION -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.custom_message_location)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.VISIBLE
+                            }
+                            UIKitConstants.IntentStrings.STICKERS -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_sticker)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.WHITEBOARD -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_whiteboard)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.WRITEBOARD -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_document);
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.POLLS -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_poll)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.MEETING -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_meeting)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
                         }
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "setTextData: " + e.message)
@@ -2743,7 +2766,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (processed is Spannable) {
                     val spannable = processed
                     count = spannable.getSpans(0, spannable.length - 1, EmojiSpan::class.java).size
-                    if (Utils.removeEmojiAndSymbol(txtMessage)!!.trim().length === 0) {
+                    if (Utils.removeEmojiAndSymbol(txtMessage)?.trim()!!.length === 0) {
                         if (FeatureRestriction.isLargerSizeEmojisEnabled()) {
                             if (count == 1) {
                                 viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 32f)
@@ -2766,11 +2789,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 //                if (isExtensionEnabled("data-masking"))
 //                    message = Extensions.checkDataMasking(baseMessage)
 
-                if(isProfanityFilter) {
+                if (isProfanityFilter) {
                     message = Extensions.getProfanityFilter(baseMessage)
                 }
 
-                if(isDataMasking) {
+                if (isDataMasking) {
                     message = Extensions.checkDataMasking(baseMessage)
                 }
 
@@ -2788,7 +2811,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.rlMessage.setOnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.getId())
                     }
@@ -2799,52 +2822,75 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isTextMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-                if (baseMessage.getMetadata() != null && baseMessage.getMetadata().has("reply")) {
+//                Log.e(TAG, "setTextData: right raw "+baseMessage.rawMessage)
+                Log.e(TAG, "setTextData: right metadata "+baseMessage.metadata)
+                if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
-                        val metaData = baseMessage.getMetadata().getJSONObject("reply")
+                        var metaData = JSONObject()
+                        if (baseMessage.metadata.has("reply-message"))
+                            metaData = baseMessage.getMetadata().getJSONObject("reply-message")
+                        else if (baseMessage.metadata.has("replyToMessage"))
+                            metaData = baseMessage.getMetadata().getJSONObject("replyToMessage")
                         val messageType = metaData.getString("type")
-                        val message = metaData.getString("message")
+                        val data = metaData.getJSONObject("data")
+                        var replyMessage = ""
+                        if (data.has("text"))
+                            replyMessage = data.getString("text")
                         viewHolder.view.replyItem.replyLayout.visibility = View.VISIBLE
-                        viewHolder.view.replyItem.replyUser.text = metaData.getString("name")
-                        if (messageType == CometChatConstants.MESSAGE_TYPE_TEXT) {
-                            viewHolder.view.replyItem.replyMessage.text = message
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
-                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_image)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_photo, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_audio), "")
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_library_music_24dp, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-                            viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.shared_a_video)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_videocam_24dp, 0, 0, 0)
-                        } else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_a_file), "")
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.LOCATION) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.resources.getString(R.string.shared_location), "").trim { it <= ' ' }
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_near_me_24dp, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.STICKERS) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_sticker))
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.default_sticker, 0, 0, 0)
-                        } else if (messageType == UIKitConstants.IntentStrings.WHITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_whiteboard);
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_whiteboard_24dp, 0, 0, 0);
-                        } else if (messageType == UIKitConstants.IntentStrings.WRITEBOARD) {
-                            viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.shared_a_writeboard);
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_writeboard_24dp, 0, 0, 0);
-                        } else if (messageType == UIKitConstants.IntentStrings.POLLS) {
-                            viewHolder.view.replyItem.replyMessage.text = String.format(context.getString(R.string.shared_a_polls), message)
-                            viewHolder.view.replyItem.replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_outline_poll_24, 0, 0, 0)
+                        viewHolder.view.replyItem.replyUser.text = Utils.getSenderName(data)
+                        when (messageType) {
+                            CometChatConstants.MESSAGE_TYPE_TEXT -> {
+                                viewHolder.view.replyItem.replyMessage.text = replyMessage
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_image)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_AUDIO -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_audio)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_video)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            CometChatConstants.MESSAGE_TYPE_FILE -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.message_file)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.LOCATION -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.resources.getString(R.string.custom_message_location)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.VISIBLE
+                            }
+                            UIKitConstants.IntentStrings.STICKERS -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_sticker)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.WHITEBOARD -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_whiteboard)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.WRITEBOARD -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_document)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.POLLS -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_poll)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
+                            UIKitConstants.IntentStrings.MEETING -> {
+                                viewHolder.view.replyItem.replyMessage.text = context.getString(R.string.custom_message_meeting)
+                                viewHolder.view.replyItem.replyMediaThumbnail.visibility = View.GONE
+                            }
                         }
-
                     } catch (e: java.lang.Exception) {
                         Log.e(TAG, "setTextData: " + e.message)
                     }
@@ -2885,7 +2931,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 if (processed is Spannable) {
                     val spannable = processed
                     count = spannable.getSpans(0, spannable.length - 1, EmojiSpan::class.java).size
-                    if (Utils.removeEmojiAndSymbol(txtMessage)!!.trim().length === 0) {
+                    if (Utils.removeEmojiAndSymbol(txtMessage)?.trim()!!.length === 0) {
                         if (count == 1) {
                             viewHolder.view.goTxtMessage.textSize = Utils.dpToPx(context, 32f)
                         } else if (count == 2) {
@@ -2899,6 +2945,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
             }
         }
     }
+
 
     private fun setReactionSupport(baseMessage: BaseMessage, reactionsLayout: ChipGroup) {
         val reactionsOnMessage: HashMap<String, String> = Extensions.getReactionsOnMessage(baseMessage)
@@ -3075,15 +3122,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         if (extensionList.containsKey("linkPreview")) {
                             val linkPreviewJsonObject = extensionList["linkPreview"]
                             try {
-                                val description = linkPreviewJsonObject!!.getString("description")
-                                val image = linkPreviewJsonObject.getString("image")
-                                val title = linkPreviewJsonObject.getString("title")
-                                url = linkPreviewJsonObject.getString("url")
+                                val description = linkPreviewJsonObject?.getString("description")
+                                val image = linkPreviewJsonObject?.getString("image")
+                                val title = linkPreviewJsonObject?.getString("title")
+                                url = linkPreviewJsonObject?.getString("url")
                                 Log.e("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
                                 viewHolder.view.linkTitle.text = title
                                 viewHolder.view.linkSubtitle.text = description
                                 Glide.with(context).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
-                                if (url.contains("youtu.be") || url.contains("youtube")) {
+                                if ((url != null && url.contains("youtu.be")) || (url != null && url.contains("youtube"))) {
                                     viewHolder.view.videoLink.visibility = View.VISIBLE
                                     viewHolder.view.visitLink.text = context.resources.getString(R.string.view_on_youtube)
                                 } else {
@@ -3162,7 +3209,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.cvLinkMessageContainer.setOnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.id)
                     }
@@ -3173,7 +3220,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isTextMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -3189,15 +3236,15 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         if (extensionList.containsKey("linkPreview")) {
                             val linkPreviewJsonObject = extensionList["linkPreview"]
                             try {
-                                val description = linkPreviewJsonObject!!.getString("description")
-                                val image = linkPreviewJsonObject.getString("image")
-                                val title = linkPreviewJsonObject.getString("title")
-                                url = linkPreviewJsonObject.getString("url")
+                                val description = linkPreviewJsonObject?.getString("description")
+                                val image = linkPreviewJsonObject?.getString("image")
+                                val title = linkPreviewJsonObject?.getString("title")
+                                url = linkPreviewJsonObject?.getString("url")
                                 Log.e("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
                                 viewHolder.view.linkTitle.text = title
                                 viewHolder.view.linkSubtitle.text = description
                                 Glide.with(context).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
-                                if (url.contains("youtu.be") || url.contains("youtube")) {
+                                if ((url != null && url.contains("youtu.be")) || (url != null && url.contains("youtube"))) {
                                     viewHolder.view.videoLink.visibility = View.VISIBLE
                                     viewHolder.view.visitLink.text = context.resources.getString(R.string.view_on_youtube)
                                 } else {
@@ -3275,7 +3322,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 viewHolder.view.cvLinkMessageContainer.setOnClickListener { view: View? ->
                     if (isLongClickEnabled && !isImageMessageClick) {
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                     } else {
                         setSelectedMessage(baseMessage.id)
                     }
@@ -3286,7 +3333,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         isLongClickEnabled = true
                         isTextMessageClick = true
                         setLongClickSelectedItem(baseMessage)
-                        messageLongClick!!.setLongMessageClick(longselectedItemList)
+                        messageLongClick?.setLongMessageClick(longselectedItemList)
                         notifyDataSetChanged()
                     }
                     true
@@ -3317,7 +3364,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
      * @see CometChatAvatar
      */
     private fun setAvatar(avatar: CometChatAvatar, avatarUrl: String?, name: String) {
-        if (avatarUrl != null && !avatarUrl.isEmpty()) Glide.with(context).load(avatarUrl).into(avatar) else avatar.setInitials(name)
+        if (avatarUrl != null && avatarUrl.isNotEmpty()) Glide.with(context).load(avatarUrl).into(avatar) else avatar.setInitials(name)
     }
 
     override fun getItemCount(): Int {
@@ -3331,7 +3378,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
     }
 
     override fun onCreateHeaderViewHolder(var1: ViewGroup?): DateItemHolder? {
-        val view = LayoutInflater.from(var1!!.context).inflate(R.layout.cometchat_messagedate_header,
+        val view = LayoutInflater.from(var1?.context).inflate(R.layout.cometchat_messagedate_header,
                 var1, false)
         return DateItemHolder(view)
     }
@@ -3364,17 +3411,22 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         val baseMessage = messageList[position]
         val extensionList = Extensions.extensionCheck(baseMessage)
         if (baseMessage.deletedAt == 0L) {
+            Log.e(TAG, "getItemViewTypes: basemessage "+baseMessage.toString())
+            if (baseMessage.metadata != null) {
+                Log.e(TAG, "getItemViewTypes: replyToMessage"+baseMessage.metadata.has("replyToMessage") )
+                Log.e(TAG, "getItemViewTypes: reply-message"+baseMessage.metadata.has("reply-message") )
+            }
             if (baseMessage.category == CometChatConstants.CATEGORY_MESSAGE) {
                 return when (baseMessage.type) {
                     CometChatConstants.MESSAGE_TYPE_TEXT -> if (baseMessage.sender.uid == loggedInUser.uid) {
                         if (isLinkPreview && extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) RIGHT_LINK_MESSAGE
-                        else if (baseMessage.metadata != null && baseMessage.metadata.has("reply"))
+                        else if (baseMessage.metadata != null && baseMessage.metadata.has("reply-message") || baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))
                             return RIGHT_REPLY_TEXT_MESSAGE
                         else RIGHT_TEXT_MESSAGE
 
                     } else {
                         if (isLinkPreview && extensionList != null && extensionList.containsKey("linkPreview") && extensionList["linkPreview"] != null) LEFT_LINK_MESSAGE
-                        else if (baseMessage.metadata != null && baseMessage.metadata.has("reply"))
+                        else if (baseMessage.metadata != null && baseMessage.metadata.has("reply-message") || baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))
                             return LEFT_REPLY_TEXT_MESSAGE
                         else LEFT_TEXT_MESSAGE
                     }

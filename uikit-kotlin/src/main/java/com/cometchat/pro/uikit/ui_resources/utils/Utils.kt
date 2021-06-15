@@ -861,5 +861,13 @@ public class Utils {
             imageDialog.show()
         }
 
+        fun getSenderName(data: JSONObject): String? {
+            val entities = data.getJSONObject("entities")
+            val sender = entities.getJSONObject("sender")
+            val entity = sender.getJSONObject("entity")
+            val name = entity.getString("name")
+            return name
+        }
+
     }
 }

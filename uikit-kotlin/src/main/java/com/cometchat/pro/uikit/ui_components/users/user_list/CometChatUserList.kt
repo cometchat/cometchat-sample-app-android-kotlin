@@ -29,6 +29,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.UserMode
 import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
@@ -91,7 +92,7 @@ class CometChatUserList constructor() : Fragment() {
         rlSearchBox = view.findViewById(R.id.rl_search_box)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
 
-        FeatureRestriction.isUserSearchEnabled(object : FeatureRestriction.OnSuccessListener{
+        FeatureRestriction.isUserSearchEnabled(object : FeatureRestriction.OnSuccessListener {
             override fun onSuccess(p0: Boolean) {
                 if (!p0) {
                     etSearch?.visibility = View.GONE
@@ -178,12 +179,9 @@ class CometChatUserList constructor() : Fragment() {
      */
     private fun fetchUsers() {
         if (usersRequest == null) {
-            if (UIKitSettings.userListing.equals("friends", ignoreCase = true))
-                usersRequest = UsersRequestBuilder().setLimit(30)
-                        .friendsOnly(true).build()
-            else if (UIKitSettings.userListing.equals("all_users", ignoreCase = true))
-                usersRequest = UsersRequestBuilder().setLimit(30).build()
-            Log.e(TAG, "newfetchUsers: ")
+            if (UIKitSettings.userInMode == UserMode.FRIENDS) usersRequest = UsersRequestBuilder().setLimit(30)
+                    .friendsOnly(true).build()
+            else if (UIKitSettings.userInMode == UserMode.ALL_USER) usersRequest = UsersRequestBuilder().setLimit(30).build()
         }
         usersRequest!!.fetchNext(object : CallbackListener<List<User>>() {
             public override fun onSuccess(users: List<User>) {
