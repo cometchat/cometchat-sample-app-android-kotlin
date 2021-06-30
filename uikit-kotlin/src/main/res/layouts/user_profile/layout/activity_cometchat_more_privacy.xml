@@ -11,6 +11,7 @@
         android:id="@+id/privacy_toolbar"
         android:layout_width="match_parent"
         app:title="@string/privacy_and_security"
+        app:navigationIcon="@drawable/ic_back"
         android:layout_height="wrap_content"/>
 
     <RelativeLayout
@@ -38,7 +39,7 @@
             android:drawablePadding="8dp"
             android:drawableEnd="@drawable/ic_arrow_right_24dp"
             android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>

@@ -56,7 +56,7 @@
         android:layout_width="wrap_content"
         android:padding="8dp"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_add_circle_grey_32dp"
+        android:src="@drawable/ic_add_circle_filled"
         android:layout_height="wrap_content"/>
 
     <RelativeLayout
@@ -94,7 +94,7 @@
             android:layout_alignBottom="@+id/record_time"
             android:visibility="gone"
             android:id="@+id/ivDelete"
-            android:src="@drawable/ic_delete_24dp"
+            android:src="@drawable/ic_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <SeekBar
@@ -135,23 +135,26 @@
         android:layout_alignParentEnd="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
         <ImageView
-            android:clickable="true"
-            android:foreground="?selectableItemBackground"
             android:id="@+id/ivMic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_mic_grey_24dp"
+            android:clickable="true"
+            android:foreground="?selectableItemBackground"
             android:padding="8dp"
-            android:background="@android:color/transparent"/>
+            android:src="@drawable/ic_microphone_circle"
+            android:focusable="true" />
+
         <ImageView
             tools:visibility="visible"
             android:visibility="gone"
             android:id="@+id/ivSend"
             android:layout_width="wrap_content"
             android:padding="8dp"
-            android:src="@drawable/ic_send"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/ic_send_message"
+            android:layout_height="wrap_content"
+            android:tint="@color/colorPrimary"/>
         <ImageView
             android:layout_width="21dp"
             android:layout_height="17dp"

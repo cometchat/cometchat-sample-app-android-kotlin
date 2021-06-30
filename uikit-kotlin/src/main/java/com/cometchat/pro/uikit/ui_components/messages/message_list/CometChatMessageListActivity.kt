@@ -88,7 +88,7 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
     override fun onBackPressed() {
         super.onBackPressed()
-        startActivity(Intent(this, CometChatUI::class.java))
+//        startActivity(Intent(this, CometChatUI::class.java))
         finish()
     }
 

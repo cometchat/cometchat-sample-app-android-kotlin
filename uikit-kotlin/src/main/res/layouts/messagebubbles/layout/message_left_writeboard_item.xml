@@ -53,7 +53,7 @@
                     android:padding="8dp"
                     android:id="@+id/icon"
                     android:tint="@color/grey_200"
-                    android:src="@drawable/ic_writeboard_24dp"
+                    android:src="@drawable/ic_collaborative_document"
                     android:layout_width="36dp"
                     android:layout_height="36dp"/>
                 <TextView
@@ -66,18 +66,20 @@
                     android:layout_marginBottom="8dp"
                     android:padding="10dp"/>
             </RelativeLayout>
+
             <com.google.android.material.button.MaterialButton
-                android:layout_width="match_parent"
-                android:text="@string/join"
-                android:layout_below="@id/top_message_layout"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginBottom="16dp"
-                app:backgroundTint="@color/textColorWhite"
-                android:textColor="@color/primaryTextColor"
-                app:cornerRadius="8dp"
                 android:id="@+id/join_writeboard"
-                android:layout_height="wrap_content"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/top_message_layout"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/join"
+                android:textColor="@color/primaryTextColor"
+                app:backgroundTint="@color/textColorWhite"
+                app:cornerRadius="8dp"
+                android:textAllCaps="false"/>
         </RelativeLayout>
         <HorizontalScrollView
             android:layout_alignStart="@id/cv_message_container"

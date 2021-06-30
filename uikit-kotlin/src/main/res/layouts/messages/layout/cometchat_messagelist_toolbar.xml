@@ -25,8 +25,8 @@
             android:layout_centerVertical="true"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:src="@drawable/ic_arrow_back_24dp"
-            android:tint="@color/colorPrimary" />
+            android:src="@drawable/ic_back"
+            android:tint="@color/colorPrimary"/>
 
         <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
             android:id="@+id/iv_chat_avatar"
@@ -77,7 +77,8 @@
                 android:maxWidth="200dp"
                 android:maxLines="1"
                 android:textSize="12sp"
-                tools:text="online" />
+                tools:text="online"
+                android:textColor="@color/colorPrimary"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -90,7 +91,7 @@
             android:layout_marginEnd="5dp"
             android:orientation="horizontal">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/iv_video_call_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -98,7 +99,8 @@
                 android:foreground="?attr/selectableItemBackground"
                 android:padding="8dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_videocall"
+                android:src="@drawable/ic_video_call"
+                android:background="@android:color/transparent"
                 android:tint="@color/colorPrimary" />
 
             <ImageView
@@ -109,8 +111,7 @@
                 android:foreground="?attr/selectableItemBackground"
                 android:padding="8dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_audiocall"
-
+                android:src="@drawable/ic_audio_call"
                 android:tint="@color/colorPrimary" />
 
             <ImageView
@@ -121,7 +122,7 @@
                 android:layout_gravity="center"
                 android:layout_alignBottom="@+id/tv_name"
                 android:layout_toEndOf="@+id/tv_name"
-                android:src="@drawable/ic_info_new"
+                android:src="@drawable/ic_info"
                 android:tint="@color/colorPrimary"/>
         </LinearLayout>
 

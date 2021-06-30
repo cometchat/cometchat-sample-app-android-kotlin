@@ -74,6 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="11:00 PM"
+                android:layout_marginEnd="8dp"
                 android:layout_toStartOf="@+id/cv_message_container"
                 android:layout_alignBottom="@+id/cv_message_container"
                 android:layout_marginBottom="8dp"

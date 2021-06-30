@@ -39,7 +39,7 @@ class CometChatBanMembersActivity : AppCompatActivity() {
         }
         if (intent.hasExtra(UIKitConstants.IntentStrings.GROUP_NAME)) {
             gName = intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_NAME)
-            banToolbar!!.title = String.format(resources.getString(R.string.ban_member_of_group), gName)
+//            banToolbar!!.title = String.format(resources.getString(R.string.ban_member_of_group), gName)
         }
         if (intent.hasExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)) {
             loggedInUserScope = intent.getStringExtra(UIKitConstants.IntentStrings.MEMBER_SCOPE)

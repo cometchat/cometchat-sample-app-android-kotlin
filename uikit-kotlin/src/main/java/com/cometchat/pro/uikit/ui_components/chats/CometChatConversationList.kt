@@ -1,6 +1,7 @@
 package com.cometchat.pro.uikit.ui_components.chats
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,7 +12,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import android.widget.TextView.OnEditorActionListener
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
@@ -22,6 +22,9 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.CometChatHelper
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.R
+import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MyButton
+import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MyButtonClickListener
+import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MySwipeHelper
 import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -58,6 +61,7 @@ class CometChatConversationList : Fragment(), TextWatcher {
     private var vw: View? = null
     private var conversation : Conversation? = null
     private var conversationList: MutableList<Conversation> = ArrayList()
+    private var ivStartConversation: ImageView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -71,11 +75,16 @@ class CometChatConversationList : Fragment(), TextWatcher {
         rlSearchBox = vw?.findViewById(R.id.rl_search_box)
         conversationShimmer = vw?.findViewById(R.id.shimmer_layout)
         clearSearch = vw?.findViewById(R.id.clear_search)
+        ivStartConversation = vw?.findViewById(R.id.iv_start_conversation)
         if (!FeatureRestriction.isChatSearchEnabled()) {
             searchEdit?.visibility = View.GONE
             clearSearch?.visibility = View.GONE
         }
         checkDarkMode()
+        ivStartConversation?.setOnClickListener {
+            var intent = Intent(context, CometChatStartConversation::class.java)
+            startActivity(intent)
+        }
         searchEdit?.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
                 rvConversation?.searchConversation(textView.text.toString())
@@ -116,7 +125,7 @@ class CometChatConversationList : Fragment(), TextWatcher {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        object : MySwipeHelper(requireContext(),rvConversation as RecyclerView,200){
+        object : MySwipeHelper(requireContext(),rvConversation as RecyclerView,260){
             override fun instantiateMyButton(
                     viewHolder: RecyclerView.ViewHolder,
                     buffer: MutableList<MyButton>
@@ -179,12 +188,6 @@ class CometChatConversationList : Fragment(), TextWatcher {
      */
     private fun makeConversationList() {
         if (conversationsRequest == null) {
-//            when {
-//                UIKitSettings.chatListMode -> conversationsRequest = ConversationsRequestBuilder().setLimit(50).build()
-//                UIKitSettings.groupInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_GROUP).setLimit(50).build()
-//                UIKitSettings.userInMode -> conversationsRequest = ConversationsRequestBuilder().setConversationType(CometChatConstants.CONVERSATION_TYPE_USER).setLimit(50).build()
-//            }
-
             conversationsRequest = ConversationsRequestBuilder().setConversationType(UIKitSettings.conversationInMode.toString()).setLimit(50).build()
 
         }

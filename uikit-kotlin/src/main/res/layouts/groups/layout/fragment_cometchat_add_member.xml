@@ -21,6 +21,7 @@
             android:id="@+id/add_member_toolbar"
             android:layout_width="match_parent"
             app:title="@string/add_members"
+            app:navigationIcon="@drawable/ic_back"
             android:layout_height="wrap_content"/>
 
         <RelativeLayout
@@ -39,7 +40,7 @@
                 android:imeOptions="actionSearch"
                 android:maxLines="1"
                 android:inputType="text"
-                android:drawableStart="@drawable/ic_search_24dp"
+                android:drawableStart="@drawable/ic_search"
                 android:drawablePadding="5dp"
                 android:padding="8dp"
                 android:background="@drawable/search_box"

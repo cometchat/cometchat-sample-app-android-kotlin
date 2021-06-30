@@ -23,7 +23,7 @@
             android:id="@+id/add_phone_iv"
             android:layout_margin="16dp"
             android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_phone_add_24dp"
+            android:src="@drawable/ic_new_call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>
@@ -44,7 +44,8 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="16dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </androidx.viewpager.widget.ViewPager>

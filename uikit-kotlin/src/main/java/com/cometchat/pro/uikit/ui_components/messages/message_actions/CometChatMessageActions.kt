@@ -132,9 +132,9 @@ class CometChatMessageActions : BottomSheetDialogFragment() {
         }
 
         val imageView = ImageView(context)
-        imageView.setImageDrawable(ContextCompat.getDrawable(context!!,R.drawable.add_reaction))
-        imageView.setColorFilter(R.color.primaryTextColor)
-        val layoutParam: LinearLayout.LayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context!!,34f).toInt(), Utils.dpToPx(context!!,34f).toInt())
+        imageView.setImageDrawable(ContextCompat.getDrawable(context!!,R.drawable.ic_reactions))
+//        imageView.setColorFilter(R.color.primaryTextColor)
+        val layoutParam: LinearLayout.LayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context!!,32f).toInt(), Utils.dpToPx(context!!,32f).toInt())
         layoutParam.topMargin = 8
         layoutParam.leftMargin = 16
         imageView.layoutParams = layoutParam

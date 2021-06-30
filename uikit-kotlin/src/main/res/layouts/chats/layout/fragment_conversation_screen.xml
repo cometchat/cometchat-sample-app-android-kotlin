@@ -1,97 +1,116 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     tools:context=".ui_components.chats.CometChatConversationList">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
 
-        <TextView
-            android:text="@string/conversation"
-            android:textSize="22sp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            android:textStyle="bold"
-            android:textColor="@color/primaryTextColor"
-            android:id="@+id/tv_title"
-            android:layout_margin="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="@string/chats"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/iv_start_conversation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_create"
+                android:tint="@color/colorPrimary"/>
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/rl_search_box"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone"
-            tools:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
             <EditText
                 android:id="@+id/search_bar"
                 android:hint="@string/search"
                 android:imeOptions="actionSearch"
                 android:maxLines="1"
                 android:inputType="text"
-                android:drawableStart="@drawable/ic_search_24dp"
+                android:drawableStart="@drawable/ic_search"
                 android:drawablePadding="5dp"
                 android:padding="8dp"
                 android:background="@drawable/search_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <ImageView
-                android:visibility="gone"
-                android:clickable="true"
-                android:layout_marginEnd="8sp"
-                android:foreground="?attr/selectableItemBackground"
                 android:id="@+id/clear_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="8sp"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:src="@drawable/ic_close_24dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:visibility="gone" />
         </RelativeLayout>
 
         <LinearLayout
-            android:alpha="0.6"
-            tools:visibility="visible"
-            android:visibility="gone"
             android:id="@+id/no_conversation_view"
-            android:layout_marginTop="24dp"
-            android:layout_gravity="center"
-            android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:alpha="0.6"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
             <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/no_conversation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:src="@drawable/no_conversation" />
+
             <TextView
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:text="@string/no_conversations"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:text="@string/no_conversations"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
         </LinearLayout>
+
         <com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
             android:id="@+id/rv_conversation_list"
             android:layout_width="match_parent"
-            tools:listitem="@layout/cometchat_conversation_list_item"
+            android:layout_height="match_parent"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:layout_height="match_parent"/>
+            tools:listitem="@layout/cometchat_conversation_list_item" />
 
     </LinearLayout>
 
-    <include layout="@layout/conversation_shimmer"/>
+    <include layout="@layout/conversation_shimmer" />
 
 
 </RelativeLayout>

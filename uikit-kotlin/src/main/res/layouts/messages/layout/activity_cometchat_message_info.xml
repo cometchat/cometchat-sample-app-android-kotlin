@@ -23,6 +23,7 @@
                 android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
                 android:elevation="8dp"
+                app:navigationIcon="@drawable/ic_back"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin">
                 <ImageView
@@ -31,7 +32,8 @@
                     android:clickable="true"
                     android:src="@drawable/ic_arrow_back_24dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
                 <TextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"

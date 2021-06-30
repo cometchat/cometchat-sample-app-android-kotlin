@@ -365,17 +365,22 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
      * @see CometChatUserProfile
      */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        if (itemId == R.id.menu_users) {
-            fragment = CometChatUserList()
-        } else if (itemId == R.id.menu_group) {
-            fragment = CometChatGroupList()
-        } else if (itemId == R.id.menu_conversation) {
-            fragment = CometChatConversationList()
-        } else if (itemId == R.id.menu_more) {
-            fragment = CometChatUserProfile()
-        } else if (itemId == R.id.menu_call) {
-            fragment = CometChatCallList()
+        when (item.itemId) {
+            R.id.menu_users -> {
+                fragment = CometChatUserList()
+            }
+            R.id.menu_group -> {
+                fragment = CometChatGroupList()
+            }
+            R.id.menu_conversation -> {
+                fragment = CometChatConversationList()
+            }
+            R.id.menu_more -> {
+                fragment = CometChatUserProfile()
+            }
+            R.id.menu_call -> {
+                fragment = CometChatCallList()
+            }
         }
         return loadFragment(fragment)
     }

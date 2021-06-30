@@ -172,15 +172,15 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER && baseMessage.sender.uid == CometChat.getLoggedInUser().uid) {
                         if (baseMessage.readAt != 0L) {
                             txtTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_double_tick, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_read, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         } else if (baseMessage.deliveredAt != 0L) {
                             txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_done_all_black_24dp, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_delivered, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         } else {
                             txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_black_24dp, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_sent, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         }
                     } else {

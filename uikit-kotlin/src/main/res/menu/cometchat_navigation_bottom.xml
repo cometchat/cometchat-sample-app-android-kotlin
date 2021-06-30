@@ -3,26 +3,26 @@
 
   <item
       android:id="@+id/menu_conversation"
-      android:title="Conversation"
-      android:icon="@drawable/ic_nav_chat" />
+      android:title="@string/chats"
+      android:icon="@drawable/ic_chats" />
 
   <item
       android:id="@+id/menu_call"
-      android:title="@string/call"
-      android:icon="@drawable/ic_call_24dp" />
+      android:title="@string/calls"
+      android:icon="@drawable/ic_calls" />
 
   <item
       android:id="@+id/menu_users"
-      android:title="Users"
-      android:icon="@drawable/ic_contacts"/>
+      android:title="@string/users"
+      android:icon="@drawable/ic_users"/>
 
   <item
-      android:icon="@drawable/ic_group"
-      android:title="Groups"
+      android:icon="@drawable/ic_groups"
+      android:title="@string/groups"
       android:id="@+id/menu_group"/>
   <item
       android:icon="@drawable/ic_more"
-      android:title="More"
+      android:title="@string/more"
       android:id="@+id/menu_more"/>
 
 </menu>

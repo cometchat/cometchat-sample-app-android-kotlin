@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -8,9 +10,7 @@
             type="com.cometchat.pro.models.CustomMessage" />
     </data>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:padding="8dp"
-                        android:src="@drawable/ic_videocam_24dp"
+                        android:src="@drawable/ic_video_call"
                         android:tint="@color/colorPrimary" />
 
                     <TextView
@@ -70,7 +70,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
                         android:layout_toEndOf="@+id/icon"
                         android:padding="10dp"
                         android:textSize="16sp"
@@ -83,13 +82,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/top_message_layout"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="6dp"
                     android:text="@string/join"
                     android:textColor="@color/colorPrimary"
                     app:backgroundTint="@color/textColorWhite"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    android:textAllCaps="false"/>
             </RelativeLayout>
 
             <HorizontalScrollView
