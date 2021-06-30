@@ -42,7 +42,7 @@
         android:foreground="?attr/selectableItemBackground"
         android:id="@+id/iv_reply_close"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_close_24dp"
+        android:src="@drawable/ic_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

@@ -1,4 +1,4 @@
-package com.cometchat.pro.uikit.ui_components.chats
+package com.cometchat.pro.uikit.ui_components.chats.delete_chat
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -151,7 +151,7 @@ abstract class MySwipeHelper(context : Context, private val recyclerView: Recycl
         isCurrentlyActive: Boolean
     ) {
         val pos = viewHolder.adapterPosition
-        var translationX = dX
+        var translationX = -300f
         var itemView = viewHolder.itemView
         if(pos < 0){
             swipePosition = pos
@@ -170,10 +170,10 @@ abstract class MySwipeHelper(context : Context, private val recyclerView: Recycl
                 translationX = dX*buffer.size.toFloat() * buttonWidth.toFloat() / itemView.width
                 drawButton(c,itemView,buffer,pos,translationX)
                 Log.e("TAG", "onChildDraw: translationX "+translationX )
-                ItemDecorator.Builder(c,recyclerView,viewHolder,-200f,actionState)
+                ItemDecorator.Builder(c, recyclerView, viewHolder, -300f, actionState)
                     .setDefaultIconTintColor(ContextCompat.getColor(getContext, R.color.textColorWhite))
                     .setFromEndToStartBgColor(ContextCompat.getColor(getContext, R.color.red))
-                    .setFromEndToStartIcon(R.drawable.trash)
+                    .setFromEndToStartIcon(R.drawable.ic_delete_white)
                     .setFromEndToStartIconTint(ContextCompat.getColor(getContext, R.color.textColorWhite))
                     .create()
                     .decorate()

@@ -4,10 +4,12 @@
 
     <!-- radius should be half of the desired TabLayout height -->
     <corners
-        android:radius="18dp"/>
+        android:radius="8dp"/>
 
     <!-- TabLayout background color -->
     <solid
-        android:color="@color/light_grey"/>
+        android:color="@color/textColorWhite"/>
+
+    <stroke android:color="@color/colorPrimary" android:width="1dp"/>
 
 </shape>

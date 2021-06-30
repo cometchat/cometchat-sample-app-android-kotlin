@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:padding="8dp"
-                        android:src="@drawable/ic_whiteboard_24dp"
+                        android:src="@drawable/ic_collaborative_whiteboard"
                         android:tint="@color/grey_200" />
 
                     <TextView
@@ -87,7 +87,8 @@
                     android:text="@string/join"
                     android:textColor="@color/primaryTextColor"
                     app:backgroundTint="@color/textColorWhite"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    android:textAllCaps="false"/>
             </RelativeLayout>
 
             <HorizontalScrollView

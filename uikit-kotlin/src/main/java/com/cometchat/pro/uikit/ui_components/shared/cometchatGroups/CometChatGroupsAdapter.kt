@@ -66,8 +66,8 @@ class CometChatGroupsAdapter(context: Context) : RecyclerView.Adapter<GroupViewH
         groupViewHolder.groupListRowBinding.txtUserMessage.text = context.resources.getString(R.string.members)+": "+group.membersCount
 
         when (group.groupType) {
-            CometChatConstants.GROUP_TYPE_PRIVATE -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_security_24dp, 0)
-            CometChatConstants.GROUP_TYPE_PASSWORD -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_lock_24dp, 0)
+            CometChatConstants.GROUP_TYPE_PRIVATE -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_private_group, 0)
+            CometChatConstants.GROUP_TYPE_PASSWORD -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_password_protected_group, 0)
             else -> groupViewHolder.groupListRowBinding.txtUserName.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
         }
 

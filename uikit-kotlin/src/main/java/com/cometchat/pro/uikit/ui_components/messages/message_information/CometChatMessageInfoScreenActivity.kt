@@ -43,6 +43,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
     private var pollsMessage: View? = null
     private lateinit var meetingMessage: View
     private var joinMeetingBtn: MaterialButton? = null
+    private var callMessage: TextView? = null
 
     private var question: TextView? = null
     private var optionGroup: LinearLayout? = null
@@ -88,6 +89,9 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         setContentView(R.layout.activity_cometchat_message_info)
 
         toolbar = findViewById(R.id.detail_toolbar)
+        toolbar?.title= ""
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         messageLayout = findViewById(R.id.message_layout)
         backIcon = findViewById(R.id.backIcon)
         textMessage = findViewById(R.id.vwTextMessage)
@@ -105,6 +109,7 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         joinWriteBoard = findViewById(R.id.join_writeboard)
         sensitiveLayout = findViewById(R.id.sensitive_layout)
         meetingMessage = findViewById(R.id.vw_meeting_message)
+        callMessage = findViewById(R.id.call_message)
 
         joinMeetingBtn = findViewById<MaterialButton>(R.id.join_call)
         pollsMessage = findViewById(R.id.vw_polls_message)
@@ -238,6 +243,8 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
                 }
             } else if (messageType.equals(UIKitConstants.IntentStrings.MEETING)) {
                 meetingMessage.visibility = View.VISIBLE
+                callMessage?.visibility = View.VISIBLE
+                callMessage?.text = resources.getString(R.string.you_created_group_call)
                 joinMeetingBtn?.isEnabled = false
             }
             else if (messageType == UIKitConstants.IntentStrings.POLLS) {
@@ -282,6 +289,10 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
 
     private fun fetchReceipts() {
         CometChat.getMessageReceipts(id, object : CometChat.CallbackListener<List<MessageReceipt>>() {

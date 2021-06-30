@@ -10,7 +10,7 @@
         android:id="@+id/groupDetailToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/ic_close_24dp"
+        app:navigationIcon="@drawable/ic_back"
         app:title="@string/details" />
 
     <androidx.core.widget.NestedScrollView
@@ -235,11 +235,12 @@
 
                 <ImageView
                     android:id="@+id/ivAdd"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_add" />
+                    android:src="@drawable/ic_add"
+                    android:tint="@color/colorPrimary"/>
 
                 <TextView
                     android:id="@+id/tv_add_member"
@@ -258,9 +259,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/rl_add_member"
+                android:layout_marginTop="15dp"
                 android:overScrollMode="never"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
             <RelativeLayout
                 android:id="@+id/rl_load_more"

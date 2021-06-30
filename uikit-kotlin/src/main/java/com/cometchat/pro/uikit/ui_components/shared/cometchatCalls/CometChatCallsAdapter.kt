@@ -133,24 +133,26 @@ class CometChatCallsAdapter(context: Context) : RecyclerView.Adapter<CometChatCa
         }
         if (call.type == CometChatConstants.CALL_TYPE_VIDEO) {
             callMessageText = callMessageText + " " + context.resources.getString(R.string.video_call)
+            callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_incoming_video_call, 0, 0, 0)
             isVideo = true
         } else {
             callMessageText = callMessageText + " " + context.resources.getString(R.string.audio_call)
+            callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_incoming_call, 0, 0, 0)
             isVideo = false
         }
-        if (isVideo) {
-            callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_videocam_24dp, 0, 0, 0)
-        } else {
-            if (isIncoming && isMissed) {
-                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_missed_incoming_24dp, 0, 0, 0)
-            } else if (isIncoming && !isMissed) {
-                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_incoming_24dp, 0, 0, 0)
-            } else if (!isIncoming && isMissed) {
-                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_missed_outgoing_24dp, 0, 0, 0)
-            } else {
-                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_outgoing_24dp, 0, 0, 0)
-            }
-        }
+//        if (isVideo) {
+//            callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_video_call, 0, 0, 0)
+//        } else {
+//            if (isIncoming && isMissed) {
+//                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_missed_incoming_24dp, 0, 0, 0)
+//            } else if (isIncoming && !isMissed) {
+//                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_incoming_24dp, 0, 0, 0)
+//            } else if (!isIncoming && isMissed) {
+//                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_missed_outgoing_24dp, 0, 0, 0)
+//            } else {
+//                callViewHolder.callListRowBinding.callMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_outgoing_24dp, 0, 0, 0)
+//            }
+//        }
         callViewHolder.callListRowBinding.calltimeTv.text = Utils.getLastMessageDate(call.initiatedAt)
         callViewHolder.callListRowBinding.callMessage.text = callMessageText
         callViewHolder.callListRowBinding.root.setTag(R.string.call, call)

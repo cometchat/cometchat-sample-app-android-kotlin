@@ -159,7 +159,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
         tvExit.typeface = fontUtils!!.getTypeFace(FontUtils.robotoMedium)
         tvAddMember.typeface = fontUtils!!.getTypeFace(FontUtils.robotoRegular)
         setSupportActionBar(toolbar)
-        if (supportActionBar != null) supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        if (supportActionBar != null) supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val linearLayoutManager = LinearLayoutManager(this)
         rvMemberList!!.layoutManager = linearLayoutManager
         //        rvMemberList.setNestedScrollingEnabled(false);

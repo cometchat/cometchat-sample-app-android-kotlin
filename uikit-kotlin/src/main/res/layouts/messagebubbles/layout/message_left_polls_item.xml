@@ -126,6 +126,7 @@
                 tools:text="11:00 PM"
                 android:layout_marginBottom="8dp"
                 android:textSize="12sp"
+                android:layout_marginStart="8dp"
                 android:layout_alignBottom="@id/cv_message_container"
                 android:layout_gravity="center"
                 android:layout_toEndOf="@id/cv_message_container"

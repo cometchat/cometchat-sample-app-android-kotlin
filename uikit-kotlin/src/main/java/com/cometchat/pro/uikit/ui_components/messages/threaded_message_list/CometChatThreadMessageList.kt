@@ -224,6 +224,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
     private var pollOptionsLL: LinearLayout? = null
     private var totalCount: TextView? = null
 
+    private var ivBackArrow: ImageView? = null
+
 //    private var view: View? = null
 
 
@@ -316,6 +318,10 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         pollOptionsLL = view.findViewById(R.id.options_group)
         totalCount = view.findViewById(R.id.total_votes)
 
+        ivBackArrow = view.findViewById(R.id.iv_back_arrow)
+        ivBackArrow?.setOnClickListener {
+            activity?.onBackPressed()
+        }
         if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE) {
             imageMessage!!.visibility = View.VISIBLE
             Glide.with(context!!).load(message).into(imageMessage!!)
@@ -580,8 +586,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         setAvatar()
         rvChatListView!!.layoutManager = linearLayoutManager
 
-        (activity as AppCompatActivity?)!!.setSupportActionBar(toolbar)
-        (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+//        (activity as AppCompatActivity?)!!.setSupportActionBar(toolbar)
+//        (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         if (Utils.isDarkMode(context!!)) {
             ivMoreOption!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))

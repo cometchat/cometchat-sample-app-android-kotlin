@@ -11,6 +11,7 @@
         android:id="@+id/toolbar_blocked_user"
         android:layout_width="match_parent"
         app:title="@string/blocked_users"
+        app:navigationIcon="@drawable/ic_back"
         android:layout_height="wrap_content"/>
     <RelativeLayout
         android:layout_marginTop="16dp"
@@ -32,7 +33,7 @@
             android:id="@+id/no_block_user"
             android:layout_margin="16dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:drawableLeft="@drawable/ic_block_24dp"
+            android:drawableLeft="@drawable/ic_ban_member"
             android:drawablePadding="8dp"
             android:layout_marginLeft="1dp"
             android:text="@string/no_block_users"

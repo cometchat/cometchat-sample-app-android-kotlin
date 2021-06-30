@@ -209,7 +209,7 @@
             android:layout_alignParentEnd="true"
             android:padding="8dp"
             android:id="@+id/close_sticker_layout"
-            android:src="@drawable/ic_close_circle"
+            android:src="@drawable/ic_close_circle_filled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>

@@ -568,8 +568,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 ViewGroup.LayoutParams.WRAP_CONTENT)
                         linearLayout.setPadding(8, 8, 8, 8)
                         linearLayout.setBackgroundColor(Color.parseColor(UIKitSettings.color))
-//                        linearLayout.background = context.resources
-//                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.background = context.resources
+                                .getDrawable(R.drawable.cc_message_bubble_right)
                         linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
                                 .getColor(R.color.textColorWhite))
                         layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
@@ -716,8 +716,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 ViewGroup.LayoutParams.WRAP_CONTENT)
                         linearLayout.setPadding(8, 8, 8, 8)
                         linearLayout.setBackgroundColor(Color.parseColor(UIKitSettings.color))
-//                        linearLayout.background = context.resources
-//                                .getDrawable(R.drawable.cc_message_bubble_right)
+                        linearLayout.background = context.resources
+                                .getDrawable(R.drawable.cc_message_bubble_right)
                         linearLayout.backgroundTintList = ColorStateList.valueOf(context.resources
                                 .getColor(R.color.textColorWhite))
                         layoutParams.bottomMargin = Utils.dpToPx(context, 8f).toInt()
@@ -1623,8 +1623,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.audiolengthTv.text = "-"
                     viewHolder.view.playBtn.visibility = View.GONE
                 }
-                viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
-                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(Color.parseColor(UIKitSettings.color)))
+//                viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+//                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(Color.parseColor(UIKitSettings.color)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
                     mediaPlayer?.reset()
@@ -1641,10 +1641,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     if (!mediaPlayer!!.isPlaying) {
                         mediaPlayer?.start()
-                        (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
+//                        (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
                     } else {
                         mediaPlayer?.pause()
-                        (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+//                        (viewHolder as LeftAudioMessageViewHolder).view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                     }
                 }
                 viewHolder.view.cvMessageContainer.setOnLongClickListener {
@@ -1708,8 +1708,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     viewHolder.view.audiolengthTv.text = "-"
                     viewHolder.view.playBtn.visibility = View.GONE
                 }
-                viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
-                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(context.resources.getColor(R.color.textColorWhite)))
+//                viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+//                viewHolder.view.playBtn.setImageTintList(ColorStateList.valueOf(context.resources.getColor(R.color.textColorWhite)))
                 viewHolder.view.playBtn.setOnClickListener {
                     //                    MediaUtils.openFile(((MediaMessage) baseMessage).getAttachment().getFileUrl(),context);
                     mediaPlayer?.reset()
@@ -1726,10 +1726,10 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     }
                     if (!mediaPlayer!!.isPlaying) {
                         mediaPlayer?.start()
-                        viewHolder.view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
+//                        viewHolder.view.playBtn.setImageResource(R.drawable.ic_pause_24dp)
                     } else {
                         mediaPlayer?.pause()
-                        viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+//                        viewHolder.view.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                     }
                 }
                 viewHolder.view.cvMessageContainer.setOnLongClickListener {
@@ -2546,22 +2546,26 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                         if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                             if (baseMessage.readAt != 0L) {
                                 txtTime.text = Utils.getHeaderDate(baseMessage.readAt * 1000)
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0)
+//                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_double_tick, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_message_read, 0)
                                 txtTime.compoundDrawablePadding = 10
                             } else if (baseMessage.deliveredAt != 0L) {
                                 txtTime.text = Utils.getHeaderDate(baseMessage.deliveredAt * 1000)
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0)
+//                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_done_all_black_24dp, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_message_delivered, 0)
                                 txtTime.compoundDrawablePadding = 10
                             } else if (baseMessage.sentAt > 0) {
                                 txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+//                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_message_sent, 0)
                                 txtTime.compoundDrawablePadding = 10
                             } else if (baseMessage.sentAt == -1L) {
                                 txtTime.text = ""
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_info_red, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_error, 0)
                             } else {
                                 txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+//                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_message_sent, 0)
                                 txtTime.compoundDrawablePadding = 10
                             }
                         } else {
@@ -2570,7 +2574,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                             } else {
                                 txtTime.text = ""
-                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_baseline_waiting_24, 0)
+                                txtTime.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_wait, 0)
                                 txtTime.compoundDrawablePadding = 10
                             }
                         }

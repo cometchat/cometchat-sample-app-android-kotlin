@@ -494,15 +494,16 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 if (keyboardVisible) {
                     scrollToBottom()
                     composeBox?.ivMic?.visibility = View.GONE
+                    composeBox?.btnLiveReaction?.visibility = View.GONE
                     composeBox?.ivSend?.visibility = View.VISIBLE
                 } else {
                     composeBox?.ivSend?.visibility = View.GONE
+                    composeBox?.btnLiveReaction?.visibility = View.VISIBLE
                     composeBox?.ivMic?.visibility = View.VISIBLE
                     FeatureRestriction.isVoiceNotesEnabled(object : FeatureRestriction.OnSuccessListener{
                         override fun onSuccess(p0: Boolean) {
                             if (p0) {
                                 composeBox!!.ivMic!!.visibility = View.VISIBLE
-                                composeBox!!.ivSend!!.visibility = View.VISIBLE
                             } else {
                                 composeBox!!.ivMic!!.visibility = View.GONE
                                 composeBox!!.ivSend!!.visibility = View.VISIBLE
@@ -558,13 +559,15 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             ivAudioCallBtn?.visibility = View.GONE
         } else ivAudioCallBtn?.visibility = View.VISIBLE
         ivAudioCallBtn?.setOnClickListener {
-            if (type == CometChatConstants.RECEIVER_TYPE_USER)
+            if (type == CometChatConstants.RECEIVER_TYPE_USER) {
                 Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_AUDIO)
+            }
 //            else Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_GROUP, CometChatConstants.CALL_TYPE_AUDIO)
         }
         ivVideoCallBtn?.setOnClickListener {
-            if (type == CometChatConstants.RECEIVER_TYPE_USER)
+            if (type == CometChatConstants.RECEIVER_TYPE_USER) {
                 Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_VIDEO)
+            }
             else {
                 val body = JSONObject()
                 body.put("sessionID", Id)
@@ -1197,7 +1200,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
      */
     private fun initMessageAdapter(messageList: List<BaseMessage>) {
         if (messageAdapter == null) {
-            messageAdapter = MessageAdapter(activity!!, messageList, CometChatMessageList::class.java.name)
+            messageAdapter = activity?.let { MessageAdapter(it, messageList, CometChatMessageList::class.java.name) }
             rvChatListView?.adapter = messageAdapter
             stickyHeaderDecoration = StickyHeaderDecoration(messageAdapter!!)
             rvChatListView?.addItemDecoration(stickyHeaderDecoration!!, 0)

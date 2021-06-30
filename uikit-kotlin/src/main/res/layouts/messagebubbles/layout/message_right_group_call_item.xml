@@ -37,32 +37,34 @@
                         android:layout_height="wrap_content"
                         android:padding="8dp"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/ic_videocam_24dp"
+                        android:src="@drawable/ic_video_call"
                         android:tint="@color/textColorWhite" />
+
                     <TextView
-                        android:layout_toEndOf="@+id/icon"
                         android:id="@+id/call_message"
-                        android:textSize="16sp"
-                        android:textColor="@color/textColorWhite"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="Someone has shared whiteboard. Click below join button to check whiteboard"
+                        android:layout_marginStart="-4dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:padding="10dp"/>
+                        android:layout_toEndOf="@+id/icon"
+                        android:padding="10dp"
+                        android:textColor="@color/textColorWhite"
+                        android:textSize="16sp"
+                        tools:text="Someone has shared whiteboard. Click below join button to check whiteboard" />
                 </RelativeLayout>
                 <com.google.android.material.button.MaterialButton
                     android:layout_width="match_parent"
                     android:text="@string/join"
                     android:layout_below="@id/top_message_layout"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="6dp"
                     android:textColor="@color/colorPrimary"
                     app:backgroundTint="@color/textColorWhite"
                     app:cornerRadius="8dp"
                     android:id="@+id/join_call"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"/>
             </RelativeLayout>
             <TextView
                 android:id="@+id/txt_time"

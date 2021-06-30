@@ -1,4 +1,4 @@
-package com.cometchat.pro.uikit.ui_components.chats
+package com.cometchat.pro.uikit.ui_components.chats.delete_chat
 
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable

@@ -17,7 +17,7 @@
         android:layout_centerVertical="true"
         android:id="@+id/delete_option"
         android:layout_toEndOf="@+id/et_option"
-        android:src="@drawable/ic_delete_24dp"
+        android:src="@drawable/ic_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

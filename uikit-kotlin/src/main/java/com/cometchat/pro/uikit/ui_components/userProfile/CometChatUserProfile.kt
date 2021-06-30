@@ -52,13 +52,13 @@ class CometChatUserProfile constructor() : Fragment() {
                 startActivity(Intent(context, CometChatMorePrivacyActivity::class.java))
             }
         })
-        if (UIKitSettings.color != null) {
-            val widgetColor = Color.parseColor(UIKitSettings.color)
-            val wrappedDrawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.ic_security_24dp))
-            wrappedDrawable.setTint(widgetColor)
-            DrawableCompat.setTint(wrappedDrawable, widgetColor)
-            moreInfoScreenBinding?.ivSecurity?.setImageDrawable(wrappedDrawable)
-        }
+//        if (UIKitSettings.color != null) {
+//            val widgetColor = Color.parseColor(UIKitSettings.color)
+//            val wrappedDrawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.ic_privacy))
+//            wrappedDrawable.setTint(widgetColor)
+//            DrawableCompat.setTint(wrappedDrawable, widgetColor)
+//            moreInfoScreenBinding?.ivSecurity?.setImageDrawable(wrappedDrawable)
+//        }
         if (Utils.isDarkMode(context!!)) {
             moreInfoScreenBinding?.tvTitle?.setTextColor(resources.getColor(R.color.textColorWhite))
             moreInfoScreenBinding?.tvSeperator?.setBackgroundColor(resources.getColor(R.color.grey))
