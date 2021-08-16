@@ -81,6 +81,8 @@ class UIKitConstants {
         const val POLL_RESULT = "poll_result"
         const val POLL_ID = "poll_id"
         const val POLL_VOTE_COUNT = "poll_vote_count"
+
+        const val TRANSFER_OWNERSHIP: String = "transfer_ownership"
     }
 
     object Tab {
@@ -103,7 +105,7 @@ class UIKitConstants {
 
     object MapUrl {
         const val MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|"
-        var MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        var MAP_ACCESS_KEY = "AIzaSyAa8HeLH2lQMbPeOiMlM9D1VxZ7pbGQq8o"
     }
 
     object MessageRequest {

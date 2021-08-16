@@ -38,7 +38,6 @@
                 <LinearLayout
                     android:layout_marginStart="16dp"
                     android:layout_toEndOf="@id/iv_user"
-                    android:layout_toStartOf="@+id/video_callBtn_iv"
                     android:orientation="vertical"
                     android:layout_centerVertical="true"
                     android:layout_width="wrap_content"
@@ -229,7 +228,7 @@
                     android:layout_marginTop="8dp"
                     android:paddingBottom="16dp"
                     android:textSize="18sp"
-                    android:textColor="@color/catalyst_redbox_background"
+                    android:textColor="@android:color/holo_red_dark"
                     android:text="@string/block_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

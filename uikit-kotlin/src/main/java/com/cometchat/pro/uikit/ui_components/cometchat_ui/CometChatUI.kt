@@ -140,7 +140,7 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                         UIKitConstants.RequestCode.RECORD)
             }
         }
-        badgeDrawable = activityCometChatUnifiedBinding!!.bottomNavigation.getOrCreateBadge(R.id.menu_conversation)
+//        badgeDrawable = activityCometChatUnifiedBinding!!.bottomNavigation.getOrCreateBadge(R.id.menu_conversation)
         activityCometChatUnifiedBinding!!.bottomNavigation.setOnNavigationItemSelectedListener(this)
 
         if (UIKitSettings.color != null && UIKitSettings.color.isNotEmpty()) {
@@ -186,7 +186,7 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         })
 
 
-        badgeDrawable!!.isVisible = false
+//        badgeDrawable!!.isVisible = false
         activityCometChatUnifiedBinding!!.bottomNavigation.id = R.id.menu_conversation
         when {
             recentChatListEnabled -> loadFragment(CometChatConversationList())
@@ -251,10 +251,10 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                     Log.e(TAG, "onSuccess: unread $stringHashMapHashMap")
                     unreadCount.addAll(stringHashMapHashMap["user"]!!.keys) //Add users whose messages are unread.
                     unreadCount.addAll(stringHashMapHashMap["group"]!!.keys) //Add groups whose messages are unread.
-                    badgeDrawable!!.isVisible = unreadCount.size != 0
-                    if (unreadCount.size != 0) {
-                        badgeDrawable!!.number = unreadCount.size //add total count of users and groups whose messages are unread in BadgeDrawable
-                    }
+//                    badgeDrawable!!.isVisible = unreadCount.size != 0
+//                    if (unreadCount.size != 0) {
+//                        badgeDrawable!!.number = unreadCount.size //add total count of users and groups whose messages are unread in BadgeDrawable
+//                    }
                 }
 
                 override fun onError(e: CometChatException) {
@@ -273,12 +273,12 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
             if (message.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
                 if (!unreadCount.contains(message.receiverUid)) {
                     unreadCount.add(message.receiverUid)
-                    setBadge()
+//                    setBadge()
                 }
             } else {
                 if (!unreadCount.contains(message.sender.uid)) {
                     unreadCount.add(message.sender.uid)
-                    setBadge()
+//                    setBadge()
                 }
             }
 //        }

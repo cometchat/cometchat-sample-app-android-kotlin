@@ -128,12 +128,11 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
             name = (conversation.conversationWith as User).name
             avatar = (conversation.conversationWith as User).avatar
             status = (conversation.conversationWith as User).status
-            if (status == CometChatConstants.USER_STATUS_ONLINE) {
-                if (userPresenceEnabled) {
-                    conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
-                    conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
-                }
-            } else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
+            if (userPresenceEnabled) {
+                conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
+                conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
+            }
+            else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
         } else {
             name = (conversation.conversationWith as Group).name
             avatar = (conversation.conversationWith as Group).icon

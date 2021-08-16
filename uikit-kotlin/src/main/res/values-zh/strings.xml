@@ -207,7 +207,6 @@
     <string name="user_removed_from_group">%1$s 已从\” %2$s 中删除\”</string>
     <string name="kicked_error">组成员被踢失败</string>
     <string name="kicked_by">踢</string>
-    <string name="leave_group_message">你想从团体中离开吗？</string>
     <string name="delete_group">删除群组</string>
     <string name="delete_group_message">删除群组</string>
     <string name="group_delete_error">组删除失败</string>
@@ -237,7 +236,6 @@
     <string name="enter_old_group_pwd">输入旧密码</string>
     <string name="enter_new_password">输入新密码</string>
     <string name="group_alert">群组警报</string>
-    <string name="transfer_ownership_message">您是群组所有者，在离开群组之前将群组所有权转移给其他人。</string>
     <string name="make_owner">让所有者</string>
     <string name="make_owner_question">你想把 %1$s 作为所有者吗</string>
     <string name="user_is_owner">%1$s 现在是所有者</string>
@@ -373,4 +371,8 @@
 
     <string name="send_message_privately">私下发送消息</string>
     <string name="view_profile">查看档案</string>
+
+    <string name="transfer">转移”</string>
+    <string name="leave_group_message">你确定要离开这组吗？”</string>
+    <string name="transfer_ownership_message">您是群组所有者，请在离开群组之前将所有权转移给会员。</string>
 </resources>

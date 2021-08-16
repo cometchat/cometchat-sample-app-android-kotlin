@@ -55,7 +55,6 @@
     <string name="user_added_to_group">%1$s pridėtas prie\”</string>
     <string name="user_removed_from_group">%1$s pašalinamas iš\”</string>
     <string name="kicked_error">Grupės narys spardė nepavyko</string>
-    <string name="leave_group_message">Ar norėtumėte išvykti iš grupės?</string>
     <string name="delete_group">Ištrinti grupę</string>
     <string name="delete_group_message">Ištrinti grupę</string>
     <string name="group_delete_error">Grupės ištrynimas nepavyko</string>
@@ -87,7 +86,6 @@
     <string name="enter_old_group_pwd">Įvesti seną slaptažodį</string>
     <string name="enter_new_password">Įvesti naują slaptažodį</string>
     <string name="group_alert">Grupės įspėjimas</string>
-    <string name="transfer_ownership_message">Jūs esate grupės savininkas, Perkelkite grupės nuosavybę kitam asmeniui prieš išvykstant iš grupės.</string>
     <string name="make_owner">Padaryti savininkas</string>
     <string name="make_owner_question">Ar jums patinka padaryti %1$s kaip savininką</string>
     <string name="user_is_owner">%1$s dabar yra savininkas</string>
@@ -318,4 +316,8 @@
 
     <string name="send_message_privately">Siųsti žinutę privačiai</string>
     <string name="view_profile">Peržiūrėti profilį</string>
+
+    <string name="transfer">perdavimas”</string>
+    <string name="leave_group_message">Ar tikrai norite palikti šią grupę?”</string>
+    <string name="transfer_ownership_message">Jūs esate grupės savininkas, Prašome perduoti nuosavybės teisę nariui prieš išvykstant iš grupės.</string>
 </resources>

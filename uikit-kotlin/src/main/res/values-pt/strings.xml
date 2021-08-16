@@ -212,7 +212,6 @@
     <string name="user_added_to_group">%1$s é adicionado a\” %2$s\”</string>
     <string name="user_removed_from_group">%1$s é removido de\” %2$s\”</string>
     <string name="kicked_error">Falha no membro do grupo com chute</string>
-    <string name="leave_group_message">Gostaria de sair do grupo?</string>
     <string name="delete_group">Excluir grupo</string>
     <string name="delete_group_message">Excluir o grupo</string>
     <string name="group_delete_error">Falha na exclusão do grupo</string>
@@ -242,7 +241,6 @@
     <string name="enter_old_group_pwd">Digite senha antiga</string>
     <string name="enter_new_password">Digite nova senha</string>
     <string name="group_alert">Alerta de grupo</string>
-    <string name="transfer_ownership_message">Você é proprietário do grupo, Transfira a propriedade do grupo para outra pessoa antes de sair do grupo.</string>
     <string name="make_owner">Faça dono</string>
     <string name="make_owner_question">Você gosta de fazer %1$s como proprietário</string>
     <string name="user_is_owner">%1$s agora é Proprietário</string>
@@ -372,4 +370,8 @@
     <string name="do_not_have_permission_to_remove_admin_from_the_group">Você não tem permissão para remover admin do grupo</string>
     <string name="send_message_privately">Enviar Mensagem Privately</string>
     <string name="view_profile">Ver Perfil</string>
+
+    <string name="transfer">Transferir”</string>
+    <string name="leave_group_message">Tem certeza que quer deixar este grupo?”</string>
+    <string name="transfer_ownership_message">Você é o proprietário do grupo. Por favor, transfira a propriedade para um membro antes de sair do grupo.</string>
 </resources>

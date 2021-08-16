@@ -123,7 +123,7 @@ open class UIKitSettings(context: Context) {
         var callNotifications = true
         var allowPromoteDemoteMembers = true
         var allowAddMembers = true
-        var joinLeaveNotifications = false
+        var joinLeaveNotifications = true
         var groupCreation = true
         var emailReplies = true
         var hideDeletedMessages = true
