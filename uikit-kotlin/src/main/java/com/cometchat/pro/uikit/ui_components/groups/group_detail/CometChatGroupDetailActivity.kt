@@ -43,13 +43,13 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
+import com.cometchat.pro.uikit.ui_components.groups.group_members.CometChatGroupMemberListActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import okhttp3.internal.Util
 import java.util.*
 
 class CometChatGroupDetailActivity() : AppCompatActivity() {
@@ -196,8 +196,12 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             }
         })
         tvExit.setOnClickListener { view: View? ->
-            createDialog(resources.getString(R.string.leave_group), resources.getString(R.string.leave_group_message),
-                    resources.getString(R.string.leave_group), resources.getString(R.string.cancel), R.drawable.ic_exit_to_app)
+            if (loggedInUser.uid == ownerId) {
+                showTransferOwnershipDialog()
+            } else {
+                createDialog(resources.getString(R.string.leave_group), resources.getString(R.string.leave_group_message),
+                        resources.getString(R.string.leave_group), resources.getString(R.string.cancel), R.drawable.ic_exit_to_app)
+            }
         }
 //        callBtn!!.setOnClickListener(View.OnClickListener { view: View? -> checkOnGoingCall(CometChatConstants.CALL_TYPE_AUDIO) })
 //        videoCallBtn!!.setOnClickListener(View.OnClickListener { view: View? -> checkOnGoingCall(CometChatConstants.CALL_TYPE_VIDEO) })
@@ -210,7 +214,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
         //
         if (!FeatureRestriction.isJoinLeaveGroupsEnabled()) tvExit.visibility = View.GONE
 
-        if (!FeatureRestriction.isGroupDeletionEnabled()) tvDelete!!.visibility = View.GONE
+        if (!FeatureRestriction.isGroupDeletionEnabled()) tvDelete?.visibility = View.GONE
 
         if (!FeatureRestriction.isSharedMediaEnabled()) {
             sharedMediaLayout?.visibility = View.GONE
@@ -355,21 +359,44 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      * @param drawableRes
      */
     private fun createDialog(title: String, message: String, positiveText: String, negativeText: String, drawableRes: Int) {
-        val alert_dialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
+        Log.e(TAG, "createDialog: "+ownerId+ " logged in: "+loggedInUser.uid)
+        val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
                 R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
-        alert_dialog.setTitle(title)
-        alert_dialog.setMessage(message)
-        alert_dialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
-            if (positiveText.equals(resources.getString(R.string.leave_group), ignoreCase = true)) leaveGroup() else if ((positiveText.equals(resources.getString(R.string.delete_group), ignoreCase = true)
-                            && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true))) deleteGroup()
+        alertDialog.setTitle(title)
+        alertDialog.setMessage(message)
+        alertDialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
+            if (positiveText.equals(resources.getString(R.string.leave_group), ignoreCase = true))
+                leaveGroup()
+            else if ((positiveText.equals(resources.getString(R.string.delete_group), ignoreCase = true)
+                            && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true)))
+                deleteGroup()
         }
-        alert_dialog.setNegativeButton(negativeText, object : DialogInterface.OnClickListener {
+        alertDialog.setNegativeButton(negativeText, object : DialogInterface.OnClickListener {
             override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 dialogInterface.dismiss()
             }
         })
-        alert_dialog.create()
-        alert_dialog.show()
+        alertDialog.create()
+        alertDialog.show()
+    }
+
+    private fun showTransferOwnershipDialog() {
+        val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
+                R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+//        alertDialog.setTitle(R.string.group_alert)
+        alertDialog.setMessage(R.string.transfer_ownership_message)
+        alertDialog.setPositiveButton(R.string.transfer, DialogInterface.OnClickListener { dialog, which ->
+            val intent = Intent(this@CometChatGroupDetailActivity, CometChatGroupMemberListActivity::class.java)
+            intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+            intent.putExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, false)
+            intent.putExtra(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP, true)
+            finish()
+            startActivity(intent)
+        }).setNegativeButton(R.string.cancel, DialogInterface.OnClickListener { dialog, which ->
+            dialog.dismiss()
+        })
+        alertDialog.create()
+        alertDialog.show()
     }
 
     /**

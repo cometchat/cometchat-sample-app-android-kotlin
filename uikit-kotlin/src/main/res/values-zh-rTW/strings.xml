@@ -214,7 +214,6 @@
     <string name="user_added_to_group">%1$s 已新增至\」%2$s\」</string>
     <string name="user_removed_from_group">%1$s 已從\」%2$s\」中移除</string>
     <string name="kicked_error">群組成員已啟動失敗</string>
-    <string name="leave_group_message">你想離開團體嗎？</string>
     <string name="delete_group">刪除群組</string>
     <string name="delete_group_message">刪除群組</string>
     <string name="group_delete_error">群組刪除失敗</string>
@@ -245,7 +244,6 @@
     <string name="enter_old_group_pwd">輸入舊密碼</string>
     <string name="enter_new_password">輸入新密碼</string>
     <string name="group_alert">群組警示</string>
-    <string name="transfer_ownership_message">您是群組擁有者，在離開群組之前，將群組擁有權轉移給其他人。</string>
     <string name="make_owner">成為擁有者</string>
     <string name="make_owner_question">您是否喜歡將 %1$s 成為擁有者</string>
     <string name="user_is_owner">%1$s 現在是擁有者</string>
@@ -375,4 +373,8 @@
 
     <string name="send_message_privately">私下傳送訊息</string>
     <string name="view_profile">檢視縱斷面</string>
+
+    <string name="transfer">轉移」</string>
+    <string name="leave_group_message">您確定要離開這個群組嗎？」</string>
+    <string name="transfer_ownership_message">您是群組擁有者，請在離開群組前將所有權轉移給會員。</string>
 </resources>

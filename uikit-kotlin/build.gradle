@@ -85,5 +85,6 @@ dependencies {
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
 
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:2.3.5'
+    compileOnly 'com.cometchat:pro-android-chat-sdk:2.4.0'
+    implementation 'com.cometchat:pro-android-calls-sdk:2.1.0'
 }

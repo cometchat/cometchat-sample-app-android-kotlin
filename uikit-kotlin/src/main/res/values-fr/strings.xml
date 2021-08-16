@@ -220,7 +220,6 @@
     <string name="kicked_by">a donné un coup de pied</string>
     <string name="left">la gauche</string>
     <string name="extension_not_enabled">l\'extension n\'est pas activée</string>
-    <string name="leave_group_message">Souhaitez-vous quitter le groupe ?</string>
     <string name="delete_group">Supprimer un groupe</string>
     <string name="delete_group_message">Supprimer le groupe</string>
     <string name="group_delete_error">Échec de la suppression du groupe</string>
@@ -250,7 +249,6 @@
     <string name="enter_old_group_pwd">Entrez l\'ancien mot de passe</string>
     <string name="enter_new_password">Entrez un nouveau mot de passe</string>
     <string name="group_alert">Alerte groupe</string>
-    <string name="transfer_ownership_message">Vous êtes propriétaire du groupe, Transférez la propriété du groupe à quelqu\'un d\'autre avant de quitter le groupe.</string>
     <string name="make_owner">Faire propriétaire</string>
     <string name="make_owner_question">Aimez-vous faire de %1$s en tant que Propriétaire</string>
     <string name="user_is_owner">%1$s est maintenant propriétaire</string>
@@ -378,4 +376,7 @@
 
     <string name="send_message_privately">Envoyer un message Privately</string>
     <string name="view_profile">Voir le profil</string>
+    <string name="transfer">transfert »</string>
+    <string name="leave_group_message">Êtes-vous sûr de vouloir quitter ce groupe ? »</string>
+    <string name="transfer_ownership_message">Vous êtes le propriétaire du groupe. Veuillez transférer la propriété à un membre avant de quitter le groupe.</string>
 </resources>

@@ -2668,8 +2668,6 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-                Log.e(TAG, "setTextData: left  raw "+baseMessage.rawMessage)
-                Log.e(TAG, "setTextData: left metadata "+baseMessage.metadata)
                 if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
                         var metaData = JSONObject()
@@ -2833,8 +2831,6 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-//                Log.e(TAG, "setTextData: right raw "+baseMessage.rawMessage)
-                Log.e(TAG, "setTextData: right metadata "+baseMessage.metadata)
                 if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
                         var metaData = JSONObject()
@@ -3415,11 +3411,6 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
         val baseMessage = messageList[position]
         val extensionList = Extensions.extensionCheck(baseMessage)
         if (baseMessage.deletedAt == 0L) {
-            Log.e(TAG, "getItemViewTypes: basemessage "+baseMessage.toString())
-            if (baseMessage.metadata != null) {
-                Log.e(TAG, "getItemViewTypes: replyToMessage"+baseMessage.metadata.has("replyToMessage") )
-                Log.e(TAG, "getItemViewTypes: reply-message"+baseMessage.metadata.has("reply-message") )
-            }
             if (baseMessage.category == CometChatConstants.CATEGORY_MESSAGE) {
                 return when (baseMessage.type) {
                     CometChatConstants.MESSAGE_TYPE_TEXT -> if (baseMessage.sender.uid == loggedInUser.uid) {

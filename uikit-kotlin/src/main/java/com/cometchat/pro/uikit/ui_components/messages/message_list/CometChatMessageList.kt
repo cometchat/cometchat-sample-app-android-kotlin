@@ -938,8 +938,10 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         customMessage = if (type.equals(CometChatConstants.RECEIVER_TYPE_USER, ignoreCase = true)) CustomMessage(Id, CometChatConstants.RECEIVER_TYPE_USER, customType, customData) else CustomMessage(Id, CometChatConstants.RECEIVER_TYPE_GROUP, customType, customData)
         val incrementCountObject = JSONObject()
         val pushNotificationObject = JSONObject()
-        if (customType == UIKitConstants.IntentStrings.LOCATION)
-            pushNotificationObject.put("pushNotification", "$name has shared his location")
+        if (customType == UIKitConstants.IntentStrings.LOCATION) {
+            pushNotificationObject.put("pushNotification", loggedInUser.name+" has shared his location")
+            customMessage.metadata = pushNotificationObject
+        }
         if (customType == UIKitConstants.IntentStrings.STICKERS || customType == UIKitConstants.IntentStrings.LOCATION) {
             incrementCountObject.put("incrementUnreadCount", true)
             customMessage.metadata = incrementCountObject
@@ -1404,6 +1406,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         private get() {
             getGroup(Id!!, object : CallbackListener<Group>() {
                 override fun onSuccess(group: Group) {
+                    Log.e(TAG, "getGroup: "+group.toString() )
                     if (activity != null) {
                         name = group.name
                         avatarUrl = group.icon
@@ -1446,10 +1449,6 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 rvSmartReply?.visibility = View.GONE
                 Log.e(TAG, "onSuccess: " + textMessage.toString())
                 if (messageAdapter != null) {
-//                    MediaUtils.playSendSound(context, R.raw.outgoing_message)
-//                    messageAdapter?.addMessage(textMessage!!)
-//                    scrollToBottom()
-
                     messageAdapter?.updateSentMessage(textMessage)
                 }
             }

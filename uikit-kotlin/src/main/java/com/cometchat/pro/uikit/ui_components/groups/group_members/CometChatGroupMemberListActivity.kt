@@ -12,6 +12,7 @@ import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 
 class CometChatGroupMemberListActivity : AppCompatActivity() {
+    private var transferOwnership = false
     private var guid: String? = null
     private var showModerators = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,10 +20,12 @@ class CometChatGroupMemberListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_screen)
         guid = intent.getStringExtra(UIKitConstants.IntentStrings.GUID)
         showModerators = intent.getBooleanExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
+        transferOwnership = intent.getBooleanExtra(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP, transferOwnership)
         val fragment: Fragment = CometChatGroupMemberList()
         val bundle = Bundle()
         bundle.putString(UIKitConstants.IntentStrings.GUID, guid)
         bundle.putBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, showModerators)
+        bundle.putBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP, transferOwnership)
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction().replace(R.id.frame_fragment, fragment).commit()
         if (UIKitSettings.color != null) window.statusBarColor = Color.parseColor(UIKitSettings.color)

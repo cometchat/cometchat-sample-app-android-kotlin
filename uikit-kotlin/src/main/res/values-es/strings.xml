@@ -8,7 +8,7 @@
     <string name="sending">Enviando...</string>
     <string name="this_message_deleted">⚠️ Este mensaje fue eliminado</string>
     <string name="you_deleted_this_message">⚠️ Has eliminado este mensaje</string>
-    <string name="message_image">📷 Foto</string>
+    <string name="message_image">📷 Imagen</string>
     <string name="message_video">📹 Vídeo</string>
     <string name="message_audio">🎵 Audio</string>
     <string name="message_file">📁 Archivo</string>
@@ -26,11 +26,11 @@
     <string name="admin">Admin</string>
     <string name="moderator">Moderador</string>
     <string name="participant">Participante</string>
-        <array name="groupType">
-            <item>Público</item>
-            <item>Privado</item>
-            <item>Protegido con contraseña</item>
-        </array>
+    <array name="groupType">
+        <item>Público</item>
+        <item>Privado</item>
+        <item>Protegido con contraseña</item>
+    </array>
     <string name="privacy_and_security">Privacidad y Seguridad</string>
     <string name="privacy">Privacidad</string>
     <string name="blocked_users">Usuarios bloqueados</string>
@@ -49,7 +49,7 @@
     <string name="typing">escribiendo...</string>
     <string name="is_typing">está escribiendo...</string>
     <string name="close">Cerrar</string>
-    <string name="enter_group_name">Por favor, introduzca el nombre del grupo</string>
+    <string name="enter_group_name">Introducir nombre de grupo</string>
     <string name="refreshing">Refrescante...</string>
     <string name="unblock">Desbloquear</string>
 
@@ -119,8 +119,8 @@
     <string name="replies"> respuestas</string>
     <string name="launch">Lanzamiento</string>
     <string name="join">Unirse</string>
-    <string name="has_shared_whiteboard">ha compartido un jabalí blanco colaborativo</string>
-    <string name="you_created_whiteboard">Has creado un nuevo jabalí blanco colaborativo</string>
+    <string name="has_shared_whiteboard">ha compartido una pizarra colaborativa</string>
+    <string name="you_created_whiteboard">Has creado una nueva pizarra colaborativa</string>
     <string name="you_created_document">Has creado una nueva documen colaborativa</string>
 
     <string name="take_a_photo">Tomar una foto</string>
@@ -142,7 +142,7 @@
     <string name="no_groups_found">No se han encontrado grupos</string>
     <string name="no_chats_found">No se encontraron chats</string>
     <string name="media_message">Mensaje multimedia</string>
-    <string name="decline">Declive</string>
+    <string name="decline">Rechazar</string>
     <string name="accept">Aceptar</string>
     <string name="call_initiated">Llamada iniciada</string>
     <string name="outgoing_audio_call">Llamada de audio saliente</string>
@@ -161,7 +161,7 @@
     <string name="no_banned_members_found">No se encontraron miembros prohibidos</string>
     <string name="name">Nombre</string>
     <string name="scope">Ámbito</string>
-    <string name="unban">Desbancar</string>
+    <string name="unban">Levantar la prohibición</string>
     <string name="select_group_type">Seleccionar tipo de grupo</string>
     <string name="create">Crear</string>
     <string name="create_poll">Crear encuesta</string>
@@ -181,7 +181,7 @@
     <string name="visit">Visitar</string>
     <string name="emoji">Emoji</string>
     <string name="no_messages_found">No se han encontrado mensajes</string>
-    <string name="thread">Rosca</string>
+    <string name="thread">Hilo</string>
     <string name="collaborative_document">Documento colaborativo</string>
     <string name="collaborative_whiteboard">Pizarra colaborativa</string>
     <string name="add_reaction">Añadir reacción</string>
@@ -210,7 +210,6 @@
     <string name="user_added_to_group">%1$s se agrega a\» %2$s\»</string>
     <string name="user_removed_from_group">%1$s se ha eliminado de\» %2$s\»</string>
     <string name="kicked_error">Error al miembro del grupo</string>
-    <string name="leave_group_message">¿Te gustaría salir del grupo?</string>
     <string name="delete_group">Eliminar grupo</string>
     <string name="delete_group_message">Eliminar el grupo</string>
     <string name="group_delete_error">Error al eliminar el grupo</string>
@@ -242,7 +241,6 @@
     <string name="enter_old_group_pwd">Introducir contraseña antigua</string>
     <string name="enter_new_password">Introduce la nueva contraseña</string>
     <string name="group_alert">Alerta de grupo</string>
-    <string name="transfer_ownership_message">Usted es propietario del grupo, Transfiera la propiedad del grupo a otra persona antes de abandonar el grupo.</string>
     <string name="make_owner">Hacer propietario</string>
     <string name="make_owner_question">¿Te gusta hacer %1$s como propietario</string>
     <string name="user_is_owner">%1$s ahora es Propietario</string>
@@ -276,7 +274,7 @@
     <string name="incoming_audio_call">Llamada de audio entrante</string>
     <string name="incoming_video_call">Videollamada entrante</string>
     <string name="missed_call">Perdida</string>
-    <string name="rejected_call">Rechazado</string>
+    <string name="rejected_call">llamada rechazada</string>
     <string name="ongoing_call">La llamada está en curso</string>
     <string name="ongoing_call_message">Ya hay llamada en curso. ¿Te gustaría unirte?</string>
     <string name="tap_to_join_call">Pulsa para unirte a una llamada continua</string>
@@ -347,11 +345,11 @@
     <string name="initiate_a_call">Iniciar una llamada</string>
     <string name="tap_to_start_conversation">Toca para iniciar una conversación</string>
     <string name="user_is_blocked">%1$s bloqueado correctamente</string>
-    <string name="has_shared_document">ha compartido una documen colaborativa</string>
+    <string name="has_shared_document">ha compartido un documento colaborativo</string>
     <string name="no_thread_message">No hay mensajes de hilo</string>
-    <string name="added">adicional</string>
+    <string name="added">añadido</string>
     <string name="initiated">iniciado</string>
-    <string name="kicked_by">golpeado</string>
+    <string name="kicked_by">patadas</string>
     <string name="made">hecho</string>
     <string name="translate_message">Traducir mensaje</string>
     <string name="no_translation_available">No hay traducción disponible</string>
@@ -379,4 +377,7 @@
     <string name="do_not_have_permission_to_remove_admin_from_the_group">No tienes permiso para eliminar administrador del grupo</string>
     <string name="send_message_privately">Enviar mensaje en privado</string>
     <string name="view_profile">Ver perfil</string>
+    <string name="transfer">transferencia»</string>
+    <string name="leave_group_message">¿Estás seguro de que quieres dejar este grupo?»</string>
+    <string name="transfer_ownership_message">Eres el propietario del grupo. Transfiere la propiedad a un miembro antes de abandonar el grupo.</string>
 </resources>

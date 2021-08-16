@@ -206,7 +206,6 @@
     <string name="user_added_to_group">%1$s\” %2$s\” में जोड़ा गया है</string>
     <string name="user_removed_from_group">%1$s\” %2$s\” से हटा दिया गया है</string>
     <string name="kicked_error">समूह सदस्य लात मारी असफल</string>
-    <string name="leave_group_message">क्या आप समूह से छोड़ना चाहेंगे?</string>
     <string name="delete_group">समूह मिटाएँ</string>
     <string name="delete_group_message">समूह मिटाएँ</string>
     <string name="group_delete_error">समूह मिटाना असफल</string>
@@ -236,7 +235,6 @@
     <string name="enter_old_group_pwd">पुराना पासवर्ड दर्ज करें</string>
     <string name="enter_new_password">नया पासवर्ड दर्ज करें</string>
     <string name="group_alert">समूह अलर्ट</string>
-    <string name="transfer_ownership_message">आप समूह के स्वामी हैं, समूह छोड़ने से पहले किसी और को समूह स्वामित्व स्थानांतरित करें।</string>
     <string name="make_owner">मालिक बनाओ</string>
     <string name="make_owner_question">क्या आप%1$s को मालिक के रूप में बनाना पसंद है</string>
     <string name="user_is_owner">%1$s अब मालिक है</string>
@@ -371,4 +369,8 @@
 
     <string name="send_message_privately">निजी तौर पर संदेश भेजें</string>
     <string name="view_profile">प्रोफ़ाइल देखें</string>
+
+    <string name="transfer">स्थानांतरण”</string>
+    <string name="leave_group_message">क्या आप निश्चित हैं कि आप इस समूह को छोड़ना चाहते हैं?”</string>
+    <string name="transfer_ownership_message">आप समूह के मालिक हैं, कृपया समूह छोड़ने से पहले किसी सदस्य को स्वामित्व स्थानांतरित करें।</string>
 </resources>

@@ -27,15 +27,14 @@ import com.cometchat.pro.core.GroupMembersRequest.GroupMembersRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.uikit.R
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
-import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
 
 /**
@@ -48,19 +47,21 @@ import java.util.*
  *
  */
 class CometChatGroupMemberList : Fragment() {
+    private var transferOwnership = false
     private var groupMemberListAdapter: GroupMemberAdapter? = null
     private var groupMembersRequest: GroupMembersRequest? = null
     private var showModerators = false
     private var rvUserList: RecyclerView? = null
     private var etSearch: EditText? = null
     private var clearSearch: ImageView? = null
-    private var guid: String? = null
+    private lateinit var guid: String
     private var c: Context? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            guid = arguments!!.getString(UIKitConstants.IntentStrings.GUID)
+            guid = arguments?.getString(UIKitConstants.IntentStrings.GUID).toString()
             showModerators = arguments!!.getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
+            transferOwnership = arguments!!.getBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP)
         }
     }
 
@@ -73,32 +74,32 @@ class CometChatGroupMemberList : Fragment() {
         clearSearch = view.findViewById(R.id.clear_search)
         val toolbar: MaterialToolbar = view.findViewById(R.id.add_member_toolbar)
         setToolbar(toolbar)
-        etSearch!!.addTextChangedListener(object : TextWatcher {
+        etSearch?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (charSequence.isNotEmpty()) clearSearch!!.visibility = View.VISIBLE
+                if (charSequence.isNotEmpty()) clearSearch?.visibility = View.VISIBLE
             }
 
             override fun afterTextChanged(editable: Editable) {}
         })
-        etSearch!!.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
+        etSearch?.setOnEditorActionListener(OnEditorActionListener { textView: TextView, i: Int, keyEvent: KeyEvent? ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
                 searchUser(textView.text.toString())
-                clearSearch!!.visibility = View.VISIBLE
+                clearSearch?.visibility = View.VISIBLE
                 return@OnEditorActionListener true
             }
             false
         })
-        clearSearch!!.setOnClickListener(View.OnClickListener { view1: View? ->
-            etSearch!!.setText("")
-            clearSearch!!.visibility = View.GONE
-            searchUser(etSearch!!.text.toString())
+        clearSearch?.setOnClickListener(View.OnClickListener { view1: View? ->
+            etSearch?.setText("")
+            clearSearch?.visibility = View.GONE
+            searchUser(etSearch?.text.toString())
             if (activity != null) {
-                val inputMethodManager = (activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                inputMethodManager.hideSoftInputFromWindow(etSearch!!.windowToken, 0)
+                val inputMethodManager = (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                inputMethodManager.hideSoftInputFromWindow(etSearch?.windowToken, 0)
             }
         })
-        rvUserList!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        rvUserList?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (!recyclerView.canScrollVertically(1)) {
                     fetchGroupMembers()
@@ -107,10 +108,18 @@ class CometChatGroupMemberList : Fragment() {
         })
 
         // On click of any group member item in rvUserList, It shows dialog with positive and negative button. On click of positive button it changes scope of group member
-        rvUserList!!.addOnItemTouchListener(RecyclerTouchListener(context, rvUserList!!, object : ClickListener() {
+        rvUserList?.addOnItemTouchListener(RecyclerTouchListener(context, rvUserList!!, object : ClickListener() {
             override fun onClick(var1: View, var2: Int) {
                 val groupMember = var1.getTag(R.string.user) as GroupMember
-                if (showModerators) {
+                if (transferOwnership) {
+                    val alertDialog = MaterialAlertDialogBuilder(activity)
+                    alertDialog.setTitle(resources.getString(R.string.make_owner))
+                    alertDialog.setMessage(String.format(resources.getString(R.string.make_owner_question), groupMember.name))
+                    alertDialog.setPositiveButton(resources.getString(R.string.yes)) { dialogInterface: DialogInterface?, i: Int -> transferOwnerShip(groupMember) }
+                    alertDialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface: DialogInterface, i: Int -> dialogInterface.dismiss() }
+                    alertDialog.create()
+                    alertDialog.show()
+                } else if (showModerators) {
                     if (activity != null) {
                         val alertDialog = MaterialAlertDialogBuilder(activity)
                         alertDialog.setTitle(resources.getString(R.string.make_group_moderator))
@@ -137,21 +146,35 @@ class CometChatGroupMemberList : Fragment() {
         return view
     }
 
+    private fun transferOwnerShip(groupMember: GroupMember) {
+        CometChat.transferGroupOwnership(guid, groupMember.uid, object : CallbackListener<String>() {
+            override fun onSuccess(p0: String?) {
+                if (activity != null)
+                    activity?.onBackPressed()
+            }
+
+            override fun onError(p0: CometChatException?) {
+                ErrorMessagesUtils.cometChatErrorMessage(context, p0.toString())
+            }
+
+        })
+    }
+
     private fun setToolbar(toolbar: MaterialToolbar) {
         if (Utils.changeToolbarFont(toolbar) != null) {
-            Utils.changeToolbarFont(toolbar)!!.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
+            Utils.changeToolbarFont(toolbar)?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         }
         if (activity != null) {
-            (activity as AppCompatActivity?)!!.setSupportActionBar(toolbar)
-            (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            (activity as AppCompatActivity?)?.setSupportActionBar(toolbar)
+            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
     }
 
     private fun updateAsAdminScope(groupMember: GroupMember) {
-        CometChat.updateGroupMemberScope(groupMember.uid, guid!!, CometChatConstants.SCOPE_ADMIN, object : CallbackListener<String>() {
+        CometChat.updateGroupMemberScope(groupMember.uid, guid, CometChatConstants.SCOPE_ADMIN, object : CallbackListener<String>() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
-                groupMemberListAdapter!!.removeGroupMember(groupMember)
+                groupMemberListAdapter?.removeGroupMember(groupMember)
 //                ErrorMessagesUtils.showCometChatErrorDialog(context, String.format(resources.getString(R.string.is_now_admin), groupMember.name), UIKitConstants.ErrorTypes.INFO)
             }
 
@@ -163,7 +186,7 @@ class CometChatGroupMemberList : Fragment() {
     }
 
     private fun updateAsModeratorScope(groupMember: GroupMember) {
-        CometChat.updateGroupMemberScope(groupMember.uid, guid!!, CometChatConstants.SCOPE_MODERATOR, object : CallbackListener<String>() {
+        CometChat.updateGroupMemberScope(groupMember.uid, guid, CometChatConstants.SCOPE_MODERATOR, object : CallbackListener<String>() {
             override fun onSuccess(s: String) {
                 Log.d(TAG, "onSuccess: $s")
                 groupMemberListAdapter!!.removeGroupMember(groupMember)
@@ -196,7 +219,7 @@ class CometChatGroupMemberList : Fragment() {
             }
 
         }
-        groupMembersRequest!!.fetchNext(object : CallbackListener<List<GroupMember>>() {
+        groupMembersRequest?.fetchNext(object : CallbackListener<List<GroupMember>>() {
             override fun onSuccess(users: List<GroupMember>) {
                 if (users.isNotEmpty()) {
                     setAdapter(users)
@@ -228,7 +251,7 @@ class CometChatGroupMemberList : Fragment() {
                             filterlist.add(gmember)
                         }
                     }
-                    groupMemberListAdapter!!.searchGroupMembers(filterlist)
+                    groupMemberListAdapter?.searchGroupMembers(filterlist)
                 }
             }
 
@@ -248,7 +271,7 @@ class CometChatGroupMemberList : Fragment() {
             groupMemberListAdapter = GroupMemberAdapter(context!!, groupMembers, null)
             rvUserList?.adapter = groupMemberListAdapter
         } else {
-            groupMemberListAdapter!!.updateGroupMembers(groupMembers)
+            groupMemberListAdapter?.updateGroupMembers(groupMembers)
         }
     }
 

@@ -74,7 +74,6 @@ import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClick
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderDecoration
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
-import com.facebook.react.bridge.UiThreadUtil.runOnUiThread
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -452,6 +451,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
 //        composeBox?.hideGroupCallOption(true)
         composeBox?.hideRecordOption(true)
         composeBox?.hideSendButton(false)
+//        composeBox?.ivMic?.visibility = View.GONE
         FeatureRestriction.isOneOnOneChatEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
                 if (p0) composeBox?.visibility = View.VISIBLE else composeBox?.visibility = View.GONE
