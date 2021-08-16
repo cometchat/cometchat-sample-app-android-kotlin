@@ -288,7 +288,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                             avatar = (conversation.conversationWith as Group).icon
                         }
                         chip.text = name
-                        Glide.with(this@CometChatForwardMessageActivity).load(avatar).placeholder(R.drawable.ic_contacts).transform(CircleCrop()).into(object : SimpleTarget<Drawable?>() {
+                        Glide.with(this@CometChatForwardMessageActivity).load(avatar).placeholder(R.drawable.ic_users).transform(CircleCrop()).into(object : SimpleTarget<Drawable?>() {
                             override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable?>?) {
                                 chip.chipIcon = resource
                             }

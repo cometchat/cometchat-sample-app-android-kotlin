@@ -73,9 +73,8 @@ class CometChatUsersAdapter(context: Context) : RecyclerView.Adapter<UserViewHol
         } else {
             userViewHolder.userListRowBinding.tvSeprator.visibility = View.VISIBLE
         }
-        if (user.status == CometChatConstants.USER_STATUS_ONLINE)
-            if (userPresenceEnabled)
-                userViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
+        if (userPresenceEnabled)
+            userViewHolder.userListRowBinding.statusIndicator.visibility = View.VISIBLE
 
         userViewHolder.userListRowBinding.statusIndicator.setUserStatus(user.status)
         userViewHolder.userListRowBinding.txtUserName.text = user.name

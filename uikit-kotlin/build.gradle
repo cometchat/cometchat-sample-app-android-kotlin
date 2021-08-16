@@ -6,7 +6,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -85,5 +85,7 @@ dependencies {
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
 
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:3.0.0-beta4'
+    compileOnly 'com.cometchat:pro-android-chat-sdk:3.0.0'
+    implementation 'com.cometchat:pro-android-calls-sdk:2.1.0'
+
 }

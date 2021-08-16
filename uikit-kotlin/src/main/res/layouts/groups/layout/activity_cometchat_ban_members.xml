@@ -10,8 +10,8 @@
         android:id="@+id/banToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/ic_close_24dp"
-        app:title="@string/banned_members" />
+        app:navigationIcon="@drawable/ic_back"
+        app:title="@string/banned_members"/>
     <FrameLayout
         android:id="@+id/ban_member_frame"
         android:layout_width="match_parent"

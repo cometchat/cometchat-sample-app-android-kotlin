@@ -18,7 +18,8 @@
         android:usesCleartextTraffic="true"
         tools:node="merge"
         tools:targetApi="m">
-        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity"></activity>
+        <activity android:name=".ui_components.chats.CometChatStartConversation" />
+        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity" />
         <activity android:name=".ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity" />
         <activity android:name=".ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity" />
         <activity android:name=".ui_components.messages.message_information.CometChatMessageInfoScreenActivity" />
@@ -59,31 +60,41 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui_components.messages.forward_message.CometChatForwardMessageActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="text/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="video/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="audio/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="application/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/*" />
             </intent-filter>
         </activity>
         <activity
@@ -99,7 +110,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui_components.messages.message_list.CometChatMessageListActivity"
-            android:parentActivityName=".ui_components.cometchat_ui.CometChatUI"
+
             android:screenOrientation="portrait" />
 
         <provider

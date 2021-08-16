@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.core.CometChat.CallbackListener
+import com.cometchat.pro.core.CometChat.markAsDelivered
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.R
@@ -299,14 +300,17 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
     fun addConversationListener() {
         CometChat.addMessageListener(TAG, object : CometChat.MessageListener() {
             override fun onTextMessageReceived(message: TextMessage) {
+                markAsDelivered(message)
                 setUnreadCount(message)
             }
 
             override fun onMediaMessageReceived(message: MediaMessage) {
+                markAsDelivered(message)
                 setUnreadCount(message)
             }
 
             override fun onCustomMessageReceived(message: CustomMessage) {
+                markAsDelivered(message)
                 setUnreadCount(message)
             }
 
@@ -365,17 +369,22 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
      * @see CometChatUserProfile
      */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        if (itemId == R.id.menu_users) {
-            fragment = CometChatUserList()
-        } else if (itemId == R.id.menu_group) {
-            fragment = CometChatGroupList()
-        } else if (itemId == R.id.menu_conversation) {
-            fragment = CometChatConversationList()
-        } else if (itemId == R.id.menu_more) {
-            fragment = CometChatUserProfile()
-        } else if (itemId == R.id.menu_call) {
-            fragment = CometChatCallList()
+        when (item.itemId) {
+            R.id.menu_users -> {
+                fragment = CometChatUserList()
+            }
+            R.id.menu_group -> {
+                fragment = CometChatGroupList()
+            }
+            R.id.menu_conversation -> {
+                fragment = CometChatConversationList()
+            }
+            R.id.menu_more -> {
+                fragment = CometChatUserProfile()
+            }
+            R.id.menu_call -> {
+                fragment = CometChatCallList()
+            }
         }
         return loadFragment(fragment)
     }

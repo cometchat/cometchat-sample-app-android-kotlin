@@ -30,10 +30,8 @@
         <ImageView
             android:padding="8dp"
             android:id="@+id/playBtn"
-            android:backgroundTint="@color/textColorWhite"
-            android:background="@drawable/ic_circle_grey_32dp"
-            android:tint="@color/colorPrimary"
-            android:src="@drawable/ic_play_arrow_black_24dp"
+            android:tint="@color/textColorWhite"
+            android:src="@drawable/ic_audio_file"
             android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

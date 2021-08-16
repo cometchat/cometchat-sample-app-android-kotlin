@@ -32,6 +32,7 @@ import java.io.IOException
 import java.util.*
 
 class CometChatComposeBox : RelativeLayout, View.OnClickListener {
+    private var type: String? = null
     public var btnLiveReaction: ImageView? = null
     private var audioRecordView: AudioRecordView? = null
     private var mediaRecorder: MediaRecorder? = null
@@ -132,11 +133,11 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         etComposeBox = findViewById(R.id.etComposeBox)
         rlActionContainer = findViewById(R.id.rlActionContainers)
 
-        ivArrow!!.imageTintList = ColorStateList.valueOf(color)
+//        ivArrow!!.imageTintList = ColorStateList.valueOf(color)
         ivCamera!!.imageTintList = ColorStateList.valueOf(color)
         ivGallery!!.imageTintList = ColorStateList.valueOf(color)
         ivFile!!.imageTintList = ColorStateList.valueOf(color)
-        ivSend!!.imageTintList = ColorStateList.valueOf(color)
+//        ivSend!!.imageTintList = ColorStateList.valueOf(color)
 
         ivAudio!!.setOnClickListener(this)
         ivArrow!!.setOnClickListener(this)
@@ -231,29 +232,29 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         if (Utils.isDarkMode(context)) {
             composeBox!!.setBackgroundColor(resources.getColor(R.color.darkModeBackground))
             ivAudio!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_white_24dp))
+//            ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_white_24dp))
             flBox!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             etComposeBox!!.setTextColor(resources.getColor(R.color.textColorWhite))
-            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
-            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+//            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
+//            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             ivCamera!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             ivGallery!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
             ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.textColorWhite))
         } else {
             composeBox!!.setBackgroundColor(resources.getColor(R.color.textColorWhite))
             ivAudio!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
-            ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_grey_24dp))
+//            ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_grey_24dp))
             etComposeBox!!.setTextColor(resources.getColor(R.color.primaryTextColor))
-            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
+//            ivSend!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             flBox!!.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
-            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
+//            ivArrow!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.grey))
             ivCamera!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
             ivFile!!.imageTintList = ColorStateList.valueOf(resources.getColor(R.color.colorPrimary))
         }
         if (UIKitSettings.color != null) {
             val settingsColor = Color.parseColor(UIKitSettings.color)
-            ivSend!!.imageTintList = ColorStateList.valueOf(settingsColor)
+//            ivSend!!.imageTintList = ColorStateList.valueOf(settingsColor)
         }
 
         isLocationVisible = FeatureRestriction.isLocationSharingEnabled()
@@ -286,7 +287,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 
         FeatureRestriction.isVoiceNotesEnabled(object : FeatureRestriction.OnSuccessListener {
             override fun onSuccess(p0: Boolean) {
-                if (p0) ivMic!!.visibility = VISIBLE else ivMic!!.visibility = GONE
+                if (p0 && type == null) ivMic!!.visibility = VISIBLE else ivMic!!.visibility = GONE
             }
 
         })
@@ -346,16 +347,16 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         if (view.id == R.id.ivDelete) {
             stopRecording(true)
             stopPlayingAudio()
-            voiceMessageLayout!!.visibility = View.GONE
-            etComposeBox!!.visibility = View.VISIBLE
-            ivArrow!!.visibility = View.VISIBLE
-            ivMic!!.visibility = View.VISIBLE
-            ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_mic_grey_24dp))
+            voiceMessageLayout?.visibility = View.GONE
+            etComposeBox?.visibility = View.VISIBLE
+            ivArrow?.visibility = View.VISIBLE
+            ivMic?.visibility = View.VISIBLE
+            ivMic?.setImageDrawable(resources.getDrawable(R.drawable.ic_microphone_circle))
             isPlaying = false
             isRecording = false
             voiceMessage = false
-            ivDelete!!.visibility = View.GONE
-            ivSend!!.visibility = View.GONE
+            ivDelete?.visibility = View.GONE
+            ivSend?.visibility = View.GONE
         }
         if (view.id == R.id.ivCamera) {
 //            composeActionListener!!.onCameraActionClicked(ivCamera)
@@ -378,7 +379,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 isRecording = false
                 isPlaying = false
                 voiceMessage = false
-                ivMic!!.setImageResource(R.drawable.ic_mic_grey_24dp)
+                ivMic!!.setImageResource(R.drawable.ic_microphone_circle)
             }
         }
         if (view.id == R.id.ivAudio) {
@@ -447,6 +448,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     }
 
     fun usedIn(className: String?) {
+        type = className
         bundle.putString("type", className)
     }
 
@@ -505,6 +507,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 recordTime!!.stop()
                 //                audioLength.setText(Utils.convertTimeStampToDurationTime(duration));
                 voiceSeekbar!!.progress = 0
+                ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_play_button))
             }
         } catch (e: Exception) {
             Log.e("playAudioError: ", e.message)
@@ -513,7 +516,10 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     }
 
     private fun stopPlayingAudio() {
-        if (mediaPlayer != null) mediaPlayer!!.stop()
+        if (mediaPlayer != null) {
+            mediaPlayer!!.stop()
+        }
+
     }
 
     private fun startRecording() {

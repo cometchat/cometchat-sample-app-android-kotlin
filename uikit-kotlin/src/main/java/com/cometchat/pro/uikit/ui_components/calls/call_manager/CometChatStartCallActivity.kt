@@ -14,8 +14,8 @@ import com.cometchat.pro.core.CallSettings
 import com.cometchat.pro.core.CallSettings.CallSettingsBuilder
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
+import com.cometchat.pro.models.AudioMode
 import com.cometchat.pro.models.User
-import com.cometchat.pro.rtc.model.AudioMode
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils

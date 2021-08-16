@@ -50,7 +50,7 @@ import com.cometchat.pro.core.CometChat.OngoingCallListener
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
-import com.cometchat.pro.rtc.model.AudioMode
+import com.cometchat.pro.models.AudioMode
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity
@@ -859,6 +859,14 @@ public class Utils {
             imageDialog.setContentView(messageVw)
             imageDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             imageDialog.show()
+        }
+
+        fun getSenderName(data: JSONObject): String? {
+            val entities = data.getJSONObject("entities")
+            val sender = entities.getJSONObject("sender")
+            val entity = sender.getJSONObject("entity")
+            val name = entity.getString("name")
+            return name
         }
 
     }

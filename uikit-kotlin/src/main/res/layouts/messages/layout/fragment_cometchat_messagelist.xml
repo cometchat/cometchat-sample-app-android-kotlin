@@ -156,7 +156,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/live_reactions_layout"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="50dp"/>
 
     <LinearLayout
         android:visibility="gone"
@@ -209,7 +209,7 @@
             android:layout_alignParentEnd="true"
             android:padding="8dp"
             android:id="@+id/close_sticker_layout"
-            android:src="@drawable/ic_close_circle"
+            android:src="@drawable/ic_close_circle_filled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>

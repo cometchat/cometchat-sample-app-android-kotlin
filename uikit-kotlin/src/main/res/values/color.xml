@@ -29,4 +29,5 @@
     <color name="blue_100">#87ceeb</color>
     <color name="orange_200">#FFA500</color>
     <color name="green">#43FA36</color>
+    <color name="optionsColor">#808080</color>
 </resources>

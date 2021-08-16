@@ -55,7 +55,6 @@
     <string name="user_added_to_group">%1$s läggs till i\” %2$s\”</string>
     <string name="user_removed_from_group">%1$s tas bort från\” %2$s\”</string>
     <string name="kicked_error">Gruppmedlem sparkade misslyckades</string>
-    <string name="leave_group_message">Vill du lämna gruppen?</string>
     <string name="delete_group">Ta bort grupp</string>
     <string name="delete_group_message">Ta bort gruppen</string>
     <string name="group_delete_error">Borttagning av grupp misslyckades</string>
@@ -87,7 +86,6 @@
     <string name="enter_old_group_pwd">Ange gammalt lösenord</string>
     <string name="enter_new_password">Ange nytt lösenord</string>
     <string name="group_alert">Gruppvarning</string>
-    <string name="transfer_ownership_message">Du är gruppägare, Överför gruppägarskap till någon annan innan du lämnar gruppen.</string>
     <string name="make_owner">Gör ägare</string>
     <string name="make_owner_question">Gillar du att göra %1$s som ägare</string>
     <string name="user_is_owner">%1$s är nu ägare</string>
@@ -316,4 +314,12 @@
     <string name="you_cannot_perform_action_on_yourself">Du kan inte utföra åtgärder på dig själv</string>
     <string name="do_not_have_permission_to_remove_admin_from_the_group">Du har inte behörighet att ta bort admin från gruppen</string>
     <string name="send_message_privately">Skicka meddelande privat</string>
-    <string name="view_profile">Visa profil</string></resources>
+    <string name="view_profile">Visa profil</string>
+
+    <string name="transfer">överföring”</string>
+    <string name="leave_group_message">Är du säker på att du vill lämna den här gruppen?”</string>
+    <string name="transfer_ownership_message">Du är gruppägare, Överför äganderätten till en medlem innan du lämnar gruppen.</string>
+
+</resources>
+
+

@@ -206,7 +206,6 @@
     <string name="user_added_to_group">تمت إضافة %1$s إلى\» %2$s\»</string>
     <string name="user_removed_from_group">تتم إزالة %1$s من\ "%2$s\»</string>
     <string name="kicked_error">فشل عضو المجموعة</string>
-    <string name="leave_group_message">هل ترغب في الرحيل من المجموعة؟</string>
     <string name="delete_group">حذف المجموعة</string>
     <string name="delete_group_message">حذف المجموعة</string>
     <string name="group_delete_error">فشل حذف المجموعة</string>
@@ -236,7 +235,6 @@
     <string name="enter_old_group_pwd">أدخل كلمة المرور القديمة</string>
     <string name="enter_new_password">أدخل كلمة مرور جديدة</string>
     <string name="group_alert">تنبيه المجموعة</string>
-    <string name="transfer_ownership_message">أنت مالك المجموعة، نقل ملكية المجموعة إلى شخص آخر قبل مغادرة المجموعة.</string>
     <string name="make_owner">جعل المالك</string>
     <string name="make_owner_question">هل ترغب في جعل %1$s كمالك</string>
     <string name="user_is_owner">%1$s هو الآن المالك</string>
@@ -372,4 +370,7 @@
 
     <string name="send_message_privately">ارسل رسالة بشكل خاص</string>
     <string name="view_profile">عرض الملف الشخصي</string>
+    <string name="transfer">نقل»</string>
+    <string name="leave_group_message">هل أنت متأكد أنك تريد مغادرة هذه المجموعة؟»</string>
+    <string name="transfer_ownership_message">أنت مالك المجموعة، يرجى نقل الملكية إلى عضو قبل مغادرة المجموعة.</string>
 </resources>

@@ -209,7 +209,6 @@
     <string name="user_added_to_group">%1$s добавлено в\» %2$s\»</string>
     <string name="user_removed_from_group">%1$s удален из\» %2$s\»</string>
     <string name="kicked_error">Не удалось запустить участника группы</string>
-    <string name="leave_group_message">Хотите уехать из группы?</string>
     <string name="delete_group">Удалить группу</string>
     <string name="delete_group_message">Удалить группу</string>
     <string name="group_delete_error">Не удалось удалить группу</string>
@@ -240,7 +239,6 @@
     <string name="enter_old_group_pwd">Введите старый пароль</string>
     <string name="enter_new_password">Введите новый пароль</string>
     <string name="group_alert">Групповое оповещение</string>
-    <string name="transfer_ownership_message">Вы являетесь владельцем группы, передайте право собственности на группу кому-то другому перед выходом из группы.</string>
     <string name="make_owner">Сделать владельца</string>
     <string name="make_owner_question">Вы хотите сделать %1$s в качестве владельца</string>
     <string name="user_is_owner">%1$s теперь является владельцем</string>
@@ -375,4 +373,9 @@
 
     <string name="send_message_privately">Отправить сообщение в частном порядке</string>
     <string name="view_profile">Просмотреть профиль</string>
+
+
+    <string name="transfer">трансфер»</string>
+    <string name="leave_group_message">Вы уверены, что хотите покинуть эту группу?»</string>
+    <string name="transfer_ownership_message">Вы являетесь владельцем группы. Прежде чем покинуть группу, передайте право собственности члену.</string>
 </resources>

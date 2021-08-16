@@ -117,7 +117,7 @@
                 <ImageView
                     android:layout_gravity="center"
                     android:id="@+id/ivSecurity"
-                    android:src="@drawable/ic_security"
+                    android:src="@drawable/ic_privacy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <TextView

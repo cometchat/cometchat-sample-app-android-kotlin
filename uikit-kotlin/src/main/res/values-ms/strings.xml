@@ -205,7 +205,6 @@
     <string name="user_added_to_group">%1$s ditambah ke\” %2$s\”</string>
     <string name="user_removed_from_group">%1$s dibuang dari\” %2$s\”</string>
     <string name="kicked_error">Ahli Kumpulan ditendang Gagal</string>
-    <string name="leave_group_message">Apakah Anda ingin meninggalkan grup?</string>
     <string name="delete_group">Hapuskan Kumpulan</string>
     <string name="delete_group_message">Hapuskan kumpulan</string>
     <string name="group_delete_error">Pemadaman Kumpulan Gagal</string>
@@ -237,7 +236,6 @@
     <string name="enter_old_group_pwd">Masukkan Kata Laluan Lama</string>
     <string name="enter_new_password">Masukkan kata laluan baru</string>
     <string name="group_alert">Amaran Kumpulan</string>
-    <string name="transfer_ownership_message">Anda adalah pemilik kumpulan, Pindahkan pemilikan kumpulan kepada orang lain sebelum meninggalkan kumpulan.</string>
     <string name="make_owner">Buat Pemilik</string>
     <string name="make_owner_question">Adakah anda ingin membuat %1$s sebagai Pemilik</string>
     <string name="user_is_owner">%1$s kini Pemilik</string>
@@ -372,4 +370,8 @@
 
     <string name="send_message_privately">Hantar Mesej Secara Swasta</string>
     <string name="view_profile">Lihat Profil</string>
+
+    <string name="transfer">pemindahan”</string>
+    <string name="leave_group_message">Anda pasti ingin keluar dari group ini?”</string>
+    <string name="transfer_ownership_message">Anda adalah pemilik kumpulan, Sila memindahkan pemilikan kepada ahli sebelum meninggalkan kumpulan.</string>
 </resources>

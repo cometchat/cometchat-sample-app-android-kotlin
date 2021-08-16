@@ -23,12 +23,14 @@ import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsers
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsersAdapter
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.UserMode
 import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
@@ -61,6 +63,7 @@ import java.util.*
 
 */
 class CometChatUserList constructor() : Fragment() {
+    private var isTitleVisible: Boolean = true
     private val LIMIT: Int = 30
     private var c: Context? = null
     private val isSearching: Boolean = false
@@ -83,7 +86,7 @@ class CometChatUserList constructor() : Fragment() {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_cometchat_userlist, container, false)
         title = view.findViewById(R.id.tv_title)
-        title!!.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
+        title?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
         rvUserList = view.findViewById(R.id.rv_user_list)
         noUserLayout = view.findViewById(R.id.no_user_layout)
         etSearch = view.findViewById(R.id.search_bar)
@@ -91,7 +94,13 @@ class CometChatUserList constructor() : Fragment() {
         rlSearchBox = view.findViewById(R.id.rl_search_box)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
 
-        FeatureRestriction.isUserSearchEnabled(object : FeatureRestriction.OnSuccessListener{
+        val fragment = fragmentManager?.findFragmentByTag("startChat")
+        if (fragment != null && fragment.isVisible) {
+            Log.e(TAG, "onCreateView: user " + fragment.toString())
+            title?.visibility = View.GONE
+        }
+
+        FeatureRestriction.isUserSearchEnabled(object : FeatureRestriction.OnSuccessListener {
             override fun onSuccess(p0: Boolean) {
                 if (!p0) {
                     etSearch?.visibility = View.GONE
@@ -158,16 +167,18 @@ class CometChatUserList constructor() : Fragment() {
         return view
     }
 
+
     private fun stopHideShimmer() {
-        shimmerFrameLayout!!.stopShimmer()
-        shimmerFrameLayout!!.visibility = View.GONE
-        title!!.visibility = View.VISIBLE
-        rlSearchBox!!.visibility = View.VISIBLE
+        shimmerFrameLayout?.stopShimmer()
+        shimmerFrameLayout?.visibility = View.GONE
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fetchUsers()
+        if (isTitleVisible)
+            title?.visibility = View.VISIBLE
+        else title?.visibility = View.GONE
     }
 
     /**
@@ -178,12 +189,9 @@ class CometChatUserList constructor() : Fragment() {
      */
     private fun fetchUsers() {
         if (usersRequest == null) {
-            if (UIKitSettings.userListing.equals("friends", ignoreCase = true))
-                usersRequest = UsersRequestBuilder().setLimit(30)
-                        .friendsOnly(true).build()
-            else if (UIKitSettings.userListing.equals("all_users", ignoreCase = true))
-                usersRequest = UsersRequestBuilder().setLimit(30).build()
-            Log.e(TAG, "newfetchUsers: ")
+            if (UIKitSettings.userInMode == UserMode.FRIENDS) usersRequest = UsersRequestBuilder().setLimit(30)
+                    .friendsOnly(true).build()
+            else if (UIKitSettings.userInMode == UserMode.ALL_USER) usersRequest = UsersRequestBuilder().setLimit(30).build()
         }
         usersRequest!!.fetchNext(object : CallbackListener<List<User>>() {
             public override fun onSuccess(users: List<User>) {
@@ -239,6 +247,10 @@ class CometChatUserList constructor() : Fragment() {
     public override fun onAttach(context: Context) {
         super.onAttach(context)
         this.c = context
+    }
+
+    fun setTitleVisible(isVisible: Boolean) {
+        isTitleVisible = isVisible
     }
 
     companion object {

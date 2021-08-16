@@ -18,7 +18,8 @@
         app:title="Administrators"
         android:layout_width="match_parent"
         android:id="@+id/admin_toolbar"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/ic_back"/>
 
 
 
@@ -34,15 +35,16 @@
         android:layout_below="@id/admin_toolbar">
 
         <ImageView
-            android:layout_marginTop="16dp"
+            android:id="@+id/ivNotification"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
-            android:layout_centerVertical="true"
-            android:id="@+id/ivNotification"
             android:src="@drawable/ic_add"
-            android:layout_width="40dp"
-            android:layout_height="40dp"/>
+            android:tint="@color/colorPrimary"/>
         <TextView
             android:id="@+id/add_as_tv"
             android:layout_toEndOf="@+id/ivNotification"

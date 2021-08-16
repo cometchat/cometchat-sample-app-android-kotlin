@@ -128,12 +128,12 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
             name = (conversation.conversationWith as User).name
             avatar = (conversation.conversationWith as User).avatar
             status = (conversation.conversationWith as User).status
-            if (status == CometChatConstants.USER_STATUS_ONLINE) {
-                if (userPresenceEnabled) {
-                    conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
-                    conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
-                }
-            } else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
+            if (userPresenceEnabled) {
+                conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.VISIBLE
+                conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
+            }
+            else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
+
         } else {
             name = (conversation.conversationWith as Group).name
             avatar = (conversation.conversationWith as Group).icon
@@ -172,15 +172,15 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
                     if (baseMessage.receiverType == CometChatConstants.RECEIVER_TYPE_USER && baseMessage.sender.uid == CometChat.getLoggedInUser().uid) {
                         if (baseMessage.readAt != 0L) {
                             txtTime.text = Utils.getLastMessageDate(baseMessage.sentAt)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_double_tick, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_read, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         } else if (baseMessage.deliveredAt != 0L) {
                             txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_done_all_black_24dp, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_delivered, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         } else {
                             txtTime.text = Utils.getHeaderDate(baseMessage.sentAt * 1000)
-                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_black_24dp, 0, 0, 0)
+                            txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message_sent, 0, 0, 0)
                             txtTime.compoundDrawablePadding = 10
                         }
                     } else {
@@ -273,9 +273,12 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
         if (filterConversationList!!.contains(conversation)) {
             val oldConversation = filterConversationList!![filterConversationList!!.indexOf(conversation)]
             filterConversationList!!.remove(oldConversation)
-            if (conversation.lastMessage.category != CometChatConstants.CATEGORY_CUSTOM && conversation.lastMessage.category != CometChatConstants.CATEGORY_ACTION && conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L) {
+            var isCustomMessage = false
+            if (conversation.lastMessage.metadata != null && conversation.lastMessage.metadata.has("incrementUnreadCount"))
+                isCustomMessage = conversation.lastMessage.metadata.getBoolean("incrementUnreadCount")
+
+            if (conversation.lastMessage.editedAt == 0L && conversation.lastMessage.deletedAt == 0L && conversation.lastMessage.category == CometChatConstants.CATEGORY_MESSAGE || isCustomMessage)
                 conversation.unreadMessageCount = oldConversation.unreadMessageCount + 1
-            }
             else {
                 conversation.unreadMessageCount = oldConversation.unreadMessageCount
             }

@@ -49,8 +49,10 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:layout_width="250dp"
-                    android:layout_height="150dp"
-                    android:id="@+id/iv_map"/>
+                    android:layout_height="160dp"
+                    android:id="@+id/iv_map"
+                    android:src="@drawable/location_map"
+                    android:scaleType="fitXY"/>
 
                 <LinearLayout
                     android:orientation="vertical"
@@ -84,6 +86,7 @@
                         android:textColor="@color/primaryTextColor"
                         android:text="@string/navigate"
                         app:cornerRadius="8dp"
+                        android:visibility="gone"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:id="@+id/navigate_btn"
                         android:layout_height="wrap_content"/>

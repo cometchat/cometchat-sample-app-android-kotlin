@@ -12,6 +12,9 @@ import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
+import com.cometchat.pro.uikit.ui_settings.enum.ConversationMode
+import com.cometchat.pro.uikit.ui_settings.enum.GroupMode
+import com.cometchat.pro.uikit.ui_settings.enum.UserMode
 
 class UIKitSettings(context: Context) {
 
@@ -124,8 +127,6 @@ class UIKitSettings(context: Context) {
         var groupCreation = true
         var emailReplies = true
         var hideDeletedMessages = true
-        var groupInMode = true
-        var userInMode = true
         var chatListMode = true
         var sendStickers = true
         var showReplyPrivately = false
@@ -134,6 +135,10 @@ class UIKitSettings(context: Context) {
         var phoneColor: Int = R.color.purple
         var urlColor: Int = R.color.dark_blue
 
+
+        var conversationInMode: ConversationMode = ConversationMode.ALL_CHATS
+        var groupInMode: GroupMode = GroupMode.ALL_GROUP
+        var userInMode: UserMode = UserMode.ALL_USER
 
 
         fun setAppID(appID: String) {

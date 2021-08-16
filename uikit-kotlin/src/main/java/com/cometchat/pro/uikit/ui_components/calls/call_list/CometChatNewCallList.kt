@@ -80,7 +80,7 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
         setContentView(R.layout.fragment_cometchat_userlist)
         title = findViewById(R.id.tv_title)
         val imageView: ImageView = ImageView(this)
-        imageView.setImageDrawable(resources.getDrawable(R.drawable.ic_close_24dp))
+        imageView.setImageDrawable(resources.getDrawable(R.drawable.ic_back))
         if (UIKitSettings.color != null) {
             window.statusBarColor = Color.parseColor(UIKitSettings.color)
             imageView.imageTintList = ColorStateList.valueOf(

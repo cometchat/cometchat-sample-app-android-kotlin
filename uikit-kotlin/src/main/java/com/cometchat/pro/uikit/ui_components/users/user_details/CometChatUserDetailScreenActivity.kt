@@ -35,6 +35,7 @@ import java.util.*
 
 class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     private var tvViewProfile: TextView?= null
+    private var tvAction: TextView?= null
     private var userAvatar: CometChatAvatar? = null
     private var userStatus: TextView? = null
     private var userName: TextView? = null
@@ -85,13 +86,14 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
 //        vidoeCallBtn = findViewById(R.id.video_callBtn_iv)
         addBtn = findViewById(R.id.btn_add)
         tvViewProfile = findViewById(R.id.tv_view_profile)
+        tvAction = findViewById(R.id.tv_action)
         tvSendMessage = findViewById(R.id.tv_send_message)
         toolbar = findViewById(R.id.user_detail_toolbar)
         divider1 = findViewById(R.id.divider_1)
         divider2 = findViewById(R.id.divider_2)
         divider3 = findViewById(R.id.divider_3)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        if (supportActionBar != null) supportActionBar?.setDisplayHomeAsUpEnabled(true)
         addBtn!!.typeface = fontUtils!!.getTypeFace(FontUtils.robotoRegular)
         blockUserLayout = findViewById(R.id.block_user_layout)
         tvBlockUser = findViewById(R.id.tv_blockUser)
@@ -108,7 +110,13 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
         checkDarkMode()
         Log.e(TAG, "initComponent: "+link.toString() )
         if (FeatureRestriction.isViewProfileEnabled()) {
-            if (link == null) tvViewProfile?.visibility = View.GONE else tvViewProfile?.visibility = View.VISIBLE
+            if (link == null) {
+                tvAction?.visibility = View.GONE
+                tvViewProfile?.visibility = View.GONE
+            } else {
+                tvAction?.visibility = View.VISIBLE
+                tvViewProfile?.visibility = View.VISIBLE
+            }
         }
 
         tvViewProfile?.setOnClickListener {
@@ -337,8 +345,9 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
             public override fun onSuccess(s: String?) {
                 if (tvBlockUser != null)
 //                    ErrorMessagesUtils.showCometChatErrorDialog(this@CometChatUserDetailScreenActivity, String.format(resources.getString(R.string.user_removed_from_group), userName!!.text.toString(), groupName), UIKitConstants.ErrorTypes.SUCCESS)
-                addBtn!!.text = String.format(resources.getString(R.string.add_in), groupName)
-                addBtn!!.visibility = View.VISIBLE
+                addBtn?.text = String.format(resources.getString(R.string.add_in), groupName)
+                addBtn?.visibility = View.VISIBLE
+                tvAction?.visibility = View.VISIBLE
                 isAlreadyAdded = false
             }
 

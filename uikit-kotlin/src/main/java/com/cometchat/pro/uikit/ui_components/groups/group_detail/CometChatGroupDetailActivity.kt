@@ -33,6 +33,7 @@ import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_components.groups.add_members.CometChatAddMembersActivity
 import com.cometchat.pro.uikit.ui_components.groups.admin_moderator_list.CometChatAdminModeratorListActivity
 import com.cometchat.pro.uikit.ui_components.groups.banned_members.CometChatBanMembersActivity
+import com.cometchat.pro.uikit.ui_components.groups.group_members.CometChatGroupMemberListActivity
 import com.cometchat.pro.uikit.ui_components.groups.group_members.GroupMemberAdapter
 import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.ui_components.shared.cometchatSharedMedia.CometChatSharedMedia
@@ -159,7 +160,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
         tvExit.typeface = fontUtils!!.getTypeFace(FontUtils.robotoMedium)
         tvAddMember.typeface = fontUtils!!.getTypeFace(FontUtils.robotoRegular)
         setSupportActionBar(toolbar)
-        if (supportActionBar != null) supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        if (supportActionBar != null) supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val linearLayoutManager = LinearLayoutManager(this)
         rvMemberList!!.layoutManager = linearLayoutManager
         //        rvMemberList.setNestedScrollingEnabled(false);
@@ -196,8 +197,12 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             }
         })
         tvExit.setOnClickListener { view: View? ->
-            createDialog(resources.getString(R.string.leave_group), resources.getString(R.string.leave_group_message),
-                    resources.getString(R.string.leave_group), resources.getString(R.string.cancel), R.drawable.ic_exit_to_app)
+            if (loggedInUser.uid == ownerId) {
+                showTransferOwnershipDialog()
+            } else {
+                createDialog(resources.getString(R.string.leave_group), resources.getString(R.string.leave_group_message),
+                        resources.getString(R.string.leave_group), resources.getString(R.string.cancel), R.drawable.ic_exit_to_app)
+            }
         }
 //        callBtn!!.setOnClickListener(View.OnClickListener { view: View? -> checkOnGoingCall(CometChatConstants.CALL_TYPE_AUDIO) })
 //        videoCallBtn!!.setOnClickListener(View.OnClickListener { view: View? -> checkOnGoingCall(CometChatConstants.CALL_TYPE_VIDEO) })
@@ -355,21 +360,45 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
      * @param drawableRes
      */
     private fun createDialog(title: String, message: String, positiveText: String, negativeText: String, drawableRes: Int) {
-        val alert_dialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
-                R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
-        alert_dialog.setTitle(title)
-        alert_dialog.setMessage(message)
-        alert_dialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
-            if (positiveText.equals(resources.getString(R.string.leave_group), ignoreCase = true)) leaveGroup() else if ((positiveText.equals(resources.getString(R.string.delete_group), ignoreCase = true)
-                            && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true))) deleteGroup()
+        Log.e(TAG, "createDialog: "+ownerId+ " logged in: "+loggedInUser.uid)
+        val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
+            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+        alertDialog.setTitle(title)
+        alertDialog.setMessage(message)
+        alertDialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
+            if (positiveText.equals(resources.getString(R.string.leave_group), ignoreCase = true))
+                leaveGroup()
+            else if ((positiveText.equals(resources.getString(R.string.delete_group), ignoreCase = true)
+                        && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true)))
+                deleteGroup()
         }
-        alert_dialog.setNegativeButton(negativeText, object : DialogInterface.OnClickListener {
+        alertDialog.setNegativeButton(negativeText, object : DialogInterface.OnClickListener {
             override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 dialogInterface.dismiss()
             }
         })
-        alert_dialog.create()
-        alert_dialog.show()
+        alertDialog.create()
+        alertDialog.show()
+    }
+
+
+    private fun showTransferOwnershipDialog() {
+        val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
+            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+//        alertDialog.setTitle(R.string.group_alert)
+        alertDialog.setMessage(R.string.transfer_ownership_message)
+        alertDialog.setPositiveButton(R.string.transfer, DialogInterface.OnClickListener { dialog, which ->
+            val intent = Intent(this@CometChatGroupDetailActivity, CometChatGroupMemberListActivity::class.java)
+            intent.putExtra(UIKitConstants.IntentStrings.GUID, guid)
+            intent.putExtra(UIKitConstants.IntentStrings.SHOW_MODERATORLIST, false)
+            intent.putExtra(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP, true)
+            finish()
+            startActivity(intent)
+        }).setNegativeButton(R.string.cancel, DialogInterface.OnClickListener { dialog, which ->
+            dialog.dismiss()
+        })
+        alertDialog.create()
+        alertDialog.show()
     }
 
     /**
@@ -384,9 +413,20 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN)) {
                 rlAddMemberView!!.visibility = View.VISIBLE
                 rlBanMembers!!.visibility = View.VISIBLE
+                rlModeratorView!!.visibility = View.VISIBLE
                 tvDelete!!.visibility = View.VISIBLE
             } else if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_MODERATOR)) {
+                rlAddMemberView!!.visibility = View.GONE
                 rlBanMembers!!.visibility = View.VISIBLE
+                rlModeratorView!!.visibility = View.VISIBLE
+                rlAdminListView!!.visibility = View.VISIBLE
+            } else {
+                dividerModerator!!.visibility = View.GONE
+                dividerAdmin!!.visibility = View.GONE
+                rlAdminListView!!.visibility = View.GONE
+                rlModeratorView!!.visibility = View.GONE
+                rlBanMembers!!.visibility = View.GONE
+                rlAddMemberView!!.visibility = View.GONE
             }
         }
         if (intent.hasExtra(UIKitConstants.IntentStrings.NAME)) {

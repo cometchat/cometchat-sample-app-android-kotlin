@@ -57,6 +57,8 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
                 bundle.putString(UIKitConstants.IntentStrings.UID, intent.getStringExtra(UIKitConstants.IntentStrings.UID))
                 bundle.putString(UIKitConstants.IntentStrings.STATUS, intent.getStringExtra(UIKitConstants.IntentStrings.STATUS))
                 bundle.putString(UIKitConstants.IntentStrings.LINK, intent.getStringExtra(UIKitConstants.IntentStrings.LINK))
+                bundle.putBoolean("isReply", intent.getBooleanExtra("isReply", false))
+                bundle.putString("baseMessageMetadata", intent.getStringExtra("baseMessageMetadata"))
             } else {
                 bundle.putString(UIKitConstants.IntentStrings.GUID, intent.getStringExtra(UIKitConstants.IntentStrings.GUID))
                 bundle.putString(UIKitConstants.IntentStrings.GROUP_OWNER, intent.getStringExtra(UIKitConstants.IntentStrings.GROUP_OWNER))
@@ -86,7 +88,7 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
     override fun onBackPressed() {
         super.onBackPressed()
-        startActivity(Intent(this, CometChatUI::class.java))
+//        startActivity(Intent(this, CometChatUI::class.java))
         finish()
     }
 

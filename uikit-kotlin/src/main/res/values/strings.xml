@@ -71,7 +71,7 @@
     <string name="user_added_to_group">%1$s is added to \"  %2$s \"</string>
     <string name="user_removed_from_group">%1$s is removed from \" %2$s \"</string>
     <string name="kicked_error">Group Member Kicked Failed</string>
-    <string name="leave_group_message">Would you like to leave from group ?</string>
+
     <string name="delete_group">Delete Group</string>
     <string name="delete_group_message">Delete the group</string>
     <string name="group_delete_error">Group Deletion Failed</string>
@@ -103,7 +103,9 @@
     <string name="enter_old_group_pwd">Enter Old Password</string>
     <string name="enter_new_password">Enter new password</string>
     <string name="group_alert">Group Alert</string>
-    <string name="transfer_ownership_message">You are group owner, Transfer group ownership to someone else before leaving the group.</string>
+    <string name="transfer">transfer</string>
+    <string name="leave_group_message">Are you sure you want to leave the group?</string>
+    <string name="transfer_ownership_message">You are the group owner, Please transfer ownership to a member before leaving the group.</string>
     <string name="make_owner">Make Owner</string>
     <string name="make_owner_question">Do you like to make %1$s as a Owner</string>
     <string name="user_is_owner">%1$s is now Owner</string>
@@ -361,6 +363,10 @@
 
     <string name="send_message_privately">Send Message Privately</string>
     <string name="view_profile">View Profile</string>
+    <string name="reply_privately">Reply Privately</string>
+    <string name="share_location_alert">Are you sure you want to share your location?</string>
+    <string name="select_user">Select User</string>
+    <string name="select_group">Select Group</string>
 
     <!--    ______________-->
 </resources>

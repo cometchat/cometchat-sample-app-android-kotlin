@@ -50,12 +50,14 @@ class UIKitConstants {
         const val GROUP_PASSWORD = "group_password"
         const val GROUP_TYPE = "group_type"
 
+        const val TRANSFER_OWNERSHIP: String = "transfer_ownership"
+
         const val MESSAGE_CATEGORY = "message_category"
         const val MESSAGE_TYPE = "message_type"
         const val TEXTMESSAGE = "text_message"
         const val SENTAT = "sent_at"
 
-        const val LOCATION = "LOCATION"
+        const val LOCATION = "location"
         const val CUSTOM_MESSAGE = "custom_message"
         const val LOCATION_LATITUDE = "latitude"
         const val LOCATION_LONGITUDE = "longitude"
@@ -64,7 +66,7 @@ class UIKitConstants {
         const val REPLY_COUNT = "reply_count"
         const val CONVERSATION_NAME = "conversation_name"
 
-        const val STICKERS = "Sticker"
+        const val STICKERS = "extension_sticker"
         const val REACTION_INFO = "reaction_info"
 
         const val WHITEBOARD = "extension_whiteboard"

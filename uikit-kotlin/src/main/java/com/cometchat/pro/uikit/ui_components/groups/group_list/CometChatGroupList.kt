@@ -29,6 +29,7 @@ import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.groups.create_group.CometChatCreateGroupActivity
 import com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroups
 import com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroupsAdapter
+import com.cometchat.pro.uikit.ui_components.users.user_list.CometChatUserList
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
@@ -36,6 +37,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+import com.cometchat.pro.uikit.ui_settings.enum.GroupMode
 import com.facebook.shimmer.ShimmerFrameLayout
 import java.util.*
 
@@ -50,6 +52,8 @@ import java.util.*
 
 */
 class CometChatGroupList constructor() : Fragment() {
+    private var isCreateGroupVisible: Boolean = true
+    private var isTitleVisible: Boolean = true
     private var rvGroups //Uses to display list of groups.
             : CometChatGroups? = null
     private var cometChatGroupsAdapter: CometChatGroupsAdapter? = null
@@ -67,8 +71,7 @@ class CometChatGroupList constructor() : Fragment() {
                                      savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_cometchat_group_list, container, false)
-        val title: TextView = view.findViewById(R.id.tv_title)
-        title.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
+
         rvGroups = view.findViewById(R.id.rv_group_list)
         noGroupLayout = view.findViewById(R.id.no_group_layout)
         etSearch = view.findViewById(R.id.search_bar)
@@ -76,6 +79,12 @@ class CometChatGroupList constructor() : Fragment() {
         conversationShimmer = view.findViewById(R.id.shimmer_layout)
         tvTitle = view.findViewById(R.id.tv_title)
         tvTitle?.typeface = FontUtils.getInstance(activity).getTypeFace(FontUtils.robotoMedium)
+
+        val fragment = fragmentManager?.findFragmentByTag("startChat")
+        if (fragment != null && fragment.isVisible) {
+            Log.e(TAG, "onCreateView: group "+ fragment.toString())
+            tvTitle?.visibility = View.GONE
+        }
 
         FeatureRestriction.isGroupSearchEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
@@ -89,9 +98,9 @@ class CometChatGroupList constructor() : Fragment() {
         ivCreateGroup?.imageTintList = ColorStateList.valueOf(Color.parseColor(UIKitSettings.color))
         if (FeatureRestriction.isGroupCreationEnabled()) ivCreateGroup?.visibility = View.VISIBLE else ivCreateGroup?.visibility = View.GONE
         if (Utils.isDarkMode(context!!)) {
-            title.setTextColor(resources.getColor(R.color.textColorWhite))
+            tvTitle?.setTextColor(resources.getColor(R.color.textColorWhite))
         } else {
-            title.setTextColor(resources.getColor(R.color.primaryTextColor))
+            tvTitle?.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
         ivCreateGroup?.setOnClickListener(View.OnClickListener { view1: View? ->
             val intent: Intent = Intent(context, CometChatCreateGroupActivity::class.java)
@@ -166,6 +175,13 @@ class CometChatGroupList constructor() : Fragment() {
     }
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (isTitleVisible)
+            tvTitle?.visibility = View.VISIBLE
+        else tvTitle?.visibility = View.GONE
+
+        if (isCreateGroupVisible)
+            ivCreateGroup?.visibility = View.VISIBLE
+        else ivCreateGroup?.visibility = View.GONE
     }
 
     /**
@@ -207,13 +223,13 @@ class CometChatGroupList constructor() : Fragment() {
             if (group.isJoined) {
                 resultList.add(group)
             }
-            if (UIKitSettings.groupListing.equals("public_groups", ignoreCase = true) &&
+            if (UIKitSettings.groupInMode == GroupMode.PUBLIC_GROUP &&
                     group.groupType.equals(CometChatConstants.GROUP_TYPE_PUBLIC, ignoreCase = true)) {
                 resultList.add(group)
-            } else if (UIKitSettings.groupListing.equals("password_protected_groups", ignoreCase = true) &&
+            } else if (UIKitSettings.groupInMode == GroupMode.PASSWORD_GROUP &&
                     group.groupType.equals(CometChatConstants.GROUP_TYPE_PASSWORD, ignoreCase = true)) {
                 resultList.add(group)
-            }  else if (UIKitSettings.groupListing == "public_and_password_protected_groups") {
+            }  else if (UIKitSettings.groupInMode == GroupMode.ALL_GROUP) {
                 resultList.add(group)
             }
         }
@@ -246,8 +262,6 @@ class CometChatGroupList constructor() : Fragment() {
     private fun stopHideShimmer() {
         conversationShimmer?.stopShimmer()
         conversationShimmer?.visibility = View.GONE
-        tvTitle?.visibility = View.VISIBLE
-        clearSearch?.visibility = View.VISIBLE
     }
 
     public override fun onStart() {
@@ -263,6 +277,14 @@ class CometChatGroupList constructor() : Fragment() {
         groupsRequest = null
         cometChatGroupsAdapter = null
         fetchGroup()
+    }
+
+    fun setTitleVisible(isVisible: Boolean) {
+        isTitleVisible = isVisible
+    }
+
+    fun setGroupCreateVisible(isVisible: Boolean) {
+        isCreateGroupVisible = isVisible
     }
 
     companion object {
