@@ -26,11 +26,11 @@
     <string name="admin">Admin</string>
     <string name="moderator">Moderador</string>
     <string name="participant">Participante</string>
-        <array name="groupType">
-            <item>Público</item>
-            <item>Privado</item>
-            <item>Protegido con contraseña</item>
-        </array>
+    <array name="groupType">
+        <item>Público</item>
+        <item>Privado</item>
+        <item>Protegido con contraseña</item>
+    </array>
     <string name="privacy_and_security">Privacidad y Seguridad</string>
     <string name="privacy">Privacidad</string>
     <string name="blocked_users">Usuarios bloqueados</string>

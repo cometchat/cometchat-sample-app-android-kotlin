@@ -138,7 +138,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
     private var messageShimmer: ShimmerFrameLayout? = null
 
     private var locationManager: LocationManager? = null
-    private val locationListener: LocationListener? = null
+    private lateinit var locationListener: LocationListener
     private val location: Location? = null
     private var LATITUDE = 0.0
     private var LONGITUDE = 0.0
@@ -452,6 +452,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
 //        composeBox?.hideGroupCallOption(true)
         composeBox?.hideRecordOption(true)
         composeBox?.hideSendButton(false)
+//        composeBox?.ivMic?.visibility = View.GONE
         FeatureRestriction.isOneOnOneChatEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
                 if (p0) composeBox?.visibility = View.VISIBLE else composeBox?.visibility = View.GONE
@@ -915,8 +916,8 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         locationManager = Objects.requireNonNull(context!!).getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if (Utils.hasPermissions(context, *arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))) {
             try {
-                locationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), locationListener)
-                locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), locationListener)
+                locationListener.let { locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), it) }
+                locationListener.let { locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), it) }
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
             }

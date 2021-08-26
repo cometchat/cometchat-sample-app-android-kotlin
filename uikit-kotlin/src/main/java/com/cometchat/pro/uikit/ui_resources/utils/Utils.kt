@@ -13,8 +13,11 @@ import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.media.AudioManager
 import android.media.RingtoneManager
@@ -28,9 +31,14 @@ import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -402,7 +410,7 @@ public class Utils {
                     return cursor.getString(column_index)
                 }
             } catch (e: java.lang.Exception) {
-                Log.e(TAG, e.message)
+                e.message?.let { Log.e(TAG, it) }
             } finally {
                 cursor?.close()
             }
@@ -543,8 +551,8 @@ public class Utils {
             return t1[2]
         }
 
-        fun getFileName(context: Context, uri: Uri): String? {
-            val mimeType = context.contentResolver.getType(uri)
+        fun getFileName(context: Context?, uri: Uri): String? {
+            val mimeType = context?.contentResolver?.getType(uri)
             var filename: String? = null
             if (mimeType == null && context != null) {
                 val path = getPath(context, uri)
@@ -555,7 +563,7 @@ public class Utils {
                     file.name
                 }
             } else {
-                val returnCursor = context.contentResolver.query(uri, null,
+                val returnCursor = context?.contentResolver?.query(uri, null,
                         null, null, null)
                 if (returnCursor != null) {
                     val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -784,7 +792,7 @@ public class Utils {
                 }
 
                 override fun onError(e: CometChatException) {
-                    Log.e("onError: ", e.message)
+                    e.message?.let { Log.e("onError: ", it) }
                     ErrorMessagesUtils.cometChatErrorMessage(activity, e.code)
                 }
 
@@ -867,6 +875,67 @@ public class Utils {
             val entity = sender.getJSONObject("entity")
             val name = entity.getString("name")
             return name
+        }
+
+        fun drawableToBitmap(drawable: Drawable?): Bitmap {
+            if (drawable is BitmapDrawable) {
+                return drawable.bitmap
+            }
+
+            val bitmap = Bitmap.createBitmap(
+                drawable!!.intrinsicWidth,
+                drawable!!.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable!!.setBounds(0, 0, canvas.width, canvas.height)
+            drawable!!.draw(canvas)
+
+            return bitmap
+        }
+
+
+         fun showPermissionAlert(
+             context: Context,
+            title: String,
+            message: String,
+            ok: String,
+            cancel: String,
+            function: () -> Unit
+        ) {
+            val mDialog = Dialog(context)
+            mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            mDialog.setContentView(R.layout.dialog_permission_alert)
+            mDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            val mTitleTv = mDialog.findViewById<TextView>(R.id.tv_alert_title)
+            mTitleTv.text = title
+
+            val mMessageTv = mDialog.findViewById<TextView>(R.id.tv_alert_message)
+            mMessageTv.text = message
+
+            val mNoBtn = mDialog.findViewById<Button>(R.id.btn_deny)
+            mNoBtn.text = cancel
+
+            val mYesBtn = mDialog.findViewById<Button>(R.id.btn_allow)
+            mYesBtn.text = ok
+
+            mYesBtn.setOnClickListener {
+                function.invoke()
+                mDialog.dismiss()
+            }
+
+            mNoBtn.setOnClickListener { mDialog.dismiss() }
+
+            mDialog.setCancelable(true)
+            mDialog.show()
+            val metrics = context.resources.displayMetrics
+            val width = metrics.widthPixels
+            val height = metrics.heightPixels
+            mDialog.window!!.setLayout(
+                width,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
         }
 
     }

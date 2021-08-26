@@ -2347,7 +2347,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
-            viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage.attachment.fileUrl, context) }
+            if(baseMessage.attachment!=null)
+                viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage?.attachment?.fileUrl, context) }
             viewHolder.view.reactionsLayout.visibility = View.GONE
             setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         }
@@ -2664,8 +2665,6 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-                Log.e(TAG, "setTextData: left  raw "+baseMessage.rawMessage)
-                Log.e(TAG, "setTextData: left metadata "+baseMessage.metadata)
                 if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
                         var metaData = JSONObject()
@@ -2829,8 +2828,6 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 viewHolder.view.root.setTag(R.string.message, baseMessage)
 
-//                Log.e(TAG, "setTextData: right raw "+baseMessage.rawMessage)
-                Log.e(TAG, "setTextData: right metadata "+baseMessage.metadata)
                 if ((baseMessage.metadata != null && baseMessage.metadata.has("reply-message")) || (baseMessage.metadata != null && baseMessage.metadata.has("replyToMessage"))) {
                     try {
                         var metaData = JSONObject()
@@ -3143,7 +3140,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 }
                                 viewHolder.view.message.text = messageStr
                             } catch (e: Exception) {
-                                Log.e("setLinkData: ", e.message)
+                                e.message?.let { Log.e("setLinkData: ", it) }
                             }
                         }
                     }
@@ -3257,7 +3254,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 }
                                 viewHolder.view.message.text = messageStr
                             } catch (e: Exception) {
-                                Log.e("setLinkData: ", e.message)
+                                e.message?.let { Log.e("setLinkData: ", it) }
                             }
                         }
                     }

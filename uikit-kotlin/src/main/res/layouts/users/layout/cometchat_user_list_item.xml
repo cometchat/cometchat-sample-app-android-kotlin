@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
-
     <RelativeLayout
         android:clickable="true"
         android:layout_width="match_parent"

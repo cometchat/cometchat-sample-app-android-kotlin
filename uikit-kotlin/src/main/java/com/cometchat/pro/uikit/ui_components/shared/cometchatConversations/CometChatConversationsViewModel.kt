@@ -66,4 +66,11 @@ class CometChatConversationsViewModel(context: Context?, cometChatConversation: 
     fun size(): Int {
         return cometChatConversationsAdapter!!.itemCount
     }
+
+    fun getConversation(pos: Int): Conversation? {
+        var conversation: Conversation? = null
+        if (cometChatConversationsAdapter != null)
+            conversation = cometChatConversationsAdapter?.getItemAtPosition(pos)
+        return conversation
+    }
 }

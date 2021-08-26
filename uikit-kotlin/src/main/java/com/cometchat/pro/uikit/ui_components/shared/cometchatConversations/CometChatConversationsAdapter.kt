@@ -133,7 +133,6 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
                 conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status)
             }
             else conversationViewHolder.conversationListRowBinding.userStatus.visibility = View.GONE
-
         } else {
             name = (conversation.conversationWith as Group).name
             avatar = (conversation.conversationWith as Group).icon
@@ -350,6 +349,10 @@ class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<Co
                 notifyDataSetChanged()
             }
         }
+    }
+
+    fun getItemAtPosition(position: Int): Conversation? {
+        return filterConversationList?.get(position)
     }
 
     inner class ConversationViewHolder(var conversationListRowBinding: CometchatConversationListItemBinding) : RecyclerView.ViewHolder(conversationListRowBinding.root)

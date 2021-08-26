@@ -167,7 +167,7 @@ class AllCall : Fragment() {
 
                 override fun onError(e: CometChatException) {
                     stopHideShimmer()
-                    Log.e("onError: ", e.message)
+                    e.message?.let { Log.e("onError: ", it) }
                     if (rvCallList != null)
                         ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
                 }

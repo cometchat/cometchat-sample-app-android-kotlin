@@ -131,7 +131,7 @@ class CallListViewFragment : Fragment() {
                 }
 
                 override fun onError(e: CometChatException) {
-                    Log.e("onError: ", e.message)
+                    e.message?.let { Log.e("onError: ", it) }
                     if (rvCallList != null) Snackbar.make(rvCallList!!, com.cometchat.pro.uikit.R.string.call_list_error, Snackbar.LENGTH_LONG).show()
                 }
             })

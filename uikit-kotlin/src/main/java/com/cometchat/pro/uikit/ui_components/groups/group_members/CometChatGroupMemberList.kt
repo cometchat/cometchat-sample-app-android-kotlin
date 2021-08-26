@@ -27,15 +27,14 @@ import com.cometchat.pro.core.GroupMembersRequest.GroupMembersRequestBuilder
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.models.GroupMember
 import com.cometchat.pro.uikit.R
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
-import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
 
 /**
@@ -61,8 +60,8 @@ class CometChatGroupMemberList : Fragment() {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
             guid = arguments?.getString(UIKitConstants.IntentStrings.GUID).toString()
-            showModerators = arguments!!.getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
-            transferOwnership = arguments!!.getBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP)
+            showModerators = requireArguments().getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
+            transferOwnership = requireArguments().getBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP)
         }
     }
 

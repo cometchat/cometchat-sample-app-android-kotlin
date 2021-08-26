@@ -14,11 +14,11 @@ import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.models.BaseMessage
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.MessageActionCloseListener
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.OnMessageLongClick
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
+
 
 /**
  *
@@ -74,7 +74,8 @@ class CometChatMessageListActivity : AppCompatActivity(), MessageAdapter.OnMessa
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode + " " + data + " " + data?.data)
+        val fragment = supportFragmentManager.findFragmentById(R.id.ChatFragment)
+        fragment?.onActivityResult(requestCode,resultCode,data)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

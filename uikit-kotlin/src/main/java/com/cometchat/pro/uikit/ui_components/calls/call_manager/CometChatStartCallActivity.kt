@@ -49,15 +49,15 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
         CometChat.startCall(callSettings, object : CometChat.OngoingCallListener {
             override fun onUserJoined(p0: User?) {
-                Log.e("onUserJoined: ", p0?.uid)
+                p0?.uid?.let { Log.e("onUserJoined: ", it) }
             }
 
             override fun onUserLeft(p0: User?) {
-                Log.e("onUserLeft: ", p0?.uid)
+                p0?.uid?.let { Log.e("onUserLeft: ", it) }
             }
 
             override fun onError(p0: CometChatException) {
-                Log.e("onstartcallError: ", p0?.message)
+                p0.message?.let { Log.e("onstartcallError: ", it) }
                 ErrorMessagesUtils.cometChatErrorMessage(this@CometChatStartCallActivity, p0.code)
             }
 

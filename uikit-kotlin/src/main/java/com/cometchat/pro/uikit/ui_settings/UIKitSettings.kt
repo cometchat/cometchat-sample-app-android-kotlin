@@ -123,7 +123,7 @@ class UIKitSettings(context: Context) {
         var callNotifications = true
         var allowPromoteDemoteMembers = true
         var allowAddMembers = true
-        var joinLeaveNotifications = false
+        var joinLeaveNotifications = true
         var groupCreation = true
         var emailReplies = true
         var hideDeletedMessages = true
@@ -139,6 +139,8 @@ class UIKitSettings(context: Context) {
         var conversationInMode: ConversationMode = ConversationMode.ALL_CHATS
         var groupInMode: GroupMode = GroupMode.ALL_GROUP
         var userInMode: UserMode = UserMode.ALL_USER
+
+        var deleteConversation = true
 
 
         fun setAppID(appID: String) {
@@ -423,6 +425,7 @@ class UIKitSettings(context: Context) {
         fun enableMessageTranslation(enableMessageTranslation: Boolean) {
             this.messageTranslation = enableMessageTranslation
         }
+
 
     }
     fun addConnectionListener(tag: String) {

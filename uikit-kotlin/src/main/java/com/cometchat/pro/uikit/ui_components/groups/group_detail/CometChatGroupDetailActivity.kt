@@ -50,7 +50,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import okhttp3.internal.Util
 import java.util.*
 
 class CometChatGroupDetailActivity() : AppCompatActivity() {
@@ -215,7 +214,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
         //
         if (!FeatureRestriction.isJoinLeaveGroupsEnabled()) tvExit.visibility = View.GONE
 
-        if (!FeatureRestriction.isGroupDeletionEnabled()) tvDelete!!.visibility = View.GONE
+        if (!FeatureRestriction.isGroupDeletionEnabled()) tvDelete?.visibility = View.GONE
 
         if (!FeatureRestriction.isSharedMediaEnabled()) {
             sharedMediaLayout?.visibility = View.GONE
@@ -381,10 +380,9 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
         alertDialog.show()
     }
 
-
     private fun showTransferOwnershipDialog() {
         val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
-            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+                R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
 //        alertDialog.setTitle(R.string.group_alert)
         alertDialog.setMessage(R.string.transfer_ownership_message)
         alertDialog.setPositiveButton(R.string.transfer, DialogInterface.OnClickListener { dialog, which ->
