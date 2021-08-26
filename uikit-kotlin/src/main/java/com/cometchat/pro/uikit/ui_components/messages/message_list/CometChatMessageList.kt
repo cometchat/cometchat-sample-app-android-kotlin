@@ -1,10 +1,14 @@
 package com.cometchat.pro.uikit.ui_components.messages.message_list
 
 import android.Manifest
+import android.Manifest.permission
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.TargetApi
+import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.*
@@ -20,6 +24,7 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
 import android.provider.Settings
@@ -28,9 +33,11 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.InputContentInfoCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -72,7 +79,10 @@ import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.listener.S
 import com.cometchat.pro.uikit.ui_components.shared.cometchatStickers.model.Sticker
 import com.cometchat.pro.uikit.ui_components.users.user_details.CometChatUserDetailScreenActivity
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
-import com.cometchat.pro.uikit.ui_resources.utils.*
+import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
+import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
+import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils
+import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.keyboard_utils.KeyBoardUtils
 import com.cometchat.pro.uikit.ui_resources.utils.keyboard_utils.KeyboardVisibilityListener
@@ -90,6 +100,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.util.*
+
 
 /**
  * Purpose - CometChatMessageScreen class is a fragment used to display list of messages and perform certain action on click of message.
@@ -255,17 +266,15 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             name = arguments?.getString(UIKitConstants.IntentStrings.NAME)
             type = arguments?.getString(UIKitConstants.IntentStrings.TYPE).toString()
             link = arguments?.getString(UIKitConstants.IntentStrings.LINK)
-            isReplyPrivately = arguments!!.getBoolean("isReply", false)
-            if ((arguments!!.getString("baseMessageMetadata") != null)) {
-                val json = arguments!!.getString("baseMessageMetadata")
+            isReplyPrivately = requireArguments().getBoolean("isReply", false)
+            if ((requireArguments().getString("baseMessageMetadata") != null)) {
+                val json = requireArguments().getString("baseMessageMetadata")
                 replyMessageJson = JSONObject(json!!)
             }
 
-            Log.e(TAG, "handleArguments: isReply "+isReply)
-//            if (isReply) replyMessage()
             if (type != null && type == CometChatConstants.RECEIVER_TYPE_GROUP) {
                 Id = arguments?.getString(UIKitConstants.IntentStrings.GUID).toString()
-                memberCount = arguments!!.getInt(UIKitConstants.IntentStrings.MEMBER_COUNT)
+                memberCount = requireArguments().getInt(UIKitConstants.IntentStrings.MEMBER_COUNT)
                 groupDesc = arguments?.getString(UIKitConstants.IntentStrings.GROUP_DESC)
                 groupPassword = arguments?.getString(UIKitConstants.IntentStrings.GROUP_PASSWORD)
                 groupType = arguments?.getString(UIKitConstants.IntentStrings.GROUP_TYPE)
@@ -276,12 +285,13 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         vw = inflater.inflate(R.layout.fragment_cometchat_messagelist, container, false)
-        initViewComponent(vw)
+
         return vw
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initViewComponent(view)
         if (isReplyPrivately && replyMessageJson != null) {
             if (replyMessageJson.has("category")) {
                 baseMessage = CometChatHelper.processMessage(replyMessageJson)
@@ -301,11 +311,11 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         setHasOptionsMenu(true)
         if (cometChatMessageActions != null) cometChatMessageActions?.dismiss()
 
-        composeBox = view!!.findViewById(R.id.message_box)
+        composeBox = requireView().findViewById(R.id.message_box)
 //        if (type == CometChatConstants.RECEIVER_TYPE_USER)
 //            composeBox?.isStartVideoCall = false
-        liveReactionLayout = view.findViewById(R.id.live_reactions_layout)
-        composeBox!!.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
+        liveReactionLayout = view?.findViewById(R.id.live_reactions_layout)
+        composeBox?.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
             override fun onClick(var1: View?) {
                 liveReactionLayout?.alpha = 0.1f
                 sendLiveReaction()
@@ -387,15 +397,15 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 //        tvDeleteMessage!!.setOnClickListener(this)
 //        tvForwardMessage = view.findViewById(R.id.forward_message)
 //        tvForwardMessage!!.setOnClickListener(this)
-        editMessageLayout = view.findViewById(R.id.editMessageLayout)
-        tvMessageTitle = view.findViewById(R.id.tv_message_layout_title)
-        tvMessageSubTitle = view.findViewById(R.id.tv_message_layout_subtitle)
-        val ivMessageClose = view.findViewById<ImageView>(R.id.iv_message_close)
+        editMessageLayout = view?.findViewById(R.id.editMessageLayout)
+        tvMessageTitle = view?.findViewById(R.id.tv_message_layout_title)
+        tvMessageSubTitle = view?.findViewById(R.id.tv_message_layout_subtitle)
+        val ivMessageClose = view?.findViewById<ImageView>(R.id.iv_message_close)
         ivMessageClose?.setOnClickListener(this)
 
-        stickersView = view.findViewById(R.id.stickersView)
-        stickerLayout = view.findViewById(R.id.sticker_layout)
-        closeStickerView = view.findViewById(R.id.close_sticker_layout)
+        stickersView = view?.findViewById(R.id.stickersView)
+        stickerLayout = view?.findViewById(R.id.sticker_layout)
+        closeStickerView = view?.findViewById(R.id.close_sticker_layout)
 
         closeStickerView?.setOnClickListener(View.OnClickListener { stickerLayout?.visibility = View.GONE })
 
@@ -413,15 +423,15 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
         })
 
-        replyMessageLayout = view.findViewById(R.id.replyMessageLayout)
-        replyTitle = view.findViewById(R.id.tv_reply_layout_title)
-        replyMessage = view.findViewById(R.id.tv_reply_layout_subtitle)
-        replyMedia = view.findViewById(R.id.iv_reply_media)
-        replyClose = view.findViewById(R.id.iv_reply_close)
+        replyMessageLayout = view?.findViewById(R.id.replyMessageLayout)
+        replyTitle = view?.findViewById(R.id.tv_reply_layout_title)
+        replyMessage = view?.findViewById(R.id.tv_reply_layout_subtitle)
+        replyMedia = view?.findViewById(R.id.iv_reply_media)
+        replyClose = view?.findViewById(R.id.iv_reply_close)
         replyClose?.setOnClickListener(this)
 
-        ivAudioCallBtn = view.findViewById(R.id.iv_audio_call_btn)
-        ivVideoCallBtn = view.findViewById(R.id.iv_video_call_btn)
+        ivAudioCallBtn = view?.findViewById(R.id.iv_audio_call_btn)
+        ivVideoCallBtn = view?.findViewById(R.id.iv_video_call_btn)
 
         FeatureRestriction.isOneOnOneAudioCallEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
@@ -437,13 +447,13 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         })
 
 
-        rvChatListView = view.findViewById(R.id.rv_message_list)
-        val unblockUserBtn: MaterialButton = view.findViewById(R.id.btn_unblock_user)
-        unblockUserBtn.setOnClickListener(this)
-        blockedUserName = view.findViewById(R.id.tv_blocked_user_name)
-        blockUserLayout = view.findViewById(R.id.blocked_user_layout)
-        tvName = view.findViewById(R.id.tv_name)
-        tvStatus = view.findViewById(R.id.tv_status)
+        rvChatListView = view?.findViewById(R.id.rv_message_list)
+        val unblockUserBtn: MaterialButton? = view?.findViewById(R.id.btn_unblock_user)
+        unblockUserBtn?.setOnClickListener(this)
+        blockedUserName = view?.findViewById(R.id.tv_blocked_user_name)
+        blockUserLayout = view?.findViewById(R.id.blocked_user_layout)
+        tvName = view?.findViewById(R.id.tv_name)
+        tvStatus = view?.findViewById(R.id.tv_status)
         FeatureRestriction.isUserPresenceEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
                 if (!p0)
@@ -451,28 +461,28 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                         tvStatus?.visibility = View.GONE
             }
         })
-        userAvatar = view.findViewById(R.id.iv_chat_avatar)
-        toolbar = view.findViewById(R.id.chatList_toolbar)
+        userAvatar = view?.findViewById(R.id.iv_chat_avatar)
+        toolbar = view?.findViewById(R.id.chatList_toolbar)
         toolbar?.setOnClickListener(this)
-        ivUserInfo = view.findViewById(R.id.iv_user_info)
+        ivUserInfo = view?.findViewById(R.id.iv_user_info)
         ivUserInfo?.setOnClickListener(this)
-        ivBackArrow = view.findViewById(R.id.iv_back_arrow)
+        ivBackArrow = view?.findViewById(R.id.iv_back_arrow)
         ivBackArrow?.setOnClickListener(this)
 
 
-        userAvatar = view.findViewById(R.id.iv_chat_avatar)
-        toolbar = view.findViewById(R.id.chatList_toolbar)
+        userAvatar = view?.findViewById(R.id.iv_chat_avatar)
+        toolbar = view?.findViewById(R.id.chatList_toolbar)
         toolbar?.setOnClickListener(this)
         linearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         tvName?.typeface = fontUtils?.getTypeFace(FontUtils.robotoMedium)
         tvName?.text = name
         setAvatar()
 
-//        barVisualizer = view.findViewById(R.id.barVisualizer);
+//        barVisualizer = view?.findViewById(R.id.barVisualizer);
         rvChatListView!!.layoutManager = linearLayoutManager
 //        (activity as AppCompatActivity?)!!.setSupportActionBar(toolbar)
 //        (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        if (Utils.isDarkMode(context!!)) {
+        if (Utils.isDarkMode(requireContext())) {
             toolbar?.setBackgroundColor(resources.getColor(R.color.grey))
             editMessageLayout?.background = resources.getDrawable(R.drawable.left_border_dark)
             composeBox?.setBackgroundColor(resources.getColor(R.color.darkModeBackground))
@@ -489,7 +499,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 //            rlMessageAction!!.setBackgroundColor(resources.getColor(R.color.textColorWhite))
             tvName?.setTextColor(resources.getColor(R.color.primaryTextColor))
         }
-        KeyBoardUtils.setKeyboardVisibilityListener(activity!!, rvChatListView?.parent as View, object : KeyboardVisibilityListener {
+        KeyBoardUtils.setKeyboardVisibilityListener(requireActivity(), rvChatListView?.parent as View, object : KeyboardVisibilityListener {
             override fun onKeyboardVisibilityChanged(keyboardVisible: Boolean) {
                 if (keyboardVisible) {
                     scrollToBottom()
@@ -544,9 +554,9 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         })
 
         //Check Ongoing Call
-        onGoingCallView = view.findViewById(R.id.ongoing_call_view)
-        onGoingCallClose = view.findViewById(R.id.close_ongoing_view)
-        onGoingCallTxt = view.findViewById(R.id.ongoing_call)
+        onGoingCallView = view?.findViewById(R.id.ongoing_call_view)
+        onGoingCallClose = view?.findViewById(R.id.close_ongoing_view)
+        onGoingCallTxt = view?.findViewById(R.id.ongoing_call)
         checkOnGoingCall()
         if (isOngoingCall) {
             ivAudioCallBtn?.isEnabled = false
@@ -560,13 +570,13 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         } else ivAudioCallBtn?.visibility = View.VISIBLE
         ivAudioCallBtn?.setOnClickListener {
             if (type == CometChatConstants.RECEIVER_TYPE_USER) {
-                Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_AUDIO)
+                Utils.initiatecall(requireContext(), Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_AUDIO)
             }
 //            else Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_GROUP, CometChatConstants.CALL_TYPE_AUDIO)
         }
         ivVideoCallBtn?.setOnClickListener {
             if (type == CometChatConstants.RECEIVER_TYPE_USER) {
-                Utils.initiatecall(context!!, Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_VIDEO)
+                Utils.initiatecall(requireContext(), Id, CometChatConstants.RECEIVER_TYPE_USER, CometChatConstants.CALL_TYPE_VIDEO)
             }
             else {
                 val body = JSONObject()
@@ -638,7 +648,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             if (onGoingCallTxt != null) {
                 onGoingCallTxt?.setOnClickListener {
                     onGoingCallView?.visibility = View.GONE
-                    Utils.joinOnGoingCall(context!!)
+                    Utils.joinOnGoingCall(requireContext())
                 }
             }
             if (onGoingCallClose != null) {
@@ -657,10 +667,6 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     private fun setComposeBoxListener() {
         composeBox?.setComposeBoxListener(object : ComposeActionListener() {
             override fun onEditTextMediaSelected(inputContentInfo: InputContentInfoCompat?) {
-                Log.e(TAG, """
-     onEditTextMediaSelected: Path=${inputContentInfo?.linkUri?.path}
-     Host=${inputContentInfo?.linkUri?.fragment}
-     """.trimIndent())
                 val messageType = inputContentInfo?.linkUri.toString().substring(inputContentInfo?.linkUri.toString().lastIndexOf('.'))
                 val mediaMessage = MediaMessage(Id, null, CometChatConstants.MESSAGE_TYPE_IMAGE, type)
                 val attachment = Attachment()
@@ -704,34 +710,77 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
 
             override fun onAudioActionClicked() {
-                if (Utils.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    startActivityForResult(MediaUtils.openAudio(activity!!), UIKitConstants.RequestCode.AUDIO)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    audioPermission.launch(permission.WRITE_EXTERNAL_STORAGE)
                 } else {
-                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), UIKitConstants.RequestCode.AUDIO)
+                    if (Utils.hasPermissions(context,WRITE_EXTERNAL_STORAGE)) {
+                        (context as Activity).startActivityForResult(
+                            MediaUtils.openAudio(activity!!),
+                            UIKitConstants.RequestCode.AUDIO
+                        )
+                    } else {
+                        requestPermissions(
+                            arrayOf(WRITE_EXTERNAL_STORAGE),
+                            UIKitConstants.RequestCode.AUDIO
+                        )
+                    }
                 }
             }
 
             override fun onCameraActionClicked() {
-                if (Utils.hasPermissions(context, *CAMERA_PERMISSION)) {
-                    startActivityForResult(MediaUtils.openCamera(context!!), UIKitConstants.RequestCode.CAMERA)
-                } else {
-                    requestPermissions(CAMERA_PERMISSION, UIKitConstants.RequestCode.CAMERA)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    cameraPermission.launch(Manifest.permission.CAMERA)
+                else {
+                    if (Utils.hasPermissions(context, *CAMERA_PERMISSION)) {
+                        (context as Activity).startActivityForResult(MediaUtils.openCamera(context!!), UIKitConstants.RequestCode.CAMERA)
+                    } else {
+                        requestPermissions(CAMERA_PERMISSION, UIKitConstants.RequestCode.CAMERA)
+                    }
                 }
             }
 
             override fun onGalleryActionClicked() {
-                if (Utils.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    startActivityForResult(MediaUtils.openGallery(activity!!), UIKitConstants.RequestCode.GALLERY)
-                } else {
-                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), UIKitConstants.RequestCode.GALLERY)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    galleryPermission.launch(WRITE_EXTERNAL_STORAGE)
+                }
+                else {
+                    if (Utils.hasPermissions(context, WRITE_EXTERNAL_STORAGE)) {
+                        startActivityForResult(
+                            MediaUtils.openGallery(activity!!),
+                            UIKitConstants.RequestCode.GALLERY
+                        )
+                    } else {
+                        requestPermissions(
+                            arrayOf(WRITE_EXTERNAL_STORAGE),
+                            UIKitConstants.RequestCode.GALLERY
+                        )
+                    }
                 }
             }
 
             override fun onFileActionClicked() {
-                if (Utils.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    startActivityForResult(MediaUtils.getFileIntent(UIKitConstants.IntentStrings.EXTRA_MIME_DOC), UIKitConstants.RequestCode.FILE)
-                } else {
-                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), UIKitConstants.RequestCode.FILE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (!checkPermission()) {
+                        requestFilePermission()
+                    } else {
+                        (context as Activity).startActivityForResult(
+                            MediaUtils.getFileIntent(
+                                UIKitConstants.IntentStrings.EXTRA_MIME_DOC
+                            ), UIKitConstants.RequestCode.FILE
+                        )
+                    }
+                }else {
+                    if (Utils.hasPermissions(context, WRITE_EXTERNAL_STORAGE)) {
+                        (context as Activity).startActivityForResult(
+                            MediaUtils.getFileIntent(UIKitConstants.IntentStrings.EXTRA_MIME_DOC),
+                            UIKitConstants.RequestCode.FILE
+                        )
+                    } else {
+                        requestPermissions(
+                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                            UIKitConstants.RequestCode.FILE
+                        )
+                    }
                 }
             }
 
@@ -757,14 +806,15 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
             override fun onLocationActionClicked() {
                 if (Utils.hasPermissions(context, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                    initLocation()
-                    //locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
-                    val provider: Boolean = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                    if (!provider) {
-                        turnOnLocation()
-                    } else {
-                        getLocation()
-                    }
+                        initLocation()
+                        //locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
+                        val provider: Boolean =
+                            locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                        if (!provider) {
+                            turnOnLocation()
+                        } else {
+                            getLocation()
+                        }
                 } else {
                     requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), UIKitConstants.RequestCode.LOCATION)
                 }
@@ -834,8 +884,273 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         })
     }
 
+//    private fun registerGalleryLauncher() : File {
+//        val galleryLauncher =
+//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//                if (result.resultCode == Activity.RESULT_OK) {
+//                    val data: Intent? = result.data
+//                    if (data == null) {
+//                        return null
+//                    }
+//                    val uri = data?.data
+//                    var imageLocalPath = File(FileUtils.getPathReal(requireActivity(), uri!!))
+//
+//                    file = imageLocalPath.absoluteFile
+//
+//                }
+//            }
+//    }
+
+    private fun checkPermission(): Boolean {
+       return Environment.isExternalStorageManager()
+
+        //  else {
+//            if (Utils.hasPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+//                startActivityForResult(
+//                    MediaUtils.openGallery(requireActivity()),
+//                    UIKitConstants.RequestCode.GALLERY
+//                )
+//            } else {
+//                requestPermissions(
+//                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+//                    UIKitConstants.RequestCode.GALLERY
+//                )
+//            }
+//        }
+//        return false
+    }
+
+    @TargetApi(30)
+    private val cameraPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            when {
+                granted -> {
+//                        Toast.makeText(context, "Permission granted!", Toast.LENGTH_SHORT).show()
+                    (context as Activity).startActivityForResult(MediaUtils.openCamera(requireActivity()), UIKitConstants.RequestCode.CAMERA)
+                }
+                else -> {
+                    requestCameraPermission()
+                }
+            }
+        }
+
+    @TargetApi(30)
+    private val galleryPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            when {
+                granted -> {
+                        Toast.makeText(context, "Permission granted!", Toast.LENGTH_SHORT).show()
+                    (context as Activity).startActivityForResult(MediaUtils.openGallery(requireActivity()),
+                        UIKitConstants.RequestCode.GALLERY)
+                }
+                else -> {
+                    Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
+                    requestGalleryPermission()
+                }
+            }
+        }
+    @TargetApi(30)
+    private val audioPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            when {
+                granted -> {
+                    Toast.makeText(context, "Permission granted!", Toast.LENGTH_SHORT).show()
+                    (context as Activity).startActivityForResult(MediaUtils.openAudio(requireActivity()),
+                        UIKitConstants.RequestCode.AUDIO)
+                }
+                else -> {
+                    Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
+                    requestGalleryPermission()
+                }
+            }
+        }
+
+    private fun requestCameraPermission() {
+
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                (context as Activity).startActivityForResult(MediaUtils.openCamera(requireActivity()), UIKitConstants.RequestCode.CAMERA)
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.camera_permission),
+                        getString(R.string.camera_permission_denied),
+                        getString(R.string.deny),
+                        getString(R.string.allow)
+                    ) { cameraPermission.launch(Manifest.permission.CAMERA) }
+                }
+            }
+            else -> {
+                context?.let {
+                    Utils.showPermissionAlert(it,
+                        getString(R.string.camera_permission),
+                        getString(R.string.camera_permission_denied),
+                        getString(R.string.setting),
+                        getString(R.string.cancel)
+                    ) {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            context?.packageName, null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                }
+
+            }
+        }
+    }
+
+    private fun requestFilePermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                (context as Activity).startActivityForResult(
+                    MediaUtils.getFileIntent(UIKitConstants.IntentStrings.EXTRA_MIME_DOC),
+                    UIKitConstants.RequestCode.FILE
+                )
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.deny),
+                        getString(R.string.allow)
+                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
+                }
+            }
+            else -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.setting),
+                        getString(R.string.cancel)
+                    ) {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            context?.packageName, null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requestAudioPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                (context as Activity).startActivityForResult(
+                    MediaUtils.openAudio(requireActivity()),
+                    UIKitConstants.RequestCode.AUDIO
+                )
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.deny),
+                        getString(R.string.allow)
+                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
+                }
+            }
+            else -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.setting),
+                        getString(R.string.cancel)
+                    ) {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            context?.packageName, null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requestGalleryPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                (context as Activity).startActivityForResult(
+                    MediaUtils.openGallery(requireActivity()),
+                    UIKitConstants.RequestCode.GALLERY
+                )
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.deny),
+                        getString(R.string.allow)
+                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
+                }
+            }
+            else -> {
+                context?.let {
+                    Utils.showPermissionAlert(
+                        it,
+                        getString(R.string.grant_storage_permission),
+                        getString(R.string.grant_permission_to_access_storage),
+                        getString(R.string.setting),
+                        getString(R.string.cancel)
+                    ) {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            context?.packageName, null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                }
+            }
+        }
+    }
+
+
+
     private fun createPollDialog() {
-        var dialog = AlertDialog.Builder(context!!, R.style.dialogTheme)
+        var dialog = AlertDialog.Builder(requireContext(), R.style.dialogTheme)
         val view: View = LayoutInflater.from(context).inflate(R.layout.create_poll_layout, null)
         dialog.setView(view)
         val alertDialog: Dialog = dialog.create()
@@ -925,7 +1240,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     private fun initAlert(customData: JSONObject) {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(getString(R.string.share_location_alert))
         builder.setPositiveButton(getString(R.string.share)) { dialog, which -> sendCustomMessage(UIKitConstants.IntentStrings.LOCATION, customData) }.setNegativeButton(getString(R.string.cancel)) { dialog, which -> dialog.dismiss() }
         builder.create()
@@ -967,7 +1282,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     private fun turnOnLocation() {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(getString(R.string.turn_on_gps))
         builder.setPositiveButton(getString(R.string.on)) { dialog, which -> startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), UIKitConstants.RequestCode.LOCATION) }.setNegativeButton(getString(R.string.cancel)) { dialog, which -> dialog.dismiss() }
         builder.create()
@@ -975,7 +1290,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     private fun initLocation() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location) {}
             override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
@@ -984,8 +1299,8 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         }
         locationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         try {
-            locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), locationListener)
-            locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), locationListener)
+            locationListener?.let { locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), it) }
+            locationListener?.let { locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST.toFloat(), it) }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
@@ -994,10 +1309,27 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         Log.d(TAG, "onRequestPermissionsResult: ")
         when (requestCode) {
-            UIKitConstants.RequestCode.CAMERA -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) startActivityForResult(MediaUtils.openCamera(activity!!), UIKitConstants.RequestCode.CAMERA) else showSnackBar(view?.findViewById(R.id.message_box), resources.getString(R.string.grant_camera_permission))
-            UIKitConstants.RequestCode.GALLERY -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) startActivityForResult(MediaUtils.openGallery(activity!!), UIKitConstants.RequestCode.GALLERY) else showSnackBar(view?.findViewById(R.id.message_box), resources.getString(R.string.grant_storage_permission))
-            UIKitConstants.RequestCode.FILE -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) startActivityForResult(MediaUtils.getFileIntent(UIKitConstants.IntentStrings.EXTRA_MIME_DOC), UIKitConstants.RequestCode.FILE) else showSnackBar(view?.findViewById(R.id.message_box), resources.getString(R.string.grant_storage_permission))
-            UIKitConstants.RequestCode.LOCATION -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            UIKitConstants.RequestCode.CAMERA ->
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                    startActivityForResult(MediaUtils.openCamera(requireActivity()),
+                            UIKitConstants.RequestCode.CAMERA)
+                else showSnackBar(view?.findViewById(R.id.message_box),
+                    resources.getString(R.string.grant_camera_permission))
+            UIKitConstants.RequestCode.GALLERY ->
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    startActivityForResult(MediaUtils.openGallery(requireActivity()),
+                        UIKitConstants.RequestCode.GALLERY)
+                else showSnackBar(view?.findViewById(R.id.message_box),
+                    resources.getString(R.string.grant_storage_permission))
+            UIKitConstants.RequestCode.FILE ->
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    startActivityForResult(MediaUtils.getFileIntent(
+                        UIKitConstants.IntentStrings.EXTRA_MIME_DOC), UIKitConstants.RequestCode.FILE)
+                else showSnackBar(view?.findViewById(R.id.message_box),
+                    resources.getString(R.string.grant_storage_permission))
+            UIKitConstants.RequestCode.LOCATION ->
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initLocation()
                 //locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
                 val provider = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -1250,8 +1582,9 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         }
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode,resultCode,data)
         Log.d(TAG, "onActivityResult: " + data?.data)
         when (requestCode) {
             UIKitConstants.RequestCode.AUDIO -> if (data != null) {
@@ -2403,7 +2736,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         cometChatMessageActions?.arguments = bundle
         if (editVisible || copyVisible || threadVisible || shareVisible || deleteVisible
                 || replyVisible || forwardVisible || reactionVisible || messageInfoVisible || sendMessagePrivatelyVisible || replyPrivatelyVisible)
-            cometChatMessageActions?.show(fragmentManager!!, cometChatMessageActions?.tag)
+            cometChatMessageActions?.show(requireFragmentManager(), cometChatMessageActions?.tag)
         cometChatMessageActions?.setMessageActionListener(object : CometChatMessageActions.MessageActionListener {
 
             override fun onEditMessageClick() {
@@ -2784,7 +3117,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             startActivity(intent)
         } else if (baseMessage != null && baseMessage?.type == CometChatConstants.MESSAGE_TYPE_IMAGE) {
             val mediaName = (baseMessage as MediaMessage).attachment.fileName
-            Glide.with(context!!).asBitmap().load((baseMessage as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
+            Glide.with(requireContext()).asBitmap().load((baseMessage as MediaMessage).attachment.fileUrl).into(object : SimpleTarget<Bitmap?>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
                     val path = MediaStore.Images.Media.insertImage(context?.contentResolver, resource, mediaName, null)
                     val shareIntent = Intent()
@@ -2809,7 +3142,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 replyMessage?.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
             } else if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_IMAGE) {
                 replyMessage?.text = resources.getString(R.string.shared_a_image)
-                Glide.with(context!!).load((baseMessage as MediaMessage).attachment.fileUrl).into(replyMedia!!)
+                Glide.with(requireContext()).load((baseMessage as MediaMessage).attachment.fileUrl).into(replyMedia!!)
                 replyMessage?.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
             } else if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_AUDIO) {
                 val messageStr = String.format(resources.getString(R.string.shared_a_audio),
@@ -2819,7 +3152,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 replyMedia?.visibility = View.GONE
             } else if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_VIDEO) {
                 replyMessage?.text = resources.getString(R.string.shared_a_video)
-                Glide.with(context!!).load((baseMessage as MediaMessage).attachment.fileUrl).into(replyMedia!!)
+                Glide.with(requireContext()).load((baseMessage as MediaMessage).attachment.fileUrl).into(replyMedia!!)
             } else if (baseMessage?.type == CometChatConstants.MESSAGE_TYPE_FILE) {
                 val messageStr = String.format(resources.getString(R.string.shared_a_file),
                         Utils.getFileSize((baseMessage as MediaMessage).attachment.fileSize))
@@ -2850,7 +3183,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             else if (baseMessage?.type == UIKitConstants.IntentStrings.STICKERS) {
                 replyMessage?.text = resources.getString(R.string.shared_a_sticker)
                 try {
-                    Glide.with(context!!).load((baseMessage as CustomMessage).customData.getString("url")).into(replyMedia!!)
+                    Glide.with(requireContext()).load((baseMessage as CustomMessage).customData.getString("url")).into(replyMedia!!)
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }

@@ -888,6 +888,10 @@ class FeatureRestriction() {
             })
         }
 
+        fun isDeleteConversationEnabled(onSuccessListener: OnSuccessListener) {
+            onSuccessListener.onSuccess(UIKitSettings.deleteConversation)
+        }
+
         fun isMalwareScannerEnabled(): Boolean {
             val featureEnabled = checkFeatureEnabled(moderation_malware_scanner_enabled)
             val extensionEnabled = checkExtensionEnabled("virus-malware-scanner")

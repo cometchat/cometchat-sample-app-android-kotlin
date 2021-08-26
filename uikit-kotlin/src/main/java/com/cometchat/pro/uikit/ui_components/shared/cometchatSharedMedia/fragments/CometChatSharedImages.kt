@@ -72,7 +72,7 @@ class CometChatSharedImages : Fragment() {
             }
 
             override fun onError(e: CometChatException) {
-                Log.e("onError: ", e.message)
+                e.message?.let { Log.e("onError: ", it) }
                 if (rvFiles != null) ErrorMessagesUtils.cometChatErrorMessage(context, e.code)
             }
         })

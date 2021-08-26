@@ -1,6 +1,8 @@
 package com.cometchat.pro.uikit.ui_components.shared.cometchatComposeBox
 
 import android.Manifest
+import android.Manifest.permission
+import android.Manifest.permission.*
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
@@ -16,6 +18,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.inputmethod.InputContentInfoCompat
 import com.cometchat.pro.uikit.R
@@ -30,6 +33,27 @@ import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import java.io.File
 import java.io.IOException
 import java.util.*
+import android.annotation.TargetApi
+
+import androidx.core.app.ActivityCompat
+
+import androidx.core.app.ActivityCompat.startActivityForResult
+
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+
+import android.os.Build
+import android.os.Build.VERSION
+
+import android.os.Build.VERSION.SDK_INT
+import android.provider.Settings
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
+import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
+import org.webrtc.ContextUtils.getApplicationContext
+
 
 class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     private var type: String? = null
@@ -343,6 +367,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
         this.composeActionListener.getFileActionView(ivFile!!)
     }
 
+//    @RequiresApi(Build.VERSION_CODES.M)
     override fun onClick(view: View) {
         if (view.id == R.id.ivDelete) {
             stopRecording(true)
@@ -411,7 +436,32 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
             cometChatComposeBoxActions!!.show(fm, cometChatComposeBoxActions!!.tag)
         }
         if (view.id == R.id.ivMic) {
-            if (Utils.hasPermissions(context, *arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                if (checkRecordAudioPermissionAPI30(UIKitConstants.RequestCode.RECORD)) {
+//                    if (!isRecording) {
+//                    startRecord()
+//                    ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_stop_24dp))
+//                    isRecording = true
+//                    isPlaying = false
+//                } else {
+//                    if (isRecording && !isPlaying) {
+//                        isPlaying = true
+//                        stopRecording(false)
+//                        recordTime!!.stop()
+//                    }
+//                    voiceSeekbar!!.visibility = View.VISIBLE
+//                    voiceMessage = true
+//                    ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_pause_24dp))
+//                    audioRecordView!!.visibility = View.GONE
+//                    ivSend!!.visibility = View.VISIBLE
+//                    ivDelete!!.visibility = View.VISIBLE
+//                    if (audioFileNameWithPath != null) startPlayingAudio(audioFileNameWithPath!!) else Toast.makeText(context, "No File Found. Please", Toast.LENGTH_LONG).show()
+//                }
+//            }
+//                }
+
+//            if (Utils.hasPermissions(context, *arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
 //            if (isOpen) {
 //                ivArrow!!.rotation = 0f
 //                isOpen = false
@@ -430,20 +480,79 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                         stopRecording(false)
                         recordTime!!.stop()
                     }
+                    voiceSeekbar!!.visibility = View.VISIBLE
+                    voiceMessage = true
                     ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_pause_24dp))
                     audioRecordView!!.visibility = View.GONE
                     ivSend!!.visibility = View.VISIBLE
                     ivDelete!!.visibility = View.VISIBLE
-                    voiceSeekbar!!.visibility = View.VISIBLE
-                    voiceMessage = true
                     if (audioFileNameWithPath != null) startPlayingAudio(audioFileNameWithPath!!) else Toast.makeText(context, "No File Found. Please", Toast.LENGTH_LONG).show()
                 }
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    (context as Activity).requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            UIKitConstants.RequestCode.RECORD)
-                }
+//            } else {
+//
+////                requestPermission()
+////                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    requestPermissions(context as Activity, arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+//                        UIKitConstants.RequestCode.RECORD)
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                    checkRecordAudioPermissionAPI30(UIKitConstants.RequestCode.RECORD)
+//                }
+//                }
+//            }
+        }
+    }
+
+    @TargetApi(30)
+    private fun checkRecordAudioPermissionAPI30(recordAudioRequestCode: Int) : Boolean{
+        if (checkSinglePermission(Manifest.permission.RECORD_AUDIO) &&
+            checkSinglePermission(MANAGE_EXTERNAL_STORAGE)) return true
+        else {
+//            AlertDialog.Builder(context)
+//            .setTitle(R.string.background_location_permission_title)
+//            .setMessage(R.string.background_location_permission_message)
+//                .setPositiveButton(R.string.yes) { _, _ ->
+                    // this request will take user to Application's Setting page
+                    requestPermissions(
+                        context as Activity,
+                        arrayOf(Manifest.permission.RECORD_AUDIO, MANAGE_EXTERNAL_STORAGE),
+                        recordAudioRequestCode
+                    )
+//                }
+//                .setNegativeButton(R.string.no) { dialog, _ ->
+//                    dialog.dismiss()
+//                }
+//                .create()
+//                .show()
+        }
+        return false
+    }
+     fun checkSinglePermission(permission: String) : Boolean {
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestPermission() {
+        if (SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+
+                intent.addCategory("android.intent.category.DEFAULT")
+                intent.data = Uri.parse(
+                    java.lang.String.format(
+                        "package:%s",
+                        context.packageName
+                    )
+                )
+                startActivityForResult(context as Activity, intent, UIKitConstants.RequestCode.RECORD, null)
+            } catch (e: java.lang.Exception) {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivityForResult(context as Activity, intent, UIKitConstants.RequestCode.RECORD, null)
             }
+        } else {
+            //below android 11
+            ActivityCompat.requestPermissions(context as Activity, arrayOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE),
+                UIKitConstants.RequestCode.RECORD
+            )
         }
     }
 
@@ -465,10 +574,11 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     }
 
 
+//    @RequiresApi(Build.VERSION_CODES.M)
     private fun startPlayingAudio(path: String) {
         try {
             if (timerRunnable != null) {
-                seekHandler.removeCallbacks(timerRunnable)
+                timerRunnable?.let { seekHandler.removeCallbacks(it) }
                 timerRunnable = null
             }
             mediaPlayer!!.reset()
@@ -477,7 +587,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 mediaPlayer!!.prepare()
                 mediaPlayer!!.start()
             } else {
-                (context as Activity?)!!.requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+               requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                         UIKitConstants.RequestCode.READ_STORAGE)
             }
             val duration = mediaPlayer!!.duration
@@ -492,16 +602,14 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
 //                        audioLength.setText(Utils.convertTimeStampToDurationTime(player.getCurrentPosition()));
                         seekHandler.postDelayed(this, 100)
                     } else {
-                        seekHandler
-                                .removeCallbacks(timerRunnable)
+                        timerRunnable?.let { seekHandler.removeCallbacks(it) }
                         timerRunnable = null
                     }
                 }
             }
-            seekHandler.postDelayed(timerRunnable, 100)
+            timerRunnable?.let { seekHandler.postDelayed(it, 100) }
             mediaPlayer!!.setOnCompletionListener { mp: MediaPlayer ->
-                seekHandler
-                        .removeCallbacks(timerRunnable)
+                timerRunnable?.let { seekHandler.removeCallbacks(it) }
                 timerRunnable = null
                 mp.stop()
                 recordTime!!.stop()
@@ -510,7 +618,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 ivMic!!.setImageDrawable(resources.getDrawable(R.drawable.ic_play_button))
             }
         } catch (e: Exception) {
-            Log.e("playAudioError: ", e.message)
+            e.message?.let { Log.e("playAudioError: ", it) }
             stopPlayingAudio()
         }
     }

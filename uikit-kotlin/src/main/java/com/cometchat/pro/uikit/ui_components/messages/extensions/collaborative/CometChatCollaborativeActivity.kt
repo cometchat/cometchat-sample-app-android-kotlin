@@ -25,7 +25,7 @@ class CometChatCollaborativeActivity : AppCompatActivity() {
         toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         if (intent.hasExtra(UIKitConstants.IntentStrings.URL)) {
-            url = intent.getStringExtra(UIKitConstants.IntentStrings.URL)
+            url = intent.getStringExtra(UIKitConstants.IntentStrings.URL).toString()
         }
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true

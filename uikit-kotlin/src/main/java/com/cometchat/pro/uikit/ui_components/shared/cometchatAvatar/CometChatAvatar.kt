@@ -190,7 +190,7 @@ class CometChatAvatar : AppCompatImageView {
     protected fun init() {
         rectF = RectF()
         clipPath = Path()
-        rectF?.set(calculateBounds())
+        calculateBounds()?.let { rectF?.set(it) }
 
         //imageSize = getResources().getDimensionPixelSize(R.dimen.avatar_size);
         imageSize = height
@@ -413,7 +413,7 @@ class CometChatAvatar : AppCompatImageView {
     override fun onDraw(canvas: Canvas) {
         if (shape == RECTANGLE) {
             canvas.drawRoundRect(rectF!!, cornerRadius.toFloat(), cornerRadius.toFloat(), borderPaint!!)
-            clipPath!!.addRoundRect(rectF, cornerRadius.toFloat(), cornerRadius.toFloat(), Path.Direction.CCW)
+            clipPath!!.addRoundRect(rectF!!, cornerRadius.toFloat(), cornerRadius.toFloat(), Path.Direction.CCW)
         } else {
             canvas.drawCircle(rectF!!.centerX(), rectF!!.centerY(), rectF!!.height() / 2 - borderWidth, borderPaint!!)
             clipPath!!.addCircle(rectF!!.centerX(), rectF!!.centerY(), rectF!!.height() / 2 - borderWidth, Path.Direction.CCW)

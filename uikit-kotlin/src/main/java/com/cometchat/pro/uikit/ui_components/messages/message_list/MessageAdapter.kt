@@ -2347,7 +2347,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
                 true
             }
-            viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage.attachment.fileUrl, context) }
+            if(baseMessage.attachment!=null)
+                viewHolder.view.playBtn.setOnClickListener { MediaUtils.openFile(baseMessage?.attachment?.fileUrl, context) }
             viewHolder.view.reactionsLayout.visibility = View.GONE
             setReactionSupport(baseMessage, viewHolder.view.reactionsLayout)
         }
@@ -3145,7 +3146,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 }
                                 viewHolder.view.message.text = messageStr
                             } catch (e: Exception) {
-                                Log.e("setLinkData: ", e.message)
+                                e.message?.let { Log.e("setLinkData: ", it) }
                             }
                         }
                     }
@@ -3259,7 +3260,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 }
                                 viewHolder.view.message.text = messageStr
                             } catch (e: Exception) {
-                                Log.e("setLinkData: ", e.message)
+                                e.message?.let { Log.e("setLinkData: ", it) }
                             }
                         }
                     }

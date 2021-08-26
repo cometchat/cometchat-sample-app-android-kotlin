@@ -33,7 +33,7 @@ class StickerFragment : Fragment() {
         type = this.arguments!!.getString("type")
         val list: List<Sticker>? = this.arguments!!.getParcelableArrayList("stickerList")
         stickers = list!!
-        Log.e("onStickerView: ", stickers[0].setName)
+        stickers[0].setName?.let { Log.e("onStickerView: ", it) }
         adapter = StickersAdapter(context, stickers)
         rvStickers?.adapter = adapter
 
