@@ -1,8 +1,12 @@
 package com.cometchat.pro.uikit.ui_components.chats
 
+import android.app.ProgressDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -11,6 +15,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import android.widget.TextView.OnEditorActionListener
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.pro.constants.CometChatConstants
@@ -22,15 +27,13 @@ import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.CometChatHelper
 import com.cometchat.pro.models.*
 import com.cometchat.pro.uikit.R
-import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MyButton
-import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MyButtonClickListener
-import com.cometchat.pro.uikit.ui_components.chats.delete_chat.MySwipeHelper
 import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversation
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerViewSwipeListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings
 import com.cometchat.pro.uikit.ui_settings.enum.ConversationMode
@@ -120,26 +123,58 @@ class CometChatConversationList : Fragment(), TextWatcher {
                     events.OnItemClick(t as Conversation, position)
             }
         })
+
+        val swipeHelper: RecyclerViewSwipeListener = object : RecyclerViewSwipeListener(context) {
+            override fun instantiateUnderlayButton(
+                viewHolder: RecyclerView.ViewHolder?,
+                underlayButtons: MutableList<UnderlayButton>?
+            ) {
+                val deleteBitmap: Bitmap = Utils.drawableToBitmap(
+                    resources.getDrawable(R.drawable.ic_delete_white)
+                )
+                FeatureRestriction.isDeleteConversationEnabled(object :
+                    FeatureRestriction.OnSuccessListener {
+                    override fun onSuccess(booleanVal: Boolean) {
+                        if (booleanVal) {
+                            underlayButtons?.add(UnderlayButton(
+                                "",
+                                deleteBitmap,
+                                resources.getColor(R.color.red),
+                                object : UnderlayButtonClickListener {
+                                    override fun onClick(pos: Int) {
+                                        val conversation: Conversation? = rvConversation?.getConversation(pos)
+                                        if (conversation != null) {
+                                            deleteConversations(conversation)
+                                        }
+                                    }
+                                }
+                            ))
+                        }
+                    }
+                })
+            }
+        }
+        swipeHelper.attachToRecyclerView(rvConversation)
         return vw
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        object : MySwipeHelper(requireContext(),rvConversation as RecyclerView,260){
-            override fun instantiateMyButton(
-                    viewHolder: RecyclerView.ViewHolder,
-                    buffer: MutableList<MyButton>
-            ) {
-                buffer.add(MyButton(object : MyButtonClickListener {
-                    override fun onClick(pos: Int) {
-                        var conversation : Conversation = conversationList[pos]
-                        deleteConversations(conversation)
-                    }
-                }))
-            }
-
-        }
-    }
+//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view, savedInstanceState)
+//        object : MySwipeHelper(requireContext(),rvConversation as RecyclerView,260){
+//            override fun instantiateMyButton(
+//                    viewHolder: RecyclerView.ViewHolder,
+//                    buffer: MutableList<MyButton>
+//            ) {
+//                buffer.add(MyButton(object : MyButtonClickListener {
+//                    override fun onClick(pos: Int) {
+//                        var conversation : Conversation = conversationList[pos]
+//                        deleteConversations(conversation)
+//                    }
+//                }))
+//            }
+//
+//        }
+//    }
 
     private fun deleteConversations(conversation: Conversation) {
         var entity = AppEntity()

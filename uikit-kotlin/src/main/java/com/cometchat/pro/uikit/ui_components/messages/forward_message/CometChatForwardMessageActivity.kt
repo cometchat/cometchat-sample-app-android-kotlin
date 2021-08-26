@@ -51,6 +51,8 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.Exception
+import java.lang.IllegalArgumentException
 import java.util.*
 
 /**
@@ -133,7 +135,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
             sendIntentType = MediaUtils.getExtensionType(intent.type!!)
             messageType = CometChatConstants.MESSAGE_TYPE_VIDEO
             uri = imageUri
-//            Log.e(TAG, "handleSendVideo: $mediaMessageUrl")
+            Log.e(TAG, "handleSendVideo: $mediaMessageUrl")
         }
     }
 
@@ -192,7 +194,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
             messageType = intent.getStringExtra(UIKitConstants.IntentStrings.TYPE)
         }
         if (intent.hasExtra(CometChatConstants.MESSAGE_TYPE_TEXT)) {
-            textMessage = intent.getStringExtra(CometChatConstants.MESSAGE_TYPE_TEXT)
+            textMessage = intent.getStringExtra(CometChatConstants.MESSAGE_TYPE_TEXT).toString()
         }
         if (intent.hasExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)) {
             mediaMessageUrl = intent.getStringExtra(UIKitConstants.IntentStrings.MESSAGE_TYPE_IMAGE_URL)
@@ -219,7 +221,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
             lon = getIntent().getDoubleExtra(UIKitConstants.IntentStrings.LOCATION_LONGITUDE, 0.0)
         }
         if (getIntent().hasExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY)) {
-            messageCategory = getIntent().getStringExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY)
+            messageCategory = getIntent().getStringExtra(UIKitConstants.IntentStrings.MESSAGE_CATEGORY).toString()
         }
     }
 
@@ -386,7 +388,10 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                                 type = CometChatConstants.RECEIVER_TYPE_GROUP
                             }
 //                            var file = MediaUtils.getRealPath(this@CometChatForwardMessageActivity, Uri.parse(mediaMessageUrl))
-                            val file = uri?.let { it1 -> messageType?.let { it2 -> sendIntentType?.let { it3 -> MediaUtils.saveFile(this, it1, it2, it3) } } }
+                            val file = uri?.let { uri ->
+                                MediaUtils.saveDriveFile(this,
+                                    uri)
+                            }
                             Log.e(TAG, "init: " + file.toString())
                             if (file != null && messageType == CometChatConstants.MESSAGE_TYPE_IMAGE)
                                 message = MediaMessage(uid, file, messageType, type)
@@ -490,7 +495,15 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
     private fun sendMediaMessage(mediaMessage: MediaMessage) {
         CometChat.sendMediaMessage(mediaMessage, object : CallbackListener<MediaMessage>() {
             override fun onSuccess(mediaMessage: MediaMessage) {
-                progressDialog?.dismiss()
+                try {
+                    if ((progressDialog != null) && progressDialog?.isShowing == true) {
+                        progressDialog?.dismiss();
+                    }
+                } catch (e: IllegalArgumentException) {
+                } catch (e: Exception) {
+                } finally {
+                    progressDialog = null
+                }
                 val intent = Intent(this@CometChatForwardMessageActivity, CometChatUI::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 startActivity(intent)

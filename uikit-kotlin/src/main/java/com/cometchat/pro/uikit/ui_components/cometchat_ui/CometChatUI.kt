@@ -16,6 +16,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.emoji.bundled.BundledEmojiCompatConfig
+import androidx.emoji.text.EmojiCompat
 import androidx.fragment.app.Fragment
 import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.CometChat
@@ -77,6 +79,8 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         // It performs action on click of user item in CometChatUserListScreen.
         setUserClickListener()
 
+        val config: EmojiCompat.Config = BundledEmojiCompatConfig(this)
+        EmojiCompat.init(config)
 
         //It performs action on click of group item in CometChatGroupListScreen.
         //It checks whether the logged-In user is already a joined a group or not and based on it perform actions.
@@ -258,7 +262,7 @@ class CometChatUI : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                 }
 
                 override fun onError(e: CometChatException) {
-                    Log.e("onError: ", e.message) //Logs the error if the error occurs.
+                    e.message?.let { Log.e("onError: ", it) } //Logs the error if the error occurs.
                 }
             })
         }

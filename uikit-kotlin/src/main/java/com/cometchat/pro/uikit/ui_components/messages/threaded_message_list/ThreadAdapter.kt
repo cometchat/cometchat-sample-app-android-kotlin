@@ -588,7 +588,7 @@ class ThreadAdapter(context: Context, messageList: List<BaseMessage>, type: Stri
                             }
                             viewHolder.view.message.text = messageStr
                         } catch (e: java.lang.Exception) {
-                            Log.e("setLinkData: ", e.message)
+                            e.message?.let { Log.e("setLinkData: ", it) }
                         }
                     }
                 }

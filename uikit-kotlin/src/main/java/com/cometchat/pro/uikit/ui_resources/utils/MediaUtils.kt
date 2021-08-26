@@ -18,7 +18,10 @@ import android.os.Environment
 import android.os.Vibrator
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.loader.content.CursorLoader
 import com.cometchat.pro.constants.CometChatConstants
@@ -31,8 +34,9 @@ import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.min
 
-public class MediaUtils {
+ class MediaUtils {
     companion object {
         private var activity: Activity? = null
 
@@ -262,78 +266,97 @@ public class MediaUtils {
         }
 
         fun getRealPath(context: Context?, fileUri: Uri?): File {
-            Log.d("", "getRealPath: " + fileUri!!.path)
+            Log.d("", "getRealPath: " + fileUri?.path)
             val realPath: String
-            if (isGoogleDrive(fileUri)) {
-                return saveDriveFile(context!!, fileUri!!)
-            } else if (Build.VERSION.SDK_INT < 11) {
-                realPath = getRealPathFromURI_BelowAPI11(context!!, fileUri)!!
-            } else if (Build.VERSION.SDK_INT < 19) {
-                realPath = getRealPathFromURI_API11to18(context!!, fileUri)!!
+            if (fileUri?.let { isGoogleDrive(it) } == true) {
+                return saveDriveFile(context!!, fileUri)
+            } else if (Build.VERSION.SDK_INT < 30){
+                realPath = fileUri?.let { getRealPathFromURI(context!!, it) }!!
             } else {
-                realPath = getRealPathFromURI_API19(context!!, fileUri)!!
+                //(Build.VERSION.SDK_INT == 30)
+                realPath = fileUri?.let { getRealPathFromN(context, it) }!!
             }
+
             return File(realPath)
         }
 
-        fun saveDriveFile(context: Context?, uri: Uri?): File {
-            return try {
-                val inputStream = context!!.contentResolver.openInputStream(uri!!)
-                val originalSize = inputStream!!.available()
-                var bis: BufferedInputStream? = null
-                var bos: BufferedOutputStream? = null
-                val fileName = Utils.getFileName(context!!, uri)
-                val file: File = makeEmptyFileWithTitle(fileName)!!
-                bis = BufferedInputStream(inputStream)
-                bos = BufferedOutputStream(FileOutputStream(
-                        file, false))
-                val buf = ByteArray(originalSize)
-                bis.read(buf)
-                do {
-                    bos.write(buf)
-                } while (bis.read(buf) != -1)
-                bos.flush()
-                bos.close()
-                bis.close()
-                file
-            } catch (e: IOException) {
-                null!!
+        @RequiresApi(Build.VERSION_CODES.R)
+        private fun getRealPathFromN(context: Context?, uri: Uri) : String? {
+            val returnUri = uri
+            val returnCursor = context?.contentResolver?.query(returnUri,
+                null, null, null, null)
+            /*
+             * Get the column indexes of the data in the Cursor,
+             *     * move to the first row in the Cursor, get the data,
+             *     * and display it.
+             * */
+            /*
+             * Get the column indexes of the data in the Cursor,
+             *     * move to the first row in the Cursor, get the data,
+             *     * and display it.
+             * */
+            val nameIndex = returnCursor?.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIndex = returnCursor?.getColumnIndex(OpenableColumns.SIZE)
+            returnCursor?.moveToFirst()
+            val name = returnCursor?.getString(nameIndex!!)
+            val size = returnCursor?.getLong(sizeIndex!!)
+            val file = File(context?.filesDir, name)
+            try {
+                val inputStream = context?.contentResolver?.openInputStream(uri)
+                val outputStream = FileOutputStream(file)
+                var read = 0
+                val maxBufferSize = 1 * 1024 * 1024
+                val bytesAvailable = inputStream!!.available()
+
+                //int bufferSize = 1024;
+                val bufferSize = min(bytesAvailable, maxBufferSize)
+                val buffers = ByteArray(bufferSize)
+                while (inputStream?.read(buffers).also { read = it } != -1) {
+                    outputStream.write(buffers, 0, read)
+                }
+                Log.e("File Size", "Size " + file.length())
+                inputStream?.close()
+                outputStream.close()
+                Log.e("File Path", "Path " + file.path)
+                Log.e("File Size", "Size " + file.length())
+            } catch (e: Exception) {
+                Log.e("Exception", e.message!!)
             }
+            return file.path
+        }
+
+        fun saveDriveFile(context: Context?, uri: Uri?): File {
+            var file : File? = null
+            try {
+                if (uri != null) {
+                    file = File(context?.cacheDir, getFileName(context, uri))
+                    val inputStream = context?.contentResolver?.openInputStream(uri)
+                    try {
+                        val output: OutputStream = FileOutputStream(file)
+                        try {
+                            val buffer = ByteArray(4 * 1024) // or other buffer size
+                            var read: Int
+                            while (inputStream!!.read(buffer).also { read = it } != -1) {
+                                output.write(buffer, 0, read)
+                            }
+                            output.flush()
+                        } finally {
+                            output.close()
+                        }
+                    } finally {
+                        inputStream!!.close()
+                        //Upload Bytes.
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "File Uri is null", Toast.LENGTH_LONG).show()
+            }
+            return file!!
         }
 
         fun makeEmptyFileWithTitle(title: String?): File? {
             val root = Environment.getExternalStorageDirectory().absolutePath
             return File(root, title)
-        }
-
-        @SuppressLint("NewApi")
-        private fun getRealPathFromURI_API11to18(context: Context, contentUri: Uri): String? {
-            val proj = arrayOf(MediaStore.Images.Media.DATA)
-            var result: String? = null
-            val cursorLoader = CursorLoader(context, contentUri, proj, null, null, null)
-            val cursor = cursorLoader.loadInBackground()
-            if (cursor != null) {
-                val column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                cursor.moveToFirst()
-                result = cursor.getString(column_index)
-                cursor.close()
-            }
-            return result
-        }
-
-        private fun getRealPathFromURI_BelowAPI11(context: Context, contentUri: Uri): String? {
-            val proj = arrayOf(MediaStore.Images.Media.DATA)
-            val cursor = context.contentResolver.query(contentUri, proj, null, null, null)
-            var column_index = 0
-            var result: String? = ""
-            if (cursor != null) {
-                column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                cursor.moveToFirst()
-                result = cursor.getString(column_index)
-                cursor.close()
-                return result
-            }
-            return result
         }
 
         /**
@@ -345,7 +368,7 @@ public class MediaUtils {
          * @param uri     The Uri to query.
          * @author paulburke
          */
-        private fun getRealPathFromURI_API19(context: Context, uri: Uri): String? {
+        private fun getRealPathFromURI(context: Context, uri: Uri): String? {
             val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
 
             // DocumentProvider
@@ -553,52 +576,52 @@ public class MediaUtils {
             vibrator.vibrate(100)
         }
 
-        fun saveFile(context: Context, imageUri: Uri, messageType: String, sendIntentType : String) :File? {
-            val var1 = Environment.getExternalStorageDirectory().toString() + "/" + context.resources.getString(R.string.app_name) + "/" + "sent/"
-            Utils.createDirectory(var1)
-            if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE)
-                return saveImageFile(context, var1, imageUri, sendIntentType)
-            else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO || messageType == CometChatConstants.MESSAGE_TYPE_AUDIO || messageType == CometChatConstants.MESSAGE_TYPE_FILE)
-                return saveAudioVideoDocumentFiles(context, var1, imageUri, messageType, sendIntentType)
-            return null
-        }
+//        fun saveFile(context: Context, imageUri: Uri, messageType: String, sendIntentType : String) :File? {
+//            val var1 = Environment.getExternalStorageDirectory().toString() + "/" + context.resources.getString(R.string.app_name) + "/" + "sent/"
+//            Utils.createDirectory(var1)
+//            if (messageType == CometChatConstants.MESSAGE_TYPE_IMAGE)
+//                return saveImageFile(context, var1, imageUri, sendIntentType)
+//            else if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO || messageType == CometChatConstants.MESSAGE_TYPE_AUDIO || messageType == CometChatConstants.MESSAGE_TYPE_FILE)
+//                return saveAudioVideoDocumentFiles(context, var1, imageUri, messageType, sendIntentType)
+//            return null
+//        }
 
-        private fun saveAudioVideoDocumentFiles(context: Context, var1: String, imageUri: Uri, messageType: String, sendIntentExtensionType: String): File? {
-            var file : File? = null
-            var count : Int? = 0
-            val istream : InputStream? = context.contentResolver.openInputStream(imageUri)
-            if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
-                val videoPath = var1 + "/" +"video/"
-                Utils.createDirectory(videoPath)
-                val extension = filterExtension(imageUri, sendIntentExtensionType)
-                file = File(videoPath, extension)
-            }
-            else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
-                val audioPath = var1 + "/" +"audio/"
-                Utils.createDirectory(audioPath)
-                val extension = filterExtension(imageUri, sendIntentExtensionType)
-                file = File(audioPath, extension)
-            }
-            else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
-                val docPath = var1 + "/" +"document/"
-                Utils.createDirectory(docPath)
-                val extension = filterExtension(imageUri, sendIntentExtensionType)
-                file = File(docPath, extension)
-            }
-            val byte = ByteArray(4096)
-            val out: FileOutputStream = FileOutputStream(file)
-            while (istream?.read(byte).also({ count = it }) != -1) {
-                out.write(byte, 0, count!!)
-            }
-            Log.e("TAG", "saveVideoFile: " + file.toString())
-            // flushing output
-            out.flush()
-            // closing streams
-            out.close()
-            istream?.close()
-
-            return file
-        }
+//        private fun saveAudioVideoDocumentFiles(context: Context, var1: String, imageUri: Uri, messageType: String, sendIntentExtensionType: String): File? {
+//            var file : File? = null
+//            var count : Int? = 0
+//            val istream : InputStream? = context.contentResolver.openInputStream(imageUri)
+//            if (messageType == CometChatConstants.MESSAGE_TYPE_VIDEO) {
+//                val videoPath = var1 + "/" +"video/"
+//                Utils.createDirectory(videoPath)
+//                val extension = filterExtension(imageUri, sendIntentExtensionType)
+//                file = File(videoPath, extension)
+//            }
+//            else if (messageType == CometChatConstants.MESSAGE_TYPE_AUDIO) {
+//                val audioPath = var1 + "/" +"audio/"
+//                Utils.createDirectory(audioPath)
+//                val extension = filterExtension(imageUri, sendIntentExtensionType)
+//                file = File(audioPath, extension)
+//            }
+//            else if (messageType == CometChatConstants.MESSAGE_TYPE_FILE) {
+//                val docPath = var1 + "/" +"document/"
+//                Utils.createDirectory(docPath)
+//                val extension = filterExtension(imageUri, sendIntentExtensionType)
+//                file = File(docPath, extension)
+//            }
+//            val byte = ByteArray(4096)
+//            val out: FileOutputStream = FileOutputStream(file)
+//            while (istream?.read(byte).also({ count = it }) != -1) {
+//                out.write(byte, 0, count!!)
+//            }
+//            Log.e("TAG", "saveVideoFile: " + file.toString())
+//            // flushing output
+//            out.flush()
+//            // closing streams
+//            out.close()
+//            istream?.close()
+//
+//            return file
+//        }
 
         private fun filterExtension(uri: Uri, extensionType : String) : String? {
             Log.e("TAG", "filterExtension: uri " + uri.toString())
@@ -620,25 +643,25 @@ public class MediaUtils {
             } else return uri.lastPathSegment
         }
 
-        private fun saveImageFile(context: Context, var1: String, imageUri: Uri, sendIntentType: String) : File {
-            var file :File? = null
-            var imagePath = var1 + "/" +"image/"
-            Utils.createDirectory(imagePath)
-            val istream = context.contentResolver.openInputStream(imageUri)
-            val extension = filterExtension(imageUri, sendIntentType)
-            file = File(imagePath, extension)
-
-            bitmap = BitmapFactory.decodeStream(istream)
-            val bytes = ByteArrayOutputStream()
-            bitmap?.compress(Bitmap.CompressFormat.PNG, 60, bytes)
-
-            var out: OutputStream = FileOutputStream(file)
-            out.write(bytes.toByteArray())
-            istream?.close()
-            out.flush()
-            out.close()
-            return file
-        }
+//        private fun saveImageFile(context: Context, var1: String, imageUri: Uri, sendIntentType: String) : File {
+//            var file :File? = null
+//            var imagePath = var1 + "/" +"image/"
+//            Utils.createDirectory(imagePath)
+//            val istream = context.contentResolver.openInputStream(imageUri)
+//            val extension = filterExtension(imageUri, sendIntentType)
+//            file = File(imagePath, extension)
+//
+//            bitmap = BitmapFactory.decodeStream(istream)
+//            val bytes = ByteArrayOutputStream()
+//            bitmap?.compress(Bitmap.CompressFormat.PNG, 60, bytes)
+//
+//            var out: OutputStream = FileOutputStream(file)
+//            out.write(bytes.toByteArray())
+//            istream?.close()
+//            out.flush()
+//            out.close()
+//            return file
+//        }
 
         fun getExtensionType(type: String): String {
             val index = type.lastIndexOf('/')

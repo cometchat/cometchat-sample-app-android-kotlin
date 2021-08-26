@@ -63,7 +63,7 @@ class GroupListViewFragment : Fragment() {
                 override fun onError(e: CometChatException) {
                     groupBinding!!.contactShimmer.stopShimmer()
                     groupBinding!!.contactShimmer.visibility = View.GONE
-                    Log.e("onError: ", e.message)
+                    e.message?.let { Log.e("onError: ", it) }
                 }
             })
         }

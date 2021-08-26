@@ -13,6 +13,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/view_foreground"
         android:clickable="true"
         android:background="?attr/selectableItemBackground"
         android:layout_width="match_parent"

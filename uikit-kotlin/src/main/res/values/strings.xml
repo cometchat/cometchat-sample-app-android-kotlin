@@ -365,6 +365,12 @@
     <string name="share_location_alert">Are you sure you want to share your location?</string>
     <string name="select_user">Select User</string>
     <string name="select_group">Select Group</string>
+    <string name="background_location_permission_title">Allow Background Location Permission</string>
+    <string name="deny">deny</string>
+    <string name="camera_permission">"Allow CometChat to access the camera? "</string>
+    <string name="camera_permission_denied">Please allow access to camera to use camera feature</string>
+    <string name="allow">Allow</string>
+    <string name="setting">Setting</string>
 
     <!--    ______________-->
 </resources>

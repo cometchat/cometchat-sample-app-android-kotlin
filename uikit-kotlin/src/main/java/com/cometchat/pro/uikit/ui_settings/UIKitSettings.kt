@@ -141,6 +141,8 @@ open class UIKitSettings(context: Context) {
         var groupInMode: GroupMode = GroupMode.ALL_GROUP
         var userInMode: UserMode = UserMode.ALL_USER
 
+        var deleteConversation = true
+
 
         fun setAppID(appID: String) {
             UIKitConstants.AppInfo.APP_ID = appID
@@ -424,6 +426,7 @@ open class UIKitSettings(context: Context) {
         fun enableMessageTranslation(enableMessageTranslation: Boolean) {
             this.messageTranslation = enableMessageTranslation
         }
+
 
     }
     fun addConnectionListener(tag: String) {

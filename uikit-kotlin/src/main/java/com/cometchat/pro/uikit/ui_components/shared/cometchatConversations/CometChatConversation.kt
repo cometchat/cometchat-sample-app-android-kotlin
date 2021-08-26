@@ -151,4 +151,11 @@ class CometChatConversation : RecyclerView {
     fun size(): Int {
         return conversationViewModel!!.size()
     }
+
+    fun getConversation(pos: Int): Conversation {
+        var conversation: Conversation? = null
+        if (conversationViewModel != null)
+            conversation = conversationViewModel?.getConversation(pos)
+        return conversation!!
+    }
 }
