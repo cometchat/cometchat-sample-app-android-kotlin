@@ -117,7 +117,6 @@
     </array>
     <!---->
 
-
     <!--GroupErrors-->
     <!--Not available in iOS-->
     <string name="you_cannot_perform_action">You cannot perform action on yourself</string>
@@ -275,7 +274,15 @@
     <string name="add_reaction">Add Reaction</string>
     <string name="added_successfully">added successfully</string>
     <string name="you_deleted_this_message">⚠️ You deleted this message</string>
+    <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
     <string name="back">back</string>
     <string name="ban">Ban</string>
     <string name="banned_successfully">Banned Successfully</string>

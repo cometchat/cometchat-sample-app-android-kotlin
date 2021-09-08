@@ -45,7 +45,7 @@ Before you begin, ensure you have met the following requirements:<br/>
 Simply clone the project from [android-kotlin-chat-app](https://github.com/cometchat-pro-samples/android-kotlin-chat-app/archive/master.zip) repository. After cloning the repository:
 
 ## Running the sample app :rocket:
-To Run to sample app you have to do the following changes by Adding **APP_ID**, **AUTH_KEY** and **REGION**
+To Run to sample app you have to do the following changes by Adding **APP_ID**, **AUTH_KEY** and **REGION**  
 You can obtain your *APP ID*, *AUTH KEY* and *REGION* from [CometChat-Pro Dashboard](https://app.cometchat.com/). Create new app and head over to the Quick Start or API & Auth Keys section and note the *APP ID*, *Auth Key*, and *Region*.
 - Open the project in Android Studio
 - Go to AppConfig file in app module
@@ -65,7 +65,7 @@ Learn more about how to integrate [UI Kit-Kotlin](https://github.com/cometchat-p
 ---
 
 # Troubleshooting
-- To read the full documentation on UI Kit-Kotlin integration visit our [Documentation](https://prodocs.cometchat.com/docs/android-kotlin-ui-kit).
+- To read the full documentation on UI Kit-Kotlin integration visit our [Documentation](https://prodocs.cometchat.com/v2.1/docs).
 - Facing any issues while integrating or installing the UI Kit-Kotlin please <a href="https://app.cometchat.io/"> connect with us via real time support present in CometChat Dashboard.</a>
 
 # Contributors
@@ -81,7 +81,7 @@ Contact us via real time support present in [CometChat Dashboard](https://app.co
 
 ## License
 
-This project uses the following license: [License](https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/LICENSE).
+This project uses the following license: [License](https://github.com/cometchat-pro/.github/blob/master/LICENSE).
 
 
 
