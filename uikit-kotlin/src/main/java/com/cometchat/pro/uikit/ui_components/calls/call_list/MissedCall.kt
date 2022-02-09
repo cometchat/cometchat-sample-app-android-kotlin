@@ -124,7 +124,7 @@ class MissedCall : Fragment() {
     private fun initiateCall(`var`: Call) {
         CometChat.initiateCall(`var`, object : CallbackListener<Call>() {
             override fun onSuccess(call: Call) {
-                Log.e("onSuccess: ", call.toString())
+                Log.v("onSuccess: ", call.toString())
                 if (call.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
                     val user: User
                     user = if ((call.callInitiator as User).uid == CometChat.getLoggedInUser().uid) {

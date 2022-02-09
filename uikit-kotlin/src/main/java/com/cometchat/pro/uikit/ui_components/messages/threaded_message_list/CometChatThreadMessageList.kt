@@ -93,6 +93,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
     private var isImageNotSafe: Boolean = false
     private var isDeleteMemberMessageVisible: Boolean = false
     private var isReactionsVisible: Boolean = false
+    private var isReactionEnded: Boolean = true
     private lateinit var reactionLayout: ChipGroup
     private lateinit var addReaction: ImageView
     private lateinit var reactionInfo: HashMap<String, String>
@@ -459,45 +460,10 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         })
 
         liveReactionLayout = view.findViewById(R.id.live_reactions_layout)
-        composeBox!!.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
-            override fun onClick(var1: View?) {
-                liveReactionLayout?.alpha = 0.1f
+        composeBox?.btnLiveReaction?.setOnClickListener {
+            if (isReactionEnded)
                 sendLiveReaction()
-            }
-
-            override fun onCancel(var1: View?) {
-                Handler().postDelayed(object : Runnable {
-                    override fun run() {
-                        if (imageToFly != null) {
-                            val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 1f, 0.5f)
-                            animator.duration = 2000
-                            animator.start()
-                            animator.addListener(object : AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    super.onAnimationEnd(animation)
-                                    if (imageToFly != null)
-                                        imageToFly?.clearAnimation()
-                                    liveReactionLayout?.clearAnimation()
-                                    if (typingTimer != null)
-                                        typingTimer!!.schedule(object : TimerTask() {
-                                            override fun run() {
-                                                val metaData = JSONObject()
-                                                try {
-                                                    metaData.put("reaction", "heart")
-                                                } catch (e: JSONException) {
-                                                    e.printStackTrace()
-                                                }
-                                                val typingIndicator = TypingIndicator(Id!!, type, metaData)
-                                                endTyping(typingIndicator)
-                                            }
-                                        }, 1000)
-                                }
-                            })
-                        }
-                    }
-                }, 1000)
-            }
-        }) {})
+        }
 
         addReaction = view.findViewById(R.id.add_reaction)
         reactionLayout = view.findViewById(R.id.reactions_layout)
@@ -682,53 +648,88 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
 
     private fun sendLiveReaction() {
         var metadata : JSONObject = JSONObject()
-        metadata.put("reaction", "heart")
-        var typingIndicator: TypingIndicator = TypingIndicator(Id!!, type, metadata)
-        CometChat.startTyping(typingIndicator)
-        setLiveReaction()
+        metadata.put("type","live_reaction")
+        metadata.put("reaction","heart")
+        val transientMessage = TransientMessage(Id, type, metadata)
+        sendTransientMessage(transientMessage)
+        setReaction()
     }
 
-    private fun setLiveReaction() {
-//        if (FeatureRestriction.isLiveReactionsEnabled()) {
-            liveReactionLayout?.alpha = 0.1f
-            imageToFly = ImageView(context)
-            flyImage(imageToFly!!, R.drawable.heart_reaction)
-//        }
-    }
+    private fun setReaction() {
+        isReactionEnded = false
+        for (i in 1..5) {
+            val imageView = ImageView(context)
 
-    private fun flyImage(imageToFly: ImageView, resId: Int) {
-        var layoutParam: FrameLayout.LayoutParams  = FrameLayout.LayoutParams(
+            var layoutParam: FrameLayout.LayoutParams  = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        layoutParam.gravity = Gravity.BOTTOM or Gravity.END
-        layoutParam.rightMargin = 16
-        liveReactionLayout?.alpha = 1.0f
-        imageToFly.layoutParams = layoutParam
-        liveReactionLayout?.addView(imageToFly)
-        val bitmap = BitmapFactory.decodeResource(context!!.resources, resId)
-        if (bitmap != null) {
-            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, (bitmap.width * 0.2f).toInt(), (bitmap.height * 0.2f).toInt(), false)
-            imageToFly.setImageBitmap(scaledBitmap)
-        }
-        fadeOutAnimation(imageToFly)
-    }
+            )
+            layoutParam.gravity = Gravity.BOTTOM or Gravity.END
+            liveReactionLayout?.alpha = 1.0f
 
-    private fun fadeOutAnimation(viewToAnimate: ImageView) {
-        var transition: ObjectAnimator = ObjectAnimator.ofFloat(viewToAnimate, "translationY", -400f)
-        var fadeOut: ObjectAnimator = ObjectAnimator.ofFloat(viewToAnimate, "alpha", 1f, 0f)
-        transition.repeatCount = 3
-        fadeOut.repeatCount = 3
-        fadeOut.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                viewToAnimate.visibility = View.GONE
+            if (i.rem(2) == 0){
+                layoutParam.rightMargin = 16
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
+            } else if (i.rem(3) == 0){
+                layoutParam.rightMargin = 30
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
+            } else {
+                layoutParam.rightMargin = 10
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
             }
-        })
-        val animatorSet= AnimatorSet()
-        animatorSet.playTogether(transition, fadeOut)
-        animatorSet.duration = 1000L
-        animatorSet.interpolator = AccelerateDecelerateInterpolator()
-        animatorSet.start()
+
+            val bitmap = BitmapFactory.decodeResource(context?.resources, R.drawable.heart_reaction)
+            if (bitmap != null) {
+                val scaledBitmap = Bitmap.createScaledBitmap(
+                    bitmap,
+                    (bitmap.width * 0.2f).toInt(),
+                    (bitmap.height * 0.2f).toInt(),
+                    false
+                )
+                imageView.setImageBitmap(scaledBitmap)
+            }
+
+            var transition: ObjectAnimator = ObjectAnimator.ofFloat(imageView, "translationY", -400f)
+            var fadeOut: ObjectAnimator = ObjectAnimator.ofFloat(imageView, "alpha", 1f, 0f)
+            transition.repeatCount = 3
+            fadeOut.repeatCount = 3
+
+            fadeOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    imageView.visibility = View.GONE
+                }
+            })
+
+            if (i.rem(2) == 0) {
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            }
+            else if (i.rem(3)== 0){
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.startDelay = 400L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            } else {
+
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.startDelay = 800L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            }
+            Handler().postDelayed({
+                isReactionEnded = true
+            },1500)
+        }
     }
 
     private fun checkOnGoingCall() {
@@ -989,7 +990,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                     stopHideShimmer()
                     val baseMessage = baseMessages[baseMessages.size - 1]
                     if (baseMessage != null) {
-                        markMessageAsRead(baseMessage)
+                        markAsRead(baseMessage)
                     }
                 }
                 if (baseMessages.isEmpty()) {
@@ -1332,9 +1333,6 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         }
     }
 
-    private fun markMessageAsRead(baseMessage: BaseMessage?) {
-        if (type == CometChatConstants.RECEIVER_TYPE_USER) markAsRead(baseMessage!!.id, baseMessage.sender.uid, baseMessage.receiverType) else markAsRead(baseMessage!!.id, baseMessage.receiverUid, baseMessage.receiverType)
-    }
 
     private fun addMessageListener() {
         addMessageListener(Companion.TAG, object : MessageListener() {
@@ -1363,6 +1361,10 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                 setTypingIndicator(typingIndicator, false)
             }
 
+            override fun onTransientMessageReceived(transientMessage: TransientMessage?) {
+                setTransientMessage(transientMessage)
+            }
+
             override fun onMessagesDelivered(messageReceipt: MessageReceipt) {
                 Log.d(Companion.TAG, "onMessagesDelivered: $messageReceipt")
                 setMessageReciept(messageReceipt)
@@ -1389,6 +1391,18 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                 updateMessage(message)
             }
         })
+    }
+
+    private fun setTransientMessage(transientMessage: TransientMessage?) {
+        if (transientMessage?.data != null) {
+            try {
+                val reaction = transientMessage.data.getString("reaction")
+                val type = transientMessage.data.getString("type")
+                if (reaction.equals("heart") && type.equals("live_reaction")) setReaction()
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun setMessageReciept(messageReceipt: MessageReceipt) {
@@ -1437,7 +1451,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
         if (messageAdapter != null) {
             messageAdapter!!.addMessage(message)
             checkSmartReply(message)
-            markMessageAsRead(message)
+            markAsRead(message)
             if (messageAdapter!!.itemCount - 1 - (rvChatListView!!.layoutManager as LinearLayoutManager).findLastVisibleItemPosition() < 5) scrollToBottom()
         } else {
             messageList.add(message)
@@ -1472,8 +1486,6 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                             }
                         })
                     }
-                    else
-                        setLiveReaction()
                 }
                 else {
                     if (typingIndicator.metadata == null) {
@@ -1486,8 +1498,6 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                             }
                         })
                     }
-                    else
-                        setLiveReaction()
                 }
             } else {
                 tvTypingIndicator!!.visibility = View.GONE

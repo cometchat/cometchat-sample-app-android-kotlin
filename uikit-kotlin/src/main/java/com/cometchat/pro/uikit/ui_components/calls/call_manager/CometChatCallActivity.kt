@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.calls.call_manager
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
@@ -146,7 +147,7 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
     private fun setValues() {
         if (isOngoing) {
             cometChatAudioHelper!!.stop(false)
-            if (CometChat.getActiveCall() != null) Utils.startCall(this, CometChat.getActiveCall(), mainView) else onBackPressed()
+            if (CometChat.getActiveCall() != null) Utils.startCall(this, CometChat.getActiveCall()) else onBackPressed()
         }
         userTv!!.text = name
         callerName!!.text = name
@@ -200,13 +201,13 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.call_hang_btn) {
-            cometChatAudioHelper!!.stop(false)
+            cometChatAudioHelper?.stop(false)
             AnimUtil.stopBlinkAnimation(tvDots!!)
             rejectCall(sessionId, CometChatConstants.CALL_STATUS_CANCELLED)
         } else if (id == R.id.accept_incoming) {
-            cometChatAudioHelper!!.stop(false)
+            cometChatAudioHelper?.stop(false)
             incomingCallView!!.visibility = View.GONE
-            answerCall(mainView, sessionId)
+            answerCall(sessionId)
         } else if (id == R.id.decline_incoming) {
             cometChatAudioHelper!!.stop(true)
             rejectCall(sessionId, CometChatConstants.CALL_STATUS_REJECTED)
@@ -240,18 +241,16 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * This method is used to accept the incoming call receievd.
      *
-     * @param mainView is a object of Relativelayout, It is used to load the CallingComponent after
-     * the call is accepted.
      * @param sessionId is a String, It is sessionId of call.
      *
      * @see CometChat.acceptCall
      * @see Call
      */
-    private fun answerCall(mainView: RelativeLayout?, sessionId: String?) {
+    private fun answerCall(sessionId: String?) {
         CometChat.acceptCall(sessionId!!, object : CallbackListener<Call>() {
             override fun onSuccess(call: Call) {
                 Log.e("CallMeta", call.toString())
-                startCall(mainView, call)
+                startCall(call)
             }
 
             override fun onError(e: CometChatException) {
@@ -272,9 +271,9 @@ class CometChatCallActivity : AppCompatActivity(), View.OnClickListener {
      *
      * @see CometChat.startCall
      */
-    private fun startCall(mainView: RelativeLayout?, call: Call) {
+    private fun startCall(call: Call) {
         hangUp!!.visibility = View.GONE
-        Utils.startCall(this@CometChatCallActivity, call, mainView)
+        Utils.startCall(this@CometChatCallActivity,call)
     }
 
     fun startOnGoingCall(call: Call?) {}

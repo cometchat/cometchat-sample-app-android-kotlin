@@ -33,6 +33,7 @@ import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_components.groups.add_members.CometChatAddMembersActivity
 import com.cometchat.pro.uikit.ui_components.groups.admin_moderator_list.CometChatAdminModeratorListActivity
 import com.cometchat.pro.uikit.ui_components.groups.banned_members.CometChatBanMembersActivity
+import com.cometchat.pro.uikit.ui_components.groups.group_members.CometChatGroupMemberListActivity
 import com.cometchat.pro.uikit.ui_components.groups.group_members.GroupMemberAdapter
 import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
 import com.cometchat.pro.uikit.ui_components.shared.cometchatSharedMedia.CometChatSharedMedia
@@ -43,7 +44,6 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.ClickListener
 import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerTouchListener
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction
-import com.cometchat.pro.uikit.ui_components.groups.group_members.CometChatGroupMemberListActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -361,14 +361,14 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
     private fun createDialog(title: String, message: String, positiveText: String, negativeText: String, drawableRes: Int) {
         Log.e(TAG, "createDialog: "+ownerId+ " logged in: "+loggedInUser.uid)
         val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
-                R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
         alertDialog.setTitle(title)
         alertDialog.setMessage(message)
         alertDialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
             if (positiveText.equals(resources.getString(R.string.leave_group), ignoreCase = true))
                 leaveGroup()
             else if ((positiveText.equals(resources.getString(R.string.delete_group), ignoreCase = true)
-                            && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true)))
+                        && loggedInUserScope.equals(CometChatConstants.SCOPE_ADMIN, ignoreCase = true)))
                 deleteGroup()
         }
         alertDialog.setNegativeButton(negativeText, object : DialogInterface.OnClickListener {
@@ -411,9 +411,20 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
             if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_ADMIN)) {
                 rlAddMemberView!!.visibility = View.VISIBLE
                 rlBanMembers!!.visibility = View.VISIBLE
+                rlModeratorView!!.visibility = View.VISIBLE
                 tvDelete!!.visibility = View.VISIBLE
             } else if (loggedInUserScope != null && (loggedInUserScope == CometChatConstants.SCOPE_MODERATOR)) {
+                rlAddMemberView!!.visibility = View.GONE
                 rlBanMembers!!.visibility = View.VISIBLE
+                rlModeratorView!!.visibility = View.VISIBLE
+                rlAdminListView!!.visibility = View.VISIBLE
+            } else {
+                dividerModerator!!.visibility = View.GONE
+                dividerAdmin!!.visibility = View.GONE
+                rlAdminListView!!.visibility = View.GONE
+                rlModeratorView!!.visibility = View.GONE
+                rlBanMembers!!.visibility = View.GONE
+                rlAddMemberView!!.visibility = View.GONE
             }
         }
         if (intent.hasExtra(UIKitConstants.IntentStrings.NAME)) {

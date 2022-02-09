@@ -32,7 +32,7 @@ import com.cometchat.pro.uikit.ui_settings.UIKitSettings
  * Modified on  - 23rd March 2020
  *
  */
-class   CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<ConversationViewHolder>(), Filterable {
+class CometChatConversationsAdapter(context: Context?) : RecyclerView.Adapter<ConversationViewHolder>(), Filterable {
     private var unreadCountEnabled: Boolean = false
     private var userPresenceEnabled: Boolean = false
     private var context: Context? = null

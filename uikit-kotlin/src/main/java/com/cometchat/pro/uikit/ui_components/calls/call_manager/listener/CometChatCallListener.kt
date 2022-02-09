@@ -53,7 +53,7 @@ object CometChatCallListener {
             override fun onOutgoingCallAccepted(call: Call) {
                 if (CometChatCallActivity.mainView != null) {
                     CometChatCallActivity.cometChatAudioHelper!!.stop(false)
-                    Utils.startCall(CometChatCallActivity.callActivity!!, call, CometChatCallActivity.mainView)
+                    Utils.startCall(CometChatCallActivity.callActivity!!, call)
                 }
             }
 

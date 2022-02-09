@@ -100,6 +100,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.util.*
+import android.widget.TextView
+
 
 
 /**
@@ -134,6 +136,8 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     private var intentRequestCode: Int? = null
     private var isOngoingCall: Boolean = false
     private var ivUserInfo: ImageView? = null
+    private var isReactionEnded: Boolean = true
+    private var imageToFlySecond: ImageView? = null
     private var imageToFly: ImageView? = null
     private var liveReactionLayout: FrameLayout? = null
     private var name: String? = ""
@@ -295,7 +299,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         if (isReplyPrivately && replyMessageJson != null) {
             if (replyMessageJson.has("category")) {
                 baseMessage = CometChatHelper.processMessage(replyMessageJson)
-                Log.e(TAG, "onCreate: base"+baseMessage )
+                Log.v(TAG, "onCreate: base"+baseMessage )
                 replyMessage()
             }
 
@@ -315,47 +319,11 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 //        if (type == CometChatConstants.RECEIVER_TYPE_USER)
 //            composeBox?.isStartVideoCall = false
         liveReactionLayout = view?.findViewById(R.id.live_reactions_layout)
-        composeBox?.btnLiveReaction?.setOnTouchListener(object : LiveReactionListener(object : ReactionClickListener() {
-            override fun onClick(var1: View?) {
-                liveReactionLayout?.alpha = 0.1f
+        composeBox?.btnLiveReaction?.setOnClickListener {
+            if (isReactionEnded)
                 sendLiveReaction()
-            }
-
-            override fun onCancel(var1: View?) {
-                Handler().postDelayed(object : Runnable {
-                    override fun run() {
-                        if (imageToFly != null) {
-                            val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 1f, 0.5f)
-                            animator.duration = 2000
-                            animator.start()
-                            animator.addListener(object : AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    super.onAnimationEnd(animation)
-                                    if (imageToFly != null)
-                                        imageToFly?.clearAnimation()
-                                    liveReactionLayout?.clearAnimation()
-                                    if (typingTimer != null)
-                                        typingTimer?.schedule(object : TimerTask() {
-                                            override fun run() {
-                                                val metaData = JSONObject()
-                                                try {
-                                                    metaData.put("reaction", "heart")
-                                                } catch (e: JSONException) {
-                                                    e.printStackTrace()
-                                                }
-                                                val typingIndicator = TypingIndicator(Id!!, type, metaData)
-                                                endTyping(typingIndicator)
-                                            }
-                                        }, 1000)
-                                }
-                            })
-                        }
-                    }
-                }, 1000)
-            }
-        }) {})
+        }
         messageShimmer = view?.findViewById(R.id.shimmer_layout)
-//        composeBox = view.findViewById(R.id.message_box)
         setComposeBoxListener()
 
         FeatureRestriction.isOneOnOneChatEnabled(object : FeatureRestriction.OnSuccessListener{
@@ -588,55 +556,88 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
     private fun sendLiveReaction() {
         var metadata : JSONObject = JSONObject()
-        metadata.put("reaction", "heart")
-        var typingIndicator: TypingIndicator = TypingIndicator(Id, type, metadata)
-        CometChat.startTyping(typingIndicator)
-        setLiveReaction()
+        metadata.put("type","live_reaction")
+        metadata.put("reaction","heart")
+        val transientMessage = TransientMessage(Id, type, metadata)
+        sendTransientMessage(transientMessage)
+        setReaction()
     }
 
-    private fun setLiveReaction() {
-        liveReactionLayout?.alpha = 0.1f
-        imageToFly = ImageView(context)
-        flyImage(imageToFly!!, R.drawable.heart_reaction)
-    }
+    private fun setReaction() {
+        isReactionEnded = false
+        for (i in 1..5) {
+            val imageView = ImageView(context)
 
-    private fun flyImage(imageToFly: ImageView, resId: Int) {
-        var layoutParam: FrameLayout.LayoutParams  = FrameLayout.LayoutParams(
+            var layoutParam: FrameLayout.LayoutParams  = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        layoutParam.gravity = Gravity.BOTTOM or Gravity.END
-        layoutParam.rightMargin = 16
+            )
+            layoutParam.gravity = Gravity.BOTTOM or Gravity.END
+            liveReactionLayout?.alpha = 1.0f
 
-        liveReactionLayout?.alpha = 1.0f
-        imageToFly.layoutParams = layoutParam
-        liveReactionLayout?.addView(imageToFly)
-
-        val bitmap = BitmapFactory.decodeResource(context?.resources, resId)
-        if (bitmap != null) {
-            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, (bitmap.width * 0.2f).toInt(), (bitmap.height * 0.2f).toInt(), false)
-            imageToFly.setImageBitmap(scaledBitmap)
-        }
-
-        fadeOutAnimation(imageToFly)
-    }
-
-    private fun fadeOutAnimation(viewToAnimate: ImageView) {
-        var transition: ObjectAnimator = ObjectAnimator.ofFloat(viewToAnimate, "translationY", -400f)
-        var fadeOut: ObjectAnimator = ObjectAnimator.ofFloat(viewToAnimate, "alpha", 1f, 0f)
-        transition.repeatCount = 3
-        fadeOut.repeatCount = 3
-        fadeOut.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                viewToAnimate.visibility = View.GONE
+            if (i.rem(2) == 0){
+                layoutParam.rightMargin = 16
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
+            } else if (i.rem(3) == 0){
+                layoutParam.rightMargin = 30
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
+            } else {
+                layoutParam.rightMargin = 10
+                imageView.layoutParams = layoutParam
+                liveReactionLayout?.addView(imageView)
             }
-        })
-        val animatorSet= AnimatorSet()
-        animatorSet.playTogether(transition, fadeOut)
-        animatorSet.duration = 1000L
-        animatorSet.interpolator = AccelerateDecelerateInterpolator()
-        animatorSet.start()
 
+            val bitmap = BitmapFactory.decodeResource(context?.resources, R.drawable.heart_reaction)
+            if (bitmap != null) {
+                val scaledBitmap = Bitmap.createScaledBitmap(
+                    bitmap,
+                    (bitmap.width * 0.2f).toInt(),
+                    (bitmap.height * 0.2f).toInt(),
+                    false
+                )
+                imageView.setImageBitmap(scaledBitmap)
+            }
+
+            var transition: ObjectAnimator = ObjectAnimator.ofFloat(imageView, "translationY", -400f)
+            var fadeOut: ObjectAnimator = ObjectAnimator.ofFloat(imageView, "alpha", 1f, 0f)
+            transition.repeatCount = 3
+            fadeOut.repeatCount = 3
+
+            fadeOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    imageView.visibility = View.GONE
+                }
+            })
+
+            if (i.rem(2) == 0) {
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            }
+            else if (i.rem(3)== 0){
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.startDelay = 400L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            } else {
+
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(transition, fadeOut)
+                animatorSet.duration = 500L
+                animatorSet.startDelay = 800L
+                animatorSet.interpolator = AccelerateDecelerateInterpolator()
+                animatorSet.start()
+            }
+            Handler().postDelayed({
+                isReactionEnded = true
+            },1500)
+        }
     }
 
     private fun checkOnGoingCall() {
@@ -660,7 +661,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
         } else if (getActiveCall() != null) {
             if (onGoingCallView != null) onGoingCallView?.visibility = View.GONE
-            Log.e(TAG, "checkOnGoingCall: " + getActiveCall().toString())
+            Log.v(TAG, "checkOnGoingCall: " + getActiveCall().toString())
         }
     }
 
@@ -675,7 +676,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 attachment.fileExtension = messageType
                 attachment.fileName = inputContentInfo?.description?.label.toString()
                 mediaMessage.attachment = attachment
-                Log.e(TAG, "onClick: $attachment")
+                Log.v(TAG, "onClick: $attachment")
                 sendMediaMessage(mediaMessage, object : CallbackListener<MediaMessage?>() {
                     override fun onSuccess(mediaMessage: MediaMessage?) {
                         if (messageAdapter != null) {
@@ -1020,38 +1021,38 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                     UIKitConstants.RequestCode.FILE
                 )
             }
-            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                context?.let {
-                    Utils.showPermissionAlert(
-                        it,
-                        getString(R.string.grant_storage_permission),
-                        getString(R.string.grant_permission_to_access_storage),
-                        getString(R.string.deny),
-                        getString(R.string.allow)
-                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
-                }
-            }
-            else -> {
-                context?.let {
-                    Utils.showPermissionAlert(
-                        it,
-                        getString(R.string.grant_storage_permission),
-                        getString(R.string.grant_permission_to_access_storage),
-                        getString(R.string.setting),
-                        getString(R.string.cancel)
-                    ) {
-                        val intent = Intent()
-                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                        val uri = Uri.fromParts(
-                            "package",
-                            context?.packageName, null
-                        )
-                        intent.data = uri
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
-                    }
-                }
-            }
+//            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+//                context?.let {
+//                    Utils.showPermissionAlert(
+//                        it,
+//                        getString(R.string.grant_storage_permission),
+//                        getString(R.string.grant_permission_to_access_storage),
+//                        getString(R.string.deny),
+//                        getString(R.string.allow)
+//                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
+//                }
+//            }
+//            else -> {
+//                context?.let {
+//                    Utils.showPermissionAlert(
+//                        it,
+//                        getString(R.string.grant_storage_permission),
+//                        getString(R.string.grant_permission_to_access_storage),
+//                        getString(R.string.setting),
+//                        getString(R.string.cancel)
+//                    ) {
+//                        val intent = Intent()
+//                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+//                        val uri = Uri.fromParts(
+//                            "package",
+//                            context?.packageName, null
+//                        )
+//                        intent.data = uri
+//                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                        startActivity(intent)
+//                    }
+//                }
+//            }
         }
     }
 
@@ -1112,38 +1113,38 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                     UIKitConstants.RequestCode.GALLERY
                 )
             }
-            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                context?.let {
-                    Utils.showPermissionAlert(
-                        it,
-                        getString(R.string.grant_storage_permission),
-                        getString(R.string.grant_permission_to_access_storage),
-                        getString(R.string.deny),
-                        getString(R.string.allow)
-                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
-                }
-            }
-            else -> {
-                context?.let {
-                    Utils.showPermissionAlert(
-                        it,
-                        getString(R.string.grant_storage_permission),
-                        getString(R.string.grant_permission_to_access_storage),
-                        getString(R.string.setting),
-                        getString(R.string.cancel)
-                    ) {
-                        val intent = Intent()
-                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                        val uri = Uri.fromParts(
-                            "package",
-                            context?.packageName, null
-                        )
-                        intent.data = uri
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
-                    }
-                }
-            }
+//            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+//                context?.let {
+//                    Utils.showPermissionAlert(
+//                        it,
+//                        getString(R.string.grant_storage_permission),
+//                        getString(R.string.grant_permission_to_access_storage),
+//                        getString(R.string.deny),
+//                        getString(R.string.allow)
+//                    ) { galleryPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) }
+//                }
+//            }
+//            else -> {
+//                context?.let {
+//                    Utils.showPermissionAlert(
+//                        it,
+//                        getString(R.string.grant_storage_permission),
+//                        getString(R.string.grant_permission_to_access_storage),
+//                        getString(R.string.setting),
+//                        getString(R.string.cancel)
+//                    ) {
+//                        val intent = Intent()
+//                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+//                        val uri = Uri.fromParts(
+//                            "package",
+//                            context?.packageName, null
+//                        )
+//                        intent.data = uri
+//                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                        startActivity(intent)
+//                    }
+//                }
+//            }
         }
     }
 
@@ -1430,7 +1431,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
      * This method is used to fetch message of users & groups. For user it fetches previous 100 messages at
      * a time and for groups it fetches previous 30 messages. You can change limit of messages by modifying
      * number in `setLimit()`
-     * This method also mark last message as read using markMessageAsRead() present in this class.
+     * This method also mark last message as read using markAsRead() method of CometChat SDK
      * So all the above messages get marked as read.
      *
      * @see MessagesRequest.fetchPrevious
@@ -1483,7 +1484,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 if (baseMessages.isNotEmpty()) {
                     stopHideShimmer()
                     val baseMessage = baseMessages[baseMessages.size - 1]
-                    markMessageAsRead(baseMessage)
+                    markAsRead(baseMessage)
                 }
                 if (baseMessages.isEmpty()) {
                     stopHideShimmer()
@@ -1513,7 +1514,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 replyList.add(replyObject.getString("reply_neutral"))
                 replyList.add(replyObject.getString("reply_negative"))
             } catch (e: Exception) {
-                Log.e(TAG, "onSuccess: " + e.message)
+                Log.v(TAG, "onSuccess: " + e.message)
             }
             setSmartReplyAdapter(replyList)
         } else {
@@ -1595,11 +1596,11 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
             UIKitConstants.RequestCode.GALLERY -> if (data != null) {
                 intentRequestCode = UIKitConstants.RequestCode.GALLERY
-                Log.e(TAG, "onActivityResult:intent $data")
+                Log.v(TAG, "onActivityResult:intent $data")
                 val file = MediaUtils.getRealPath(context, data.data)
                 val cr = activity?.contentResolver
                 val mimeType = cr?.getType(data.data!!)
-                Log.e(TAG, "onActivityResult:file $file")
+                Log.v(TAG, "onActivityResult:file $file")
                 if (mimeType != null && mimeType.contains("image")) {
                     if (file.exists()) sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_IMAGE) else Snackbar.make(rvChatListView!!, R.string.file_not_exist, Snackbar.LENGTH_LONG).show()
                 } else {
@@ -1737,9 +1738,9 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
      */
     private val group: Unit
         private get() {
-            getGroup(Id!!, object : CallbackListener<Group>() {
+            getGroup(Id, object : CallbackListener<Group>() {
                 override fun onSuccess(group: Group) {
-                    Log.e(TAG, "getGroup: "+group.toString() )
+                    Log.v(TAG, "getGroup: "+group.toString() )
                     if (activity != null) {
                         name = group.name
                         avatarUrl = group.icon
@@ -1780,7 +1781,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             override fun onSuccess(textMessage: TextMessage?) {
                 isSmartReplyClicked = false
                 rvSmartReply?.visibility = View.GONE
-                Log.e(TAG, "onSuccess: " + textMessage.toString())
+                Log.v(TAG, "onSuccess: " + textMessage.toString())
                 if (messageAdapter != null) {
                     messageAdapter?.updateSentMessage(textMessage)
                 }
@@ -1850,13 +1851,13 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         editMessage(textMessage, object : CallbackListener<BaseMessage>() {
             override fun onSuccess(message: BaseMessage) {
                 if (messageAdapter != null) {
-                    Log.e(TAG, "onSuccess: $message")
+                    Log.v(TAG, "onSuccess: $message")
                     messageAdapter?.setUpdatedMessage(message)
                 }
             }
 
             override fun onError(e: CometChatException) {
-                Log.d(TAG, "onError: " + e.message)
+                Log.e(TAG, "onError: " + e.message)
             }
         })
     }
@@ -2049,7 +2050,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
 
             override fun onTypingStarted(typingIndicator: TypingIndicator) {
-                Log.e(TAG, "onTypingStarted: $typingIndicator")
+                Log.v(TAG, "onTypingStarted: $typingIndicator")
                 setTypingIndicator(typingIndicator, true)
             }
 
@@ -2058,13 +2059,17 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 setTypingIndicator(typingIndicator, false)
             }
 
+            override fun onTransientMessageReceived(transientMessage: TransientMessage?) {
+                setTransientMessage(transientMessage)
+            }
+
             override fun onMessagesDelivered(messageReceipt: MessageReceipt) {
                 Log.d(TAG, "onMessagesDelivered: $messageReceipt")
                 setMessageReciept(messageReceipt)
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt) {
-                Log.e(TAG, "onMessagesRead: $messageReceipt")
+                Log.v(TAG, "onMessagesRead: $messageReceipt")
                 setMessageReciept(messageReceipt)
             }
 
@@ -2080,6 +2085,22 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         })
     }
 
+    private fun setTransientMessage(transientMessage: TransientMessage?) {
+        Log.e(TAG, "setTransientMessage: "+transientMessage)
+        Log.e(TAG, "setTransientMessage: "+Id)
+
+            if (transientMessage?.data != null) {
+                try {
+                    val reaction = transientMessage.data.getString("reaction")
+                    val type = transientMessage.data.getString("type")
+                    if (reaction.equals("heart") && type.equals("live_reaction")) setReaction()
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+    }
+
     private fun setMessageReciept(messageReceipt: MessageReceipt) {
         if (messageAdapter != null) {
             if (messageReceipt.receivertype == CometChatConstants.RECEIVER_TYPE_USER) {
@@ -2092,7 +2113,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
     private fun setTypingIndicator(typingIndicator: TypingIndicator, isShow: Boolean) {
         if (typingIndicator.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER, ignoreCase = true)) {
-            Log.e(TAG, "onTypingStarted: $typingIndicator")
+            Log.v(TAG, "onTypingStarted: $typingIndicator")
             if (Id != null && Id.equals(typingIndicator.sender.uid, ignoreCase = true)) typingIndicator(typingIndicator, isShow)
         } else {
             if (Id != null && Id.equals(typingIndicator.receiverId, ignoreCase = true)) typingIndicator(typingIndicator, isShow)
@@ -2102,11 +2123,12 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     private fun onMessageReceived(message: BaseMessage) {
         MediaUtils.playSendSound(context, R.raw.incoming_message)
         if (message.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
-            if (Id != null && Id.equals(message.sender.uid, ignoreCase = true)) {
-                setMessage(message)
-            } else if (Id != null && Id.equals(message.receiverUid, ignoreCase = true) && message.sender.uid.equals(loggedInUser.uid, ignoreCase = true)) {
+             if (Id != null && Id.equals(message.sender.uid, ignoreCase = true)) {
                 setMessage(message)
             }
+             else if (Id != null && Id.equals(message.receiverUid, ignoreCase = true) && message.sender.uid.equals(loggedInUser.uid, ignoreCase = true)) {
+                 setMessage(message)
+             }
         } else {
             if (Id != null && Id.equals(message.receiverUid, ignoreCase = true)) {
                 setMessage(message)
@@ -2136,7 +2158,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             if (messageAdapter != null) {
                 messageAdapter?.addMessage(message)
                 checkSmartReply(message)
-                markMessageAsRead(message)
+                markAsRead(message)
                 if (messageAdapter!!.itemCount - 1 - (rvChatListView?.layoutManager as LinearLayoutManager?)!!.findLastVisibleItemPosition() < 5) scrollToBottom()
             } else {
                 messageList.add(message)
@@ -2163,7 +2185,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         if (messageAdapter != null) {
             if (show) {
                 if (typingIndicator.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
-                    if (typingIndicator.metadata == null) {
+//                    if (typingIndicator.metadata == null) {
                         FeatureRestriction.isTypingIndicatorsEnabled(object : FeatureRestriction.OnSuccessListener{
                             override fun onSuccess(p0: Boolean) {
                                 if (p0) {
@@ -2173,11 +2195,11 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                             }
 
                         })
-                    }
-                    else
-                        setLiveReaction()
+//                    }
+//                    else
+//                        setLiveReaction()
                 } else {
-                    if (typingIndicator.metadata == null) {
+//                    if (typingIndicator.metadata == null) {
                         FeatureRestriction.isTypingIndicatorsEnabled(object : FeatureRestriction.OnSuccessListener{
                             override fun onSuccess(p0: Boolean) {
                                 if (p0) {
@@ -2187,9 +2209,9 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                             }
 
                         })
-                    }
-                    else
-                        setLiveReaction()
+//                    }
+//                    else
+//                        setLiveReaction()
                 }
             } else {
                 if (typingIndicator.receiverType == CometChatConstants.RECEIVER_TYPE_USER){
@@ -2200,35 +2222,35 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                             }
                         })
                     }
-                    else{
-                        val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 0.2f)
-                        animator.duration = 700
-                        animator.repeatCount = 3
-                        animator.start()
-                        animator.addListener(object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator) {
-                                super.onAnimationEnd(animation)
-                                if (imageToFly != null) imageToFly?.clearAnimation()
-                                liveReactionLayout?.removeAllViews()
-                            }
-                        })
-                    }
+//                    else{
+//                        val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 0.2f)
+//                        animator.duration = 700
+//                        animator.repeatCount = 3
+//                        animator.start()
+//                        animator.addListener(object : AnimatorListenerAdapter() {
+//                            override fun onAnimationEnd(animation: Animator) {
+//                                super.onAnimationEnd(animation)
+//                                if (imageToFly != null) imageToFly?.clearAnimation()
+//                                liveReactionLayout?.removeAllViews()
+//                            }
+//                        })
+//                    }
                 }
                 else{
                     if (typingIndicator.metadata == null)
                         tvStatus?.text = memberNames
-                    else{
-                        val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 0.2f)
-                        animator.duration = 700
-                        animator.start()
-                        animator.addListener(object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator) {
-                                super.onAnimationEnd(animation)
-                                if (imageToFly != null) imageToFly?.clearAnimation()
-                                liveReactionLayout?.removeAllViews()
-                            }
-                        })
-                    }
+//                    else{
+//                        val animator = ObjectAnimator.ofFloat(liveReactionLayout!!, "alpha", 0.2f)
+//                        animator.duration = 700
+//                        animator.start()
+//                        animator.addListener(object : AnimatorListenerAdapter() {
+//                            override fun onAnimationEnd(animation: Animator) {
+//                                super.onAnimationEnd(animation)
+//                                if (imageToFly != null) imageToFly?.clearAnimation()
+//                                liveReactionLayout?.removeAllViews()
+//                            }
+//                        })
+//                    }
                 }
             }
         }
@@ -2272,7 +2294,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 //        onCloseAction()
         super.onResume()
         Log.d(TAG, "onResume: ")
-        Log.e(TAG, "onResume: " + intentRequestCode)
+        Log.v(TAG, "onResume: " + intentRequestCode)
         checkOnGoingCall()
         stickyHeaderDecoration?.let { this.rvChatListView?.removeItemDecoration(it) }
         if (!(intentRequestCode == UIKitConstants.RequestCode.AUDIO || intentRequestCode == UIKitConstants.RequestCode.GALLERY ||
@@ -2437,7 +2459,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     override fun setLongMessageClick(baseMessagesList: List<BaseMessage>?) {
-        Log.e(TAG, "setLongMessageClick: $baseMessagesList")
+        Log.v(TAG, "setLongMessageClick: $baseMessagesList")
 
         isReply = false
         isEdit = false
@@ -2520,6 +2542,12 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                         threadVisible
                     }
                     copyVisible = false
+
+                    if (baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO,true) ||
+                            baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_VIDEO,true) ||
+                            baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_FILE,true))
+                        shareVisible = false
+
                     if (basemessage.sender.uid == getLoggedInUser().uid) {
                         deleteVisible = FeatureRestriction.isDeleteMessageEnabled()
                         editVisible = false
@@ -2783,7 +2811,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                         message = message + "[" + Utils.getLastMessageDate(bMessage.getSentAt()) + "] " + bMessage.getSender().name + ": " + bMessage.text
                     }
                 }
-                Log.e(TAG, "onCopy: $message")
+                Log.v(TAG, "onCopy: $message")
                 val clipboardManager = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clipData = ClipData.newPlainText("MessageAdapter", message)
                 clipboardManager.setPrimaryClip(clipData)
@@ -2978,7 +3006,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         callExtension("reactions", "POST", "/v1/react", body,
                 object : CallbackListener<JSONObject>() {
                     override fun onSuccess(responseObject: JSONObject) {
-                        Log.e(TAG, "onSuccess: $responseObject")
+                        Log.v(TAG, "onSuccess: $responseObject")
                         // ReactionModel added successfully.
                     }
 

@@ -16,6 +16,7 @@ class UIKitConstants {
         var APP_ID = ""
     }
     object IntentStrings {
+        const val IS_DEFAULT_CALL = "default_call"
         const val INTENT_MEDIA_MESSAGE = "intent_media_message"
         const val IMAGE_TYPE = "image/*"
         const val UID = "uid"
@@ -50,6 +51,8 @@ class UIKitConstants {
         const val GROUP_PASSWORD = "group_password"
         const val GROUP_TYPE = "group_type"
 
+        const val TRANSFER_OWNERSHIP = "transfer_ownership"
+
         const val MESSAGE_CATEGORY = "message_category"
         const val MESSAGE_TYPE = "message_type"
         const val TEXTMESSAGE = "text_message"
@@ -82,7 +85,6 @@ class UIKitConstants {
         const val POLL_ID = "poll_id"
         const val POLL_VOTE_COUNT = "poll_vote_count"
 
-        const val TRANSFER_OWNERSHIP: String = "transfer_ownership"
     }
 
     object Tab {

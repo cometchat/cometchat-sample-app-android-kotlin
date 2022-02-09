@@ -60,8 +60,8 @@ class CometChatGroupMemberList : Fragment() {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
             guid = arguments?.getString(UIKitConstants.IntentStrings.GUID).toString()
-            showModerators = arguments!!.getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
-            transferOwnership = arguments!!.getBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP)
+            showModerators = requireArguments().getBoolean(UIKitConstants.IntentStrings.SHOW_MODERATORLIST)
+            transferOwnership = requireArguments().getBoolean(UIKitConstants.IntentStrings.TRANSFER_OWNERSHIP)
         }
     }
 

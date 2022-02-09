@@ -86,7 +86,7 @@ public class Extensions {
                     replyList.add(replyObject.getString("reply_neutral"))
                     replyList.add(replyObject.getString("reply_negative"))
                 } catch (e: java.lang.Exception) {
-                    Log.e(TAG, "onSuccess: " + e.message)
+                    Log.e(TAG, "onSmartReplyError: " + e.message)
                 }
                 return replyList
             }
@@ -201,7 +201,7 @@ public class Extensions {
                         var reaction : JSONObject = reactionObject.getJSONObject(keyValue)
                         var reactionCount: String = reaction.length().toString()
                         resultReactions[keyValue] = reactionCount
-                        Log.e(TAG, "getReactionsOnMessage: $keyValue=$reactionCount")
+                        Log.v(TAG, "getReactionsOnMessage: $keyValue=$reactionCount")
                     }
                 }
             }
@@ -230,7 +230,7 @@ public class Extensions {
                                     val uid = uids.next() as String
                                     val user = react.getJSONObject(uid)
                                     reactionUser.add(user.getString("name"))
-                                    Log.e(TAG, "getReactionsOnMessage: " + keyValue + "=" + user.getString("name"))
+                                    Log.v(TAG, "getReactionsOnMessage: " + keyValue + "=" + user.getString("name"))
                                 }
                                 result[keyValue] = reactionUser
                             }
@@ -405,7 +405,7 @@ public class Extensions {
                     result = confidence > 50
                 }
             } catch (e: java.lang.Exception) {
-                Toast.makeText(context, "Error:" + e.message, Toast.LENGTH_LONG).show()
+                e.printStackTrace()
             }
             return result
         }
@@ -420,7 +420,7 @@ public class Extensions {
             } catch (e: java.lang.Exception) {
                 Log.e(TAG, "getVoteCount: " + e.message)
             }
-            Log.e(TAG, "getVoteCount: $voteCount")
+            Log.v(TAG, "getVoteCount: $voteCount")
             return voteCount
         }
 
@@ -498,7 +498,7 @@ public class Extensions {
         fun checkExtensionEnabled(extensionId: String) :Boolean {
             isExtensionEnabled(extensionId, object : CallbackListener<Boolean>() {
                 override fun onSuccess(p0: Boolean) {
-                    Log.e(TAG, "onSuccess: " + extensionId + " - " + p0)
+                    Log.v(TAG, "onSuccess: " + extensionId + " - " + p0)
                     isEnabled = p0
                 }
                 override fun onError(p0: CometChatException?) {

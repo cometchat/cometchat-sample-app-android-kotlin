@@ -581,24 +581,24 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 timerRunnable?.let { seekHandler.removeCallbacks(it) }
                 timerRunnable = null
             }
-            mediaPlayer!!.reset()
+            mediaPlayer?.reset()
             if (Utils.hasPermissions(context, *arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                mediaPlayer!!.setDataSource(path)
-                mediaPlayer!!.prepare()
-                mediaPlayer!!.start()
+                mediaPlayer?.setDataSource(path)
+                mediaPlayer?.prepare()
+                mediaPlayer?.start()
             } else {
                requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                         UIKitConstants.RequestCode.READ_STORAGE)
             }
-            val duration = mediaPlayer!!.duration
-            voiceSeekbar!!.max = duration
-            recordTime!!.base = SystemClock.elapsedRealtime()
-            recordTime!!.start()
+            val duration = mediaPlayer?.duration
+            voiceSeekbar?.max = duration!!
+            recordTime?.base = SystemClock.elapsedRealtime()
+            recordTime?.start()
             timerRunnable = object : Runnable {
                 override fun run() {
-                    var pos = mediaPlayer!!.currentPosition
-                    voiceSeekbar!!.progress = pos
-                    if (mediaPlayer!!.isPlaying && pos < duration) {
+                    var pos = mediaPlayer?.currentPosition
+                    voiceSeekbar?.progress = pos!!
+                    if (mediaPlayer?.isPlaying!! && pos < duration) {
 //                        audioLength.setText(Utils.convertTimeStampToDurationTime(player.getCurrentPosition()));
                         seekHandler.postDelayed(this, 100)
                     } else {
@@ -608,7 +608,7 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
                 }
             }
             timerRunnable?.let { seekHandler.postDelayed(it, 100) }
-            mediaPlayer!!.setOnCompletionListener { mp: MediaPlayer ->
+            mediaPlayer?.setOnCompletionListener { mp: MediaPlayer ->
                 timerRunnable?.let { seekHandler.removeCallbacks(it) }
                 timerRunnable = null
                 mp.stop()
@@ -665,8 +665,8 @@ class CometChatComposeBox : RelativeLayout, View.OnClickListener {
     private fun stopRecording(isCancel: Boolean) {
         try {
             if (mediaRecorder != null) {
-                mediaRecorder!!.stop()
-                mediaRecorder!!.release()
+                mediaRecorder?.stop()
+                mediaRecorder?.release()
                 mediaRecorder = null
                 if (isCancel) {
                     File(audioFileNameWithPath).delete()

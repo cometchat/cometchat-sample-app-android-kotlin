@@ -9,14 +9,14 @@ abstract class LiveReactionListener(reactionClickListener: ReactionClickListener
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
         when(event?.action){
             MotionEvent.ACTION_DOWN -> {
-                v?.animate()?.scaleX(1.5f)?.setDuration(300)?.start()
-                v?.animate()?.scaleY(1.5f)?.setDuration(300)?.start()
+//                v?.animate()?.scaleX(1.5f)?.setDuration(10000)?.start()
+//                v?.animate()?.scaleY(1.5f)?.setDuration(10000)?.start()
                 reactionClickListener.onClick(v)
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                v?.animate()?.scaleX(1f)?.setDuration(300)?.start()
-                v?.animate()?.scaleY(1f)?.setDuration(300)?.start()
+//                v?.animate()?.scaleX(1f)?.setDuration(1000)?.start()
+//                v?.animate()?.scaleY(1f)?.setDuration(1000)?.start()
                 reactionClickListener.onCancel(v)
                 return true
             }

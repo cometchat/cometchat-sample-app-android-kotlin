@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -70,6 +69,7 @@ class CometChatUserDetailScreenActivity constructor() : AppCompatActivity() {
     private var divider2: View? = null
     private var divider3: View? = null
     private val callList: MutableList<BaseMessage> = ArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cometchat_user_detail)
