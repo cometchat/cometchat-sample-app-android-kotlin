@@ -28,6 +28,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="72dp">
+
                 <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
                     android:layout_width="40dp"
                     tools:src="@tools:sample/avatars"

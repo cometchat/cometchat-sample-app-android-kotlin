@@ -295,7 +295,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         if (isReplyPrivately && replyMessageJson != null) {
             if (replyMessageJson.has("category")) {
                 baseMessage = CometChatHelper.processMessage(replyMessageJson)
-                Log.e(TAG, "onCreate: base"+baseMessage )
+                Log.v(TAG, "onCreate: base"+baseMessage )
                 replyMessage()
             }
 
@@ -660,7 +660,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
         } else if (getActiveCall() != null) {
             if (onGoingCallView != null) onGoingCallView?.visibility = View.GONE
-            Log.e(TAG, "checkOnGoingCall: " + getActiveCall().toString())
+            Log.v(TAG, "checkOnGoingCall: " + getActiveCall().toString())
         }
     }
 
@@ -675,7 +675,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 attachment.fileExtension = messageType
                 attachment.fileName = inputContentInfo?.description?.label.toString()
                 mediaMessage.attachment = attachment
-                Log.e(TAG, "onClick: $attachment")
+                Log.v(TAG, "onClick: $attachment")
                 sendMediaMessage(mediaMessage, object : CallbackListener<MediaMessage?>() {
                     override fun onSuccess(mediaMessage: MediaMessage?) {
                         if (messageAdapter != null) {
@@ -1513,7 +1513,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                 replyList.add(replyObject.getString("reply_neutral"))
                 replyList.add(replyObject.getString("reply_negative"))
             } catch (e: Exception) {
-                Log.e(TAG, "onSuccess: " + e.message)
+                Log.v(TAG, "onSuccess: " + e.message)
             }
             setSmartReplyAdapter(replyList)
         } else {
@@ -1595,11 +1595,11 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
             UIKitConstants.RequestCode.GALLERY -> if (data != null) {
                 intentRequestCode = UIKitConstants.RequestCode.GALLERY
-                Log.e(TAG, "onActivityResult:intent $data")
+                Log.v(TAG, "onActivityResult:intent $data")
                 val file = MediaUtils.getRealPath(context, data.data)
                 val cr = activity?.contentResolver
                 val mimeType = cr?.getType(data.data!!)
-                Log.e(TAG, "onActivityResult:file $file")
+                Log.v(TAG, "onActivityResult:file $file")
                 if (mimeType != null && mimeType.contains("image")) {
                     if (file.exists()) sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_IMAGE) else Snackbar.make(rvChatListView!!, R.string.file_not_exist, Snackbar.LENGTH_LONG).show()
                 } else {
@@ -1739,7 +1739,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         private get() {
             getGroup(Id!!, object : CallbackListener<Group>() {
                 override fun onSuccess(group: Group) {
-                    Log.e(TAG, "getGroup: "+group.toString() )
+                    Log.v(TAG, "getGroup: "+group.toString() )
                     if (activity != null) {
                         name = group.name
                         avatarUrl = group.icon
@@ -1780,7 +1780,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             override fun onSuccess(textMessage: TextMessage?) {
                 isSmartReplyClicked = false
                 rvSmartReply?.visibility = View.GONE
-                Log.e(TAG, "onSuccess: " + textMessage.toString())
+                Log.v(TAG, "onSuccess: " + textMessage.toString())
                 if (messageAdapter != null) {
                     messageAdapter?.updateSentMessage(textMessage)
                 }
@@ -1850,13 +1850,13 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         editMessage(textMessage, object : CallbackListener<BaseMessage>() {
             override fun onSuccess(message: BaseMessage) {
                 if (messageAdapter != null) {
-                    Log.e(TAG, "onSuccess: $message")
+                    Log.v(TAG, "onSuccess: $message")
                     messageAdapter?.setUpdatedMessage(message)
                 }
             }
 
             override fun onError(e: CometChatException) {
-                Log.d(TAG, "onError: " + e.message)
+                Log.e(TAG, "onError: " + e.message)
             }
         })
     }
@@ -2049,7 +2049,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
 
             override fun onTypingStarted(typingIndicator: TypingIndicator) {
-                Log.e(TAG, "onTypingStarted: $typingIndicator")
+                Log.v(TAG, "onTypingStarted: $typingIndicator")
                 setTypingIndicator(typingIndicator, true)
             }
 
@@ -2064,7 +2064,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             }
 
             override fun onMessagesRead(messageReceipt: MessageReceipt) {
-                Log.e(TAG, "onMessagesRead: $messageReceipt")
+                Log.v(TAG, "onMessagesRead: $messageReceipt")
                 setMessageReciept(messageReceipt)
             }
 
@@ -2092,7 +2092,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 
     private fun setTypingIndicator(typingIndicator: TypingIndicator, isShow: Boolean) {
         if (typingIndicator.receiverType.equals(CometChatConstants.RECEIVER_TYPE_USER, ignoreCase = true)) {
-            Log.e(TAG, "onTypingStarted: $typingIndicator")
+            Log.v(TAG, "onTypingStarted: $typingIndicator")
             if (Id != null && Id.equals(typingIndicator.sender.uid, ignoreCase = true)) typingIndicator(typingIndicator, isShow)
         } else {
             if (Id != null && Id.equals(typingIndicator.receiverId, ignoreCase = true)) typingIndicator(typingIndicator, isShow)
@@ -2272,7 +2272,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
 //        onCloseAction()
         super.onResume()
         Log.d(TAG, "onResume: ")
-        Log.e(TAG, "onResume: " + intentRequestCode)
+        Log.v(TAG, "onResume: " + intentRequestCode)
         checkOnGoingCall()
         stickyHeaderDecoration?.let { this.rvChatListView?.removeItemDecoration(it) }
         if (!(intentRequestCode == UIKitConstants.RequestCode.AUDIO || intentRequestCode == UIKitConstants.RequestCode.GALLERY ||
@@ -2437,7 +2437,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
     }
 
     override fun setLongMessageClick(baseMessagesList: List<BaseMessage>?) {
-        Log.e(TAG, "setLongMessageClick: $baseMessagesList")
+        Log.v(TAG, "setLongMessageClick: $baseMessagesList")
 
         isReply = false
         isEdit = false
@@ -2520,6 +2520,12 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                         threadVisible
                     }
                     copyVisible = false
+
+                    if (baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_AUDIO,true) ||
+                            baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_VIDEO,true) ||
+                            baseMessage?.type.equals(CometChatConstants.MESSAGE_TYPE_FILE,true))
+                        shareVisible = false
+
                     if (basemessage.sender.uid == getLoggedInUser().uid) {
                         deleteVisible = FeatureRestriction.isDeleteMessageEnabled()
                         editVisible = false
@@ -2783,7 +2789,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
                         message = message + "[" + Utils.getLastMessageDate(bMessage.getSentAt()) + "] " + bMessage.getSender().name + ": " + bMessage.text
                     }
                 }
-                Log.e(TAG, "onCopy: $message")
+                Log.v(TAG, "onCopy: $message")
                 val clipboardManager = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clipData = ClipData.newPlainText("MessageAdapter", message)
                 clipboardManager.setPrimaryClip(clipData)
@@ -2978,7 +2984,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         callExtension("reactions", "POST", "/v1/react", body,
                 object : CallbackListener<JSONObject>() {
                     override fun onSuccess(responseObject: JSONObject) {
-                        Log.e(TAG, "onSuccess: $responseObject")
+                        Log.v(TAG, "onSuccess: $responseObject")
                         // ReactionModel added successfully.
                     }
 

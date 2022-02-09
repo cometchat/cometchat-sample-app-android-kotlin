@@ -24,6 +24,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Environment.getExternalStoragePublicDirectory
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -53,8 +54,7 @@ import com.cometchat.pro.constants.CometChatConstants
 import com.cometchat.pro.core.Call
 import com.cometchat.pro.core.CallSettings
 import com.cometchat.pro.core.CometChat
-import com.cometchat.pro.core.CometChat.CallbackListener
-import com.cometchat.pro.core.CometChat.OngoingCallListener
+import com.cometchat.pro.core.CometChat.*
 import com.cometchat.pro.exceptions.CometChatException
 import com.cometchat.pro.helpers.Logger
 import com.cometchat.pro.models.*
@@ -592,15 +592,19 @@ public class Utils {
         }
 
         fun getOutputMediaFile(context: Context): String? {
-            val var0 = File(Environment.getExternalStorageDirectory(), context.resources.getString(R.string.app_name))
-            return if (!var0.exists() && !var0.mkdirs()) {
-                null
-            } else {
-                val var1 = (Environment.getExternalStorageDirectory().toString() + "/" + context.resources.getString(R.string.app_name) + "/"
+            val dir: String
+            dir = if (Build.VERSION_CODES.R > Build.VERSION.SDK_INT) {
+                (Environment.getExternalStorageDirectory()
+                    .toString() + "/" + context.resources.getString(R.string.app_name) + "/"
                         + "audio/")
-                createDirectory(var1)
-                var1 + SimpleDateFormat("yyyyMMddHHmmss").format(Date()) + ".mp3"
+            } else {
+                (getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).path + "/" + context.resources.getString(
+                    R.string.app_name
+                ) + "/"
+                        + "audio/")
             }
+            createDirectory(dir)
+            return dir + SimpleDateFormat("yyyyMMddHHmmss").format(Date()) + ".mp3"
         }
 
         fun createDirectory(var0: String?) {
@@ -774,46 +778,19 @@ public class Utils {
             }
         }
 
-        fun startCall(activity: Activity, call: Call, mainView: RelativeLayout?) {
-            val callSettings = CallSettings.CallSettingsBuilder(activity, mainView)
-                    .setSessionId(call.sessionId)
-                    .startWithAudioMuted(true)
-                    .startWithVideoMuted(true)
-                    .build()
-            CometChat.startCall(callSettings, object : OngoingCallListener {
-                override fun onUserJoined(user: User) {
-                    Log.e("onUserJoined: ", user.uid)
-                }
-
-                override fun onUserLeft(user: User) {
-                    Snackbar.make(activity.window.decorView.rootView, "User Left: " + user.name, Snackbar.LENGTH_LONG).show()
-                    Log.e("onUserLeft: ", user.uid)
-                }
-
-                override fun onError(e: CometChatException) {
-                    e.message?.let { Log.e("onError: ", it) }
-                    ErrorMessagesUtils.cometChatErrorMessage(activity, e.code)
-                }
-
-                override fun onCallEnded(call: Call) {
-                    Log.e(TAG, "onCallEnded: $call")
-                    activity.finish()
-                }
-
-                override fun onUserListUpdated(p0: MutableList<User>?) {
-                    Log.e(TAG, "onUserListUpdated: " + p0.toString())
-                }
-
-                override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
-                    Log.e(TAG, "onAudioModesUpdated: "+p0.toString())
-                }
-
-            })
+        fun startCall(activity: Activity, call: Call) {
+            val intent = Intent(activity,CometChatStartCallActivity::class.java)
+            intent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.sessionId)
+            intent.putExtra(UIKitConstants.IntentStrings.IS_DEFAULT_CALL,true)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            activity.startActivity(intent)
+            activity.finish()
         }
 
         fun joinOnGoingCall(context: Context) {
-            val intent = Intent(context, CometChatCallActivity::class.java)
-            intent.putExtra(UIKitConstants.IntentStrings.JOIN_ONGOING, true)
+            val intent = Intent(context, CometChatStartCallActivity::class.java)
+            intent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, getActiveCall().sessionId)
+            intent.putExtra(UIKitConstants.IntentStrings.IS_DEFAULT_CALL,true)
             context.startActivity(intent)
         }
 

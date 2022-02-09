@@ -130,7 +130,8 @@ class CometChatSharedMediaAdapter(context: Context, messageArrayList: List<BaseM
         val message = messageArrayList[i]
         FeatureRestriction.isImageModerationEnabled(object : FeatureRestriction.OnSuccessListener{
             override fun onSuccess(p0: Boolean) {
-                isImageNotSafe = Extensions.getImageModeration(context, message)
+                if (p0)
+                    isImageNotSafe = Extensions.getImageModeration(context, message)
             }
         })
 

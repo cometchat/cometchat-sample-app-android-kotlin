@@ -16,6 +16,7 @@ class UIKitConstants {
         var APP_ID = ""
     }
     object IntentStrings {
+        const val IS_DEFAULT_CALL = "default_call"
         const val INTENT_MEDIA_MESSAGE = "intent_media_message"
         const val IMAGE_TYPE = "image/*"
         const val UID = "uid"

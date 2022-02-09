@@ -9,7 +9,10 @@ import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.text.Html
 import android.text.Spannable
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -613,7 +616,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                         // Voted successfully
                                         viewHolder.view.loadingProgressBar.visibility = View.VISIBLE
                                         viewHolder.view.totalVotes.text = "0 Votes"
-                                        Log.e(TAG, "onSuccess: $jsonObject")
+                                        Log.v(TAG, "onSuccess: $jsonObject")
                                         Toast.makeText(context, "Voted Successfully", Toast.LENGTH_LONG).show()
                                     }
 
@@ -761,7 +764,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                         // Voted successfully
                                         viewHolder.view.loadingProgressBar.visibility = View.VISIBLE
                                         viewHolder.view.totalVotes.text = "0 Votes"
-                                        Log.e(TAG, "onSuccess: $jsonObject")
+                                        Log.v(TAG, "onSuccess: $jsonObject")
                                         Toast.makeText(context, "Voted Successfully", Toast.LENGTH_LONG).show()
                                     }
 
@@ -2636,7 +2639,8 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                 }
 
 
-                viewHolder.view.goTxtMessage.text = message
+                viewHolder.view.goTxtMessage.text = Html.fromHtml(message,Html.FROM_HTML_MODE_COMPACT)
+                viewHolder.view.goTxtMessage.movementMethod = LinkMovementMethod.getInstance()
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
                 if (baseMessage.getSender().uid == loggedInUser.uid) viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.textColorWhite)) else viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
                 showMessageTime(viewHolder, baseMessage)
@@ -2800,7 +2804,9 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                     message = Extensions.checkDataMasking(baseMessage)
                 }
 
-                viewHolder.view.goTxtMessage.text = message
+                viewHolder.view.goTxtMessage.text = Html.fromHtml(message,Html.FROM_HTML_MODE_COMPACT)
+                viewHolder.view.goTxtMessage.autoLinkMask = Linkify.ALL
+                viewHolder.view.goTxtMessage.linksClickable = true
                 viewHolder.view.goTxtMessage.typeface = fontUtils.getTypeFace(FontUtils.robotoRegular)
                 if (baseMessage.getSender().uid == loggedInUser.uid) viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.textColorWhite)) else viewHolder.view.goTxtMessage.setTextColor(context.resources.getColor(R.color.primaryTextColor))
                 showMessageTime(viewHolder, baseMessage)
@@ -3127,7 +3133,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 val image = linkPreviewJsonObject?.getString("image")
                                 val title = linkPreviewJsonObject?.getString("title")
                                 url = linkPreviewJsonObject?.getString("url")
-                                Log.e("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
+                                Log.v("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
                                 viewHolder.view.linkTitle.text = title
                                 viewHolder.view.linkSubtitle.text = description
                                 Glide.with(context).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
@@ -3241,7 +3247,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
                                 val image = linkPreviewJsonObject?.getString("image")
                                 val title = linkPreviewJsonObject?.getString("title")
                                 url = linkPreviewJsonObject?.getString("url")
-                                Log.e("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
+                                Log.v("setLinkData: ", baseMessage.toString() + "\n\n" + url + "\n" + description + "\n" + image)
                                 viewHolder.view.linkTitle.text = title
                                 viewHolder.view.linkSubtitle.text = description
                                 Glide.with(context).load(Uri.parse(image)).timeout(1000).into(viewHolder.view.linkImg)
@@ -3544,11 +3550,11 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
      * @see BaseMessage
      */
     fun addMessage(baseMessage: BaseMessage) { //        if (!messageList.contains(baseMessage)) {
-        Log.e(TAG, "addMessage: before " + messageList.size)
+        Log.v(TAG, "addMessage: before " + messageList.size)
         messageList.add(baseMessage)
         selectedItemList.clear()
         //        }
-        Log.e(TAG, "addMessage: after " + messageList.size)
+        Log.v(TAG, "addMessage: after " + messageList.size)
 //        notifyDataSetChanged()
         //        }
         notifyItemInserted(messageList.size - 1)
@@ -3583,7 +3589,7 @@ class MessageAdapter(context: Context, messageList: List<BaseMessage>, type: Str
 
     val lastMessage: BaseMessage?
         get() = if (messageList.size > 0) {
-            Log.e(TAG, "getLastMessage: " + messageList[messageList.size - 1])
+            Log.v(TAG, "getLastMessage: " + messageList[messageList.size - 1])
             messageList[messageList.size - 1]
         } else null
 
