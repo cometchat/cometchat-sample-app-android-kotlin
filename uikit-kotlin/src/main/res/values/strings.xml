@@ -71,7 +71,7 @@
     <string name="user_added_to_group">%1$s is added to \"  %2$s \"</string>
     <string name="user_removed_from_group">%1$s is removed from \" %2$s \"</string>
     <string name="kicked_error">Group Member Kicked Failed</string>
-
+    <string name="leave_group_message">Are you sure you want to leave the group?</string>
     <string name="delete_group">Delete Group</string>
     <string name="delete_group_message">Delete the group</string>
     <string name="group_delete_error">Group Deletion Failed</string>
@@ -103,8 +103,6 @@
     <string name="enter_old_group_pwd">Enter Old Password</string>
     <string name="enter_new_password">Enter new password</string>
     <string name="group_alert">Group Alert</string>
-    <string name="transfer">transfer</string>
-    <string name="leave_group_message">Are you sure you want to leave the group?</string>
     <string name="transfer_ownership_message">You are the group owner, Please transfer ownership to a member before leaving the group.</string>
     <string name="make_owner">Make Owner</string>
     <string name="make_owner_question">Do you like to make %1$s as a Owner</string>
@@ -119,14 +117,13 @@
     </array>
     <!---->
 
-
     <!--GroupErrors-->
     <!--Not available in iOS-->
     <string name="you_cannot_perform_action">You cannot perform action on yourself</string>
     <string name="only_group_owner_removes_admin">You don\'t have permission to remove admin from the group..</string>
     <string name="removed_from_admin">%1$s is removed from admin privilege</string>
     <string name="update_group_member_error">Unable to update Group Member</string>
-    <string name="admin_list_retrieve_error" >Admin list retrieval failed</string>
+    <string name="admin_list_retrieve_error">Admin list retrieval failed</string>
     <string name="create_group_error">Unable to create a group</string>
     <string name="update_scope_error">Operation failed on %1$s</string>
     <string name="group_member_list_error">Error : Not able to load group member list</string>
@@ -208,6 +205,7 @@
     <string name="create_a_poll">Create a Poll</string>
     <string name="take_a_photo">Take a Photo</string>
     <string name="ok">OK</string>
+    <string name="transfer">transfer</string>
     <string name="send_sticker">Send Stickers</string>
     <string name="you_created_whiteboard">You’ve created a new collaborative whiteboard.</string>
     <string name="has_shared_whiteboard">has shared a collaborative whiteboard.</string>
@@ -276,7 +274,15 @@
     <string name="add_reaction">Add Reaction</string>
     <string name="added_successfully">added successfully</string>
     <string name="you_deleted_this_message">⚠️ You deleted this message</string>
+    <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
     <string name="back">back</string>
     <string name="ban">Ban</string>
     <string name="banned_successfully">Banned Successfully</string>
@@ -333,9 +339,9 @@
     <string name="participant">participant</string>
     <string name="translate_message">Translate Message</string>
     <string name="no_translation_available">No translation available</string>
-    <string name="has_shared_group_call">has shared a group call.</string>
-    <string name="you_created_group_call">You\'ve created a group call.</string>
-    <string name="custom_message_meeting">"📹 Group Call "</string>
+    <string name="has_shared_group_call">has initiated a group call.</string>
+    <string name="you_created_group_call">You\'ve initiated a group call.</string>
+    <string name="custom_message_meeting">📞  Group Call</string>
     <string name="start_group_call">Start a Group Call</string>
     <string name="retry">Retry</string>
     <string name="uploading">Uploading</string>
@@ -358,7 +364,6 @@
     <string name="grant_permission_to_access_storage">Please grant permission to access storage</string>
     <string name="you_cannot_perform_action_on_yourself">You cannot perform action on yourself</string>
     <string name="do_not_have_permission_to_remove_admin_from_the_group">You don\'t have permission to remove admin from the group</string>
-
 
 
     <string name="send_message_privately">Send Message Privately</string>

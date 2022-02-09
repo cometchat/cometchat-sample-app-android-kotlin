@@ -369,6 +369,7 @@
 
     <string name="send_message_privately">निजी तौर पर संदेश भेजें</string>
     <string name="view_profile">प्रोफ़ाइल देखें</string>
+
     <string name="transfer">स्थानांतरण”</string>
     <string name="leave_group_message">क्या आप निश्चित हैं कि आप इस समूह को छोड़ना चाहते हैं?”</string>
     <string name="transfer_ownership_message">आप समूह के मालिक हैं, कृपया समूह छोड़ने से पहले किसी सदस्य को स्वामित्व स्थानांतरित करें।</string>

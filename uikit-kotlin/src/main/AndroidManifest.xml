@@ -20,7 +20,8 @@
         tools:targetApi="R">
 
         <activity android:name=".ui_components.chats.CometChatStartConversation" />
-        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity" />
+        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity"
+            android:launchMode="singleInstance"/>
         <activity android:name=".ui_components.messages.extensions.collaborative.CometChatCollaborativeActivity" />
         <activity android:name=".ui_components.messages.extensions.message_reaction.CometChatReactionInfoActivity" />
         <activity android:name=".ui_components.messages.message_information.CometChatMessageInfoScreenActivity" />
@@ -99,6 +100,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_path" />
         </provider>
+
+        <receiver
+            android:name=".ui_components.calls.call_manager.ongoing_call.OngoingCallBroadcast"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="restartService" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".ui_components.calls.call_manager.ongoing_call.OngoingCallService"
+            android:enabled="true" />
     </application>
 
 </manifest>

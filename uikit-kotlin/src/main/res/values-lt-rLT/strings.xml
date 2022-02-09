@@ -316,6 +316,7 @@
 
     <string name="send_message_privately">Siųsti žinutę privačiai</string>
     <string name="view_profile">Peržiūrėti profilį</string>
+
     <string name="transfer">perdavimas”</string>
     <string name="leave_group_message">Ar tikrai norite palikti šią grupę?”</string>
     <string name="transfer_ownership_message">Jūs esate grupės savininkas, Prašome perduoti nuosavybės teisę nariui prieš išvykstant iš grupės.</string>

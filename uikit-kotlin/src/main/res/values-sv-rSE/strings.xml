@@ -319,7 +319,4 @@
     <string name="transfer">överföring”</string>
     <string name="leave_group_message">Är du säker på att du vill lämna den här gruppen?”</string>
     <string name="transfer_ownership_message">Du är gruppägare, Överför äganderätten till en medlem innan du lämnar gruppen.</string>
-
 </resources>
-
-

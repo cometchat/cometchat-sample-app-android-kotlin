@@ -182,12 +182,12 @@ class CometChatNewCallList constructor() : AppCompatActivity() {
      */
     private fun fetchUsers() {
         if (usersRequest == null) {
-            Log.e(TAG, "newfetchUsers: ")
+            Log.v(TAG, "newfetchUsers: ")
             usersRequest = UsersRequestBuilder().setLimit(30).build()
         }
         usersRequest!!.fetchNext(object : CallbackListener<List<User?>>() {
             public override fun onSuccess(users: List<User?>) {
-                Log.e(TAG, "onfetchSuccess: " + users.size)
+                Log.v(TAG, "onfetchSuccess: " + users.size)
                 stopHideShimmer()
                 rvUserList!!.setUserList(users)
             }

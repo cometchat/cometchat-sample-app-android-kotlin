@@ -156,7 +156,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/live_reactions_layout"
-        android:layout_marginBottom="50dp"/>
+        android:layout_marginBottom="10dp"/>
 
     <LinearLayout
         android:visibility="gone"

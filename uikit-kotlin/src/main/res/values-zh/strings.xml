@@ -372,7 +372,6 @@
     <string name="send_message_privately">私下发送消息</string>
     <string name="view_profile">查看档案</string>
 
-
     <string name="transfer">转移”</string>
     <string name="leave_group_message">你确定要离开这组吗？”</string>
     <string name="transfer_ownership_message">您是群组所有者，请在离开群组之前将所有权转移给会员。</string>
