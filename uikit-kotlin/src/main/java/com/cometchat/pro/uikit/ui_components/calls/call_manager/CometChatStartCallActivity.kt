@@ -80,6 +80,7 @@ class CometChatStartCallActivity : AppCompatActivity() {
                 Log.e("TAG", "onCallEnded: ")
                 showToast()
                 finish()
+                stopService(mServiceIntent)
             }
 
             override fun onUserListUpdated(p0: MutableList<User>?) {
