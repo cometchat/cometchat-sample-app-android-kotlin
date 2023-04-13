@@ -52,7 +52,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity
-import org.webrtc.ContextUtils.getApplicationContext
 
 
 class CometChatComposeBox : RelativeLayout, View.OnClickListener {

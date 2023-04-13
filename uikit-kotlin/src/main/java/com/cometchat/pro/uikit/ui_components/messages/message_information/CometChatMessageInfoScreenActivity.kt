@@ -25,7 +25,6 @@ import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
 import com.cometchat.pro.uikit.ui_resources.utils.Utils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
-import okhttp3.internal.Util
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -269,8 +268,8 @@ class CometChatMessageInfoScreenActivity : AppCompatActivity() {
                         val textViewOption = TextView(this)
                         textViewPercentage.setPadding(16, 4, 0, 4)
                         textViewOption.setPadding(16, 4, 0, 4)
-                        textViewOption.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium)
-                        textViewPercentage.setTextAppearance(this, R.style.TextAppearance_AppCompat_Medium)
+                        textViewOption.setTextAppearance(this, androidx.appcompat.R.style.TextAppearance_AppCompat_Medium)
+                        textViewPercentage.setTextAppearance(this, androidx.appcompat.R.style.TextAppearance_AppCompat_Medium)
                         textViewPercentage.setTextColor(resources.getColor(R.color.primaryTextColor))
                         textViewOption.setTextColor(resources.getColor(R.color.primaryTextColor))
                         val optionStr = options.getString((i + 1).toString())

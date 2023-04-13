@@ -16,14 +16,13 @@ import com.cometchat.pro.core.CallSettings
 import com.cometchat.pro.core.CallSettings.CallSettingsBuilder
 import com.cometchat.pro.core.CometChat
 import com.cometchat.pro.exceptions.CometChatException
-import com.cometchat.pro.models.User
 import com.cometchat.pro.models.AudioMode
+import com.cometchat.pro.models.User
 import com.cometchat.pro.uikit.R
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.ongoing_call.OngoingCallService
 import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants
 import com.cometchat.pro.uikit.ui_resources.utils.ErrorMessagesUtils
-import com.cometchat.pro.uikit.ui_resources.utils.Utils
 
 class CometChatStartCallActivity : AppCompatActivity() {
 
@@ -47,8 +46,8 @@ class CometChatStartCallActivity : AppCompatActivity() {
         setContentView(R.layout.activity_cometchat_start_call)
         activity = this
         mainView = findViewById(R.id.call_view)
-        if (intent != null)
-            sessionID = intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID)
+        if (intent != null) sessionID =
+            intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID)
         ongoingCallService = OngoingCallService()
         mServiceIntent = Intent(this, ongoingCallService?.javaClass)
         isDefaultCall = intent.getBooleanExtra(UIKitConstants.IntentStrings.IS_DEFAULT_CALL, false)
@@ -56,38 +55,53 @@ class CometChatStartCallActivity : AppCompatActivity() {
             startService(mServiceIntent)
         }
 
-        callSettings = CallSettingsBuilder(this, mainView)
-                .setSessionId(sessionID)
-                .startWithAudioMuted(true)
-                .startWithVideoMuted(true)
-                .build()
+        callSettings =
+            CallSettingsBuilder(this, mainView).setSessionId(sessionID).startWithAudioMuted(true)
+                .startWithVideoMuted(true).build()
 
         CometChat.startCall(callSettings, object : CometChat.OngoingCallListener {
             override fun onUserJoined(p0: User?) {
-                p0?.uid?.let { Log.e("onUserJoined: ", it) }
+                p0?.uid?.let { Log.i("onUserJoined: ", it) }
             }
 
             override fun onUserLeft(p0: User?) {
-                p0?.uid?.let { Log.e("onUserLeft: ", it) }
+                p0?.uid?.let { Log.i("onUserLeft: ", it) }
             }
 
-            override fun onError(p0: CometChatException) {
-                p0.message?.let { Log.e("onstartcallError: ", it) }
-                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatStartCallActivity, p0.code)
+            override fun onError(p0: CometChatException?) {
+                p0?.message?.let { Log.i("onstartcallError: ", it) }
+                ErrorMessagesUtils.cometChatErrorMessage(this@CometChatStartCallActivity, p0?.code)
             }
 
             override fun onCallEnded(p0: Call?) {
-                Log.e("TAG", "onCallEnded: ")
+                Log.i("TAG", "onCallEnded: ")
                 showToast()
                 finish()
+                stopService(mServiceIntent)
             }
 
             override fun onUserListUpdated(p0: MutableList<User>?) {
-                Log.e("TAG", "onUserListUpdated: " + p0.toString())
+                Log.i("TAG", "onUserListUpdated: " + p0.toString())
             }
 
             override fun onAudioModesUpdated(p0: MutableList<AudioMode>?) {
-                Log.e("TAG", "onAudioModesUpdated: "+p0.toString() )
+                Log.i("TAG", "onAudioModesUpdated: " + p0.toString())
+            }
+
+            override fun onRecordingStarted(p0: User?) {
+                Log.i("TAG", "onRecordingStarted: " + p0.toString())
+            }
+
+            override fun onRecordingStopped(p0: User?) {
+                Log.i("TAG", "onRecordingStopped: " + p0.toString())
+            }
+
+            override fun onUserMuted(p0: User?, p1: User?) {
+                Log.i("TAG", "onUserMuted: " + p0.toString())
+            }
+
+            override fun onCallSwitchedToVideo(p0: String?, p1: User?, p2: User?) {
+                Log.i("TAG", "onCallSwitchedToVideo: " + p0.toString())
             }
 
         })
@@ -95,12 +109,14 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
     private fun showToast() {
         val layoutInflater = layoutInflater
-        val layout :View = layoutInflater.inflate(R.layout.custom_toast, findViewById<ViewGroup>(R.id.group_layout))
+        val layout: View = layoutInflater.inflate(
+            R.layout.custom_toast, findViewById<ViewGroup>(R.id.group_layout)
+        )
         val tvMessage = layout.findViewById<TextView>(R.id.message)
         tvMessage.text = "Call Ended"
         val toast = Toast(applicationContext)
         toast.duration = Toast.LENGTH_SHORT
-        toast.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM,0,0)
+        toast.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM, 0, 0)
         toast.view = layout
 
         toast.show()
@@ -112,7 +128,8 @@ class CometChatStartCallActivity : AppCompatActivity() {
 
     private fun isMyServiceRunning(serviceClass: Class<out OngoingCallService?>): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        return manager.getRunningServices(Integer.MAX_VALUE).any { it.service.className == serviceClass.canonicalName }
+        return manager.getRunningServices(Integer.MAX_VALUE)
+            .any { it.service.className == serviceClass.canonicalName }
 
     }
 }
