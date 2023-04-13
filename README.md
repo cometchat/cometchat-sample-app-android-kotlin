@@ -65,7 +65,7 @@ Learn more about how to integrate [UI Kit-Kotlin](https://github.com/cometchat-p
 ---
 
 # Troubleshooting
-- To read the full documentation on UI Kit-Kotlin integration visit our [Documentation](https://prodocs.cometchat.com/docs/android-kotlin-ui-kit).
+- To read the full documentation on UI Kit-Kotlin integration visit our [Documentation](https://prodocs.cometchat.com/v2.1/docs).
 - Facing any issues while integrating or installing the UI Kit-Kotlin please <a href="https://app.cometchat.io/"> connect with us via real time support present in CometChat Dashboard.</a>
 
 # Contributors
@@ -75,13 +75,14 @@ Thanks to the following people who have contributed to this project:<br/>
 [@yadavmangesh :spiral_notepad:](https://github.com/yadavmangesh)<br/>
 [@anantgarg :man_judge:](https://github.com/anantgarg)<br/>
 [@Tristankluivert :man_technologist:](https://github.com/Tristankluivert)<br/>
+[@Vivekprajapati :man_technologist:](https://github.com/vivekCometChat)<br/>
 
 ## Contact :mailbox:
 Contact us via real time support present in [CometChat Dashboard](https://app.cometchat.io/).
 
 ## License
 
-This project uses the following license: [License](https://github.com/cometchat-pro/android-kotlin-chat-app/blob/master/LICENSE).
+This project uses the following license: [License](https://github.com/cometchat-pro/.github/blob/master/LICENSE).
 
 
 

@@ -311,7 +311,11 @@ import kotlin.math.min
                 //int bufferSize = 1024;
                 val bufferSize = min(bytesAvailable, maxBufferSize)
                 val buffers = ByteArray(bufferSize)
-                while (inputStream?.read(buffers).also { read = it } != -1) {
+                while (inputStream?.read(buffers).also {
+                        if (it != null) {
+                            read = it
+                        }
+                    } != -1) {
                     outputStream.write(buffers, 0, read)
                 }
                 Log.e("File Size", "Size " + file.length())

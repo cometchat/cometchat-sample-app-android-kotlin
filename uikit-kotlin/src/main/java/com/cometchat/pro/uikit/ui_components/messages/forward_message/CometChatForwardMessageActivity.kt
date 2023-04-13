@@ -354,7 +354,7 @@ class CometChatForwardMessageActivity : AppCompatActivity() {
                                 uid = (conversation.conversationWith as Group).guid
                                 type = CometChatConstants.RECEIVER_TYPE_GROUP
                             }
-                            message = MediaMessage(uid, null, messageType, type)
+                            message = MediaMessage(uid, messageType, type)
                             val attachment = Attachment()
                             attachment.fileUrl = mediaMessageUrl
                             attachment.fileMimeType = mediaMessageMime

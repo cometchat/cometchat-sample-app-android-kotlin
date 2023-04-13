@@ -396,9 +396,9 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
                     val textViewOption = TextView(context)
                     textViewPercentage.setPadding(16, 4, 0, 4)
                     textViewOption.setPadding(16, 4, 0, 4)
-                    textViewOption.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
-                    textViewPercentage.setTextAppearance(context, R.style.TextAppearance_AppCompat_Medium)
-                    textViewPercentage.setTextColor(context!!.resources.getColor(R.color.primaryTextColor))
+                    textViewOption.setTextAppearance(context, androidx.appcompat.R.style.TextAppearance_AppCompat_Medium)
+                    textViewPercentage.setTextAppearance(context, androidx.appcompat.R.style.TextAppearance_AppCompat_Medium)
+                    textViewPercentage.setTextColor(context!!.getColor(R.color.primaryTextColor))
                     textViewOption.setTextColor(context!!.resources.getColor(R.color.primaryTextColor))
                     val optionStr = options.getString((k + 1).toString())
                     if (voteCount > 0) {
@@ -698,7 +698,7 @@ class CometChatThreadMessageList : Fragment(), View.OnClickListener, OnMessageLo
             fadeOut.repeatCount = 3
 
             fadeOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     imageView.visibility = View.GONE
                 }
             })

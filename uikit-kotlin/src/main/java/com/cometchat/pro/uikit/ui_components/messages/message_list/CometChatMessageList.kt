@@ -606,7 +606,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
             fadeOut.repeatCount = 3
 
             fadeOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     imageView.visibility = View.GONE
                 }
             })
@@ -669,7 +669,7 @@ class CometChatMessageList : Fragment(), View.OnClickListener, OnMessageLongClic
         composeBox?.setComposeBoxListener(object : ComposeActionListener() {
             override fun onEditTextMediaSelected(inputContentInfo: InputContentInfoCompat?) {
                 val messageType = inputContentInfo?.linkUri.toString().substring(inputContentInfo?.linkUri.toString().lastIndexOf('.'))
-                val mediaMessage = MediaMessage(Id, null, CometChatConstants.MESSAGE_TYPE_IMAGE, type)
+                val mediaMessage = MediaMessage(Id, CometChatConstants.MESSAGE_TYPE_IMAGE, type)
                 val attachment = Attachment()
                 attachment.fileUrl = inputContentInfo?.linkUri.toString()
                 attachment.fileMimeType = inputContentInfo?.description?.getMimeType(0)
