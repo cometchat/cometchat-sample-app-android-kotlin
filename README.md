@@ -75,6 +75,7 @@ Thanks to the following people who have contributed to this project:<br/>
 [@yadavmangesh :spiral_notepad:](https://github.com/yadavmangesh)<br/>
 [@anantgarg :man_judge:](https://github.com/anantgarg)<br/>
 [@Tristankluivert :man_technologist:](https://github.com/Tristankluivert)<br/>
+[@Vivekprajapati :man_technologist:](https://github.com/vivekCometChat)<br/>
 
 ## Contact :mailbox:
 Contact us via real time support present in [CometChat Dashboard](https://app.cometchat.io/).
