@@ -361,7 +361,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
     private fun createDialog(title: String, message: String, positiveText: String, negativeText: String, drawableRes: Int) {
         Log.e(TAG, "createDialog: "+ownerId+ " logged in: "+loggedInUser.uid)
         val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
-            R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+            com.google.android.material.R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
         alertDialog.setTitle(title)
         alertDialog.setMessage(message)
         alertDialog.setPositiveButton(positiveText) { dialogInterface: DialogInterface?, i: Int ->
@@ -382,7 +382,7 @@ class CometChatGroupDetailActivity() : AppCompatActivity() {
 
     private fun showTransferOwnershipDialog() {
         val alertDialog = MaterialAlertDialogBuilder(this@CometChatGroupDetailActivity,
-                R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
+                com.google.android.material.R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog_Centered)
 //        alertDialog.setTitle(R.string.group_alert)
         alertDialog.setMessage(R.string.transfer_ownership_message)
         alertDialog.setPositiveButton(R.string.transfer, DialogInterface.OnClickListener { dialog, which ->
