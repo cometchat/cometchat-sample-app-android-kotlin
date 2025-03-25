@@ -805,13 +805,6 @@ public class CometChatGroups extends MaterialCardView {
      */
     public ImageView getBackIconView() {
         return binding.ivBack;
-    }    /**
-     * Gets the stroke width.
-     *
-     * @return the stroke width.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -821,6 +814,13 @@ public class CometChatGroups extends MaterialCardView {
      */
     public @ColorInt int getBackIconTint() {
         return backIconTint;
+    }    /**
+     * Gets the stroke width.
+     *
+     * @return the stroke width.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -1068,14 +1068,6 @@ public class CometChatGroups extends MaterialCardView {
     public void setSearchInputPlaceHolderTextColor(@ColorInt int searchInputPlaceHolderTextColor) {
         this.searchInputPlaceHolderTextColor = searchInputPlaceHolderTextColor;
         binding.searchBox.setSearchInputPlaceHolderTextColor(searchInputPlaceHolderTextColor);
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth the stroke width to set.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1095,6 +1087,14 @@ public class CometChatGroups extends MaterialCardView {
     public void setSearchInputIcon(Drawable searchInputIcon) {
         this.searchInputIcon = searchInputIcon;
         binding.searchBox.setSearchInputStartIcon(searchInputIcon);
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth the stroke width to set.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2254,7 +2254,7 @@ public class CometChatGroups extends MaterialCardView {
      *
      * @param visibility the desired visibility state of the search box.
      */
-    private void setSearchBoxVisibility(int visibility) {
+    public void setSearchBoxVisibility(int visibility) {
         this.searchBoxVisibility = visibility;
         binding.searchBox.setVisibility(visibility);
 
@@ -2278,7 +2278,7 @@ public class CometChatGroups extends MaterialCardView {
      *
      * @param visibility the desired visibility state of the back icon.
      */
-    private void setBackIconVisibility(int visibility) {
+    public void setBackIconVisibility(int visibility) {
         this.backIconVisibility = visibility;
         if (visibility == GONE) {
             binding.ivBack.setVisibility(GONE);
@@ -2302,18 +2302,9 @@ public class CometChatGroups extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setEmptyStateVisibility(int visibility) {
+    public void setEmptyStateVisibility(int visibility) {
         this.emptyStateVisibility = visibility;
         binding.emptyStateView.setVisibility(visibility);
-    }    /**
-     * Called when the view is attached to a window. Adds listeners and fetches
-     * groups.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        groupsViewModel.addListeners();
-        groupsViewModel.fetchGroup();
     }
 
     /**
@@ -2345,6 +2336,15 @@ public class CometChatGroups extends MaterialCardView {
      */
     public int getErrorStateVisibility() {
         return errorStateVisibility;
+    }    /**
+     * Called when the view is attached to a window. Adds listeners and fetches
+     * groups.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        groupsViewModel.addListeners();
+        groupsViewModel.fetchGroup();
     }
 
     /**
@@ -2352,7 +2352,7 @@ public class CometChatGroups extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setErrorStateVisibility(int visibility) {
+    public void setErrorStateVisibility(int visibility) {
         this.errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(visibility);
     }

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">Chattar</string>
+    <string name="app_bottom_nav_calls">Samtal</string>
+    <string name="app_bottom_nav_users">Användare</string>
+    <string name="app_bottom_nav_groups">Grupper</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">Logga in</string>
+    <string name="app_continue_with_google">Fortsätt med Google</string>
+    <string name="app_no_banned_members">Inga blockerade medlemmar</string>
+    <string name="app_banned_few_members_to_show_them_here">Några medlemmar har blockerats för att visas här</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">Misslyckades att logga in med Google, inget konto hittades.</string>
+    <string name="app_google_sign_in_failed">Google-inloggning misslyckades: </string>
+    <string name="app_group">grupp</string>
+    <string name="app_btn_leave">Lämna</string>
+    <string name="app_leave_this_group">Lämna den här gruppen?</string>
+    <string name="app_leave_this_group_description">Är du säker på att du vill lämna den här gruppen? Du kommer inte att få några fler meddelanden från den här chatten.</string>
+    <string name="app_btn_cancel">Avbryt</string>
+    <string name="app_transfer_ownership_description">Är du säker på att du vill överföra ägarskapet? Det här kan inte ångras, och den nya ägaren får full kontroll.</string>
+    <string name="app_btn_continue">Fortsätt</string>
+    <string name="app_delete_and_exit">Radera och lämna?</string>
+    <string name="app_delete_and_exit_action">Radera och lämna</string>
+    <string name="app_delete_and_exit_description">Är du säker på att du vill radera den här chatten och lämna gruppen? Den här åtgärden går inte att ångra.</string>
+    <string name="app_btn_delete">Radera</string>
+    <string name="app_add">Lägg till</string>
+    <string name="app_member">Medlem</string>
+    <string name="app_members">Medlemmar</string>
+    <string name="app_base_message">basmeddelande</string>
+    <string name="app_user">användare</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">samtalstyp</string>
+    <string name="app_not_logged_in">Du är inte inloggad. Logga in och försök igen.</string>
+    <string name="app_transfer_ownership">Överför ägarskap</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">Samtalsinformation</string>
+    <string name="app_call_details_history">Historik</string>
+    <string name="app_call_details_participants">Deltagare</string>
+    <string name="app_call_details_recordings">Inspelningar</string>
+    <string name="app_call_outgoing">Utgående</string>
+    <string name="app_call_missed">Missat</string>
+    <string name="app_call_incoming">Inkommande</string>
+    <string name="app_no_recordings_found">Inga inspelningar hittades</string>
+
+    <string name="app_accept">Acceptera</string>
+    <string name="app_decline">Neka</string>
+    <string name="app_incoming_s_call">Inkommande %s-samtal</string>
+    <string name="app_user_info">Användarinformation</string>
+    <string name="app_voice">Röst</string>
+    <string name="app_video">Video</string>
+
+    <string name="app_delete">Radera chat</string>
+    <string name="app_delete_chat_title">Radera den här chatten?</string>
+    <string name="app_delete_chat_subtitle">Är du säker på att du vill radera den här chatten? Den här åtgärden går inte att ångra.</string>
+    <string name="app_delete_chat_positive_button">Radera</string>
+    <string name="app_delete_chat_negative_button">Avbryt</string>
+    <string name="app_delete_chat_error">Radering misslyckades</string>
+    <string name="app_delete_chat_success">Chat raderad</string>
+
+    <string name="app_block">Blockera</string>
+    <string name="app_block_user_title">Blockera den här kontakten?</string>
+    <string name="app_block_user_subtitle">Är du säker på att du vill blockera den här kontakten? Du kommer inte att få fler meddelanden från den personen.</string>
+    <string name="app_block_user_positive_button">Blockera</string>
+    <string name="app_block_user_negative_button">Avbryt</string>
+    <string name="app_block_user_error">Blockering misslyckades</string>
+    <string name="app_block_user_success">Användare blockerad</string>
+
+    <string name="app_unblock">Avblockera</string>
+    <string name="app_unblock_user_title">Avblockera den här kontakten?</string>
+    <string name="app_unblock_user_subtitle">Är du säker på att du vill avblockera den här kontakten?</string>
+    <string name="app_unblock_user_positive_button">Avblockera</string>
+    <string name="app_unblock_user_negative_button">Avbryt</string>
+    <string name="app_unblock_user_error">Avblockering misslyckades</string>
+    <string name="app_unblock_user_success">Användare avblockerad</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">Välj en exempelanvändare</string>
+    <string name="app_continue">Fortsätt</string>
+    <string name="app_or">Eller</string>
+    <string name="app_change">Ändra</string>
+    <string name="app_app_credentials">Appuppgifter</string>
+    <string name="app_enter_uid">Ange UID</string>
+    <string name="app_enter_your_uid">Ange din UID</string>
+    <string name="app_error_invalid_user_or_uid_login">Välj en användare eller ange en giltig UID</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">Region</string>
+    <string name="app_region_us">USA</string>
+    <string name="app_region_eu">EU</string>
+    <string name="app_region_in">Indien</string>
+    <string name="app_app_id">App-ID</string>
+    <string name="app_app_id_hint">Ange App-ID</string>
+    <string name="app_auth_key">Autentiseringsnyckel</string>
+    <string name="app_auth_key_hint">Ange autentiseringsnyckel</string>
+    <string name="app_please_select_app_region">Välj appens region</string>
+    <string name="app_invalid_app_id">Ange ett giltigt App-ID</string>
+    <string name="app_invalid_auth_token">Ange en giltig autentiseringstoken</string>
+    <string name="app_new_group">Ny grupp</string>
+    <string name="app_group_type">Typ</string>
+    <string name="app_group_name">Namn</string>
+    <string name="app_group_hint_name">Ange gruppnamn</string>
+    <string name="app_password">Lösenord</string>
+    <string name="app_hint_enter_the_password">Ange lösenord</string>
+    <string name="app_btn_create_group">Skapa grupp</string>
+    <string name="app_create_conversation">Skapa konversation</string>
+    <string name="app_logout">Logga ut</string>
+    <string name="app_group_info">Gruppinfo</string>
+    <string name="app_no_longer_part_of_this_group">Du är inte längre en del av den här gruppen</string>
+    <string name="app_view_members">Visa medlemmar</string>
+    <string name="app_add_members">Lägg till medlemmar</string>
+    <string name="app_banned_members">Blockerade medlemmar</string>
+    <string name="app_view_members_chip">Visa\nmedlemmar</string>
+    <string name="app_add_members_chip">Lägg till\nmedlemmar</string>
+    <string name="app_banned_members_chip">Blockerade\nmedlemmar</string>
+    <string name="app_leave">Lämna</string>
+    <string name="app_block_user_unable_to_send_message">Du kan inte skicka meddelanden till den här gruppen eftersom du inte längre är medlem.</string>
+    <string name="app_unblock_user">Avblockera användare</string>
+    <string name="app_description">Beskrivning</string>
+    <string name="app_steps_to_reproduce">Steg för att återskapa</string>
+    <string name="app_join_group">Gå med i gruppen</string>
+    <string name="app_type">Typ</string>
+    <string name="app_enter_the_password">Ange lösenord</string>
+    <string name="app_something_went_wrong_please_try_again">Något gick fel. Försök igen.</string>
+    <string name="app_retry">Försök igen</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">Det verkar som att något gick fel.\nFörsök igen.</string>
+    <string name="app_type_public">Offentlig</string>
+
+    <string name="app_transfer_ownership_text">Överför ägarskap</string>
+    <string name="app_type_private">Privat</string>
+    <string name="app_type_protected">Skyddad</string>
+    <string name="app_thread_title">Tråd</string>
+    <string name="app_error_conversations_title">Oj!</string>
+    <string name="app_group_members_empty_title">Inga medlemmar tillgängliga</string>
+    <string name="app_group_member_empty_subtitle">Lägg till medlemmar i gruppen och de visas här.</string>
+    <string name="app_search">Sök</string>
+    <string name="app_new_chat">Ny chat</string>
+    <string name="app_report">Starta rapport</string>
+    <string name="app_has_blocked_you">har blockerat dig</string>
+    <string name="app_you_have_blocked_this_user">Du har blockerat</string>
+</resources>

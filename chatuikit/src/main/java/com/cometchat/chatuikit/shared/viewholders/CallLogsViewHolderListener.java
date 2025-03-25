@@ -11,7 +11,7 @@ import com.cometchat.chatuikit.shared.interfaces.ViewHolderCallBack;
 
 import java.util.List;
 
-public class CallLogsViewHolderListener implements ViewHolderCallBack {
+public abstract class CallLogsViewHolderListener implements ViewHolderCallBack {
     private static final String TAG = CallLogsViewHolderListener.class.getSimpleName();
 
     public View createView(Context context, CometchatCallLogsItemsBinding listItem) {

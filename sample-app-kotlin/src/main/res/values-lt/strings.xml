@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">Pokalbiai</string>
+    <string name="app_bottom_nav_calls">Skambučiai</string>
+    <string name="app_bottom_nav_users">Vartotojai</string>
+    <string name="app_bottom_nav_groups">Grupės</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">Prisijungti</string>
+    <string name="app_continue_with_google">Tęsti su Google</string>
+    <string name="app_no_banned_members">Nėra užblokuotų narių</string>
+    <string name="app_banned_few_members_to_show_them_here">Užblokuota keletas narių, kad juos būtų galima matyti čia</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">Nepavyko prisijungti naudojant „Google“, nerasta paskyros.</string>
+    <string name="app_google_sign_in_failed">Nepavyko prisijungti naudojant „Google“:</string>
+    <string name="app_group">grupė</string>
+    <string name="app_btn_leave">Palikti</string>
+    <string name="app_leave_this_group">Palikti šią grupę?</string>
+    <string name="app_leave_this_group_description">Ar tikrai norite palikti šią grupę? Nebegausite daugiau žinučių iš šio pokalbio.</string>
+    <string name="app_btn_cancel">Atšaukti</string>
+    <string name="app_transfer_ownership_description">Ar tikrai norite perleisti nuosavybę? Tai negrįžtamas veiksmas, o naujasis savininkas gaus visišką valdymą.</string>
+    <string name="app_btn_continue">Tęsti</string>
+    <string name="app_delete_and_exit">Ištrinti ir išeiti?</string>
+    <string name="app_delete_and_exit_action">Ištrinti ir išeiti</string>
+    <string name="app_delete_and_exit_description">Ar tikrai norite ištrinti šį pokalbį ir palikti grupę? Šio veiksmo atšaukti negalima.</string>
+    <string name="app_btn_delete">Ištrinti</string>
+    <string name="app_add">Pridėti</string>
+    <string name="app_member">Narys</string>
+    <string name="app_members">Nariai</string>
+    <string name="app_base_message">bazinėŽinutė</string>
+    <string name="app_user">vartotojas</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">skambučioTipas</string>
+    <string name="app_not_logged_in">Jūs nesate prisijungę. Prisijunkite ir bandykite dar kartą.</string>
+    <string name="app_transfer_ownership">Perleisti nuosavybę</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">Skambučio detalės</string>
+    <string name="app_call_details_history">Istorija</string>
+    <string name="app_call_details_participants">Dalyviai</string>
+    <string name="app_call_details_recordings">Įrašai</string>
+    <string name="app_call_outgoing">Išeinantis</string>
+    <string name="app_call_missed">Praleistas</string>
+    <string name="app_call_incoming">Įeinantis</string>
+    <string name="app_no_recordings_found">Įrašų nerasta</string>
+
+    <string name="app_accept">Priimti</string>
+    <string name="app_decline">Atmesti</string>
+    <string name="app_incoming_s_call">Įeinantis %s skambutis</string>
+    <string name="app_user_info">Vartotojo informacija</string>
+    <string name="app_voice">Balsas</string>
+    <string name="app_video">Vaizdas</string>
+
+    <string name="app_delete">Ištrinti pokalbį</string>
+    <string name="app_delete_chat_title">Ištrinti šį pokalbį?</string>
+    <string name="app_delete_chat_subtitle">Ar tikrai norite ištrinti šį pokalbį? Šio veiksmo atšaukti negalima.</string>
+    <string name="app_delete_chat_positive_button">Ištrinti</string>
+    <string name="app_delete_chat_negative_button">Atšaukti</string>
+    <string name="app_delete_chat_error">Nepavyko ištrinti</string>
+    <string name="app_delete_chat_success">Pokalbis ištrintas</string>
+
+    <string name="app_block">Blokuoti</string>
+    <string name="app_block_user_title">Blokuoti šį kontaktą?</string>
+    <string name="app_block_user_subtitle">Ar tikrai norite blokuoti šį kontaktą? Nebegausite iš jo jokių žinučių.</string>
+    <string name="app_block_user_positive_button">Blokuoti</string>
+    <string name="app_block_user_negative_button">Atšaukti</string>
+    <string name="app_block_user_error">Nepavyko užblokuoti</string>
+    <string name="app_block_user_success">Vartotojas užblokuotas</string>
+
+    <string name="app_unblock">Atblokuoti</string>
+    <string name="app_unblock_user_title">Atblokuoti šį kontaktą?</string>
+    <string name="app_unblock_user_subtitle">Ar tikrai norite atblokuoti šį kontaktą?</string>
+    <string name="app_unblock_user_positive_button">Atblokuoti</string>
+    <string name="app_unblock_user_negative_button">Atšaukti</string>
+    <string name="app_unblock_user_error">Nepavyko atblokuoti</string>
+    <string name="app_unblock_user_success">Vartotojas atblokuotas</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">Pasirinkite pavyzdinį vartotoją</string>
+    <string name="app_continue">Tęsti</string>
+    <string name="app_or">Arba</string>
+    <string name="app_change">Keisti</string>
+    <string name="app_app_credentials">Programėlės prisijungimo duomenys</string>
+    <string name="app_enter_uid">Įveskite UID</string>
+    <string name="app_enter_your_uid">Įveskite savo UID</string>
+    <string name="app_error_invalid_user_or_uid_login">Pasirinkite vartotoją arba įveskite teisingą UID</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">Regionas</string>
+    <string name="app_region_us">JAV</string>
+    <string name="app_region_eu">ES</string>
+    <string name="app_region_in">Indija</string>
+    <string name="app_app_id">Programėlės ID</string>
+    <string name="app_app_id_hint">Įveskite programėlės ID</string>
+    <string name="app_auth_key">Autentifikavimo raktas</string>
+    <string name="app_auth_key_hint">Įveskite autentifikavimo raktą</string>
+    <string name="app_please_select_app_region">Pasirinkite programėlės regioną</string>
+    <string name="app_invalid_app_id">Prašome įvesti galiojantį programėlės ID</string>
+    <string name="app_invalid_auth_token">Prašome įvesti galiojantį autentifikavimo raktą</string>
+    <string name="app_new_group">Nauja grupė</string>
+    <string name="app_group_type">Tipas</string>
+    <string name="app_group_name">Pavadinimas</string>
+    <string name="app_group_hint_name">Įveskite grupės pavadinimą</string>
+    <string name="app_password">Slaptažodis</string>
+    <string name="app_hint_enter_the_password">Įveskite slaptažodį</string>
+    <string name="app_btn_create_group">Sukurti grupę</string>
+    <string name="app_create_conversation">Sukurti pokalbį</string>
+    <string name="app_logout">Atsijungti</string>
+    <string name="app_group_info">Grupės informacija</string>
+    <string name="app_no_longer_part_of_this_group">Jūs nebesate šios grupės narys</string>
+    <string name="app_view_members">Peržiūrėti narius</string>
+    <string name="app_add_members">Pridėti narių</string>
+    <string name="app_banned_members">Užblokuoti nariai</string>
+    <string name="app_view_members_chip">Peržiūrėti\nnarius</string>
+    <string name="app_add_members_chip">Pridėti\nnarių</string>
+    <string name="app_banned_members_chip">Užblokuoti\nnariai</string>
+    <string name="app_leave">Palikti</string>
+    <string name="app_block_user_unable_to_send_message">Negalite siųsti žinučių šiai grupei, nes nebesate jos narys.</string>
+    <string name="app_unblock_user">Atblokuoti vartotoją</string>
+    <string name="app_description">Aprašymas</string>
+    <string name="app_steps_to_reproduce">Veiksmai, kaip atkurti</string>
+    <string name="app_join_group">Prisijungti prie grupės</string>
+    <string name="app_type">Tipas</string>
+    <string name="app_enter_the_password">Įveskite slaptažodį</string>
+    <string name="app_something_went_wrong_please_try_again">Įvyko klaida. Bandykite dar kartą.</string>
+    <string name="app_retry">Bandyti dar kartą</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">Atrodo, kad įvyko klaida.\nBandykite dar kartą.</string>
+    <string name="app_type_public">Vieša</string>
+
+    <string name="app_transfer_ownership_text">Perleisti nuosavybę</string>
+    <string name="app_type_private">Privati</string>
+    <string name="app_type_protected">Apsaugota</string>
+    <string name="app_thread_title">Gija</string>
+    <string name="app_error_conversations_title">Oi!</string>
+    <string name="app_group_members_empty_title">Nėra galimų narių</string>
+    <string name="app_group_member_empty_subtitle">Pridėkite narių į grupę, ir jie bus rodomi čia.</string>
+    <string name="app_search">Paieška</string>
+    <string name="app_new_chat">Naujas pokalbis</string>
+    <string name="app_report">Pradėti ataskaitą</string>
+    <string name="app_has_blocked_you">užblokavo tave</string>
+    <string name="app_you_have_blocked_this_user">Jūs užblokavote</string>
+</resources>

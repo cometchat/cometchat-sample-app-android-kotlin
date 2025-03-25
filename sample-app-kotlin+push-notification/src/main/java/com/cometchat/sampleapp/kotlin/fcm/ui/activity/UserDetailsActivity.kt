@@ -7,6 +7,8 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.constants.CometChatConstants
@@ -15,11 +17,11 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.calls.CometChatCallActivity
+import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatConfirmDialog
 import com.cometchat.sampleapp.kotlin.fcm.R
 import com.cometchat.sampleapp.kotlin.fcm.databinding.ActivityUserDetailsBinding
 import com.cometchat.sampleapp.kotlin.fcm.utils.AppUtils.customToast
-import com.cometchat.sampleapp.kotlin.fcm.utils.AppUtils.showUserStatusAndLastSeen
 import com.cometchat.sampleapp.kotlin.fcm.viewmodels.UserDetailsViewModel
 import com.google.gson.Gson
 
@@ -34,6 +36,11 @@ class UserDetailsActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding!!.root)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         initViewModel()
 
@@ -60,7 +67,7 @@ class UserDetailsActivity : AppCompatActivity() {
                 intent.getStringExtra(getString(R.string.app_base_message)), BaseMessage::class.java
             )
         )
-        viewModel!!.user.observe(this, updateUserHeader())
+        viewModel!!.user.observe(this, setUserHeader())
         viewModel!!.isUserBlockedByMe.observe(this, isUserBlockedByMe)
         viewModel!!.isUserBlocked.observe(this, blockUserStateObserver())
         viewModel!!.isUserUnblocked.observe(this, unblockUserStateObserver())
@@ -167,18 +174,43 @@ class UserDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserHeader(): Observer<in User?> {
+    private fun setUserHeader(): Observer<in User?> {
         return Observer { user: User? ->
-            if (user == null) {
-                return@Observer
-            }
-            if (binding!!.tvTitle.text != user.name) {
+            if (user != null) {
                 binding!!.avatar.setAvatar(user.name, user.avatar)
                 binding!!.tvTitle.text = user.name
+                if (!Utils.isBlocked(user)) {
+                    binding!!.infoMessage.visibility = View.GONE
+                    binding!!.tvSubtitle.visibility = View.VISIBLE
+                    binding!!.cardVideoCall.visibility = View.VISIBLE
+                    binding!!.cardVoiceCall.visibility = View.VISIBLE
+                    if (user.status == CometChatConstants.USER_STATUS_ONLINE) {
+                        binding!!.tvSubtitle.text = resources.getString(com.cometchat.chatuikit.R.string.cometchat_online)
+                    } else {
+                        if (user.lastActiveAt == 0L) {
+                            binding!!.tvSubtitle.text = getString(com.cometchat.chatuikit.R.string.cometchat_offline)
+                        } else {
+                            val lastSeen = Utils.getLastSeenTime(this, user.lastActiveAt)
+                            binding!!.tvSubtitle.text = lastSeen
+                            binding!!.tvSubtitle.isSelected = true
+                        }
+                    }
+                } else {
+                    binding!!.tvSubtitle.visibility = View.GONE
+                    binding!!.cardVideoCall.visibility = View.GONE
+                    binding!!.cardVoiceCall.visibility = View.GONE
+                    if (user.isBlockedByMe) {
+                        binding!!.infoMessage.visibility = View.VISIBLE
+                        binding!!.tvInfoMessage.text = String.format("%s %s", getString(R.string.app_you_have_blocked_this_user), user.name)
+                    } else {
+                        binding!!.infoMessage.visibility = View.VISIBLE
+                        binding!!.tvInfoMessage.text = String.format("%s %s", user.name, getString(R.string.app_has_blocked_you))
+                    }
+                }
             }
-            showUserStatusAndLastSeen(this, user, binding!!.tvSubtitle)
         }
     }
+
 
     private fun onCallStart(): Observer<Call> {
         return Observer { call: Call? ->
@@ -189,9 +221,9 @@ class UserDetailsActivity : AppCompatActivity() {
     }
 
     private fun onCallStartError(): Observer<in String?> {
-        return Observer { msg: String? ->
+        return Observer {
             customToast(
-                this, msg, CometChatTheme.getErrorColor(this)
+                this, getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong), CometChatTheme.getErrorColor(this)
             )
         }
     }

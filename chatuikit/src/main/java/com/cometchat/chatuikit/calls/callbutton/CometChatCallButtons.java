@@ -13,7 +13,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.cometchat.calls.core.CometChatCalls;
 import com.cometchat.chat.constants.CometChatConstants;
@@ -149,8 +149,8 @@ public class CometChatCallButtons extends MaterialCardView {
         params.weight = 1;
 
         // Observe call status updates from ViewModel
-        callButtonsViewModel.getCallInitiated().observe((AppCompatActivity) context, this::callInitiated);
-        callButtonsViewModel.getStartDirectCall().observe((AppCompatActivity) context, this::startDirectCall);
+        callButtonsViewModel.getCallInitiated().observe((LifecycleOwner) context, this::callInitiated);
+        callButtonsViewModel.getStartDirectCall().observe((LifecycleOwner) context, this::startDirectCall);
 
         // Set click listeners for voice and video call buttons
         voiceCall.setOnClickListener(view12 -> {

@@ -83,6 +83,8 @@ class UserDetailsViewModel : ViewModel() {
                     ) {
                         isUserBlocked.value = true
                         isUserBlockedByMe.setValue(true)
+                        user.value!!.isBlockedByMe = true
+                        setUser(user.value!!)
                     } else {
                         isUserBlocked.setValue(false)
                     }
@@ -107,6 +109,8 @@ class UserDetailsViewModel : ViewModel() {
                     ) {
                         isUserUnblocked.value = true
                         isUserBlockedByMe.setValue(false)
+                        user.value!!.isBlockedByMe = false
+                        setUser(user.value!!)
                     } else {
                         isUserUnblocked.setValue(false)
                     }

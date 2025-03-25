@@ -109,6 +109,8 @@ public class UserDetailsViewModel extends ViewModel {
                     if (resultMap != null && AppConstants.SuccessConstants.SUCCESS.equalsIgnoreCase(resultMap.get(user.getValue().getUid()))) {
                         isUserBlocked.setValue(true);
                         isUserBlockedByMe.setValue(true);
+                        user.getValue().setBlockedByMe(true);
+                        setUser(user.getValue());
                     } else {
                         isUserBlocked.setValue(false);
                     }
@@ -132,6 +134,8 @@ public class UserDetailsViewModel extends ViewModel {
                     if (resultMap != null && AppConstants.SuccessConstants.SUCCESS.equalsIgnoreCase(resultMap.get(user.getValue().getUid()))) {
                         isUserUnblocked.setValue(true);
                         isUserBlockedByMe.setValue(false);
+                        user.getValue().setBlockedByMe(false);
+                        setUser(user.getValue());
                     } else {
                         isUserUnblocked.setValue(false);
                     }
@@ -182,7 +186,7 @@ public class UserDetailsViewModel extends ViewModel {
 
                 @Override
                 public void onError(CometChatException e) {
-                    onStarCallError.setValue(e.getMessage());
+                    onStarCallError.setValue("");
                 }
             });
         } else {

@@ -160,9 +160,11 @@ public class CollaborativeDocumentExtensionDecorator extends DataSourceDecorator
                 public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
                     return CollaborativeUtils.getCollaborativeBubbleView(context,
                                                                          configuration,
-                                                                         "Collaborative Document",
-                                                                         "Open document to edit content together.",
-                                                                         "Open Document");
+                                                                         context.getResources().getString(R.string.cometchat_collaborative_doc),
+                                                                         context
+                                                                             .getResources()
+                                                                             .getString(R.string.cometchat_open_document_to_edit_content_together),
+                                                                         context.getResources().getString(R.string.cometchat_open_document));
                 }
 
                 @Override

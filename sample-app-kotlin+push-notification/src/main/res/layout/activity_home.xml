@@ -5,6 +5,7 @@
     android:id="@+id/home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="?attr/cometchatBackgroundColor1"
     tools:context="ui.activity.HomeActivity">
 
@@ -42,14 +43,11 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
-        android:layout_height="@dimen/cometchat_70dp"
+        android:layout_height="wrap_content"
         android:background="?attr/cometchatBackgroundColor1"
-        app:background="@android:color/transparent"
         app:elevation="0dp"
         app:itemHorizontalTranslationEnabled="false"
         app:itemIconSize="@dimen/cometchat_32dp"
-        app:itemPaddingBottom="@dimen/cometchat_10dp"
-        app:itemPaddingTop="@dimen/cometchat_padding_3"
         app:itemRippleColor="@android:color/transparent"
         app:itemTextAppearanceActive="?attr/cometchatTextAppearanceCaption1Medium"
         app:itemTextAppearanceInactive="?attr/cometchatTextAppearanceCaption1Regular"

@@ -13,13 +13,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.cometchat.chat.constants.CometChatConstants
-import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.logger.CometChatLogger
 import com.cometchat.chatuikit.shared.resources.utils.Utils
@@ -39,22 +36,6 @@ object AppUtils {
         toast.duration = Toast.LENGTH_LONG
         toast.view = binding.root
         toast.show()
-    }
-
-    fun showUserStatusAndLastSeen(
-        context: Context, user: User, textView: TextView
-    ) {
-        if (user.status == CometChatConstants.USER_STATUS_ONLINE) {
-            textView.text = context.resources.getString(com.cometchat.chatuikit.R.string.cometchat_online)
-        } else {
-            if (user.lastActiveAt == 0L) {
-                textView.text = context.getString(com.cometchat.chatuikit.R.string.cometchat_offline)
-            } else {
-                val lastSeen = Utils.getLastSeenTime(context, user.lastActiveAt)
-                textView.text = lastSeen
-                textView.isSelected = true
-            }
-        }
     }
 
     fun <T> saveDataInSharedPref(

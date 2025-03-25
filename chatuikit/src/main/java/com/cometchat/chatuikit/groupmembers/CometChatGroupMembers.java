@@ -17,8 +17,8 @@ import androidx.annotation.Dimension;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -255,14 +255,14 @@ public class CometChatGroupMembers extends MaterialCardView {
 
         // Initialize the ViewModel and observe various live data updates
         groupMembersViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupMembersViewModel.class);
-        groupMembersViewModel.getMutableGroupMembersList().observe((AppCompatActivity) getContext(), this::setGroupMemberList);
-        groupMembersViewModel.getStates().observe((AppCompatActivity) getContext(), this::setStateChangeObserver);
-        groupMembersViewModel.insertAtTop().observe((AppCompatActivity) getContext(), this::notifyInsertedAt);
-        groupMembersViewModel.moveToTop().observe((AppCompatActivity) getContext(), this::notifyItemMovedToTop);
-        groupMembersViewModel.updateGroupMember().observe((AppCompatActivity) getContext(), this::notifyItemChanged);
-        groupMembersViewModel.removeGroupMember().observe((AppCompatActivity) getContext(), this::notifyItemRemoved);
-        groupMembersViewModel.getDialogState().observe((AppCompatActivity) getContext(), this::setDialogState);
-        groupMembersViewModel.getCometChatException().observe((AppCompatActivity) getContext(), exceptionObserver);
+        groupMembersViewModel.getMutableGroupMembersList().observe((LifecycleOwner) getContext(), this::setGroupMemberList);
+        groupMembersViewModel.getStates().observe((LifecycleOwner) getContext(), this::setStateChangeObserver);
+        groupMembersViewModel.insertAtTop().observe((LifecycleOwner) getContext(), this::notifyInsertedAt);
+        groupMembersViewModel.moveToTop().observe((LifecycleOwner) getContext(), this::notifyItemMovedToTop);
+        groupMembersViewModel.updateGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemChanged);
+        groupMembersViewModel.removeGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemRemoved);
+        groupMembersViewModel.getDialogState().observe((LifecycleOwner) getContext(), this::setDialogState);
+        groupMembersViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
 
         // Set up the back button click event
         binding.ivBack.setOnClickListener(view -> {
@@ -800,9 +800,9 @@ public class CometChatGroupMembers extends MaterialCardView {
                                         UIKitConstants.GroupMemberOption.BAN);
         } else if (item.getId().equalsIgnoreCase(UIKitConstants.GroupMemberOption.KICK)) {
             showConfirmationAlertDialog(groupMember,
-                                        getResources().getString(R.string.cometchat_remove) + " " + groupMember.getName() + " ?",
+                                        getResources().getString(R.string.cometchat_kick) + " " + groupMember.getName() + " ?",
                                         "Are You sure you want to " + getResources()
-                                            .getString(R.string.cometchat_remove)
+                                            .getString(R.string.cometchat_kick)
                                             .toLowerCase() + " " + groupMember.getName() + "?",
                                         getResources().getString(R.string.cometchat_yes),
                                         getResources().getString(R.string.cometchat_no),
@@ -1087,15 +1087,6 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     public void setGroupMembersRequestBuilder(GroupMembersRequest.GroupMembersRequestBuilder groupMembersRequestBuilder) {
         groupMembersViewModel.setGroupMembersRequestBuilder(groupMembersRequestBuilder);
-    }    /**
-     * Sets the stroke color of the card.
-     *
-     * @param strokeColor The color to use for the card's stroke.
-     */
-    @Override
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1137,6 +1128,15 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     public GroupMembersViewModel getViewModel() {
         return groupMembersViewModel;
+    }    /**
+     * Sets the stroke color of the card.
+     *
+     * @param strokeColor The color to use for the card's stroke.
+     */
+    @Override
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1374,15 +1374,6 @@ public class CometChatGroupMembers extends MaterialCardView {
     public void setTitleTextColor(@ColorInt int titleTextColor) {
         this.titleTextColor = titleTextColor;
         binding.tvTitle.setTextColor(titleTextColor);
-    }    /**
-     * Sets the stroke width of the card.
-     *
-     * @param strokeWidth The width of the stroke to set for the card.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1479,6 +1470,15 @@ public class CometChatGroupMembers extends MaterialCardView {
         this.itemTitleTextColor = itemTitleTextColor;
         binding.tvSelectionCount.setTextColor(itemTitleTextColor);
         groupMembersAdapter.setItemTitleTextColor(itemTitleTextColor);
+    }    /**
+     * Sets the stroke width of the card.
+     *
+     * @param strokeWidth The width of the stroke to set for the card.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1536,6 +1536,19 @@ public class CometChatGroupMembers extends MaterialCardView {
     public void setSeparatorHeight(@Dimension int separatorHeight) {
         this.separatorHeight = separatorHeight;
         binding.viewSeparator.getLayoutParams().height = separatorHeight;
+    }
+
+    public int getSeparatorVisibility() {
+        return binding.viewSeparator.getVisibility();
+    }
+
+    /**
+     * Gets the visibility of the separator.
+     *
+     * @return The visibility state of the separator.
+     */
+    public void setSeparatorVisibility(int visibility) {
+        binding.viewSeparator.setVisibility(visibility);
     }
 
     /**
@@ -1779,18 +1792,6 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     public int getStatusIndicatorStyle() {
         return statusIndicatorStyle;
-    }    /**
-     * Called when the view is attached to a window.
-     *
-     * <p>
-     * This method is invoked when the view is attached to a window, allowing the
-     * {@link GroupMembersViewModel} to add necessary listeners. This is useful for
-     * setting up data binding and responding to live data changes.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        groupMembersViewModel.addListeners();
     }
 
     /**
@@ -1997,6 +1998,18 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     public Drawable getSearchInputStartIcon() {
         return searchInputStartIcon;
+    }    /**
+     * Called when the view is attached to a window.
+     *
+     * <p>
+     * This method is invoked when the view is attached to a window, allowing the
+     * {@link GroupMembersViewModel} to add necessary listeners. This is useful for
+     * setting up data binding and responding to live data changes.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        groupMembersViewModel.addListeners();
     }
 
     /**

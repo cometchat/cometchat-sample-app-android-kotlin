@@ -260,6 +260,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
         addMembersLayoutBinding.addMembers.setTitleText(getString(com.cometchat.chatuikit.R.string.cometchat_add_members));
         addMembersLayoutBinding.addMembers.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE);
         addMembersLayoutBinding.addMembers.setSubmitSelectionIconVisibility(View.GONE);
+        addMembersLayoutBinding.addMembers.setBackIconVisibility(View.VISIBLE);
         addMembersLayoutBinding.addMembers.setOnItemClick((view, poUser, user) -> addMembersLayoutBinding.addMembers.selectUser(user,
                                                                                                                                 UIKitConstants.SelectionMode.MULTIPLE));
         addMembersLayoutBinding.addMembersBtn.setOnClickListener(view -> viewModel.addMembersToGroup(addMembersLayoutBinding.addMembers.getSelectedUsers()));

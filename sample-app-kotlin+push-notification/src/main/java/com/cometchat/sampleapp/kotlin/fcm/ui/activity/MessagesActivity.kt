@@ -7,6 +7,8 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
@@ -38,6 +40,12 @@ class MessagesActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         // Create an instance of the MessagesViewModel
         viewModel = ViewModelProvider

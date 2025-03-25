@@ -12,7 +12,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.chat.constants.CometChatConstants;
@@ -137,14 +137,14 @@ public class CometChatMessageHeader extends MaterialCardView {
      */
     private void init() {
         messageHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageHeaderViewModel.class);
-        messageHeaderViewModel.getMemberCount().observe((AppCompatActivity) getContext(), this::setMembersCount);
-        messageHeaderViewModel.getUserPresenceStatus().observe((AppCompatActivity) getContext(), this::showUserStatusAndLastSeen);
-        messageHeaderViewModel.getUpdatedGroup().observe((AppCompatActivity) getContext(), this::setGroup);
-        messageHeaderViewModel.getUpdatedUser().observe((AppCompatActivity) getContext(), this::setUser);
-        messageHeaderViewModel.getException().observe((AppCompatActivity) getContext(), e -> {
+        messageHeaderViewModel.getMemberCount().observe((LifecycleOwner) getContext(), this::setMembersCount);
+        messageHeaderViewModel.getUserPresenceStatus().observe((LifecycleOwner) getContext(), this::showUserStatusAndLastSeen);
+        messageHeaderViewModel.getUpdatedGroup().observe((LifecycleOwner) getContext(), this::setGroup);
+        messageHeaderViewModel.getUpdatedUser().observe((LifecycleOwner) getContext(), this::setUser);
+        messageHeaderViewModel.getException().observe((LifecycleOwner) getContext(), e -> {
             if (onError != null) onError.onError(e);
         });
-        messageHeaderViewModel.getTyping().observe((AppCompatActivity) getContext(), this::setTypingIndicator);
+        messageHeaderViewModel.getTyping().observe((LifecycleOwner) getContext(), this::setTypingIndicator);
         configureBackIcon();
     }
 

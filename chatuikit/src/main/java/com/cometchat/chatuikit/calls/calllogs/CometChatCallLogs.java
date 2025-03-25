@@ -15,7 +15,7 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -366,15 +366,15 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     private void initViewModel() {
         callLogsViewModel = new ViewModelProvider.NewInstanceFactory().create(CallLogsViewModel.class);
-        callLogsViewModel.getMutableCallsList().observe((AppCompatActivity) getContext(), listObserver);
-        callLogsViewModel.getStates().observe((AppCompatActivity) getContext(), stateChangeObserver);
-        callLogsViewModel.insertAtTop().observe((AppCompatActivity) getContext(), insertAtTop);
-        callLogsViewModel.moveToTop().observe((AppCompatActivity) getContext(), moveToTop);
-        callLogsViewModel.updateCall().observe((AppCompatActivity) getContext(), update);
-        callLogsViewModel.removeCall().observe((AppCompatActivity) getContext(), remove);
-        callLogsViewModel.getInitiatedCall().observe((AppCompatActivity) getContext(), (call) -> {
+        callLogsViewModel.getMutableCallsList().observe((LifecycleOwner) getContext(), listObserver);
+        callLogsViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
+        callLogsViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
+        callLogsViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
+        callLogsViewModel.updateCall().observe((LifecycleOwner) getContext(), update);
+        callLogsViewModel.removeCall().observe((LifecycleOwner) getContext(), remove);
+        callLogsViewModel.getInitiatedCall().observe((LifecycleOwner) getContext(), (call) -> {
         });
-        callLogsViewModel.getCometChatException().observe((AppCompatActivity) getContext(), exceptionObserver);
+        callLogsViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
     }
 
     /**
@@ -627,10 +627,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @Nullable Drawable getBackIcon() {
         return backIcon;
-    }    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -660,6 +656,10 @@ public class CometChatCallLogs extends MaterialCardView {
     public void setBackIconTint(@ColorInt int backIconTint) {
         this.backIconTint = backIconTint;
         binding.toolbarBackIcon.setBackgroundTintList(ColorStateList.valueOf(backIconTint));
+    }    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -1012,14 +1012,6 @@ public class CometChatCallLogs extends MaterialCardView {
 
     public @ColorInt int getItemMissedCallTitleColor() {
         return itemMissedCallTitleColor;
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth The stroke width for the call logs.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeColor);
     }
 
     public void setItemMissedCallTitleColor(@ColorInt int itemMissedCallTitleColor) {
@@ -1072,6 +1064,14 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @Nullable Drawable getItemAudioCallIcon() {
         return itemAudioCallIcon;
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth The stroke width for the call logs.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeColor);
     }
 
     /**
@@ -1247,13 +1247,6 @@ public class CometChatCallLogs extends MaterialCardView {
 
     public void setTitleView(CallLogsViewHolderListener titleView) {
         callLogsAdapter.setTitleView(titleView);
-    }    /**
-     * Returns the stroke width.
-     *
-     * @return The stroke width of the call logs.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     public void setLeadingView(CallLogsViewHolderListener leadingView) {
@@ -1332,6 +1325,13 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     private void setCustomLoaderVisibility(int visibility) {
         binding.customLayout.setVisibility(visibility);
+    }    /**
+     * Returns the stroke width.
+     *
+     * @return The stroke width of the call logs.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -1519,7 +1519,7 @@ public class CometChatCallLogs extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setEmptyStateVisibility(int visibility) {
+    public void setEmptyStateVisibility(int visibility) {
         this.emptyStateVisibility = visibility;
         binding.emptyStateView.setVisibility(visibility);
     }
@@ -1562,7 +1562,7 @@ public class CometChatCallLogs extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setErrorStateVisibility(int visibility) {
+    public void setErrorStateVisibility(int visibility) {
         this.errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(visibility);
     }

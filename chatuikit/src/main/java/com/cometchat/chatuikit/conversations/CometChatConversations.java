@@ -16,8 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -393,16 +393,16 @@ public class CometChatConversations extends MaterialCardView {
      */
     private void initViewModels() {
         conversationsViewModel = new ViewModelProvider.NewInstanceFactory().create(ConversationsViewModel.class);
-        conversationsViewModel.getMutableConversationList().observe((AppCompatActivity) getContext(), listObserver);
-        conversationsViewModel.getStates().observe((AppCompatActivity) getContext(), stateChangeObserver);
-        conversationsViewModel.insertAtTop().observe((AppCompatActivity) getContext(), insertAtTop);
-        conversationsViewModel.moveToTop().observe((AppCompatActivity) getContext(), moveToTop);
-        conversationsViewModel.getTyping().observe((AppCompatActivity) getContext(), typing);
-        conversationsViewModel.updateConversation().observe((AppCompatActivity) getContext(), updateConversation);
-        conversationsViewModel.playSound().observe((AppCompatActivity) getContext(), this::playSound);
-        conversationsViewModel.remove().observe((AppCompatActivity) getContext(), remove);
-        conversationsViewModel.progressState().observe((AppCompatActivity) getContext(), conversationDeleteObserver);
-        conversationsViewModel.getCometChatException().observe((AppCompatActivity) getContext(), cometchatExceptionObserver);
+        conversationsViewModel.getMutableConversationList().observe((LifecycleOwner) getContext(), listObserver);
+        conversationsViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
+        conversationsViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
+        conversationsViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
+        conversationsViewModel.getTyping().observe((LifecycleOwner) getContext(), typing);
+        conversationsViewModel.updateConversation().observe((LifecycleOwner) getContext(), updateConversation);
+        conversationsViewModel.playSound().observe((LifecycleOwner) getContext(), this::playSound);
+        conversationsViewModel.remove().observe((LifecycleOwner) getContext(), remove);
+        conversationsViewModel.progressState().observe((LifecycleOwner) getContext(), conversationDeleteObserver);
+        conversationsViewModel.getCometChatException().observe((LifecycleOwner) getContext(), cometchatExceptionObserver);
     }
 
     /**
@@ -1067,13 +1067,6 @@ public class CometChatConversations extends MaterialCardView {
     public void setItemMessageTypeIconTint(@ColorInt int itemMessageTypeIconTint) {
         this.itemMessageTypeIconTint = itemMessageTypeIconTint;
         conversationsAdapter.setConversationsItemMessageTypeIconTint(itemMessageTypeIconTint);
-    }    /**
-     * Gets the stroke color for the conversations card.
-     *
-     * @return the stroke color used for the conversations card.
-     */
-    public @ColorInt int getStrokeColor() {
-        return strokeColor;
     }
 
     /**
@@ -1102,6 +1095,13 @@ public class CometChatConversations extends MaterialCardView {
      */
     public @Dimension int getSeparatorHeight() {
         return separatorHeight;
+    }    /**
+     * Gets the stroke color for the conversations card.
+     *
+     * @return the stroke color used for the conversations card.
+     */
+    public @ColorInt int getStrokeColor() {
+        return strokeColor;
     }
 
     /**
@@ -1243,14 +1243,6 @@ public class CometChatConversations extends MaterialCardView {
     public void setTitleTextAppearance(@StyleRes int titleTextAppearance) {
         this.titleTextAppearance = titleTextAppearance;
         binding.tvTitle.setTextAppearance(titleTextAppearance);
-    }    /**
-     * Sets the stroke color for the conversations card.
-     *
-     * @param strokeColor the color to use for the card's stroke.
-     */
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1318,6 +1310,14 @@ public class CometChatConversations extends MaterialCardView {
     public void setErrorStateTextTitleAppearance(@StyleRes int errorStateTextTitleAppearance) {
         this.errorStateTextTitleAppearance = errorStateTextTitleAppearance;
         binding.tvErrorTitle.setTextAppearance(errorStateTextTitleAppearance);
+    }    /**
+     * Sets the stroke color for the conversations card.
+     *
+     * @param strokeColor the color to use for the card's stroke.
+     */
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1655,13 +1655,6 @@ public class CometChatConversations extends MaterialCardView {
      */
     public void setDateFormat(SimpleDateFormat dateFormat) {
         conversationsAdapter.setDateFormat(dateFormat);
-    }    /**
-     * Gets the stroke width for the conversations card.
-     *
-     * @return the stroke width used for the conversations card.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -1766,6 +1759,13 @@ public class CometChatConversations extends MaterialCardView {
         if (view != null) {
             Utils.handleView(binding.overflowMenuLayout, view, true);
         }
+    }    /**
+     * Gets the stroke width for the conversations card.
+     *
+     * @return the stroke width used for the conversations card.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -1850,14 +1850,6 @@ public class CometChatConversations extends MaterialCardView {
         } else {
             setShimmerVisibility(View.GONE);
         }
-    }    /**
-     * Sets the stroke width for the conversations card.
-     *
-     * @param strokeWidth the width to use for the card's stroke.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1918,7 +1910,7 @@ public class CometChatConversations extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setEmptyStateVisibility(int visibility) {
+    public void setEmptyStateVisibility(int visibility) {
         this.emptyStateVisibility = visibility;
         binding.emptyStateView.setVisibility(visibility);
     }
@@ -1957,6 +1949,14 @@ public class CometChatConversations extends MaterialCardView {
     public void setSubmitSelectionIconTint(@ColorInt int submitSelectionIconTint) {
         this.submitSelectionIconTint = submitSelectionIconTint;
         binding.ivSubmitSelection.setImageTintList(ColorStateList.valueOf(submitSelectionIconTint));
+    }    /**
+     * Sets the stroke width for the conversations card.
+     *
+     * @param strokeWidth the width to use for the card's stroke.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     public int getCheckBoxStrokeWidth() {
@@ -2261,12 +2261,6 @@ public class CometChatConversations extends MaterialCardView {
      */
     public int getReceiptsVisibility() {
         return receiptsVisibility;
-    }    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        processFormatters();
-        conversationsViewModel.addListener();
-        conversationsViewModel.fetchConversation();
     }
 
     /**
@@ -2293,7 +2287,7 @@ public class CometChatConversations extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setErrorStateVisibility(int visibility) {
+    public void setErrorStateVisibility(int visibility) {
         this.errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(View.VISIBLE);
     }
@@ -2307,6 +2301,13 @@ public class CometChatConversations extends MaterialCardView {
 
 
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        processFormatters();
+        conversationsViewModel.addListener();
+        conversationsViewModel.fetchConversation();
+    }
 
 
 }

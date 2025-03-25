@@ -11,7 +11,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -257,8 +257,8 @@ public class CometChatThreadHeader extends MaterialCardView {
 
         // Initialize and set up the ViewModel
         threadHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadHeaderViewModel.class);
-        threadHeaderViewModel.getParentMessageListLiveData().observe((AppCompatActivity) getContext(), this::updateMessage);
-        threadHeaderViewModel.getReplyCount().observe((AppCompatActivity) getContext(), this::updateReplyCount);
+        threadHeaderViewModel.getParentMessageListLiveData().observe((LifecycleOwner) getContext(), this::updateMessage);
+        threadHeaderViewModel.getReplyCount().observe((LifecycleOwner) getContext(), this::updateReplyCount);
 
         // Apply additional style attributes to the view
         applyStyleAttributes(attrs, defStyleAttr, 0);
@@ -549,6 +549,14 @@ public class CometChatThreadHeader extends MaterialCardView {
             }
             createMessageMap();
         }
+    }
+
+    public void setLeftBubbleMargin(int top, int bottom, int left, int right) {
+        adapter.setLeftBubbleMargin(top, bottom, left, right);
+    }
+
+    public void setRightBubbleMargin(int top, int bottom, int left, int right) {
+        adapter.setRightBubbleMargin(top, bottom, left, right);
     }
 
     /**

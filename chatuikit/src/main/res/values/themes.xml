@@ -346,7 +346,7 @@
         <item name="cometchatMessageListErrorStateSubtitleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometchatMessageListDeleteDialogStyle">@style/CometChatConfirmDialogStyle</item>
         <item name="cometchatMessageListMessageInformationStyle">?attr/cometchatMessageInformationStyle</item>
-        <item name="cometchatMessageListMessageOptionSheetStyle">?attr/cometchatMessageOptionSheetStyle</item>
+        <item name="cometchatMessageListMessageOptionSheetStyle">?attr/cometchatPopupMenuStyle</item>
         <item name="cometchatMessageListReactionListStyle">?attr/cometchatReactionListStyle</item>
     </style>
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -30,6 +31,7 @@ import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,7 +86,6 @@ import com.cometchat.chatuikit.shared.views.aismartreplies.CometChatAISmartRepli
 import com.cometchat.chatuikit.shared.views.badge.CometChatBadge;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
 import com.cometchat.chatuikit.shared.views.optionsheet.OptionSheetMenuItem;
-import com.cometchat.chatuikit.shared.views.optionsheet.messageoptionsheet.CometChatMessageOptionSheet;
 import com.cometchat.chatuikit.shared.views.reaction.emojikeyboard.CometChatEmojiKeyboard;
 import com.cometchat.chatuikit.shared.views.reaction.emojikeyboard.EmojiKeyBoardView;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnAddMoreReactionsClick;
@@ -93,7 +94,7 @@ import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionLongCl
 import com.cometchat.chatuikit.shimmer.CometChatShimmerAdapter;
 import com.cometchat.chatuikit.shimmer.CometChatShimmerFrameLayout;
 import com.cometchat.chatuikit.shimmer.CometChatShimmerUtils;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.cometchat.chatuikit.threadheader.CometChatThreadHeader;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 
@@ -279,6 +280,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 break;
         }
     };
+    private CometChatMessagePopupMenu cometchatPopUpMenuMessage;
     private OnReactionListItemClick onReactionListItemClick;
     private ThreadReplyClick onThreadRepliesClick;
     private MessageAdapter.OnMessageLongClick messageLongClick;
@@ -363,46 +365,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         cometchatReactionList.setReactionsRequestBuilder(reactionRequestBuilder);
         cometchatReactionList.setOnReactionListItemClick(onReactionListItemClick);
         cometchatReactionList.setOnEmpty(() -> bottomSheetDialog.dismiss());
-        showBottomSheet(bottomSheetDialog, true, true, cometchatReactionList);
-    }
-
-    /**
-     * Displays a BottomSheetDialog with the specified configurations.
-     *
-     * @param bottomSheetDialog the BottomSheetDialog to be displayed.
-     * @param isCancelable      specifies whether the bottom sheet can be canceled by the user.
-     * @param openHalfScreen    specifies whether the bottom sheet should open to half the screen
-     *                          height.
-     * @param view              the view to be set as the content of the bottom sheet.
-     */
-    private void showBottomSheet(BottomSheetDialog bottomSheetDialog, boolean isCancelable, boolean openHalfScreen, View view) {
-        try {
-            Utils.removeParentFromView(view);
-            bottomSheetDialog.setContentView(view);
-            bottomSheetDialog.setOnShowListener(dialogInterface -> {
-                View bottomSheet = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-                if (bottomSheet != null) {
-                    bottomSheet.setBackgroundResource(R.color.cometchat_color_transparent);
-
-                    BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
-                    if (openHalfScreen) {
-                        behavior.setPeekHeight((int) (getResources().getDisplayMetrics().heightPixels * 0.5)); // 50% of
-                        // screen
-                        // height
-                        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        bottomSheet.getLayoutParams().height = (int) (getResources().getDisplayMetrics().heightPixels * 0.5);
-                    } else {
-                        bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    }
-                    bottomSheet.requestLayout();
-                }
-            });
-            bottomSheetDialog.setCancelable(isCancelable);
-            bottomSheetDialog.show();
-        } catch (Exception ignored) {
-            // Exception is ignored to prevent crashing, but consider logging for debugging
-            // purposes.
-        }
+        Utils.showBottomSheet(getContext(), bottomSheetDialog, true, true, cometchatReactionList);
     }
 
     /**
@@ -415,6 +378,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         // Initialize MaterialCard using a utility function
         Utils.initMaterialCard(this);
         bottomSheetDialog = new BottomSheetDialog(getContext());
+        cometchatPopUpMenuMessage = new CometChatMessagePopupMenu(getContext(), 0);
 
         // Initialize additional parameters and screen height
         additionParameter = new AdditionParameter();
@@ -431,6 +395,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         // Inflate the view and initialize components
         View view = LayoutInflater.from(getContext()).inflate(R.layout.cometchat_messagelist, (ViewGroup) getParent(), false);
         initViewComponent(view);
+
 
         // Add the inflated view to the parent layout
         addView(view);
@@ -530,13 +495,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void initializeConversationStarterView() {
         aiConversationStarterView = new CometChatAIConversationStarterView(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                                                               ViewGroup.LayoutParams.WRAP_CONTENT
-        );
+                                                                               ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(Utils.convertDpToPx(getContext(), 10),
                                 getResources().getDimensionPixelSize(R.dimen.cometchat_margin_2),
                                 Utils.convertDpToPx(getContext(), 10),
-                                Utils.convertDpToPx(getContext(), 10)
-        );
+                                Utils.convertDpToPx(getContext(), 10));
         aiConversationStarterView.setLayoutParams(layoutParams);
         aiConversationStarterView.setOnClick((id, reply, position) -> {
             CometChatUIKitHelper.onComposeMessage(id, reply);
@@ -548,28 +511,26 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * Observes changes in the message list and other state changes using ViewModel.
      */
     private void observeMessageListChanges() {
-        messageListViewModel.getMutableMessageList().observe((AppCompatActivity) getContext(), this::setList);
-        messageListViewModel.messagesRangeChanged().observe((AppCompatActivity) getContext(), this::notifyRangeChanged);
-        messageListViewModel.updateMessage().observe((AppCompatActivity) getContext(), this::updateMessage);
-        messageListViewModel.addMessage().observe((AppCompatActivity) getContext(), this::addMessage);
-        messageListViewModel.getCometChatException().observe((AppCompatActivity) getContext(), this::throwError);
-        messageListViewModel.removeMessage().observe((AppCompatActivity) getContext(), this::removeMessage);
-        messageListViewModel.getMutableIsInProgress().observe((AppCompatActivity) getContext(), this::isInProgress);
-        messageListViewModel.getMutableHasMore().observe((AppCompatActivity) getContext(), this::hasMore);
-        messageListViewModel.notifyUpdate().observe((AppCompatActivity) getContext(), this::notifyDataChanged);
-        messageListViewModel.getStates().observe((AppCompatActivity) getContext(), stateChangeObserver);
-        messageListViewModel.getMessageDeleteState().observe((AppCompatActivity) getContext(), messageDeleteObserver);
-        messageListViewModel.closeTopPanel().observe((AppCompatActivity) getContext(), this::closeInternalTopPanel);
-        messageListViewModel.closeBottomPanel().observe((AppCompatActivity) getContext(), this::closeInternalBottomPanel);
-        messageListViewModel.showTopPanel().observe((AppCompatActivity) getContext(), this::showInternalTopPanel);
-        messageListViewModel.showBottomPanel().observe((AppCompatActivity) getContext(), this::showInternalBottomPanel);
-        messageListViewModel.getMutableSmartReplies().observe((AppCompatActivity) getContext(), this::setSmartReplies);
-        messageListViewModel
-            .getMutableConversationStarterReplies()
-            .observe((AppCompatActivity) getContext(), this::setConversationStarters);
-        messageListViewModel.getRemoveConversationStarter().observe((AppCompatActivity) getContext(), this::removeAIView);
-        messageListViewModel.getConversationStarterUIState().observe((AppCompatActivity) getContext(), this::handleConversationStarterUIState);
-        messageListViewModel.getSmartRepliesUIState().observe((AppCompatActivity) getContext(), this::handleAISmartRepliesUIState);
+        messageListViewModel.getMutableMessageList().observe((LifecycleOwner) getContext(), this::setList);
+        messageListViewModel.messagesRangeChanged().observe((LifecycleOwner) getContext(), this::notifyRangeChanged);
+        messageListViewModel.updateMessage().observe((LifecycleOwner) getContext(), this::updateMessage);
+        messageListViewModel.addMessage().observe((LifecycleOwner) getContext(), this::addMessage);
+        messageListViewModel.getCometChatException().observe((LifecycleOwner) getContext(), this::throwError);
+        messageListViewModel.removeMessage().observe((LifecycleOwner) getContext(), this::removeMessage);
+        messageListViewModel.getMutableIsInProgress().observe((LifecycleOwner) getContext(), this::isInProgress);
+        messageListViewModel.getMutableHasMore().observe((LifecycleOwner) getContext(), this::hasMore);
+        messageListViewModel.notifyUpdate().observe((LifecycleOwner) getContext(), this::notifyDataChanged);
+        messageListViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
+        messageListViewModel.getMessageDeleteState().observe((LifecycleOwner) getContext(), messageDeleteObserver);
+        messageListViewModel.closeTopPanel().observe((LifecycleOwner) getContext(), this::closeInternalTopPanel);
+        messageListViewModel.closeBottomPanel().observe((LifecycleOwner) getContext(), this::closeInternalBottomPanel);
+        messageListViewModel.showTopPanel().observe((LifecycleOwner) getContext(), this::showInternalTopPanel);
+        messageListViewModel.showBottomPanel().observe((LifecycleOwner) getContext(), this::showInternalBottomPanel);
+        messageListViewModel.getMutableSmartReplies().observe((LifecycleOwner) getContext(), this::setSmartReplies);
+        messageListViewModel.getMutableConversationStarterReplies().observe((LifecycleOwner) getContext(), this::setConversationStarters);
+        messageListViewModel.getRemoveConversationStarter().observe((LifecycleOwner) getContext(), this::removeAIView);
+        messageListViewModel.getConversationStarterUIState().observe((LifecycleOwner) getContext(), this::handleConversationStarterUIState);
+        messageListViewModel.getSmartRepliesUIState().observe((LifecycleOwner) getContext(), this::handleAISmartRepliesUIState);
     }
 
     public void handleAISmartRepliesUIState(UIKitConstants.States states) {
@@ -800,13 +761,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void initializeSmartRepliesView() {
         aiSmartRepliesView = new CometChatAISmartRepliesView(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                                                               ViewGroup.LayoutParams.WRAP_CONTENT
-        );
+                                                                               ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(Utils.convertDpToPx(getContext(), 10),
                                 getResources().getDimensionPixelSize(R.dimen.cometchat_margin_2),
                                 Utils.convertDpToPx(getContext(), 10),
-                                Utils.convertDpToPx(getContext(), 10)
-        );
+                                Utils.convertDpToPx(getContext(), 10));
         aiSmartRepliesView.setLayoutParams(layoutParams);
 
         aiSmartRepliesView.setOnCLoseIconClick(view -> detachedAISmartRepliesView());
@@ -1381,6 +1340,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void setMessageAlignment(UIKitConstants.MessageListAlignment alignment) {
         messageAdapter.setAlignment(alignment);
+        cometchatPopUpMenuMessage.setMessageAlignment(alignment);
     }
 
     /**
@@ -1668,15 +1628,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         if (lastMessage != null && lastMessage.getReadAt() == 0) {
             messageListViewModel.markLastMessageAsRead(lastMessage);
         }
-    }
-
-    /**
-     * Gets the RecyclerView that displays the chat messages.
-     *
-     * @return The {@link RecyclerView} instance used to display the chat messages.
-     */
-    public RecyclerView getRecyclerView() {
-        return this.rvChatListView;
     }
 
     /**
@@ -1991,53 +1942,68 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * @param items the list of OptionSheetMenuItem to display in the bottom sheet.
      */
     private void openMessageOptionBottomSheet(List<OptionSheetMenuItem> items) {
-        CometChatMessageOptionSheet cometchatMessageOptionSheet = new CometChatMessageOptionSheet(getContext());
-        cometchatMessageOptionSheet.setMessageOptionItems(items);
-        cometchatMessageOptionSheet.setStyle(messageOptionSheetStyle);
+        cometchatPopUpMenuMessage.setStyle(messageOptionSheetStyle);
+        cometchatPopUpMenuMessage.setAddReactionIcon(addReactionIcon);
+        if (UIKitConstants.MessageCategory.INTERACTIVE.equals(baseMessage.getCategory()) || messageReactionOptionVisibility != View.VISIBLE) {
+            cometchatPopUpMenuMessage.setQuickReactionsVisibility(GONE);
+        }
 
-        cometchatMessageOptionSheet.setEmojiPickerClickListener(() -> {
+        cometchatPopUpMenuMessage.setEmojiPickerClickListener(() -> {
             if (emojiPickerClickListener != null) {
                 emojiPickerClickListener.onEmojiPickerClick();
             } else {
                 showEmojiKeyBoard();
             }
-            bottomSheetDialog.dismiss();
         });
-
-        cometchatMessageOptionSheet.setMessageOptionClickListener((menuItem) -> {
-            if (messageOptionClickListener != null) {
-                messageOptionClickListener.onMessageOptionClick(menuItem);
-            } else {
-                for (CometChatMessageOption option : customOption) {
-                    if (option != null && option.getId() != null && option.getId().equals(menuItem.getId())) {
-                        if (option.getClick() != null) {
-                            option.getClick().onClick();
-                            bottomSheetDialog.dismiss();
-                            break;
-                        } else {
-                            handleMessageOptionSheetClicks(menuItem);
-                        }
-                        bottomSheetDialog.dismiss();
-                    }
-                }
-            }
-        });
-        cometchatMessageOptionSheet.setQuickReactions(quickReactions);
-
-        if (UIKitConstants.MessageCategory.INTERACTIVE.equals(baseMessage.getCategory()) || messageReactionOptionVisibility != View.VISIBLE) {
-            cometchatMessageOptionSheet.disableReactions(true);
-        }
-
-        cometchatMessageOptionSheet.setReactionClickListener((msg, reaction) -> {
+        cometchatPopUpMenuMessage.setReactionClickListener((baseMessage, reaction) -> {
             if (quickReactionClickListener != null) {
                 quickReactionClickListener.onReactionClick(baseMessage, reaction);
             } else {
-                onReactionClick.onClick(reaction, baseMessage);
+                if (onReactionClick != null) onReactionClick.onClick(reaction, baseMessage);
             }
-            bottomSheetDialog.dismiss();
+            cometchatPopUpMenuMessage.dismiss();
         });
 
-        showBottomSheet(bottomSheetDialog, true, false, cometchatMessageOptionSheet);
+        cometchatPopUpMenuMessage.setMessageTemplates(messageTemplates);
+        cometchatPopUpMenuMessage.setTextFormatters(textFormatters);
+        cometchatPopUpMenuMessage.setQuickReactions(quickReactions);
+        List<CometChatMessagePopupMenu.MenuItem> menuItems = new ArrayList<>();
+        for (OptionSheetMenuItem optionItem : items) {
+            menuItems.add(new CometChatMessagePopupMenu.MenuItem(optionItem.getId(),
+                                                                 optionItem.getText(),
+                                                                 optionItem.getStartIcon() != 0 ? ResourcesCompat.getDrawable(getResources(),
+                                                                                                                              optionItem.getStartIcon(),
+                                                                                                                              getContext().getTheme()) : null,
+                                                                 optionItem.getEndIcon() != 0 ? ResourcesCompat.getDrawable(getResources(),
+                                                                                                                            optionItem.getEndIcon(),
+                                                                                                                            getContext().getTheme()) : null,
+                                                                 optionItem.getStartIconTint(),
+                                                                 optionItem.getEndIconTint(),
+                                                                 optionItem.getTextColor(),
+                                                                 optionItem.getAppearance(),
+                                                                 null));
+        }
+
+        cometchatPopUpMenuMessage.setMenuItems(menuItems);
+        cometchatPopUpMenuMessage.setOnMenuItemClickListener((id, name) -> {
+            if (messageOptionClickListener == null) {
+                for (CometChatMessageOption option : customOption) {
+                    if (option != null && option.getId() != null && option.getId().equals(id)) {
+                        if (option.getClick() != null) {
+                            option.getClick().onClick();
+                            cometchatPopUpMenuMessage.dismiss();
+                            break;
+                        } else {
+                            handleMessageOptionSheetClicks(id);
+                        }
+                        cometchatPopUpMenuMessage.dismiss();
+                    }
+                }
+            } else {
+                messageOptionClickListener.onMessageOptionClick(new OptionSheetMenuItem(id, name, 0, 0, 0, 0, 0, 0));
+            }
+        });
+        cometchatPopUpMenuMessage.show(messageBubble.getContentView(), this, baseMessage);
     }
 
     /**
@@ -2080,6 +2046,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             public void onClick(String emoji) {
                 onReactionClick.onClick(emoji, baseMessage);
                 emojiKeyboard.dismiss();
+                cometchatPopUpMenuMessage.dismiss();
             }
 
             @Override
@@ -2092,10 +2059,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     /**
      * Performs the action associated with the specified action item.
      *
-     * @param actionItem the OptionSheetMenuItem representing the action to perform.
+     * @param id the String representing the action to perform.
      */
-    private void handleMessageOptionSheetClicks(OptionSheetMenuItem actionItem) {
-        switch (actionItem.getId()) {
+    private void handleMessageOptionSheetClicks(@NonNull String id) {
+        switch (id) {
             case UIKitConstants.MessageOption.MESSAGE_INFORMATION:
                 showMessageInformation();
                 break;
@@ -2139,7 +2106,16 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         cometchatMessageInformation.init(getContext(), baseMessage);
         cometchatMessageInformation.setStyle(messageInformationStyle);
         cometchatMessageInformation.setTemplate(messageTemplate);
-        cometchatMessageInformation.setBubbleView((var1, var2) -> messageBubble);
+        cometchatMessageInformation.setBubbleView((context, message) -> {
+            CometChatThreadHeader threadHeader = new CometChatThreadHeader(context);
+            threadHeader.setParentMessage(baseMessage);
+            threadHeader.setTemplates(messageTemplates);
+            threadHeader.setTextFormatters(textFormatters);
+            threadHeader.setReplyCountBarVisibility(View.GONE);
+            threadHeader.setCardBackgroundColor(Color.TRANSPARENT);
+            threadHeader.setMaxHeight(Utils.convertDpToPx(context, 300));
+            return threadHeader;
+        });
         cometchatMessageInformation.setBottomSheetListener(() -> cometchatMessageInformation = null);
         cometchatMessageInformation.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "CometChatMessageInformation");
     }
@@ -2209,10 +2185,16 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void shareMessage() {
         if (baseMessage != null && baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_TEXT)) {
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-            String shareBody = ((TextMessage) baseMessage).getText();
+            String message = ((TextMessage) baseMessage).getText();
+            String formatterString = String.valueOf(FormatterUtils.getFormattedText(getContext(),
+                                                                                    baseMessage,
+                                                                                    UIKitConstants.FormattingType.MESSAGE_BUBBLE,
+                                                                                    UIKitConstants.MessageBubbleAlignment.RIGHT,
+                                                                                    message,
+                                                                                    textFormatters));
             intent.setType("text/plain");
             intent.putExtra(android.content.Intent.EXTRA_SUBJECT, getContext().getString(R.string.cometchat_share));
-            intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            intent.putExtra(android.content.Intent.EXTRA_TEXT, formatterString);
             getContext().startActivity(Intent.createChooser(intent, getContext().getString(R.string.cometchat_share)));
         } else if (baseMessage != null && baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
             String mediaName = ((MediaMessage) baseMessage).getAttachment().getFileName();
@@ -2246,6 +2228,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     private void messagePrivately() {
         messageListViewModel.fetchMessageSender(baseMessage);
+    }
+
+    /**
+     * Gets the RecyclerView that displays the chat messages.
+     *
+     * @return The {@link RecyclerView} instance used to display the chat messages.
+     */
+    public RecyclerView getRecyclerView() {
+        return this.rvChatListView;
     }
 
     /**
@@ -2290,8 +2281,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * @param quickReactions The list of quick reactions to set.
      */
     public void setQuickReactions(List<String> quickReactions) {
-        if (quickReactions != null)
-            this.quickReactions = quickReactions;
+        if (quickReactions != null) this.quickReactions = quickReactions;
     }
 
     /**

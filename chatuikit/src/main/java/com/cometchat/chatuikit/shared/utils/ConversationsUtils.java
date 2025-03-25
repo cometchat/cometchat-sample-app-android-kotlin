@@ -399,18 +399,14 @@ public class ConversationsUtils {
                     User actionBy = (User) action.getActionBy();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_GROUP_JOINED_MESSAGE,
-                                                                        actionBy.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_joined));
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_LEFT: {
                     User actionBy = (User) action.getActionBy();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_GROUP_LEFT_MESSAGE,
-                                                                        actionBy.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_left));
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_KICKED: {
@@ -418,10 +414,7 @@ public class ConversationsUtils {
                     User actionOn = (User) action.getActionOn();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_MEMBER_KICKED_MESSAGE,
-                                                                        actionBy.getName(),
-                                                                        actionOn.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_kicked_by) + " " + actionOn.getName());
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_BANNED: {
@@ -429,10 +422,7 @@ public class ConversationsUtils {
                     User actionOn = (User) action.getActionOn();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_MEMBER_BANNED_MESSAGE,
-                                                                        actionBy.getName(),
-                                                                        actionOn.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_banned) + " " + actionOn.getName());
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_UNBANNED: {
@@ -440,10 +430,7 @@ public class ConversationsUtils {
                     User actionOn = (User) action.getActionOn();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_MEMBER_UNBANNED_MESSAGE,
-                                                                        actionBy.getName(),
-                                                                        actionOn.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_unban) + " " + actionOn.getName());
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_MEMBER_ADDED: {
@@ -451,22 +438,34 @@ public class ConversationsUtils {
                     User actionOn = (User) action.getActionOn();
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_MEMBER_ADDED_TO_GROUP,
-                                                                        actionBy.getName(),
-                                                                        actionOn.getName()));
+                                                          actionBy.getName() + " " + context.getString(R.string.cometchat_added) + " " + actionOn.getName());
                     break;
                 }
                 case CometChatConstants.ActionKeys.ACTION_SCOPE_CHANGED: {
                     User actionBy = (User) action.getActionBy();
                     User actionOn = (User) action.getActionOn();
+                    String newScope = action.getNewScope();
+                    String actionMessage;
+                    switch (newScope.toLowerCase()) {
+                        case CometChatConstants.SCOPE_MODERATOR:
+                            actionMessage = actionBy.getName() + " " + context.getString(R.string.cometchat_made) + " " + actionOn.getName() + " " + context.getString(
+                                R.string.cometchat_moderator);
+                            break;
+                        case CometChatConstants.SCOPE_ADMIN:
+                            actionMessage = actionBy.getName() + " " + context.getString(R.string.cometchat_made) + " " + actionOn.getName() + " " + context.getString(
+                                R.string.cometchat_admin);
+                            break;
+                        case CometChatConstants.SCOPE_PARTICIPANT:
+                            actionMessage = actionBy.getName() + " " + context.getString(R.string.cometchat_made) + " " + actionOn.getName() + " " + context.getString(
+                                R.string.cometchat_participant);
+                            break;
+                        default:
+                            actionMessage = action.getMessage();
+                            break;
+                    }
                     lastMessageData = new LastMessageData(MessageType.DEFAULT,
                                                           "",
-                                                          String.format(Locale.US,
-                                                                        CometChatConstants.ActionMessages.ACTION_MEMBER_SCOPE_CHANGED,
-                                                                        actionBy.getName(),
-                                                                        actionOn.getName(),
-                                                                        action.getNewScope()));
+                                                          actionMessage);
                     break;
                 }
                 default: {

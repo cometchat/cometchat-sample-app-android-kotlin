@@ -131,8 +131,9 @@
                 android:layout_marginStart="@dimen/cometchat_margin_1"
                 android:layout_weight="1"
                 android:background="@null"
-                android:inputType="text"
-                android:hint="@string/cometchat_search" />
+                android:hint="@string/cometchat_search"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
 
             <ImageView
                 android:id="@+id/iv_clear"

@@ -17,6 +17,7 @@ import com.cometchat.chat.models.InteractiveMessage;
 import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.ai.AIOptionsStyle;
 import com.cometchat.chatuikit.logger.CometChatLogger;
@@ -140,10 +141,14 @@ public class MessagesDataSource implements DataSource {
     }
 
     private CometChatMessageOption _getDeleteOption(@NonNull Context context) {
-        return new CometChatMessageOption(UIKitConstants.MessageOption.DELETE,
-                                          context.getString(R.string.cometchat_delete),
-                                          R.drawable.cometchat_ic_delete,
-                                          null);
+        return new CometChatMessageOption(
+            UIKitConstants.MessageOption.DELETE,
+            context.getString(R.string.cometchat_delete),
+            CometChatTheme.getErrorColor(context),
+            R.drawable.cometchat_ic_delete,
+            CometChatTheme.getErrorColor(context),
+            0,
+            null);
     }
 
     private CometChatMessageOption _getMessagePrivatelyOption(Context context) {

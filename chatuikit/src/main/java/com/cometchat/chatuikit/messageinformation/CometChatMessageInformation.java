@@ -16,7 +16,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.chat.exceptions.CometChatException;
@@ -166,12 +166,12 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
     private void initViewModel() {
         messageInformationViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageInformationViewModel.class);
         messageInformationViewModel.addListener();
-        messageInformationViewModel.getLiveListData().observe((AppCompatActivity) context, this::setList);
-        messageInformationViewModel.updateReceipt().observe((AppCompatActivity) context, this::notifyUpdateReceipt);
-        messageInformationViewModel.addReceipt().observe((AppCompatActivity) context, this::notifyAddReceipt);
-        messageInformationViewModel.exceptionMutableLiveData().observe((AppCompatActivity) context, this::showError);
-        messageInformationViewModel.clearList().observe((AppCompatActivity) context, this::clear);
-        messageInformationViewModel.getState().observe((AppCompatActivity) context, this::stateChangeObserver);
+        messageInformationViewModel.getLiveListData().observe((LifecycleOwner) context, this::setList);
+        messageInformationViewModel.updateReceipt().observe((LifecycleOwner) context, this::notifyUpdateReceipt);
+        messageInformationViewModel.addReceipt().observe((LifecycleOwner) context, this::notifyAddReceipt);
+        messageInformationViewModel.exceptionMutableLiveData().observe((LifecycleOwner) context, this::showError);
+        messageInformationViewModel.clearList().observe((LifecycleOwner) context, this::clear);
+        messageInformationViewModel.getState().observe((LifecycleOwner) context, this::stateChangeObserver);
         messageInformationViewModel.setMessage(message);
     }
 

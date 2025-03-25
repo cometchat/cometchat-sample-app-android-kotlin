@@ -10,7 +10,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -194,11 +193,11 @@ public class CometChatReactionList extends MaterialCardView {
         reactionListViewModel.clearReactedUserCacheHashMap();
 
         reactionListViewModel.getLoadingStateLiveData().observe((LifecycleOwner) getContext(), this::stateChangeObserver);
-        reactionListViewModel.getBaseMessageLiveData().observe((AppCompatActivity) getContext(), this::setBaseMessage);
-        reactionListViewModel.getReactionHeaderLiveData().observe((AppCompatActivity) getContext(), this::setReactionHeaderList);
-        reactionListViewModel.getSelectedReactionLiveData().observe((AppCompatActivity) getContext(), this::updatedSelectedReaction);
-        reactionListViewModel.getActiveTabIndexLiveData().observe((AppCompatActivity) getContext(), this::setActiveTab);
-        reactionListViewModel.getReactedUsersLiveData().observe((AppCompatActivity) getContext(), this::setReactedUsersList);
+        reactionListViewModel.getBaseMessageLiveData().observe((LifecycleOwner) getContext(), this::setBaseMessage);
+        reactionListViewModel.getReactionHeaderLiveData().observe((LifecycleOwner) getContext(), this::setReactionHeaderList);
+        reactionListViewModel.getSelectedReactionLiveData().observe((LifecycleOwner) getContext(), this::updatedSelectedReaction);
+        reactionListViewModel.getActiveTabIndexLiveData().observe((LifecycleOwner) getContext(), this::setActiveTab);
+        reactionListViewModel.getReactedUsersLiveData().observe((LifecycleOwner) getContext(), this::setReactedUsersList);
     }
 
     /**

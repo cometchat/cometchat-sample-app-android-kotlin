@@ -43,9 +43,11 @@ import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
@@ -53,6 +55,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
@@ -122,11 +125,72 @@ public class Utils {
         mainThread.post(runnable);
     }
 
+    public static Bitmap captureScreen(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return captureScreenUsingPixelCopy(activity);
+        } else {
+            return captureScreenLegacy(activity);
+        }
+    }
+
+    // ✅ **Best method for Android O (API 26+)**
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static Bitmap captureScreenUsingPixelCopy(Activity activity) {
+        try {
+            // Get the Window Decor View
+            Window window = activity.getWindow();
+            final View decorView = window.getDecorView();
+            final Bitmap bitmap = Bitmap.createBitmap(decorView.getWidth(), decorView.getHeight(), Bitmap.Config.ARGB_8888);
+
+            PixelCopy.request(window, bitmap, copyResult -> {
+                if (copyResult != PixelCopy.SUCCESS) {
+                    throw new RuntimeException("PixelCopy failed");
+                }
+            }, new android.os.Handler());
+
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // ✅ **Fallback for Older Versions**
+    private static Bitmap captureScreenLegacy(Activity activity) {
+        try {
+            View rootView = activity.getWindow().getDecorView().getRootView();
+            rootView.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
+            rootView.setDrawingCacheEnabled(false);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Bitmap applyRenderScriptBlur(Activity activity, Bitmap bitmap) {
+        Bitmap outputBitmap = Bitmap.createBitmap(bitmap);
+        RenderScript rs = RenderScript.create(activity, RenderScript.ContextType.NORMAL);
+        Allocation input = Allocation.createFromBitmap(rs, bitmap);
+        Allocation output = Allocation.createFromBitmap(rs, outputBitmap);
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, input.getElement());
+        script.setRadius(25f);
+        script.setInput(input);
+        script.forEach(output);
+        output.copyTo(outputBitmap);
+        rs.destroy();
+        return outputBitmap;
+    }
+
     public static HashMap<String, String> getIdMap(BaseMessage baseMessage) {
         HashMap<String, String> idMap = new HashMap<>();
         if (baseMessage.getParentMessageId() > 0)
             idMap.put(UIKitConstants.MapId.PARENT_MESSAGE_ID, String.valueOf(baseMessage.getParentMessageId()));
-        idMap.put(UIKitConstants.MapId.RECEIVER_ID, baseMessage.getReceiverUid().equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid()) ? baseMessage.getSender().getUid() : baseMessage.getReceiverUid());
+        idMap.put(UIKitConstants.MapId.RECEIVER_ID,
+                  baseMessage.getReceiverUid().equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid()) ? baseMessage
+                      .getSender()
+                      .getUid() : baseMessage.getReceiverUid());
         idMap.put(UIKitConstants.MapId.RECEIVER_TYPE, baseMessage.getReceiverType());
         return idMap;
     }

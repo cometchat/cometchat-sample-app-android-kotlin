@@ -82,7 +82,7 @@ public class GroupsFragment extends Fragment {
      */
     private void openGroupChat(Group group) {
         if (group.isJoined()) {
-            if (bottomSheetDialog.isShowing()) bottomSheetDialog.dismiss();
+            if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) bottomSheetDialog.dismiss();
             Intent intent = new Intent(requireActivity(), MessagesActivity.class);
             intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
             startActivity(intent);
@@ -112,7 +112,7 @@ public class GroupsFragment extends Fragment {
                 progressBar.setVisibility(View.VISIBLE);
                 break;
             case SUCCESS:
-                if (bottomSheetDialog.isShowing()) {
+                if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
                     bottomSheetDialog.dismiss();
                 }
                 break;
@@ -158,8 +158,16 @@ public class GroupsFragment extends Fragment {
                                                                                                              .toString()
                                                                                                              .trim()
         ));
+
+        if (bottomSheetDialog == null) {
+            bottomSheetDialog = new BottomSheetDialog(requireActivity(), R.style.DialogStyle);
+        }
+
         Utils.showBottomSheet(getContext(), bottomSheetDialog, true, false, joinPasswordGroupLayoutBinding.getRoot());
+
         bottomSheetDialog.show();
+
+        bottomSheetDialog.setOnDismissListener(dialog -> bottomSheetDialog = null);
     }
 
     /**
@@ -167,7 +175,12 @@ public class GroupsFragment extends Fragment {
      */
     private void setOverFlowMenu() {
         OverflowMenuLayoutBinding overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(getLayoutInflater());
-        overflowMenuLayoutBinding.ivMenu.setOnClickListener(view -> openCreateGroupDialog());
+        overflowMenuLayoutBinding.ivMenu.setOnClickListener(view -> {
+            if (bottomSheetDialog == null) {
+                bottomSheetDialog = new BottomSheetDialog(requireActivity(), R.style.DialogStyle);
+            }
+            openCreateGroupDialog();
+        });
         binding.group.setOverflowMenu(overflowMenuLayoutBinding.getRoot());
     }
 
@@ -222,6 +235,8 @@ public class GroupsFragment extends Fragment {
 
         bottomSheetDialog.getBehavior().setPeekHeight(1000);
         bottomSheetDialog.show();
+
+        bottomSheetDialog.setOnDismissListener(dialog -> bottomSheetDialog = null);
 
         createGroupLayoutBinding.etName.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {

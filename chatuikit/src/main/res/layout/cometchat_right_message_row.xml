@@ -19,7 +19,7 @@
             android:id="@+id/message_bubble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/cometchat_32dp" />
+            android:layout_marginStart="@dimen/cometchat_50dp" />
     </LinearLayout>
 
 </LinearLayout>

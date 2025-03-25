@@ -17,7 +17,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
@@ -34,8 +34,6 @@ import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManag
 import com.cometchat.chatuikit.shared.resources.soundmanager.Sound;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
-
-import java.util.Locale;
 
 public class CometChatIncomingCall extends MaterialCardView {
     private Call call;
@@ -89,9 +87,9 @@ public class CometChatIncomingCall extends MaterialCardView {
         soundManager = new CometChatSoundManager(getContext());
         // Initialize ViewModel and observe call state
         viewModel = new ViewModelProvider.NewInstanceFactory().create(IncomingCallViewModel.class);
-        viewModel.getAcceptedCall().observe((AppCompatActivity) getContext(), this::acceptedCall);
-        viewModel.getRejectCall().observe((AppCompatActivity) getContext(), this::rejectedCall);
-        viewModel.getException().observe((AppCompatActivity) getContext(), this::throwError);
+        viewModel.getAcceptedCall().observe((LifecycleOwner) getContext(), this::acceptedCall);
+        viewModel.getRejectCall().observe((LifecycleOwner) getContext(), this::rejectedCall);
+        viewModel.getException().observe((LifecycleOwner) getContext(), this::throwError);
 
         binding.acceptButton.setOnClickListener(v -> {
             if (onAcceptClick != null) {
@@ -330,13 +328,17 @@ public class CometChatIncomingCall extends MaterialCardView {
         this.call = call;
         setCallerInfo();
         binding.callTypeIcon.setImageDrawable(call.getType().equals(CometChatConstants.CALL_TYPE_AUDIO) ? voiceCallIcon : videoCallIcon);
-        binding.callType.setText(String.format(Locale.getDefault(), getString(getContext(), R.string.cometchat_incoming_call_type), call.getType()));
+        binding.callType.setText(String.format(getString(getContext(), R.string.cometchat_incoming_call_type),
+                                               call
+                                                   .getType()
+                                                   .equals(CometChatConstants.CALL_TYPE_AUDIO) ? getContext().getString(R.string.cometchat_incoming_call_audio) :
+                                                   getContext().getString(R.string.cometchat_incoming_call_video)));
     }
 
     private void setCallerInfo() {
         User callUser = (User) call.getCallInitiator();
         binding.callerName.setText(callUser.getName());
-        binding.callType.setText(String.format(Locale.getDefault(), getContext().getString(R.string.cometchat_incoming_call_type), call.getType()));
+        binding.callType.setText(String.format(getContext().getString(R.string.cometchat_incoming_call_type), call.getType()));
         binding.callerAvatar.setAvatar(callUser.getName(), callUser.getAvatar());
         binding.callTypeIcon.setImageResource(call
                                                   .getType()
@@ -485,14 +487,6 @@ public class CometChatIncomingCall extends MaterialCardView {
      */
     public void setVideoCallIcon(Drawable videoCallIcon) {
         this.videoCallIcon = videoCallIcon;
-    }    /**
-     * Sets the stroke width for this component.
-     *
-     * @param strokeWidth the width in pixels to set for the stroke.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        binding.incomingCallComponent.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -531,6 +525,14 @@ public class CometChatIncomingCall extends MaterialCardView {
     public void setRejectCallButtonBackgroundColor(@ColorInt int rejectCallButtonBackgroundColor) {
         this.rejectCallButtonBackgroundColor = rejectCallButtonBackgroundColor;
         binding.declineButton.setBackgroundColor(rejectCallButtonBackgroundColor);
+    }    /**
+     * Sets the stroke width for this component.
+     *
+     * @param strokeWidth the width in pixels to set for the stroke.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        binding.incomingCallComponent.setStrokeWidth(strokeWidth);
     }
 
     @Override
@@ -757,11 +759,6 @@ public class CometChatIncomingCall extends MaterialCardView {
     public void setSubtitleView(View subtitleView) {
         this.subtitleView = subtitleView;
         Utils.handleView(binding.subtitleContainer, subtitleView, true);
-    }    /**
-     * Plays the incoming call sound if sound is not disabled.
-     */
-    public void playSound() {
-        if (!disableSoundForCalls) soundManager.play(Sound.incomingCall, customSoundForCalls);
     }
 
     /**
@@ -793,6 +790,13 @@ public class CometChatIncomingCall extends MaterialCardView {
 
 
 
+
+    /**
+     * Plays the incoming call sound if sound is not disabled.
+     */
+    public void playSound() {
+        if (!disableSoundForCalls) soundManager.play(Sound.incomingCall, customSoundForCalls);
+    }
 
 
     /**

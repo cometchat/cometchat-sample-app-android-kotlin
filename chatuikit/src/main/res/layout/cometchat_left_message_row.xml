@@ -12,14 +12,13 @@
         android:orientation="vertical"
         android:paddingStart="@dimen/cometchat_padding_4"
         android:paddingTop="@dimen/cometchat_padding_2"
-        android:paddingEnd="@dimen/cometchat_padding_4"
+        android:paddingEnd="@dimen/cometchat_16dp"
         android:paddingBottom="@dimen/cometchat_padding_2">
 
         <com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble
             android:id="@+id/message_bubble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/cometchat_32dp"
             android:visibility="visible" />
     </LinearLayout>
 

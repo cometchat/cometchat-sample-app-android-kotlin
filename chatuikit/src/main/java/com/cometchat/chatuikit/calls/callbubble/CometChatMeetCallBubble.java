@@ -319,7 +319,8 @@ public class CometChatMeetCallBubble extends MaterialCardView {
                     binding.callIcon.setImageDrawable(isIncoming ? incomingVideoCallIcon : outgoingVideoCallIcon);
                     break;
             }
-            setTitleText(CometChatConstants.CALL_TYPE_VIDEO.equals(callType) ? "Video Call" : "Audio Call");
+            setTitleText(CometChatConstants.CALL_TYPE_VIDEO.equals(callType) ? getContext().getString(R.string.cometchat_video_call) : getContext().getString(
+                R.string.cometchat_audio_call));
             setSubtitleText(formatSeconds(customMessage.getSentAt()));
         }
     }
@@ -484,15 +485,6 @@ public class CometChatMeetCallBubble extends MaterialCardView {
      */
     public int getIconBackgroundColor() {
         return iconBackgroundColor;
-    }    /**
-     * Sets the width of the card's border stroke.
-     *
-     * @param strokeWidth The width, in pixels, to set for the card's stroke.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -504,6 +496,15 @@ public class CometChatMeetCallBubble extends MaterialCardView {
         this.iconBackgroundColor = iconBackgroundColor;
         binding.callIconCard.setRadius(1000);
         binding.callIconCard.setCardBackgroundColor(iconBackgroundColor);
+    }    /**
+     * Sets the width of the card's border stroke.
+     *
+     * @param strokeWidth The width, in pixels, to set for the card's stroke.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -711,6 +712,7 @@ public class CometChatMeetCallBubble extends MaterialCardView {
             extractAttributesAndApplyDefaults(typedArray);
         }
     }
+
 
 
 

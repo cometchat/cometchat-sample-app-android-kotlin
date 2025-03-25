@@ -11,6 +11,8 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.cometchat.calls.constants.CometChatCallsConstants
 import com.cometchat.calls.model.CallLog
 import com.cometchat.calls.model.CallUser
@@ -42,6 +44,11 @@ class CallDetailsActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_layout)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         callLog = Gson().fromJson(
             intent.getStringExtra("callLog"), CallLog::class.java

@@ -56,6 +56,7 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
     private MessageOptionClickListener messageOptionClickListener;
     private ReactionClickListener reactionClickListener;
 
+
     /**
      * Custom view for displaying message options in the CometChat application.
      *
@@ -366,13 +367,6 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
         if (adapter != null) {
             adapter.addOptionItem(actionItem);
         }
-    }    /**
-     * Called when the view is attached to a window.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        configureReactions();
     }
 
     /**
@@ -384,6 +378,13 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
         if (adapter != null) {
             adapter.updateOptionItem(actionItem);
         }
+    }    /**
+     * Called when the view is attached to a window.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        configureReactions();
     }
 
     /**

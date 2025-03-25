@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">聊天</string>
+    <string name="app_bottom_nav_calls">通话</string>
+    <string name="app_bottom_nav_users">用户</string>
+    <string name="app_bottom_nav_groups">群组</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">登录</string>
+    <string name="app_continue_with_google">使用 Google 继续</string>
+    <string name="app_no_banned_members">没有被禁用的成员</string>
+    <string name="app_banned_few_members_to_show_them_here">禁止了一些成员以在此处显示</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">使用 Google 登录失败，未找到账号。</string>
+    <string name="app_google_sign_in_failed">Google 登录失败：</string>
+    <string name="app_group">群组</string>
+    <string name="app_btn_leave">离开</string>
+    <string name="app_leave_this_group">要离开此群组吗？</string>
+    <string name="app_leave_this_group_description">确定要离开此群组吗？您将不会再收到此聊天的消息。</string>
+    <string name="app_btn_cancel">取消</string>
+    <string name="app_transfer_ownership_description">确定要转让所有权吗？此操作无法撤销，新所有者将获得完全控制。</string>
+    <string name="app_btn_continue">继续</string>
+    <string name="app_delete_and_exit">删除并退出？</string>
+    <string name="app_delete_and_exit_action">删除并退出</string>
+    <string name="app_delete_and_exit_description">确定要删除此聊天并退出群组吗？此操作无法撤销。</string>
+    <string name="app_btn_delete">删除</string>
+    <string name="app_add">添加</string>
+    <string name="app_member">成员</string>
+    <string name="app_members">成员</string>
+    <string name="app_base_message">基础消息</string>
+    <string name="app_user">用户</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">通话类型</string>
+    <string name="app_not_logged_in">您尚未登录。请登录后重试。</string>
+    <string name="app_transfer_ownership">转让所有权</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">通话详情</string>
+    <string name="app_call_details_history">历史</string>
+    <string name="app_call_details_participants">参与者</string>
+    <string name="app_call_details_recordings">录音</string>
+    <string name="app_call_outgoing">呼出</string>
+    <string name="app_call_missed">未接</string>
+    <string name="app_call_incoming">呼入</string>
+    <string name="app_no_recordings_found">未找到录音</string>
+
+    <string name="app_accept">接受</string>
+    <string name="app_decline">拒绝</string>
+    <string name="app_incoming_s_call">有 %s 来电</string>
+    <string name="app_user_info">用户信息</string>
+    <string name="app_voice">语音</string>
+    <string name="app_video">视频</string>
+
+    <string name="app_delete">删除聊天</string>
+    <string name="app_delete_chat_title">删除此聊天？</string>
+    <string name="app_delete_chat_subtitle">确定要删除此聊天吗？此操作无法撤销。</string>
+    <string name="app_delete_chat_positive_button">删除</string>
+    <string name="app_delete_chat_negative_button">取消</string>
+    <string name="app_delete_chat_error">删除失败</string>
+    <string name="app_delete_chat_success">聊天已删除</string>
+
+    <string name="app_block">屏蔽</string>
+    <string name="app_block_user_title">屏蔽此联系人？</string>
+    <string name="app_block_user_subtitle">确定要屏蔽此联系人吗？您将不再接收其消息。</string>
+    <string name="app_block_user_positive_button">屏蔽</string>
+    <string name="app_block_user_negative_button">取消</string>
+    <string name="app_block_user_error">屏蔽失败</string>
+    <string name="app_block_user_success">用户已被屏蔽</string>
+
+    <string name="app_unblock">取消屏蔽</string>
+    <string name="app_unblock_user_title">取消屏蔽此联系人？</string>
+    <string name="app_unblock_user_subtitle">确定要取消屏蔽此联系人吗？</string>
+    <string name="app_unblock_user_positive_button">取消屏蔽</string>
+    <string name="app_unblock_user_negative_button">取消</string>
+    <string name="app_unblock_user_error">取消屏蔽失败</string>
+    <string name="app_unblock_user_success">已取消对用户的屏蔽</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">选择一个示例用户</string>
+    <string name="app_continue">继续</string>
+    <string name="app_or">或</string>
+    <string name="app_change">更改</string>
+    <string name="app_app_credentials">应用凭据</string>
+    <string name="app_enter_uid">输入 UID</string>
+    <string name="app_enter_your_uid">输入您的 UID</string>
+    <string name="app_error_invalid_user_or_uid_login">请选择用户或输入正确的 UID</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">地区</string>
+    <string name="app_region_us">美国</string>
+    <string name="app_region_eu">欧洲</string>
+    <string name="app_region_in">印度</string>
+    <string name="app_app_id">应用 ID</string>
+    <string name="app_app_id_hint">输入应用 ID</string>
+    <string name="app_auth_key">认证密钥</string>
+    <string name="app_auth_key_hint">输入认证密钥</string>
+    <string name="app_please_select_app_region">请选择应用地区</string>
+    <string name="app_invalid_app_id">请输入有效的应用 ID</string>
+    <string name="app_invalid_auth_token">请输入有效的认证令牌</string>
+    <string name="app_new_group">新建群组</string>
+    <string name="app_group_type">类型</string>
+    <string name="app_group_name">名称</string>
+    <string name="app_group_hint_name">输入群组名称</string>
+    <string name="app_password">密码</string>
+    <string name="app_hint_enter_the_password">输入密码</string>
+    <string name="app_btn_create_group">创建群组</string>
+    <string name="app_create_conversation">创建会话</string>
+    <string name="app_logout">登出</string>
+    <string name="app_group_info">群组信息</string>
+    <string name="app_no_longer_part_of_this_group">您已不在此群组中</string>
+    <string name="app_view_members">查看成员</string>
+    <string name="app_add_members">添加成员</string>
+    <string name="app_banned_members">已禁用成员</string>
+    <string name="app_view_members_chip">查看\n成员</string>
+    <string name="app_add_members_chip">添加\n成员</string>
+    <string name="app_banned_members_chip">已禁用\n成员</string>
+    <string name="app_leave">离开</string>
+    <string name="app_block_user_unable_to_send_message">您无法向此群组发送消息，因为您已不再是群组成员。</string>
+    <string name="app_unblock_user">取消屏蔽用户</string>
+    <string name="app_description">描述</string>
+    <string name="app_steps_to_reproduce">重现步骤</string>
+    <string name="app_join_group">加入群组</string>
+    <string name="app_type">类型</string>
+    <string name="app_enter_the_password">输入密码</string>
+    <string name="app_something_went_wrong_please_try_again">出现问题。请重试。</string>
+    <string name="app_retry">重试</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">看起来出现了问题。\n请重试。</string>
+    <string name="app_type_public">公开</string>
+
+    <string name="app_transfer_ownership_text">转让所有权</string>
+    <string name="app_type_private">私有</string>
+    <string name="app_type_protected">受保护</string>
+    <string name="app_thread_title">线程</string>
+    <string name="app_error_conversations_title">哎呀！</string>
+    <string name="app_group_members_empty_title">暂无成员</string>
+    <string name="app_group_member_empty_subtitle">添加成员到群组，并在此查看他们的列表。</string>
+    <string name="app_search">搜索</string>
+    <string name="app_new_chat">新聊天</string>
+    <string name="app_report">开始报告</string>
+    <string name="app_has_blocked_you">已屏蔽您</string>
+    <string name="app_you_have_blocked_this_user">您已屏蔽该用户</string>
+</resources>

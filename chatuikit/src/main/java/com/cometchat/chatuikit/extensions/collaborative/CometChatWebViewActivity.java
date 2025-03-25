@@ -2,6 +2,7 @@ package com.cometchat.chatuikit.extensions.collaborative;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -45,11 +46,12 @@ public class CometChatWebViewActivity extends AppCompatActivity {
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
             webSettings.setSupportZoom(true);
+            webView.getSettings().setUseWideViewPort(true);
             webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
             webView.setWebViewClient(new WebViewClient() {
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    return false;
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    return super.shouldOverrideUrlLoading(view, request);
                 }
             });
             webView.loadUrl(url);

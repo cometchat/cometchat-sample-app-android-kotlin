@@ -162,9 +162,9 @@ public class CollaborativeWhiteboardExtensionDecorator extends DataSourceDecorat
                 public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
                     return CollaborativeUtils.getCollaborativeBubbleView(context,
                                                                          configuration,
-                                                                         "Collaborative Whiteboard",
-                                                                         "Open whiteboard to draw together.",
-                                                                         "Open Whiteboard");
+                                                                         context.getString(R.string.cometchat_collaborative_whiteboard),
+                                                                         context.getString(R.string.cometchat_open_whiteboard_to_edit_content_together),
+                                                                         context.getString(R.string.cometchat_open_whiteboard));
                 }
 
                 @Override

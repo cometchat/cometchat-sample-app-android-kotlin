@@ -101,6 +101,7 @@
                 android:background="@null"
                 android:hint="@string/app_search"
                 android:inputType="text"
+                android:imeOptions="actionSearch"
                 android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
                 android:textColor="?attr/cometchatTextColorPrimary"
                 android:textColorHint="?attr/cometchatTextColorSecondary" />

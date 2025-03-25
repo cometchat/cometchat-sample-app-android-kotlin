@@ -51,7 +51,6 @@ class CallsFragment : Fragment() {
         if (enableAutoRefresh) {
             enableAutoRefresh = false
             isCallActive = false
-            binding.callLog.refreshCallLogs()
         }
     }
 
@@ -93,24 +92,29 @@ class CallsFragment : Fragment() {
         })
 
         binding.callLog.setOnCallIconClickListener { view, holder, position, callLog ->
-
+            val callView = holder.binding.tailView.getChildAt(0)
+            val progressBar = getProgressBar(
+                requireContext(),
+                requireContext().resources.getDimensionPixelSize(R.dimen.cometchat_30dp),
+                CometChatTheme.getTextColorPrimary(requireContext())
+            )
             if (!isCallActive) {
                 isCallActive = true
                 holder.binding.tailView.removeAllViews()
-                holder.binding.tailView.addView(
-                    getProgressBar(
-                        requireContext(),
-                        requireContext().resources.getDimensionPixelSize(R.dimen.cometchat_30dp),
-                        CometChatTheme.getTextColorPrimary(requireContext())
-                    )
-                )
+                holder.binding.tailView.addView(progressBar)
                 val listener: CometChat.CallbackListener<Void> = object : CometChat.CallbackListener<Void>() {
                     override fun onSuccess(unused: Void?) {
                         isCallActive = false
+                        holder.binding.tailView.removeAllViews();
+                        if (callView != null)
+                            holder.binding.tailView.addView(callView);
                     }
 
                     override fun onError(e: CometChatException) {
                         isCallActive = false
+                        holder.binding.tailView.removeAllViews();
+                        if (callView != null)
+                            holder.binding.tailView.addView(callView);
                     }
                 }
                 if (callLog.type == CometChatCallsConstants.CALL_TYPE_AUDIO) {

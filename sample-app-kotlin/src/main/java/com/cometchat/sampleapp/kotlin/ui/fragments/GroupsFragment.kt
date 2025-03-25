@@ -100,7 +100,7 @@ class GroupsFragment : Fragment() {
      */
     private fun openGroupChat(group: Group) {
         if (group.isJoined) {
-            if (bottomSheetDialog!!.isShowing) bottomSheetDialog!!.dismiss()
+            if (bottomSheetDialog != null && bottomSheetDialog!!.isShowing) bottomSheetDialog!!.dismiss()
             val intent = Intent(requireActivity(), MessagesActivity::class.java)
             intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
             startActivity(intent)
@@ -112,7 +112,12 @@ class GroupsFragment : Fragment() {
         val overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(
             layoutInflater
         )
-        overflowMenuLayoutBinding.ivMenu.setOnClickListener { view: View? -> openCreateGroupDialog() }
+        overflowMenuLayoutBinding.ivMenu.setOnClickListener {
+            if (bottomSheetDialog == null) {
+                bottomSheetDialog = BottomSheetDialog(requireActivity(), R.style.DialogStyle)
+            }
+            openCreateGroupDialog()
+        }
         binding.group.overflowMenu = overflowMenuLayoutBinding.root
     }
 
@@ -166,6 +171,10 @@ class GroupsFragment : Fragment() {
         bottomSheetDialog!!.behavior.peekHeight = 1000
 
         bottomSheetDialog!!.show()
+
+        bottomSheetDialog!!.setOnDismissListener {
+            bottomSheetDialog = null
+        }
 
         createGroupLayoutBinding.etName.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
@@ -224,10 +233,17 @@ class GroupsFragment : Fragment() {
         joinPasswordGroupLayoutBinding.joinButton.setOnClickListener { view: View? ->
             viewModel.joinPasswordGroup(group, joinPasswordGroupLayoutBinding.etPassword.text.toString().trim { it <= ' ' })
         }
+        if (bottomSheetDialog == null) {
+            bottomSheetDialog = BottomSheetDialog(requireActivity(), R.style.DialogStyle)
+        }
+
         Utils.showBottomSheet(
             context, bottomSheetDialog!!, true, false, joinPasswordGroupLayoutBinding.root
         )
         bottomSheetDialog!!.show()
+        bottomSheetDialog!!.setOnDismissListener {
+            bottomSheetDialog = null
+        }
     }
 
     /**
@@ -245,7 +261,7 @@ class GroupsFragment : Fragment() {
                 progressBar!!.visibility = View.VISIBLE
             }
 
-            DialogState.SUCCESS -> if (bottomSheetDialog!!.isShowing) {
+            DialogState.SUCCESS -> if (bottomSheetDialog != null && bottomSheetDialog!!.isShowing) {
                 bottomSheetDialog!!.dismiss()
             }
 

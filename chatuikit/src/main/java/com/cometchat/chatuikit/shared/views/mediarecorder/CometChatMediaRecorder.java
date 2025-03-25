@@ -244,8 +244,10 @@ public class CometChatMediaRecorder extends MaterialCardView {
             }
         });
         binding.ivRightStop.setOnClickListener(v -> {
-            binding.audioBubble.setAudioUrl(recordedFilePath, Utils.getFileSize(recordedFilePath));
-            stopRecording();
+            if (recordedFilePath != null) {
+                binding.audioBubble.setAudioUrl(recordedFilePath, Utils.getFileSize(recordedFilePath));
+                stopRecording();
+            }
         });
         binding.ivLeftDelete.setOnClickListener(v -> {
             deleteRecording();
@@ -657,14 +659,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public Drawable getDeleteIcon() {
         return deleteIcon;
-    }    /**
-     * Returns the current stroke width of the media recorder.
-     *
-     * @return the stroke width
-     */
-    @Override
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -675,6 +669,14 @@ public class CometChatMediaRecorder extends MaterialCardView {
     public void setDeleteIcon(Drawable deleteIcon) {
         this.deleteIcon = deleteIcon;
         binding.ivLeftDelete.setImageDrawable(deleteIcon);
+    }    /**
+     * Returns the current stroke width of the media recorder.
+     *
+     * @return the stroke width
+     */
+    @Override
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -818,15 +820,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getStartIconTint() {
         return startIconTint;
-    }    /**
-     * Sets the stroke width of the media recorder.
-     *
-     * @param strokeWidth the stroke width to set
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -847,6 +840,15 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getStartIconBackgroundColor() {
         return startIconBackgroundColor;
+    }    /**
+     * Sets the stroke width of the media recorder.
+     *
+     * @param strokeWidth the stroke width to set
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

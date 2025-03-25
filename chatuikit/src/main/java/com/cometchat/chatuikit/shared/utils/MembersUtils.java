@@ -76,7 +76,7 @@ public class MembersUtils {
                                                             click));
         if (kickMemberOptionVisibility == VISIBLE)
             optionsList.add(new CometChatPopupMenu.MenuItem(UIKitConstants.GroupMemberOption.KICK,
-                                                            context.getResources().getString(R.string.cometchat_remove),
+                                                            context.getResources().getString(R.string.cometchat_kick),
                                                             click));
         return optionsList;
     }

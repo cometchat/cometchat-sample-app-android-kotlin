@@ -15,16 +15,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.cometchat.chat.constants.CometChatConstants;
-import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -43,20 +39,6 @@ public class AppUtils {
         toast.setDuration(Toast.LENGTH_LONG);
         toast.setView(binding.getRoot());
         toast.show();
-    }
-
-    public static void showUserStatusAndLastSeen(@NonNull Context context, @NonNull User user, @NonNull TextView textView) {
-        if (user.getStatus().equals(CometChatConstants.USER_STATUS_ONLINE)) {
-            textView.setText(context.getResources().getString(com.cometchat.chatuikit.R.string.cometchat_online));
-        } else {
-            if (user.getLastActiveAt() == 0) {
-                textView.setText(context.getString(com.cometchat.chatuikit.R.string.cometchat_offline));
-            } else {
-                String lastSeen = Utils.getLastSeenTime(context, user.getLastActiveAt());
-                textView.setText(lastSeen);
-                textView.setSelected(true);
-            }
-        }
     }
 
     public static <T> void saveDataInSharedPref(Context context, String key, T value) {

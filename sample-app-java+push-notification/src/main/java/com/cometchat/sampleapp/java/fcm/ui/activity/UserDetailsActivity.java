@@ -18,6 +18,7 @@ import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.calls.CometChatCallActivity;
+import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatConfirmDialog;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityUserDetailsBinding;
@@ -47,7 +48,7 @@ public class UserDetailsActivity extends AppCompatActivity {
         viewModel.addListeners();
         viewModel.setUser(new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_user)), User.class));
         viewModel.setBaseMessage(new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_base_message)), BaseMessage.class));
-        viewModel.getUser().observe(this, updateUserHeader());
+        viewModel.getUser().observe(this, this::setUserHeader);
         viewModel.isUserBlockedByMe().observe(this, isUserBlockedByMe());
         viewModel.isUserBlocked().observe(this, blockUserStateObserver());
         viewModel.isUserUnblocked().observe(this, unblockUserStateObserver());
@@ -77,15 +78,37 @@ public class UserDetailsActivity extends AppCompatActivity {
         binding.cardVideoCall.setOnClickListener(v -> viewModel.startCall(CometChatConstants.CALL_TYPE_VIDEO));
     }
 
-    @NonNull
-    private Observer<User> updateUserHeader() {
-        return user -> {
-            if (!binding.tvTitle.getText().equals(user.getName())) {
-                binding.avatar.setAvatar(user.getName(), user.getAvatar());
-                binding.tvTitle.setText(user.getName());
+    private void setUserHeader(User user) {
+        binding.avatar.setAvatar(user.getName(), user.getAvatar());
+        binding.tvTitle.setText(user.getName());
+        if (!Utils.isBlocked(user)) {
+            binding.infoMessage.setVisibility(View.GONE);
+            binding.tvSubtitle.setVisibility(View.VISIBLE);
+            binding.cardVideoCall.setVisibility(View.VISIBLE);
+            binding.cardVoiceCall.setVisibility(View.VISIBLE);
+            if (user.getStatus().equals(CometChatConstants.USER_STATUS_ONLINE)) {
+                binding.tvSubtitle.setText(getResources().getString(com.cometchat.chatuikit.R.string.cometchat_online));
+            } else {
+                if (user.getLastActiveAt() == 0) {
+                    binding.tvSubtitle.setText(getString(com.cometchat.chatuikit.R.string.cometchat_offline));
+                } else {
+                    String lastSeen = Utils.getLastSeenTime(this, user.getLastActiveAt());
+                    binding.tvSubtitle.setText(lastSeen);
+                    binding.tvSubtitle.setSelected(true);
+                }
             }
-            AppUtils.showUserStatusAndLastSeen(this, user, binding.tvSubtitle);
-        };
+        } else {
+            binding.tvSubtitle.setVisibility(View.GONE);
+            binding.cardVideoCall.setVisibility(View.GONE);
+            binding.cardVoiceCall.setVisibility(View.GONE);
+            if (user.isBlockedByMe()) {
+                binding.infoMessage.setVisibility(View.VISIBLE);
+                binding.tvInfoMessage.setText(String.format("%s %s", getString(R.string.app_you_have_blocked_this_user), user.getName()));
+            } else {
+                binding.infoMessage.setVisibility(View.VISIBLE);
+                binding.tvInfoMessage.setText(String.format("%s %s", user.getName(), getString(R.string.app_has_blocked_you)));
+            }
+        }
     }
 
     @NonNull
@@ -148,9 +171,7 @@ public class UserDetailsActivity extends AppCompatActivity {
 
     @NonNull
     private Observer<String> onCallStartError() {
-        return msg -> {
-            AppUtils.customToast(this, msg, CometChatTheme.getErrorColor(this));
-        };
+        return msg -> AppUtils.customToast(this, getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong), CometChatTheme.getErrorColor(this));
     }
 
     private void blockUser() {

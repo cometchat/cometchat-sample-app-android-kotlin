@@ -37,7 +37,7 @@ class HomeActivity : AppCompatActivity(), OnItemClickListener {
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
@@ -87,7 +87,7 @@ class HomeActivity : AppCompatActivity(), OnItemClickListener {
                 )
             )
         )
-
+        binding.bottomNavigationView.itemPaddingBottom = 0
         binding.bottomNavigationView.itemIconTintList = colorStateList
         binding.bottomNavigationView.itemTextColor = colorStateList
     }

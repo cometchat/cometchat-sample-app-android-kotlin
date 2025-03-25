@@ -105,25 +105,29 @@ public class CallsFragment extends Fragment {
         binding.callLog.setOnCallIconClickListener(new CometChatCallLogs.OnCallIconClick() {
             @Override
             public void onCallIconClick(View view, CallLogsAdapter.CallLogsViewHolder holder, int position, CallLog callLog) {
+                View callView = holder.getBinding().tailView.getChildAt(0);
+                View progressBarView = AppUtils.getProgressBar(
+                        requireContext(),
+                        requireContext().getResources().getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_30dp),
+                        CometChatTheme.getTextColorPrimary(requireContext())
+                );
                 if (!isCallActive) {
                     isCallActive = true;
                     holder.getBinding().tailView.removeAllViews();
-                    holder.getBinding().tailView.addView(
-                        AppUtils.getProgressBar(
-                            requireContext(),
-                            requireContext().getResources().getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_30dp),
-                            CometChatTheme.getTextColorPrimary(requireContext())
-                        )
-                    );
+                    holder.getBinding().tailView.addView(progressBarView);
                     CometChat.CallbackListener<Void> listener = new CometChat.CallbackListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
                             isCallActive = false;
+                            holder.getBinding().tailView.removeAllViews();
+                            holder.getBinding().tailView.addView(callView);
                         }
 
                         @Override
                         public void onError(CometChatException e) {
                             isCallActive = false;
+                            holder.getBinding().tailView.removeAllViews();
+                            holder.getBinding().tailView.addView(callView);
                         }
                     };
                     if (callLog.getType().equals(CometChatCallsConstants.CALL_TYPE_AUDIO)) {

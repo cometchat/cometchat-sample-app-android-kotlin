@@ -594,6 +594,7 @@ public class CometChatUsers extends MaterialCardView {
     public void setDiscardSelectionVisibility(int visibility) {
         if (visibility == View.GONE) {
             binding.ivDiscardSelection.setVisibility(View.GONE);
+            setBackIconVisibility(backIconVisibility);
         } else {
             if (!hashMap.isEmpty()) {
                 binding.ivDiscardSelection.setVisibility(View.VISIBLE);
@@ -1021,13 +1022,6 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @ColorInt int getSearchInputTextColor() {
         return searchInputTextColor;
-    }    /**
-     * Gets the stroke width.
-     *
-     * @return the stroke width.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -1057,6 +1051,13 @@ public class CometChatUsers extends MaterialCardView {
     public void setSearchInputPlaceHolderTextAppearance(@StyleRes int searchInputPlaceHolderTextAppearance) {
         this.searchInputPlaceHolderTextAppearance = searchInputPlaceHolderTextAppearance;
         binding.searchBox.setSearchInputPlaceHolderTextAppearance(searchInputPlaceHolderTextAppearance);
+    }    /**
+     * Gets the stroke width.
+     *
+     * @return the stroke width.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -1353,14 +1354,6 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @ColorInt int getCheckBoxBackgroundColor() {
         return checkBoxBackgroundColor;
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth the stroke width to set.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1418,6 +1411,14 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @ColorInt int getEmptyStateTextColor() {
         return emptyStateTextColor;
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth the stroke width to set.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2337,7 +2338,7 @@ public class CometChatUsers extends MaterialCardView {
      *
      * @param visibility the desired visibility state of the search box.
      */
-    private void setSearchBoxVisibility(int visibility) {
+    public void setSearchBoxVisibility(int visibility) {
         searchBoxVisibility = visibility;
         binding.searchBox.setVisibility(visibility);
     }
@@ -2360,7 +2361,7 @@ public class CometChatUsers extends MaterialCardView {
      *
      * @param visibility the desired visibility state of the back icon.
      */
-    private void setBackIconVisibility(int visibility) {
+    public void setBackIconVisibility(int visibility) {
         backIconVisibility = visibility;
         if (visibility == GONE) {
             binding.ivBack.setVisibility(GONE);
@@ -2410,7 +2411,7 @@ public class CometChatUsers extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setEmptyStateVisibility(int visibility) {
+    public void setEmptyStateVisibility(int visibility) {
         emptyStateVisibility = visibility;
         binding.emptyStateView.setVisibility(visibility);
     }
@@ -2429,7 +2430,7 @@ public class CometChatUsers extends MaterialCardView {
      *
      * @param visibility Visibility constant (View.VISIBLE, View.GONE, etc.).
      */
-    private void setErrorStateVisibility(int visibility) {
+    public void setErrorStateVisibility(int visibility) {
         errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(visibility);
     }

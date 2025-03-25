@@ -185,8 +185,18 @@
     </plurals>
     <string name="cometchat_meeting_initiated_by_you" translatable="true">%s have Initiated a Group Call</string>
     <string name="cometchat_meeting_initiated_by_others" translatable="true">%s has Initiated Group Call</string>
-    <string name="cometchat_edited">Edited</string>
-    <string name="cometchat_incoming_call_accept">Accept</string>
-    <string name="cometchat_incoming_call_decline">Decline</string>
-    <string name="cometchat_incoming_call_type">Incoming %s Call</string>
+    <string name="cometchat_edited" translatable="true">Edited</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Accept</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Decline</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Incoming %s Call</string>
+    <string name="cometchat_kick" translatable="true">Kick</string>
+
+    <string name="cometchat_open_document_to_edit_content_together" translatable="true">Open document to edit content together</string>
+    <string name="cometchat_open_document" translatable="true">Open Document</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together" translatable="true">Open whiteboard to edit content together</string>
+    <string name="cometchat_open_whiteboard" translatable="true">Open Whiteboard</string>
+    <string name="cometchat_video_call" translatable="true">Video Call</string>
+    <string name="cometchat_audio_call" translatable="true">Audio Call</string>
+    <string name="cometchat_incoming_call_audio" translatable="true">audio</string>
+    <string name="cometchat_incoming_call_video" translatable="true">video</string>
 </resources>

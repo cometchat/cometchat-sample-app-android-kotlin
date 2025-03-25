@@ -60,10 +60,10 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
 
     private void initViewModel() {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OngoingCallViewModel.class);
-        viewModel.getEndCall().observe((AppCompatActivity) getContext(), this::endCall);
-        viewModel.getException().observe((AppCompatActivity) getContext(), this::showError);
-        viewModel.hideProgressBar().observe((AppCompatActivity) getContext(), this::hideProgressBar);
-        viewModel.isJoined().observe((AppCompatActivity) getContext(), aBoolean -> ((AppCompatActivity) getContext()).runOnUiThread(() -> {
+        viewModel.getEndCall().observe((LifecycleOwner) getContext(), this::endCall);
+        viewModel.getException().observe((LifecycleOwner) getContext(), this::showError);
+        viewModel.hideProgressBar().observe((LifecycleOwner) getContext(), this::hideProgressBar);
+        viewModel.isJoined().observe((LifecycleOwner) getContext(), aBoolean -> ((AppCompatActivity) getContext()).runOnUiThread(() -> {
             if (((AppCompatActivity) getContext()).isInPictureInPictureMode()) {
                 CometChatCalls.enterPIPMode();
             }

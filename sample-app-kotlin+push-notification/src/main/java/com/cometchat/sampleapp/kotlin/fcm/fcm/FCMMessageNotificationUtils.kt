@@ -18,6 +18,7 @@ import android.graphics.RectF
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import com.cometchat.chat.constants.CometChatConstants
@@ -32,9 +33,11 @@ import java.util.Random
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+
 object FCMMessageNotificationUtils {
     private val TAG: String = FCMMessageNotificationUtils::class.java.simpleName
     private val executor: Executor = Executors.newSingleThreadExecutor()
+    private var existingNotificationMessages: MutableMap<String, String> = mutableMapOf()
 
     fun showNotification(
         context: Context, fcmMessageDTO: FCMMessageDTO, onNotificationClickIntent: Intent, actionButtonText: String, notificationCategory: String
@@ -55,6 +58,15 @@ object FCMMessageNotificationUtils {
             val mNotificationManager = context.getSystemService(FirebaseMessagingService.NOTIFICATION_SERVICE) as NotificationManager
             val notifications = mNotificationManager.activeNotifications
             var currentText: String? = null
+            val currentMessageId = fcmMessageDTO.tag
+            val isMessageDeleted = fcmMessageDTO.text.equals("Message deleted")
+
+            if (!isMessageDeleted) {
+                if (currentMessageId != null && fcmMessageDTO.text != null) {
+                    existingNotificationMessages[currentMessageId] = fcmMessageDTO.text!!
+                }
+            }
+
             if (notifications.isEmpty()) {
                 currentText =
                     if (isUser) fcmMessageDTO.text else fcmMessageDTO.senderName + " @ " + fcmMessageDTO.receiverName + ": " + fcmMessageDTO.text
@@ -65,12 +77,25 @@ object FCMMessageNotificationUtils {
                     val uid = extras.getString(AppConstants.FCMConstants.KEY_UID)
                     if (uid != null && uid == userId) {
                         val mText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT) as String?
-                        notificationID = extras.getInt(AppConstants.FCMConstants.KEY_NOTIFICATION_ID)
-                        currentText = if (isUser) {
-                            "$mText\n${fcmMessageDTO.text}"
+
+                        if (isMessageDeleted) {
+                            val originalMessage = existingNotificationMessages[currentMessageId]
+                            if (originalMessage != null && mText != null) {
+                                currentText = if (isUser) {
+                                    mText.replace(originalMessage, "Message deleted")
+                                } else {
+                                    "${mText.replace(originalMessage, "Message deleted")}\n${fcmMessageDTO.senderName} @ ${fcmMessageDTO.receiverName}: ${fcmMessageDTO.text}"
+                                }
+                            }
                         } else {
-                            "$mText\n${fcmMessageDTO.senderName} @ ${fcmMessageDTO.receiverName}: ${fcmMessageDTO.text}"
+                            currentText = if (isUser) {
+                                "$mText\n${fcmMessageDTO.text}"
+                            } else {
+                                "$mText\n${fcmMessageDTO.senderName} @ ${fcmMessageDTO.receiverName}: ${fcmMessageDTO.text}"
+                            }
                         }
+
+                        notificationID = extras.getInt(AppConstants.FCMConstants.KEY_NOTIFICATION_ID)
                         isFound = true
                         break
                     }

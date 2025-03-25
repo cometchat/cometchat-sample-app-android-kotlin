@@ -32,7 +32,6 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderAdapter;
 import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.utils.MessageReceiptUtils;
-import com.cometchat.chatuikit.shared.viewholders.MessagesViewHolderListener;
 import com.cometchat.chatuikit.shared.views.date.CometChatDate;
 import com.cometchat.chatuikit.shared.views.date.Pattern;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
@@ -852,73 +851,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             hideName = false;
         } else hideName = !listAlignment.equals(UIKitConstants.MessageListAlignment.LEFT_ALIGNED);
         return hideName;
-    }
-
-    private CometChatMessageTemplate clonedTemplate(CometChatMessageTemplate template,
-                                                    BaseMessage baseMessage,
-                                                    UIKitConstants.MessageBubbleAlignment alignment,
-                                                    int position,
-                                                    RecyclerView.ViewHolder viewHolder,
-                                                    String time,
-                                                    boolean hideName,
-                                                    boolean showReadReceipt) {
-        CometChatMessageTemplate cometchatMessageTemplate = template.clone();
-        cometchatMessageTemplate.setBubbleView(new MessagesViewHolderListener() {
-            @Override
-            public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment1) {
-                return getMessageBubble(baseMessage, template, alignment, viewHolder, position, time, hideName, showReadReceipt);
-            }
-
-            @Override
-            public void bindView(Context context,
-                                 View createdView,
-                                 BaseMessage message,
-                                 UIKitConstants.MessageBubbleAlignment alignment,
-                                 RecyclerView.ViewHolder holder,
-                                 List<BaseMessage> messageList,
-                                 int position) {
-            }
-        });
-        return cometchatMessageTemplate;
-    }
-
-    public CometChatMessageBubble getMessageBubble(BaseMessage baseMessage,
-                                                   CometChatMessageTemplate template,
-                                                   UIKitConstants.MessageBubbleAlignment alignment,
-                                                   RecyclerView.ViewHolder holder,
-                                                   int position,
-                                                   String time,
-                                                   boolean hideName,
-                                                   boolean showReadReceipt) {
-        CometChatMessageBubble messageBubble = new CometChatMessageBubble(context);
-        if (layoutDirection == View.LAYOUT_DIRECTION_RTL)
-            messageBubble.setMessageAlignment(UIKitConstants.MessageBubbleAlignment.RIGHT);
-        else messageBubble.setMessageAlignment(UIKitConstants.MessageBubbleAlignment.LEFT);
-
-        View bubbleView;
-        if (template.getBubbleView() != null) {
-            bubbleView = template.getBubbleView().createView(context, messageBubble, alignment);
-            template.getBubbleView().bindView(context, bubbleView, baseMessage, alignment, holder, baseMessageList, position);
-            messageBubble.setContentView(bubbleView);
-        } else {
-            View contentView;
-            if (template.getContentView() != null) {
-                contentView = template.getContentView().createView(context, messageBubble, alignment);
-                template.getContentView().bindView(context, contentView, baseMessage, alignment, holder, baseMessageList, position);
-                messageBubble.setContentView(contentView);
-            }
-            View statusInfoView;
-            if (template.getStatusInfoView() != null) {
-                statusInfoView = template.getStatusInfoView().createView(context, messageBubble, alignment);
-                template.getStatusInfoView().bindView(context, statusInfoView, baseMessage, alignment, holder, baseMessageList, position);
-            } else {
-                statusInfoView = MessageBubbleUtils.getStatusInfoViewContainer(context);
-                statusInfoView.setTag(UIKitConstants.ViewTag.INTERNAL_STATUS_INFO_VIEW);
-            }
-            messageBubble.setStatusInfoView(statusInfoView);
-            applyBubbleStyle(baseMessage, false, alignment, messageBubble, showReadReceipt, hideName, null, statusInfoView, null, null);
-        }
-        return messageBubble;
     }
 
     /**
@@ -6622,12 +6554,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             cometchatMessageBubble.setMessageAlignment(alignment); // Set message alignment
 
             // Set margins for the parent layout based on provided values
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) parent.getLayoutParams();
-            if (leftBubbleMarginStart != -1) layoutParams.setMarginStart(leftBubbleMarginStart);
-            if (leftBubbleMarginEnd != -1) layoutParams.setMarginEnd(leftBubbleMarginEnd);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) cometchatMessageBubble.getLayoutParams();
+            if (leftBubbleMarginStart != -1) layoutParams.leftMargin = leftBubbleMarginStart;
+            if (leftBubbleMarginEnd != -1) layoutParams.rightMargin = leftBubbleMarginEnd;
             if (leftBubbleMarginTop != -1) layoutParams.topMargin = leftBubbleMarginTop;
             if (leftBubbleMarginBottom != -1) layoutParams.bottomMargin = leftBubbleMarginBottom;
-            parent.setLayoutParams(layoutParams); // Apply layout parameters
+            cometchatMessageBubble.setLayoutParams(layoutParams); // Apply layout parameters
 
             // Check if template and views are available, then initialize the views
             // accordingly
@@ -6771,15 +6703,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         if (threadView != null) {
                             threadView.setOnClickListener(view1 -> {
                                 if (threadReplyClick != null) {
-                                    CometChatMessageTemplate clonedTemplate = clonedTemplate(template,
-                                                                                             baseMessage,
-                                                                                             alignment,
-                                                                                             position,
-                                                                                             this,
-                                                                                             time,
-                                                                                             hideName,
-                                                                                             showReadReceipt);
-                                    threadReplyClick.onThreadReplyClick(context, baseMessage, clonedTemplate);
+                                    threadReplyClick.onThreadReplyClick(context, baseMessage, template);
                                 }
                             });
                         }
@@ -6791,28 +6715,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 // Set long click listener for message options
                 parent.setOnLongClickListener(view -> {
                     List<CometChatMessageOption> options = template.getOptions(context, baseMessage, group);
-                    if (options != null && !options.isEmpty()) {
-                        CometChatMessageTemplate clonedTemplate = clonedTemplate(template,
-                                                                                 baseMessage,
-                                                                                 alignment,
-                                                                                 position,
-                                                                                 this,
-                                                                                 time,
-                                                                                 hideName,
-                                                                                 showReadReceipt);
+                    if (baseMessage.getDeletedAt() == 0) {
                         onMessageLongClick.onLongClick(options,
                                                        baseMessage,
-                                                       clonedTemplate,
-                                                       getMessageBubble(baseMessage,
-                                                                        template,
-                                                                        alignment,
-                                                                        this,
-                                                                        position,
-                                                                        time,
-                                                                        hideName,
-                                                                        showReadReceipt));
-                    }
-                    return true;
+                                                       template,
+                                                       cometchatMessageBubble);
+                        return true;
+                    } else return false;
                 });
             }
         }
@@ -6849,12 +6758,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             cometchatMessageBubble.setMessageAlignment(alignment); // Set message alignment
 
             // Set margins for the parent layout based on provided values
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) parent.getLayoutParams();
-            if (rightBubbleMarginStart != -1) layoutParams.setMarginStart(rightBubbleMarginStart);
-            if (rightBubbleMarginEnd != -1) layoutParams.setMarginEnd(rightBubbleMarginEnd);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) cometchatMessageBubble.getLayoutParams();
+            if (rightBubbleMarginStart != -1) layoutParams.leftMargin = rightBubbleMarginStart;
+            if (rightBubbleMarginEnd != -1) layoutParams.rightMargin = rightBubbleMarginEnd;
             if (rightBubbleMarginTop != -1) layoutParams.topMargin = rightBubbleMarginTop;
             if (rightBubbleMarginBottom != -1) layoutParams.bottomMargin = rightBubbleMarginBottom;
-            parent.setLayoutParams(layoutParams); // Apply layout parameters
+            cometchatMessageBubble.setLayoutParams(layoutParams); // Apply layout parameters
 
             // Check if template and views are available, then initialize the views
             // accordingly
@@ -6998,15 +6907,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         if (threadView != null) {
                             threadView.setOnClickListener(view1 -> {
                                 if (threadReplyClick != null) {
-                                    CometChatMessageTemplate clonedTemplate = clonedTemplate(template,
-                                                                                             baseMessage,
-                                                                                             alignment,
-                                                                                             position,
-                                                                                             this,
-                                                                                             time,
-                                                                                             hideName,
-                                                                                             showReadReceipt);
-                                    threadReplyClick.onThreadReplyClick(context, baseMessage, clonedTemplate);
+                                    threadReplyClick.onThreadReplyClick(context, baseMessage, template);
                                 }
                             });
                         }
@@ -7018,28 +6919,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 // Set long click listener for message options
                 parent.setOnLongClickListener(view -> {
                     List<CometChatMessageOption> options = template.getOptions(context, baseMessage, group);
-                    if (options != null && !options.isEmpty()) {
-                        CometChatMessageTemplate clonedTemplate = clonedTemplate(template,
-                                                                                 baseMessage,
-                                                                                 alignment,
-                                                                                 position,
-                                                                                 this,
-                                                                                 time,
-                                                                                 hideName,
-                                                                                 showReadReceipt);
+                    if (baseMessage.getDeletedAt() == 0) {
                         onMessageLongClick.onLongClick(options,
                                                        baseMessage,
-                                                       clonedTemplate,
-                                                       getMessageBubble(baseMessage,
-                                                                        template,
-                                                                        alignment,
-                                                                        this,
-                                                                        position,
-                                                                        time,
-                                                                        hideName,
-                                                                        showReadReceipt));
-                    }
-                    return true;
+                                                       template,
+                                                       cometchatMessageBubble);
+                        return true;
+                    } else return false;
                 });
             }
         }
@@ -7144,20 +7030,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         template.getFooterView().bindView(context, footerView, baseMessage, alignment, this, baseMessageList, position);
                     }
                 }
-
-                // Set long click listener for message options
-                parent.setOnLongClickListener(view -> {
-                    List<CometChatMessageOption> options = template.getOptions(context, baseMessage, group);
-                    if (options != null && !options.isEmpty()) {
-                        onMessageLongClick.onLongClick(options,
-                                                       baseMessage,
-                                                       template,
-                                                       getMessageBubble(baseMessage, template, alignment, this, position, time, true, false));
-                    } else {
-                        return false; // Return false if no options are available
-                    }
-                    return true; // Return true to indicate the long click was handled
-                });
             }
         }
     }

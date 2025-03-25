@@ -17,7 +17,7 @@ experience into an existing or a new app.
 
 ## 🚀 Explore the Sample Apps!
 
-Dive straight into our Sample Apps to see CometChat UI Kit in action! Whether you're building a messaging app or enhancing your existing project, this sample app showcases the full potential of our React UI components.  
+Dive straight into our Sample Apps to see CometChat UI Kit in action! Whether you're building a messaging app or enhancing your existing project, this sample app showcases the full potential of our React UI components.
 - [Sample App for Java](sample-app-java#readme)
 - [Sample App for Java with Push Notifications](sample-app-java%2Bpush-notification#readme)
 - [Sample App for Kotlin](sample-app-kotlin#readme)
@@ -40,10 +40,10 @@ To set up CometChat Android UI Kit and utilize CometChat for your chat functiona
 
 3. Check the [Key Concepts](https://www.cometchat.com/docs/fundamentals/key-concepts) to understand the basic components of CometChat.
 
-4. Refer to the [Integration Steps](https://www.cometchat.com/docs/ui-kit/android/5.0/getting-started) in our documentation to integrate the UI Kit into your
+4. Refer to the [Integration Steps](https://www.cometchat.com/docs/ui-kit/android/getting-started) in our documentation to integrate the UI Kit into your
    Android app.
 
 ## Help and Support
 
-For issues running the project or integrating with our UI Kits, consult our [documentation](https://www.cometchat.com/docs/ui-kit/android/5.0/getting-started)
+For issues running the project or integrating with our UI Kits, consult our [documentation](https://www.cometchat.com/docs/ui-kit/android/getting-started)
 or create a [support ticket](https://help.cometchat.com/hc/en-us) or seek real-time support via the [CometChat Dashboard](https://app.cometchat.com/).

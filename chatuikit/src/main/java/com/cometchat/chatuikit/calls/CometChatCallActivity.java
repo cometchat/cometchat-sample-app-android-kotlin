@@ -17,10 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
-import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
-import com.cometchat.chat.core.CometChat;
-import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chat.models.User;
@@ -28,7 +25,6 @@ import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.outgoingcall.CometChatOutgoingCall;
 import com.cometchat.chatuikit.calls.outgoingcall.OutgoingCallConfiguration;
 import com.cometchat.chatuikit.logger.CometChatLogger;
-import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKitHelper;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 
 import javax.annotation.Nonnull;
@@ -37,7 +33,6 @@ import javax.annotation.Nullable;
 public class CometChatCallActivity extends AppCompatActivity {
     private static final String TAG = CometChatCallActivity.class.getSimpleName();
     private static final String OUTGOING_CALL = "outgoing_call";
-    private static final String INCOMING_CALL = "incoming_call";
     private static final String DIRECT_CALL = "direct_call";
     private static BaseMessage baseMessage;
     private static Call call;
@@ -63,26 +58,6 @@ public class CometChatCallActivity extends AppCompatActivity {
         Intent intent = new Intent(context, CometChatCallActivity.class);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
-    }
-
-    private static void rejectCall(String sessionId) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            CometChat.rejectCall(sessionId, CometChatConstants.CALL_STATUS_BUSY, new CometChat.CallbackListener<Call>() {
-                @Override
-                public void onSuccess(Call call) {
-                    CometChatUIKitHelper.onCallRejected(call);
-                }
-
-                @Override
-                public void onError(CometChatException e) {
-                }
-            });
-        }).start();
     }
 
     public static void launchConferenceCallScreen(

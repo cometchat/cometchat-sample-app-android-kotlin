@@ -62,11 +62,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:gravity="end"
-                        android:orientation="horizontal"
-                        android:paddingStart="@dimen/cometchat_padding_4"
-                        android:paddingTop="@dimen/cometchat_padding_5"
-                        android:paddingEnd="@dimen/cometchat_padding_4"
-                        android:paddingBottom="@dimen/cometchat_padding_5" />
+                        android:orientation="horizontal" />
 
                     <LinearLayout
                         android:id="@+id/message_bubble_view_overlay"

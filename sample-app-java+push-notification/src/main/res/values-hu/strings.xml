@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">Csevegések</string>
+    <string name="app_bottom_nav_calls">Hívások</string>
+    <string name="app_bottom_nav_users">Felhasználók</string>
+    <string name="app_bottom_nav_groups">Csoportok</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">Bejelentkezés</string>
+    <string name="app_continue_with_google">Folytatás Google-lel</string>
+    <string name="app_no_banned_members">Nincsenek letiltott tagok</string>
+    <string name="app_banned_few_members_to_show_them_here">Néhány tag le lett tiltva, hogy itt jelenhessenek meg</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">Nem sikerült bejelentkezni Google-lel, nem található fiók.</string>
+    <string name="app_google_sign_in_failed">Sikertelen Google-bejelentkezés:</string>
+    <string name="app_group">csoport</string>
+    <string name="app_btn_leave">Kilépés</string>
+    <string name="app_leave_this_group">Kilépés ebből a csoportból?</string>
+    <string name="app_leave_this_group_description">Biztosan ki szeretnél lépni ebből a csoportból? Nem fogsz több üzenetet kapni ebből a csevegésből.</string>
+    <string name="app_btn_cancel">Mégse</string>
+    <string name="app_transfer_ownership_description">Biztosan át szeretnéd ruházni a tulajdonjogot? Ez a művelet nem vonható vissza, és az új tulajdonos teljes ellenőrzést kap.</string>
+    <string name="app_btn_continue">Folytatás</string>
+    <string name="app_delete_and_exit">Törlés és kilépés?</string>
+    <string name="app_delete_and_exit_action">Törlés és kilépés</string>
+    <string name="app_delete_and_exit_description">Biztosan törölni szeretnéd ezt a csevegést és kilépni a csoportból? Ez a művelet nem visszavonható.</string>
+    <string name="app_btn_delete">Törlés</string>
+    <string name="app_add">Hozzáadás</string>
+    <string name="app_member">Tag</string>
+    <string name="app_members">Tagok</string>
+    <string name="app_base_message">alapÜzenet</string>
+    <string name="app_user">felhasználó</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">hívásTípus</string>
+    <string name="app_not_logged_in">Nem vagy bejelentkezve. Kérlek, jelentkezz be, majd próbáld újra.</string>
+    <string name="app_transfer_ownership">Tulajdonjog átruházása</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">Hívás részletei</string>
+    <string name="app_call_details_history">Előzmények</string>
+    <string name="app_call_details_participants">Résztvevők</string>
+    <string name="app_call_details_recordings">Felvételek</string>
+    <string name="app_call_outgoing">Kimenő</string>
+    <string name="app_call_missed">Nem fogadott</string>
+    <string name="app_call_incoming">Bejövő</string>
+    <string name="app_no_recordings_found">Nem találhatók felvételek</string>
+
+    <string name="app_accept">Elfogadás</string>
+    <string name="app_decline">Elutasítás</string>
+    <string name="app_incoming_s_call">Bejövő %s hívás</string>
+    <string name="app_user_info">Felhasználói információk</string>
+    <string name="app_voice">Hang</string>
+    <string name="app_video">Videó</string>
+
+    <string name="app_delete">Csevegés törlése</string>
+    <string name="app_delete_chat_title">Törlöd ezt a csevegést?</string>
+    <string name="app_delete_chat_subtitle">Biztos, hogy törölni szeretnéd ezt a csevegést? Ez a művelet nem vonható vissza.</string>
+    <string name="app_delete_chat_positive_button">Törlés</string>
+    <string name="app_delete_chat_negative_button">Mégse</string>
+    <string name="app_delete_chat_error">Sikertelen törlés</string>
+    <string name="app_delete_chat_success">A csevegés törölve</string>
+
+    <string name="app_block">Letiltás</string>
+    <string name="app_block_user_title">Letiltod ezt a névjegyet?</string>
+    <string name="app_block_user_subtitle">Biztos, hogy le szeretnéd tiltani ezt a névjegyet? Nem fogsz tőle több üzenetet kapni.</string>
+    <string name="app_block_user_positive_button">Letiltás</string>
+    <string name="app_block_user_negative_button">Mégse</string>
+    <string name="app_block_user_error">A letiltás sikertelen</string>
+    <string name="app_block_user_success">A felhasználó le lett tiltva</string>
+
+    <string name="app_unblock">Tiltás feloldása</string>
+    <string name="app_unblock_user_title">Feloldod a tiltást ennél a névjegynél?</string>
+    <string name="app_unblock_user_subtitle">Biztos vagy benne, hogy szeretnéd feloldani a tiltását ennek a névjegynek?</string>
+    <string name="app_unblock_user_positive_button">Tiltás feloldása</string>
+    <string name="app_unblock_user_negative_button">Mégse</string>
+    <string name="app_unblock_user_error">A tiltás feloldása sikertelen</string>
+    <string name="app_unblock_user_success">A felhasználó tiltása feloldva</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">Válassz egy példa felhasználót</string>
+    <string name="app_continue">Folytatás</string>
+    <string name="app_or">Vagy</string>
+    <string name="app_change">Módosítás</string>
+    <string name="app_app_credentials">Alkalmazás-hitelesítő adatok</string>
+    <string name="app_enter_uid">Írd be a UID-t</string>
+    <string name="app_enter_your_uid">Írd be a saját UID-det</string>
+    <string name="app_error_invalid_user_or_uid_login">Válassz egy felhasználót vagy írj be egy helyes UID-t</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">Régió</string>
+    <string name="app_region_us">USA</string>
+    <string name="app_region_eu">EU</string>
+    <string name="app_region_in">India</string>
+    <string name="app_app_id">Alkalmazásazonosító</string>
+    <string name="app_app_id_hint">Írd be az alkalmazásazonosítót</string>
+    <string name="app_auth_key">Hitelesítési kulcs</string>
+    <string name="app_auth_key_hint">Írd be a hitelesítési kulcsot</string>
+    <string name="app_please_select_app_region">Válaszd ki az alkalmazás régióját</string>
+    <string name="app_invalid_app_id">Adj meg egy érvényes alkalmazásazonosítót</string>
+    <string name="app_invalid_auth_token">Adj meg egy érvényes hitelesítési tokent</string>
+    <string name="app_new_group">Új csoport</string>
+    <string name="app_group_type">Típus</string>
+    <string name="app_group_name">Név</string>
+    <string name="app_group_hint_name">Írd be a csoport nevét</string>
+    <string name="app_password">Jelszó</string>
+    <string name="app_hint_enter_the_password">Írd be a jelszót</string>
+    <string name="app_btn_create_group">Csoport létrehozása</string>
+    <string name="app_create_conversation">Beszélgetés létrehozása</string>
+    <string name="app_logout">Kijelentkezés</string>
+    <string name="app_group_info">Csoportinformációk</string>
+    <string name="app_no_longer_part_of_this_group">Már nem vagy tagja ennek a csoportnak</string>
+    <string name="app_view_members">Tagok megtekintése</string>
+    <string name="app_add_members">Tagok hozzáadása</string>
+    <string name="app_banned_members">Letiltott tagok</string>
+    <string name="app_view_members_chip">Tagok\nmegtekintése</string>
+    <string name="app_add_members_chip">Tagok\nhozzáadása</string>
+    <string name="app_banned_members_chip">Letiltott\nTagok</string>
+    <string name="app_leave">Kilépés</string>
+    <string name="app_block_user_unable_to_send_message">Nem tudsz üzenetet küldeni ebbe a csoportba, mert már nem vagy tagja.</string>
+    <string name="app_unblock_user">Felhasználó tiltásának feloldása</string>
+    <string name="app_description">Leírás</string>
+    <string name="app_steps_to_reproduce">Lépések a hiba reprodukálásához</string>
+    <string name="app_join_group">Csatlakozás a csoporthoz</string>
+    <string name="app_type">Típus</string>
+    <string name="app_enter_the_password">Írd be a jelszót</string>
+    <string name="app_something_went_wrong_please_try_again">Valami hiba történt. Kérlek, próbáld újra.</string>
+    <string name="app_retry">Újrapróbál</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">Úgy tűnik, valami gond adódott.\nKérlek, próbáld újra.</string>
+    <string name="app_type_public">Nyilvános</string>
+
+    <string name="app_transfer_ownership_text">Tulajdonjog átruházása</string>
+    <string name="app_type_private">Privát</string>
+    <string name="app_type_protected">Védett</string>
+    <string name="app_thread_title">Szál</string>
+    <string name="app_error_conversations_title">Hoppá!</string>
+    <string name="app_group_members_empty_title">Nincsenek elérhető tagok</string>
+    <string name="app_group_member_empty_subtitle">Vegyél fel tagokat a csoportba, hogy itt megjelenjenek.</string>
+    <string name="app_search">Keresés</string>
+    <string name="app_new_chat">Új csevegés</string>
+    <string name="app_report">Jelentés indítása</string>
+    <string name="app_has_blocked_you">blokkolt téged</string>
+    <string name="app_you_have_blocked_this_user">blokkoltad ezt a felhasználót</string>
+</resources>

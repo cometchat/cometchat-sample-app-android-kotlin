@@ -9,8 +9,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -159,14 +159,14 @@ public class CometChatBannedMembers extends MaterialCardView {
      */
     private void initViewModel() {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(BannedMembersViewModel.class);
-        viewModel.getMutableBannedGroupMembersList().observe((AppCompatActivity) getContext(), this::setGroupMemberList);
-        viewModel.getStates().observe((AppCompatActivity) getContext(), this::setStateChangeObserver);
-        viewModel.insertAtTop().observe((AppCompatActivity) getContext(), this::notifyInsertedAt);
-        viewModel.moveToTop().observe((AppCompatActivity) getContext(), this::notifyItemMovedToTop);
-        viewModel.updateGroupMember().observe((AppCompatActivity) getContext(), this::notifyItemChanged);
-        viewModel.removeGroupMember().observe((AppCompatActivity) getContext(), this::notifyItemRemoved);
-        viewModel.getCometChatException().observe((AppCompatActivity) getContext(), exceptionObserver);
-        viewModel.getDialogStates().observe((AppCompatActivity) getContext(), this::setDialogState);
+        viewModel.getMutableBannedGroupMembersList().observe((LifecycleOwner) getContext(), this::setGroupMemberList);
+        viewModel.getStates().observe((LifecycleOwner) getContext(), this::setStateChangeObserver);
+        viewModel.insertAtTop().observe((LifecycleOwner) getContext(), this::notifyInsertedAt);
+        viewModel.moveToTop().observe((LifecycleOwner) getContext(), this::notifyItemMovedToTop);
+        viewModel.updateGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemChanged);
+        viewModel.removeGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemRemoved);
+        viewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
+        viewModel.getDialogStates().observe((LifecycleOwner) getContext(), this::setDialogState);
 
         // Set up the back button click event
         binding.ivBack.setOnClickListener(view -> {

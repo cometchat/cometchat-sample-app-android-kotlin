@@ -5,7 +5,7 @@
 
 # Android Sample App for Kotlin by CometChat
 
-This is a reference application showcasing the integration of [CometChat's Android UI Kit](https://www.cometchat.com/docs/ui-kit/android/5.0/overview) in a native Android application using Kotlin. It demonstrates how to implement real-time messaging and voice/video calling features with ease.
+This is a reference application showcasing the integration of [CometChat's Android UI Kit](https://www.cometchat.com/docs/ui-kit/android/overview) in a native Android application using Kotlin. It demonstrates how to implement real-time messaging and voice/video calling features with ease.
 
 <div style="display: flex; align-items: center; justify-content: center">
    <img src="../screenshots/overview_cometchat_screens.png" />
@@ -38,8 +38,8 @@ This is a reference application showcasing the integration of [CometChat's Andro
 5. `[Optional]` Enter your CometChat _`App ID`_, _`Region`_, and _`Auth Key`_ in the [AppCredentials.java](src/main/java/com/cometchat/sampleapp/kotlin/AppCredentials.kt) file:
    file:https://github.com/cometchat/cometchat-uikit-android/blob/b7b7c0d76eb70960728e6622ed7f70ab4e45b4af/sample-app-kotlin/src/main/java/com/cometchat/sampleapp/kotlin/AppCredentials.kt#L3-L11
 
-6. In the Android Studio toolbar, select the `sample-app-kotlin` module from the module dropdown and run the project using an emulator or a physical device 
+6. In the Android Studio toolbar, select the `sample-app-kotlin` module from the module dropdown and run the project using an emulator or a physical device
 
 ## Help and Support
 
-For issues running the project or integrating with our UI Kits, consult our [documentation](https://www.cometchat.com/docs/ui-kit/android/5.0/getting-started) or create a [support ticket](https://help.cometchat.com/hc/en-us). You can also access real-time support via the [CometChat Dashboard](http://app.cometchat.com/).
+For issues running the project or integrating with our UI Kits, consult our [documentation](https://www.cometchat.com/docs/ui-kit/android/getting-started) or create a [support ticket](https://help.cometchat.com/hc/en-us). You can also access real-time support via the [CometChat Dashboard](http://app.cometchat.com/).

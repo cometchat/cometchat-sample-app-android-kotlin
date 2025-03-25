@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -397,15 +398,15 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     private void setupViewModel() {
         composerViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageComposerViewModel.class);
-        composerViewModel.sentMessage().observe((AppCompatActivity) getContext(), this::messageSentSuccess);
-        composerViewModel.getException().observe((AppCompatActivity) getContext(), this::messageSendException);
-        composerViewModel.processEdit().observe((AppCompatActivity) getContext(), this::showEditMessagePreview);
-        composerViewModel.successEdit().observe((AppCompatActivity) getContext(), this::onMessageEditSuccess);
-        composerViewModel.closeTopPanel().observe((AppCompatActivity) getContext(), this::closeInternalTopPanel);
-        composerViewModel.closeBottomPanel().observe((AppCompatActivity) getContext(), this::closeInternalBottomPanel);
-        composerViewModel.showTopPanel().observe((AppCompatActivity) getContext(), this::showInternalTopPanel);
-        composerViewModel.showBottomPanel().observe((AppCompatActivity) getContext(), this::showInternalBottomPanel);
-        composerViewModel.getComposeText().observe((AppCompatActivity) getContext(), this::setInitialComposerText);
+        composerViewModel.sentMessage().observe((LifecycleOwner) getContext(), this::messageSentSuccess);
+        composerViewModel.getException().observe((LifecycleOwner) getContext(), this::messageSendException);
+        composerViewModel.processEdit().observe((LifecycleOwner) getContext(), this::showEditMessagePreview);
+        composerViewModel.successEdit().observe((LifecycleOwner) getContext(), this::onMessageEditSuccess);
+        composerViewModel.closeTopPanel().observe((LifecycleOwner) getContext(), this::closeInternalTopPanel);
+        composerViewModel.closeBottomPanel().observe((LifecycleOwner) getContext(), this::closeInternalBottomPanel);
+        composerViewModel.showTopPanel().observe((LifecycleOwner) getContext(), this::showInternalTopPanel);
+        composerViewModel.showBottomPanel().observe((LifecycleOwner) getContext(), this::showInternalBottomPanel);
+        composerViewModel.getComposeText().observe((LifecycleOwner) getContext(), this::setInitialComposerText);
     }
 
     /**
@@ -919,13 +920,6 @@ public class CometChatMessageComposer extends MaterialCardView {
                     tempTextFormatter.search(getContext(), getQueryString(text, cursorPosition, tempTextFormatter.getTrackingCharacter()));
             }
         }, interval);
-    }    /**
-     * @param color The new color to set for the card background
-     */
-    @Override
-    public void setCardBackgroundColor(@ColorInt int color) {
-        this.backgroundColor = color;
-        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -975,6 +969,13 @@ public class CometChatMessageComposer extends MaterialCardView {
     private void visibleSuggestionList() {
         binding.suggestionList.setVisibility(View.VISIBLE);
         binding.suggestionList.showShimmer(true);
+    }    /**
+     * @param color The new color to set for the card background
+     */
+    @Override
+    public void setCardBackgroundColor(@ColorInt int color) {
+        this.backgroundColor = color;
+        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -1875,10 +1876,10 @@ public class CometChatMessageComposer extends MaterialCardView {
         cometchatTextFormatterHashMap = new HashMap<>();
         for (CometChatTextFormatter formatter : cometchatTextFormatters) {
             if (formatter != null) {
-                formatter.getSuggestionItemList().observe((AppCompatActivity) getContext(), this::setTagList);
-                formatter.getTagInfoMessage().observe((AppCompatActivity) getContext(), this::setInfoMessage);
-                formatter.getTagInfoVisibility().observe((AppCompatActivity) getContext(), this::setInfoVisibility);
-                formatter.getShowLoadingIndicator().observe((AppCompatActivity) getContext(), this::setLoadingStateVisibility);
+                formatter.getSuggestionItemList().observe((LifecycleOwner) getContext(), this::setTagList);
+                formatter.getTagInfoMessage().observe((LifecycleOwner) getContext(), this::setInfoMessage);
+                formatter.getTagInfoVisibility().observe((LifecycleOwner) getContext(), this::setInfoVisibility);
+                formatter.getShowLoadingIndicator().observe((LifecycleOwner) getContext(), this::setLoadingStateVisibility);
                 if (user != null) {
                     formatter.setUser(user);
                     formatter.setGroup(null);
@@ -2113,13 +2114,6 @@ public class CometChatMessageComposer extends MaterialCardView {
     public void setAttachmentIconTint(@ColorInt int color) {
         this.attachmentIconTint = color;
         secondaryButtonLayoutBinding.ivAttachments.setImageTintList(ColorStateList.valueOf(color));
-    }    /**
-     * @param strokeWidth The new width to set for the stroke
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2178,6 +2172,13 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public String getText() {
         return text;
+    }    /**
+     * @param strokeWidth The new width to set for the stroke
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

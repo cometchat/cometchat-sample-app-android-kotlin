@@ -19,7 +19,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
@@ -128,10 +128,10 @@ public class CometChatOutgoingCall extends MaterialCardView {
         initSensors(context);
         soundManager = new CometChatSoundManager(context);
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OutgoingViewModel.class);
-        viewModel.getAcceptedCall().observe((AppCompatActivity) context, this::acceptedCall);
-        viewModel.getRejectCall().observe((AppCompatActivity) context, this::rejectedCall);
-        viewModel.getException().observe((AppCompatActivity) context, this::triggerError);
-        viewModel.getDisableEndCallButton().observe((AppCompatActivity) context, this::setDisableEndCallButton);
+        viewModel.getAcceptedCall().observe((LifecycleOwner) context, this::acceptedCall);
+        viewModel.getRejectCall().observe((LifecycleOwner) context, this::rejectedCall);
+        viewModel.getException().observe((LifecycleOwner) context, this::triggerError);
+        viewModel.getDisableEndCallButton().observe((LifecycleOwner) context, this::setDisableEndCallButton);
 
         binding.endCall.getButton().setOnClickListener(view -> {
             binding.endCall.getButton().setEnabled(false);
@@ -577,15 +577,6 @@ public class CometChatOutgoingCall extends MaterialCardView {
     public void setEndCallButtonBackgroundColor(@ColorInt int endCallButtonBackgroundColor) {
         this.endCallButtonBackgroundColor = endCallButtonBackgroundColor;
         binding.endCall.setButtonBackgroundColor(endCallButtonBackgroundColor);
-    }    /**
-     * Plays the outgoing call sound if sound notifications are not disabled. It
-     * uses the custom sound resource if provided; otherwise, it defaults to the
-     * standard outgoing call sound.
-     */
-    private void playSound() {
-        if (!disableSoundForCall) {
-            soundManager.play(Sound.outgoingCall, customSoundForCalls);
-        }
     }
 
     /**
@@ -605,6 +596,15 @@ public class CometChatOutgoingCall extends MaterialCardView {
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
         super.setCardBackgroundColor(backgroundColor);
+    }    /**
+     * Plays the outgoing call sound if sound notifications are not disabled. It
+     * uses the custom sound resource if provided; otherwise, it defaults to the
+     * standard outgoing call sound.
+     */
+    private void playSound() {
+        if (!disableSoundForCall) {
+            soundManager.play(Sound.outgoingCall, customSoundForCalls);
+        }
     }
 
     /**

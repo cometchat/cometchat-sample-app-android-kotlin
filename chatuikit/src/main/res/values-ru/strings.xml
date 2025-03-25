@@ -1,26 +1,28 @@
-<resources xmlns:tools="http://schemas.android.com/tools" translatable="true">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- You can leave "UI KIT" as-is or localize further if desired -->
     <string name="cometchat_app_name" translatable="true">UI KIT</string>
-    <string name="cometchat_user" translatable="true">пользователь</string>
-    <string name="cometchat_group" translatable="true">группа</string>
-    <string name="cometchat_conversation" translatable="true">беседа</string>
+
+    <string name="cometchat_user" translatable="true">Пользователь</string>
+    <string name="cometchat_group" translatable="true">Группа</string>
+    <string name="cometchat_conversation" translatable="true">Беседа</string>
     <string name="cometchat_reply_lowercase" translatable="true">ответить</string>
-    <string name="cometchat_call" translatable="true">Вызов</string>
+    <string name="cometchat_call" translatable="true">Звонок</string>
     <string name="cometchat_sticker_lowercase" translatable="true">стикер</string>
-    <string name="cometchat_message" translatable="true">Написать сообщение</string>
+    <string name="cometchat_message" translatable="true">Напишите сообщение</string>
     <string name="cometchat_start_conv_hint" translatable="true">Нажмите, чтобы начать беседу</string>
-    <string name="cometchat_admin" translatable="true">Админ</string>
+    <string name="cometchat_admin" translatable="true">Администратор</string>
     <string name="cometchat_moderator" translatable="true">Модератор</string>
     <string name="cometchat_member" translatable="true">Участник</string>
     <string name="cometchat_join" translatable="true">Присоединиться</string>
-    <string name="cometchat_camera_perm" translatable="true">Пожалуйста, разрешите доступ к камере в настройках приложения</string>
-    <string name="cometchat_storage_perm" translatable="true">Пожалуйста, разрешите доступ к хранилищу в настройках приложения</string>
+    <string name="cometchat_camera_perm" translatable="true">Пожалуйста, предоставьте доступ к камере в настройках приложения</string>
+    <string name="cometchat_storage_perm" translatable="true">Пожалуйста, предоставьте доступ к хранилищу в настройках приложения</string>
     <string name="cometchat_file_not_exist" translatable="true">Файл не существует</string>
-    <string name="cometchat_ended" translatable="true">Завершено</string>
+    <string name="cometchat_ended" translatable="true">Завершён</string>
     <string name="cometchat_outgoing" translatable="true">Исходящий</string>
     <string name="cometchat_incoming" translatable="true">Входящий</string>
-    <string name="cometchat_missed_call" translatable="true">Пропущенный</string>
-    <string name="cometchat_cancel_call" translatable="true">Отменено</string>
-    <string name="cometchat_rejected_call" translatable="true">Отклонено</string>
+    <string name="cometchat_missed_call" translatable="true">Пропущен</string>
+    <string name="cometchat_cancel_call" translatable="true">Отменён</string>
+    <string name="cometchat_rejected_call" translatable="true">Отклонён</string>
     <string name="cometchat_busy_call" translatable="true">Занято</string>
     <string name="cometchat_you" translatable="true">Вы</string>
     <string name="cometchat_edit" translatable="true">Редактировать</string>
@@ -28,86 +30,89 @@
     <string name="cometchat_share" translatable="true">Поделиться</string>
     <string name="cometchat_copy" translatable="true">Копировать</string>
     <string name="cometchat_translate" translatable="true">Перевести</string>
-    <string name="cometchat_message_privately" translatable="true">Написать в личку</string>
-    <string name="cometchat_reply_uppercase" translatable="true">ОТВЕТИТЬ</string>
+    <string name="cometchat_message_privately" translatable="true">Отправить личное сообщение</string>
+    <string name="cometchat_reply_uppercase" translatable="true">Ответить</string>
     <string name="cometchat_info" translatable="true">Информация</string>
     <string name="cometchat_online" translatable="true">В сети</string>
-    <string name="cometchat_offline" translatable="true">Офлайн</string>
-    <string name="cometchat_attach_image" translatable="true">Библиотека фото и видео</string>
-    <string name="cometchat_poll" translatable="true">Создать опрос</string>
-    <string name="cometchat_camera" translatable="true">Сделать фото</string>
+    <string name="cometchat_offline" translatable="true">Не в сети</string>
+    <string name="cometchat_attach_image" translatable="true">Прикрепить изображение</string>
+    <string name="cometchat_attach_video" translatable="true">Прикрепить видео</string>
+    <string name="cometchat_poll" translatable="true">Опрос</string>
+    <string name="cometchat_camera" translatable="true">Камера</string>
     <string name="cometchat_yes" translatable="true">Да</string>
-    <string name="cometchat_shared_sticker" translatable="true">Поделился стикером</string>
-    <string name="cometchat_attach_audio" translatable="true">Отправить аудиофайлы</string>
-    <string name="cometchat_attach_document" translatable="true">Файлы и документы</string>
+    <string name="cometchat_shared_sticker" translatable="true">Отправил(а) стикер</string>
+    <string name="cometchat_attach_audio" translatable="true">Прикрепить аудио</string>
+    <string name="cometchat_attach_document" translatable="true">Прикрепить документ</string>
     <string name="cometchat_no" translatable="true">Нет</string>
     <string name="cometchat_question" translatable="true">Вопрос</string>
     <string name="cometchat_collaborative_whiteboard" translatable="true">Совместная доска</string>
     <string name="cometchat_collaborative_doc" translatable="true">Совместный документ</string>
     <string name="cometchat_yesterday" translatable="true">Вчера</string>
-    <string name="cometchat_ban" translatable="true">Забанить</string>
+    <string name="cometchat_ban" translatable="true">Заблокировать</string>
     <string name="cometchat_document" translatable="true">Документ</string>
     <string name="cometchat_polls" translatable="true">Опросы</string>
-    <string name="cometchat_sticker_uppercase" translatable="true">СТИКЕР</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">Стикер</string>
     <string name="cometchat_custom_message_whiteboard" translatable="true">Доска</string>
     <string name="cometchat_error" translatable="true">Ошибка</string>
-    <string name="cometchat_added" translatable="true">добавлено</string>
-    <string name="cometchat_kicked_by" translatable="true">выгнан</string>
-    <string name="cometchat_left" translatable="true">покинул</string>
-    <string name="cometchat_joined" translatable="true">присоединился</string>
-    <string name="cometchat_unban" translatable="true">Разбанить</string>
-    <string name="cometchat_made" translatable="true">сделал</string>
+    <string name="cometchat_added" translatable="true">добавил(а)</string>
+    <string name="cometchat_kicked_by" translatable="true">исключил(а)</string>
+    <string name="cometchat_left" translatable="true">вышел(а)</string>
+    <string name="cometchat_joined" translatable="true">присоединился(-ась)</string>
+    <string name="cometchat_unban" translatable="true">Разблокировать</string>
+    <string name="cometchat_made" translatable="true">назначил(а)</string>
     <string name="cometchat_participant" translatable="true">Участник</string>
-    <string name="cometchat_translation_error" translatable="true">Выбранный язык для перевода похож на язык оригинального сообщения</string>
-    <string name="cometchat_group_call" translatable="true">Групповой вызов</string>
-    <string name="cometchat_updating" translatable="true">Обновление</string>
+    <string name="cometchat_translation_error" translatable="true">Выбранный язык перевода совпадает с языком оригинального сообщения</string>
+    <string name="cometchat_group_call" translatable="true">Групповой звонок</string>
+    <string name="cometchat_updating" translatable="true">Обновляется</string>
     <string name="cometchat_chats" translatable="true">Чаты</string>
-    <string name="cometchat_downloading" translatable="true">Загрузка</string>
+    <string name="cometchat_downloading" translatable="true">Загружается</string>
     <string name="cometchat_today" translatable="true">Сегодня</string>
     <string name="cometchat_replies" translatable="true">Ответы</string>
     <string name="cometchat_new_message" translatable="true">новое сообщение</string>
-    <string name="cometchat_new_messages" translatable="true">новые сообщения</string>
+    <string name="cometchat_new_messages" translatable="true">" новые сообщения"</string>
     <string name="cometchat_channel_description" translatable="true">Описание канала</string>
-    <string name="cometchat_action_item" translatable="true">пункт действия</string>
-    <string name="cometchat_try_again" translatable="true">Попробуйте снова</string>
+    <string name="cometchat_action_item" translatable="true">элемент_действия</string>
+    <string name="cometchat_try_again" translatable="true">Повторить попытку</string>
     <string name="cometchat_something_went_wrong" translatable="true">Что-то пошло не так.</string>
-    <string name="cometchat_transfer_ownership" translatable="true">Передать право собственности</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Передать права владения</string>
     <string name="cometchat_add_members" translatable="true">Добавить участников</string>
     <string name="cometchat_owner" translatable="true">Владелец</string>
-    <string name="cometchat_banned" translatable="true">Забанен</string>
-    <string name="cometchat_calling" translatable="true">звонок</string>
-    <string name="cometchat_accepted" translatable="true">принято</string>
-    <string name="cometchat_unanswered" translatable="true">неотвечено</string>
+    <string name="cometchat_banned" translatable="true">Заблокирован(а)</string>
+    <string name="cometchat_calling" translatable="true">звонит</string>
+    <string name="cometchat_accepted" translatable="true">принят(а)</string>
+    <string name="cometchat_unanswered" translatable="true">без ответа</string>
     <string name="cometchat_message_receipt" translatable="true">Получение сообщения</string>
-    <string name="cometchat_file_download_failed" translatable="true">Ошибка загрузки файла.</string>
-    <string name="cometchat_suggest_a_reply" translatable="true">Предложить ответ</string>
+    <string name="cometchat_file_download_failed" translatable="true">Не удалось скачать файл.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Предложите ответ</string>
     <string name="cometchat_enter_a_text" translatable="true">Введите текст</string>
     <string name="cometchat_form_completion_message" translatable="true">Спасибо за заполнение формы.</string>
-    <string name="cometchat_conversation_summary" translatable="true">Резюме беседы</string>
-    <string name="cometchat_generate_summary" translatable="true">Создать резюме</string>
-    <string name="cometchat_more_times" translatable="true">Больше раз</string>
+    <string name="cometchat_conversation_summary" translatable="true">Итог беседы</string>
+    <string name="cometchat_generate_summary" translatable="true">Сгенерировать итог</string>
+    <string name="cometchat_more_times" translatable="true">Больше вариантов времени</string>
     <string name="cometchat_select_a_day" translatable="true">Выберите день</string>
     <string name="cometchat_meeting_scheduled" translatable="true">Ваша встреча запланирована.</string>
-    <string name="cometchat_meet_with" translatable="true">Встретиться с</string>
-    <string name="cometchat_min_meeting" translatable="true">минут на встречу</string>
+    <string name="cometchat_meet_with" translatable="true">"Встретиться с "</string>
+    <string name="cometchat_min_meeting" translatable="true">мин. совещание</string>
     <string name="cometchat_select_a_time" translatable="true">Выберите время</string>
-    <string name="cometchat_no_time_slots_available" translatable="true">Нет доступных временных слотов для этой даты. Попробуйте другую дату.</string>
-    <string name="cometchat_book_new_slot" translatable="true">Забронировать новый слот</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">На эту дату нет доступных временных интервалов. Попробуйте другую дату.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Забронировать новый интервал</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Что-то пошло не так. Пожалуйста, попробуйте снова.</string>
-    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Время больше недоступно. Пожалуйста, выберите другое.</string>
-    <string name="cometchat_no_quick_time_slots_available" translatable="true">Нет доступных временных слотов.</string>
-    <string name="cometchat_tag_item" translatable="true">Тег элемента</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Этот временной интервал больше недоступен. Пожалуйста, выберите другой.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Нет доступных временных интервалов.</string>
+    <string name="cometchat_tag_item" translatable="true">Отметить элемент</string>
     <string name="cometchat_you_can_mention_up_to" translatable="true">Вы можете упомянуть до</string>
-    <string name="cometchat_time_at_a_time" translatable="true">раз за раз</string>
+    <string name="cometchat_time_at_a_time" translatable="true">раз за один раз</string>
     <string name="cometchat_reply" translatable="true">Ответить</string>
     <string name="cometchat_all" translatable="true">Все</string>
-    <string name="cometchat_tap_to_remove" translatable="true">Нажмите, чтобы удалить</string>
-    <string name="cometchat_avatar" translatable="true">Аватар CometChat</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Нажмите, чтобы убрать</string>
+    <string name="cometchat_avatar" translatable="true">CometChat Аватар</string>
     <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
-    <string name="cometchat_empty_conversations_title" translatable="true">Нет разговоров</string>
-    <string name="cometchat_empty_conversations_subtitle" translatable="true">Начните новый чат или пригласите других присоединиться к разговору.</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Пока нет бесед</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Начните новый чат или пригласите других в
+беседу.</string>
     <string name="cometchat_error_conversations_title" translatable="true">Ой!</string>
-    <string name="cometchat_error_conversations_subtitle" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">Кажется, что-то пошло не так.
+Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_typing" translatable="true">Печатает…</string>
     <string name="cometchat_is_typing" translatable="true">печатает…</string>
     <string name="cometchat_message_image" translatable="true">Фото</string>
@@ -120,69 +125,86 @@
     <string name="cometchat_message_location" translatable="true">Местоположение</string>
     <string name="cometchat_message_collaborative_whiteboard" translatable="true">Совместная доска</string>
     <string name="cometchat_message_collaborative_document" translatable="true">Совместный документ</string>
-    <string name="cometchat_conversation_delete_message_title" translatable="true">Удалить этот разговор?</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Удалить эту беседу?</string>
     <string name="cometchat_delete_message_title" translatable="true">Удалить это сообщение?</string>
-    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Вы уверены, что хотите удалить этот разговор? Это действие нельзя отменить.</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.</string>
     <string name="cometchat_delete_message_subtitle" translatable="true">Вы уверены, что хотите удалить это сообщение? Это действие нельзя отменить.</string>
     <string name="cometchat_cancel" translatable="true">Отмена</string>
-    <string name="cometchat_reaction_list_error" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
-    <string name="cometchat_text_translated" translatable="true">Текст переведен</string>
+    <string name="cometchat_reaction_list_error" translatable="true">Кажется, что-то пошло не так.
+Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_text_translated" translatable="true">Текст переведён</string>
     <string name="cometchat_composer_place_holder_text" translatable="true">Введите ваше сообщение…</string>
-    <string name="cometchat_last_seen" translatable="true">Последний раз видел</string>
-    <string name="cometchat_conversation_delete_error" translatable="true">Не удается удалить разговор</string>
+    <string name="cometchat_last_seen" translatable="true">Был(а) в сети</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Не удалось удалить беседу</string>
     <string name="cometchat_message_info" translatable="true">Информация о сообщении</string>
     <string name="cometchat_read" translatable="true">Прочитано</string>
     <string name="cometchat_deliver" translatable="true">Доставлено</string>
     <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
-    <string name="cometchat_message_delete_error" translatable="true">Не удается удалить сообщение</string>
+    <string name="cometchat_message_delete_error" translatable="true">Не удалось удалить сообщение</string>
     <string name="cometchat_no_stickers_available" translatable="true">Нет доступных стикеров</string>
-    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">У вас еще нет стикеров.</string>
-    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">У вас пока нет стикеров.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Кажется, что-то пошло не так.
+ Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_retry" translatable="true">Повторить</string>
     <string name="cometchat_group_members_empty_title" translatable="true">Нет доступных участников</string>
-    <string name="cometchat_group_member_empty_subtitle" translatable="true">Добавьте участников в группу, чтобы они появились здесь.</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Добавьте участников в группу, и они появятся здесь.</string>
     <string name="cometchat_remove" translatable="true">Удалить</string>
     <string name="cometchat_scope_change" translatable="true">Изменить роль</string>
-    <string name="cometchat_change_scope_subtitle" translatable="true">Вы можете изменить роли, чтобы управлять разрешениями и обязанностями группы.</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Вы можете изменить роль для управления правами и обязанностями группы.</string>
     <string name="cometchat_save" translatable="true">Сохранить</string>
     <string name="cometchat_users" translatable="true">Пользователи</string>
     <string name="cometchat_user_list_empty_state_title" translatable="true">Нет доступных пользователей</string>
-    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Добавьте контакты, чтобы начать разговоры и увидеть их здесь.</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Добавьте контакты, чтобы начать беседы, и они появятся здесь.</string>
     <string name="cometchat_user_list_error_state_title" translatable="true">Ой!</string>
-    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Кажется, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_search" translatable="true">Поиск</string>
     <string name="cometchat_groups" translatable="true">Группы</string>
     <string name="cometchat_group_list_empty_state_title" translatable="true">Группы не найдены</string>
-    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Создайте или присоединитесь к группам, чтобы увидеть их здесь и начать сотрудничество.</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Создайте или присоединитесь к группам, чтобы увидеть их здесь и начать совместную работу.</string>
     <string name="cometchat_group_list_error_state_title" translatable="true">Ой!</string>
-    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Кажется, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_members" translatable="true">Участники</string>
     <string name="cometchat_call_logs_title" translatable="true">Звонки</string>
-    <string name="cometchat_call_logs_empty_title" translatable="true">Нет записей звонков</string>
-    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Совершите или получите звонки, чтобы увидеть историю звонков здесь.</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Пока нет журналов звонков</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Совершайте или принимайте звонки, чтобы увидеть вашу историю здесь</string>
     <string name="cometchat_call_logs_error_title" translatable="true">Ой!</string>
-    <string name="cometchat_call_logs_error_subtitle" translatable="true">Похоже, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">Кажется, что-то пошло не так. Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_this_message_deleted" translatable="true">Это сообщение было удалено</string>
     <string name="cometchat_this_message_type_is_not_supported" translatable="true">Этот тип сообщения не поддерживается</string>
     <string name="cometchat_message_form" translatable="true">Форма</string>
-    <string name="cometchat_message_card" translatable="true">Карта</string>
+    <string name="cometchat_message_card" translatable="true">Карточка</string>
     <string name="cometchat_message_scheduler" translatable="true">Планировщик</string>
-    <string name="cometchat_message_mention_max_limit" translatable="true">Вы можете упомянуть до 10 раз за раз</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Вы можете упоминать до 10 раз за один раз</string>
     <string name="cometchat_ask_question" translatable="true">Задать вопрос</string>
-    <string name="cometchat_options" translatable="true">Опции</string>
+    <string name="cometchat_options" translatable="true">Параметры</string>
     <string name="cometchat_send" translatable="true">Отправить</string>
     <string name="cometchat_submit" translatable="true">Отправить</string>
     <string name="cometchat_add" translatable="true">Добавить</string>
-    <string name="cometchat_last_seen_a_min_ago" translatable="true">минуту назад</string>
-    <plurals name="cometchat_last_seen_minutes_ago" tools:ignore="MissingQuantity" translatable="true">
-        <item quantity="one" translatable="true">%d мин назад</item>
-        <item quantity="other" translatable="true">%d мин назад</item>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">1 минуту назад</string>
+
+    <!-- Plurals (simplified to "one" / "other" for Android) -->
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true" tools:ignore="MissingQuantity">
+        <item quantity="one">%d минуту назад</item>
+        <item quantity="other">%d минут назад</item>
     </plurals>
-    <plurals name="cometchat_last_seen_hours_ago" tools:ignore="MissingQuantity" translatable="true">
-        <item quantity="one" translatable="true">%d ч назад</item>
-        <item quantity="other" translatable="true">%d ч назад</item>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true" tools:ignore="MissingQuantity">
+        <item quantity="one">%d час назад</item>
+        <item quantity="other">%d часов назад</item>
     </plurals>
-    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s начал групповую видеозвонок</string>
-    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s начал групповую видеозвонок</string>
-    <string name="cometchat_edited">Редактировано</string>
+
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s создал(а) групповой звонок</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s начал(а) групповой звонок</string>
+    <string name="cometchat_edited" translatable="true">Отредактировано</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Принять</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Отклонить</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Входящий звонок: %s</string>
+    <string name="cometchat_kick">Кик</string>
+    <string name="cometchat_open_document_to_edit_content_together">Открыть документ для совместного редактирования</string>
+    <string name="cometchat_open_document">Открыть документ</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together">Открыть доску для совместного редактирования</string>
+    <string name="cometchat_open_whiteboard">Открыть доску</string>
+    <string name="cometchat_video_call">Видеозвонок</string>
+    <string name="cometchat_audio_call">Аудиозвонок</string>
+    <string name="cometchat_incoming_call_audio">аудио</string>
+    <string name="cometchat_incoming_call_video">видео</string>
 </resources>

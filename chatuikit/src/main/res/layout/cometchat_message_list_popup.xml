@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/reaction_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+        app:cardCornerRadius="@dimen/cometchat_radius_max">
+
+        <HorizontalScrollView
+            android:id="@+id/horizontal_container_reactions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/cometchat_padding_1"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/view_reactions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal" />
+
+        </HorizontalScrollView>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.cometchat.chatuikit.threadheader.CometChatThreadHeader
+        android:id="@+id/message_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/reaction_card"
+        android:layout_marginTop="-10dp" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/menu_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message_preview"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-30dp"
+        app:cardCornerRadius="@dimen/cometchat_radius_2"
+        app:cardElevation="10dp"
+        app:strokeColor="?attr/cometchatStrokeColorLight"
+        app:strokeWidth="@dimen/cometchat_1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</RelativeLayout>
+

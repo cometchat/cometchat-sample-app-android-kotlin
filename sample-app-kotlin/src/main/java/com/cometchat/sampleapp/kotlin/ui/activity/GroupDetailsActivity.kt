@@ -11,6 +11,8 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.GroupMember
@@ -49,6 +51,11 @@ class GroupDetailsActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         group = Gson().fromJson(
             intent.getStringExtra(getString(R.string.app_group)), Group::class.java
@@ -302,6 +309,7 @@ class GroupDetailsActivity : AppCompatActivity() {
         addMembersLayoutBinding.addMembers.setTitleText(getString(com.cometchat.chatuikit.R.string.cometchat_add_members))
         addMembersLayoutBinding.addMembers.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
         addMembersLayoutBinding.addMembers.setSubmitSelectionIconVisibility(View.GONE)
+        addMembersLayoutBinding.addMembers.backIconVisibility = View.VISIBLE
         addMembersLayoutBinding.addMembers.setOnItemClick { view, position, user ->
             addMembersLayoutBinding.addMembers.selectUser(user, UIKitConstants.SelectionMode.MULTIPLE)
         }

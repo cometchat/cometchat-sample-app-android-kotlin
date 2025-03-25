@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">Discussions</string>
+    <string name="app_bottom_nav_calls">Appels</string>
+    <string name="app_bottom_nav_users">Utilisateurs</string>
+    <string name="app_bottom_nav_groups">Groupes</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">Se connecter</string>
+    <string name="app_continue_with_google">Continuer avec Google</string>
+    <string name="app_no_banned_members">Aucun membre banni</string>
+    <string name="app_banned_few_members_to_show_them_here">Quelques membres ont été bannis pour être affichés ici</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">Échec de la connexion avec Google, aucun compte trouvé.</string>
+    <string name="app_google_sign_in_failed">Échec de la connexion Google :</string>
+    <string name="app_group">groupe</string>
+    <string name="app_btn_leave">Quitter</string>
+    <string name="app_leave_this_group">Quitter ce groupe ?</string>
+    <string name="app_leave_this_group_description">Êtes-vous sûr de vouloir quitter ce groupe ? Vous ne recevrez plus de messages dans cette discussion.</string>
+    <string name="app_btn_cancel">Annuler</string>
+    <string name="app_transfer_ownership_description">Êtes-vous sûr de vouloir transférer la propriété ? Cette action est irréversible et le nouveau propriétaire aura un contrôle total.</string>
+    <string name="app_btn_continue">Continuer</string>
+    <string name="app_delete_and_exit">Supprimer et quitter ?</string>
+    <string name="app_delete_and_exit_action">Supprimer et quitter</string>
+    <string name="app_delete_and_exit_description">Êtes-vous sûr de vouloir supprimer cette discussion et quitter le groupe ? Cette action est irréversible.</string>
+    <string name="app_btn_delete">Supprimer</string>
+    <string name="app_add">Ajouter</string>
+    <string name="app_member">Membre</string>
+    <string name="app_members">Membres</string>
+    <string name="app_base_message">baseMessage</string>
+    <string name="app_user">utilisateur</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">typeAppel</string>
+    <string name="app_not_logged_in">Vous n’êtes pas connecté. Veuillez vous connecter et réessayer.</string>
+    <string name="app_transfer_ownership">Transférer la Propriété</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">Détails de l’Appel</string>
+    <string name="app_call_details_history">Historique</string>
+    <string name="app_call_details_participants">Participants</string>
+    <string name="app_call_details_recordings">Enregistrements</string>
+    <string name="app_call_outgoing">Sortant</string>
+    <string name="app_call_missed">Manqué</string>
+    <string name="app_call_incoming">Entrant</string>
+    <string name="app_no_recordings_found">Aucun enregistrement trouvé</string>
+
+    <string name="app_accept">Accepter</string>
+    <string name="app_decline">Refuser</string>
+    <string name="app_incoming_s_call">Appel entrant %s</string>
+    <string name="app_user_info">Informations sur l’Utilisateur</string>
+    <string name="app_voice">Voix</string>
+    <string name="app_video">Vidéo</string>
+
+    <string name="app_delete">Supprimer la Discussion</string>
+    <string name="app_delete_chat_title">Supprimer cette discussion ?</string>
+    <string name="app_delete_chat_subtitle">Êtes-vous sûr de vouloir supprimer cette discussion ? Cette action est irréversible.</string>
+    <string name="app_delete_chat_positive_button">Supprimer</string>
+    <string name="app_delete_chat_negative_button">Annuler</string>
+    <string name="app_delete_chat_error">Échec de la suppression</string>
+    <string name="app_delete_chat_success">Discussion supprimée</string>
+
+    <string name="app_block">Bloquer</string>
+    <string name="app_block_user_title">Bloquer ce contact ?</string>
+    <string name="app_block_user_subtitle">Êtes-vous sûr de vouloir bloquer ce contact ? Vous ne recevrez plus de messages de sa part.</string>
+    <string name="app_block_user_positive_button">Bloquer</string>
+    <string name="app_block_user_negative_button">Annuler</string>
+    <string name="app_block_user_error">Échec du blocage</string>
+    <string name="app_block_user_success">Utilisateur bloqué</string>
+
+    <string name="app_unblock">Débloquer</string>
+    <string name="app_unblock_user_title">Débloquer ce contact ?</string>
+    <string name="app_unblock_user_subtitle">Êtes-vous sûr de vouloir débloquer ce contact ?</string>
+    <string name="app_unblock_user_positive_button">Débloquer</string>
+    <string name="app_unblock_user_negative_button">Annuler</string>
+    <string name="app_unblock_user_error">Échec du déblocage</string>
+    <string name="app_unblock_user_success">Utilisateur débloqué</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">Choisir un Utilisateur Exemple</string>
+    <string name="app_continue">Continuer</string>
+    <string name="app_or">Ou</string>
+    <string name="app_change">Changer</string>
+    <string name="app_app_credentials">Identifiants de l’Application</string>
+    <string name="app_enter_uid">Saisir l’UID</string>
+    <string name="app_enter_your_uid">Saisir votre UID</string>
+    <string name="app_error_invalid_user_or_uid_login">Veuillez sélectionner un utilisateur ou saisir un UID valide</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">Région</string>
+    <string name="app_region_us">États-Unis</string>
+    <string name="app_region_eu">UE</string>
+    <string name="app_region_in">Inde</string>
+    <string name="app_app_id">ID de l’Application</string>
+    <string name="app_app_id_hint">Saisir l’ID de l’application</string>
+    <string name="app_auth_key">Clé d’Authentification</string>
+    <string name="app_auth_key_hint">Saisir la clé d’authentification</string>
+    <string name="app_please_select_app_region">Veuillez sélectionner la région de l’application</string>
+    <string name="app_invalid_app_id">Veuillez saisir un ID de l’application valide</string>
+    <string name="app_invalid_auth_token">Veuillez saisir un jeton d’authentification valide</string>
+    <string name="app_new_group">Nouveau Groupe</string>
+    <string name="app_group_type">Type</string>
+    <string name="app_group_name">Nom</string>
+    <string name="app_group_hint_name">Saisir le nom du groupe</string>
+    <string name="app_password">Mot de passe</string>
+    <string name="app_hint_enter_the_password">Saisir le mot de passe</string>
+    <string name="app_btn_create_group">Créer un Groupe</string>
+    <string name="app_create_conversation">Créer une discussion</string>
+    <string name="app_logout">Se déconnecter</string>
+    <string name="app_group_info">Infos du Groupe</string>
+    <string name="app_no_longer_part_of_this_group">Vous ne faites plus partie de ce groupe</string>
+    <string name="app_view_members">Voir les Membres</string>
+    <string name="app_add_members">Ajouter des Membres</string>
+    <string name="app_banned_members">Membres Bannis</string>
+    <string name="app_view_members_chip">Voir\nMembres</string>
+    <string name="app_add_members_chip">Ajouter\nMembres</string>
+    <string name="app_banned_members_chip">Membres\nBannis</string>
+    <string name="app_leave">Quitter</string>
+    <string name="app_block_user_unable_to_send_message">Vous ne pouvez pas envoyer de messages à ce groupe, car vous n’en êtes plus membre.</string>
+    <string name="app_unblock_user">Débloquer l’Utilisateur</string>
+    <string name="app_description">Description</string>
+    <string name="app_steps_to_reproduce">Étapes pour reproduire</string>
+    <string name="app_join_group">Rejoindre le groupe</string>
+    <string name="app_type">Type</string>
+    <string name="app_enter_the_password">Saisir le mot de passe</string>
+    <string name="app_something_went_wrong_please_try_again">Un problème est survenu. Veuillez réessayer.</string>
+    <string name="app_retry">Réessayer</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">Il semble qu’un problème soit survenu.\nVeuillez réessayer.</string>
+    <string name="app_type_public">Public</string>
+
+    <string name="app_transfer_ownership_text">Transférer la Propriété</string>
+    <string name="app_type_private">Privé</string>
+    <string name="app_type_protected">Protégé</string>
+    <string name="app_thread_title">Fil</string>
+    <string name="app_error_conversations_title">Oups !</string>
+    <string name="app_group_members_empty_title">Aucun membre disponible</string>
+    <string name="app_group_member_empty_subtitle">Ajoutez des membres au groupe et ils apparaîtront ici.</string>
+    <string name="app_search">Rechercher</string>
+    <string name="app_new_chat">Nouvelle Discussion</string>
+    <string name="app_report">Commencer le Rapport</string>
+    <string name="app_has_blocked_you">vous a bloqué</string>
+    <string name="app_you_have_blocked_this_user">Vous avez bloqué cet utilisateur</string>
+</resources>

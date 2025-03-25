@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">الدردشات</string>
+    <string name="app_bottom_nav_calls">المكالمات</string>
+    <string name="app_bottom_nav_users">المستخدمون</string>
+    <string name="app_bottom_nav_groups">المجموعات</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">تسجيل الدخول</string>
+    <string name="app_continue_with_google">متابعة باستخدام Google</string>
+    <string name="app_no_banned_members">لا يوجد أعضاء محظورون</string>
+    <string name="app_banned_few_members_to_show_them_here">تم حظر بعض الأعضاء لعرضهم هنا</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">فشل تسجيل الدخول باستخدام Google، لم يتم العثور على حساب.</string>
+    <string name="app_google_sign_in_failed">فشل تسجيل الدخول عبر Google: </string>
+    <string name="app_group">مجموعة</string>
+    <string name="app_btn_leave">مغادرة</string>
+    <string name="app_leave_this_group">مغادرة هذه المجموعة؟</string>
+    <string name="app_leave_this_group_description">هل أنت متأكد أنك تريد مغادرة هذه المجموعة؟ لن تتلقى أي رسائل أخرى من هذه الدردشة.</string>
+    <string name="app_btn_cancel">إلغاء</string>
+    <string name="app_transfer_ownership_description">هل أنت متأكد أنك تريد نقل الملكية؟ لا يمكن التراجع عن هذا الإجراء، وسيحصل المالك الجديد على التحكم الكامل.</string>
+    <string name="app_btn_continue">متابعة</string>
+    <string name="app_delete_and_exit">حذف ومغادرة؟</string>
+    <string name="app_delete_and_exit_action">حذف ومغادرة</string>
+    <string name="app_delete_and_exit_description">هل أنت متأكد أنك تريد حذف هذه الدردشة ومغادرة المجموعة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="app_btn_delete">حذف</string>
+    <string name="app_add">إضافة</string>
+    <string name="app_member">عضو</string>
+    <string name="app_members">الأعضاء</string>
+    <string name="app_base_message">رسالة_أساسية</string>
+    <string name="app_user">مستخدم</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">نوع_المكالمة</string>
+    <string name="app_not_logged_in">أنت غير مسجل الدخول. يرجى تسجيل الدخول ثم المحاولة مرة أخرى.</string>
+    <string name="app_transfer_ownership">نقل الملكية</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">تفاصيل المكالمة</string>
+    <string name="app_call_details_history">السجل</string>
+    <string name="app_call_details_participants">المشاركون</string>
+    <string name="app_call_details_recordings">التسجيلات</string>
+    <string name="app_call_outgoing">صادرة</string>
+    <string name="app_call_missed">فائتة</string>
+    <string name="app_call_incoming">واردة</string>
+    <string name="app_no_recordings_found">لم يتم العثور على تسجيلات</string>
+
+    <string name="app_accept">قبول</string>
+    <string name="app_decline">رفض</string>
+    <string name="app_incoming_s_call">مكالمة واردة %s</string>
+    <string name="app_user_info">معلومات المستخدم</string>
+    <string name="app_voice">صوت</string>
+    <string name="app_video">فيديو</string>
+
+    <string name="app_delete">حذف الدردشة</string>
+    <string name="app_delete_chat_title">حذف هذه الدردشة؟</string>
+    <string name="app_delete_chat_subtitle">هل أنت متأكد أنك تريد حذف هذه الدردشة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="app_delete_chat_positive_button">حذف</string>
+    <string name="app_delete_chat_negative_button">إلغاء</string>
+    <string name="app_delete_chat_error">فشل الحذف</string>
+    <string name="app_delete_chat_success">تم حذف الدردشة</string>
+
+    <string name="app_block">حظر</string>
+    <string name="app_block_user_title">حظر هذا الشخص؟</string>
+    <string name="app_block_user_subtitle">هل أنت متأكد أنك تريد حظر هذا الشخص؟ لن تتلقى أي رسائل أخرى منه.</string>
+    <string name="app_block_user_positive_button">حظر</string>
+    <string name="app_block_user_negative_button">إلغاء</string>
+    <string name="app_block_user_error">فشل الحظر</string>
+    <string name="app_block_user_success">تم حظر المستخدم</string>
+
+    <string name="app_unblock">إلغاء الحظر</string>
+    <string name="app_unblock_user_title">إلغاء حظر هذا الشخص؟</string>
+    <string name="app_unblock_user_subtitle">هل أنت متأكد أنك تريد إلغاء حظر هذا الشخص؟</string>
+    <string name="app_unblock_user_positive_button">إلغاء الحظر</string>
+    <string name="app_unblock_user_negative_button">إلغاء</string>
+    <string name="app_unblock_user_error">فشل إلغاء الحظر</string>
+    <string name="app_unblock_user_success">تم إلغاء حظر المستخدم</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">اختر مستخدمًا تجريبيًا</string>
+    <string name="app_continue">متابعة</string>
+    <string name="app_or">أو</string>
+    <string name="app_change">تغيير</string>
+    <string name="app_app_credentials">بيانات اعتماد التطبيق</string>
+    <string name="app_enter_uid">أدخل UID</string>
+    <string name="app_enter_your_uid">أدخل UID الخاص بك</string>
+    <string name="app_error_invalid_user_or_uid_login">الرجاء اختيار مستخدم أو إدخال UID صحيح</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">المنطقة</string>
+    <string name="app_region_us">الولايات المتحدة</string>
+    <string name="app_region_eu">الاتحاد الأوروبي</string>
+    <string name="app_region_in">الهند</string>
+    <string name="app_app_id">معرّف التطبيق</string>
+    <string name="app_app_id_hint">أدخل معرّف التطبيق</string>
+    <string name="app_auth_key">مفتاح المصادقة</string>
+    <string name="app_auth_key_hint">أدخل مفتاح المصادقة</string>
+    <string name="app_please_select_app_region">الرجاء اختيار منطقة التطبيق</string>
+    <string name="app_invalid_app_id">الرجاء إدخال معرّف تطبيق صالح</string>
+    <string name="app_invalid_auth_token">الرجاء إدخال رمز مصادقة صالح</string>
+    <string name="app_new_group">مجموعة جديدة</string>
+    <string name="app_group_type">النوع</string>
+    <string name="app_group_name">الاسم</string>
+    <string name="app_group_hint_name">أدخل اسم المجموعة</string>
+    <string name="app_password">كلمة المرور</string>
+    <string name="app_hint_enter_the_password">أدخل كلمة المرور</string>
+    <string name="app_btn_create_group">إنشاء مجموعة</string>
+    <string name="app_create_conversation">إنشاء محادثة</string>
+    <string name="app_logout">تسجيل الخروج</string>
+    <string name="app_group_info">معلومات المجموعة</string>
+    <string name="app_no_longer_part_of_this_group">لم تعد جزءًا من هذه المجموعة</string>
+    <string name="app_view_members">عرض الأعضاء</string>
+    <string name="app_add_members">إضافة أعضاء</string>
+    <string name="app_banned_members">الأعضاء المحظورون</string>
+    <string name="app_view_members_chip">عرض\nالأعضاء</string>
+    <string name="app_add_members_chip">إضافة\nأعضاء</string>
+    <string name="app_banned_members_chip">أعضاء\nمحظورون</string>
+    <string name="app_leave">مغادرة</string>
+    <string name="app_block_user_unable_to_send_message">لا يمكنك إرسال رسائل إلى هذه المجموعة لأنك لم تعد عضوًا فيها.</string>
+    <string name="app_unblock_user">إلغاء حظر المستخدم</string>
+    <string name="app_description">الوصف</string>
+    <string name="app_steps_to_reproduce">خطوات إعادة الإجراء</string>
+    <string name="app_join_group">الانضمام للمجموعة</string>
+    <string name="app_type">النوع</string>
+    <string name="app_enter_the_password">أدخل كلمة المرور</string>
+    <string name="app_something_went_wrong_please_try_again">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
+    <string name="app_retry">إعادة المحاولة</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">يبدو أن هناك خطأ ما.\nيرجى المحاولة مرة أخرى.</string>
+    <string name="app_type_public">عام</string>
+
+    <string name="app_transfer_ownership_text">نقل الملكية</string>
+    <string name="app_type_private">خاص</string>
+    <string name="app_type_protected">محمي</string>
+    <string name="app_thread_title">سلسلة</string>
+    <string name="app_error_conversations_title">عذرًا!</string>
+    <string name="app_group_members_empty_title">لا يوجد أعضاء متاحون</string>
+    <string name="app_group_member_empty_subtitle">أضف أعضاءً إلى المجموعة وسيظهرون هنا.</string>
+    <string name="app_search">بحث</string>
+    <string name="app_new_chat">دردشة جديدة</string>
+    <string name="app_report">بدء التقرير</string>
+    <string name="app_has_blocked_you">قام بحظرك</string>
+    <string name="app_you_have_blocked_this_user">لقد قمت بحظر</string>
+</resources>

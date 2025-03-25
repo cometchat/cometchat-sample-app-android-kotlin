@@ -32,13 +32,15 @@ import com.google.gson.Gson;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class FCMMessageNotificationUtils {
     private static final String TAG = FCMMessageNotificationUtils.class.getSimpleName();
-
+    private static Map<String, String> existingNotificationMessages = new HashMap<>();
     private static final Executor executor = Executors.newSingleThreadExecutor();
 
     public static void showNotification(
@@ -224,6 +226,13 @@ public class FCMMessageNotificationUtils {
             StatusBarNotification[] notifications = mNotificationManager.getActiveNotifications();
 
             String currentText = null;
+            String currentMessageId = fcmMessageDTO.getTag();
+            boolean isMessageDeleted = fcmMessageDTO.getText().equalsIgnoreCase("message deleted");
+
+            if (!isMessageDeleted) {
+                existingNotificationMessages.put(currentMessageId, fcmMessageDTO.getText());
+            }
+
             if (notifications.length == 0) {
                 currentText = isUser ? fcmMessageDTO.getText() : fcmMessageDTO.getSenderName() + " @ " + fcmMessageDTO.getReceiverName() + ": " + fcmMessageDTO.getText();
             } else {
@@ -233,8 +242,14 @@ public class FCMMessageNotificationUtils {
                     String UID = extras.getString(AppConstants.FCMConstants.KEY_UID);
                     if (UID != null && UID.equals(userId)) {
                         String mText = (String) extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                        if (isMessageDeleted) {
+                            String originalMessage = existingNotificationMessages.get(currentMessageId);
+                            if (originalMessage != null & mText != null)
+                                currentText = isUser ? mText.replace(originalMessage, "Message Deleted") : mText.replace(originalMessage, "Message Deleted") + "\n" + fcmMessageDTO.getSenderName() + " @ " + fcmMessageDTO.getReceiverName() + ": " + fcmMessageDTO.getText();
+                        } else {
+                            currentText = isUser ? mText + "\n" + fcmMessageDTO.getText() : mText + "\n" + fcmMessageDTO.getSenderName() + " @ " + fcmMessageDTO.getReceiverName() + ": " + fcmMessageDTO.getText();
+                        }
                         notificationID = extras.getInt(AppConstants.FCMConstants.KEY_NOTIFICATION_ID);
-                        currentText = isUser ? mText + "\n" + fcmMessageDTO.getText() : mText + "\n" + fcmMessageDTO.getSenderName() + " @ " + fcmMessageDTO.getReceiverName() + ": " + fcmMessageDTO.getText();
                         isFound = true;
                         break;
                     }

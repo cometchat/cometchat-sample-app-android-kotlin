@@ -229,6 +229,7 @@ public class ConversationsViewModel extends ViewModel {
     }
 
     private void handleUnreadCount(int oldConversationIndex, Conversation oldConversation, @NonNull Conversation conversation, boolean isSent) {
+        conversation.setConversationWith(oldConversation.getConversationWith());
         if (oldConversation.getLastMessage() != null && conversation.getLastMessage() != null && (oldConversation
             .getLastMessage()
             .getId() != conversation.getLastMessage().getId())) {

@@ -1,6 +1,7 @@
 package com.cometchat.chatuikit.shared.models;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.StyleRes;
 
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 
@@ -42,4 +43,27 @@ public class CometChatMessageOption extends CometChatOption {
     public CometChatMessageOption(@NotNull String id, @NotNull String title, @ColorInt int icon, OnClick onClick) {
         super(id, title, icon, onClick);
     }
+
+    /**
+     * Constructs a new instance of CometChatOption with the specified properties.
+     *
+     * @param id              the unique identifier of the option
+     * @param title           the title of the option
+     * @param titleColor      the color of the option title
+     * @param icon            the icon resource of the option
+     * @param iconTintColor   the tint color of the option icon
+     * @param titleAppearance the appearance style resource of the option title
+     * @param onClick         the click listener for the option
+     */
+    public CometChatMessageOption(String id,
+                                  String title,
+                                  int titleColor,
+                                  int icon,
+                                  int iconTintColor,
+                                  @StyleRes int titleAppearance,
+                                  OnClick onClick) {
+        super(id, title, titleColor, icon, iconTintColor, titleAppearance, onClick);
+    }
+
+
 }

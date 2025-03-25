@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bottom_nav_chats">Sembang</string>
+    <string name="app_bottom_nav_calls">Panggilan</string>
+    <string name="app_bottom_nav_users">Pengguna</string>
+    <string name="app_bottom_nav_groups">Kumpulan</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="app_login">Log Masuk</string>
+    <string name="app_continue_with_google">Teruskan dengan Google</string>
+    <string name="app_no_banned_members">Tiada ahli yang disekat</string>
+    <string name="app_banned_few_members_to_show_them_here">Beberapa ahli telah disekat untuk dipaparkan di sini</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found">Gagal log masuk dengan Google, tiada akaun dijumpai.</string>
+    <string name="app_google_sign_in_failed">Log masuk Google gagal:</string>
+    <string name="app_group">kumpulan</string>
+    <string name="app_btn_leave">Keluar</string>
+    <string name="app_leave_this_group">Tinggalkan kumpulan ini?</string>
+    <string name="app_leave_this_group_description">Adakah anda pasti ingin meninggalkan kumpulan ini? Anda tidak akan menerima sebarang mesej lagi daripada sembang ini.</string>
+    <string name="app_btn_cancel">Batal</string>
+    <string name="app_transfer_ownership_description">Adakah anda pasti ingin memindahkan hak milik? Tindakan ini tidak boleh dipulihkan dan pemilik baharu akan mendapat kawalan penuh.</string>
+    <string name="app_btn_continue">Teruskan</string>
+    <string name="app_delete_and_exit">Padam dan Keluar?</string>
+    <string name="app_delete_and_exit_action">Padam dan Keluar</string>
+    <string name="app_delete_and_exit_description">Adakah anda pasti ingin memadam sembang ini dan keluar daripada kumpulan? Tindakan ini tidak boleh dipulihkan.</string>
+    <string name="app_btn_delete">Padam</string>
+    <string name="app_add">Tambah</string>
+    <string name="app_member">Ahli</string>
+    <string name="app_members">Ahli-Ahli</string>
+    <string name="app_base_message">baseMessage</string>
+    <string name="app_user">pengguna</string>
+    <string name="app_session_id">sessionId</string>
+    <string name="app_call_type">jenisPanggilan</string>
+    <string name="app_not_logged_in">Anda belum log masuk. Sila log masuk dan cuba lagi.</string>
+    <string name="app_transfer_ownership">Pindahkan Hak Milik</string>
+
+    <!--  Call Details  -->
+    <string name="app_call_details">Butiran Panggilan</string>
+    <string name="app_call_details_history">Sejarah</string>
+    <string name="app_call_details_participants">Peserta</string>
+    <string name="app_call_details_recordings">Rakaman</string>
+    <string name="app_call_outgoing">Keluar</string>
+    <string name="app_call_missed">Terlepas</string>
+    <string name="app_call_incoming">Masuk</string>
+    <string name="app_no_recordings_found">Tiada rakaman dijumpai</string>
+
+    <string name="app_accept">Terima</string>
+    <string name="app_decline">Tolak</string>
+    <string name="app_incoming_s_call">Panggilan Masuk %s</string>
+    <string name="app_user_info">Maklumat Pengguna</string>
+    <string name="app_voice">Suara</string>
+    <string name="app_video">Video</string>
+
+    <string name="app_delete">Padam Sembang</string>
+    <string name="app_delete_chat_title">Padam sembang ini?</string>
+    <string name="app_delete_chat_subtitle">Adakah anda pasti ingin memadam sembang ini? Tindakan ini tidak boleh dipulihkan.</string>
+    <string name="app_delete_chat_positive_button">Padam</string>
+    <string name="app_delete_chat_negative_button">Batal</string>
+    <string name="app_delete_chat_error">Gagal memadam</string>
+    <string name="app_delete_chat_success">Sembang dipadam</string>
+
+    <string name="app_block">Sekat</string>
+    <string name="app_block_user_title">Sekat kenalan ini?</string>
+    <string name="app_block_user_subtitle">Adakah anda pasti ingin menyekat kenalan ini? Anda tidak akan menerima mesej daripadanya lagi.</string>
+    <string name="app_block_user_positive_button">Sekat</string>
+    <string name="app_block_user_negative_button">Batal</string>
+    <string name="app_block_user_error">Gagal menyekat</string>
+    <string name="app_block_user_success">Pengguna disekat</string>
+
+    <string name="app_unblock">Nyahsekat</string>
+    <string name="app_unblock_user_title">Nyahsekat kenalan ini?</string>
+    <string name="app_unblock_user_subtitle">Adakah anda pasti ingin menyahsekat kenalan ini?</string>
+    <string name="app_unblock_user_positive_button">Nyahsekat</string>
+    <string name="app_unblock_user_negative_button">Batal</string>
+    <string name="app_unblock_user_error">Gagal nyahsekat</string>
+    <string name="app_unblock_user_success">Pengguna dinyahsekat</string>
+    <string name="app_message_id">message_id</string>
+    <string name="app_choose_sample_user">Pilih Pengguna Contoh</string>
+    <string name="app_continue">Teruskan</string>
+    <string name="app_or">Atau</string>
+    <string name="app_change">Tukar</string>
+    <string name="app_app_credentials">Kelayakan Aplikasi</string>
+    <string name="app_enter_uid">Masukkan UID</string>
+    <string name="app_enter_your_uid">Masukkan UID anda</string>
+    <string name="app_error_invalid_user_or_uid_login">Sila pilih pengguna atau masukkan UID yang betul</string>
+    <string name="app_shared_pref">AppSharedPref</string>
+    <string name="app_cred_id">appId</string>
+    <string name="app_cred_region">appRegion</string>
+    <string name="app_cred_auth">appAuthKey</string>
+    <string name="app_region">Kawasan</string>
+    <string name="app_region_us">AS</string>
+    <string name="app_region_eu">EU</string>
+    <string name="app_region_in">India</string>
+    <string name="app_app_id">ID Aplikasi</string>
+    <string name="app_app_id_hint">Masukkan ID Aplikasi</string>
+    <string name="app_auth_key">Kunci Pengesahan</string>
+    <string name="app_auth_key_hint">Masukkan Kunci Pengesahan</string>
+    <string name="app_please_select_app_region">Sila pilih Kawasan Aplikasi</string>
+    <string name="app_invalid_app_id">Sila masukkan ID Aplikasi yang sah</string>
+    <string name="app_invalid_auth_token">Sila masukkan token pengesahan yang sah</string>
+    <string name="app_new_group">Kumpulan Baharu</string>
+    <string name="app_group_type">Jenis</string>
+    <string name="app_group_name">Nama</string>
+    <string name="app_group_hint_name">Masukkan nama kumpulan</string>
+    <string name="app_password">Kata Laluan</string>
+    <string name="app_hint_enter_the_password">Masukkan kata laluan</string>
+    <string name="app_btn_create_group">Cipta Kumpulan</string>
+    <string name="app_create_conversation">Cipta perbualan</string>
+    <string name="app_logout">Log Keluar</string>
+    <string name="app_group_info">Maklumat Kumpulan</string>
+    <string name="app_no_longer_part_of_this_group">Anda tidak lagi menjadi ahli kumpulan ini</string>
+    <string name="app_view_members">Lihat Ahli</string>
+    <string name="app_add_members">Tambah Ahli</string>
+    <string name="app_banned_members">Ahli Disekat</string>
+    <string name="app_view_members_chip">Lihat\nAhli</string>
+    <string name="app_add_members_chip">Tambah\nAhli</string>
+    <string name="app_banned_members_chip">Ahli\nDisekat</string>
+    <string name="app_leave">Keluar</string>
+    <string name="app_block_user_unable_to_send_message">Anda tidak dapat menghantar mesej ke kumpulan ini kerana anda bukan lagi ahlinya.</string>
+    <string name="app_unblock_user">Nyahsekat Pengguna</string>
+    <string name="app_description">Deskripsi</string>
+    <string name="app_steps_to_reproduce">Langkah-langkah untuk mencuba semula</string>
+    <string name="app_join_group">Sertai kumpulan</string>
+    <string name="app_type">Jenis</string>
+    <string name="app_enter_the_password">Masukkan kata laluan</string>
+    <string name="app_something_went_wrong_please_try_again">Terdapat masalah. Sila cuba lagi.</string>
+    <string name="app_retry">Cuba Semula</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again">Nampaknya ada masalah.\nSila cuba lagi.</string>
+    <string name="app_type_public">Awam</string>
+
+    <string name="app_transfer_ownership_text">Pindahkan Hak Milik</string>
+    <string name="app_type_private">Peribadi</string>
+    <string name="app_type_protected">Dilindungi</string>
+    <string name="app_thread_title">Benang</string>
+    <string name="app_error_conversations_title">Aduh!</string>
+    <string name="app_group_members_empty_title">Tiada Ahli Tersedia</string>
+    <string name="app_group_member_empty_subtitle">Tambahkan ahli ke dalam kumpulan dan mereka akan tersenarai di sini.</string>
+    <string name="app_search">Cari</string>
+    <string name="app_new_chat">Sembang Baharu</string>
+    <string name="app_report">Mulakan Laporan</string>
+    <string name="app_has_blocked_you">telah menyekat anda</string>
+    <string name="app_you_have_blocked_this_user">Anda telah menyekat</string>
+</resources>

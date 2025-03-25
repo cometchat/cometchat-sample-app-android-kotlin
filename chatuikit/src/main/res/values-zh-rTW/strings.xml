@@ -1,13 +1,13 @@
-<resources xmlns:tools="http://schemas.android.com/tools" translatable="true">
-    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="cometchat_app_name" translatable="true">UI 套件</string>
     <string name="cometchat_user" translatable="true">使用者</string>
     <string name="cometchat_group" translatable="true">群組</string>
     <string name="cometchat_conversation" translatable="true">對話</string>
     <string name="cometchat_reply_lowercase" translatable="true">回覆</string>
     <string name="cometchat_call" translatable="true">通話</string>
     <string name="cometchat_sticker_lowercase" translatable="true">貼圖</string>
-    <string name="cometchat_message" translatable="true">寫訊息</string>
-    <string name="cometchat_start_conv_hint" translatable="true">點擊開始對話</string>
+    <string name="cometchat_message" translatable="true">撰寫訊息</string>
+    <string name="cometchat_start_conv_hint" translatable="true">輕觸以開始對話</string>
     <string name="cometchat_admin" translatable="true">管理員</string>
     <string name="cometchat_moderator" translatable="true">主持人</string>
     <string name="cometchat_member" translatable="true">成員</string>
@@ -15,13 +15,13 @@
     <string name="cometchat_camera_perm" translatable="true">請在應用程式設定中授予相機權限</string>
     <string name="cometchat_storage_perm" translatable="true">請在應用程式設定中授予儲存權限</string>
     <string name="cometchat_file_not_exist" translatable="true">檔案不存在</string>
-    <string name="cometchat_ended" translatable="true">結束</string>
-    <string name="cometchat_outgoing" translatable="true">外撥</string>
-    <string name="cometchat_incoming" translatable="true">來電</string>
-    <string name="cometchat_missed_call" translatable="true">錯過</string>
+    <string name="cometchat_ended" translatable="true">已結束</string>
+    <string name="cometchat_outgoing" translatable="true">撥出</string>
+    <string name="cometchat_incoming" translatable="true">撥入</string>
+    <string name="cometchat_missed_call" translatable="true">未接</string>
     <string name="cometchat_cancel_call" translatable="true">已取消</string>
     <string name="cometchat_rejected_call" translatable="true">已拒絕</string>
-    <string name="cometchat_busy_call" translatable="true">忙線中</string>
+    <string name="cometchat_busy_call" translatable="true">忙線</string>
     <string name="cometchat_you" translatable="true">你</string>
     <string name="cometchat_edit" translatable="true">編輯</string>
     <string name="cometchat_delete" translatable="true">刪除</string>
@@ -33,81 +33,82 @@
     <string name="cometchat_info" translatable="true">資訊</string>
     <string name="cometchat_online" translatable="true">線上</string>
     <string name="cometchat_offline" translatable="true">離線</string>
-    <string name="cometchat_attach_image" translatable="true">照片與影片庫</string>
-    <string name="cometchat_poll" translatable="true">建立投票</string>
-    <string name="cometchat_camera" translatable="true">拍照</string>
+    <string name="cometchat_attach_image" translatable="true">附加圖片</string>
+    <string name="cometchat_attach_video" translatable="true">附加影片</string>
+    <string name="cometchat_poll" translatable="true">投票</string>
+    <string name="cometchat_camera" translatable="true">相機</string>
     <string name="cometchat_yes" translatable="true">是</string>
-    <string name="cometchat_shared_sticker" translatable="true">分享貼圖</string>
-    <string name="cometchat_attach_audio" translatable="true">傳送音訊檔案</string>
-    <string name="cometchat_attach_document" translatable="true">檔案與文件</string>
+    <string name="cometchat_shared_sticker" translatable="true">分享了貼圖</string>
+    <string name="cometchat_attach_audio" translatable="true">附加音訊</string>
+    <string name="cometchat_attach_document" translatable="true">附加文件</string>
     <string name="cometchat_no" translatable="true">否</string>
     <string name="cometchat_question" translatable="true">問題</string>
     <string name="cometchat_collaborative_whiteboard" translatable="true">協作白板</string>
     <string name="cometchat_collaborative_doc" translatable="true">協作文件</string>
     <string name="cometchat_yesterday" translatable="true">昨天</string>
-    <string name="cometchat_ban" translatable="true">封鎖</string>
+    <string name="cometchat_ban" translatable="true">禁言</string>
     <string name="cometchat_document" translatable="true">文件</string>
     <string name="cometchat_polls" translatable="true">投票</string>
     <string name="cometchat_sticker_uppercase" translatable="true">貼圖</string>
     <string name="cometchat_custom_message_whiteboard" translatable="true">白板</string>
     <string name="cometchat_error" translatable="true">錯誤</string>
     <string name="cometchat_added" translatable="true">已新增</string>
-    <string name="cometchat_kicked_by" translatable="true">已被踢出</string>
-    <string name="cometchat_left" translatable="true">已離開</string>
-    <string name="cometchat_joined" translatable="true">已加入</string>
-    <string name="cometchat_unban" translatable="true">解封</string>
-    <string name="cometchat_made" translatable="true">已製作</string>
+    <string name="cometchat_kicked_by" translatable="true">踢出</string>
+    <string name="cometchat_left" translatable="true">離開</string>
+    <string name="cometchat_joined" translatable="true">加入</string>
+    <string name="cometchat_unban" translatable="true">解除禁言</string>
+    <string name="cometchat_made" translatable="true">設為</string>
     <string name="cometchat_participant" translatable="true">參與者</string>
-    <string name="cometchat_translation_error" translatable="true">選擇的語言與原始訊息語言相似，無法翻譯</string>
+    <string name="cometchat_translation_error" translatable="true">選擇的翻譯語言與原始訊息的語言相同</string>
     <string name="cometchat_group_call" translatable="true">群組通話</string>
     <string name="cometchat_updating" translatable="true">更新中</string>
-    <string name="cometchat_chats" translatable="true">對話</string>
+    <string name="cometchat_chats" translatable="true">聊天</string>
     <string name="cometchat_downloading" translatable="true">下載中</string>
     <string name="cometchat_today" translatable="true">今天</string>
     <string name="cometchat_replies" translatable="true">回覆</string>
     <string name="cometchat_new_message" translatable="true">新訊息</string>
-    <string name="cometchat_new_messages" translatable="true">新訊息</string>
+    <string name="cometchat_new_messages" translatable="true">" 新訊息"</string>
     <string name="cometchat_channel_description" translatable="true">頻道描述</string>
-    <string name="cometchat_action_item" translatable="true">行動項目</string>
-    <string name="cometchat_try_again" translatable="true">再試一次</string>
-    <string name="cometchat_something_went_wrong" translatable="true">發生錯誤。</string>
+    <string name="cometchat_action_item" translatable="true">動作項目</string>
+    <string name="cometchat_try_again" translatable="true">重試</string>
+    <string name="cometchat_something_went_wrong" translatable="true">發生了一些問題。</string>
     <string name="cometchat_transfer_ownership" translatable="true">轉移所有權</string>
     <string name="cometchat_add_members" translatable="true">新增成員</string>
     <string name="cometchat_owner" translatable="true">擁有者</string>
-    <string name="cometchat_banned" translatable="true">已封鎖</string>
-    <string name="cometchat_calling" translatable="true">通話中</string>
+    <string name="cometchat_banned" translatable="true">被禁言</string>
+    <string name="cometchat_calling" translatable="true">撥打中</string>
     <string name="cometchat_accepted" translatable="true">已接受</string>
     <string name="cometchat_unanswered" translatable="true">未接聽</string>
-    <string name="cometchat_message_receipt" translatable="true">訊息回條</string>
+    <string name="cometchat_message_receipt" translatable="true">訊息回執</string>
     <string name="cometchat_file_download_failed" translatable="true">檔案下載失敗。</string>
-    <string name="cometchat_suggest_a_reply" translatable="true">建議回覆</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">建議一個回覆</string>
     <string name="cometchat_enter_a_text" translatable="true">輸入文字</string>
-    <string name="cometchat_form_completion_message" translatable="true">感謝您填寫表單。</string>
+    <string name="cometchat_form_completion_message" translatable="true">感謝您填寫此表單。</string>
     <string name="cometchat_conversation_summary" translatable="true">對話摘要</string>
-    <string name="cometchat_generate_summary" translatable="true">生成摘要</string>
-    <string name="cometchat_more_times" translatable="true">更多次</string>
-    <string name="cometchat_select_a_day" translatable="true">選擇一天</string>
+    <string name="cometchat_generate_summary" translatable="true">產生摘要</string>
+    <string name="cometchat_more_times" translatable="true">更多時間</string>
+    <string name="cometchat_select_a_day" translatable="true">選擇日期</string>
     <string name="cometchat_meeting_scheduled" translatable="true">您的會議已安排。</string>
-    <string name="cometchat_meet_with" translatable="true">與會者</string>
+    <string name="cometchat_meet_with" translatable="true">"與…會面 "</string>
     <string name="cometchat_min_meeting" translatable="true">分鐘會議</string>
     <string name="cometchat_select_a_time" translatable="true">選擇時間</string>
-    <string name="cometchat_no_time_slots_available" translatable="true">此日期無可用時間。請選擇其他日期。</string>
-    <string name="cometchat_book_new_slot" translatable="true">預訂新時段</string>
-    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">發生錯誤。請再試一次。</string>
-    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">此時段已不再可用。請選擇其他時段。</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">此日期沒有可用時段。請嘗試其他日期。</string>
+    <string name="cometchat_book_new_slot" translatable="true">預約新時段</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">發生了一些問題。請重試。</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">時段不再可用。請選擇其他時段。</string>
     <string name="cometchat_no_quick_time_slots_available" translatable="true">沒有可用的時段。</string>
     <string name="cometchat_tag_item" translatable="true">標籤項目</string>
     <string name="cometchat_you_can_mention_up_to" translatable="true">您最多可以提及</string>
     <string name="cometchat_time_at_a_time" translatable="true">次</string>
     <string name="cometchat_reply" translatable="true">回覆</string>
     <string name="cometchat_all" translatable="true">全部</string>
-    <string name="cometchat_tap_to_remove" translatable="true">點擊以移除</string>
+    <string name="cometchat_tap_to_remove" translatable="true">點擊移除</string>
     <string name="cometchat_avatar" translatable="true">CometChat 頭像</string>
     <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
     <string name="cometchat_empty_conversations_title" translatable="true">尚無對話</string>
-    <string name="cometchat_empty_conversations_subtitle" translatable="true">開始一個新聊天或邀請他人加入對話。</string>
-    <string name="cometchat_error_conversations_title" translatable="true">哎呀！</string>
-    <string name="cometchat_error_conversations_subtitle" translatable="true">看起來發生了錯誤。\n請再試一次。</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">開始新的聊天，或邀請他人加入對話。</string>
+    <string name="cometchat_error_conversations_title" translatable="true">糟糕！</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">看起來出現了一些問題。\n請再試一次。</string>
     <string name="cometchat_typing" translatable="true">正在輸入…</string>
     <string name="cometchat_is_typing" translatable="true">正在輸入…</string>
     <string name="cometchat_message_image" translatable="true">照片</string>
@@ -120,15 +121,15 @@
     <string name="cometchat_message_location" translatable="true">位置</string>
     <string name="cometchat_message_collaborative_whiteboard" translatable="true">協作白板</string>
     <string name="cometchat_message_collaborative_document" translatable="true">協作文件</string>
-    <string name="cometchat_conversation_delete_message_title" translatable="true">刪除此對話嗎？</string>
-    <string name="cometchat_delete_message_title" translatable="true">刪除此訊息嗎？</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">刪除此對話？</string>
+    <string name="cometchat_delete_message_title" translatable="true">刪除此訊息？</string>
     <string name="cometchat_conversation_delete_message_subtitle" translatable="true">您確定要刪除此對話嗎？此操作無法復原。</string>
     <string name="cometchat_delete_message_subtitle" translatable="true">您確定要刪除此訊息嗎？此操作無法復原。</string>
     <string name="cometchat_cancel" translatable="true">取消</string>
-    <string name="cometchat_reaction_list_error" translatable="true">看起來發生了錯誤。\n請再試一次。</string>
-    <string name="cometchat_text_translated" translatable="true">已翻譯文本</string>
+    <string name="cometchat_reaction_list_error" translatable="true">看起來出現了一些問題。\n請再試一次。</string>
+    <string name="cometchat_text_translated" translatable="true">文字已翻譯</string>
     <string name="cometchat_composer_place_holder_text" translatable="true">輸入您的訊息…</string>
-    <string name="cometchat_last_seen" translatable="true">最後一次線上</string>
+    <string name="cometchat_last_seen" translatable="true">最後上線時間</string>
     <string name="cometchat_conversation_delete_error" translatable="true">無法刪除對話</string>
     <string name="cometchat_message_info" translatable="true">訊息資訊</string>
     <string name="cometchat_read" translatable="true">已讀</string>
@@ -137,52 +138,67 @@
     <string name="cometchat_message_delete_error" translatable="true">無法刪除訊息</string>
     <string name="cometchat_no_stickers_available" translatable="true">沒有可用的貼圖</string>
     <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">您還沒有任何貼圖。</string>
-    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">看起來發生了錯誤。\n請再試一次。</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">看起來出現了一些問題。\n請再試一次。</string>
     <string name="cometchat_retry" translatable="true">重試</string>
     <string name="cometchat_group_members_empty_title" translatable="true">沒有可用的成員</string>
-    <string name="cometchat_group_member_empty_subtitle" translatable="true">加入成員到群組並在此處查看。</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">將成員新增到群組後可在此查看。</string>
     <string name="cometchat_remove" translatable="true">移除</string>
-    <string name="cometchat_scope_change" translatable="true">更改範圍</string>
-    <string name="cometchat_change_scope_subtitle" translatable="true">您可以更改角色來管理群組許可權與責任。</string>
+    <string name="cometchat_scope_change" translatable="true">更改權限</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">您可以更改角色以管理群組許可和權限。</string>
     <string name="cometchat_save" translatable="true">儲存</string>
-    <string name="cometchat_users" translatable="true">用戶</string>
-    <string name="cometchat_user_list_empty_state_title" translatable="true">沒有可用的用戶</string>
-    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">新增聯絡人以開始對話並在此處查看。</string>
-    <string name="cometchat_user_list_error_state_title" translatable="true">哎呀！</string>
-    <string name="cometchat_user_list_error_state_subtitle" translatable="true">看起來發生了錯誤。請再試一次。</string>
+    <string name="cometchat_users" translatable="true">使用者</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">沒有可用的使用者</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">新增聯絡人以開始對話，並在此查看。</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">糟糕！</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">看起來出現了一些問題。請再試一次。</string>
     <string name="cometchat_search" translatable="true">搜尋</string>
     <string name="cometchat_groups" translatable="true">群組</string>
-    <string name="cometchat_group_list_empty_state_title" translatable="true">找不到群組</string>
-    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">建立或加入群組，以在此查看並開始協作。</string>
-    <string name="cometchat_group_list_error_state_title" translatable="true">哎呀！</string>
-    <string name="cometchat_group_list_error_state_subtitle" translatable="true">看起來發生了錯誤。請再試一次。</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">沒有找到群組</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">建立或加入群組，以便在此列出並開始協作。</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">糟糕！</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">看起來出現了一些問題。請再試一次。</string>
     <string name="cometchat_members" translatable="true">成員</string>
-    <string name="cometchat_call_logs_title" translatable="true">通話紀錄</string>
-    <string name="cometchat_call_logs_empty_title" translatable="true">尚無通話紀錄</string>
-    <string name="cometchat_call_logs_empty_subtitle" translatable="true">撥打或接聽電話以查看您的通話歷史紀錄。</string>
-    <string name="cometchat_call_logs_error_title" translatable="true">哎呀！</string>
-    <string name="cometchat_call_logs_error_subtitle" translatable="true">看起來發生了錯誤。請再試一次。</string>
-    <string name="cometchat_this_message_deleted" translatable="true">此訊息已刪除</string>
-    <string name="cometchat_this_message_type_is_not_supported" translatable="true">此訊息類型不支援</string>
+    <string name="cometchat_call_logs_title" translatable="true">通話</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">尚無通話記錄</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">撥打或接聽通話後可在此查看通話紀錄</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">糟糕！</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">看起來出現了一些問題。請再試一次。</string>
+    <string name="cometchat_this_message_deleted" translatable="true">此訊息已被刪除</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">不支援此訊息類型</string>
     <string name="cometchat_message_form" translatable="true">表單</string>
     <string name="cometchat_message_card" translatable="true">卡片</string>
-    <string name="cometchat_message_scheduler" translatable="true">排程器</string>
-    <string name="cometchat_message_mention_max_limit" translatable="true">您最多可以一次提及 10 次</string>
+    <string name="cometchat_message_scheduler" translatable="true">排程</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">您一次最多可以提及 10 次</string>
     <string name="cometchat_ask_question" translatable="true">提問</string>
     <string name="cometchat_options" translatable="true">選項</string>
-    <string name="cometchat_send" translatable="true">發送</string>
-    <string name="cometchat_submit" translatable="true">提交</string>
+    <string name="cometchat_send" translatable="true">送出</string>
+    <string name="cometchat_submit" translatable="true">送出</string>
     <string name="cometchat_add" translatable="true">新增</string>
-    <string name="cometchat_last_seen_a_min_ago" translatable="true">一分鐘前</string>
-    <plurals name="cometchat_last_seen_minutes_ago" tools:ignore="UnusedQuantity" translatable="true">
-        <item quantity="one" translatable="true">%d 分鐘前</item>
-        <item quantity="other" translatable="true">%d 分鐘前</item>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">1 分鐘前</string>
+
+    <!-- Plurals -->
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true" tools:ignore="UnusedQuantity">
+        <item quantity="one">%d 分鐘前</item>
+        <item quantity="other">%d 分鐘前</item>
     </plurals>
-    <plurals name="cometchat_last_seen_hours_ago" tools:ignore="UnusedQuantity" translatable="true">
-        <item quantity="one" translatable="true">%d 小時前</item>
-        <item quantity="other" translatable="true">%d 小時前</item>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true" tools:ignore="UnusedQuantity">
+        <item quantity="one">%d 小時前</item>
+        <item quantity="other">%d 小時前</item>
     </plurals>
+
     <string name="cometchat_meeting_initiated_by_you" translatable="true">%s 發起了群組通話</string>
     <string name="cometchat_meeting_initiated_by_others" translatable="true">%s 發起了群組通話</string>
-    <string name="cometchat_edited">編輯</string>
+    <string name="cometchat_edited" translatable="true">已編輯</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">接受</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">拒絕</string>
+    <string name="cometchat_incoming_call_type" translatable="true">來電：%s 通話</string>
+    <string name="cometchat_kick">踢出</string>
+    <string name="cometchat_open_document_to_edit_content_together">開啟檔案以共同編輯內容</string>
+    <string name="cometchat_open_document">開啟檔案</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together">開啟白板以共同編輯內容</string>
+    <string name="cometchat_open_whiteboard">開啟白板</string>
+    <string name="cometchat_video_call">視訊通話</string>
+    <string name="cometchat_audio_call">音訊通話</string>
+    <string name="cometchat_incoming_call_audio">音訊</string>
+    <string name="cometchat_incoming_call_video">視訊</string>
 </resources>
