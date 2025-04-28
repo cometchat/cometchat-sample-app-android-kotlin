@@ -67,11 +67,11 @@ class FCMService : FirebaseMessagingService() {
                 } else if ("call".equals(type, ignoreCase = true)) {
                     val sessionId = message.data["sessionId"]
                     val callAction = message.data["callAction"]
-                    if (MyApplication.isAppInForeground() && MyApplication.getTempCall() != null &&
+                    if (!MyApplication.isAppInForeground() && MyApplication.getTempCall() != null &&
                         (MyApplication
                             .getTempCall()
-                            ?.sessionId.equals(sessionId)
-                            ) && CometChatConstants.CALL_STATUS_CANCELLED == callAction
+                            ?.sessionId
+                            == sessionId) && (CometChatConstants.CALL_STATUS_CANCELLED == callAction || CometChatConstants.CALL_STATUS_UNANSWERED == callAction)
                     ) {
                         MyApplication.setTempCall(null)
                     }

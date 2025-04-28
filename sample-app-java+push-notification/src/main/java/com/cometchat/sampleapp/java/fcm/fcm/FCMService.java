@@ -83,7 +83,8 @@ public class FCMService extends FirebaseMessagingService {
                         MyApplication
                             .getTempCall()
                             .getSessionId()
-                            .equals(sessionId) && CometChatConstants.CALL_STATUS_CANCELLED.equals(callAction)) {
+                            .equals(sessionId) && (CometChatConstants.CALL_STATUS_CANCELLED.equals(callAction) || CometChatConstants.CALL_STATUS_UNANSWERED.equals(
+                        callAction))) {
                         MyApplication.setTempCall(null);
                     }
                     if (!CometChatVoIP.hasReadPhoneStatePermission(this)) return;
@@ -160,7 +161,7 @@ public class FCMService extends FirebaseMessagingService {
 
     private void voipIncomingCall(FCMCallDto callData) {
         if (MyApplication.isAppInForeground()) {
-            CometChatLogger.e(TAG, "Call ignored as app is in the foreground.");
+            CometChatLogger.e(TAG, "Call ignored as app is in the foreground and call popup is showing.");
             return;
         }
         if (CometChat.getActiveCall() != null || CometChatVoIPUtils.isCallOngoing) {

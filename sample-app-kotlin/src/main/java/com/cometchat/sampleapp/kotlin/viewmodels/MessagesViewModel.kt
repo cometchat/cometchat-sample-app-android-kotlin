@@ -143,7 +143,7 @@ class MessagesViewModel : ViewModel() {
 
         CometChatUIEvents.addListener(LISTENER_ID, object : CometChatUIEvents() {
             override fun ccActiveChatChanged(
-                id: HashMap<String, String>, message: BaseMessage, user: User?, group: Group?
+                id: HashMap<String, String>, message: BaseMessage?, user: User?, group: Group?
             ) {
                 baseMessage.value = message
             }

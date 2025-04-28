@@ -34,6 +34,7 @@ import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
 import com.cometchat.chatuikit.shared.interfaces.OnEmpty;
@@ -99,6 +100,7 @@ public class CometChatConversations extends MaterialCardView {
             conversationsAdapter.notifyItemRemoved(integer);
         }
     };
+    private DateTimeFormatterCallback dateTimeFormatter;
     private int toolbarVisibility = View.VISIBLE;
     private int deleteConversationOptionVisibility = View.VISIBLE;
     private int backIconVisibility = View.GONE;
@@ -879,6 +881,15 @@ public class CometChatConversations extends MaterialCardView {
         binding.tvTitle.setVisibility(visibility);
     }
 
+    public DateTimeFormatterCallback getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public void setDateTimeFormatter(@NonNull DateTimeFormatterCallback dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        conversationsAdapter.setDateTimeFormatter(dateTimeFormatter);
+    }
+
     /**
      * Gets the tint color of the back icon in the conversations toolbar.
      *
@@ -1095,13 +1106,6 @@ public class CometChatConversations extends MaterialCardView {
      */
     public @Dimension int getSeparatorHeight() {
         return separatorHeight;
-    }    /**
-     * Gets the stroke color for the conversations card.
-     *
-     * @return the stroke color used for the conversations card.
-     */
-    public @ColorInt int getStrokeColor() {
-        return strokeColor;
     }
 
     /**
@@ -1148,6 +1152,13 @@ public class CometChatConversations extends MaterialCardView {
      */
     public void setDeleteOptionIcon(Drawable deleteOptionIcon) {
         this.deleteOptionIcon = deleteOptionIcon;
+    }    /**
+     * Gets the stroke color for the conversations card.
+     *
+     * @return the stroke color used for the conversations card.
+     */
+    public @ColorInt int getStrokeColor() {
+        return strokeColor;
     }
 
     /**
@@ -1310,14 +1321,6 @@ public class CometChatConversations extends MaterialCardView {
     public void setErrorStateTextTitleAppearance(@StyleRes int errorStateTextTitleAppearance) {
         this.errorStateTextTitleAppearance = errorStateTextTitleAppearance;
         binding.tvErrorTitle.setTextAppearance(errorStateTextTitleAppearance);
-    }    /**
-     * Sets the stroke color for the conversations card.
-     *
-     * @param strokeColor the color to use for the card's stroke.
-     */
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1420,6 +1423,14 @@ public class CometChatConversations extends MaterialCardView {
     public void setStatusIndicatorStyle(@StyleRes int statusIndicatorStyle) {
         this.statusIndicatorStyle = statusIndicatorStyle;
         conversationsAdapter.setConversationsStatusIndicatorStyle(statusIndicatorStyle);
+    }    /**
+     * Sets the stroke color for the conversations card.
+     *
+     * @param strokeColor the color to use for the card's stroke.
+     */
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -1759,13 +1770,6 @@ public class CometChatConversations extends MaterialCardView {
         if (view != null) {
             Utils.handleView(binding.overflowMenuLayout, view, true);
         }
-    }    /**
-     * Gets the stroke width for the conversations card.
-     *
-     * @return the stroke width used for the conversations card.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -1922,6 +1926,13 @@ public class CometChatConversations extends MaterialCardView {
     public void setDiscardSelectionIcon(Drawable discardSelectionIcon) {
         this.discardSelectionIcon = discardSelectionIcon;
         binding.ivDiscardSelection.setImageDrawable(discardSelectionIcon);
+    }    /**
+     * Gets the stroke width for the conversations card.
+     *
+     * @return the stroke width used for the conversations card.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     public int getDiscardSelectionIconTint() {
@@ -1949,14 +1960,6 @@ public class CometChatConversations extends MaterialCardView {
     public void setSubmitSelectionIconTint(@ColorInt int submitSelectionIconTint) {
         this.submitSelectionIconTint = submitSelectionIconTint;
         binding.ivSubmitSelection.setImageTintList(ColorStateList.valueOf(submitSelectionIconTint));
-    }    /**
-     * Sets the stroke width for the conversations card.
-     *
-     * @param strokeWidth the width to use for the card's stroke.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     public int getCheckBoxStrokeWidth() {
@@ -2059,6 +2062,14 @@ public class CometChatConversations extends MaterialCardView {
      */
     private void setRecyclerViewVisibility(int visibility) {
         binding.recyclerviewConversationsList.setVisibility(visibility);
+    }    /**
+     * Sets the stroke width for the conversations card.
+     *
+     * @param strokeWidth the width to use for the card's stroke.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

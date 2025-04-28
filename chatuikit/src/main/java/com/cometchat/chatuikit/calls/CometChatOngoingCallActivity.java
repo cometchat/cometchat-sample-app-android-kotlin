@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
+import com.cometchat.chat.core.CometChat;
 import com.cometchat.chatuikit.databinding.CometchatOngoingCallActivityBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 
@@ -116,5 +117,7 @@ public class CometChatOngoingCallActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         onGoingCallSettingsBuilder = null;
+        CallingExtension.setActiveCall(null);
+        CometChat.clearActiveCall();
     }
 }

@@ -131,7 +131,16 @@ class GroupDetailsActivity : AppCompatActivity() {
                 )
             } else {
                 if (group.membersCount > 2) {
-                    showTransferOwnership()
+                    showAlertDialog(
+                        resources.getString(com.cometchat.chatuikit.R.string.cometchat_transfer_ownership),
+                        getString(R.string.app_transfer_ownership_information),
+                        getString(R.string.app_btn_cancel),
+                        getString(R.string.app_btn_continue),
+                        true,
+                        CometChatTheme.getPrimaryColor(this),
+                        0,
+                        GroupAction.SHOW_OWNERSHIP_TRANSFER
+                    )
                 } else
                     showAlertDialog(
                         resources.getString(com.cometchat.chatuikit.R.string.cometchat_transfer_ownership),
@@ -189,6 +198,8 @@ class GroupDetailsActivity : AppCompatActivity() {
                 viewModel.leaveGroup(group)
             } else if (GroupAction.DELETE == groupAction) {
                 viewModel.deleteGroup(group)
+            } else if (GroupAction.SHOW_OWNERSHIP_TRANSFER == groupAction) {
+                showTransferOwnership()
             } else if (GroupAction.TRANSFER_OWNERSHIP == groupAction) {
                 if (group.membersCount > 2) {
                     confirmDialog!!.dismiss()

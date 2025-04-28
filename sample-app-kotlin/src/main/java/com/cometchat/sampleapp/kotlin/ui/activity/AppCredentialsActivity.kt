@@ -5,11 +5,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cometchat.chatuikit.CometChatTheme
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityAppCredentialsBinding
 import com.cometchat.sampleapp.kotlin.viewmodels.AppCredentialsViewModel
 import com.google.android.material.card.MaterialCardView
-import java.util.Locale
 
 class AppCredentialsActivity : AppCompatActivity() {
     private var binding: ActivityAppCredentialsBinding? = null
@@ -63,17 +63,17 @@ class AppCredentialsActivity : AppCompatActivity() {
         }
 
         binding!!.cardUs.setOnClickListener { v: View? ->
-            viewModel!!.setSelectedRegion(getString(R.string.app_region_us).lowercase(Locale.getDefault()))
+            viewModel!!.setSelectedRegion(getString(R.string.app_region_us).lowercase(CometChatLocalize.getDefault()))
             regionCardUIHandler(binding!!.cardUs, binding!!.cardEu, binding!!.cardIn)
         }
 
         binding!!.cardEu.setOnClickListener { v: View? ->
-            viewModel!!.setSelectedRegion(getString(R.string.app_region_eu).lowercase(Locale.getDefault()))
+            viewModel!!.setSelectedRegion(getString(R.string.app_region_eu).lowercase(CometChatLocalize.getDefault()))
             regionCardUIHandler(binding!!.cardEu, binding!!.cardUs, binding!!.cardIn)
         }
 
         binding!!.cardIn.setOnClickListener { v: View? ->
-            viewModel!!.setSelectedRegion(getString(R.string.app_region_in).lowercase(Locale.getDefault()))
+            viewModel!!.setSelectedRegion(getString(R.string.app_region_in).lowercase(CometChatLocalize.getDefault()))
             regionCardUIHandler(binding!!.cardIn, binding!!.cardEu, binding!!.cardUs)
         }
     }

@@ -46,14 +46,14 @@ class CometChatVoIPConnection(private val context: Context) : Connection(), Come
         if (receiverUid == null || receiverType == null || sessionId == null || callType == null) {
             Log.e(TAG, "onAnswer: receiverUid, receiverType, sessionId, or callType is null")
             return
-        } // Mark the connection as active
-        //setActive();
+        }
         val call = Call(receiverUid, receiverType, callType)
         call.sessionId = sessionId
 
         Repository.acceptCall(call, object : CometChat.CallbackListener<Call>() {
             override fun onSuccess(call: Call) {
                 val intent = Intent(context, CometChatOngoingCallActivity::class.java)
+                CometChatVoIPUtils.isCallOngoing = true
                 intent.putExtra(context.getString(R.string.app_session_id), call.sessionId)
                 intent.putExtra(context.getString(R.string.app_call_type), call.type)
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -61,7 +61,7 @@ class CometChatVoIPConnection(private val context: Context) : Connection(), Come
             }
 
             override fun onError(e: CometChatException) {
-                killAppAndClearTask()
+                CometChatVoIPUtils.isCallOngoing = false
             }
         })
     }
@@ -82,14 +82,13 @@ class CometChatVoIPConnection(private val context: Context) : Connection(), Come
         call.sessionId = sessionId
         Repository.rejectCall(call, object : CometChat.CallbackListener<Call>() {
             override fun onSuccess(call: Call) {
-                killAppAndClearTask()
             }
 
             override fun onError(e: CometChatException) {
-                killAppAndClearTask()
             }
         })
         setDisconnected(DisconnectCause(DisconnectCause.REJECTED, "Rejected"))
+        CometChatVoIPUtils.isCallOngoing = false
     }
 
     private fun killAppAndClearTask() {
@@ -104,11 +103,17 @@ class CometChatVoIPConnection(private val context: Context) : Connection(), Come
 
     override fun onCallEnded() {
         setDisconnected(DisconnectCause(DisconnectCause.CANCELED, "Canceled"))
-        killAppAndClearTask()
+        CometChatVoIPUtils.isCallOngoing = false
     }
 
     override fun onCallEndButtonPressed() {
         setDisconnected(DisconnectCause(DisconnectCause.CANCELED, "Canceled"))
+        CometChatVoIPUtils.isCallOngoing = false
+    }
+
+    override fun onSessionTimeout() {
+        setDisconnected(DisconnectCause(DisconnectCause.CANCELED, "Canceled"))
+        CometChatVoIPUtils.isCallOngoing = false
     }
 
     override fun onUserJoined(rtcUser: RTCUser) {

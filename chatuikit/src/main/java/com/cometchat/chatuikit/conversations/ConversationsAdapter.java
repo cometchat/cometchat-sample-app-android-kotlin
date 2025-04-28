@@ -27,6 +27,7 @@ import com.cometchat.chatuikit.databinding.CometchatConversationsListItemsBindin
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.utils.ConversationTailView;
 import com.cometchat.chatuikit.shared.utils.ConversationsUtils;
@@ -51,6 +52,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     private List<CometChatTextFormatter> formatters;
     private List<Conversation> conversationsList;
     private SimpleDateFormat dateFormat;
+    private DateTimeFormatterCallback dateTimeFormatter;
     private HashMap<Conversation, Boolean> selectedConversation;
     private HashMap<Conversation, TypingIndicator> typingIndicatorHashMap;
     private ConversationsViewHolderListener titleView, leadingView, subtitleViewHolder, trailingViewHolder, itemViewHolder;
@@ -879,6 +881,13 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        if (dateTimeFormatter != null) {
+            this.dateTimeFormatter = dateTimeFormatter;
+            notifyDataSetChanged();
+        }
+    }
+
     /**
      * ViewHolder class for binding and displaying conversation items in a
      * RecyclerView.
@@ -1033,6 +1042,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
                     ConversationsUtils.bindConversationTailView(
                         tailView,
                         dateFormat,
+                        dateTimeFormatter,
                         conversation,
                         conversationsBadgeStyle,
                         conversationsDateStyle

@@ -12,6 +12,7 @@ import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chatuikit.extensions.sticker.keyboard.model.Sticker;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.views.reaction.ExtensionResponseListener;
 
 import org.json.JSONArray;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 public class Extensions {
     public static final String linkPreview = "link-preview";
@@ -511,7 +511,7 @@ public class Extensions {
         List<String> resultList = new ArrayList<>();
         try {
             for (int i = 0; i < replyObject.length(); i++) {
-                String localeLanguage = Locale.getDefault().getLanguage();
+                String localeLanguage = CometChatLocalize.getDefault().getLanguage();
                 JSONObject body = new JSONObject();
                 JSONArray languages = new JSONArray();
                 languages.put(localeLanguage);
@@ -556,7 +556,7 @@ public class Extensions {
                     if (translations.length() > 0) {
                         JSONObject translationsJSONObject = translations.getJSONObject(0);
                         String language = translationsJSONObject.getString("language_translated");
-                        String localLanguage = Locale.getDefault().getLanguage();
+                        String localLanguage = CometChatLocalize.getDefault().getLanguage();
                         String translatedMessage = translationsJSONObject.getString("message_translated");
                         result = language.equalsIgnoreCase(localLanguage) && !txtMessage.equalsIgnoreCase(translatedMessage);
                     }
@@ -580,12 +580,10 @@ public class Extensions {
                     if (translations.length() > 0) {
                         JSONObject translationsJSONObject = translations.getJSONObject(0);
                         String language = translationsJSONObject.getString("language_translated");
-                        String localLanguage = Locale.getDefault().getLanguage();
+                        String localLanguage = CometChatLocalize.getDefault().getLanguage();
                         String translatedMessage = translationsJSONObject.getString("message_translated");
                         if (language.equalsIgnoreCase(localLanguage) && !originalString.equalsIgnoreCase(translatedMessage)) {
                             result = translatedMessage;
-                        } else {
-                            result = originalString;
                         }
                     }
                 }

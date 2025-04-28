@@ -6,6 +6,7 @@ import static com.cometchat.chatuikit.shared.resources.utils.AnimationUtils.anim
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -265,6 +266,7 @@ public class CometChatMessageComposer extends MaterialCardView {
     private @StyleRes int aiOptionSheetStyle;
     private @StyleRes int attachmentOptionSheetStyle;
     private @StyleRes int suggestionListStyle;
+    private String[] microPhonePermissions;
 
     /**
      * The constructor for the CometChatMessageComposer class.
@@ -323,12 +325,20 @@ public class CometChatMessageComposer extends MaterialCardView {
         setPlaceHolderText(getResources().getString(R.string.cometchat_composer_place_holder_text));
         initializeComposerActions();
         setupPermissionResultListener();
+        setupMicroPhonePermissions();
         setupPermissionHandlerBuilder();
         setupActivityResultHandler();
         setupSuggestionListScrollListener();
         setupSuggestionListClickListener();
         setMessageInputTextChangeListener();
         applyStyleAttributes(attributeSet, defStyleAttr, 0);
+    }
+
+    private void setupMicroPhonePermissions() {
+        microPhonePermissions = new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) {
+            microPhonePermissions = new String[]{Manifest.permission.RECORD_AUDIO};
+        }
     }
 
     /**
@@ -465,26 +475,55 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     private void setupPermissionResultListener() {
         permissionResultListener = (grantedPermission, deniedPermission) -> {
-            if (grantedPermission.isEmpty()) {
-                handleDeniedPermission();
+            if (!deniedPermission.isEmpty()) {
+                handleDeniedPermission(deniedPermission);
             } else {
-                handleGrantedPermission();
+                if (grantedPermission.contains(Manifest.permission.RECORD_AUDIO)) {
+                    openMediaRecorderSheet();
+                } else
+                    handleGrantedPermission();
             }
         };
+    }
+
+    private void showPermissionDialog(List<String> deniedPermissions) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(R.string.cometchat_permission_required);
+        if (deniedPermissions.get(0).equals(Manifest.permission.RECORD_AUDIO))
+            builder.setMessage(R.string.cometchat_microphone_permission_warning);
+        else if (deniedPermissions.get(0).equals(Manifest.permission.CAMERA))
+            builder.setMessage(R.string.cometchat_camera_permission_warning);
+        else
+            builder.setMessage(R.string.cometchat_storage_permission_warning);
+
+        builder.setNegativeButton(R.string.cometchat_cancel_button, (dialog, which) -> dialog.dismiss());
+
+        builder.setPositiveButton(R.string.cometchat_settings_button, (dialog, which) -> {
+            Utils.openAppSettings(getContext());
+        });
+
+        builder.create().show();
     }
 
     /**
      * Handles the case when permissions are denied.
      */
-    private void handleDeniedPermission() {
+    private void handleDeniedPermission(List<String> deniedPermissions) {
         if (UIKitConstants.ComposerAction.CAMERA.equals(RESULT_TO_BE_OPEN)) {
-            showWarning(getResources().getString(R.string.cometchat_camera_perm));
-        } else {
+            showPermissionDialog(deniedPermissions);
+        } else if (
+            UIKitConstants.ComposerAction.DOCUMENT.equals(RESULT_TO_BE_OPEN) ||
+                UIKitConstants.ComposerAction.IMAGE.equals(RESULT_TO_BE_OPEN) ||
+                UIKitConstants.ComposerAction.VIDEO.equals(RESULT_TO_BE_OPEN) ||
+                UIKitConstants.ComposerAction.AUDIO.equals(RESULT_TO_BE_OPEN)
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 openStorage();
             } else {
-                showWarning(getResources().getString(R.string.cometchat_storage_perm));
+                showPermissionDialog(deniedPermissions);
             }
+        } else {
+            showPermissionDialog(deniedPermissions);
         }
     }
 
@@ -969,13 +1008,6 @@ public class CometChatMessageComposer extends MaterialCardView {
     private void visibleSuggestionList() {
         binding.suggestionList.setVisibility(View.VISIBLE);
         binding.suggestionList.showShimmer(true);
-    }    /**
-     * @param color The new color to set for the card background
-     */
-    @Override
-    public void setCardBackgroundColor(@ColorInt int color) {
-        this.backgroundColor = color;
-        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -1093,6 +1125,7 @@ public class CometChatMessageComposer extends MaterialCardView {
                 binding.footerViewLayout.removeView(internalBottomPanel);
             this.internalBottomPanel = view.apply(getContext());
             binding.footerViewLayout.addView(internalBottomPanel);
+            animateVisibilityVisible(binding.footerViewLayout);
         }
     }
 
@@ -1142,6 +1175,7 @@ public class CometChatMessageComposer extends MaterialCardView {
      * displayed.
      */
     private void closeInternalBottomPanel(Void avoid) {
+        animateVisibilityGone(binding.footerViewLayout);
         binding.footerViewLayout.removeView(internalBottomPanel);
         internalBottomPanel = null;
     }
@@ -1190,6 +1224,13 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void sendMediaMessage(File file, String contentType) {
         composerViewModel.sendMediaMessage(file, contentType);
+    }    /**
+     * @param color The new color to set for the card background
+     */
+    @Override
+    public void setCardBackgroundColor(@ColorInt int color) {
+        this.backgroundColor = color;
+        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -1278,6 +1319,18 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void requestStoragePermission() {
         permissionHandlerBuilder.withPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}).check();
+    }
+
+    /**
+     * Requests audio permission from the user.
+     *
+     * <p>
+     * This method checks for the {@link Manifest.permission#RECORD_AUDIO} permission.
+     * If the permission is not granted, it will prompt the user to allow access to
+     * the device's microphone.
+     */
+    public void requestMicrophonePermission() {
+        permissionHandlerBuilder.withPermissions(microPhonePermissions).check();
     }
 
     /**
@@ -1544,7 +1597,7 @@ public class CometChatMessageComposer extends MaterialCardView {
     private void initializeSecondaryView() {
         secondaryButtonLayoutBinding.ivAttachments.setOnClickListener(v -> openAttachmentOptionSheet());
         secondaryButtonLayoutBinding.ivMicrophone.setOnClickListener(view1 -> {
-            openMediaRecorderSheet();
+            requestMicrophonePermission();
         });
         binding.messageInput.setSecondaryButtonView(secondaryButtonLayoutBinding.getRoot());
     }
@@ -2172,13 +2225,6 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public String getText() {
         return text;
-    }    /**
-     * @param strokeWidth The new width to set for the stroke
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2433,6 +2479,13 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public TextView getInfoMessage() {
         return binding.tagInfoMessage;
+    }    /**
+     * @param strokeWidth The new width to set for the stroke
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

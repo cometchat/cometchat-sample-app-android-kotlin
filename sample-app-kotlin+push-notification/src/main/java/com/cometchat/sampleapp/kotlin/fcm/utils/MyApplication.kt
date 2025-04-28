@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class MyApplication : Application() {
     private var currentActivity: Activity? = null
-    private var snackBar: Snackbar? = null
     private var tempCall: Call? = null
     private val isConnectedToWebSockets = AtomicBoolean(false)
+    var snackBar: Snackbar? = null
 
     /**
      * Initializes the application by setting up Firebase, adding the CometChat call
@@ -93,7 +93,7 @@ class MyApplication : Application() {
 
             override fun onActivityResumed(activity: Activity) {
                 currentActivity = activity
-                if (snackBar != null && snackBar!!.isShown && tempCall != null) {
+                if (snackBar != null && tempCall != null) {
                     showTopSnackBar(tempCall)
                 } else
                     dismissTopSnackBar()
@@ -137,6 +137,7 @@ class MyApplication : Application() {
     private fun addCallListener() {
         CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener() {
             override fun onIncomingCallReceived(call: Call) {
+                playSound()
                 launchIncomingCallPopup(call)
             }
 
@@ -182,6 +183,7 @@ class MyApplication : Application() {
 
 
         val cometChatIncomingCall = CometChatIncomingCall(currentActivity)
+        cometChatIncomingCall.disableSoundForCalls(true)
         cometChatIncomingCall.call = call!!
         cometChatIncomingCall.onError = OnError { cometchatException: CometChatException? -> dismissTopSnackBar() }
 
@@ -190,6 +192,7 @@ class MyApplication : Application() {
         val layout: Snackbar.SnackbarLayout = snackBar?.view as Snackbar.SnackbarLayout
         val params: FrameLayout.LayoutParams = layout.layoutParams as FrameLayout.LayoutParams
         params.gravity = Gravity.TOP
+        params.topMargin = Utils.convertDpToPx(this, 35)
         layout.setLayoutParams(params)
         layout.setBackgroundColor(
             currentActivity!!.resources.getColor(android.R.color.transparent, null)
@@ -231,7 +234,6 @@ class MyApplication : Application() {
 
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {
             CallingExtension.setActiveCall(call)
-            playSound()
             showTopSnackBar(call)
         } else {
             rejectCallWithBusyStatus(call)
@@ -282,6 +284,7 @@ class MyApplication : Application() {
         private var isAppInForeground: Boolean = false
         var currentActivity: Activity? = null
         var soundManager: CometChatSoundManager? = null
+
         private var tempCall: Call? = null
 
         fun getTempCall(): Call? {
@@ -290,7 +293,9 @@ class MyApplication : Application() {
 
         fun setTempCall(call: Call?) {
             tempCall = call
-            if (call == null && soundManager != null) soundManager?.pauseSilently()
+            if (call == null && soundManager != null) {
+                soundManager?.pauseSilently()
+            }
         }
 
         fun isAppInForeground(): Boolean {

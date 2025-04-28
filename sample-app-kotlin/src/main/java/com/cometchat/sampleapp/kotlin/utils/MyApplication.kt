@@ -74,7 +74,7 @@ class MyApplication : Application() {
 
             override fun onActivityResumed(activity: Activity) {
                 currentActivity = activity
-                if (snackBar != null && snackBar!!.isShown && tempCall != null) {
+                if (snackBar != null && tempCall != null) {
                     showTopSnackBar(tempCall)
                 } else
                     dismissTopSnackBar()
@@ -108,6 +108,7 @@ class MyApplication : Application() {
     private fun addCallListener() {
         CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener() {
             override fun onIncomingCallReceived(call: Call) {
+                playSound()
                 launchIncomingCallPopup(call)
             }
 
@@ -153,6 +154,7 @@ class MyApplication : Application() {
 
 
         val cometChatIncomingCall = CometChatIncomingCall(currentActivity)
+        cometChatIncomingCall.disableSoundForCalls(true)
         cometChatIncomingCall.call = call!!
         cometChatIncomingCall.onError = OnError { cometchatException: CometChatException? -> dismissTopSnackBar() }
 
@@ -161,6 +163,7 @@ class MyApplication : Application() {
         val layout: Snackbar.SnackbarLayout = snackBar?.view as Snackbar.SnackbarLayout
         val params: FrameLayout.LayoutParams = layout.layoutParams as FrameLayout.LayoutParams
         params.gravity = Gravity.TOP
+        params.topMargin = Utils.convertDpToPx(this, 35)
         layout.setLayoutParams(params)
         layout.setBackgroundColor(
             currentActivity!!.resources.getColor(android.R.color.transparent, null)
@@ -202,7 +205,6 @@ class MyApplication : Application() {
 
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {
             CallingExtension.setActiveCall(call)
-            playSound()
             showTopSnackBar(call)
         } else {
             rejectCallWithBusyStatus(call)

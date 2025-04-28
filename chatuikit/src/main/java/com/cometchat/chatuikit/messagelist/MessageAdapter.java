@@ -26,8 +26,10 @@ import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.models.CometChatMessageOption;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderAdapter;
 import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
@@ -45,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<MessageAdapter.DateItemHolder> {
     private static final String TAG = MessageAdapter.class.getSimpleName();
@@ -74,6 +75,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean showLeftBubbleGroupAvatar = true;
     private SimpleDateFormat timeFormat;
     private SimpleDateFormat dateSeparatorFormat;
+    private DateTimeFormatterCallback dateTimeFormatter;
     private UIKitConstants.TimeStampAlignment timeStampAlignment = UIKitConstants.TimeStampAlignment.BOTTOM;
     // Message Template and Style Configuration
     private HashMap<String, CometChatMessageTemplate> messageTemplateHashMap;
@@ -482,8 +484,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.onMessageLongClick = onMessageLongClick;
         this.viewTypeTemplateHashMap = new HashMap<>();
         this.messageViewTypeHashMap = new HashMap<>();
-        this.timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
-
+        this.timeFormat = new SimpleDateFormat("h:mm a", CometChatLocalize.getDefault());
+        this.dateTimeFormatter = CometChatUIKit.getAuthSettings().getDateTimeFormatterCallback();
         // Get the size of the reaction chips
         reactionChipSize = getTheSizeOfReactionChip("😂", 1);
         plusReactionChipSize = getTheSizeOfReactionChip("+", 9);
@@ -720,6 +722,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             // message
             if (baseMessage.getSentAt() > 0) {
                 var1.txtMessageDate.setDateFormat(dateSeparatorFormat);
+                var1.txtMessageDate.setDateTimeFormatterCallback(dateTimeFormatter);
                 var1.txtMessageDate.setDate(baseMessage.getSentAt(), Pattern.DAY_DATE);
             } else {
                 var1.txtMessageDate.setDateText(context.getString(R.string.cometchat_updating));
@@ -1732,7 +1735,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public String getTimePattern(BaseMessage baseMessage) {
-        if (timeFormat != null) return timeFormat.format(baseMessage.getSentAt() * 1000);
+        long time = baseMessage.getSentAt() * 1000;
+        if (dateTimeFormatter != null) {
+            String timeString = dateTimeFormatter.time(time);
+            if (timeString != null) {
+                return timeString;
+            }
+        }
+        if (timeFormat != null) return timeFormat.format(time);
         return "";
     }
 
@@ -6496,6 +6506,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void hideGroupActionMessage(boolean hideGroupActionMessage) {
         this.hideGroupActionMessage = hideGroupActionMessage;
         notifyDataSetChanged();
+    }
+
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        if (dateTimeFormatter != null) {
+            this.dateTimeFormatter = dateTimeFormatter;
+            notifyDataSetChanged();
+        }
     }
 
     /**

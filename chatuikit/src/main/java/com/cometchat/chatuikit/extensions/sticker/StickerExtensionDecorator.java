@@ -2,10 +2,13 @@ package com.cometchat.chatuikit.extensions.sticker;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -151,21 +154,44 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
             stickerImage.setImageTintList(ColorStateList.valueOf(additionParameter.getInactiveAuxiliaryIconTint()));
         }
 
-        view.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            Rect r = new Rect();
-            view.getWindowVisibleDisplayFrame(r);
-            int screenHeight = view.getRootView().getHeight();
-            int keypadHeight = screenHeight - r.bottom;
+        boolean[] delayedKeyboardShow = {false};
 
-            // 0.15 ratio is an arbitrary threshold to classify keyboard visibility.
-            boolean isVisible = keypadHeight > screenHeight * 0.15;
+        ViewTreeObserver.OnGlobalFocusChangeListener focusChangeListener = (oldFocus, newFocus) -> {
+            // This is called when the focus changes
+            // Check if the new focus is not null and is CometChatEditText
+            if (newFocus != null && newFocus.getId() == R.id.cometchat_compose_box) {
+                if (!delayedKeyboardShow[0]) {
+                    delayedKeyboardShow[0] = true;
 
-            if (isVisible != isKeyboardVisible) {
-                isKeyboardVisible = isVisible;
-                if (isKeyboardVisible) {
+                    newFocus.clearFocus(); // Prevent the keyboard from showing immediately
+                    CometChatUIKitHelper.hidePanel(mapId, UIKitConstants.CustomUIPosition.COMPOSER_BOTTOM); // Hide the sticker keyboard
                     activeStickerImage.setVisibility(View.GONE);
                     stickerImage.setVisibility(View.VISIBLE);
-                    CometChatUIKitHelper.hidePanel(mapId, UIKitConstants.CustomUIPosition.COMPOSER_BOTTOM);
+
+                    // Request focus and show the keyboard after a delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        newFocus.requestFocus();
+                        Utils.showKeyBoard(context, newFocus);
+                        delayedKeyboardShow[0] = false;
+                    }, 350);
+                }
+            }
+        };
+
+        ViewTreeObserver observer = view.getViewTreeObserver();
+        observer.addOnGlobalFocusChangeListener(focusChangeListener);
+
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(@NonNull View v) {
+                // No-op
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(@NonNull View v) {
+                // Remove the focus change listener when the view is detached
+                if (v.getViewTreeObserver().isAlive()) {
+                    v.getViewTreeObserver().removeOnGlobalFocusChangeListener(focusChangeListener);
                 }
             }
         });

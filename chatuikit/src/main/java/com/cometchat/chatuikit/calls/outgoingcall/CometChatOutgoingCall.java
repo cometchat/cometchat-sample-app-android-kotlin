@@ -9,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -17,8 +18,11 @@ import android.view.WindowManager;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
+import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -46,7 +50,7 @@ import com.google.android.material.card.MaterialCardView;
  * It extends the MaterialCardView class and provides methods for setting
  * call-related properties and styles.
  */
-public class CometChatOutgoingCall extends MaterialCardView {
+public class CometChatOutgoingCall extends MaterialCardView implements DefaultLifecycleObserver {
     private static final String TAG = CometChatOutgoingCall.class.getSimpleName();
     private CometchatOutgoingCallLayoutBinding binding;
     private OutgoingViewModel viewModel;
@@ -77,6 +81,7 @@ public class CometChatOutgoingCall extends MaterialCardView {
     private @Dimension int strokeWidth;
     private @ColorInt int strokeColor;
 
+    private PowerManager.WakeLock wakeLock;
     private SensorManager sensorManager;
     private Sensor proximitySensor;
     private SensorEventListener proximitySensorListener;
@@ -127,6 +132,8 @@ public class CometChatOutgoingCall extends MaterialCardView {
 
         initSensors(context);
         soundManager = new CometChatSoundManager(context);
+        // Register the component as a LifecycleObserver
+        ((AppCompatActivity) context).getLifecycle().addObserver(this);
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OutgoingViewModel.class);
         viewModel.getAcceptedCall().observe((LifecycleOwner) context, this::acceptedCall);
         viewModel.getRejectCall().observe((LifecycleOwner) context, this::rejectedCall);
@@ -224,7 +231,9 @@ public class CometChatOutgoingCall extends MaterialCardView {
             Activity activity = (Activity) getContext();
             PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
             if (powerManager != null) {
-                PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "MyApp::ProximityWakeLock");
+                if (wakeLock == null) {
+                    wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "MyApp::ProximityWakeLock");
+                }
                 if (!wakeLock.isHeld()) {
                     wakeLock.acquire();
                 }
@@ -233,15 +242,8 @@ public class CometChatOutgoingCall extends MaterialCardView {
     }
 
     private void turnOnScreen() {
-        if (getContext() instanceof Activity) {
-            Activity activity = (Activity) getContext();
-            PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-            if (powerManager != null) {
-                PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "MyApp::ProximityWakeLock");
-                if (wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
-            }
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
         }
     }
 
@@ -596,15 +598,6 @@ public class CometChatOutgoingCall extends MaterialCardView {
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
         super.setCardBackgroundColor(backgroundColor);
-    }    /**
-     * Plays the outgoing call sound if sound notifications are not disabled. It
-     * uses the custom sound resource if provided; otherwise, it defaults to the
-     * standard outgoing call sound.
-     */
-    private void playSound() {
-        if (!disableSoundForCall) {
-            soundManager.play(Sound.outgoingCall, customSoundForCalls);
-        }
     }
 
     /**
@@ -633,6 +626,15 @@ public class CometChatOutgoingCall extends MaterialCardView {
      */
     public ColorStateList getStokeColor() {
         return ColorStateList.valueOf(strokeColor);
+    }    /**
+     * Plays the outgoing call sound if sound notifications are not disabled. It
+     * uses the custom sound resource if provided; otherwise, it defaults to the
+     * standard outgoing call sound.
+     */
+    private void playSound() {
+        if (!disableSoundForCall) {
+            soundManager.play(Sound.outgoingCall, customSoundForCalls);
+        }
     }
 
     /**
@@ -645,6 +647,13 @@ public class CometChatOutgoingCall extends MaterialCardView {
         viewModel.removeListeners();
         soundManager.pauseSilently();
         stopProximitySensor();
+        if (getContext() instanceof AppCompatActivity) {
+            ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
+        }
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            wakeLock = null;
+        }
     }
 
     public void stopProximitySensor() {
@@ -697,6 +706,27 @@ public class CometChatOutgoingCall extends MaterialCardView {
         }
     }
 
+    @Override
+    public void onDestroy(@NonNull LifecycleOwner owner) {
+        if (getContext() instanceof LifecycleOwner) {
+            ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
+        }
+    }
+
+    @Override
+    public void onStop(@NonNull LifecycleOwner owner) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (((Activity) getContext()).isInPictureInPictureMode()) {
+                handlePiPExit();
+            }
+        }
+    }
+
+    private void handlePiPExit() {
+        viewModel.removeListeners();
+        viewModel.rejectCall(call);
+        ((Activity) getContext()).finish();
+    }
 
 
 
@@ -741,5 +771,6 @@ public class CometChatOutgoingCall extends MaterialCardView {
         }
         startProximitySensor();
     }
+
 
 }

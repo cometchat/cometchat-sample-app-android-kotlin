@@ -51,6 +51,11 @@ public class OutgoingViewModel extends ViewModel {
             @Override
             public void onError(CometChatException e) {
                 CometChatUIKitHelper.onCallRejected(call);
+
+                if (CometChat.getActiveCall() != null) {
+                    CometChat.clearActiveCall();
+                }
+
                 exception.setValue(e);
             }
         });

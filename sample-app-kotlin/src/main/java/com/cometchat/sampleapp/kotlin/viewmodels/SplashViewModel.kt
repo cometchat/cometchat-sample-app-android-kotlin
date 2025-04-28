@@ -48,7 +48,7 @@ class SplashViewModel : ViewModel() {
 
         val uiKitSettings: UIKitSettings = UIKitSettings
             .UIKitSettingsBuilder()
-            .setAutoEstablishSocketConnection(false)
+            .setAutoEstablishSocketConnection(true)
             .setAppId(appId)
             .setRegion(region)
             .setAuthKey(authKey)

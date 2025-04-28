@@ -207,4 +207,10 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_audio_call">Hanghívás</string>
     <string name="cometchat_incoming_call_audio">hang</string>
     <string name="cometchat_incoming_call_video">videó</string>
+    <string name="cometchat_permission_required">Engedély Szükséges</string>
+    <string name="cometchat_microphone_permission_warning">A mikrofon engedélye szükséges a hangrögzítéshez.</string>
+    <string name="cometchat_camera_permission_warning">A kamera engedélye szükséges a fényképezéshez.</string>
+    <string name="cometchat_storage_permission_warning">A tárhely engedélye szükséges a fájlok eléréséhez.</string>
+    <string name="cometchat_cancel_button">Mégse</string>
+    <string name="cometchat_settings_button">Beállítások</string>
 </resources>

@@ -64,6 +64,7 @@ import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.EmojiPickerClickListener;
 import com.cometchat.chatuikit.shared.interfaces.Function1;
 import com.cometchat.chatuikit.shared.interfaces.MessageOptionClickListener;
@@ -232,6 +233,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         }
     };
+    private DateTimeFormatterCallback dateTimeFormatter;
     // Layout Components
     private LinearLayout customViewLayout, errorViewLayout;
     private LinearLayout parent;
@@ -364,6 +366,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         cometchatReactionList.setBaseMessage(baseMessage);
         cometchatReactionList.setReactionsRequestBuilder(reactionRequestBuilder);
         cometchatReactionList.setOnReactionListItemClick(onReactionListItemClick);
+        cometchatReactionList.setStyle(reactionListStyle);
         cometchatReactionList.setOnEmpty(() -> bottomSheetDialog.dismiss());
         Utils.showBottomSheet(getContext(), bottomSheetDialog, true, true, cometchatReactionList);
     }
@@ -773,6 +776,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             CometChatUIKitHelper.onComposeMessage(id, reply);
             detachedAISmartRepliesView();
         });
+    }
+
+    public DateTimeFormatterCallback getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        messageAdapter.setDateTimeFormatter(dateTimeFormatter);
     }
 
     public boolean isEnableConversationStarter() {

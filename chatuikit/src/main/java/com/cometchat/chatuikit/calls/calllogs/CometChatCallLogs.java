@@ -27,6 +27,7 @@ import com.cometchat.calls.model.CallLog;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCallLogsBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
 import com.cometchat.chatuikit.shared.interfaces.OnCallError;
@@ -257,6 +258,7 @@ public class CometChatCallLogs extends MaterialCardView {
     };
     private int separatorVisibility = VISIBLE;
     private int titleVisibility = VISIBLE;
+    private DateTimeFormatterCallback dateTimeFormatter;
 
     /**
      * Constructs a new CometChatCallLogs instance using the specified context.
@@ -555,6 +557,15 @@ public class CometChatCallLogs extends MaterialCardView {
         callLogsAdapter.setDateFormat(simpleDateFormat);
     }
 
+    public DateTimeFormatterCallback getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        callLogsAdapter.setDateTimeFormatter(dateTimeFormatter);
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -656,10 +667,6 @@ public class CometChatCallLogs extends MaterialCardView {
     public void setBackIconTint(@ColorInt int backIconTint) {
         this.backIconTint = backIconTint;
         binding.toolbarBackIcon.setBackgroundTintList(ColorStateList.valueOf(backIconTint));
-    }    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -669,6 +676,10 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @StyleRes int getTitleTextAppearance() {
         return titleTextAppearance;
+    }    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -1064,14 +1075,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @Nullable Drawable getItemAudioCallIcon() {
         return itemAudioCallIcon;
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth The stroke width for the call logs.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeColor);
     }
 
     /**
@@ -1092,6 +1095,14 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @ColorInt int getItemAudioCallIconTint() {
         return itemAudioCallIconTint;
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth The stroke width for the call logs.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeColor);
     }
 
     /**
@@ -1325,13 +1336,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     private void setCustomLoaderVisibility(int visibility) {
         binding.customLayout.setVisibility(visibility);
-    }    /**
-     * Returns the stroke width.
-     *
-     * @return The stroke width of the call logs.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -1360,6 +1364,13 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public void setOnError(OnCallError onError) {
         this.onError = onError;
+    }    /**
+     * Returns the stroke width.
+     *
+     * @return The stroke width of the call logs.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     public OnEmpty getOnEmpty() {

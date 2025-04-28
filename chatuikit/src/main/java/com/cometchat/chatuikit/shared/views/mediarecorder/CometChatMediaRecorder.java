@@ -669,14 +669,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
     public void setDeleteIcon(Drawable deleteIcon) {
         this.deleteIcon = deleteIcon;
         binding.ivLeftDelete.setImageDrawable(deleteIcon);
-    }    /**
-     * Returns the current stroke width of the media recorder.
-     *
-     * @return the stroke width
-     */
-    @Override
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -686,6 +678,14 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getDeleteIconTint() {
         return deleteIconTint;
+    }    /**
+     * Returns the current stroke width of the media recorder.
+     *
+     * @return the stroke width
+     */
+    @Override
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -840,15 +840,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getStartIconBackgroundColor() {
         return startIconBackgroundColor;
-    }    /**
-     * Sets the stroke width of the media recorder.
-     *
-     * @param strokeWidth the stroke width to set
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -868,6 +859,15 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @Dimension int getStartIconRadius() {
         return startIconRadius;
+    }    /**
+     * Sets the stroke width of the media recorder.
+     *
+     * @param strokeWidth the stroke width to set
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1557,12 +1557,14 @@ public class CometChatMediaRecorder extends MaterialCardView {
      * animation and resumes the timer updates.
      */
     private void resumeRecording() {
-        recordingStateHandler(RecordingState.RECORDING);
-        recorder.resume();
-        binding.audioRippleEffect.startAnimation();
-        isRecording = true;
-        startTime = System.currentTimeMillis() - pauseTime;
-        timerHandler.postDelayed(timerRunnable, 0);
+        if (recorder != null) {
+            recordingStateHandler(RecordingState.RECORDING);
+            recorder.resume();
+            binding.audioRippleEffect.startAnimation();
+            isRecording = true;
+            startTime = System.currentTimeMillis() - pauseTime;
+            timerHandler.postDelayed(timerRunnable, 0);
+        }
     }
 
     /**

@@ -30,9 +30,11 @@ import com.cometchat.chatuikit.calls.utils.CallUtils;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.extensions.Extensions;
 import com.cometchat.chatuikit.logger.CometChatLogger;
+import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.date.Pattern;
 
@@ -94,12 +96,15 @@ public class ConversationsUtils {
 
     public static void bindConversationTailView(ConversationTailView conversationTailView,
                                                 SimpleDateFormat dateFormat,
+                                                DateTimeFormatterCallback dateTimeFormatterCallback,
                                                 Conversation conversation,
                                                 @StyleRes int badgeStyle,
                                                 @StyleRes int dateStyle) {
         conversationTailView.getBadge().setCount(conversation.getUnreadMessageCount());
         conversationTailView.getBadge().setVisibility(conversation.getUnreadMessageCount() != 0 ? View.VISIBLE : View.GONE);
         conversationTailView.getDate().setDateFormat(dateFormat);
+        conversationTailView.getDate().setDateTimeFormatterCallback(dateTimeFormatterCallback == null ? CometChatUIKit.getAuthSettings()
+                                                                                                                      .getDateTimeFormatterCallback() : dateTimeFormatterCallback);
         conversationTailView.getDate().setDate(conversation.getUpdatedAt(), Pattern.DAY_DATE_TIME);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                                                                LinearLayout.LayoutParams.WRAP_CONTENT);

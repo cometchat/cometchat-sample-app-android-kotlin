@@ -14,14 +14,12 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
  * ViewModel for managing user data in the application.
  */
 public class UsersViewModel extends ViewModel {
     private static final String TAG = UsersViewModel.class.getSimpleName();
-    private final Semaphore semaphore = new Semaphore(1);  // Allow only one thread at a time
     public UsersRequest.UsersRequestBuilder usersRequestBuilder;
     public UsersRequest.UsersRequestBuilder searchUsersRequestBuilder;
     public String LISTENERS_TAG;

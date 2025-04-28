@@ -2,6 +2,7 @@ package com.cometchat.sampleapp.java.fcm.ui.activity;
 
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -73,7 +74,8 @@ public class ThreadMessageActivity extends AppCompatActivity {
         binding.messageList.setParentMessage(parentMessage.getId());
         binding.messageComposer.setParentMessageId(parentMessage.getId());
         binding.threadHeader.setParentMessage(parentMessage);
-
+        binding.tvSubtitle.setText(user != null ? user.getName() : group != null ? group.getName() : "");
+        binding.tvSubtitle.setVisibility(binding.tvSubtitle.getText().toString().isEmpty() ? View.GONE : View.VISIBLE);
         // Set user or group data to the message header and composer
         if (user != null) {
             binding.messageList.setUser(user);

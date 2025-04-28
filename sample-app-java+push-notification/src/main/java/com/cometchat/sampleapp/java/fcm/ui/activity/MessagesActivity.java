@@ -43,7 +43,7 @@ public class MessagesActivity extends AppCompatActivity {
         // Deserialize the user and group data from the Intent
         user = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_user)), User.class);
         group = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_group)), Group.class);
-        MyApplication.currentOpenChatId = group != null ? group.getGuid() : user.getUid();
+        MyApplication.currentOpenChatId = group != null ? group.getGuid() : user != null ? user.getUid() : null;
 
         // Set the user and group in the ViewModel
         viewModel.setUser(user);
@@ -108,10 +108,10 @@ public class MessagesActivity extends AppCompatActivity {
     private void updateUserBlockStatus(User user) {
         if (user.isBlockedByMe()) {
             binding.messageComposer.setVisibility(View.GONE);
-            binding.unblockBtn.setVisibility(View.VISIBLE);
+            binding.unblockLayout.setVisibility(View.VISIBLE);
         } else {
-            binding.unblockBtn.setVisibility(View.GONE);
             binding.messageComposer.setVisibility(View.VISIBLE);
+            binding.unblockLayout.setVisibility(View.GONE);
         }
     }
 

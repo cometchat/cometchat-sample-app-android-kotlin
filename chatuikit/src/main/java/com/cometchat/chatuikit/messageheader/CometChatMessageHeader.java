@@ -21,7 +21,9 @@ import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageHeaderBinding;
+import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.Function3;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
@@ -74,6 +76,7 @@ public class CometChatMessageHeader extends MaterialCardView {
     private int groupStatusVisibility = VISIBLE;
     private int videoCallButtonVisibility = VISIBLE;
     private int voiceCallButtonVisibility = VISIBLE;
+    private DateTimeFormatterCallback dateTimeFormatter;
 
     /**
      * Constructs a new CometChatMessageHeader with a given context.
@@ -213,6 +216,14 @@ public class CometChatMessageHeader extends MaterialCardView {
                 ((Activity) getContext()).onBackPressed();
             }
         });
+    }
+
+    public DateTimeFormatterCallback getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
     }
 
     /**
@@ -958,7 +969,10 @@ public class CometChatMessageHeader extends MaterialCardView {
                         if (mUser.getLastActiveAt() == 0) {
                             binding.tvMessageHeaderSubtitle.setText(getContext().getString(R.string.cometchat_offline));
                         } else {
-                            String lastSeen = Utils.getLastSeenTime(getContext(), mUser.getLastActiveAt());
+                            String lastSeen = Utils.getLastSeenTime(getContext(),
+                                                                    mUser.getLastActiveAt(),
+                                                                    dateTimeFormatter == null ? CometChatUIKit.getAuthSettings()
+                                                                                                              .getDateTimeFormatterCallback() : dateTimeFormatter);
                             binding.tvMessageHeaderSubtitle.setText(lastSeen);
                             binding.tvMessageHeaderSubtitle.setSelected(true);
                         }

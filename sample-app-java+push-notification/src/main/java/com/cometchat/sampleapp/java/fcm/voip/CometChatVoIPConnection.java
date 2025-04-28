@@ -68,6 +68,7 @@ public class CometChatVoIPConnection extends Connection implements CometChatCall
             @Override
             public void onSuccess(Call call) {
                 Intent intent = new Intent(context, CometChatOngoingCallActivity.class);
+                CometChatVoIPUtils.isCallOngoing = true;
                 intent.putExtra(context.getString(R.string.app_session_id), call.getSessionId());
                 intent.putExtra(context.getString(R.string.app_call_type), call.getType());
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -76,7 +77,7 @@ public class CometChatVoIPConnection extends Connection implements CometChatCall
 
             @Override
             public void onError(CometChatException e) {
-                killAppAndClearTask();
+                CometChatVoIPUtils.isCallOngoing = false;
             }
         });
     }
@@ -99,15 +100,14 @@ public class CometChatVoIPConnection extends Connection implements CometChatCall
         Repository.rejectCall(call, new CometChat.CallbackListener<Call>() {
             @Override
             public void onSuccess(Call call) {
-                killAppAndClearTask();
             }
 
             @Override
             public void onError(CometChatException e) {
-                killAppAndClearTask();
             }
         });
         setDisconnected(new DisconnectCause(DisconnectCause.REJECTED, "Rejected"));
+        CometChatVoIPUtils.isCallOngoing = false;
     }
 
     private void killAppAndClearTask() {
@@ -126,12 +126,19 @@ public class CometChatVoIPConnection extends Connection implements CometChatCall
     @Override
     public void onCallEnded() {
         setDisconnected(new DisconnectCause(DisconnectCause.CANCELED, "Canceled"));
-        killAppAndClearTask();
+        CometChatVoIPUtils.isCallOngoing = false;
     }
 
     @Override
     public void onCallEndButtonPressed() {
         setDisconnected(new DisconnectCause(DisconnectCause.CANCELED, "Canceled"));
+        CometChatVoIPUtils.isCallOngoing = false;
+    }
+
+    @Override
+    public void onSessionTimeout() {
+        setDisconnected(new DisconnectCause(DisconnectCause.CANCELED, "Session Timeout"));
+        CometChatVoIPUtils.isCallOngoing = false;
     }
 
     @Override

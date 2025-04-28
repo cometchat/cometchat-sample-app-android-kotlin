@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <com.cometchat.chatuikit.shared.views.messageinput.CometChatEditText
-        android:id="@+id/compose_box"
+        android:id="@+id/cometchat_compose_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"

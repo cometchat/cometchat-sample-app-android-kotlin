@@ -202,4 +202,10 @@
     <string name="cometchat_audio_call">ऑडियो कॉल</string>
     <string name="cometchat_incoming_call_audio">ऑडियो</string>
     <string name="cometchat_incoming_call_video">वीडियो</string>
+    <string name="cometchat_permission_required">अनुमति आवश्यक</string>
+    <string name="cometchat_microphone_permission_warning">ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन की अनुमति आवश्यक है।</string>
+    <string name="cometchat_camera_permission_warning">तस्वीरें लेने के लिए कैमरा अनुमति आवश्यक है।</string>
+    <string name="cometchat_storage_permission_warning">फ़ाइलों तक पहुंचने के लिए संग्रहण अनुमति आवश्यक है।</string>
+    <string name="cometchat_cancel_button">रद्द करें</string>
+    <string name="cometchat_settings_button">सेटिंग्स</string>
 </resources>

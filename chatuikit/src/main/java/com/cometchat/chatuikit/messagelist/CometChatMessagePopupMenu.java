@@ -10,7 +10,6 @@ import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.DrawableRes;
@@ -84,18 +82,15 @@ class CometChatMessagePopupMenu {
     public void setStyle(@StyleRes int style) {
         if (style != 0) {
             this.style = style;
-            applyStyleAttributes(context, null, R.attr.cometchatPopupMenuStyle, style);
+            applyStyleAttributes(context, style);
         }
     }
 
     /**
      * Applies the style attributes from XML, allowing direct attribute overrides.
-     *
-     * @param attrs        The attributes of the XML tag that is inflating the view.
-     * @param defStyleAttr The default style to apply to this view.
      */
-    private void applyStyleAttributes(Context context, AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int style) {
-        TypedArray directAttributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatPopupMenu, defStyleAttr, style);
+    private void applyStyleAttributes(Context context, @StyleRes int style) {
+        TypedArray directAttributes = context.getTheme().obtainStyledAttributes(style, R.styleable.CometChatPopupMenu);
         extractAttributesAndApplyDefaults(directAttributes);
     }
 

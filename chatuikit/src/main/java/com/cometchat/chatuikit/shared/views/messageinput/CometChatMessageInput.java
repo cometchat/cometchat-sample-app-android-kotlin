@@ -79,7 +79,7 @@ public class CometChatMessageInput extends MaterialCardView {
     private void inflateAndInitializeView(AttributeSet attrs, int defStyleAttr) {
         Utils.initMaterialCard(this);
         binding = CometchatMessageInputLayoutBinding.inflate(LayoutInflater.from(getContext()), this, true);
-        binding.composeBox.setTextWatcher(textWatcher);
+        binding.cometchatComposeBox.setTextWatcher(textWatcher);
         applyStyleAttributes(attrs, defStyleAttr);
     }
 
@@ -257,7 +257,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setMessageInputTextAppearance(@StyleRes int messageInputTextAppearance) {
         this.messageInputTextAppearance = messageInputTextAppearance;
-        binding.composeBox.setTextAppearance(messageInputTextAppearance);
+        binding.cometchatComposeBox.setTextAppearance(messageInputTextAppearance);
     }
 
     /**
@@ -276,7 +276,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setMessageInputTextColor(@ColorInt int messageInputTextColor) {
         this.messageInputTextColor = messageInputTextColor;
-        binding.composeBox.setTextColor(messageInputTextColor);
+        binding.cometchatComposeBox.setTextColor(messageInputTextColor);
     }
 
     /**
@@ -296,7 +296,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setMessageInputPlaceHolderTextColor(@ColorInt int messageInputPlaceHolderTextColor) {
         this.messageInputPlaceHolderTextColor = messageInputPlaceHolderTextColor;
-        binding.composeBox.setHintTextColor(messageInputPlaceHolderTextColor);
+        binding.cometchatComposeBox.setHintTextColor(messageInputPlaceHolderTextColor);
     }
 
     /**
@@ -308,7 +308,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void removeTextWatcher() {
         if (textWatcher != null) {
-            binding.composeBox.removeTextChangedListener(null);
+            binding.cometchatComposeBox.removeTextChangedListener(null);
         }
     }
 
@@ -318,7 +318,7 @@ public class CometChatMessageInput extends MaterialCardView {
      * @return The start position of the selection, or -1 if there is no selection.
      */
     public int getSelectionStart() {
-        return binding.composeBox.getSelectionStart();
+        return binding.cometchatComposeBox.getSelectionStart();
     }
 
     /**
@@ -327,14 +327,14 @@ public class CometChatMessageInput extends MaterialCardView {
      * @return The end position of the selection, or -1 if there is no selection.
      */
     public int getSelectionEnd() {
-        return binding.composeBox.getSelectionEnd();
+        return binding.cometchatComposeBox.getSelectionEnd();
     }
 
     /**
      * Requests focus for the compose box, allowing it to receive input.
      */
     public void requestEditBoxFocus() {
-        binding.composeBox.requestFocus();
+        binding.cometchatComposeBox.requestFocus();
     }
 
     /**
@@ -343,7 +343,7 @@ public class CometChatMessageInput extends MaterialCardView {
      * @param index The index at which to set the selection.
      */
     public void setTextSelection(int index) {
-        binding.composeBox.setSelection(index);
+        binding.cometchatComposeBox.setSelection(index);
     }
 
     /**
@@ -390,7 +390,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setMaxLine(int value) {
         if (value > 0) {
-            binding.composeBox.setMaxLines(value);
+            binding.cometchatComposeBox.setMaxLines(value);
         }
     }
 
@@ -402,7 +402,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setSpannableText(SpannableString text) {
         if (text != null) {
-            binding.composeBox.setText(text);
+            binding.cometchatComposeBox.setText(text);
         }
     }
 
@@ -412,7 +412,7 @@ public class CometChatMessageInput extends MaterialCardView {
      * @return The text currently in the compose box, converted to a string.
      */
     public String getText() {
-        return binding.composeBox.getText() + "";
+        return binding.cometchatComposeBox.getText() + "";
     }
 
     /**
@@ -422,7 +422,7 @@ public class CometChatMessageInput extends MaterialCardView {
      */
     public void setText(String text) {
         if (text != null) {
-            binding.composeBox.setText(text);
+            binding.cometchatComposeBox.setText(text);
         }
     }
 
@@ -432,7 +432,7 @@ public class CometChatMessageInput extends MaterialCardView {
      * @return The editable text currently in the compose box.
      */
     public Editable getEditableText() {
-        return binding.composeBox.getText();
+        return binding.cometchatComposeBox.getText();
     }
 
     /**
@@ -511,7 +511,7 @@ public class CometChatMessageInput extends MaterialCardView {
     public void setOnTextChangedListener(CometChatTextWatcher textWatcher) {
         if (textWatcher != null) {
             this.textWatcher = textWatcher;
-            binding.composeBox.setTextWatcher(textWatcher);
+            binding.cometchatComposeBox.setTextWatcher(textWatcher);
         }
     }
 
@@ -532,7 +532,7 @@ public class CometChatMessageInput extends MaterialCardView {
      *                out of bounds, it may throw an exception.
      */
     public void setSelection(int spanEnd) {
-        binding.composeBox.setSelection(spanEnd);
+        binding.cometchatComposeBox.setSelection(spanEnd);
     }
 
     /**
@@ -542,7 +542,7 @@ public class CometChatMessageInput extends MaterialCardView {
      * @return The {@link CometChatEditText} instance representing the compose box.
      */
     public CometChatEditText getComposeBox() {
-        return binding.composeBox;
+        return binding.cometchatComposeBox;
     }
 
     /**
@@ -551,6 +551,6 @@ public class CometChatMessageInput extends MaterialCardView {
      * @param text The placeholder text to set.
      */
     public void setPlaceHolderText(String text) {
-        binding.composeBox.setHint(text);
+        binding.cometchatComposeBox.setHint(text);
     }
 }

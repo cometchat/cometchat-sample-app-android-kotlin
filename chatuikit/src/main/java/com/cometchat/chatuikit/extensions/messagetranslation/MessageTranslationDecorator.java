@@ -2,7 +2,6 @@ package com.cometchat.chatuikit.extensions.messagetranslation;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -11,6 +10,7 @@ import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.TextMessage;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.extensions.Extensions;
@@ -24,13 +24,14 @@ import com.cometchat.chatuikit.shared.framework.DataSource;
 import com.cometchat.chatuikit.shared.framework.DataSourceDecorator;
 import com.cometchat.chatuikit.shared.models.AdditionParameter;
 import com.cometchat.chatuikit.shared.models.CometChatMessageOption;
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
+import com.cometchat.chatuikit.shared.resources.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Locale;
 
 public class MessageTranslationDecorator extends DataSourceDecorator {
     private static final String TAG = MessageTranslationDecorator.class.getSimpleName();
@@ -59,23 +60,25 @@ public class MessageTranslationDecorator extends DataSourceDecorator {
 
     private void translateMessage(@NonNull Context context, BaseMessage baseMessage, AdditionParameter additionParameter) {
         try {
-            String localeLanguage = Locale.getDefault().getLanguage();
+            String localeLanguage = CometChatLocalize.getDefault().getLanguage();
             JSONObject body = new JSONObject();
             JSONArray languages = new JSONArray();
             languages.put(localeLanguage);
             body.put("msgId", baseMessage.getId());
             body.put("languages", languages);
-            body.put("text",
-                     FormatterUtils.getFormattedText(context,
-                                                     baseMessage,
-                                                     UIKitConstants.FormattingType.MESSAGE_COMPOSER,
-                                                     UIKitConstants.MessageBubbleAlignment.LEFT,
-                                                     ((TextMessage) baseMessage).getText(),
-                                                     ChatConfigurator.getDataSource().getTextFormatters(context, additionParameter)));
+            String originalText = String.valueOf(FormatterUtils.getFormattedText(context,
+                                                                                 baseMessage,
+                                                                                 UIKitConstants.FormattingType.MESSAGE_COMPOSER,
+                                                                                 UIKitConstants.MessageBubbleAlignment.LEFT,
+                                                                                 ((TextMessage) baseMessage).getText(),
+                                                                                 ChatConfigurator
+                                                                                     .getDataSource()
+                                                                                     .getTextFormatters(context, additionParameter)));
+            body.put("text", originalText);
             CometChat.callExtension("message-translation", "POST", "/v2/translate", body, new CometChat.CallbackListener<JSONObject>() {
                 @Override
                 public void onSuccess(JSONObject jsonObject) {
-                    String translatedText = Extensions.getTextFromTranslatedMessage(jsonObject, ((TextMessage) baseMessage).getText());
+                    String translatedText = Extensions.getTextFromTranslatedMessage(jsonObject, originalText);
                     if (translatedText != null) {
                         if (baseMessage.getMetadata() != null) {
                             JSONObject meta = baseMessage.getMetadata();
@@ -113,7 +116,7 @@ public class MessageTranslationDecorator extends DataSourceDecorator {
 
     public void showError(Context context, String message) {
         String errorMessage = message;
-        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+        Utils.showToast(context, errorMessage, CometChatTheme.getWarningColor(context));
     }
 
     @Override

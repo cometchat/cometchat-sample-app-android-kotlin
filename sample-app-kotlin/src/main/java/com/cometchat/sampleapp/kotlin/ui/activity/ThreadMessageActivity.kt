@@ -55,7 +55,7 @@ class ThreadMessageActivity : AppCompatActivity() {
 
         // Calculate 25% of the screen height
         val requiredHeight = (screenHeight * 0.35).toInt()
-        binding!!.threadHeader.setMaxHeight(requiredHeight)
+        binding!!.threadHeader.maxHeight = requiredHeight
     }
 
     private fun setParentMessage(parentMessage: BaseMessage) {
@@ -83,6 +83,9 @@ class ThreadMessageActivity : AppCompatActivity() {
                 }
             }
         }
+
+        binding!!.tvSubtitle.text = if (user != null) user!!.name else if (group != null) group!!.name else ""
+        binding!!.tvSubtitle.visibility = if (binding!!.tvSubtitle.text.toString().isEmpty()) View.GONE else View.VISIBLE
 
         binding!!.messageList.setParentMessage(parentMessage.id)
         binding!!.messageComposer.parentMessageId = parentMessage.id

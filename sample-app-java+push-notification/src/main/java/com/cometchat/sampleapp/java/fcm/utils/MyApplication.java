@@ -130,7 +130,7 @@ public class MyApplication extends Application {
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
                 currentActivity = activity;
-                if (snackbar != null && snackbar.isShown() && tempCall != null) {
+                if (snackbar != null && tempCall != null) {
                     showTopSnackBar(tempCall);
                 } else
                     dismissTopSnackBar();
@@ -182,6 +182,7 @@ public class MyApplication extends Application {
         CometChat.addCallListener(LISTENER_ID, new CometChat.CallListener() {
             @Override
             public void onIncomingCallReceived(Call call) {
+                playSound();
                 launchIncomingCallPopup(call);
             }
 
@@ -233,6 +234,7 @@ public class MyApplication extends Application {
             View rootView = currentActivity.findViewById(android.R.id.content);
 
             CometChatIncomingCall cometChatIncomingCall = new CometChatIncomingCall(currentActivity);
+            cometChatIncomingCall.disableSoundForCalls(true);
             cometChatIncomingCall.setCall(call);
             cometChatIncomingCall.setOnError((cometchatException) -> dismissTopSnackBar());
 
@@ -269,7 +271,6 @@ public class MyApplication extends Application {
 
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {
             CallingExtension.setActiveCall(call);
-            playSound();
             showTopSnackBar(call);
         } else {
             rejectCallWithBusyStatus(call);

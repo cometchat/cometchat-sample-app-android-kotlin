@@ -19,6 +19,7 @@
     <string name="app_leave_this_group_description" translatable="true">Are you sure you want to leave this group? You won\'t receive any more messages from this chat.</string>
     <string name="app_btn_cancel" translatable="true">Cancel</string>
     <string name="app_transfer_ownership_description" translatable="true">Are you sure you want to transfer ownership ? This can\'t be undone, and the new owner will take full control.</string>
+    <string name="app_transfer_ownership_information" translatable="true">You need to transfer ownership of this group to another group member before leaving this group.</string>
     <string name="app_btn_continue" translatable="true">Continue</string>
     <string name="app_delete_and_exit" translatable="true">Delete and Exit?</string>
     <string name="app_delete_and_exit_action" translatable="true">Delete and Exit</string>
@@ -140,5 +141,6 @@
     <string name="app_report" translatable="true">Start Reporting</string>
     <string name="app_has_blocked_you" translatable="true">has blocked you</string>
     <string name="app_you_have_blocked_this_user" translatable="true">You have blocked</string>
+    <string name="unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
 
 </resources>

@@ -141,22 +141,22 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         viewModel.removeListener();
-        if (getContext() instanceof AppCompatActivity) {
-            ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
+        if (getContext() instanceof LifecycleOwner) {
+            ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
         }
     }
 
     @Override
     public void onDestroy(LifecycleOwner owner) {
-        if (getContext() instanceof AppCompatActivity) {
-            ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
+        if (getContext() instanceof LifecycleOwner) {
+            ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
         }
     }
 
     @Override
     public void onStop(LifecycleOwner owner) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (((AppCompatActivity) getContext()).isInPictureInPictureMode()) {
+            if (((Activity) getContext()).isInPictureInPictureMode()) {
                 handlePiPExit();
             }
         }
@@ -171,7 +171,7 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
             CometChatCalls.endSession();
         }
         CallingExtension.setIsActiveMeeting(false);
-        ((AppCompatActivity) getContext()).finish();
+        ((Activity) getContext()).finish();
     }
 
     /**

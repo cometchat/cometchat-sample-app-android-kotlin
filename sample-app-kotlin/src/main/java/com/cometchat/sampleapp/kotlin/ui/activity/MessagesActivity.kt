@@ -2,9 +2,11 @@ package com.cometchat.sampleapp.kotlin.ui.activity
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -40,7 +42,7 @@ class MessagesActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-
+        adjustWindowSettings()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -127,6 +129,18 @@ class MessagesActivity : AppCompatActivity() {
             )
             intent.putExtra(getString(R.string.app_message_id), baseMessage.id)
             context.startActivity(intent)
+        }
+    }
+
+    /**
+     * Adjusts the window settings for the activity.
+     */
+
+    private fun adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(true)
+        } else {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         }
     }
 

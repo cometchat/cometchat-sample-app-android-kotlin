@@ -201,4 +201,10 @@
     <string name="cometchat_audio_call">Panggilan Audio</string>
     <string name="cometchat_incoming_call_audio">audio</string>
     <string name="cometchat_incoming_call_video">video</string>
+    <string name="cometchat_permission_required">Kebenaran Diperlukan</string>
+    <string name="cometchat_microphone_permission_warning">Kebenaran mikrofon diperlukan untuk merakam audio.</string>
+    <string name="cometchat_camera_permission_warning">Kebenaran kamera diperlukan untuk mengambil gambar.</string>
+    <string name="cometchat_storage_permission_warning">Kebenaran storan diperlukan untuk mengakses fail.</string>
+    <string name="cometchat_cancel_button">Batal</string>
+    <string name="cometchat_settings_button">Tetapan</string>
 </resources>

@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
 import com.cometchat.chat.core.Call;
+import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chat.models.User;
@@ -172,6 +173,9 @@ public class CometChatCallActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        CometChatCalls.endSession();
+        CallingExtension.setActiveCall(null);
+        CometChat.clearActiveCall();
         baseMessage = null;
         call = null;
         callingType = null;

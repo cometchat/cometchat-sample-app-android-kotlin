@@ -22,6 +22,8 @@ import com.cometchat.calls.model.CallUser;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.utils.CallUtils;
 import com.cometchat.chatuikit.databinding.CometchatCallLogsItemsBinding;
+import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
 import com.cometchat.chatuikit.shared.interfaces.OnItemLongClick;
@@ -31,7 +33,6 @@ import com.cometchat.chatuikit.shared.views.date.CometChatDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -92,6 +93,7 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.CallLo
     private @StyleRes int avatarStyle;
     private @StyleRes int dateStyle;
     private SimpleDateFormat simpleDateFormat;
+    private DateTimeFormatterCallback dateTimeFormatter;
 
     /**
      * Creates a new instance of the CallLogsAdapter.
@@ -565,6 +567,13 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.CallLo
         notifyDataSetChanged();
     }
 
+    public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
+        if (dateTimeFormatter != null) {
+            this.dateTimeFormatter = dateTimeFormatter;
+            notifyDataSetChanged();
+        }
+    }
+
     /**
      * ViewHolder for the CallLogsAdapter, holding the view references for a single
      * CallLog item. This class extends RecyclerView.ViewHolder and is used to
@@ -745,8 +754,11 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.CallLo
                                                                                    ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(context.getResources().getDimensionPixelSize(R.dimen.cometchat_margin_1), 0, 0, 0);
             cometchatDate.setLayoutParams(layoutParams);
-            if (simpleDateFormat != null) cometchatDate.setDateText(simpleDateFormat.format(new Date(timestamp * 1000)));
-            else cometchatDate.setDateText(Utils.callLogsTimeStamp(timestamp, null));
+            cometchatDate.setDateText(Utils.callLogsTimeStamp(timestamp,
+                                                              simpleDateFormat,
+                                                              dateTimeFormatter == null ? CometChatUIKit
+                                                                  .getAuthSettings()
+                                                                  .getDateTimeFormatterCallback() : dateTimeFormatter));
             cometchatDate.setStyle(dateStyle);
             return cometchatDate;
         }

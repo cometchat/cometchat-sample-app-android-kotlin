@@ -37,19 +37,20 @@
         tools:node="merge"
         tools:targetApi="m">
         <activity
+            android:name=".shared.views.mediaviewer.CometChatImageViewerActivity"
+            android:exported="false"
+            android:theme="@style/UiKit.Internal.Theme.Transparent2" />
+        <activity
             android:name=".shared.permission.CometChatPermissionActivity"
             android:theme="@style/UiKit.Internal.Theme.Transparent" />
-
         <activity
-            android:name="com.cometchat.chatuikit.calls.CometChatCallActivity"
+            android:name=".calls.CometChatCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             android:supportsPictureInPicture="true" />
-
         <activity
-            android:name="com.cometchat.chatuikit.extensions.collaborative.CometChatWebViewActivity"
+            android:name=".extensions.collaborative.CometChatWebViewActivity"
             android:exported="false" />
-
         <activity
             android:name=".calls.CometChatOngoingCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout"
@@ -61,6 +62,7 @@
         <meta-data
             android:name="com.cometchat.chatuikit"
             android:value="${applicationId}" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

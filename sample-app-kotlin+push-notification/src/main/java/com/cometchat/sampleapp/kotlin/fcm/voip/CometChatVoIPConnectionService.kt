@@ -39,6 +39,7 @@ class CometChatVoIPConnectionService : android.telecom.ConnectionService() {
         if (timeoutHandler != null) {
             timeoutHandler!!.removeCallbacks(timeoutRunnable!!)
         }
+        CometChatVoIPUtils.isCallOngoing = false
     }
 
     companion object {

@@ -217,11 +217,8 @@ public class MessageBubbleUtils {
                 cometchatImageBubble.setStyle(imageBubbleStyle);
                 deletedBubble.setVisibility(View.GONE);
                 cometchatImageBubble.setVisibility(View.VISIBLE);
-                Attachment attachment = mediaMessage.getAttachment();
                 File file = Utils.getFileFromLocalPath(mediaMessage);
-                cometchatImageBubble.setImageUrl(file,
-                                                 attachment != null ? attachment.getFileUrl() : "",
-                                                 attachment != null ? attachment.getFileExtension().equalsIgnoreCase("gif") : Utils.isGifFile(file));
+                cometchatImageBubble.setMessage(mediaMessage, file);
                 if (file == null && (thumbnail != null && !thumbnail.isEmpty()))
                     cometchatImageBubble.setImageThumbnail(thumbnail);
                 if (mediaMessage.getCaption() != null) {

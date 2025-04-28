@@ -468,9 +468,11 @@ public class CometChatThreadHeader extends MaterialCardView {
      * @param integer The number of replies to display in the thread header.
      */
     private void updateReplyCount(Integer integer) {
-        binding.tvReplies.setText(integer < 2 ? integer + " " + getContext()
-            .getResources()
-            .getString(R.string.cometchat_reply_lowercase) : integer + " " + getContext().getResources().getString(R.string.cometchat_replies));
+        binding.tvReplies.setText(
+                integer == 0 ? integer + " " + getContext().getResources().getString(R.string.cometchat_replies) : integer + " " + getContext().getResources().getString(integer < 2
+                        ? R.string.cometchat_reply
+                        : R.string.cometchat_replies)
+        );
     }
 
     /**

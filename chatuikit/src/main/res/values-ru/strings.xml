@@ -207,4 +207,10 @@
     <string name="cometchat_audio_call">Аудиозвонок</string>
     <string name="cometchat_incoming_call_audio">аудио</string>
     <string name="cometchat_incoming_call_video">видео</string>
+    <string name="cometchat_permission_required">Требуется Разрешение</string>
+    <string name="cometchat_microphone_permission_warning">Для записи аудио требуется разрешение на использование микрофона.</string>
+    <string name="cometchat_camera_permission_warning">Для съемки требуется разрешение на использование камеры.</string>
+    <string name="cometchat_storage_permission_warning">Для доступа к файлам требуется разрешение на использование хранилища.</string>
+    <string name="cometchat_cancel_button">Отмена</string>
+    <string name="cometchat_settings_button">Настройки</string>
 </resources>

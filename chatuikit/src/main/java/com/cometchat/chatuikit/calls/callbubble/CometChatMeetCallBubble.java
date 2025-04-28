@@ -19,12 +19,12 @@ import com.cometchat.chatuikit.databinding.CometchatMeetCallBubbleBinding;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * A custom widget representing a call bubble for the Calling feature.
@@ -356,7 +356,7 @@ public class CometChatMeetCallBubble extends MaterialCardView {
         // Create a Date object with the milliseconds
         Date date = new Date(milliseconds);
         // Format the date to "dd MMM, HH:mm a"
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault());
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM, hh:mm a", CometChatLocalize.getDefault());
         return formatter.format(date);
     }
 
@@ -496,15 +496,6 @@ public class CometChatMeetCallBubble extends MaterialCardView {
         this.iconBackgroundColor = iconBackgroundColor;
         binding.callIconCard.setRadius(1000);
         binding.callIconCard.setCardBackgroundColor(iconBackgroundColor);
-    }    /**
-     * Sets the width of the card's border stroke.
-     *
-     * @param strokeWidth The width, in pixels, to set for the card's stroke.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -524,6 +515,15 @@ public class CometChatMeetCallBubble extends MaterialCardView {
     public void setTitleTextColor(@ColorInt int color) {
         this.titleTextColor = color;
         binding.titleText.setTextColor(color);
+    }    /**
+     * Sets the width of the card's border stroke.
+     *
+     * @param strokeWidth The width, in pixels, to set for the card's stroke.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

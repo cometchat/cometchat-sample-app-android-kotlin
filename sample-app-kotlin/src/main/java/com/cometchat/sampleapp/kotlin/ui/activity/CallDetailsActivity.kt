@@ -19,6 +19,7 @@ import com.cometchat.calls.model.CallUser
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.calls.utils.CallUtils
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityCallDetailsBinding
@@ -31,7 +32,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.gson.Gson
-import java.util.Locale
 
 class CallDetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCallDetailsBinding
@@ -201,10 +201,10 @@ class CallDetailsActivity : AppCompatActivity() {
         }
         return text
             .substring(0, 1)
-            .uppercase(Locale.getDefault()) + text
+            .uppercase(CometChatLocalize.getDefault()) + text
             .substring(1)
             .lowercase(
-                Locale.getDefault()
+                CometChatLocalize.getDefault()
             )
     }
 

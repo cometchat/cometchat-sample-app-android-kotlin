@@ -1,5 +1,6 @@
 package com.cometchat.chatuikit.shared.views.imagebubble;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -9,7 +10,6 @@ import android.text.SpannableString;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -18,6 +18,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+import androidx.core.app.ActivityOptionsCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -27,13 +28,16 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.cometchat.chat.models.Attachment;
+import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
-import com.cometchat.chatuikit.shared.resources.utils.MediaUtils;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 
 import java.io.File;
+import java.util.Collections;
 
 /**
  * Custom view that displays an image bubble for messaging applications.
@@ -46,14 +50,12 @@ import java.io.File;
 public class CometChatImageBubble extends MaterialCardView {
     private static final String TAG = CometChatImageBubble.class.getSimpleName();
     private Context context;
-    private LinearLayout parent;
     private ImageView shapeableImageView;
     private MaterialCardView imageViewContainerCard;
     private ProgressBar progressBar;
     private TextView textView;
     private OnClick onClick;
     private String imageUrl;
-
     private @ColorInt int backgroundColor;
     private @Dimension int strokeWidth;
     private @ColorInt int strokeColor;
@@ -61,6 +63,7 @@ public class CometChatImageBubble extends MaterialCardView {
     private Drawable backgroundDrawable = null;
     private @StyleRes int style;
     private @ColorInt int progressIndeterminateTint;
+    private MediaMessage mediaMessage;
 
     /**
      * Constructs a new instance of CometChatImageBubble.
@@ -107,6 +110,7 @@ public class CometChatImageBubble extends MaterialCardView {
         // Inflate and set up the view
         View view = View.inflate(context, R.layout.cometchat_image_bubble, null);
         shapeableImageView = view.findViewById(R.id.image);
+        shapeableImageView.setTransitionName(getContext().getString(R.string.cometchat_shared_image_transition, 0));
         imageViewContainerCard = view.findViewById(R.id.image_view_container_card);
         progressBar = view.findViewById(R.id.loader_icon);
         textView = view.findViewById(R.id.caption);
@@ -138,7 +142,14 @@ public class CometChatImageBubble extends MaterialCardView {
      * Opens the media view activity to display the image in full screen.
      */
     private void openMediaViewActivity() {
-        MediaUtils.openMediaInPlayer(getContext(), imageUrl, "image/*");
+        if (mediaMessage == null && (imageUrl == null || imageUrl.isEmpty())) {
+            CometChatLogger.e(TAG, "MediaMessage is null and imageUrl is empty");
+            return;
+        }
+        Utils.openImageViewer(shapeableImageView,
+                              Collections.singletonList(imageUrl),
+                              Collections.singletonList(mediaMessage.getAttachment().getFileMimeType()),
+                              Collections.singletonList(mediaMessage.getAttachment().getFileName()));
     }
 
     /**
@@ -194,15 +205,6 @@ public class CometChatImageBubble extends MaterialCardView {
         if (appearance != 0) {
             textView.setTextAppearance(appearance);
         }
-    }    /**
-     * Sets the stroke width for the image view container card.
-     *
-     * @param width The width of the stroke to be set.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int width) {
-        this.strokeWidth = width;
-        this.imageViewContainerCard.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -219,6 +221,10 @@ public class CometChatImageBubble extends MaterialCardView {
     @Override
     public ColorStateList getStrokeColorStateList() {
         return ColorStateList.valueOf(strokeColor);
+    }
+
+    private ActivityOptionsCompat getActivityOption(View targetView) {
+        return ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, targetView, targetView.getTransitionName());
     }
 
     /**
@@ -243,6 +249,218 @@ public class CometChatImageBubble extends MaterialCardView {
             textView.setVisibility(VISIBLE);
             textView.setText(caption);
         } else textView.setVisibility(GONE);
+    }
+
+    /**
+     * Sets the thumbnail of the image using a URL. The thumbnail image is loaded
+     * asynchronously using the Glide library.
+     *
+     * @param url The URL of the thumbnail image to be displayed.
+     */
+    public void setImageThumbnail(String url) {
+        if (url != null && !url.isEmpty()) {
+            glideLoadImageFromUrl(url);
+        }
+    }
+
+    /**
+     * Loads an image from the specified URL into the ImageView using Glide.
+     *
+     * <p>
+     * This method delegates the loading task to
+     * {@link #loadBitmapIntoImageView(File, String)} with the provided URL and a
+     * null file parameter. It sets up the image loading process to handle the image
+     * fetched from the internet.
+     *
+     * @param url The URL of the image to be loaded.
+     */
+    private void glideLoadImageFromUrl(String url) {
+        loadBitmapIntoImageView(null, url);
+    }
+
+    /**
+     * Loads a bitmap image into the ImageView from either a file or a URL.
+     *
+     * <p>
+     * This method uses Glide to load a bitmap image from the specified file or URL
+     * into the associated ImageView. It handles caching, placeholder, and
+     * visibility of the progress bar during the loading process.
+     *
+     * @param file The File object representing the image file, or null to load from
+     *             a URL.
+     * @param url  The URL of the image to be loaded, or null to load from a file.
+     */
+    private void loadBitmapIntoImageView(File file, String url) {
+        RequestBuilder<Bitmap> builder = Glide.with(context).asBitmap();
+        builder
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .placeholder(0)
+            .error(R.drawable.cometchat_image_placeholder)
+            .skipMemoryCache(false)
+            .load(file != null && file.exists() ? file : url)
+            .addListener(new RequestListener<Bitmap>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object o, @NonNull Target<Bitmap> target, boolean b) {
+                    progressBar.setVisibility(View.GONE);
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(@NonNull Bitmap bitmap,
+                                               @NonNull Object o,
+                                               Target<Bitmap> target,
+                                               @NonNull DataSource dataSource,
+                                               boolean b) {
+                    progressBar.setVisibility(View.GONE);
+                    return false;
+                }
+            })
+            .into(shapeableImageView);
+    }
+
+    public ImageView getShapeableImageView() {
+        return shapeableImageView;
+    }
+
+    public MaterialCardView getImageViewContainerCard() {
+        return imageViewContainerCard;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public TextView getTextView() {
+        return textView;
+    }
+
+    public OnClick getOnClick() {
+        return onClick;
+    }
+
+    /**
+     * Sets the click listener for the image bubble.
+     *
+     * @param onClick The OnClick listener to be set.
+     */
+    public void setOnClick(OnClick onClick) {
+        this.onClick = onClick;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * Sets the background color of the image view container card.
+     *
+     * @param color The color to be set as the background color.
+     */
+    @Override
+    public void setBackgroundColor(@ColorInt int color) {
+        this.backgroundColor = color;
+        this.imageViewContainerCard.setCardBackgroundColor(backgroundColor);
+        super.setBackgroundColor(backgroundColor);
+    }
+
+    public int getCornerRadius() {
+        return cornerRadius;
+    }
+
+    /**
+     * Sets the corner radius for the image view container card.
+     *
+     * @param radius The radius of the corners to be set.
+     */
+    public void setCornerRadius(@Dimension int radius) {
+        this.cornerRadius = radius;
+        this.imageViewContainerCard.setRadius(cornerRadius);
+        super.setRadius(cornerRadius);
+    }
+
+    public Drawable getBackgroundDrawable() {
+        return backgroundDrawable;
+    }
+
+    /**
+     * Sets the background drawable for the image view container card.
+     *
+     * @param drawable The drawable to be set as the background.
+     */
+    @Override
+    public void setBackgroundDrawable(Drawable drawable) {
+        this.backgroundDrawable = drawable;
+        if (imageViewContainerCard != null)
+            this.imageViewContainerCard.setBackground(backgroundDrawable);
+        super.setBackgroundDrawable(backgroundDrawable);
+    }
+
+    public @ColorInt int getProgressIndeterminateTint() {
+        return progressIndeterminateTint;
+    }
+
+    /**
+     * Sets the tint color for the progress bar.
+     *
+     * @param progressIndeterminateTint The color value to be set.
+     */
+    public void setProgressIndeterminateTint(int progressIndeterminateTint) {
+        this.progressIndeterminateTint = progressIndeterminateTint;
+        progressBar.getIndeterminateDrawable().setColorFilter(progressIndeterminateTint, android.graphics.PorterDuff.Mode.SRC_IN);
+    }    /**
+     * Sets the stroke width for the image view container card.
+     *
+     * @param width The width of the stroke to be set.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int width) {
+        this.strokeWidth = width;
+        this.imageViewContainerCard.setStrokeWidth(strokeWidth);
+    }
+
+    public int getStyle() {
+        return style;
+    }
+
+    /**
+     * Sets the style for the image bubble from a style resource.
+     *
+     * @param styleResId The style resource ID.
+     */
+    public void setStyle(@StyleRes int styleResId) {
+        this.style = styleResId;
+        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(styleResId, R.styleable.CometChatImageBubble);
+        extractAttributesAndApplyDefaults(typedArray);
+    }
+
+    /**
+     * Method to set MediaMessage
+     *
+     * @param mediaMessage
+     */
+
+    public void setMessage(MediaMessage mediaMessage) {
+        this.mediaMessage = mediaMessage;
+        setMessage(mediaMessage, null);
+    }
+
+    /**
+     * Method to set MediaMessage and File
+     *
+     * @param mediaMessage
+     * @param file
+     */
+
+    public void setMessage(MediaMessage mediaMessage, File file) {
+        this.mediaMessage = mediaMessage;
+        Attachment attachment = mediaMessage.getAttachment();
+        setImageUrl(file,
+                    attachment != null ? attachment.getFileUrl() : "",
+                    attachment != null ? attachment.getFileExtension().equalsIgnoreCase("gif") : Utils.isGifFile(file));
     }
 
     /**
@@ -313,46 +531,6 @@ public class CometChatImageBubble extends MaterialCardView {
     }
 
     /**
-     * Loads a bitmap image into the ImageView from either a file or a URL.
-     *
-     * <p>
-     * This method uses Glide to load a bitmap image from the specified file or URL
-     * into the associated ImageView. It handles caching, placeholder, and
-     * visibility of the progress bar during the loading process.
-     *
-     * @param file The File object representing the image file, or null to load from
-     *             a URL.
-     * @param url  The URL of the image to be loaded, or null to load from a file.
-     */
-    private void loadBitmapIntoImageView(File file, String url) {
-        RequestBuilder<Bitmap> builder = Glide.with(context).asBitmap();
-        builder
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
-            .placeholder(0)
-            .error(R.drawable.cometchat_image_placeholder)
-            .skipMemoryCache(false)
-            .load(file != null && file.exists() ? file : url)
-            .addListener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object o, @NonNull Target<Bitmap> target, boolean b) {
-                    progressBar.setVisibility(View.GONE);
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(@NonNull Bitmap bitmap,
-                                               @NonNull Object o,
-                                               Target<Bitmap> target,
-                                               @NonNull DataSource dataSource,
-                                               boolean b) {
-                    progressBar.setVisibility(View.GONE);
-                    return false;
-                }
-            })
-            .into(shapeableImageView);
-    }
-
-    /**
      * Loads a GIF image into the ImageView from either a file or a URL.
      *
      * <p>
@@ -393,21 +571,6 @@ public class CometChatImageBubble extends MaterialCardView {
     }
 
     /**
-     * Loads an image from the specified URL into the ImageView using Glide.
-     *
-     * <p>
-     * This method delegates the loading task to
-     * {@link #loadBitmapIntoImageView(File, String)} with the provided URL and a
-     * null file parameter. It sets up the image loading process to handle the image
-     * fetched from the internet.
-     *
-     * @param url The URL of the image to be loaded.
-     */
-    private void glideLoadImageFromUrl(String url) {
-        loadBitmapIntoImageView(null, url);
-    }
-
-    /**
      * Loads a GIF image from the specified URL into the ImageView using Glide.
      *
      * <p>
@@ -422,134 +585,15 @@ public class CometChatImageBubble extends MaterialCardView {
         loadGifInToImageView(null, url);
     }
 
-    /**
-     * Sets the thumbnail of the image using a URL. The thumbnail image is loaded
-     * asynchronously using the Glide library.
-     *
-     * @param url The URL of the thumbnail image to be displayed.
-     */
-    public void setImageThumbnail(String url) {
-        if (url != null && !url.isEmpty()) {
-            glideLoadImageFromUrl(url);
-        }
-    }
-
-    public ImageView getShapeableImageView() {
-        return shapeableImageView;
-    }
-
-    public MaterialCardView getImageViewContainerCard() {
-        return imageViewContainerCard;
-    }
-
-    public ProgressBar getProgressBar() {
-        return progressBar;
-    }
-
-    public TextView getTextView() {
-        return textView;
-    }
-
-    public OnClick getOnClick() {
-        return onClick;
-    }
-
-    /**
-     * Sets the click listener for the image bubble.
-     *
-     * @param onClick The OnClick listener to be set.
-     */
-    public void setOnClick(OnClick onClick) {
-        this.onClick = onClick;
-    }
 
     // Getters for testing or direct access if needed
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
 
-    public int getBackgroundColor() {
-        return backgroundColor;
-    }
 
-    /**
-     * Sets the background color of the image view container card.
-     *
-     * @param color The color to be set as the background color.
-     */
     @Override
-    public void setBackgroundColor(@ColorInt int color) {
-        this.backgroundColor = color;
-        this.imageViewContainerCard.setCardBackgroundColor(backgroundColor);
-        super.setBackgroundColor(backgroundColor);
-    }
-
-    public int getCornerRadius() {
-        return cornerRadius;
-    }
-
-    /**
-     * Sets the corner radius for the image view container card.
-     *
-     * @param radius The radius of the corners to be set.
-     */
-    public void setCornerRadius(@Dimension int radius) {
-        this.cornerRadius = radius;
-        this.imageViewContainerCard.setRadius(cornerRadius);
-        super.setRadius(cornerRadius);
-    }
-
-    public Drawable getBackgroundDrawable() {
-        return backgroundDrawable;
-    }
-
-    /**
-     * Sets the background drawable for the image view container card.
-     *
-     * @param drawable The drawable to be set as the background.
-     */
-    @Override
-    public void setBackgroundDrawable(Drawable drawable) {
-        this.backgroundDrawable = drawable;
-        if (imageViewContainerCard != null)
-            this.imageViewContainerCard.setBackground(backgroundDrawable);
-        super.setBackgroundDrawable(backgroundDrawable);
-    }
-
-    public @ColorInt int getProgressIndeterminateTint() {
-        return progressIndeterminateTint;
-    }    @Override
     public int getStrokeWidth() {
         return strokeWidth;
     }
-
-    /**
-     * Sets the tint color for the progress bar.
-     *
-     * @param progressIndeterminateTint The color value to be set.
-     */
-    public void setProgressIndeterminateTint(int progressIndeterminateTint) {
-        this.progressIndeterminateTint = progressIndeterminateTint;
-        progressBar.getIndeterminateDrawable().setColorFilter(progressIndeterminateTint, android.graphics.PorterDuff.Mode.SRC_IN);
-    }
-
-    public int getStyle() {
-        return style;
-    }
-
-    /**
-     * Sets the style for the image bubble from a style resource.
-     *
-     * @param styleResId The style resource ID.
-     */
-    public void setStyle(@StyleRes int styleResId) {
-        this.style = styleResId;
-        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(styleResId, R.styleable.CometChatImageBubble);
-        extractAttributesAndApplyDefaults(typedArray);
-    }
-
-
 
 
 }

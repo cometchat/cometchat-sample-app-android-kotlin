@@ -1,5 +1,6 @@
 <resources>
     <string name="cometchat_app_name" translatable="true">UI KIT</string>
+    <string name="cometchat_shared_image_transition" translatable="false">shared_image_transition_%1$d</string>
     <string name="cometchat_user" translatable="true">user</string>
     <string name="cometchat_group" translatable="true">group</string>
     <string name="cometchat_conversation" translatable="true">conversation</string>
@@ -199,4 +200,10 @@
     <string name="cometchat_audio_call" translatable="true">Audio Call</string>
     <string name="cometchat_incoming_call_audio" translatable="true">audio</string>
     <string name="cometchat_incoming_call_video" translatable="true">video</string>
+    <string name="cometchat_permission_required">Permission Required</string>
+    <string name="cometchat_microphone_permission_warning">Microphone permission is required to record audio.</string>
+    <string name="cometchat_camera_permission_warning">Camera permission is required to take pictures.</string>
+    <string name="cometchat_storage_permission_warning">Storage permission is required to access files.</string>
+    <string name="cometchat_cancel_button">Cancel</string>
+    <string name="cometchat_settings_button">Settings</string>
 </resources>

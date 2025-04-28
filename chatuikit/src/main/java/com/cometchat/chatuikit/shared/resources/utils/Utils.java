@@ -11,6 +11,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -35,6 +36,7 @@ import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -43,6 +45,7 @@ import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +53,7 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
@@ -58,6 +62,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.FileProvider;
 
 import com.cometchat.chat.constants.CometChatConstants;
@@ -76,9 +81,11 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.MessageReceipt;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.databinding.CometchatCustomToastLayoutBinding;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
 import com.cometchat.chatuikit.shared.models.interactiveelements.DateTimeElement;
 import com.cometchat.chatuikit.shared.models.interactivemessage.CardMessage;
@@ -86,6 +93,8 @@ import com.cometchat.chatuikit.shared.models.interactivemessage.CustomInteractiv
 import com.cometchat.chatuikit.shared.models.interactivemessage.FormMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.InteractiveConstants;
 import com.cometchat.chatuikit.shared.models.interactivemessage.SchedulerMessage;
+import com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity;
+import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -287,6 +296,28 @@ public class Utils {
                 }
             }
         }).start();
+    }
+
+    public static void openImageViewer(View imageView, List<String> imageUrls, List<String> mimeTypes, List<String> names) {
+        Context context = imageView.getContext();
+//        Rect visibleRect = new Rect();
+//        boolean isFullyVisible = view.getGlobalVisibleRect(visibleRect);
+//        if (isFullyVisible && visibleRect.height() == view.getHeight()) {
+//            context.startActivity(CometChatImageViewerActivity.createIntent(context, imageUrl, 0),
+//                                  getActivityOption(view).toBundle());
+//        } else {
+        context.startActivity(CometChatImageViewerActivity.createIntent(
+            context,
+            imageUrls,
+            mimeTypes,
+            names
+        ));
+        ((Activity) context).overridePendingTransition(R.anim.cometchat_fade_in_fast, R.anim.cometchat_fade_out_fast);
+//        }
+    }
+
+    private static ActivityOptionsCompat getActivityOption(View targetView) {
+        return ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) targetView.getContext(), targetView, targetView.getTransitionName());
     }
 
     @ColorInt
@@ -551,6 +582,23 @@ public class Utils {
     public static List<User> userSort(List<User> userList) {
         Collections.sort(userList, (user, user1) -> user.getName().toLowerCase().compareTo(user1.getName().toLowerCase()));
         return userList;
+    }
+
+    public static void showToast(Context context, String message, @ColorInt int backgroundColor) {
+        CometchatCustomToastLayoutBinding binding = CometchatCustomToastLayoutBinding.inflate(LayoutInflater.from(context));
+        binding.tvMsg.setText(message);
+        binding.parentCard.setCardBackgroundColor(backgroundColor);
+        Toast toast = new Toast(context);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(binding.getRoot());
+        toast.show();
+    }
+
+    public static void openAppSettings(Context context) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        intent.setData(uri);
+        context.startActivity(intent);
     }
 
     public static TextView changeToolbarFont(MaterialToolbar toolbar) {
@@ -1048,7 +1096,7 @@ public class Utils {
     }
 
     public static String getAddress(Context context, double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        Geocoder geocoder = new Geocoder(context, CometChatLocalize.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null && !addresses.isEmpty()) {
@@ -1316,6 +1364,10 @@ public class Utils {
         return view.getMeasuredWidth();
     }
 
+    public static String getLastSeenTime(Context context, long timestamp) {
+        return getLastSeenTime(context, timestamp, null);
+    }
+
     /**
      * Returns a formatted string indicating when the user was last seen.
      *
@@ -1324,7 +1376,7 @@ public class Utils {
      * @return A string describing when the user was last seen (e.g., "last seen
      * today at 10:10 am").
      */
-    public static String getLastSeenTime(Context context, long timestamp) {
+    public static String getLastSeenTime(Context context, long timestamp, DateTimeFormatterCallback dateTimeFormatterCallback) {
         if (String.valueOf(timestamp).length() == 10) {
             // Convert seconds to milliseconds
             timestamp *= 1000;
@@ -1340,10 +1392,22 @@ public class Utils {
 
         // Check if the timestamp is within the last hour
         if (diffInMinutes == 0) {
+            if (dateTimeFormatterCallback != null) {
+                String minute = dateTimeFormatterCallback.minute(timestamp);
+                if (minute != null) {
+                    return minute;
+                }
+            }
             return context.getResources().getString(R.string.cometchat_last_seen) + " " + context
                 .getResources()
                 .getQuantityString(R.plurals.cometchat_last_seen_minutes_ago, 1, 1);
         } else if (diffInMinutes < 60) {
+            if (dateTimeFormatterCallback != null) {
+                String minutes = dateTimeFormatterCallback.minutes(diffInMinutes, timestamp);
+                if (minutes != null) {
+                    return minutes;
+                }
+            }
             return context.getResources().getString(R.string.cometchat_last_seen) + " " + context
                 .getResources()
                 .getQuantityString(R.plurals.cometchat_last_seen_minutes_ago, (int) diffInMinutes, (int) diffInMinutes);
@@ -1351,9 +1415,31 @@ public class Utils {
 
         // Check if the timestamp is within the last 24 hours
         if (diffInHours < 24) {
+            if (diffInHours < 2) {
+                if (dateTimeFormatterCallback != null) {
+                    String hour = dateTimeFormatterCallback.hour(timestamp);
+                    if (hour != null) {
+                        return hour;
+                    }
+                }
+            } else {
+                if (dateTimeFormatterCallback != null) {
+                    String hours = dateTimeFormatterCallback.hours(diffInHours, timestamp);
+                    if (hours != null) {
+                        return hours;
+                    }
+                }
+            }
             return context.getResources().getString(R.string.cometchat_last_seen) + " " + context
                 .getResources()
                 .getQuantityString(R.plurals.cometchat_last_seen_hours_ago, (int) diffInHours, (int) diffInHours);
+        }
+
+        if (dateTimeFormatterCallback != null) {
+            String otherDays = dateTimeFormatterCallback.otherDays(timestamp);
+            if (otherDays != null) {
+                return otherDays;
+            }
         }
 
         // Determine if the timestamp is within the current year
@@ -1371,14 +1457,18 @@ public class Utils {
         // Append time to the date pattern
         datePattern += " 'at' hh:mm a";
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern, CometChatLocalize.getDefault());
         return context.getResources().getString(R.string.cometchat_last_seen) + " " + dateFormat.format(new Date(timestamp));
     }
 
     public static String getDateTimeMessageInformation(long milliseconds) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy, h:mm a", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy, h:mm a", CometChatLocalize.getDefault());
         Date date = new Date(milliseconds);
         return sdf.format(date);
+    }
+
+    public static String callLogsTimeStamp(long timestamp, @Nullable SimpleDateFormat dateFormat) {
+        return callLogsTimeStamp(timestamp, dateFormat, null);
     }
 
     /**
@@ -1388,12 +1478,12 @@ public class Utils {
      * PM". - If the year is not the current year, the format will be: "8 August
      * 2022, 8:14 PM".
      *
-     * @param timestamp   The timestamp.
-     * @param datePattern The desired date format pattern. If null, the default format is
-     *                    applied.
+     * @param timestamp  The timestamp.
+     * @param dateFormat The desired date format pattern. If null, the default format is
+     *                   applied.
      * @return A formatted date string.
      */
-    public static String callLogsTimeStamp(long timestamp, @Nullable String datePattern) {
+    public static String callLogsTimeStamp(long timestamp, @Nullable SimpleDateFormat dateFormat, DateTimeFormatterCallback dateTimeFormatter) {
         if (String.valueOf(timestamp).length() == 10) {
             // Convert seconds to milliseconds
             timestamp *= 1000;
@@ -1408,17 +1498,23 @@ public class Utils {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         int inputYear = calendar.get(Calendar.YEAR);
 
-        // Apply default formats if datePattern is null
-        if (datePattern == null) {
-            if (inputYear == currentYear) {
-                datePattern = "d MMMM, h:mm a"; // "8 August, 8:14 PM"
-            } else {
-                datePattern = "d MMMM yyyy, h:mm a"; // "8 August 2022, 8:14 PM"
+        if (dateTimeFormatter != null) {
+            String dateTime = dateTimeFormatter.otherDays(timestamp);
+            if (dateTime != null) {
+                return dateTime;
             }
         }
 
-        // Create a SimpleDateFormat with the provided pattern or the default one
-        SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
+        // Apply default formats if dateFormat is null
+        if (dateFormat == null) {
+            if (inputYear == currentYear) {
+                dateFormat = new SimpleDateFormat("d MMMM, h:mm a", CometChatLocalize.getDefault());
+                // "8 August, 8:14 PM"
+            } else {
+                dateFormat = new SimpleDateFormat("d MMMM yyyy, h:mm a", CometChatLocalize.getDefault()); // "8 August 2022, 8:14 PM"
+            }
+        }
+
         return dateFormat.format(date);
     }
 }

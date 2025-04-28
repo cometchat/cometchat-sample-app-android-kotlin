@@ -2,6 +2,7 @@ package com.cometchat.chatuikit.shared.cometchatuikit;
 
 import com.cometchat.chatuikit.ai.AIExtensionDataSource;
 import com.cometchat.chatuikit.shared.framework.ExtensionsDataSource;
+import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class UIKitSettings {
     private final String overrideClientHost;
     private final List<AIExtensionDataSource> aiFeatures;
     private final List<ExtensionsDataSource> extensions;
+    private final DateTimeFormatterCallback dateTimeFormatterCallback;
 
     /**
      * Constructs a new instance of `UIKitSettings` using the builder pattern.
@@ -37,6 +39,7 @@ public class UIKitSettings {
         this.overrideClientHost = builder.overrideClientHost;
         this.aiFeatures = builder.aiFeatures;
         this.extensions = builder.extensions;
+        this.dateTimeFormatterCallback = builder.dateTimeFormatterCallback;
     }
 
     /**
@@ -110,6 +113,10 @@ public class UIKitSettings {
         return extensions;
     }
 
+    public DateTimeFormatterCallback getDateTimeFormatterCallback() {
+        return dateTimeFormatterCallback;
+    }
+
     /**
      * Builder class for constructing `UIKitSettings` instances.
      */
@@ -124,6 +131,7 @@ public class UIKitSettings {
         private String overrideClientHost;
         private List<AIExtensionDataSource> aiFeatures;
         private List<ExtensionsDataSource> extensions;
+        private DateTimeFormatterCallback dateTimeFormatterCallback;
 
         /**
          * Constructs a new instance of `UIKitSettingsBuilder`.
@@ -246,6 +254,11 @@ public class UIKitSettings {
 
         public UIKitSettingsBuilder setExtensions(List<ExtensionsDataSource> extensions) {
             this.extensions = extensions;
+            return this;
+        }
+
+        public UIKitSettingsBuilder setDateTimeFormatterCallback(DateTimeFormatterCallback dateTimeFormatterCallback) {
+            this.dateTimeFormatterCallback = dateTimeFormatterCallback;
             return this;
         }
     }

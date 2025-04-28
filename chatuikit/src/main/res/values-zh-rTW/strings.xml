@@ -201,4 +201,10 @@
     <string name="cometchat_audio_call">音訊通話</string>
     <string name="cometchat_incoming_call_audio">音訊</string>
     <string name="cometchat_incoming_call_video">視訊</string>
+    <string name="cometchat_permission_required">需要權限</string>
+    <string name="cometchat_microphone_permission_warning">錄製音訊需要麥克風權限。</string>
+    <string name="cometchat_camera_permission_warning">拍照需要相機權限。</string>
+    <string name="cometchat_storage_permission_warning">訪問文件需要存儲權限。</string>
+    <string name="cometchat_cancel_button">取消</string>
+    <string name="cometchat_settings_button">設定</string>
 </resources>

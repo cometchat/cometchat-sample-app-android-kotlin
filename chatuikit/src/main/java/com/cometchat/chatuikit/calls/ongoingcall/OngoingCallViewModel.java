@@ -28,17 +28,16 @@ import java.util.ArrayList;
 
 public class OngoingCallViewModel extends ViewModel {
     private static final String TAG = OngoingCallViewModel.class.getSimpleName();
-    private String LISTENER_ID;
-    private String sessionId;
-    private String callType;
     private final MutableLiveData<Boolean> hideProgressBar;
     private final MutableLiveData<Boolean> endCall;
     private final MutableLiveData<CometChatException> exception;
+    private final MutableLiveData<Boolean> isJoined;
+    private String LISTENER_ID;
+    private String sessionId;
+    private String callType;
     private CometChatCalls.CallSettingsBuilder callSettingsBuilder;
     private UIKitConstants.CallWorkFlow callWorkFlow = UIKitConstants.CallWorkFlow.DEFAULT;
     private CallSettings callSettings;
-
-    private MutableLiveData<Boolean> isJoined;
 
     public OngoingCallViewModel() {
         endCall = new MutableLiveData<>();
@@ -88,6 +87,11 @@ public class OngoingCallViewModel extends ViewModel {
             }
 
             @Override
+            public void onSessionTimeout() {
+                exitScreen();
+            }
+
+            @Override
             public void onUserJoined(RTCUser rtcUser) {
                 if (rtcUser.getUid().equals(CometChat.getLoggedInUser().getUid())) {
                     isJoined.postValue(true);
@@ -125,6 +129,31 @@ public class OngoingCallViewModel extends ViewModel {
         });
     }
 
+    public void exitScreen() {
+        endCall.postValue(Boolean.TRUE);
+    }
+
+    public void endCall() {
+        CometChat.endCall(sessionId, new CometChat.CallbackListener<Call>() {
+            @Override
+            public void onSuccess(@Nullable Call call) {
+                if (call != null) {
+                    CometChatUIKitHelper.onCallEnded(call);
+                }
+                CometChatCalls.endSession();
+                CometChat.clearActiveCall();
+                exitScreen();
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                exitScreen();
+                exception.setValue(e);
+                CometChatLogger.e(TAG, e.toString());
+            }
+        });
+    }
+
     public void removeListener() {
         CometChatCalls.removeCallsEventListeners(LISTENER_ID);
     }
@@ -145,10 +174,6 @@ public class OngoingCallViewModel extends ViewModel {
         if (builder != null) {
             this.callSettingsBuilder = builder;
         }
-    }
-
-    public void exitScreen() {
-        endCall.postValue(Boolean.TRUE);
     }
 
     public void startCall(RelativeLayout callingViewContainer) {
@@ -181,26 +206,6 @@ public class OngoingCallViewModel extends ViewModel {
 
             @Override
             public void onError(com.cometchat.calls.exceptions.CometChatException e) {
-                CometChatLogger.e(TAG, e.toString());
-            }
-        });
-    }
-
-    public void endCall() {
-        CometChat.endCall(sessionId, new CometChat.CallbackListener<Call>() {
-            @Override
-            public void onSuccess(@Nullable Call call) {
-                if (call != null) {
-                    CometChatUIKitHelper.onCallEnded(call);
-                    CometChatCalls.endSession();
-                    exitScreen();
-                }
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                exitScreen();
-                exception.setValue(e);
                 CometChatLogger.e(TAG, e.toString());
             }
         });

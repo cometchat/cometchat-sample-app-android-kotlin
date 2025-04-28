@@ -50,6 +50,7 @@ public class CometChatVoIPConnectionService extends ConnectionService {
         if (timeoutHandler != null) {
             timeoutHandler.removeCallbacks(timeoutRunnable);
         }
+        CometChatVoIPUtils.isCallOngoing = false;
     }
 
 
