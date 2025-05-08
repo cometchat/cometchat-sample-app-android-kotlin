@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+    <string name="cometchat_shared_image_transition" translatable="false">paylaşılan_resim_geçişi_%1$d</string>
+    <string name="cometchat_user" translatable="true">kullanıcı</string>
+    <string name="cometchat_group" translatable="true">grup</string>
+    <string name="cometchat_conversation" translatable="true">sohbet</string>
+    <string name="cometchat_reply_lowercase" translatable="true">yanıtla</string>
+    <string name="cometchat_call" translatable="true">Çağrı</string>
+    <string name="cometchat_sticker_lowercase" translatable="true">sticker</string>
+    <string name="cometchat_message" translatable="true">Mesaj yaz</string>
+    <string name="cometchat_start_conv_hint" translatable="true">Sohbete başlamak için dokunun</string>
+    <string name="cometchat_admin" translatable="true">Yönetici</string>
+    <string name="cometchat_moderator" translatable="true">Moderator</string>
+    <string name="cometchat_member" translatable="true">Üye</string>
+    <string name="cometchat_join" translatable="true">Katıl</string>
+    <string name="cometchat_camera_perm" translatable="true">Lütfen uygulama ayarlarından kamera iznini verin</string>
+    <string name="cometchat_storage_perm" translatable="true">Lütfen uygulama ayarlarından depolama iznini verin</string>
+    <string name="cometchat_file_not_exist" translatable="true">Dosya mevcut değil</string>
+    <string name="cometchat_ended" translatable="true">Sonlandırıldı</string>
+    <string name="cometchat_outgoing" translatable="true">Giden</string>
+    <string name="cometchat_incoming" translatable="true">Gelen</string>
+    <string name="cometchat_missed_call" translatable="true">Kaçırıldı</string>
+    <string name="cometchat_cancel_call" translatable="true">İptal Edildi</string>
+    <string name="cometchat_rejected_call" translatable="true">Reddedildi</string>
+    <string name="cometchat_busy_call" translatable="true">Meşgul</string>
+    <string name="cometchat_you" translatable="true">Sen</string>
+    <string name="cometchat_edit" translatable="true">Düzenle</string>
+    <string name="cometchat_delete" translatable="true">Sil</string>
+    <string name="cometchat_share" translatable="true">Paylaş</string>
+    <string name="cometchat_copy" translatable="true">Kopyala</string>
+    <string name="cometchat_translate" translatable="true">Çevir</string>
+    <string name="cometchat_message_privately" translatable="true">Özel Mesaj Gönder</string>
+    <string name="cometchat_reply_uppercase" translatable="true">YANITLA</string>
+    <string name="cometchat_info" translatable="true">"Bilgi"</string>
+    <string name="cometchat_online" translatable="true">Çevrimiçi</string>
+    <string name="cometchat_offline" translatable="true">Çevrimdışı</string>
+    <string name="cometchat_attach_image" translatable="true">Resim Ekle</string>
+    <string name="cometchat_attach_video" translatable="true">Video Ekle</string>
+    <string name="cometchat_poll" translatable="true">Anket</string>
+    <string name="cometchat_camera" translatable="true">Kamera</string>
+    <string name="cometchat_yes" translatable="true">Evet</string>
+    <string name="cometchat_shared_sticker" translatable="true">Sticker Paylaşıldı</string>
+    <string name="cometchat_attach_audio" translatable="true">Ses Ekle</string>
+    <string name="cometchat_attach_document" translatable="true">Belge Ekle</string>
+    <string name="cometchat_no" translatable="true">Hayır</string>
+    <string name="cometchat_question" translatable="true">Soru</string>
+    <string name="cometchat_collaborative_whiteboard" translatable="true">İşbirlikçi Beyaz Tahta</string>
+    <string name="cometchat_collaborative_doc" translatable="true">İşbirlikçi Belge</string>
+    <string name="cometchat_yesterday" translatable="true">Dün</string>
+    <string name="cometchat_ban" translatable="true">Yasakla</string>
+    <string name="cometchat_document" translatable="true">Belge</string>
+    <string name="cometchat_polls" translatable="true">Anketler</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">STICKER</string>
+    <string name="cometchat_custom_message_whiteboard" translatable="true">Beyaz Tahta</string>
+    <string name="cometchat_error" translatable="true">Hata</string>
+    <string name="cometchat_added" translatable="true">eklendi</string>
+    <string name="cometchat_kicked_by" translatable="true">atıldı</string>
+    <string name="cometchat_left" translatable="true">ayrıldı</string>
+    <string name="cometchat_joined" translatable="true">katıldı</string>
+    <string name="cometchat_unban" translatable="true">Yasak Kaldır</string>
+    <string name="cometchat_made" translatable="true">yapıldı</string>
+    <string name="cometchat_participant" translatable="true">Katılımcı</string>
+    <string name="cometchat_translation_error" translatable="true">Seçilen dil, orijinal mesajın diliyle benzer.</string>
+    <string name="cometchat_group_call" translatable="true">Grup Çağrısı</string>
+    <string name="cometchat_updating" translatable="true">Güncelleniyor</string>
+    <string name="cometchat_chats" translatable="true">Sohbetler</string>
+    <string name="cometchat_downloading" translatable="true">İndiriliyor</string>
+    <string name="cometchat_today" translatable="true">Bugün</string>
+    <string name="cometchat_replies" translatable="true">Yanıtlar</string>
+    <string name="cometchat_new_message" translatable="true">yeni mesaj</string>
+    <string name="cometchat_new_messages" translatable="true">yeni mesajlar</string>
+    <string name="cometchat_channel_description" translatable="true">Kanal Açıklaması</string>
+    <string name="cometchat_action_item" translatable="true">aksiyon_ögesi</string>
+    <string name="cometchat_try_again" translatable="true">Tekrar deneyin</string>
+    <string name="cometchat_something_went_wrong" translatable="true">Bir şeyler yanlış gitti.</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Sahipliği Devret</string>
+    <string name="cometchat_add_members" translatable="true">Üye Ekle</string>
+    <string name="cometchat_owner" translatable="true">Sahip</string>
+    <string name="cometchat_banned" translatable="true">Yasaklı</string>
+    <string name="cometchat_calling" translatable="true">çağrılıyor</string>
+    <string name="cometchat_accepted" translatable="true">kabul edildi</string>
+    <string name="cometchat_unanswered" translatable="true">cevapsız</string>
+    <string name="cometchat_message_receipt" translatable="true">Mesaj Alındı</string>
+    <string name="cometchat_file_download_failed" translatable="true">Dosya indirme başarısız oldu.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Yanıt öner</string>
+    <string name="cometchat_enter_a_text" translatable="true">Metin girin</string>
+    <string name="cometchat_form_completion_message" translatable="true">Formu doldurduğunuz için teşekkür ederiz.</string>
+    <string name="cometchat_conversation_summary" translatable="true">Sohbet Özeti</string>
+    <string name="cometchat_generate_summary" translatable="true">Özet oluştur</string>
+    <string name="cometchat_more_times" translatable="true">Daha fazla zaman</string>
+    <string name="cometchat_select_a_day" translatable="true">Bir gün seçin</string>
+    <string name="cometchat_meeting_scheduled" translatable="true">Toplantınız planlandı.</string>
+    <string name="cometchat_meet_with" translatable="true">Buluşma</string>
+    <string name="cometchat_min_meeting" translatable="true">dakika toplantısı</string>
+    <string name="cometchat_select_a_time" translatable="true">Bir zaman seçin</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">Bu tarih için zaman dilimi mevcut değil. Lütfen başka bir tarih deneyin.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Yeni zaman dilimi ayarlayın</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Bir şeyler yanlış gitti. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Zaman dilimi artık mevcut değil. Lütfen başka birini seçin.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Hızlı zaman dilimi mevcut değil.</string>
+    <string name="cometchat_tag_item" translatable="true">Etiket Öğesi</string>
+    <string name="cometchat_you_can_mention_up_to" translatable="true">En fazla</string>
+    <string name="cometchat_time_at_a_time" translatable="true">kez aynı anda</string>
+    <string name="cometchat_reply" translatable="true">Yanıtla</string>
+    <string name="cometchat_all" translatable="true">Hepsi</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Kaldırmak için dokunun</string>
+    <string name="cometchat_avatar" translatable="true">CometChat Avatarı</string>
+    <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Henüz Sohbet Yok</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Yeni bir sohbet başlatın veya diğerlerini davet ederek\nsohbeti başlatın.</string>
+    <string name="cometchat_error_conversations_title" translatable="true">Hups!</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">Bir şeyler yanlış gitti.\nLütfen tekrar deneyin.</string>
+    <string name="cometchat_typing" translatable="true">Yazıyor…</string>
+    <string name="cometchat_is_typing" translatable="true">yazıyor…</string>
+    <string name="cometchat_message_image" translatable="true">Fotoğraf</string>
+    <string name="cometchat_message_video" translatable="true">Video</string>
+    <string name="cometchat_message_audio" translatable="true">Ses</string>
+    <string name="cometchat_message_sticker" translatable="true">Çıkartma</string>
+    <string name="cometchat_message_gif" translatable="true">GIF</string>
+    <string name="cometchat_message_poll" translatable="true">Anket</string>
+    <string name="cometchat_message_document" translatable="true">Belge</string>
+    <string name="cometchat_message_location" translatable="true">Konum</string>
+    <string name="cometchat_message_collaborative_whiteboard" translatable="true">Ortak Beyaz Tahta</string>
+    <string name="cometchat_message_collaborative_document" translatable="true">Ortak Belge</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Bu sohbeti silmek istiyor musunuz?</string>
+    <string name="cometchat_delete_message_title" translatable="true">Bu mesajı silmek istiyor musunuz?</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Bu sohbeti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="cometchat_delete_message_subtitle" translatable="true">Bu mesajı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="cometchat_cancel" translatable="true">İptal</string>
+    <string name="cometchat_reaction_list_error" translatable="true">Bir şeyler yanlış gitti.\nLütfen tekrar deneyin.</string>
+    <string name="cometchat_text_translated" translatable="true">Metin Çevrildi</string>
+    <string name="cometchat_composer_place_holder_text" translatable="true">Mesajınızı yazın…</string>
+    <string name="cometchat_last_seen" translatable="true">Son Görülme</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Sohbet silinemedi</string>
+    <string name="cometchat_message_info" translatable="true">Mesaj Bilgisi</string>
+    <string name="cometchat_read" translatable="true">Okundu</string>
+    <string name="cometchat_deliver" translatable="true">Teslim Edildi</string>
+    <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
+    <string name="cometchat_message_delete_error" translatable="true">Mesaj silinemedi</string>
+    <string name="cometchat_no_stickers_available" translatable="true">Hiç Çıkartma Yok</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">Henüz çıkartmanız yok.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Bir şeyler yanlış gitti.\nLütfen tekrar deneyin.</string>
+    <string name="cometchat_retry" translatable="true">Yeniden Dene</string>
+    <string name="cometchat_group_members_empty_title" translatable="true">Hiç Üye Yok</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Gruba üye ekleyin ve onları burada görün.</string>
+    <string name="cometchat_remove" translatable="true">Kaldır</string>
+    <string name="cometchat_scope_change" translatable="true">Rol Değiştirme</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Grup izinlerini ve sorumluluklarını yönetmek için rol değiştirebilirsiniz.</string>
+    <string name="cometchat_save" translatable="true">Kaydet</string>
+    <string name="cometchat_users" translatable="true">Kullanıcılar</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">Hiç Kullanıcı Yok</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Sohbet başlatmak için kişileri ekleyin ve onları burada görün.</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">Hups!</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Bir şeyler yanlış gitti. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_search" translatable="true">Ara</string>
+    <string name="cometchat_groups" translatable="true">Gruplar</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">Hiç Grup Bulunamadı</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Gruplar oluşturun veya katılın, burada listelensin ve birlikte çalışmaya başlayın.</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">Hups!</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Bir şeyler yanlış gitti. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_members" translatable="true">Üyeler</string>
+    <string name="cometchat_call_logs_title" translatable="true">Aramalar</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Henüz Arama Kaydı Yok</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Arama yapmak veya almak için arama geçmişinizi burada görün.</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">Hups!</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">Bir şeyler yanlış gitti. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_this_message_deleted" translatable="true">Bu mesaj silindi</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">Bu mesaj türü desteklenmiyor</string>
+    <string name="cometchat_message_form" translatable="true">Form</string>
+    <string name="cometchat_message_card" translatable="true">Kart</string>
+    <string name="cometchat_message_scheduler" translatable="true">Zamanlayıcı</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Bir kerede en fazla 10 kişiyi etiketleyebilirsiniz</string>
+    <string name="cometchat_ask_question" translatable="true">Soru sor</string>
+    <string name="cometchat_options" translatable="true">Seçenekler</string>
+    <string name="cometchat_send" translatable="true">Gönder</string>
+    <string name="cometchat_submit" translatable="true">Gönder</string>
+    <string name="cometchat_add" translatable="true">Ekle</string>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">1 dakika önce</string>
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true">
+        <item quantity="one" translatable="true">%d dakika önce</item>
+        <item quantity="other" translatable="true">%d dakika önce</item>
+    </plurals>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true">
+        <item quantity="one" translatable="true">%d saat önce</item>
+        <item quantity="other" translatable="true">%d saat önce</item>
+    </plurals>
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s bir grup görüşmesi başlattı</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s bir grup görüşmesi başlattı</string>
+    <string name="cometchat_edited" translatable="true">Düzenlendi</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Kabul Et</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Reddet</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Gelen %s Araması</string>
+    <string name="cometchat_kick" translatable="true">Atmak</string>
+    <string name="cometchat_open_document_to_edit_content_together" translatable="true">İçeriği birlikte düzenlemek için belgeyi açın</string>
+    <string name="cometchat_open_document" translatable="true">Belgeyi Aç</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together" translatable="true">İçeriği birlikte düzenlemek için beyaz tahtayı açın</string>
+    <string name="cometchat_open_whiteboard" translatable="true">Beyaz Tahtayı Aç</string>
+    <string name="cometchat_video_call" translatable="true">Video Araması</string>
+    <string name="cometchat_audio_call" translatable="true">Sesli Arama</string>
+    <string name="cometchat_incoming_call_audio" translatable="true">sesli</string>
+    <string name="cometchat_incoming_call_video" translatable="true">video</string>
+    <string name="cometchat_permission_required">İzin Gerekiyor</string>
+    <string name="cometchat_microphone_permission_warning">Ses kaydetmek için mikrofon izni gereklidir.</string>
+    <string name="cometchat_camera_permission_warning">Fotoğraf çekmek için kamera izni gereklidir.</string>
+    <string name="cometchat_storage_permission_warning">Dosyalara erişmek için depolama izni gereklidir.</string>
+    <string name="cometchat_cancel_button">İptal</string>
+    <string name="cometchat_settings_button">Ayarlar</string>
+
+</resources>

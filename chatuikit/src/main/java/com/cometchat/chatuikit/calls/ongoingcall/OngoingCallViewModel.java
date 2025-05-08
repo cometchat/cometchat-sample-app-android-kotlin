@@ -88,6 +88,8 @@ public class OngoingCallViewModel extends ViewModel {
 
             @Override
             public void onSessionTimeout() {
+                CallingExtension.setIsActiveMeeting(false);
+                CometChatCalls.endSession();
                 exitScreen();
             }
 

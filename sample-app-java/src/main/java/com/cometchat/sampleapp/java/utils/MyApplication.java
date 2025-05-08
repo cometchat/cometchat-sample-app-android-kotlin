@@ -267,8 +267,8 @@ public class MyApplication extends Application {
             snackbar = null;
             tempCall = null;
             CallingExtension.setActiveCall(null);
-            pauseSound();
         }
+        pauseSound();
     }
 
     /**

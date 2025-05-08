@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">CometChat Team Messenger</string>
+    <string name="app_bottom_nav_chats" translatable="true">Gesprekken</string>
+    <string name="app_bottom_nav_calls" translatable="true">Oproepen</string>
+    <string name="app_bottom_nav_users" translatable="true">Gebruikers</string>
+    <string name="app_bottom_nav_groups" translatable="true">Groepen</string>
+
+    <string name="app_login" translatable="true">Inloggen</string>
+    <string name="app_continue_with_google" translatable="true">Doorgaan met Google</string>
+    <string name="app_no_banned_members" translatable="true">Geen verbannen leden</string>
+    <string name="app_banned_few_members_to_show_them_here" translatable="true">Weinig verbannen leden om hier weer te geven</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Inloggen met Google mislukt, geen account gevonden.</string>
+    <string name="app_google_sign_in_failed" translatable="true">"Google inloggen mislukt: "</string>
+    <string name="app_group" translatable="true">groep</string>
+    <string name="app_btn_leave" translatable="true">Verlaten</string>
+    <string name="app_leave_this_group" translatable="true">Deze groep verlaten?</string>
+    <string name="app_leave_this_group_description" translatable="true">Weet je zeker dat je deze groep wilt verlaten? Je ontvangt geen berichten meer van deze chat.</string>
+    <string name="app_btn_cancel" translatable="true">Annuleren</string>
+    <string name="app_transfer_ownership_description" translatable="true">Weet je zeker dat je het eigendom wilt overdragen? Dit kan niet ongedaan worden gemaakt en de nieuwe eigenaar krijgt de volledige controle.</string>
+    <string name="app_transfer_ownership_information" translatable="true">Je moet het eigendom van deze groep overdragen aan een ander groepslid voordat je deze groep verlaat.</string>
+    <string name="app_btn_continue" translatable="true">Doorgaan</string>
+    <string name="app_delete_and_exit" translatable="true">Verwijderen en verlaten?</string>
+    <string name="app_delete_and_exit_action" translatable="true">Verwijderen en verlaten</string>
+    <string name="app_delete_and_exit_description" translatable="true">Weet je zeker dat je deze chat wilt verwijderen en de groep wilt verlaten? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="app_btn_delete" translatable="true">Verwijderen</string>
+    <string name="app_add" translatable="true">Toevoegen</string>
+    <string name="app_member" translatable="true">Lid</string>
+    <string name="app_members" translatable="true">Leden</string>
+    <string name="app_base_message" translatable="true">baseMessage</string>
+    <string name="app_user" translatable="true">gebruiker</string>
+    <string name="app_session_id" translatable="true">sessionId</string>
+    <string name="app_call_type" translatable="true">callType</string>
+    <string name="app_not_logged_in" translatable="true">Je bent niet ingelogd. Log in en probeer het opnieuw.</string>
+    <string name="app_transfer_ownership" translatable="true">Eigendom overdragen</string>
+
+    <string name="app_call_details" translatable="true">Oproepdetails</string>
+    <string name="app_call_details_history" translatable="true">Geschiedenis</string>
+    <string name="app_call_details_participants" translatable="true">Deelnemers</string>
+    <string name="app_call_details_recordings" translatable="true">Opnames</string>
+    <string name="app_call_outgoing" translatable="true">Uitgaand</string>
+    <string name="app_call_missed" translatable="true">Gemist</string>
+    <string name="app_call_incoming" translatable="true">Inkomend</string>
+    <string name="app_no_recordings_found" translatable="true">Geen opnames gevonden</string>
+
+    <string name="app_accept" translatable="true">Accepteren</string>
+    <string name="app_decline" translatable="true">Weigeren</string>
+    <string name="app_incoming_s_call" translatable="true">Inkomende %s Oproep</string>
+    <string name="app_user_info" translatable="true">Gebruikersinfo</string>
+    <string name="app_voice" translatable="true">Stem</string>
+    <string name="app_video" translatable="true">Video</string>
+
+    <string name="app_delete" translatable="true">Verwijder Chat</string>
+    <string name="app_delete_chat_title" translatable="true">Deze chat verwijderen?</string>
+    <string name="app_delete_chat_subtitle" translatable="true">Weet je zeker dat je deze chat wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="app_delete_chat_positive_button" translatable="true">Verwijderen</string>
+    <string name="app_delete_chat_negative_button" translatable="true">Annuleren</string>
+    <string name="app_delete_chat_error" translatable="true">Verwijderen mislukt</string>
+    <string name="app_delete_chat_success" translatable="true">Chat verwijderd</string>
+
+    <string name="app_block" translatable="true">Blokkeren</string>
+    <string name="app_block_user_title" translatable="true">Deze contactpersoon blokkeren?</string>
+    <string name="app_block_user_subtitle" translatable="true">Weet je zeker dat je deze contactpersoon wilt blokkeren? Je ontvangt geen berichten meer van hen.</string>
+    <string name="app_block_user_positive_button" translatable="true">Blokkeren</string>
+    <string name="app_block_user_negative_button" translatable="true">Annuleren</string>
+    <string name="app_block_user_error" translatable="true">Blokkeren mislukt</string>
+    <string name="app_block_user_success" translatable="true">Gebruiker geblokkeerd</string>
+
+    <string name="app_unblock" translatable="true">Blokkade opheffen</string>
+    <string name="app_unblock_user_title" translatable="true">Deze contactpersoon deblokkeren?</string>
+    <string name="app_unblock_user_subtitle" translatable="true">Weet je zeker dat je deze contactpersoon wilt deblokkeren?</string>
+    <string name="app_unblock_user_positive_button" translatable="true">Deblokkeren</string>
+    <string name="app_unblock_user_negative_button" translatable="true">Annuleren</string>
+    <string name="app_unblock_user_error" translatable="true">Deblokkeren mislukt</string>
+    <string name="app_unblock_user_success" translatable="true">Gebruiker deblokkeren</string>
+    <string name="app_message_id" translatable="true">message_id</string>
+    <string name="app_choose_sample_user" translatable="true">Kies een voorbeeldgebruiker</string>
+    <string name="app_continue" translatable="true">Doorgaan</string>
+    <string name="app_or" translatable="true">Of</string>
+    <string name="app_change" translatable="true">Wijzig</string>
+    <string name="app_app_credentials" translatable="true">App-inloggegevens</string>
+    <string name="app_enter_uid" translatable="true">Voer UID in</string>
+    <string name="app_enter_your_uid" translatable="true">Voer je UID in</string>
+    <string name="app_error_invalid_user_or_uid_login" translatable="true">Kies een gebruiker of voer de juiste UID in</string>
+    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
+    <string name="app_cred_id" translatable="true">App-ID</string>
+    <string name="app_cred_region" translatable="true">App-regio</string>
+    <string name="app_cred_auth" translatable="true">App-authenticatiesleutel</string>
+    <string name="app_region" translatable="true">Regio</string>
+    <string name="app_region_us" translatable="true">VS</string>
+    <string name="app_region_eu" translatable="true">EU</string>
+    <string name="app_region_in" translatable="true">IN</string>
+    <string name="app_app_id" translatable="true">App-ID</string>
+    <string name="app_app_id_hint" translatable="true">Voer de app-ID in</string>
+    <string name="app_auth_key" translatable="true">Authenticatiesleutel</string>
+    <string name="app_auth_key_hint" translatable="true">Voer de authenticatiesleutel in</string>
+    <string name="app_please_select_app_region" translatable="true">Selecteer de app-regio</string>
+    <string name="app_invalid_app_id" translatable="true">Voer een geldige app-ID in</string>
+    <string name="app_invalid_auth_token" translatable="true">Voer een geldige authenticatietoken in</string>
+    <string name="app_new_group" translatable="true">Nieuwe Groep</string>
+    <string name="app_group_type" translatable="true">Type</string>
+    <string name="app_group_name" translatable="true">Naam</string>
+    <string name="app_group_hint_name" translatable="true">Voer de groepsnaam in</string>
+    <string name="app_password" translatable="true">Wachtwoord</string>
+    <string name="app_hint_enter_the_password" translatable="true">Voer het wachtwoord in</string>
+    <string name="app_btn_create_group" translatable="true">Groep Aanmaken</string>
+    <string name="app_create_conversation" translatable="true">Gesprek Aanmaken</string>
+    <string name="app_logout" translatable="true">Uitloggen</string>
+    <string name="app_group_info" translatable="true">Groep Informatie</string>
+    <string name="app_no_longer_part_of_this_group" translatable="true">Je bent geen lid meer van deze groep</string>
+    <string name="app_view_members" translatable="true">Bekijk Leden</string>
+    <string name="app_add_members" translatable="true">Voeg Leden Toe</string>
+    <string name="app_banned_members" translatable="true">Verbannen Leden</string>
+    <string name="app_view_members_chip" translatable="true">Bekijk \nLeden</string>
+    <string name="app_add_members_chip" translatable="true">Voeg \nLeden Toe</string>
+    <string name="app_banned_members_chip" translatable="true">Verbannen \nLeden</string>
+    <string name="app_leave" translatable="true">Verlaten</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">Je kunt geen bericht sturen naar deze groep omdat je geen lid meer bent.</string>
+    <string name="app_unblock_user" translatable="true">Deblokkeer Gebruiker</string>
+    <string name="app_description" translatable="true">Beschrijving</string>
+    <string name="app_steps_to_reproduce" translatable="true">Stappen om te reproduceren</string>
+    <string name="app_join_group" translatable="true">Groep Laten Betreden</string>
+    <string name="app_type" translatable="true">Type</string>
+    <string name="app_enter_the_password" translatable="true">Voer het Wachtwoord in</string>
+    <string name="app_something_went_wrong_please_try_again" translatable="true">Er ging iets mis. Probeer het opnieuw.</string>
+    <string name="app_retry" translatable="true">Opnieuw Proberen</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">Het lijkt erop dat er iets mis is gegaan.\n Probeer het opnieuw.</string>
+    <string name="app_type_public" translatable="true">Openbaar</string>
+    <string name="app_transfer_ownership_text" translatable="true">Eigendom Overdragen</string>
+    <string name="app_type_private" translatable="true">Privé</string>
+    <string name="app_type_protected" translatable="true">Beveiligd</string>
+    <string name="app_thread_title" translatable="true">Thread</string>
+    <string name="app_error_conversations_title" translatable="true">Oeps!</string>
+    <string name="app_group_members_empty_title" translatable="true">Geen Leden Beschikbaar</string>
+    <string name="app_group_member_empty_subtitle" translatable="true">Voeg leden toe aan de groep en zie ze hier verschijnen.</string>
+    <string name="app_search" translatable="true">Zoeken</string>
+    <string name="app_new_chat" translatable="true">Nieuw Gesprek</string>
+    <string name="app_report" translatable="true">Rapport Beginnen</string>
+    <string name="app_has_blocked_you" translatable="true">heeft je geblokkeerd</string>
+    <string name="app_you_have_blocked_this_user" translatable="true">Je hebt deze gebruiker geblokkeerd</string>
+    <string name="unblock_message" translatable="true">Je kunt geen bericht sturen omdat de gebruiker is geblokkeerd</string>
+    <string name="participant_scope_with_group" translatable="true">
+    Alleen groepsbeheerders kunnen deze actie uitvoeren. Gebruiker %1$s heeft de rol \'deelnemer\' in groep %2$s.
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    Alleen groepsbeheerders kunnen deze actie uitvoeren. Gebruiker %1$s heeft de rol \'deelnemer\'.
+    </string>
+</resources>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">CometChat Team Messenger</string>
+    <string name="app_bottom_nav_chats" translatable="true">チャット</string>
+    <string name="app_bottom_nav_calls" translatable="true">通話</string>
+    <string name="app_bottom_nav_users" translatable="true">ユーザー</string>
+    <string name="app_bottom_nav_groups" translatable="true">グループ</string>
+
+    <string name="app_login" translatable="true">ログイン</string>
+    <string name="app_continue_with_google" translatable="true">Googleで続行</string>
+    <string name="app_no_banned_members" translatable="true">禁止されたメンバーはありません</string>
+    <string name="app_banned_few_members_to_show_them_here" translatable="true">禁止されたメンバーが少ないため、ここに表示できません</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Googleでのサインインに失敗しました。アカウントが見つかりませんでした。</string>
+    <string name="app_google_sign_in_failed" translatable="true">"Google サインインに失敗しました: "</string>
+    <string name="app_group" translatable="true">グループ</string>
+    <string name="app_btn_leave" translatable="true">退出</string>
+    <string name="app_leave_this_group" translatable="true">このグループを退出しますか？</string>
+    <string name="app_leave_this_group_description" translatable="true">本当にこのグループを退出しますか？このチャットからのメッセージはもう受け取れません。</string>
+    <string name="app_btn_cancel" translatable="true">キャンセル</string>
+    <string name="app_transfer_ownership_description" translatable="true">本当に所有権を移譲しますか？この操作は元に戻せません。新しい所有者が完全にコントロールします。</string>
+    <string name="app_transfer_ownership_information" translatable="true">このグループを退出する前に、他のメンバーに所有権を移譲する必要があります。</string>
+    <string name="app_btn_continue" translatable="true">続ける</string>
+    <string name="app_delete_and_exit" translatable="true">削除して退出しますか？</string>
+    <string name="app_delete_and_exit_action" translatable="true">削除して退出</string>
+    <string name="app_delete_and_exit_description" translatable="true">本当にこのチャットを削除してグループを退出しますか？この操作は元に戻せません。</string>
+    <string name="app_btn_delete" translatable="true">削除</string>
+    <string name="app_add" translatable="true">追加</string>
+    <string name="app_member" translatable="true">メンバー</string>
+    <string name="app_members" translatable="true">メンバー</string>
+    <string name="app_base_message" translatable="true">baseMessage</string>
+    <string name="app_user" translatable="true">ユーザー</string>
+    <string name="app_session_id" translatable="true">sessionId</string>
+    <string name="app_call_type" translatable="true">callType</string>
+    <string name="app_not_logged_in" translatable="true">ログインしていません。ログインして再試行してください。</string>
+    <string name="app_transfer_ownership" translatable="true">所有権を移譲</string>
+
+    <string name="app_call_details" translatable="true">通話の詳細</string>
+    <string name="app_call_details_history" translatable="true">履歴</string>
+    <string name="app_call_details_participants" translatable="true">参加者</string>
+    <string name="app_call_details_recordings" translatable="true">録音</string>
+    <string name="app_call_outgoing" translatable="true">発信</string>
+    <string name="app_call_missed" translatable="true">不在</string>
+    <string name="app_call_incoming" translatable="true">着信</string>
+    <string name="app_no_recordings_found" translatable="true">録音が見つかりません</string>
+
+    <string name="app_accept" translatable="true">受け入れ</string>
+    <string name="app_decline" translatable="true">拒否</string>
+    <string name="app_incoming_s_call" translatable="true">着信 %s 通話</string>
+    <string name="app_user_info" translatable="true">ユーザー情報</string>
+    <string name="app_voice" translatable="true">音声</string>
+    <string name="app_video" translatable="true">ビデオ</string>
+
+    <string name="app_delete" translatable="true">チャットを削除</string>
+    <string name="app_delete_chat_title" translatable="true">このチャットを削除しますか？</string>
+    <string name="app_delete_chat_subtitle" translatable="true">本当にこのチャットを削除しますか？この操作は元に戻せません。</string>
+    <string name="app_delete_chat_positive_button" translatable="true">削除</string>
+    <string name="app_delete_chat_negative_button" translatable="true">キャンセル</string>
+    <string name="app_delete_chat_error" translatable="true">削除に失敗しました</string>
+    <string name="app_delete_chat_success" translatable="true">チャットが削除されました</string>
+
+    <string name="app_block" translatable="true">ブロック</string>
+    <string name="app_block_user_title" translatable="true">この連絡先をブロックしますか？</string>
+    <string name="app_block_user_subtitle" translatable="true">本当にこの連絡先をブロックしますか？これ以降、メッセージを受け取ることはありません。</string>
+    <string name="app_block_user_positive_button" translatable="true">ブロック</string>
+    <string name="app_block_user_negative_button" translatable="true">キャンセル</string>
+    <string name="app_block_user_error" translatable="true">ブロックに失敗しました</string>
+    <string name="app_block_user_success" translatable="true">ユーザーがブロックされました</string>
+
+    <string name="app_unblock" translatable="true">ブロック解除</string>
+    <string name="app_unblock_user_title" translatable="true">この連絡先のブロックを解除しますか？</string>
+    <string name="app_unblock_user_subtitle" translatable="true">本当にこの連絡先のブロックを解除しますか？</string>
+    <string name="app_unblock_user_positive_button" translatable="true">ブロック解除</string>
+    <string name="app_unblock_user_negative_button" translatable="true">キャンセル</string>
+    <string name="app_unblock_user_error" translatable="true">ブロック解除に失敗しました</string>
+    <string name="app_unblock_user_success" translatable="true">ユーザーのブロックが解除されました</string>
+    <string name="app_message_id" translatable="true">message_id</string>
+    <string name="app_choose_sample_user" translatable="true">サンプルユーザーを選択</string>
+    <string name="app_continue" translatable="true">続ける</string>
+    <string name="app_or" translatable="true">または</string>
+    <string name="app_change" translatable="true">変更</string>
+    <string name="app_app_credentials" translatable="true">アプリの認証情報</string>
+    <string name="app_enter_uid" translatable="true">UIDを入力</string>
+    <string name="app_enter_your_uid" translatable="true">あなたのUIDを入力</string>
+    <string name="app_error_invalid_user_or_uid_login" translatable="true">ユーザーを選択するか、正しいUIDを入力してください</string>
+    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
+    <string name="app_cred_id" translatable="true">アプリID</string>
+    <string name="app_cred_region" translatable="true">アプリの地域</string>
+    <string name="app_cred_auth" translatable="true">アプリ認証キー</string>
+    <string name="app_region" translatable="true">地域</string>
+    <string name="app_region_us" translatable="true">米国</string>
+    <string name="app_region_eu" translatable="true">EU</string>
+    <string name="app_region_in" translatable="true">インド</string>
+    <string name="app_app_id" translatable="true">アプリID</string>
+    <string name="app_app_id_hint" translatable="true">アプリIDを入力</string>
+    <string name="app_auth_key" translatable="true">認証キー</string>
+    <string name="app_auth_key_hint" translatable="true">認証キーを入力</string>
+    <string name="app_please_select_app_region" translatable="true">アプリの地域を選択してください</string>
+    <string name="app_invalid_app_id" translatable="true">有効なアプリIDを入力してください</string>
+    <string name="app_invalid_auth_token" translatable="true">有効な認証トークンを入力してください</string>
+    <string name="app_new_group" translatable="true">新しいグループ</string>
+    <string name="app_group_type" translatable="true">タイプ</string>
+    <string name="app_group_name" translatable="true">名前</string>
+    <string name="app_group_hint_name" translatable="true">グループ名を入力</string>
+    <string name="app_password" translatable="true">パスワード</string>
+    <string name="app_hint_enter_the_password" translatable="true">パスワードを入力</string>
+    <string name="app_btn_create_group" translatable="true">グループ作成</string>
+    <string name="app_create_conversation" translatable="true">会話を作成</string>
+    <string name="app_logout" translatable="true">ログアウト</string>
+    <string name="app_group_info" translatable="true">グループ情報</string>
+    <string name="app_no_longer_part_of_this_group" translatable="true">このグループのメンバーではなくなりました</string>
+    <string name="app_view_members" translatable="true">メンバーを見る</string>
+    <string name="app_add_members" translatable="true">メンバーを追加</string>
+    <string name="app_banned_members" translatable="true">禁止されたメンバー</string>
+    <string name="app_view_members_chip" translatable="true">メンバーを \n表示</string>
+    <string name="app_add_members_chip" translatable="true">メンバーを \n追加</string>
+    <string name="app_banned_members_chip" translatable="true">禁止された \nメンバー</string>
+    <string name="app_leave" translatable="true">退出</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">あなたはこのグループにもうメンバーではないため、メッセージを送信できません。</string>
+    <string name="app_unblock_user" translatable="true">ユーザーのブロックを解除</string>
+    <string name="app_description" translatable="true">説明</string>
+    <string name="app_steps_to_reproduce" translatable="true">再現手順</string>
+    <string name="app_join_group" translatable="true">グループに参加</string>
+    <string name="app_type" translatable="true">タイプ</string>
+    <string name="app_enter_the_password" translatable="true">パスワードを入力</string>
+    <string name="app_something_went_wrong_please_try_again" translatable="true">何かがうまくいきませんでした。もう一度試してください。</string>
+    <string name="app_retry" translatable="true">再試行</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">何かがうまくいかなかったようです。\n もう一度試してください。</string>
+    <string name="app_type_public" translatable="true">公開</string>
+    <string name="app_transfer_ownership_text" translatable="true">所有権の移転</string>
+    <string name="app_type_private" translatable="true">プライベート</string>
+    <string name="app_type_protected" translatable="true">保護された</string>
+    <string name="app_thread_title" translatable="true">スレッド</string>
+    <string name="app_error_conversations_title" translatable="true">おっと！</string>
+    <string name="app_group_members_empty_title" translatable="true">メンバーがいません</string>
+    <string name="app_group_member_empty_subtitle" translatable="true">グループにメンバーを追加し、ここで確認してください。</string>
+    <string name="app_search" translatable="true">検索</string>
+    <string name="app_new_chat" translatable="true">新しいチャット</string>
+    <string name="app_report" translatable="true">レポートを開始</string>
+    <string name="app_has_blocked_you" translatable="true">あなたをブロックしました</string>
+    <string name="app_you_have_blocked_this_user" translatable="true">あなたはこのユーザーをブロックしました</string>
+    <string name="app_unblock_message" translatable="true">ユーザーがブロックされているため、メッセージを送信できません</string>
+    <string name="participant_scope_with_group" translatable="true">
+    この操作はグループ管理者のみが実行できます。ユーザー %1$s はグループ %2$s で「参加者」の権限を持っています。
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    この操作はグループ管理者のみが実行できます。ユーザー %1$s は「参加者」の権限を持っています。
+    </string>
+</resources>

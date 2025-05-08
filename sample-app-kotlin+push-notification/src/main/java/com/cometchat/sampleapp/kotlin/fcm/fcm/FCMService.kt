@@ -29,6 +29,16 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 
 class FCMService : FirebaseMessagingService() {
+
+    companion object {
+        private val TAG: String = FCMService::class.java.simpleName
+        var fCMToken: String? = null
+            private set
+        const val CALL_STATUS_INITIATED: String = "initiated"
+        const val CALL_STATUS_CANCELLED: String = "cancelled"
+        const val CALL_STATUS_UNANSWERED: String = "unanswered"
+    }
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
@@ -121,12 +131,6 @@ class FCMService : FirebaseMessagingService() {
         CometChatLogger.e(TAG, "onNewToken: FCM Token: $fCMToken")
     }
 
-    companion object {
-        private val TAG: String = FCMService::class.java.simpleName
-        var fCMToken: String? = null
-            private set
-    }
-
     private fun configureVoIP(callData: FCMCallDto) {
         CometChatVoIP.init(this, applicationInfo.loadLabel(packageManager).toString())
     }
@@ -139,9 +143,9 @@ class FCMService : FirebaseMessagingService() {
         val gson = Gson()
         val callData: FCMCallDto = gson.fromJson(gson.toJson(message.data), FCMCallDto::class.java)
         configureVoIP(callData) // Check if the call action is "initiated"
-        if ("initiated" == callData.callAction) {
+        if (CALL_STATUS_INITIATED == callData.callAction) {
             showIncomingCallScreen(callData)
-        } else if ("cancelled" == callData.callAction) {
+        } else if (CALL_STATUS_CANCELLED == callData.callAction || CALL_STATUS_UNANSWERED == callData.callAction) {
             if (CometChatVoIPUtils.currentSessionId == callData.sessionId) {
                 if (ActivityCompat.checkSelfPermission(
                         this@FCMService, Manifest.permission.ANSWER_PHONE_CALLS

@@ -140,4 +140,8 @@
     <string name="app_report">Commencer le Rapport</string>
     <string name="app_has_blocked_you">vous a bloqué</string>
     <string name="app_you_have_blocked_this_user">Vous avez bloqué cet utilisateur</string>
+    <string name="app_unblock_message">Impossible d\'envoyer un message car l\'utilisateur est bloqué</string>
+    <string name="app_transfer_ownership_information">Vous devez transférer la propriété de ce groupe à un autre membre avant de le quitter.</string>
+    <string name="participant_scope_with_group">Seuls les administrateurs du groupe peuvent effectuer cette action. L’utilisateur %1$s a le rôle de "participant" dans le groupe %2$s.</string>
+    <string name="participant_scope_without_group">Seuls les administrateurs du groupe peuvent effectuer cette action. L’utilisateur %1$s a le rôle de "participant".</string>
 </resources>

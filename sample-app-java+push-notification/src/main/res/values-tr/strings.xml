@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">CometChat Takım Mesajlaşma</string>
+    <string name="app_bottom_nav_chats" translatable="true">Sohbetler</string>
+    <string name="app_bottom_nav_calls" translatable="true">Aramalar</string>
+    <string name="app_bottom_nav_users" translatable="true">Kullanıcılar</string>
+    <string name="app_bottom_nav_groups" translatable="true">Gruplar</string>
+
+    <string name="app_login" translatable="true">Giriş Yap</string>
+    <string name="app_continue_with_google" translatable="true">Google ile Devam Et</string>
+    <string name="app_no_banned_members" translatable="true">Yasaklı Üye Yok</string>
+    <string name="app_banned_few_members_to_show_them_here" translatable="true">Burada gösterecek kadar yasaklı üye yok</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Google ile giriş yapılamadı, hesap bulunamadı.</string>
+    <string name="app_google_sign_in_failed" translatable="true">"Google Girişi Başarısız: "</string>
+    <string name="app_group" translatable="true">grup</string>
+    <string name="app_btn_leave" translatable="true">Çık</string>
+    <string name="app_leave_this_group" translatable="true">Bu gruptan çıkmak istiyor musunuz?</string>
+    <string name="app_leave_this_group_description" translatable="true">Bu gruptan çıkmak istediğinizden emin misiniz? Bu sohbetten artık mesaj almayacaksınız.</string>
+    <string name="app_btn_cancel" translatable="true">İptal</string>
+    <string name="app_transfer_ownership_description" translatable="true">Sahipliği devretmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve yeni sahip tam kontrolü alacaktır.</string>
+    <string name="app_transfer_ownership_information" translatable="true">Bu gruptan ayrılmadan önce sahipliği başka bir grup üyesine devretmelisiniz.</string>
+    <string name="app_btn_continue" translatable="true">Devam Et</string>
+    <string name="app_delete_and_exit" translatable="true">Sil ve Çık?</string>
+    <string name="app_delete_and_exit_action" translatable="true">Sil ve Çık</string>
+    <string name="app_delete_and_exit_description" translatable="true">Bu sohbeti silmek ve gruptan çıkmak istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="app_btn_delete" translatable="true">Sil</string>
+    <string name="app_add" translatable="true">Ekle</string>
+    <string name="app_member" translatable="true">Üye</string>
+    <string name="app_members" translatable="true">Üyeler</string>
+    <string name="app_base_message" translatable="true">baseMessage</string>
+    <string name="app_user" translatable="true">kullanıcı</string>
+    <string name="app_session_id" translatable="true">sessionId</string>
+    <string name="app_call_type" translatable="true">callType</string>
+    <string name="app_not_logged_in" translatable="true">Giriş yapmadınız. Lütfen giriş yapın ve tekrar deneyin.</string>
+    <string name="app_transfer_ownership" translatable="true">Sahipliği Devret</string>
+
+    <string name="app_call_details" translatable="true">Arama Detayları</string>
+    <string name="app_call_details_history" translatable="true">Geçmiş</string>
+    <string name="app_call_details_participants" translatable="true">Katılımcılar</string>
+    <string name="app_call_details_recordings" translatable="true">Kayıtlar</string>
+    <string name="app_call_outgoing" translatable="true">Giden</string>
+    <string name="app_call_missed" translatable="true">Kaçırıldı</string>
+    <string name="app_call_incoming" translatable="true">Gelen</string>
+    <string name="app_no_recordings_found" translatable="true">Kayıt Bulunamadı</string>
+
+    <string name="app_accept" translatable="true">Kabul Et</string>
+    <string name="app_decline" translatable="true">Reddet</string>
+    <string name="app_incoming_s_call" translatable="true">%s Gelen Arama</string>
+    <string name="app_user_info" translatable="true">Kullanıcı Bilgisi</string>
+    <string name="app_voice" translatable="true">Ses</string>
+    <string name="app_video" translatable="true">Video</string>
+
+    <string name="app_delete" translatable="true">Sohbeti Sil</string>
+    <string name="app_delete_chat_title" translatable="true">Bu sohbeti silmek ister misiniz?</string>
+    <string name="app_delete_chat_subtitle" translatable="true">Bu sohbeti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="app_delete_chat_positive_button" translatable="true">Sil</string>
+    <string name="app_delete_chat_negative_button" translatable="true">İptal</string>
+    <string name="app_delete_chat_error" translatable="true">Silme Başarısız</string>
+    <string name="app_delete_chat_success" translatable="true">Sohbet Silindi</string>
+
+    <string name="app_block" translatable="true">Engelle</string>
+    <string name="app_block_user_title" translatable="true">Bu kişiyi engellemek istiyor musunuz?</string>
+    <string name="app_block_user_subtitle" translatable="true">Bu kişiyi engellemeyi istediğinizden emin misiniz? Artık onlardan mesaj almayacaksınız.</string>
+    <string name="app_block_user_positive_button" translatable="true">Engelle</string>
+    <string name="app_block_user_negative_button" translatable="true">İptal</string>
+    <string name="app_block_user_error" translatable="true">Engelleme Başarısız</string>
+    <string name="app_block_user_success" translatable="true">Kullanıcı Engellendi</string>
+
+    <string name="app_unblock" translatable="true">Engellemeyi Kaldır</string>
+    <string name="app_unblock_user_title" translatable="true">Bu kişiyi engellemeyi kaldırmak istiyor musunuz?</string>
+    <string name="app_unblock_user_subtitle" translatable="true">Bu kişiyi engellemeyi kaldırmak istediğinizden emin misiniz?</string>
+    <string name="app_unblock_user_positive_button" translatable="true">Engellemeyi Kaldır</string>
+    <string name="app_unblock_user_negative_button" translatable="true">İptal</string>
+    <string name="app_unblock_user_error" translatable="true">Engellemeyi Kaldırma Başarısız</string>
+    <string name="app_unblock_user_success" translatable="true">Kullanıcı Engellemeyi Kaldırdı</string>
+    <string name="app_message_id" translatable="true">message_id</string>
+    <string name="app_choose_sample_user" translatable="true">Bir Örnek Kullanıcı Seç</string>
+    <string name="app_continue" translatable="true">Devam Et</string>
+    <string name="app_or" translatable="true">Veya</string>
+    <string name="app_change" translatable="true">Değiştir</string>
+    <string name="app_app_credentials" translatable="true">Uygulama Kimlik Bilgileri</string>
+    <string name="app_enter_uid" translatable="true">UID Gir</string>
+    <string name="app_enter_your_uid" translatable="true">UID\'nizi girin</string>
+    <string name="app_error_invalid_user_or_uid_login" translatable="true">Lütfen kullanıcıyı seçin veya doğru UID\'yi girin</string>
+    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
+    <string name="app_cred_id" translatable="true">Uygulama ID\'si</string>
+    <string name="app_cred_region" translatable="true">Uygulama Bölgesi</string>
+    <string name="app_cred_auth" translatable="true">Uygulama Kimlik Doğrulama Anahtarı</string>
+    <string name="app_region" translatable="true">Bölge</string>
+    <string name="app_region_us" translatable="true">ABD</string>
+    <string name="app_region_eu" translatable="true">AB</string>
+    <string name="app_region_in" translatable="true">Hindistan</string>
+    <string name="app_app_id" translatable="true">Uygulama ID\'si</string>
+    <string name="app_app_id_hint" translatable="true">Uygulama ID\'sini girin</string>
+    <string name="app_auth_key" translatable="true">Kimlik Doğrulama Anahtarı</string>
+    <string name="app_auth_key_hint" translatable="true">Kimlik doğrulama anahtarını girin</string>
+    <string name="app_please_select_app_region" translatable="true">Lütfen Uygulama Bölgesini Seçin</string>
+    <string name="app_invalid_app_id" translatable="true">Lütfen geçerli bir Uygulama ID\'si girin</string>
+    <string name="app_invalid_auth_token" translatable="true">Lütfen geçerli bir Kimlik Doğrulama Token\'ı girin</string>
+    <string name="app_new_group" translatable="true">Yeni Grup</string>
+    <string name="app_group_type" translatable="true">Tür</string>
+    <string name="app_group_name" translatable="true">Ad</string>
+    <string name="app_group_hint_name" translatable="true">Grup adını girin</string>
+    <string name="app_password" translatable="true">Şifre</string>
+    <string name="app_hint_enter_the_password" translatable="true">Şifreyi girin</string>
+    <string name="app_btn_create_group" translatable="true">Grup Oluştur</string>
+    <string name="app_create_conversation" translatable="true">Konuşma Oluştur</string>
+    <string name="app_logout" translatable="true">Çıkış Yap</string>
+    <string name="app_group_info" translatable="true">Grup Bilgisi</string>
+    <string name="app_no_longer_part_of_this_group" translatable="true">Artık bu grubun bir parçası değilsiniz</string>
+    <string name="app_view_members" translatable="true">Üyeleri Görüntüle</string>
+    <string name="app_add_members" translatable="true">Üye Ekle</string>
+    <string name="app_banned_members" translatable="true">Yasaklı Üyeler</string>
+    <string name="app_view_members_chip" translatable="true">Üyeleri \nGörüntüle</string>
+    <string name="app_add_members_chip" translatable="true">Üye \nEkle</string>
+    <string name="app_banned_members_chip" translatable="true">Yasaklı \nÜyeler</string>
+    <string name="app_leave" translatable="true">Ayrıl</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">Artık bu grubun üyesi olmadığınız için mesaj gönderemezsiniz.</string>
+    <string name="app_unblock_user" translatable="true">Kullanıcıyı Engellemeyi Kaldır</string>
+    <string name="app_description" translatable="true">Açıklama</string>
+    <string name="app_steps_to_reproduce" translatable="true">Yeniden Üretme Adımları</string>
+    <string name="app_join_group" translatable="true">Gruba Katıl</string>
+    <string name="app_type" translatable="true">Tür</string>
+    <string name="app_enter_the_password" translatable="true">Şifreyi Girin</string>
+    <string name="app_something_went_wrong_please_try_again" translatable="true">Bir şeyler yanlış gitti. Lütfen tekrar deneyin.</string>
+    <string name="app_retry" translatable="true">Tekrar Dene</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">Bir şeyler yanlış gitti gibi görünüyor.\n Lütfen tekrar deneyin.</string>
+    <string name="app_type_public" translatable="true">Herkese Açık</string>
+    <string name="app_transfer_ownership_text" translatable="true">Sahipliği Devret</string>
+    <string name="app_type_private" translatable="true">Özel</string>
+    <string name="app_type_protected" translatable="true">Korunan</string>
+    <string name="app_thread_title" translatable="true">Konuşma</string>
+    <string name="app_error_conversations_title" translatable="true">Hoppala!</string>
+    <string name="app_group_members_empty_title" translatable="true">Üye Yok</string>
+    <string name="app_group_member_empty_subtitle" translatable="true">Gruba üye ekleyin ve burada listeleyin.</string>
+    <string name="app_search" translatable="true">Ara</string>
+    <string name="app_new_chat" translatable="true">Yeni Sohbet</string>
+    <string name="app_report" translatable="true">Rapor Başlat</string>
+    <string name="app_has_blocked_you" translatable="true">sizi engelledi</string>
+    <string name="app_you_have_blocked_this_user" translatable="true">Bu kullanıcıyı engellediniz</string>
+    <string name="app_unblock_message" translatable="true">Kullanıcı engellendiği için mesaj gönderilemiyor</string>
+    <string name="participant_scope_with_group" translatable="true">
+    Bu işlemi yalnızca grup yöneticileri gerçekleştirebilir. %1$s kullanıcısının %2$s grubundaki yetkisi \'katılımcı\'dır.
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    Bu işlemi yalnızca grup yöneticileri gerçekleştirebilir. %1$s kullanıcısının yetkisi \'katılımcı\'dır.
+    </string>
+</resources>

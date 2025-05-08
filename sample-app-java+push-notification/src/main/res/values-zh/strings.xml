@@ -140,4 +140,8 @@
     <string name="app_report">开始报告</string>
     <string name="app_has_blocked_you">已屏蔽您</string>
     <string name="app_you_have_blocked_this_user">您已屏蔽该用户</string>
+    <string name="app_transfer_ownership_information">在退出该群组之前，您需要将所有权转移给其他成员。</string>
+    <string name="app_unblock_message">由于用户被封锁，无法发送消息</string>
+    <string name="participant_scope_with_group">只有群组管理员才能执行此操作。用户 %1$s 在群组 %2$s 中的权限是“参与者”。</string>
+    <string name="participant_scope_without_group">只有群组管理员才能执行此操作。用户 %1$s 的权限是“参与者”。</string>
 </resources>

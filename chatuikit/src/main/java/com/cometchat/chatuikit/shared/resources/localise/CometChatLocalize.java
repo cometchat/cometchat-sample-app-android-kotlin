@@ -16,7 +16,7 @@ import java.util.Locale;
  */
 public class CometChatLocalize {
     private static final String TAG = CometChatLocalize.class.getSimpleName();
-    private static Locale locale;
+
 
     /**
      * Sets the locale for the specified activity.
@@ -26,21 +26,13 @@ public class CometChatLocalize {
      *                 English, "fr" for French)
      */
     public static void setLocale(Context context, @Language.Code String language) {
-        locale = new Locale(language);
+        Locale locale = new Locale(language);
         Locale.setDefault(locale);
         Resources resources = context.getResources();
         Configuration config = resources.getConfiguration();
         config.setLocale(locale);
         config.setLayoutDirection(locale);
         resources.updateConfiguration(config, resources.getDisplayMetrics());
-    }
-
-    public static Locale getDefault() {
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-        Locale.setDefault(locale);
-        return Locale.getDefault();
     }
 
     /**

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">CometChat 팀 메신저</string>
+    <string name="app_bottom_nav_chats" translatable="true">채팅</string>
+    <string name="app_bottom_nav_calls" translatable="true">통화</string>
+    <string name="app_bottom_nav_users" translatable="true">사용자</string>
+    <string name="app_bottom_nav_groups" translatable="true">그룹</string>
+
+    <string name="app_login" translatable="true">로그인</string>
+    <string name="app_continue_with_google" translatable="true">Google로 계속</string>
+    <string name="app_no_banned_members" translatable="true">차단된 멤버가 없습니다</string>
+    <string name="app_banned_few_members_to_show_them_here" translatable="true">차단된 멤버가 적어 여기에 표시할 수 없습니다</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Google로 로그인하는 데 실패했습니다. 계정을 찾을 수 없습니다.</string>
+    <string name="app_google_sign_in_failed" translatable="true">"Google 로그인 실패: "</string>
+    <string name="app_group" translatable="true">그룹</string>
+    <string name="app_btn_leave" translatable="true">나가기</string>
+    <string name="app_leave_this_group" translatable="true">이 그룹을 나가시겠습니까?</string>
+    <string name="app_leave_this_group_description" translatable="true">정말로 이 그룹을 나가시겠습니까? 이 채팅에서 더 이상 메시지를 받지 않게 됩니다.</string>
+    <string name="app_btn_cancel" translatable="true">취소</string>
+    <string name="app_transfer_ownership_description" translatable="true">소유권을 이전하시겠습니까? 이 작업은 취소할 수 없으며, 새로운 소유자가 모든 권한을 갖게 됩니다.</string>
+    <string name="app_transfer_ownership_information" translatable="true">이 그룹을 나가기 전에 다른 멤버에게 소유권을 이전해야 합니다.</string>
+    <string name="app_btn_continue" translatable="true">계속</string>
+    <string name="app_delete_and_exit" translatable="true">삭제하고 나가시겠습니까?</string>
+    <string name="app_delete_and_exit_action" translatable="true">삭제하고 나가기</string>
+    <string name="app_delete_and_exit_description" translatable="true">이 채팅을 삭제하고 그룹을 나가시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="app_btn_delete" translatable="true">삭제</string>
+    <string name="app_add" translatable="true">추가</string>
+    <string name="app_member" translatable="true">회원</string>
+    <string name="app_members" translatable="true">회원들</string>
+    <string name="app_base_message" translatable="true">baseMessage</string>
+    <string name="app_user" translatable="true">사용자</string>
+    <string name="app_session_id" translatable="true">sessionId</string>
+    <string name="app_call_type" translatable="true">callType</string>
+    <string name="app_not_logged_in" translatable="true">로그인되지 않았습니다. 로그인 후 다시 시도하세요.</string>
+    <string name="app_transfer_ownership" translatable="true">소유권 이전</string>
+
+    <string name="app_call_details" translatable="true">통화 상세</string>
+    <string name="app_call_details_history" translatable="true">히스토리</string>
+    <string name="app_call_details_participants" translatable="true">참여자</string>
+    <string name="app_call_details_recordings" translatable="true">녹음</string>
+    <string name="app_call_outgoing" translatable="true">발신</string>
+    <string name="app_call_missed" translatable="true">놓친 통화</string>
+    <string name="app_call_incoming" translatable="true">수신</string>
+    <string name="app_no_recordings_found" translatable="true">녹음이 없습니다</string>
+
+    <string name="app_accept" translatable="true">수락</string>
+    <string name="app_decline" translatable="true">거절</string>
+    <string name="app_incoming_s_call" translatable="true">수신 중 %s 통화</string>
+    <string name="app_user_info" translatable="true">사용자 정보</string>
+    <string name="app_voice" translatable="true">음성</string>
+    <string name="app_video" translatable="true">영상</string>
+
+    <string name="app_delete" translatable="true">채팅 삭제</string>
+    <string name="app_delete_chat_title" translatable="true">이 채팅을 삭제하시겠습니까?</string>
+    <string name="app_delete_chat_subtitle" translatable="true">정말로 이 채팅을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="app_delete_chat_positive_button" translatable="true">삭제</string>
+    <string name="app_delete_chat_negative_button" translatable="true">취소</string>
+    <string name="app_delete_chat_error" translatable="true">삭제 실패</string>
+    <string name="app_delete_chat_success" translatable="true">채팅 삭제됨</string>
+
+    <string name="app_block" translatable="true">차단</string>
+    <string name="app_block_user_title" translatable="true">이 연락처를 차단하시겠습니까?</string>
+    <string name="app_block_user_subtitle" translatable="true">정말로 이 연락처를 차단하시겠습니까? 이 사람으로부터 더 이상 메시지를 받지 않게 됩니다.</string>
+    <string name="app_block_user_positive_button" translatable="true">차단</string>
+    <string name="app_block_user_negative_button" translatable="true">취소</string>
+    <string name="app_block_user_error" translatable="true">차단 실패</string>
+    <string name="app_block_user_success" translatable="true">사용자 차단됨</string>
+
+    <string name="app_unblock" translatable="true">차단 해제</string>
+    <string name="app_unblock_user_title" translatable="true">이 연락처의 차단을 해제하시겠습니까?</string>
+    <string name="app_unblock_user_subtitle" translatable="true">정말로 이 연락처의 차단을 해제하시겠습니까?</string>
+    <string name="app_unblock_user_positive_button" translatable="true">차단 해제</string>
+    <string name="app_unblock_user_negative_button" translatable="true">취소</string>
+    <string name="app_unblock_user_error" translatable="true">차단 해제 실패</string>
+    <string name="app_unblock_user_success" translatable="true">사용자 차단 해제됨</string>
+    <string name="app_message_id" translatable="true">message_id</string>
+    <string name="app_choose_sample_user" translatable="true">샘플 사용자 선택</string>
+    <string name="app_continue" translatable="true">계속</string>
+    <string name="app_or" translatable="true">또는</string>
+    <string name="app_change" translatable="true">변경</string>
+    <string name="app_app_credentials" translatable="true">앱 자격 증명</string>
+    <string name="app_enter_uid" translatable="true">UID 입력</string>
+    <string name="app_enter_your_uid" translatable="true">당신의 UID를 입력하세요</string>
+    <string name="app_error_invalid_user_or_uid_login" translatable="true">사용자를 선택하거나 올바른 UID를 입력하세요</string>
+    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
+    <string name="app_cred_id" translatable="true">앱 ID</string>
+    <string name="app_cred_region" translatable="true">앱 지역</string>
+    <string name="app_cred_auth" translatable="true">앱 인증 키</string>
+    <string name="app_region" translatable="true">지역</string>
+    <string name="app_region_us" translatable="true">미국</string>
+    <string name="app_region_eu" translatable="true">유럽</string>
+    <string name="app_region_in" translatable="true">인도</string>
+    <string name="app_app_id" translatable="true">앱 ID</string>
+    <string name="app_app_id_hint" translatable="true">앱 ID를 입력하세요</string>
+    <string name="app_auth_key" translatable="true">인증 키</string>
+    <string name="app_auth_key_hint" translatable="true">인증 키를 입력하세요</string>
+    <string name="app_please_select_app_region" translatable="true">앱 지역을 선택하세요</string>
+    <string name="app_invalid_app_id" translatable="true">유효한 앱 ID를 입력하세요</string>
+    <string name="app_invalid_auth_token" translatable="true">유효한 인증 토큰을 입력하세요</string>
+    <string name="app_new_group" translatable="true">새 그룹</string>
+    <string name="app_group_type" translatable="true">유형</string>
+    <string name="app_group_name" translatable="true">이름</string>
+    <string name="app_group_hint_name" translatable="true">그룹 이름을 입력하세요</string>
+    <string name="app_password" translatable="true">비밀번호</string>
+    <string name="app_hint_enter_the_password" translatable="true">비밀번호를 입력하세요</string>
+    <string name="app_btn_create_group" translatable="true">그룹 만들기</string>
+    <string name="app_create_conversation" translatable="true">대화 만들기</string>
+    <string name="app_logout" translatable="true">로그아웃</string>
+    <string name="app_group_info" translatable="true">그룹 정보</string>
+    <string name="app_no_longer_part_of_this_group" translatable="true">이 그룹의 일원이 아닙니다</string>
+    <string name="app_view_members" translatable="true">회원 보기</string>
+    <string name="app_add_members" translatable="true">회원 추가</string>
+    <string name="app_banned_members" translatable="true">차단된 회원</string>
+    <string name="app_view_members_chip" translatable="true">회원 \n보기</string>
+    <string name="app_add_members_chip" translatable="true">회원 \n추가</string>
+    <string name="app_banned_members_chip" translatable="true">차단된 \n회원</string>
+    <string name="app_leave" translatable="true">떠나기</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">이 그룹에서 더 이상 회원이 아니기 때문에 메시지를 보낼 수 없습니다.</string>
+    <string name="app_unblock_user" translatable="true">사용자 차단 해제</string>
+    <string name="app_description" translatable="true">설명</string>
+    <string name="app_steps_to_reproduce" translatable="true">재현 단계</string>
+    <string name="app_join_group" translatable="true">그룹에 참여</string>
+    <string name="app_type" translatable="true">유형</string>
+    <string name="app_enter_the_password" translatable="true">비밀번호 입력</string>
+    <string name="app_something_went_wrong_please_try_again" translatable="true">문제가 발생했습니다. 다시 시도해 주세요.</string>
+    <string name="app_retry" translatable="true">재시도</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">뭔가 잘못된 것 같습니다.\n 다시 시도해 주세요.</string>
+    <string name="app_type_public" translatable="true">공개</string>
+    <string name="app_transfer_ownership_text" translatable="true">소유권 이전</string>
+    <string name="app_type_private" translatable="true">비공개</string>
+    <string name="app_type_protected" translatable="true">보호됨</string>
+    <string name="app_thread_title" translatable="true">스레드</string>
+    <string name="app_error_conversations_title" translatable="true">오류!</string>
+    <string name="app_group_members_empty_title" translatable="true">회원 없음</string>
+    <string name="app_group_member_empty_subtitle" translatable="true">그룹에 회원을 추가하고 여기에 표시해 주세요.</string>
+    <string name="app_search" translatable="true">검색</string>
+    <string name="app_new_chat" translatable="true">새 채팅</string>
+    <string name="app_report" translatable="true">보고 시작</string>
+    <string name="app_has_blocked_you" translatable="true">당신을 차단했습니다</string>
+    <string name="app_you_have_blocked_this_user" translatable="true">이 사용자를 차단했습니다</string>
+    <string name="unblock_message" translatable="true">이 사용자가 차단되어 메시지를 보낼 수 없습니다</string>
+    <string name="participant_scope_with_group" translatable="true">
+    이 작업은 그룹 관리자만 수행할 수 있습니다. 사용자 %1$s의 그룹 %2$s에서의 권한은 \'참여자\'입니다.
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    이 작업은 그룹 관리자만 수행할 수 있습니다. 사용자 %1$s의 권한은 \'참여자\'입니다.
+    </string>
+</resources>

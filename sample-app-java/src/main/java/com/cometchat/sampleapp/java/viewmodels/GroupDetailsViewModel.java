@@ -1,5 +1,7 @@
 package com.cometchat.sampleapp.java.viewmodels;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
@@ -15,11 +17,14 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.events.CometChatGroupEvents;
+import com.cometchat.sampleapp.java.R;
 import com.cometchat.sampleapp.java.data.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ViewModel for managing the state and data of a specific group in the chat
@@ -215,7 +220,7 @@ public class GroupDetailsViewModel extends ViewModel {
      *
      * @param users The list of Users to be added to the group.
      */
-    public void addMembersToGroup(List<User> users) {
+    public void addMembersToGroup(Context context, List<User> users) {
         dialogState.setValue(UIKitConstants.DialogState.INITIATED);
         List<GroupMember> groupMembers = new ArrayList<>();
 
@@ -232,9 +237,64 @@ public class GroupDetailsViewModel extends ViewModel {
             @Override
             public void onError(CometChatException e) {
                 dialogState.setValue(UIKitConstants.DialogState.FAILURE);
-                errorMessage.setValue(e.getMessage());
+                handleError(context, e.getMessage());
             }
         });
+    }
+
+    private void handleError(Context context, String error) {
+        Matcher matcher = Pattern.compile("UID (\\w+) .*?GUID (\\w+)").matcher(error);
+
+        if (!matcher.find()) {
+            postGenericError(context);
+            return;
+        }
+
+        String uid = matcher.group(1);
+        String guid = matcher.group(2);
+
+        if (uid == null || guid == null) {
+            postGenericError(context);
+            return;
+        }
+
+        Repository.getUser(uid, new CometChat.CallbackListener<User>() {
+            @Override
+            public void onSuccess(User user) {
+                fetchGroupAndPostErrorMessage(context, user, guid);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                postGenericError(context);
+            }
+        });
+    }
+
+    private void fetchGroupAndPostErrorMessage(Context context, User user, String guid) {
+        Repository.getGroup(guid, new CometChat.CallbackListener<Group>() {
+            @Override
+            public void onSuccess(Group group) {
+                postCompleteError(context, group.getName(), user.getName());
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                postGenericError(context);
+            }
+        });
+    }
+
+    private void postCompleteError(Context context, String groupName, String userName) {
+        String message = groupName != null
+                ? context.getString(R.string.participant_scope_with_group, userName, groupName)
+                : context.getString(R.string.participant_scope_without_group, userName);
+
+        errorMessage.setValue(message);
+    }
+
+    private void postGenericError(Context context) {
+        errorMessage.setValue(context.getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong));
     }
 
     /**

@@ -140,4 +140,8 @@
     <string name="app_report">Starta rapport</string>
     <string name="app_has_blocked_you">har blockerat dig</string>
     <string name="app_you_have_blocked_this_user">Du har blockerat</string>
+    <string name="app_unblock_message">Kan inte skicka ett meddelande eftersom användaren är blockerad</string>
+    <string name="app_transfer_ownership_information">Du måste överföra ägarskapet för denna grupp till en annan medlem innan du lämnar.</string>
+    <string name="participant_scope_with_group">Endast gruppadministratörer kan utföra denna åtgärd. Användaren %1$s har rollen "deltagare" i gruppen %2$s.</string>
+    <string name="participant_scope_without_group">Endast gruppadministratörer kan utföra denna åtgärd. Användaren %1$s har rollen "deltagare".</string>
 </resources>

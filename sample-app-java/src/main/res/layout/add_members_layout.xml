@@ -30,8 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/cometchat_margin_2"
             android:layout_marginEnd="@dimen/cometchat_margin_2"
-            android:layout_marginBottom="@dimen/cometchat_margin_1"
-            android:text="@string/app_something_went_wrong_please_try_again"
+            android:layout_marginBottom="@dimen/cometchat_margin_3"
             android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
             android:textColor="?attr/cometchatErrorColor"
             android:visibility="gone" />

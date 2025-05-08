@@ -33,10 +33,20 @@ public class ThreadMessageActivity extends AppCompatActivity {
 
         // Create an instance of the MessagesViewModel
         ThreadMessageViewModel viewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel.class);
-        viewModel.getParentMessage().observe(this, this::setParentMessage);
-        int messageId = getIntent().getIntExtra(getString(R.string.app_message_id), -1);
-        viewModel.fetchMessageDetails(messageId);
+        viewModel.fetchMessageDetails(getIntent().getIntExtra(getString(R.string.app_message_id), -1));
 
+        viewModel.addUserListener();
+        viewModel.getParentMessage().observe(this, this::setParentMessage);
+        viewModel.getUserBlockStatus().observe(this, this::updateUserBlockStatus);
+        viewModel.getUnblockButtonState().observe(this, this::setUnblockButtonState);
+        viewModel.setUser(user);
+
+        binding.unblockBtn.setOnClickListener(view -> viewModel.unblockUser());
+
+        setupUI();
+    }
+
+    private void setupUI() {
         // Set up back button behavior
         binding.backIcon.setOnClickListener((v) -> {
             Utils.hideKeyBoard(this, binding.getRoot());
@@ -80,9 +90,30 @@ public class ThreadMessageActivity extends AppCompatActivity {
         if (user != null) {
             binding.messageList.setUser(user);
             binding.messageComposer.setUser(user);
+            updateUserBlockStatus(user);
         } else if (group != null) {
             binding.messageList.setGroup(group);
             binding.messageComposer.setGroup(group);
+        }
+    }
+
+    private void updateUserBlockStatus(User user) {
+        if (user.isBlockedByMe()) {
+            binding.messageComposer.setVisibility(View.GONE);
+            binding.unblockLayout.setVisibility(View.VISIBLE);
+        } else {
+            binding.messageComposer.setVisibility(View.VISIBLE);
+            binding.unblockLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void setUnblockButtonState(UIKitConstants.DialogState dialogState) {
+        if (dialogState == UIKitConstants.DialogState.INITIATED) {
+            binding.unblockText.setVisibility(View.GONE);
+            binding.progress.setVisibility(View.VISIBLE);
+        } else if (dialogState == UIKitConstants.DialogState.SUCCESS || dialogState == UIKitConstants.DialogState.FAILURE) {
+            binding.unblockText.setVisibility(View.VISIBLE);
+            binding.progress.setVisibility(View.GONE);
         }
     }
 }

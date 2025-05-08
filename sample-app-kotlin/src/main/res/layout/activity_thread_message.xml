@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
@@ -67,6 +68,66 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/unblock_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/cometchat_margin_4"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_unblock_message"
+            android:textAlignment="center"
+            android:textColor="?attr/cometchatTextColorSecondary"
+            android:textSize="14sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/unblock_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/cometchat_margin_2"
+            app:cardBackgroundColor="?attr/cometchatBackgroundColor4"
+            app:cardCornerRadius="@dimen/cometchat_radius_2"
+            app:cardElevation="0dp"
+            app:strokeColor="?attr/cometchatStrokeColorDark"
+            app:strokeWidth="@dimen/cometchat_1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/cometchat_padding_5"
+                android:layout_marginTop="@dimen/cometchat_padding_2"
+                android:layout_marginEnd="@dimen/cometchat_padding_5"
+                android:layout_marginBottom="@dimen/cometchat_padding_2"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/unblock_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_unblock_user"
+                    android:textAlignment="center"
+                    android:textAppearance="?attr/cometchatTextAppearanceBodyMedium"
+                    android:textColor="?attr/cometchatTextColorPrimary" />
+
+                <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="@dimen/cometchat_15dp"
+                    android:layout_height="@dimen/cometchat_15dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="?attr/cometchatIconTintSecondary"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
     <com.cometchat.chatuikit.messagecomposer.CometChatMessageComposer
         android:id="@+id/message_composer"

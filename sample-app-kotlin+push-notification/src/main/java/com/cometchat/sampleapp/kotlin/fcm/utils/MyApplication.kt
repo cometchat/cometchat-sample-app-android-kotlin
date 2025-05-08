@@ -217,8 +217,8 @@ class MyApplication : Application() {
             snackBar = null
             tempCall = null
             CallingExtension.setActiveCall(null)
-            pauseSound()
         }
+        pauseSound()
     }
 
     /**
@@ -273,7 +273,7 @@ class MyApplication : Application() {
     /**
      * Silently pauses any currently playing sound.
      */
-    fun pauseSound() {
+    private fun pauseSound() {
         soundManager?.pauseSilently()
     }
 

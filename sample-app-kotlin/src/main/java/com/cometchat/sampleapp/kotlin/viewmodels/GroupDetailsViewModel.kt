@@ -1,5 +1,7 @@
 package com.cometchat.sampleapp.kotlin.viewmodels
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.cometchat.chat.constants.CometChatConstants
@@ -13,6 +15,7 @@ import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.events.CometChatGroupEvents
+import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.data.repository.Repository
 
 /**
@@ -173,7 +176,7 @@ class GroupDetailsViewModel : ViewModel() {
      * @param users
      * The list of Users to be added to the group.
      */
-    fun addMembersToGroup(users: List<User>) {
+    fun addMembersToGroup(context: Context, users: List<User>) {
         dialogState.value = DialogState.INITIATED
         val groupMembers: MutableList<GroupMember> = ArrayList()
 
@@ -188,9 +191,62 @@ class GroupDetailsViewModel : ViewModel() {
 
             override fun onError(e: CometChatException) {
                 dialogState.value = DialogState.FAILURE
-                errorMessage.value = e.message
+                handleError(context, e.message!!)
             }
         })
+    }
+
+    private fun handleError(context: Context, error: String) {
+        val pattern = Regex("UID (.+?) .*?GUID ([^\\s.]+)")
+        val matchResult = pattern.find(error)
+
+        if (matchResult == null) {
+            postGenericError(context)
+            return
+        }
+
+        val (uid, guid) = matchResult.destructured
+
+        if (uid.isBlank() || guid.isBlank()) {
+            postGenericError(context)
+            return
+        }
+
+        Repository.getUser(uid, object : CometChat.CallbackListener<User>() {
+            override fun onSuccess(user: User) {
+                fetchGroupAndPostErrorMessage(context, user, guid)
+            }
+
+            override fun onError(e: CometChatException?) {
+                postGenericError(context)
+            }
+        })
+    }
+
+    private fun fetchGroupAndPostErrorMessage(context: Context, user: User, guid: String) {
+        Repository.getGroup(guid, object : CometChat.CallbackListener<Group>() {
+            override fun onSuccess(group: Group) {
+                postCompleteError(context, group.name, user.name)
+            }
+
+            override fun onError(e: CometChatException?) {
+                postGenericError(context)
+            }
+        })
+    }
+
+    private fun postCompleteError(context: Context, groupName: String?, userName: String) {
+        val message = if (!groupName.isNullOrBlank()) {
+            context.getString(R.string.participant_scope_with_group, userName, groupName)
+        } else {
+            context.getString(R.string.participant_scope_without_group, userName)
+        }
+
+        errorMessage.value = message
+    }
+
+    private fun postGenericError(context: Context) {
+        errorMessage.value = context.getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong)
     }
 
     /**

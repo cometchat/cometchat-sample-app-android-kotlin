@@ -327,7 +327,7 @@ class GroupDetailsActivity : AppCompatActivity() {
 
 
         addMembersLayoutBinding.addMembersBtn.setOnClickListener {
-            viewModel.addMembersToGroup(
+            viewModel.addMembersToGroup(this,
                 addMembersLayoutBinding.addMembers.selectedUsers
             )
         }

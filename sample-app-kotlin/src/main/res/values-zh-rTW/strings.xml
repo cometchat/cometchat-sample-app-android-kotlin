@@ -140,4 +140,8 @@
     <string name="app_report">開始回報</string>
     <string name="app_has_blocked_you">已封鎖您</string>
     <string name="app_you_have_blocked_this_user">您已封鎖該用戶</string>
+    <string name="unblock_message">由於用戶被封鎖，無法發送消息</string>
+    <string name="app_transfer_ownership_information">在退出此群組之前，您需要將所有權轉移給其他成員。</string>
+    <string name="participant_scope_with_group">只有群組管理員可以執行此操作。使用者 %1$s 在群組 %2$s 的權限是「參與者」。</string>
+    <string name="participant_scope_without_group">只有群組管理員可以執行此操作。使用者 %1$s 的權限是「參與者」。</string>
 </resources>

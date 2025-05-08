@@ -140,4 +140,8 @@
     <string name="app_report">Jelentés indítása</string>
     <string name="app_has_blocked_you">blokkolt téged</string>
     <string name="app_you_have_blocked_this_user">blokkoltad ezt a felhasználót</string>
+    <string name="app_unblock_message">Üzenet nem küldhető, mivel a felhasználó le van tiltva</string>
+    <string name="app_transfer_ownership_information">A csoport elhagyása előtt át kell ruháznod a tulajdonjogot egy másik tagra.</string>
+    <string name="participant_scope_with_group">Csak a csoport adminisztrátorai hajthatják végre ezt a műveletet. A(z) %1$s felhasználónak "résztvevő" szerepe van a(z) %2$s csoportban.</string>
+    <string name="participant_scope_without_group">Csak a csoport adminisztrátorai hajthatják végre ezt a műveletet. A(z) %1$s felhasználónak "résztvevő" szerepe van.</string>
 </resources>

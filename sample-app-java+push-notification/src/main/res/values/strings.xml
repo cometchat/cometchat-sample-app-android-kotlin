@@ -141,6 +141,11 @@
     <string name="app_report" translatable="true">Start Reporting</string>
     <string name="app_has_blocked_you" translatable="true">has blocked you</string>
     <string name="app_you_have_blocked_this_user" translatable="true">You have blocked</string>
-    <string name="unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
-
+    <string name="app_unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
+    <string name="participant_scope_with_group" translatable="true">
+    Only group admins can perform this action. User %1$s has a scope \'participant\' in group %2$s.
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    Only group admins can perform this action. User %1$s has a scope \'participant\'.
+    </string>
 </resources>

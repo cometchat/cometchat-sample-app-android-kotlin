@@ -33,6 +33,9 @@ import com.google.gson.Gson;
 
 public class FCMService extends FirebaseMessagingService {
     private static final String TAG = FCMService.class.getSimpleName();
+    private static final String CALL_STATUS_INITIATED = "initiated";
+    private static final String CALL_STATUS_CANCELLED = "cancelled";
+    private static final String CALL_STATUS_UNANSWERED = "unanswered";
     private static String fcmToken;
 
     public static String getFCMToken() {
@@ -132,9 +135,9 @@ public class FCMService extends FirebaseMessagingService {
         configureVoIP(callData);
 
         // Check if the call action is "initiated"
-        if ("initiated".equals(callData.getCallAction())) {
+        if (CALL_STATUS_INITIATED.equals(callData.getCallAction())) {
             showIncomingCallScreen(callData);
-        } else if ("cancelled".equals(callData.getCallAction())) {
+        } else if (CALL_STATUS_CANCELLED.equals(callData.getCallAction()) || CALL_STATUS_UNANSWERED.equals(callData.getCallAction())) {
             if (CometChatVoIPUtils.currentSessionId.equals(callData.getSessionId())) {
                 if (ActivityCompat.checkSelfPermission(
                     this,

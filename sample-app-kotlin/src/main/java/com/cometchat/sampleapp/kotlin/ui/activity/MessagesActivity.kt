@@ -92,7 +92,10 @@ class MessagesActivity : AppCompatActivity() {
 
         viewModel.updateUser.observe(
             this
-        ) { user: User -> this.updateUserBlockStatus(user) }
+        ) { user: User ->
+            this.user = user
+            this.updateUserBlockStatus(user)
+        }
 
         viewModel
             .openUserChat()
@@ -127,6 +130,8 @@ class MessagesActivity : AppCompatActivity() {
             val intent = Intent(
                 context, ThreadMessageActivity::class.java
             )
+            if (user != null)
+                intent.putExtra("user", Gson().toJson(user))
             intent.putExtra(getString(R.string.app_message_id), baseMessage.id)
             context.startActivity(intent)
         }
@@ -191,10 +196,10 @@ class MessagesActivity : AppCompatActivity() {
     private fun updateUserBlockStatus(user: User) {
         if (user.isBlockedByMe) {
             binding.messageComposer.visibility = View.GONE
-            binding.unblockBtn.visibility = View.VISIBLE
+            binding.unblockLayout.visibility = View.VISIBLE
         } else {
-            binding.unblockBtn.visibility = View.GONE
             binding.messageComposer.visibility = View.VISIBLE
+            binding.unblockLayout.visibility = View.GONE
         }
     }
 

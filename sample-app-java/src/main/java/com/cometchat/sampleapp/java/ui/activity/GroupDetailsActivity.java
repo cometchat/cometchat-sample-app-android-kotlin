@@ -273,7 +273,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
         addMembersLayoutBinding.addMembers.setBackIconVisibility(View.VISIBLE);
         addMembersLayoutBinding.addMembers.setOnItemClick((view, poUser, user) -> addMembersLayoutBinding.addMembers.selectUser(user,
                                                                                                                                 UIKitConstants.SelectionMode.MULTIPLE));
-        addMembersLayoutBinding.addMembersBtn.setOnClickListener(view -> viewModel.addMembersToGroup(addMembersLayoutBinding.addMembers.getSelectedUsers()));
+        addMembersLayoutBinding.addMembersBtn.setOnClickListener(view -> viewModel.addMembersToGroup(this, addMembersLayoutBinding.addMembers.getSelectedUsers()));
 
         alertDialog = new AlertDialog.Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat);
         Utils.removeParentFromView(addMembersLayoutBinding.getRoot());

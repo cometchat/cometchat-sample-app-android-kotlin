@@ -140,4 +140,8 @@
     <string name="app_report">بدء التقرير</string>
     <string name="app_has_blocked_you">قام بحظرك</string>
     <string name="app_you_have_blocked_this_user">لقد قمت بحظر</string>
+    <string name="app_transfer_ownership_information">يجب عليك نقل ملكية هذه المجموعة إلى عضو آخر قبل مغادرتها.</string>
+    <string name="app_unblock_message">لا يمكن إرسال رسالة لأن المستخدم محظور</string>
+    <string name="participant_scope_with_group">يُسمح فقط لمشرفي المجموعة بتنفيذ هذا الإجراء. المستخدم %1$s لديه صلاحية "مشارك" في المجموعة %2$s.</string>
+    <string name="participant_scope_without_group">يُسمح فقط لمشرفي المجموعة بتنفيذ هذا الإجراء. المستخدم %1$s لديه صلاحية "مشارك".</string>
 </resources>

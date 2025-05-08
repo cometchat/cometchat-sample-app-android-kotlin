@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">CometChat Team Messenger</string>
+    <string name="app_bottom_nav_chats" translatable="true">Chat</string>
+    <string name="app_bottom_nav_calls" translatable="true">Chiamate</string>
+    <string name="app_bottom_nav_users" translatable="true">Utenti</string>
+    <string name="app_bottom_nav_groups" translatable="true">Gruppi</string>
+
+    <string name="app_login" translatable="true">Accedi</string>
+    <string name="app_continue_with_google" translatable="true">Continua con Google</string>
+    <string name="app_no_banned_members" translatable="true">Nessun membro bannato</string>
+    <string name="app_banned_few_members_to_show_them_here" translatable="true">Pochi membri bannati per mostrarli qui</string>
+    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Accesso fallito con Google, nessun account trovato.</string>
+    <string name="app_google_sign_in_failed" translatable="true">"Accesso Google fallito: "</string>
+    <string name="app_group" translatable="true">gruppo</string>
+    <string name="app_btn_leave" translatable="true">Esci</string>
+    <string name="app_leave_this_group" translatable="true">Vuoi lasciare questo gruppo?</string>
+    <string name="app_leave_this_group_description" translatable="true">Sei sicuro di voler lasciare questo gruppo? Non riceverai più messaggi da questa chat.</string>
+    <string name="app_btn_cancel" translatable="true">Annulla</string>
+    <string name="app_transfer_ownership_description" translatable="true">Sei sicuro di voler trasferire la proprietà? Questa azione non può essere annullata e il nuovo proprietario avrà il pieno controllo.</string>
+    <string name="app_transfer_ownership_information" translatable="true">Devi trasferire la proprietà di questo gruppo a un altro membro prima di lasciare il gruppo.</string>
+    <string name="app_btn_continue" translatable="true">Continua</string>
+    <string name="app_delete_and_exit" translatable="true">Eliminare ed uscire?</string>
+    <string name="app_delete_and_exit_action" translatable="true">Elimina ed Esci</string>
+    <string name="app_delete_and_exit_description" translatable="true">Sei sicuro di voler eliminare questa chat e uscire dal gruppo? Questa azione non può essere annullata.</string>
+    <string name="app_btn_delete" translatable="true">Elimina</string>
+    <string name="app_add" translatable="true">Aggiungi</string>
+    <string name="app_member" translatable="true">Membro</string>
+    <string name="app_members" translatable="true">Membri</string>
+    <string name="app_base_message" translatable="true">baseMessage</string>
+    <string name="app_user" translatable="true">utente</string>
+    <string name="app_session_id" translatable="true">sessionId</string>
+    <string name="app_call_type" translatable="true">callType</string>
+    <string name="app_not_logged_in" translatable="true">Non sei loggato. Per favore effettua il login e riprova.</string>
+    <string name="app_transfer_ownership" translatable="true">Trasferisci proprietà</string>
+
+    <string name="app_call_details" translatable="true">Dettagli chiamata</string>
+    <string name="app_call_details_history" translatable="true">Storia</string>
+    <string name="app_call_details_participants" translatable="true">Partecipanti</string>
+    <string name="app_call_details_recordings" translatable="true">Registrazioni</string>
+    <string name="app_call_outgoing" translatable="true">In uscita</string>
+    <string name="app_call_missed" translatable="true">Persa</string>
+    <string name="app_call_incoming" translatable="true">In arrivo</string>
+    <string name="app_no_recordings_found" translatable="true">Nessuna registrazione trovata</string>
+
+    <string name="app_accept" translatable="true">Accetta</string>
+    <string name="app_decline" translatable="true">Rifiuta</string>
+    <string name="app_incoming_s_call" translatable="true">Chiamata in arrivo %s</string>
+    <string name="app_user_info" translatable="true">Informazioni utente</string>
+    <string name="app_voice" translatable="true">Voce</string>
+    <string name="app_video" translatable="true">Video</string>
+
+    <string name="app_delete" translatable="true">Elimina Chat</string>
+    <string name="app_delete_chat_title" translatable="true">Eliminare questa chat?</string>
+    <string name="app_delete_chat_subtitle" translatable="true">Sei sicuro di voler eliminare questa chat? Questa azione non può essere annullata.</string>
+    <string name="app_delete_chat_positive_button" translatable="true">Elimina</string>
+    <string name="app_delete_chat_negative_button" translatable="true">Annulla</string>
+    <string name="app_delete_chat_error" translatable="true">Eliminazione fallita</string>
+    <string name="app_delete_chat_success" translatable="true">Chat eliminata</string>
+
+    <string name="app_block" translatable="true">Blocca</string>
+    <string name="app_block_user_title" translatable="true">Bloccare questo contatto?</string>
+    <string name="app_block_user_subtitle" translatable="true">Sei sicuro di voler bloccare questo contatto? Non riceverai più messaggi da loro.</string>
+    <string name="app_block_user_positive_button" translatable="true">Blocca</string>
+    <string name="app_block_user_negative_button" translatable="true">Annulla</string>
+    <string name="app_block_user_error" translatable="true">Blocca fallito</string>
+    <string name="app_block_user_success" translatable="true">Utente bloccato</string>
+
+    <string name="app_unblock" translatable="true">Sblocca</string>
+    <string name="app_unblock_user_title" translatable="true">Sbloccare questo contatto?</string>
+    <string name="app_unblock_user_subtitle" translatable="true">Sei sicuro di voler sbloccare questo contatto?</string>
+    <string name="app_unblock_user_positive_button" translatable="true">Sblocca</string>
+    <string name="app_unblock_user_negative_button" translatable="true">Annulla</string>
+    <string name="app_unblock_user_error" translatable="true">Sblocca fallito</string>
+    <string name="app_unblock_user_success" translatable="true">Utente sbloccato</string>
+    <string name="app_message_id" translatable="true">message_id</string>
+
+    <string name="app_choose_sample_user" translatable="true">Scegli un utente di esempio</string>
+    <string name="app_continue" translatable="true">Continua</string>
+    <string name="app_or" translatable="true">O</string>
+    <string name="app_change" translatable="true">Cambia</string>
+    <string name="app_app_credentials" translatable="true">Credenziali dell\'app</string>
+    <string name="app_enter_uid" translatable="true">Inserisci UID</string>
+    <string name="app_enter_your_uid" translatable="true">Inserisci il tuo UID</string>
+    <string name="app_error_invalid_user_or_uid_login" translatable="true">Seleziona un utente o inserisci l\'UID corretto</string>
+    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
+    <string name="app_cred_id" translatable="true">appId</string>
+    <string name="app_cred_region" translatable="true">appRegion</string>
+    <string name="app_cred_auth" translatable="true">appAuthKey</string>
+    <string name="app_region" translatable="true">Regione</string>
+    <string name="app_region_us" translatable="true">US</string>
+    <string name="app_region_eu" translatable="true">EU</string>
+    <string name="app_region_in" translatable="true">IN</string>
+    <string name="app_app_id" translatable="true">ID App</string>
+    <string name="app_app_id_hint" translatable="true">Inserisci l\'ID dell\'app</string>
+    <string name="app_auth_key" translatable="true">Chiave di autenticazione</string>
+    <string name="app_auth_key_hint" translatable="true">Inserisci la chiave di autenticazione</string>
+    <string name="app_please_select_app_region" translatable="true">Seleziona la regione dell\'app</string>
+    <string name="app_invalid_app_id" translatable="true">Inserisci un ID app valido</string>
+    <string name="app_invalid_auth_token" translatable="true">Inserisci un token di autenticazione valido</string>
+    <string name="app_new_group" translatable="true">Nuovo Gruppo</string>
+    <string name="app_group_type" translatable="true">Tipo</string>
+    <string name="app_group_name" translatable="true">Nome</string>
+    <string name="app_group_hint_name" translatable="true">Inserisci il nome del gruppo</string>
+    <string name="app_password" translatable="true">Password</string>
+    <string name="app_hint_enter_the_password" translatable="true">Inserisci la password</string>
+    <string name="app_btn_create_group" translatable="true">Crea Gruppo</string>
+    <string name="app_create_conversation" translatable="true">Crea conversazione</string>
+    <string name="app_logout" translatable="true">Disconnetti</string>
+    <string name="app_group_info" translatable="true">Info Gruppo</string>
+    <string name="app_no_longer_part_of_this_group" translatable="true">Non fai più parte di questo gruppo</string>
+    <string name="app_view_members" translatable="true">Visualizza Membri</string>
+    <string name="app_add_members" translatable="true">Aggiungi Membri</string>
+    <string name="app_banned_members" translatable="true">Membri Bannati</string>
+    <string name="app_view_members_chip" translatable="true">Visualizza \nMembri</string>
+    <string name="app_add_members_chip" translatable="true">Aggiungi \nMembri</string>
+    <string name="app_banned_members_chip" translatable="true">Bannati \nMembri</string>
+    <string name="app_leave" translatable="true">Lascia</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">Non puoi inviare messaggi a questo gruppo perché non fai più parte del gruppo.</string>
+    <string name="app_unblock_user" translatable="true">Sblocca Utente</string>
+    <string name="app_description" translatable="true">Descrizione</string>
+    <string name="app_steps_to_reproduce" translatable="true">Passi per riprodurre</string>
+    <string name="app_join_group" translatable="true">Unisciti al gruppo</string>
+    <string name="app_type" translatable="true">Tipo</string>
+    <string name="app_enter_the_password" translatable="true">Inserisci la password</string>
+    <string name="app_something_went_wrong_please_try_again" translatable="true">Qualcosa è andato storto. Per favore riprova.</string>
+    <string name="app_retry" translatable="true">Riprova</string>
+    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">Sembra che ci sia stato un problema.\n Per favore riprova.</string>
+    <string name="app_type_public" translatable="true">Pubblico</string>
+    <string name="app_transfer_ownership_text" translatable="true">Trasferisci proprietà</string>
+    <string name="app_type_private" translatable="true">Privato</string>
+    <string name="app_type_protected" translatable="true">Protetto</string>
+    <string name="app_thread_title" translatable="true">Thread</string>
+    <string name="app_error_conversations_title" translatable="true">Ops!</string>
+    <string name="app_group_members_empty_title" translatable="true">Nessun membro disponibile</string>
+    <string name="app_group_member_empty_subtitle" translatable="true">Aggiungi membri al gruppo e vedili qui.</string>
+    <string name="app_search" translatable="true">Cerca</string>
+    <string name="app_new_chat" translatable="true">Nuova chat</string>
+    <string name="app_report" translatable="true">Inizia segnalazione</string>
+    <string name="app_has_blocked_you" translatable="true">ti ha bloccato</string>
+    <string name="app_you_have_blocked_this_user" translatable="true">Hai bloccato</string>
+    <string name="app_unblock_message" translatable="true">Non puoi inviare un messaggio perché l\'utente è bloccato</string>
+    <string name="participant_scope_with_group" translatable="true">
+    Solo gli amministratori del gruppo possono eseguire questa azione. L\'utente %1$s ha un ambito \'partecipante\' nel gruppo %2$s.
+    </string>
+    <string name="participant_scope_without_group" translatable="true">
+    Solo gli amministratori del gruppo possono eseguire questa azione. L\'utente %1$s ha un ambito \'partecipante\'.
+    </string>
+</resources>
