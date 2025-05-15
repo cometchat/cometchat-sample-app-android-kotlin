@@ -21,7 +21,7 @@ public class Language {
      * Annotation for defining valid language codes.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({Code.de, Code.ar, Code.zh_tw, Code.en, Code.fr, Code.es, Code.hi, Code.hu, Code.lt, Code.ms, Code.ru, Code.zh, Code.sv, Code.pt})
+    @StringDef({Code.de, Code.ar, Code.zh_tw, Code.en, Code.fr, Code.es, Code.hi, Code.hu, Code.lt, Code.ms, Code.ru, Code.zh, Code.sv, Code.pt, Code.it, Code.ja, Code.ko, Code.nl, Code.tr})
     public @interface Code {
         String de = "de";
         String ar = "ar";
@@ -37,5 +37,10 @@ public class Language {
         String pt = "pt";
         String hi = "hi";
         String zh = "zh";
+        String it = "it";
+        String ja = "ja";
+        String ko = "ko";
+        String nl = "nl";
+        String tr = "tr";
     }
 }
