@@ -34,6 +34,7 @@
                 app:cardCornerRadius="@dimen/cometchat_radius_max" />
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/iv_scope_change_card"
                 android:layout_width="@dimen/cometchat_80dp"
                 android:layout_height="@dimen/cometchat_80dp"
                 android:layout_gravity="center_horizontal"
@@ -67,6 +68,7 @@
                 android:textColor="?attr/cometchatTextColorPrimary" />
 
             <TextView
+                android:id="@+id/scope_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

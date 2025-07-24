@@ -56,7 +56,7 @@ class FCMService : FirebaseMessagingService() {
                         Gson().toJson(message.data), FCMMessageDTO::class.java
                     )
                     CometChat.markAsDelivered(
-                        fcmMessageDTO.tag!!.toInt(),
+                        fcmMessageDTO.tag!!.toLong(),
                         fcmMessageDTO.sender!!,
                         fcmMessageDTO.receiverType!!,
                         fcmMessageDTO.receiver!!

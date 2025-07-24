@@ -65,6 +65,16 @@ class CallDetailsActivity : AppCompatActivity() {
         initTabFragment()
 
         initClickListeners()
+
+        binding.parentLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.toolbarBackIcon.setColorFilter(CometChatTheme.getIconTintPrimary(this))
+        binding.toolbarTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.toolbarDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
+        binding.messageHeaderDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
+        binding.infoLayout.setBackgroundColor(CometChatTheme.getBackgroundColor2(this))
+        binding.tvInfoTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.tvInfoCallDuration.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.infoLayoutDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
     }
 
     private fun initViewModel() {
@@ -85,7 +95,11 @@ class CallDetailsActivity : AppCompatActivity() {
         }
 
         viewModel.receiverUser.observe(this) { user: User? ->
-            binding.messageHeader.user = user!!
+            if (user != null) {
+                binding.messageHeader.videoCallButtonVisibility = if (user.isHasBlockedMe || user.isBlockedByMe) View.GONE else View.VISIBLE
+                binding.messageHeader.voiceCallButtonVisibility = if (user.isHasBlockedMe || user.isBlockedByMe) View.GONE else View.VISIBLE
+                binding.messageHeader.user = user
+            }
             binding.messageHeader.userStatusVisibility = View.GONE
             binding.messageHeader.setBackIconVisibility(View.GONE)
         }

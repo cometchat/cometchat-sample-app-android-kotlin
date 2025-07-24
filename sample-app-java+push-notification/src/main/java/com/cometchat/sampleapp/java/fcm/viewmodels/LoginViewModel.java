@@ -68,6 +68,17 @@ public class LoginViewModel extends ViewModel {
                 Repository.registerFCMToken(new CometChat.CallbackListener<String>() {
                     @Override
                     public void onSuccess(String s) {
+                        CometChat.connect(new CometChat.CallbackListener<String>() {
+                            @Override
+                            public void onSuccess(String s) {
+
+                            }
+
+                            @Override
+                            public void onError(CometChatException e) {
+
+                            }
+                        });
                         loginStatus.setValue(true);
                     }
 

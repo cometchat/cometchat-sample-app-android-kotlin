@@ -1,6 +1,7 @@
 package com.cometchat.sampleapp.java.ui.customviews;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -123,6 +124,8 @@ public class CometChatBannedMembers extends MaterialCardView {
         // Handle click events within the view
         clickEvents();
 
+        setUpColors();
+
         super.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(getContext()));
     }
 
@@ -241,6 +244,24 @@ public class CometChatBannedMembers extends MaterialCardView {
 
         // Set up the retry button click event for retrying to fetch group members
         binding.retryBtn.setOnClickListener(view -> viewModel.fetchGroupMember());
+    }
+
+    private void setUpColors() {
+        binding.parentLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(getContext()));
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(getContext()));
+        binding.ivBack.setColorFilter(CometChatTheme.getIconTintPrimary(getContext()));
+        binding.viewSeparator.setBackgroundColor(CometChatTheme.getStrokeColorLight(getContext()));
+        binding.groupMemberSearchCard.setStrokeColor(ColorStateList.valueOf(CometChatTheme.getStrokeColorLight(getContext())));
+        binding.ivSearch.setColorFilter(CometChatTheme.getIconTintSecondary(getContext()));
+        binding.ivClear.setColorFilter(CometChatTheme.getIconTintSecondary(getContext()));
+        binding.etSearch.setTextColor(CometChatTheme.getTextColorPrimary(getContext()));
+        binding.etSearch.setHintTextColor(CometChatTheme.getTextColorSecondary(getContext()));
+        binding.tvEmptyGroupMembersTitle.setTextColor(CometChatTheme.getTextColorPrimary(getContext()));
+        binding.tvEmptyGroupMembersSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(getContext()));
+        binding.tvErrorGroupMembersTitle.setTextColor(CometChatTheme.getTextColorPrimary(getContext()));
+        binding.tvErrorGroupMembersSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(getContext()));
+        binding.retryBtn.setTextColor(CometChatTheme.getColorWhite(getContext()));
+        binding.retryBtn.setBackgroundTintList(ColorStateList.valueOf(CometChatTheme.getPrimaryColor(getContext())));
     }
 
     /**

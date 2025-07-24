@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cometchat.calls.core.CallLogRequest;
 import com.cometchat.calls.exceptions.CometChatException;
 import com.cometchat.calls.model.CallLog;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCallLogsBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -415,41 +416,57 @@ public class CometChatCallLogs extends MaterialCardView {
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         if (typedArray == null) return;
         try {
-            backgroundColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsBackgroundColor, 0);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatCallLogs_cometchatCallLogsStrokeWidth, 0);
             strokeColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsStrokeColor, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCallLogs_cometchatCallLogsCornerRadius, 0);
             backIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsBackIcon);
-            backIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsBackIconTint, 0);
+            backIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsBackIconTint,
+                                               CometChatTheme.getIconTintPrimary(getContext()));
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsTitleTextAppearance, 0);
-            titleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsTitleTextColor, 0);
+            titleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()));
             emptyStateTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateTitleTextAppearance, 0);
-            emptyStateTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateTitleTextColor, 0);
+            emptyStateTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateTitleTextColor,
+                                                           CometChatTheme.getTextColorPrimary(getContext()));
             emptyStateSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateSubtitleTextAppearance,
                                                                         0);
-            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateSubtitleTextColor, 0);
+            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsEmptyStateSubtitleTextColor,
+                                                              CometChatTheme.getTextColorSecondary(getContext()));
             errorTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsErrorTitleTextAppearance, 0);
-            errorTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsErrorTitleTextColor, 0);
+            errorTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsErrorTitleTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext()));
             errorSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsErrorSubtitleTextAppearance, 0);
-            errorSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsErrorSubtitleTextColor, 0);
+            errorSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsErrorSubtitleTextColor,
+                                                         CometChatTheme.getTextColorSecondary(getContext()));
             itemTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsItemTitleTextAppearance, 0);
-            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemTitleTextColor, 0);
+            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemTitleTextColor,
+                                                     CometChatTheme.getTextColorPrimary(getContext()));
             itemSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsItemSubtitleTextAppearance, 0);
-            itemSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemSubtitleTextColor, 0);
+            itemSubtitleTextColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemSubtitleTextColor,
+                                                        CometChatTheme.getTextColorSecondary(getContext()));
             itemIncomingCallIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsItemIncomingCallIcon);
-            itemIncomingCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemIncomingCallIconTint, 0);
+            itemIncomingCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemIncomingCallIconTint,
+                                                           CometChatTheme.getSuccessColor(getContext()));
             itemOutgoingCallIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsItemOutgoingCallIcon);
-            itemOutgoingCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemOutgoingCallIconTint, 0);
-            itemMissedCallTitleColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemMissedCallTitleColor, 0);
+            itemOutgoingCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemOutgoingCallIconTint,
+                                                           CometChatTheme.getSuccessColor(getContext()));
+            itemMissedCallTitleColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemMissedCallTitleColor,
+                                                           CometChatTheme.getErrorColor(getContext()));
             itemMissedCallIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsItemMissedCallIcon);
-            itemMissedCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemMissedCallIconTint, 0);
+            itemMissedCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemMissedCallIconTint,
+                                                         CometChatTheme.getErrorColor(getContext()));
             itemAudioCallIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsItemAudioCallIcon);
-            itemAudioCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemAudioCallIconTint, 0);
+            itemAudioCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemAudioCallIconTint,
+                                                        CometChatTheme.getIconTintPrimary(getContext()));
             itemVideoCallIcon = typedArray.getDrawable(R.styleable.CometChatCallLogs_cometchatCallLogsItemVideoCallIcon);
-            itemVideoCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemVideoCallIconTint, 0);
+            itemVideoCallIconTint = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsItemVideoCallIconTint,
+                                                        CometChatTheme.getIconTintPrimary(getContext()));
             avatarStyle = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsAvatarStyle, 0);
             dateStyle = typedArray.getResourceId(R.styleable.CometChatCallLogs_cometchatCallLogsDateStyle, 0);
-            separatorColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsSeparatorColor, 0);
+            separatorColor = typedArray.getColor(R.styleable.CometChatCallLogs_cometchatCallLogsSeparatorColor,
+                                                 CometChatTheme.getStrokeColorLight(getContext()));
 
             // Apply default styles
             updateUI();
@@ -676,10 +693,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @StyleRes int getTitleTextAppearance() {
         return titleTextAppearance;
-    }    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -699,6 +712,10 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @ColorInt int getTitleTextColor() {
         return titleTextColor;
+    }    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -1095,14 +1112,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @ColorInt int getItemAudioCallIconTint() {
         return itemAudioCallIconTint;
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth The stroke width for the call logs.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeColor);
     }
 
     /**
@@ -1141,6 +1150,14 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @ColorInt int getItemVideoCallIconTint() {
         return itemVideoCallIconTint;
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth The stroke width for the call logs.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeColor);
     }
 
     /**
@@ -1364,13 +1381,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public void setOnError(OnCallError onError) {
         this.onError = onError;
-    }    /**
-     * Returns the stroke width.
-     *
-     * @return The stroke width of the call logs.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     public OnEmpty getOnEmpty() {
@@ -1415,6 +1425,13 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public void setOnBackPressListener(OnBackPress onBackPress) {
         this.onBackPress = onBackPress;
+    }    /**
+     * Returns the stroke width.
+     *
+     * @return The stroke width of the call logs.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     public OnItemClick<CallLog> getOnItemClick() {

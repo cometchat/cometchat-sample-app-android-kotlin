@@ -15,6 +15,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageInputLayoutBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -112,8 +113,10 @@ public class CometChatMessageInput extends MaterialCardView {
             messageInputStrokeColor = typedArray.getColor(R.styleable.CometChatMessageInput_cometchatMessageInputStrokeColor, 0);
             messageInputCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageInput_cometchatMessageInputCornerRadius, 0);
             messageInputTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInput_cometchatMessageInputTextAppearance, 0);
-            messageInputTextColor = typedArray.getColor(R.styleable.CometChatMessageInput_cometchatMessageInputTextColor, 0);
-            messageInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatMessageInput_cometchatMessageInputPlaceHolderTextColor, 0);
+            messageInputTextColor = typedArray.getColor(R.styleable.CometChatMessageInput_cometchatMessageInputTextColor,
+                                                        CometChatTheme.getTextColorPrimary(getContext()));
+            messageInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatMessageInput_cometchatMessageInputPlaceHolderTextColor,
+                                                                   CometChatTheme.getTextColorTertiary(getContext()));
             // Apply default styles
             applyDefault();
         } finally {

@@ -33,6 +33,5 @@ public class UsersFragment extends Fragment {
             intent.putExtra(getString(R.string.app_user), new Gson().toJson(user));
             startActivity(intent);
         });
-
     }
 }

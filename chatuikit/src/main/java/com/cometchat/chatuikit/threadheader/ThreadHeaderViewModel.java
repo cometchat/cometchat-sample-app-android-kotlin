@@ -95,19 +95,25 @@ public class ThreadHeaderViewModel extends ViewModel {
 
             @Override
             public void onTextMessageReceived(TextMessage textMessage) {
-                incrementParentMessageReplyCount();
+                if (textMessage != null && parentMessage != null && parentMessage.getId() == textMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(textMessage);
             }
 
             @Override
             public void onMediaMessageReceived(MediaMessage mediaMessage) {
-                incrementParentMessageReplyCount();
+                if (mediaMessage != null && parentMessage != null && parentMessage.getId() == mediaMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(mediaMessage);
             }
 
             @Override
             public void onCustomMessageReceived(CustomMessage customMessage) {
-                incrementParentMessageReplyCount();
+                if (customMessage != null && parentMessage != null && parentMessage.getId() == customMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(customMessage);
             }
 
@@ -133,25 +139,33 @@ public class ThreadHeaderViewModel extends ViewModel {
 
             @Override
             public void onFormMessageReceived(FormMessage formMessage) {
-                incrementParentMessageReplyCount();
+                if (formMessage != null && parentMessage != null && parentMessage.getId() == formMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(formMessage);
             }
 
             @Override
             public void onSchedulerMessageReceived(SchedulerMessage schedulerMessage) {
-                incrementParentMessageReplyCount();
+                if (schedulerMessage != null && parentMessage != null && parentMessage.getId() == schedulerMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(schedulerMessage);
             }
 
             @Override
             public void onCardMessageReceived(CardMessage cardMessage) {
-                incrementParentMessageReplyCount();
+                if (cardMessage != null && parentMessage != null && parentMessage.getId() == cardMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(cardMessage);
             }
 
             @Override
             public void onCustomInteractiveMessageReceived(CustomInteractiveMessage customInteractiveMessage) {
-                incrementParentMessageReplyCount();
+                if (customInteractiveMessage != null && parentMessage != null && parentMessage.getId() == customInteractiveMessage.getParentMessageId()) {
+                    incrementParentMessageReplyCount();
+                }
                 updateParentMessage(customInteractiveMessage);
             }
 
@@ -187,12 +201,21 @@ public class ThreadHeaderViewModel extends ViewModel {
     }
 
     public void updateParentMessage(BaseMessage baseMessage) {
-        if (baseMessage != null && parentMessage != null && parentMessage.getId() == baseMessage.getParentMessageId()) {
-            receiveMessage.setValue(baseMessage);
-            if (!messageList.isEmpty()) {
-                messageList.set(0, parentMessage);
-                parentMessageListLiveData.setValue(messageList);
+        if (baseMessage != null && parentMessage != null) {
+            if (baseMessage.getParentMessageId() > 0 && baseMessage.getParentMessageId() == parentMessage.getId()) {
+                // Thread message
+                if (!messageList.isEmpty()) {
+                    messageList.set(0, parentMessage);
+                    parentMessageListLiveData.setValue(messageList);
+                }
             }
+            if (baseMessage.getId() == parentMessage.getId()){
+                if (!messageList.isEmpty()) {
+                    messageList.set(0, baseMessage);
+                    parentMessageListLiveData.setValue(messageList);
+                }
+            }
+            receiveMessage.setValue(baseMessage);
         }
     }
 

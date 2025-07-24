@@ -116,7 +116,7 @@ public class CometChatBadge extends MaterialCardView {
      * Sets the default values for the CometChatBadge.
      */
     private void setDefaultValues() {
-        badgeTextColor = CometChatTheme.getButtonIconTint(getContext());
+        badgeTextColor = CometChatTheme.getPrimaryButtonIconTint(getContext());
         badgeBackgroundColor = CometChatTheme.getPrimaryColor(getContext());
     }
 

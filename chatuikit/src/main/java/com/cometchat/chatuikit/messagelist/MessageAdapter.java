@@ -21,6 +21,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
@@ -1889,7 +1890,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             TypedArray typedArray = context.obtainStyledAttributes(messageBubbleStyle, R.styleable.CometChatMessageBubble);
             try {
                 setIncomingMessageBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor,
-                                                                            0));
+                                                                            CometChatTheme.getNeutralColor300(context)));
                 setIncomingMessageBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleCornerRadius,
                                                                                       0));
                 setIncomingMessageBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeWidth,
@@ -1904,13 +1905,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 setIncomingMessageBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextAppearance,
                                                                                                0));
                 setIncomingMessageBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextColor,
-                                                                                     0));
+                                                                                     CometChatTheme.getTextColorPrimary(context)));
                 setIncomingMessageBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorIconTint,
-                                                                                    0));
+                                                                                    CometChatTheme.getIconTintSecondary(context)));
                 setIncomingMessageBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextAppearance,
                                                                                           0));
                 setIncomingMessageBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextColor,
-                                                                                0));
+                                                                                CometChatTheme.getPrimaryColor(context)));
                 setIncomingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle, 0));
                 setIncomingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
                 setIncomingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle, 0));
@@ -3985,7 +3986,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             TypedArray typedArray = context.obtainStyledAttributes(messageBubbleStyle, R.styleable.CometChatMessageBubble);
             try {
                 setOutgoingMessageBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor,
-                                                                            com.cometchat.chatuikit.CometChatTheme.getPrimaryColor(context)));
+                                                                            CometChatTheme.getPrimaryColor(context)));
                 setOutgoingMessageBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleCornerRadius,
                                                                                       0));
                 setOutgoingMessageBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeWidth,
@@ -4000,13 +4001,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 setOutgoingMessageBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextAppearance,
                                                                                                0));
                 setOutgoingMessageBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextColor,
-                                                                                     0));
+                                                                                     CometChatTheme.getTextColorPrimary(context)));
                 setOutgoingMessageBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorIconTint,
-                                                                                    0));
+                                                                                    CometChatTheme.getIconTintSecondary(context)));
                 setOutgoingMessageBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextAppearance,
                                                                                           0));
                 setOutgoingMessageBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextColor,
-                                                                                0));
+                                                                                CometChatTheme.getPrimaryColor(context)));
                 setOutgoingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle, 0));
                 setOutgoingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
                 setOutgoingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle, 0));

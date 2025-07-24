@@ -37,7 +37,7 @@ class ThreadMessageActivity : AppCompatActivity() {
         viewModel.parentMessage.observe(
             this
         ) { parentMessage: BaseMessage -> this.setParentMessage(parentMessage) }
-        val messageId = intent.getIntExtra(getString(R.string.app_message_id), -1)
+        val messageId = intent.getLongExtra(getString(R.string.app_message_id), -1)
         viewModel.fetchMessageDetails(messageId)
 
         // Set up back button behavior

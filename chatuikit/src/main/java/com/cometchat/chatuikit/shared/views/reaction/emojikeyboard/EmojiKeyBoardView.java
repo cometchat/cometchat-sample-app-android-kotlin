@@ -196,19 +196,24 @@ public class EmojiKeyBoardView extends MaterialCardView {
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setCategoryIconTint(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCategoryIconTint, 0));
+            setCategoryIconTint(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCategoryIconTint,
+                                                    CometChatTheme.getIconTintSecondary(getContext())));
             setSelectedCategoryIconTint(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardSelectedCategoryIconTint,
-                                                            0));
+                                                            CometChatTheme.getIconTintHighlight(getContext())));
             setSelectedCategoryBackgroundColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardSelectedCategoryBackgroundColor,
                                                                    CometChatTheme.getExtendedPrimaryColor100(getContext())));
             setCategoryTextAppearance(typedArray.getResourceId(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCategoryTextAppearance,
                                                                0));
-            setCategoryTextColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCategoryTextColor, 0));
-            setSeparatorColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardSeparatorColor, 0));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardBackgroundColor, 0));
+            setCategoryTextColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCategoryTextColor,
+                                                     CometChatTheme.getTextColorTertiary(getContext())));
+            setSeparatorColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardSeparatorColor,
+                                                  CometChatTheme.getStrokeColorDefault(getContext())));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor1(getContext())));
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardStrokeWidth, 0));
-            setStrokeColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardStrokeColor, 0));
+            setStrokeColor(typedArray.getColor(R.styleable.CometChatEmojiKeyBoardView_cometchatEmojiKeyboardStrokeColor,
+                                               CometChatTheme.getStrokeColorLight(getContext())));
         } finally {
             typedArray.recycle();
         }
@@ -216,6 +221,18 @@ public class EmojiKeyBoardView extends MaterialCardView {
 
     public @Dimension int getCornerRadius() {
         return cornerRadius;
+    }
+
+    public void setCornerRadius(@Dimension int cornerRadius) {
+        this.cornerRadius = cornerRadius;
+        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+            .toBuilder()
+            .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+            .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, 0)
+            .setBottomRightCorner(CornerFamily.ROUNDED, 0)
+            .build();
+        super.setShapeAppearanceModel(shapeAppearanceModel);
     }    /**
      * Sets up the tabs for the emoji categories in the TabLayout. This method
      * iterates through the list of emoji categories and adds each category as a
@@ -231,16 +248,22 @@ public class EmojiKeyBoardView extends MaterialCardView {
         }
     }
 
-    public void setCornerRadius(@Dimension int cornerRadius) {
-        this.cornerRadius = cornerRadius;
-        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
-            .toBuilder()
-            .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
-            .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
-            .setBottomLeftCorner(CornerFamily.ROUNDED, 0)
-            .setBottomRightCorner(CornerFamily.ROUNDED, 0)
-            .build();
-        super.setShapeAppearanceModel(shapeAppearanceModel);
+    // getters to get direct access to the attributes and components
+    public int getStyle() {
+        return style;
+    }
+
+    /**
+     * Sets the style of the text bubble from a specific style resource.
+     *
+     * @param style The resource ID of the style to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            this.style = style;
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatEmojiKeyBoardView);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
     }    /**
      * Adds a tab icon for the specified emoji category to the TabLayout.
      *
@@ -290,36 +313,6 @@ public class EmojiKeyBoardView extends MaterialCardView {
         tabLayout.addTab(tabLayout.newTab().setCustomView(createTabView(drawableId)));
     }
 
-    // getters to get direct access to the attributes and components
-    public int getStyle() {
-        return style;
-    }
-
-    /**
-     * Sets the style of the text bubble from a specific style resource.
-     *
-     * @param style The resource ID of the style to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            this.style = style;
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatEmojiKeyBoardView);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
-    }    /**
-     * Creates a custom tab view with an icon for the specified drawable resource.
-     *
-     * @param drawableId The resource ID of the drawable to use as the icon.
-     * @return A View representing the custom tab.
-     */
-    private View createTabView(int drawableId) {
-        // Inflate a custom view (you need to create tab_item.xml layout in res/layout)
-        View view = View.inflate(getContext(), R.layout.cometchat_emoji_tab_item, null);
-        ImageView icon = view.findViewById(R.id.tabIcon);
-        icon.setImageResource(drawableId);
-        return view;
-    }
-
     public int getBackgroundColor() {
         return backgroundColor;
     }
@@ -332,20 +325,22 @@ public class EmojiKeyBoardView extends MaterialCardView {
     public void setBackgroundColor(@ColorInt int backgroundColor) {
         this.backgroundColor = backgroundColor;
         super.setCardBackgroundColor(backgroundColor);
-    }    /**
-     * Called when the view is attached to a window. If the TabLayout does not have
-     * any tabs, it sets up the tabs.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (tabLayout.getTabCount() == 0) {
-            setTabs();
-        }
     }
 
     public int getSeparatorColor() {
         return separatorColor;
+    }    /**
+     * Creates a custom tab view with an icon for the specified drawable resource.
+     *
+     * @param drawableId The resource ID of the drawable to use as the icon.
+     * @return A View representing the custom tab.
+     */
+    private View createTabView(int drawableId) {
+        // Inflate a custom view (you need to create tab_item.xml layout in res/layout)
+        View view = View.inflate(getContext(), R.layout.cometchat_emoji_tab_item, null);
+        ImageView icon = view.findViewById(R.id.tabIcon);
+        icon.setImageResource(drawableId);
+        return view;
     }
 
     /**
@@ -370,6 +365,16 @@ public class EmojiKeyBoardView extends MaterialCardView {
     public void setCategoryTextColor(@ColorInt int categoryTextColor) {
         this.categoryTextColor = categoryTextColor;
         emojiAdapter.setCategoryTextColor(categoryTextColor);
+    }    /**
+     * Called when the view is attached to a window. If the TabLayout does not have
+     * any tabs, it sets up the tabs.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (tabLayout.getTabCount() == 0) {
+            setTabs();
+        }
     }
 
     public int getCategoryTextAppearance() {
@@ -397,15 +402,10 @@ public class EmojiKeyBoardView extends MaterialCardView {
      */
     public void setSelectedCategoryBackgroundColor(@ColorInt int backgroundColor) {
         this.selectedCategoryBackgroundColor = backgroundColor;
-    }    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     public int getSelectedCategoryIconTint() {
         return selectedCategoryIconTint;
-    }    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -415,17 +415,10 @@ public class EmojiKeyBoardView extends MaterialCardView {
      */
     public void setSelectedCategoryIconTint(@ColorInt int selectedCategoryIconTint) {
         this.selectedCategoryIconTint = selectedCategoryIconTint;
-    }    @Override
-    public int getStrokeColor() {
-        return strokeColor;
     }
 
     public int getCategoryIconTint() {
         return categoryIconTint;
-    }    @Override
-    public void setStrokeColor(int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -439,6 +432,8 @@ public class EmojiKeyBoardView extends MaterialCardView {
 
     public OnClick getOnClick() {
         return onClick;
+    }    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -455,6 +450,9 @@ public class EmojiKeyBoardView extends MaterialCardView {
 
     public TextView getSeparator() {
         return separator;
+    }    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     public boolean isScrolling() {
@@ -463,6 +461,9 @@ public class EmojiKeyBoardView extends MaterialCardView {
 
     public LinearLayoutManager getLinearLayoutManager() {
         return linearLayoutManager;
+    }    @Override
+    public int getStrokeColor() {
+        return strokeColor;
     }
 
     public TabLayout getTabLayout() {
@@ -471,6 +472,10 @@ public class EmojiKeyBoardView extends MaterialCardView {
 
     public List<EmojiCategory> getEmojiCategories() {
         return emojiCategories;
+    }    @Override
+    public void setStrokeColor(int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     public EmojiAdapter getEmojiAdapter() {
@@ -505,6 +510,8 @@ public class EmojiKeyBoardView extends MaterialCardView {
          */
         void onLongClick(String emoji);
     }
+
+
 
 
 

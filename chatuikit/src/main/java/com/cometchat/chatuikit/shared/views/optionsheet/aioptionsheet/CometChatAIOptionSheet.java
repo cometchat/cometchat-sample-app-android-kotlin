@@ -13,6 +13,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatAiOptionSheetBinding;
 import com.cometchat.chatuikit.shared.interfaces.OptionSheetClickListener;
@@ -34,11 +35,9 @@ import java.util.List;
  */
 public class CometChatAIOptionSheet extends MaterialCardView {
     private static final String TAG = CometChatAIOptionSheet.class.getSimpleName();
-
-    private CometchatAiOptionSheetBinding binding;
-
-    private OptionSheetAdapter adapter;
     private final List<OptionSheetMenuItem> aiMenuItems = new ArrayList<>();
+    private CometchatAiOptionSheetBinding binding;
+    private OptionSheetAdapter adapter;
     private OptionSheetClickListener optionSheetClickListener;
 
     private @StyleRes int titleTextAppearance;
@@ -104,6 +103,29 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     }
 
     /**
+     * Initializes the RecyclerView, sets up the adapter, and adds an item touch
+     * listener.
+     */
+    private void initRecyclerView() {
+        adapter = new OptionSheetAdapter(getContext(), aiMenuItems);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
+        binding.recyclerView.scheduleLayoutAnimation();
+        binding.recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerView, new ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                view.setBackgroundColor(getContext().getResources().getColor(R.color.cometchat_color_background4, getContext().getTheme()));
+                OptionSheetMenuItem item = (OptionSheetMenuItem) view.getTag(R.string.cometchat_action_item);
+                if (optionSheetClickListener != null) {
+                    new Handler().postDelayed(() -> {
+                        optionSheetClickListener.onOptionSheetItemClick(item);
+                    }, 100);
+                }
+            }
+        }));
+    }
+
+    /**
      * Applies the style attributes from XML to the view.
      *
      * @param attrs        The attribute set to use for styling.
@@ -117,18 +139,6 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     }
 
     /**
-     * Sets the style for the AI option sheet.
-     *
-     * @param style The style resource ID to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAIOptionSheet);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
-    }
-
-    /**
      * Extracts attributes from the provided TypedArray and applies default values.
      *
      * @param typedArray The TypedArray containing style attributes.
@@ -138,10 +148,14 @@ public class CometChatAIOptionSheet extends MaterialCardView {
         try {
             // Extract attributes or apply default values
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetTitleTextAppearance, 0);
-            titleColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetTitleColor, 0);
-            iconTint = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetIconTint, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetBackgroundColor, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetStrokeColor, 0);
+            titleColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetTitleColor,
+                                             CometChatTheme.getTextColorPrimary(getContext()));
+            iconTint = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetIconTint,
+                                           CometChatTheme.getIconTintHighlight(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            strokeColor = typedArray.getColor(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(getContext()));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetStrokeWidth, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatAIOptionSheet_cometchatAIOptionSheetCornerRadius, 0);
             // Call setters
@@ -166,26 +180,36 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     }
 
     /**
-     * Initializes the RecyclerView, sets up the adapter, and adds an item touch
-     * listener.
+     * Sets the stroke color for the AI option sheet.
+     *
+     * @param strokeColor The stroke color to set as an integer.
      */
-    private void initRecyclerView() {
-        adapter = new OptionSheetAdapter(getContext(), aiMenuItems);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(adapter);
-        binding.recyclerView.scheduleLayoutAnimation();
-        binding.recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerView, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                view.setBackgroundColor(getContext().getResources().getColor(R.color.cometchat_color_background4, getContext().getTheme()));
-                OptionSheetMenuItem item = (OptionSheetMenuItem) view.getTag(R.string.cometchat_action_item);
-                if (optionSheetClickListener != null) {
-                    new Handler().postDelayed(() -> {
-                        optionSheetClickListener.onOptionSheetItemClick(item);
-                    }, 100);
-                }
-            }
-        }));
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        if (binding != null) {
+            binding.viewBottomSheet.setStrokeColor(strokeColor);
+        }
+    }
+
+    /**
+     * Gets the stroke color of the AI option sheet.
+     *
+     * @return The stroke color as an integer.
+     */
+    public ColorStateList getStrokeColorStateList() {
+        return ColorStateList.valueOf(strokeColor);
+    }
+
+    /**
+     * Sets the style for the AI option sheet.
+     *
+     * @param style The style resource ID to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAIOptionSheet);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
     }
 
     /**
@@ -193,6 +217,17 @@ public class CometChatAIOptionSheet extends MaterialCardView {
      */
     public void textAlignCenter() {
         mTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+    }
+
+    /**
+     * Sets the text alignment for the AI option items.
+     *
+     * @param alignment The alignment to apply.
+     */
+    private void mTextAlignment(int alignment) {
+        if (adapter != null) {
+            adapter.setItemTextAlignment(alignment);
+        }
     }
 
     /**
@@ -210,23 +245,19 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     }
 
     /**
-     * Sets the text alignment for the AI option items.
-     *
-     * @param alignment The alignment to apply.
-     */
-    private void mTextAlignment(int alignment) {
-        if (adapter != null) {
-            adapter.setItemTextAlignment(alignment);
-        }
-    }
-
-    /**
      * Gets the corner radius of the AI option sheet.
      *
      * @return The corner radius in pixels.
      */
     public @Dimension int getCornerRadius() {
         return cornerRadius;
+    }    /**
+     * Gets the stroke width of the AI option sheet.
+     *
+     * @return The stroke width in pixels.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -237,21 +268,16 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     public void setCornerRadius(@Dimension int cornerRadius) {
         this.cornerRadius = cornerRadius;
         if (binding != null) {
-            ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel().toBuilder().setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius).setTopRightCorner(CornerFamily.ROUNDED, cornerRadius).setBottomLeftCorner(CornerFamily.ROUNDED, 0).setBottomRightCorner(CornerFamily.ROUNDED, 0).build();
+            ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+                .toBuilder()
+                .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+                .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+                .setBottomLeftCorner(CornerFamily.ROUNDED, 0)
+                .setBottomRightCorner(CornerFamily.ROUNDED, 0)
+                .build();
             binding.viewBottomSheet.setShapeAppearanceModel(shapeAppearanceModel);
         }
-    }
-
-    /**
-     * Gets the stroke width of the AI option sheet.
-     *
-     * @return The stroke width in pixels.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    /**
+    }    /**
      * Sets the stroke width for the AI option sheet.
      *
      * @param strokeWidth The stroke width to set in pixels.
@@ -260,27 +286,6 @@ public class CometChatAIOptionSheet extends MaterialCardView {
         this.strokeWidth = strokeWidth;
         if (binding != null) {
             binding.viewBottomSheet.setStrokeWidth(strokeWidth);
-        }
-    }
-
-    /**
-     * Gets the stroke color of the AI option sheet.
-     *
-     * @return The stroke color as an integer.
-     */
-    public ColorStateList getStrokeColorStateList() {
-        return ColorStateList.valueOf(strokeColor);
-    }
-
-    /**
-     * Sets the stroke color for the AI option sheet.
-     *
-     * @param strokeColor The stroke color to set as an integer.
-     */
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        if (binding != null) {
-            binding.viewBottomSheet.setStrokeColor(strokeColor);
         }
     }
 
@@ -417,4 +422,8 @@ public class CometChatAIOptionSheet extends MaterialCardView {
     public void setOptionSheetClickListener(OptionSheetClickListener optionSheetClickListener) {
         this.optionSheetClickListener = optionSheetClickListener;
     }
+
+
+
+
 }

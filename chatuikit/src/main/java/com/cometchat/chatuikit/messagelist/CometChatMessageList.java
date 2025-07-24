@@ -52,6 +52,7 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.ReactionCount;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.messageinformation.CometChatMessageInformation;
@@ -247,7 +248,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private @StyleRes int messageOptionSheetStyle;
     private @StyleRes int reactionListStyle;
     // Other Properties
-    private int parentMessageId = -1;
+    private long parentMessageId = -1;
     private AdditionParameter additionParameter;
     private List<CometChatTextFormatter> textFormatters;
     private BottomSheetDialog bottomSheetDialog;
@@ -517,6 +518,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getMutableMessageList().observe((LifecycleOwner) getContext(), this::setList);
         messageListViewModel.messagesRangeChanged().observe((LifecycleOwner) getContext(), this::notifyRangeChanged);
         messageListViewModel.updateMessage().observe((LifecycleOwner) getContext(), this::updateMessage);
+        messageListViewModel.getOnMessageDeleted().observe((LifecycleOwner) getContext(), this::dismissMessagePopupMenu);
         messageListViewModel.addMessage().observe((LifecycleOwner) getContext(), this::addMessage);
         messageListViewModel.getCometChatException().observe((LifecycleOwner) getContext(), this::throwError);
         messageListViewModel.removeMessage().observe((LifecycleOwner) getContext(), this::removeMessage);
@@ -534,6 +536,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getRemoveConversationStarter().observe((LifecycleOwner) getContext(), this::removeAIView);
         messageListViewModel.getConversationStarterUIState().observe((LifecycleOwner) getContext(), this::handleConversationStarterUIState);
         messageListViewModel.getSmartRepliesUIState().observe((LifecycleOwner) getContext(), this::handleAISmartRepliesUIState);
+    }
+
+    private void dismissMessagePopupMenu(BaseMessage message) {
+        if (baseMessage != null && message != null && baseMessage.getId() == message.getId()) {
+            if (cometchatPopUpMenuMessage != null && message.getDeletedAt() > 0) {
+                cometchatPopUpMenuMessage.dismiss();
+            }
+        }
     }
 
     public void handleAISmartRepliesUIState(UIKitConstants.States states) {
@@ -682,9 +692,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                                                                       0));
             setErrorStateSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextAppearance,
                                                                          0));
-            setErrorStateTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextColor, 0));
-            setErrorStateSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextColor, 0));
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListBackgroundColor, 0));
+            setErrorStateTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextColor,
+                                                            CometChatTheme.getTextColorPrimary(getContext())));
+            setErrorStateSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextColor,
+                                                               CometChatTheme.getTextColorSecondary(getContext())));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor3(getContext())));
             setStrokeColor(ColorStateList.valueOf(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListStrokeColor, 0)));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageList_cometchatMessageListStrokeWidth, 0));
             setRadius(typedArray.getDimension(R.styleable.CometChatMessageList_cometchatMessageListCornerRadius, 0));
@@ -1297,7 +1310,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      *
      * @param parentMessage The ID of the parent message.
      */
-    public void setParentMessage(int parentMessage) {
+    public void setParentMessage(long parentMessage) {
         if (parentMessage > -1) {
             this.parentMessageId = parentMessage;
         }
@@ -2126,6 +2139,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             threadHeader.setReplyCountBarVisibility(View.GONE);
             threadHeader.setCardBackgroundColor(Color.TRANSPARENT);
             threadHeader.setMaxHeight(Utils.convertDpToPx(context, 300));
+            threadHeader.setReactionVisibility(View.GONE);
             return threadHeader;
         });
         cometchatMessageInformation.setBottomSheetListener(() -> cometchatMessageInformation = null);
@@ -2824,7 +2838,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      *
      * @return An integer representing the parent message ID.
      */
-    public int getParentMessageId() {
+    public long getParentMessageId() {
         return parentMessageId;
     }
 

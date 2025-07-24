@@ -1,3 +1,10 @@
 <resources>
+
     <style name="JavaSampleApp.v5" parent="CometChatTheme.DayNight" />
+
+<style name="Builder.Theme.Roboto" parent="CometChatTheme.DayNight">
+       <item name="cometchatFontBold">@font/roboto_bold</item>
+       <item name="cometchatFontRegular">@font/roboto_regular</item>
+       <item name="cometchatFontMedium">@font/roboto_medium</item>
+</style>
 </resources>

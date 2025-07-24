@@ -18,6 +18,7 @@ import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -118,8 +119,10 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
                 promptTextStyle.setTextSize(Utils.getTextSize(context,
                                                               typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatMentionTextAppearance,
                                                                                        0)));
-                promptTextStyle.setColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionTextColor, 0));
-                promptTextStyle.setBackgroundColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionBackgroundColor, 0));
+                promptTextStyle.setColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionTextColor,
+                                                             CometChatTheme.getPrimaryColor(context)));
+                promptTextStyle.setBackgroundColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionBackgroundColor,
+                                                                       CometChatTheme.getPrimaryColor(context)));
             } finally {
                 typedArray.recycle();
             }
@@ -202,6 +205,11 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
         if (getGroup() != null)
             this.groupMembersRequestBuilder = groupMembersRequestBuilderCallBack.apply(getGroup());
         initializeGroupMemberRequestBuilder();
+    }
+
+    private void initializeGroupMemberRequestBuilder() {
+        if (groupMembersRequestBuilder == null)
+            groupMembersRequestBuilder = new GroupMembersRequest.GroupMembersRequestBuilder(groupId).setLimit(requestLimit);
     }
 
     public void setUsersRequestBuilder(@Nonnull UsersRequest.UsersRequestBuilder usersRequestBuilder) {
@@ -433,11 +441,6 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
             groupMembersRequestBuilder = null;
         }
         initializeGroupMemberRequestBuilder();
-    }
-
-    private void initializeGroupMemberRequestBuilder() {
-        if (groupMembersRequestBuilder == null)
-            groupMembersRequestBuilder = new GroupMembersRequest.GroupMembersRequestBuilder(groupId).setLimit(requestLimit);
     }
 
     public void setUser(User user) {

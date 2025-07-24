@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatAiConversationStarterBinding;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -186,8 +187,8 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
             setStrokeColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterStrokeColor, 0));
 
             setItemBackgroundColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemBackgroundColor,
-                                                       0
-            ));
+                                                       CometChatTheme.getBackgroundColor1(getContext()
+                                                       )));
             setItemBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemBackgroundDrawable));
             setItemCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemCornerRadius,
                                                                  0
@@ -196,17 +197,19 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
                                                                 0
             ));
             setItemStrokeColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemStrokeColor, 0));
-            setItemTextColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemTextColor, 0));
+
             setItemTextAppearance(typedArray.getResourceId(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemTextAppearance,
                                                            0
             ));
-            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterErrorStateTextColor,
-                                                       0
-            ));
+            setItemTextColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterItemTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()
+                                                 )));
             setErrorStateTextAppearance(typedArray.getResourceId(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterErrorStateTextAppearance,
                                                                  0
             ));
-
+            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatAIConversationStarter_cometchatAIConversationStarterErrorStateTextColor,
+                                                       CometChatTheme.getTextColorSecondary(getContext())
+            ));
         } finally {
             typedArray.recycle();
         }
@@ -319,15 +322,6 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
     @Dimension
     public int getMaxHeight() {
         return maxHeight;
-    }    /**
-     * Sets the stroke width for the view's border.
-     *
-     * @param strokeWidth Width of the stroke.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -350,14 +344,14 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
     public CometchatAiConversationStarterBinding getBinding() {
         return binding;
     }    /**
-     * Sets the color of the view's border.
+     * Sets the stroke width for the view's border.
      *
-     * @param strokeColor Color of the stroke.
+     * @param strokeWidth Width of the stroke.
      */
     @Override
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -398,6 +392,15 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
     @ColorInt
     public int getBackgroundColor() {
         return backgroundColor;
+    }    /**
+     * Sets the color of the view's border.
+     *
+     * @param strokeColor Color of the stroke.
+     */
+    @Override
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -635,15 +638,6 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
     public void setErrorStateTextAppearance(@StyleRes int errorStateTextAppearance) {
         this.errorStateTextAppearance = errorStateTextAppearance;
         binding.tvError.setTextAppearance(errorStateTextAppearance);
-    }    /**
-     * Retrieves the stroke width for the component's border.
-     *
-     * @return The stroke width in pixels.
-     */
-    @Dimension
-    @Override
-    public int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -668,15 +662,6 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
             View view = View.inflate(getContext(), errorViewLayout, null);
             binding.errorViewLayout.addView(view);
         }
-    }    /**
-     * Gets the color of the stroke around the component.
-     *
-     * @return The stroke color as an integer.
-     */
-    @ColorInt
-    @Override
-    public int getStrokeColor() {
-        return strokeColor;
     }
 
     /**
@@ -724,6 +709,15 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
             TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAIConversationStarter);
             extractAttributesAndApplyDefaults(typedArray);
         }
+    }    /**
+     * Retrieves the stroke width for the component's border.
+     *
+     * @return The stroke width in pixels.
+     */
+    @Dimension
+    @Override
+    public int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -758,7 +752,16 @@ public class CometChatAIConversationStarterView extends MaterialCardView {
         void onClick(String id, String reply, int position);
     }
 
-
+    /**
+     * Gets the color of the stroke around the component.
+     *
+     * @return The stroke color as an integer.
+     */
+    @ColorInt
+    @Override
+    public int getStrokeColor() {
+        return strokeColor;
+    }
 
 
 

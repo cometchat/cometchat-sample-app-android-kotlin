@@ -58,7 +58,7 @@ public class FCMService extends FirebaseMessagingService {
                 if ("chat".equalsIgnoreCase(type)) {
                     FCMMessageDTO fcmMessageDTO = new Gson().fromJson(new Gson().toJson(message.getData()), FCMMessageDTO.class);
 
-                    CometChat.markAsDelivered(Integer.parseInt(fcmMessageDTO.getTag()),
+                    CometChat.markAsDelivered(Long.parseLong(fcmMessageDTO.getTag()),
                                               fcmMessageDTO.getSender(),
                                               fcmMessageDTO
                                                   .getReceiverType()

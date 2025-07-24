@@ -1,11 +1,11 @@
 package com.cometchat.chatuikit.extensions.sticker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableString;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -56,7 +56,7 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
 
     private final String stickerTypeConstant = ExtensionConstants.ExtensionType.STICKER;
     private StickerKeyboardConfiguration configuration;
-    private boolean isKeyboardVisible = false;
+    private final boolean isKeyboardVisible = false;
 
     public StickerExtensionDecorator(DataSource dataSource) {
         super(dataSource);
@@ -198,6 +198,13 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
 
         stickerImage.setOnClickListener(view1 -> {
             Utils.hideKeyBoard(context, view1);
+
+            // Clear edit text focus if it still has
+            View currentFocus = ((Activity) context).getCurrentFocus();
+            if (currentFocus != null && currentFocus.getId() == R.id.cometchat_compose_box) {
+                currentFocus.clearFocus();
+            }
+
             CometChatStickerKeyboard stickerKeyboard = getStickerKeyboard(context,
                                                                           activeStickerImage,
                                                                           stickerImage,
@@ -286,7 +293,7 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
             CustomMessage customMessage = new CustomMessage(id, receiverType, stickerTypeConstant, stickerData);
             customMessage.shouldUpdateConversation(true);
             if (idMap.containsKey(UIKitConstants.MapId.PARENT_MESSAGE_ID)) {
-                customMessage.setParentMessageId(Integer.parseInt(idMap.get(UIKitConstants.MapId.PARENT_MESSAGE_ID)));
+                customMessage.setParentMessageId(Long.parseLong(idMap.get(UIKitConstants.MapId.PARENT_MESSAGE_ID)));
             }
             customMessage.setMetadata(jsonObject);
             CometChatUIKit.sendCustomMessage(customMessage, null);

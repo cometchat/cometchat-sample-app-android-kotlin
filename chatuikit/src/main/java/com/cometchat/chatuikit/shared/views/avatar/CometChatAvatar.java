@@ -139,7 +139,7 @@ public class CometChatAvatar extends MaterialCardView {
             avatarPlaceHolderTextAppearance = typedArray.getResourceId(R.styleable.CometChatAvatar_cometchatAvatarPlaceHolderTextAppearance,
                                                                        avatarPlaceHolderTextAppearance);
             avatarPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatAvatar_cometchatAvatarPlaceHolderTextColor,
-                                                             avatarPlaceHolderTextColor);
+                                                             CometChatTheme.getPrimaryButtonIconTint(getContext()));
             // Apply default styles
             applyDefault();
         } finally {
@@ -189,7 +189,7 @@ public class CometChatAvatar extends MaterialCardView {
                 text = getFirstCodePoint(nameParts[0]) + getNextCodePoint(nameParts[0], 1);
             }
         }
-        setIvAvatarVisibility(View.GONE);
+        setIvAvatarVisibility(View.INVISIBLE);
         binding.tvAvatar.setText(text.toUpperCase());
         setTvAvatarVisibility(View.VISIBLE);
     }
@@ -249,12 +249,12 @@ public class CometChatAvatar extends MaterialCardView {
         return "";
     }
 
-    private void setIvAvatarVisibility(int visibility) {
-        binding.ivAvatar.setVisibility(visibility);
-    }
-
     private void setTvAvatarVisibility(int visibility) {
         binding.tvAvatar.setVisibility(visibility);
+    }
+
+    private void setIvAvatarVisibility(int visibility) {
+        binding.ivAvatar.setVisibility(visibility);
     }
 
     /**
@@ -300,14 +300,13 @@ public class CometChatAvatar extends MaterialCardView {
                                                        Target<Drawable> target,
                                                        @NonNull DataSource dataSource,
                                                        boolean isFirstResource) {
-
+                            setTvAvatarVisibility(View.GONE);
+                            setIvAvatarVisibility(View.VISIBLE);
                             return false;
                         }
                     }).into(binding.ivAvatar);
                 }
                 binding.innerViewLayout.setBackgroundColor(getContext().getColor(android.R.color.transparent));
-                setIvAvatarVisibility(View.VISIBLE);
-                setTvAvatarVisibility(View.GONE);
                 applyDefault();
             }
         } catch (Exception e) {

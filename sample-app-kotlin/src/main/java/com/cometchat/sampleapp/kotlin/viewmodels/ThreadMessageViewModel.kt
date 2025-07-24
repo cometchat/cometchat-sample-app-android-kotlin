@@ -26,12 +26,12 @@ class ThreadMessageViewModel : ViewModel() {
 
     private val listenerId = "${System.currentTimeMillis()}_${this::class.java.simpleName}"
 
-    private var messageId: Int = -1
+    private var messageId: Long = -1
     private var user: User? = null
 
-    fun getMessageId(): Int = messageId
+    fun getMessageId(): Long = messageId
 
-    fun fetchMessageDetails(id: Int) {
+    fun fetchMessageDetails(id: Long) {
         this.messageId = id
         Repository.fetchMessageInformation(id, object : CometChat.CallbackListener<BaseMessage>() {
             override fun onSuccess(message: BaseMessage?) {

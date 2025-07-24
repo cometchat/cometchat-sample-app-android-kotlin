@@ -61,6 +61,7 @@
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/iv_unban_member"
             android:layout_width="@dimen/cometchat_24dp"
             android:layout_height="@dimen/cometchat_24dp"
             android:layout_marginStart="@dimen/cometchat_margin_4"

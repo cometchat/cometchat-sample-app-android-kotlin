@@ -115,7 +115,7 @@ public class CometChatDate extends LinearLayout {
         simpleDateFormat = new SimpleDateFormat(datePattern, CometChatLocalize.getDefault());
         simpleDayFormat = new SimpleDateFormat(dayPattern, CometChatLocalize.getDefault());
         simpleTimeFormat = new SimpleDateFormat(timePattern, CometChatLocalize.getDefault());
-        dateTextColor = CometChatTheme.getTextColorSecondary(getContext());
+        dateTextColor = CometChatTheme.getTextColorPrimary(getContext());
         setTransparentBackground(true);
     }
 

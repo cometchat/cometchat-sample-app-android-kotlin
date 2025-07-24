@@ -1,5 +1,6 @@
 package com.cometchat.chatuikit.calls.callbutton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -121,18 +122,7 @@ public class CallButtonsViewModel extends ViewModel {
     public void initiateCall(String callType) {
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {
             if (receiverType.equalsIgnoreCase(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-                JSONObject customData = new JSONObject();
-                try {
-                    customData.put(UIKitConstants.CallingJSONConstants.CALL_TYPE, callType);
-                    customData.put(UIKitConstants.CallingJSONConstants.CALL_SESSION_ID, System.currentTimeMillis() + "");
-                } catch (Exception ignored) {
-
-                }
-                CustomMessage customMessage = new CustomMessage(receiverId,
-                                                                CometChatConstants.RECEIVER_TYPE_GROUP,
-                                                                UIKitConstants.MessageType.MEETING,
-                                                                customData
-                );
+                CustomMessage customMessage = getCustomMessage(callType);
                 JSONObject jsonObject = getJsonObject(customMessage);
                 customMessage.setMetadata(jsonObject);
                 customMessage.shouldUpdateConversation(true);
@@ -163,6 +153,22 @@ public class CallButtonsViewModel extends ViewModel {
                 });
             }
         }
+    }
+
+    @NonNull
+    private CustomMessage getCustomMessage(String callType) {
+        JSONObject customData = new JSONObject();
+        try {
+            customData.put(UIKitConstants.CallingJSONConstants.CALL_TYPE, callType);
+            customData.put(UIKitConstants.CallingJSONConstants.CALL_SESSION_ID, receiverId);
+        } catch (Exception exception) {
+            CometChatLogger.e(TAG, exception.getMessage());
+        }
+        return new CustomMessage(receiverId,
+                                 CometChatConstants.RECEIVER_TYPE_GROUP,
+                                 UIKitConstants.MessageType.MEETING,
+                                 customData
+        );
     }
 
     @Nullable

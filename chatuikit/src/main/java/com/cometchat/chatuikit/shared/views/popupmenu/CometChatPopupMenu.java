@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
@@ -18,6 +17,7 @@ import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.google.android.material.card.MaterialCardView;
@@ -27,10 +27,9 @@ import java.util.List;
 
 public class CometChatPopupMenu {
     private static final String TAG = CometChatPopupMenu.class.getSimpleName();
-    private PopupWindow popupWindow;
-
     private final Context context;
     private final List<MenuItem> menuItems;
+    private PopupWindow popupWindow;
     private OnMenuItemClickListener onMenuItemClickListener;
 
     private @Dimension int elevation;
@@ -42,10 +41,6 @@ public class CometChatPopupMenu {
     private @Dimension int strokeWidth;
     private @ColorInt int startIconTint;
     private @ColorInt int endIconTint;
-
-    public interface OnMenuItemClickListener {
-        void onMenuItemClick(String id, String item);
-    }
 
     // Constructor
     public CometChatPopupMenu(Context context, @StyleRes int style) {
@@ -76,13 +71,18 @@ public class CometChatPopupMenu {
         try {
             elevation = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuElevation, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuCornerRadius, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuBackgroundColor, 0);
-            textColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextColor, 0);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(context));
+            textColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextColor,
+                                            CometChatTheme.getTextColorPrimary(context));
             textAppearance = typedArray.getResourceId(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextAppearance, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeColor, 0);
+            strokeColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(context));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeWidth, 0);
-            startIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemStartIconTint, 0);
-            endIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemEndIconTint, 0);
+            startIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemStartIconTint,
+                                                CometChatTheme.getIconTintPrimary(context));
+            endIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemEndIconTint,
+                                              CometChatTheme.getIconTintPrimary(context));
         } finally {
             typedArray.recycle();
         }
@@ -91,6 +91,14 @@ public class CometChatPopupMenu {
     public void setOnMenuItemClickListener(OnMenuItemClickListener listener) {
         // Set the listener
         this.onMenuItemClickListener = listener;
+    }
+
+    public void setStyle(@StyleRes int style) {
+        // Apply the new style
+        if (style != 0) {
+            TypedArray attributes = context.getTheme().obtainStyledAttributes(style, R.styleable.CometChatPopupMenu);
+            extractAttributesAndApplyDefaults(attributes);
+        }
     }
 
     public void dismiss() {
@@ -192,6 +200,10 @@ public class CometChatPopupMenu {
         popupWindow.showAtLocation(anchorView, Gravity.NO_GRAVITY, adjustedXOffset, yOffset);
     }
 
+    public interface OnMenuItemClickListener {
+        void onMenuItemClick(String id, String item);
+    }
+
     // Data class for menu items
     public static class MenuItem {
         private final String id;
@@ -213,7 +225,15 @@ public class CometChatPopupMenu {
             this(id, name, startIcon, endIcon, 0, 0, 0, 0, click);
         }
 
-        public MenuItem(String id, String name, Drawable startIcon, Drawable endIcon, @ColorInt int startIconTint, @ColorInt int endIconTint, @ColorInt int textColor, @StyleRes int textAppearance, OnClick click) {
+        public MenuItem(String id,
+                        String name,
+                        Drawable startIcon,
+                        Drawable endIcon,
+                        @ColorInt int startIconTint,
+                        @ColorInt int endIconTint,
+                        @ColorInt int textColor,
+                        @StyleRes int textAppearance,
+                        OnClick click) {
             this.id = id;
             this.name = name;
             this.startIcon = startIcon;

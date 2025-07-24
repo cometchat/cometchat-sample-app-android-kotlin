@@ -21,6 +21,7 @@ import com.cometchat.chat.core.Call;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CometChatCallActivity;
 import com.cometchat.chatuikit.calls.outgoingcall.OutgoingCallConfiguration;
@@ -257,11 +258,15 @@ public class CometChatCallButtons extends MaterialCardView {
             setVideoCallIcon(typedArray.getDrawable(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallIcon));
             setVoiceCallIcon(typedArray.getDrawable(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallIcon));
 
-            setVideoCallIconTint(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallIconTint, 0));
-            setVoiceCallIconTint(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallIconTint, 0));
+            setVideoCallIconTint(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallIconTint,
+                                                     CometChatTheme.getIconTintPrimary(getContext())));
+            setVoiceCallIconTint(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallIconTint,
+                                                     CometChatTheme.getIconTintPrimary(getContext())));
 
-            setVideoCallTextColor(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallTextColor, 0));
-            setVoiceCallTextColor(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallTextColor, 0));
+            setVideoCallTextColor(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext())));
+            setVoiceCallTextColor(typedArray.getColor(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext())));
 
             setVideoCallTextAppearance(typedArray.getResourceId(R.styleable.CometChatCallButtons_cometchatCallButtonsVideoCallTextAppearance, 0));
             setVoiceCallTextAppearance(typedArray.getResourceId(R.styleable.CometChatCallButtons_cometchatCallButtonsVoiceCallTextAppearance, 0));

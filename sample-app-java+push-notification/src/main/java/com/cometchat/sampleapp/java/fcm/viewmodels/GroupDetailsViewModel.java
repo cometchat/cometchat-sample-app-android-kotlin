@@ -11,6 +11,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.Action;
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chat.models.User;
@@ -39,6 +40,7 @@ public class GroupDetailsViewModel extends ViewModel {
     private final MutableLiveData<UIKitConstants.DialogState> transferOwnershipDialogState;
     private final MutableLiveData<String> errorMessage;
     private final MutableLiveData<Group> updatedGroup;
+    private final MutableLiveData<BaseMessage> baseMessage;
     private Group group;
 
     /**
@@ -47,10 +49,19 @@ public class GroupDetailsViewModel extends ViewModel {
     public GroupDetailsViewModel() {
         dialogState = new MutableLiveData<>();
         confirmDialogState = new MutableLiveData<>();
+        baseMessage = new MutableLiveData<>();
         transferOwnershipDialogState = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
         updatedGroup = new MutableLiveData<>();
         GROUP_LISTENER_ID = System.currentTimeMillis() + "_" + this.getClass().getSimpleName();
+    }
+
+    public MutableLiveData<BaseMessage> getBaseMessage() {
+        return baseMessage;
+    }
+
+    public void setBaseMessage(BaseMessage message) {
+        baseMessage.setValue(message);
     }
 
     /**
@@ -394,6 +405,21 @@ public class GroupDetailsViewModel extends ViewModel {
             @Override
             public void onError(CometChatException e) {
                 transferOwnershipDialogState.setValue(UIKitConstants.DialogState.FAILURE);
+            }
+        });
+    }
+
+    public void deleteChat() {
+        confirmDialogState.setValue(UIKitConstants.DialogState.INITIATED);
+        Repository.deleteChat(group.getGuid(), baseMessage.getValue(), UIKitConstants.ReceiverType.GROUP, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                confirmDialogState.setValue(UIKitConstants.DialogState.SUCCESS);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                confirmDialogState.setValue(UIKitConstants.DialogState.FAILURE);
             }
         });
     }

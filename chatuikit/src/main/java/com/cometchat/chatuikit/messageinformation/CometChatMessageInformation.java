@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.MessageReceipt;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageInformationBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -270,30 +271,36 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
         try {
             // Extract attributes or apply default values
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationTitleTextAppearance, 0);
-            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationTitleTextColor, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationBackgroundColor, 0);
+            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(context));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(context));
             backgroundHighlightColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationBackgroundHighlightColor,
-                                                           0);
+                                                           CometChatTheme.getBackgroundColor2(context));
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageInformation_cometchatMessageInformationCornerRadius, 0);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageInformation_cometchatMessageInformationStrokeWidth, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationStrokeColor, 0);
+            strokeColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(context));
             itemNameTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemNameTextAppearance,
                                                               0);
-            itemNameTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemNameTextColor, 0);
+            itemNameTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemNameTextColor,
+                                                    CometChatTheme.getTextColorPrimary(context));
             itemReadTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadTextAppearance,
                                                               0);
-            itemReadTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadTextColor, 0);
+            itemReadTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadTextColor,
+                                                    CometChatTheme.getTextColorSecondary(context));
             itemReadDateTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadDateTextAppearance,
                                                                   0);
-            itemReadDateTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadDateTextColor, 0);
+            itemReadDateTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemReadDateTextColor,
+                                                        CometChatTheme.getTextColorSecondary(context));
             itemDeliveredTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemDeliveredTextAppearance,
                                                                    0);
             itemDeliveredTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemDeliveredTextColor,
-                                                         0);
+                                                         CometChatTheme.getTextColorSecondary(context));
             itemDeliveredDateTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemDeliveredDateTextAppearance,
                                                                        0);
             itemDeliveredDateTextColor = typedArray.getColor(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemDeliveredDateTextColor,
-                                                             0);
+                                                             CometChatTheme.getTextColorSecondary(context));
             itemAvatarStyle = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationItemAvatarStyle, 0);
             messageReceipt = typedArray.getResourceId(R.styleable.CometChatMessageInformation_cometchatMessageInformationMessageReceiptStyle, 0);
             // Apply default styles

@@ -14,6 +14,7 @@ import androidx.annotation.StyleRes;
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.utils.CallUtils;
 import com.cometchat.chatuikit.databinding.CometchatCallActionBubbleBinding;
@@ -174,24 +175,30 @@ public class CometChatCallActionBubble extends MaterialCardView {
         try {
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleStrokeWidth, 0));
-            setStrokeColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleStrokeColor, 0));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleBackgroundColor, 0));
+            setStrokeColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleStrokeColor,
+                                               CometChatTheme.getStrokeColorDefault(getContext())));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor2(getContext())));
             setBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleBackgroundDrawable));
 
-            setTextColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleTextColor, 0));
+            setTextColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleTextColor,
+                                             CometChatTheme.getTextColorSecondary(getContext())));
             setTextAppearance(typedArray.getResourceId(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleTextAppearance, 0));
 
-            setIconTint(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleIconTint, 0));
-            setMissedCallTextColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallTextColor, 0));
+            setIconTint(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleIconTint,
+                                            CometChatTheme.getIconTintSecondary(getContext())));
+            setMissedCallTextColor(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallTextColor,
+                                                       CometChatTheme.getErrorColor(getContext())));
             setMissedCallTextAppearance(typedArray.getResourceId(
                 R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallTextAppearance,
                 0
             ));
             setMissedCallBackgroundColor(typedArray.getColor(
                 R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallBackgroundColor,
-                0
+                CometChatTheme.getBackgroundColor2(getContext())
             ));
-            setMissedCallIconTint(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallIconTint, 0));
+            setMissedCallIconTint(typedArray.getColor(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallIconTint,
+                                                      CometChatTheme.getErrorColor(getContext())));
             setMissedCallBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatCallActionBubble_cometchatCallActionBubbleMissedCallBackgroundDrawable));
 
         } finally {
@@ -294,14 +301,6 @@ public class CometChatCallActionBubble extends MaterialCardView {
      */
     public Drawable getBackgroundDrawable() {
         return backgroundDrawable;
-    }    /**
-     * Sets the stroke width of the bubble.
-     *
-     * @param strokeWidth Width of the stroke in pixels.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
     }
 
     /**
@@ -312,6 +311,14 @@ public class CometChatCallActionBubble extends MaterialCardView {
     @Override
     public void setBackgroundDrawable(Drawable backgroundDrawable) {
         this.backgroundDrawable = backgroundDrawable;
+    }    /**
+     * Sets the stroke width of the bubble.
+     *
+     * @param strokeWidth Width of the stroke in pixels.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
     }
 
     /**
@@ -457,14 +464,6 @@ public class CometChatCallActionBubble extends MaterialCardView {
      */
     public int getMissedCallBackgroundColor() {
         return missedCallBackgroundColor;
-    }    /**
-     * Retrieves the stroke width of the bubble.
-     *
-     * @return The width of the stroke in pixels.
-     */
-    @Override
-    public int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -483,6 +482,14 @@ public class CometChatCallActionBubble extends MaterialCardView {
      */
     public int getMissedCallIconTint() {
         return missedCallIconTint;
+    }    /**
+     * Retrieves the stroke width of the bubble.
+     *
+     * @return The width of the stroke in pixels.
+     */
+    @Override
+    public int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -533,6 +540,7 @@ public class CometChatCallActionBubble extends MaterialCardView {
             extractAttributesAndApplyDefaults(typedArray);
         }
     }
+
 
 
 

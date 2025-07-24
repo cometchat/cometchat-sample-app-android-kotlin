@@ -38,13 +38,16 @@ public class CallsFragmentViewModel extends ViewModel {
         Repository.getUser(user.getUid(), new CometChat.CallbackListener<User>() {
             @Override
             public void onSuccess(@NonNull User userObj) {
-                if (userObj.isBlockedByMe()) {
-                    if (listener != null) {
+                if (listener != null) {
+                    if (userObj.isBlockedByMe()) {
                         listener.onError(new CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"));
+                        onError.setValue(new CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"));
+                    } else if (userObj.isHasBlockedMe()) {
+                        listener.onError(new CometChatException("BLOCKED_ME", "Call cannot be initiated as user has blocked you"));
+                        onError.setValue(new CometChatException("BLOCKED_ME", "Call cannot be initiated as user has blocked you"));
+                    } else {
+                        startCall(callType, userObj, listener);
                     }
-                    onError.setValue(new CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"));
-                } else {
-                    startCall(callType, userObj, listener);
                 }
             }
 

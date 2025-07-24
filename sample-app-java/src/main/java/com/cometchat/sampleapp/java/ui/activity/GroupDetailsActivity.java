@@ -1,8 +1,11 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
 import android.app.Dialog;
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,8 +16,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chatuikit.CometChatTheme;
@@ -32,9 +40,11 @@ import com.cometchat.sampleapp.java.databinding.TransferOwnershipLayoutBinding;
 import com.cometchat.sampleapp.java.viewmodels.GroupDetailsViewModel;
 import com.google.gson.Gson;
 
+import java.util.Objects;
+
 public class GroupDetailsActivity extends AppCompatActivity {
     private Group group;
-
+    private BaseMessage baseMessage;
     private ActivityGroupDetailsBinding binding;
     private AddMembersLayoutBinding addMembersLayoutBinding;
 
@@ -57,8 +67,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
         binding = ActivityGroupDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        group = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_group)), Group.class);
+        applyWindowInsets(binding.main);
+        adjustWindowSettings();
 
+        group = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_group)), Group.class);
+        baseMessage = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_base_message)), BaseMessage.class);
         initViewModel();
 
         setHeaderData(group);
@@ -70,15 +83,60 @@ public class GroupDetailsActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    /**
+     * Adjusts the window settings based on the Android version.
+     * For Android R and above, sets decor fits system windows to true.
+     * For below Android R, sets soft input mode to adjust resize.
+     */
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    /**
+     * Applies window insets to the view.
+     *
+     * @param view The view to apply window insets to.
+     */
+
+    private void applyWindowInsets(View view) {
+        ViewCompat.setOnApplyWindowInsetsListener(view, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+                );
+
+                return insets;
+            }
+        });
+    }
+
     private void initViewModel() {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(GroupDetailsViewModel.class);
         viewModel.getDialogState().observe(this, this::setDialogState);
+        viewModel.getBaseMessage().observe(this, this::setDeleteChatVisibility);
         viewModel.getErrorMessage().observe(this, this::setError);
         viewModel.getConfirmDialogState().observe(this, this::setConfirmDialogStateObserver);
         viewModel.getUpdatedGroup().observe(this, this::setHeaderData);
         viewModel.getTransferOwnershipDialogState().observe(this, this::setTransferOwnershipDialogStateObserver);
         viewModel.setGroup(group);
+        viewModel.setBaseMessage(baseMessage);
         viewModel.addListeners();
+    }
+
+    private void setDeleteChatVisibility(BaseMessage baseMessage) {
+        binding.tvDeleteChat.setVisibility(baseMessage != null ? View.VISIBLE : View.GONE);
     }
 
     private void setHeaderData(Group group) {
@@ -86,6 +144,37 @@ public class GroupDetailsActivity extends AppCompatActivity {
         binding.tvGroupName.setText(group.getName());
         binding.tvMemberCount.setText(group.getMembersCount() > 1 ? group.getMembersCount() + " " + getResources().getString(com.cometchat.chatuikit.R.string.cometchat_members) : group.getMembersCount() + " " + getResources().getString(
             com.cometchat.chatuikit.R.string.cometchat_member));
+
+        binding.main.setBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.ivBack.setImageTintList(ColorStateList.valueOf(CometChatTheme.getIconTintPrimary(this)));
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.viewSeparator.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+        binding.infoMessage.setBackgroundColor(CometChatTheme.getWarningColor(this));
+        binding.ivInfo.setImageTintList(ColorStateList.valueOf(CometChatTheme.getTextColorPrimary(this)));
+        binding.tvInfoMessage.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tvGroupName.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tvMemberCount.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.viewMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.viewMembersCard.setStrokeColor(CometChatTheme.getStrokeColorLight(this));
+        binding.tvViewMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.tvViewMembers.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
+        binding.tvViewMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.viewAddMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.viewAddMembersCard.setStrokeColor(CometChatTheme.getStrokeColorLight(this));
+        binding.tvAddMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.tvAddMembers.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
+        binding.tvAddMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.viewBannedMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.viewBannedMembersCard.setStrokeColor(CometChatTheme.getStrokeColorLight(this));
+        binding.tvBannedMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.tvBannedMembers.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
+        binding.tvBannedMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.viewDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+        binding.ivLeaveGroup.setImageTintList(ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
+        binding.tvLeaveGroup.setTextColor(CometChatTheme.getErrorColor(this));
+        binding.ivDeleteGroup.setImageTintList(ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
+        binding.tvDeleteGroup.setTextColor(CometChatTheme.getErrorColor(this));
+
         setOptionsVisibility();
 
         if (group.isJoined()) {
@@ -95,6 +184,21 @@ public class GroupDetailsActivity extends AppCompatActivity {
         }
 
         binding.ivBack.setOnClickListener(view -> finish());
+
+        binding.tvDeleteChat.setOnClickListener(view -> {
+            if (baseMessage != null) {
+                showAlertDialog(
+                    getString(R.string.app_delete_chat_title),
+                    getString(R.string.app_delete_chat_subtitle),
+                    getString(R.string.app_delete_chat_negative_button),
+                    getString(R.string.app_delete_chat_positive_button),
+                    false,
+                    CometChatTheme.getErrorColor(this),
+                    R.drawable.ic_delete,
+                    GroupAction.DELETE_CHAT
+                );
+            }
+        });
 
         binding.leaveGroupLay.setOnClickListener(view -> {
             if (!CometChatUIKit.getLoggedInUser().getUid().equals(group.getOwner())) {
@@ -165,9 +269,12 @@ public class GroupDetailsActivity extends AppCompatActivity {
         confirmDialog.setOnPositiveButtonClick(v -> {
             if (GroupAction.LEAVE.equals(groupAction)) {
                 viewModel.leaveGroup(group);
+            } else if (GroupAction.DELETE_CHAT.equals(groupAction)) {
+                viewModel.deleteChat();
             } else if (GroupAction.DELETE.equals(groupAction)) {
                 viewModel.deleteGroup(group);
             } else if (GroupAction.SHOW_OWNERSHIP_TRANSFER.equals(groupAction)) {
+                confirmDialog.dismiss();
                 showTransferOwnership();
             } else if (GroupAction.TRANSFER_OWNERSHIP.equals(groupAction)) {
                 if (group.getMembersCount() > 2) {
@@ -238,6 +345,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
         dialog = alertDialog.create();
         Utils.setDialogStatusBarColor(dialog, CometChatTheme.getBackgroundColor1(this));
         dialog.show();
+
+        if (dialog != null)
+            applyWindowInsets(Objects.requireNonNull(dialog.getWindow()).findViewById(R.id.banned_members_main));
+
         bannedMemberLayoutBinding.bannedMembers.setOnBackPressListener(() -> dialog.dismiss());
     }
 
@@ -254,6 +365,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
         dialog = alertDialog.create();
         Utils.setDialogStatusBarColor(dialog, CometChatTheme.getBackgroundColor1(this));
         dialog.show();
+
+        if (dialog != null)
+            applyWindowInsets(Objects.requireNonNull(Objects.requireNonNull(dialog.getWindow()).findViewById(R.id.view_members_main)));
+
         viewMembersLayoutBinding.viewMembers.setOnBackPressListener(() -> dialog.dismiss());
     }
 
@@ -267,13 +382,18 @@ public class GroupDetailsActivity extends AppCompatActivity {
         progressBar = addMembersLayoutBinding.progress;
         btnText = addMembersLayoutBinding.tvAddMembers;
 
+        addMembersLayoutBinding.addMembersBtn.setCardBackgroundColor(CometChatTheme.getPrimaryColor(this));
+        addMembersLayoutBinding.tvAddMembers.setTextColor(CometChatTheme.getColorWhite(this));
+        addMembersLayoutBinding.progress.setIndeterminateTintList(ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this)));
+
         addMembersLayoutBinding.addMembers.setTitleText(getString(com.cometchat.chatuikit.R.string.cometchat_add_members));
         addMembersLayoutBinding.addMembers.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE);
         addMembersLayoutBinding.addMembers.setSubmitSelectionIconVisibility(View.GONE);
         addMembersLayoutBinding.addMembers.setBackIconVisibility(View.VISIBLE);
         addMembersLayoutBinding.addMembers.setOnItemClick((view, poUser, user) -> addMembersLayoutBinding.addMembers.selectUser(user,
                                                                                                                                 UIKitConstants.SelectionMode.MULTIPLE));
-        addMembersLayoutBinding.addMembersBtn.setOnClickListener(view -> viewModel.addMembersToGroup(this, addMembersLayoutBinding.addMembers.getSelectedUsers()));
+        addMembersLayoutBinding.addMembersBtn.setOnClickListener(view -> viewModel.addMembersToGroup(this,
+                                                                                                     addMembersLayoutBinding.addMembers.getSelectedUsers()));
 
         alertDialog = new AlertDialog.Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat);
         Utils.removeParentFromView(addMembersLayoutBinding.getRoot());
@@ -281,6 +401,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
         dialog = alertDialog.create();
         Utils.setDialogStatusBarColor(dialog, CometChatTheme.getBackgroundColor1(this));
         dialog.show();
+
+        if (dialog != null)
+            applyWindowInsets(Objects.requireNonNull(dialog.getWindow()).findViewById(R.id.add_members_main));
+
         addMembersLayoutBinding.addMembers.setOnBackPressListener(() -> dialog.dismiss());
     }
 
@@ -289,6 +413,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
                                                                                                                          R.layout.transfer_ownership_layout,
                                                                                                                          null
         ));
+
+        transferOwnershipLayoutBinding.transferOwnershipBtn.setCardBackgroundColor(CometChatTheme.getPrimaryColor(this));
+        transferOwnershipLayoutBinding.tvOwnership.setTextColor(CometChatTheme.getColorWhite(this));
+        transferOwnershipLayoutBinding.progress.setIndeterminateTintList(ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this)));
+
         transferOwnershipLayoutBinding.transferOwnership.setTitleText(getString(R.string.app_transfer_ownership));
         transferOwnershipLayoutBinding.transferOwnership.excludeOwner(true);
         transferOwnershipLayoutBinding.transferOwnership.setGroup(group);

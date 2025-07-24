@@ -12,6 +12,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.StyleRes;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.spans.MentionMovementMethod;
@@ -25,7 +26,6 @@ import com.google.android.material.card.MaterialCardView;
  */
 public class CometChatActionBubble extends MaterialCardView {
     private static final String TAG = CometChatActionBubble.class.getSimpleName();
-
 
     private TextView textView;
     private @ColorInt int textColor;
@@ -111,87 +111,18 @@ public class CometChatActionBubble extends MaterialCardView {
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
             setTextAppearance(typedArray.getResourceId(R.styleable.CometChatActionBubble_cometchatActionBubbleTextAppearance, 0));
-            setTextColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleTextColor, 0));
+            setTextColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleTextColor,
+                                             CometChatTheme.getTextColorSecondary(getContext())));
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatActionBubble_cometchatActionBubbleCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatActionBubble_cometchatActionBubbleStrokeWidth, 0));
-            setStrokeColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleStrokeColor, 0));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleBackgroundColor, 0));
+            setStrokeColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleStrokeColor,
+                                               CometChatTheme.getStrokeColorDefault(getContext())));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatActionBubble_cometchatActionBubbleBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor2(getContext())));
             setBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatActionBubble_cometchatActionBubbleBackgroundDrawable));
         } finally {
             typedArray.recycle();
         }
-    }
-
-    /**
-     * Sets the text color of the text bubble.
-     *
-     * @param color The color to set for the text.
-     */
-    public void setTextColor(@ColorInt int color) {
-        textColor = color;
-        textView.setTextColor(color);
-    }
-
-    /**
-     * Sets the text appearance (style) of the text bubble.
-     *
-     * @param appearance The resource ID of the text appearance.
-     */
-    public void setTextAppearance(@StyleRes int appearance) {
-        textAppearance = appearance;
-        textView.setTextAppearance(appearance);
-    }
-
-    /**
-     * Sets the background color of the text bubble.
-     *
-     * @param color The color to set for the background.
-     */
-    @Override
-    public void setBackgroundColor(@ColorInt int color) {
-        backgroundColor = color;
-        setCardBackgroundColor(color);
-    }
-
-    /**
-     * Sets the corner radius of the text bubble.
-     *
-     * @param radius The radius to set for the corners, in pixels.
-     */
-    public void setCornerRadius(@Dimension int radius) {
-        cornerRadius = radius;
-        setRadius(radius);
-    }
-
-    /**
-     * Sets the border width of the text bubble.
-     *
-     * @param width The width of the border, in pixels.
-     */
-    public void setStrokeWidth(@Dimension int width) {
-        strokeWidth = width;
-        super.setStrokeWidth(width);
-    }
-
-    /**
-     * Sets the border color of the text bubble.
-     *
-     * @param color The color to set for the border.
-     */
-    public void setStrokeColor(@ColorInt int color) {
-        strokeColor = color;
-        super.setStrokeColor(color);
-    }
-
-    /**
-     * Sets the background drawable for the text bubble.
-     *
-     * @param backgroundDrawable The drawable to set as the background.
-     */
-    @Override
-    public void setBackgroundDrawable(Drawable backgroundDrawable) {
-        this.backgroundDrawable = backgroundDrawable;
-        super.setBackgroundDrawable(backgroundDrawable);
     }
 
     /**
@@ -222,6 +153,99 @@ public class CometChatActionBubble extends MaterialCardView {
         return textView;
     }
 
+    // Getters for testing or direct access if needed
+    public int getTextColor() {
+        return textColor;
+    }
+
+    /**
+     * Sets the text color of the text bubble.
+     *
+     * @param color The color to set for the text.
+     */
+    public void setTextColor(@ColorInt int color) {
+        textColor = color;
+        textView.setTextColor(color);
+    }    /**
+     * Sets the border width of the text bubble.
+     *
+     * @param width The width of the border, in pixels.
+     */
+    public void setStrokeWidth(@Dimension int width) {
+        strokeWidth = width;
+        super.setStrokeWidth(width);
+    }
+
+    public int getTextAppearance() {
+        return textAppearance;
+    }    /**
+     * Sets the border color of the text bubble.
+     *
+     * @param color The color to set for the border.
+     */
+    public void setStrokeColor(@ColorInt int color) {
+        strokeColor = color;
+        super.setStrokeColor(color);
+    }
+
+    /**
+     * Sets the text appearance (style) of the text bubble.
+     *
+     * @param appearance The resource ID of the text appearance.
+     */
+    public void setTextAppearance(@StyleRes int appearance) {
+        textAppearance = appearance;
+        textView.setTextAppearance(appearance);
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * Sets the background color of the text bubble.
+     *
+     * @param color The color to set for the background.
+     */
+    @Override
+    public void setBackgroundColor(@ColorInt int color) {
+        backgroundColor = color;
+        setCardBackgroundColor(color);
+    }
+
+    public int getCornerRadius() {
+        return cornerRadius;
+    }
+
+    /**
+     * Sets the corner radius of the text bubble.
+     *
+     * @param radius The radius to set for the corners, in pixels.
+     */
+    public void setCornerRadius(@Dimension int radius) {
+        cornerRadius = radius;
+        setRadius(radius);
+    }
+
+    public Drawable getBackgroundDrawable() {
+        return backgroundDrawable;
+    }
+
+    /**
+     * Sets the background drawable for the text bubble.
+     *
+     * @param backgroundDrawable The drawable to set as the background.
+     */
+    @Override
+    public void setBackgroundDrawable(Drawable backgroundDrawable) {
+        this.backgroundDrawable = backgroundDrawable;
+        super.setBackgroundDrawable(backgroundDrawable);
+    }
+
+    public int getStyle() {
+        return style;
+    }
+
     /**
      * Sets the style of the text bubble from a specific style resource.
      *
@@ -235,23 +259,6 @@ public class CometChatActionBubble extends MaterialCardView {
         }
     }
 
-    // Getters for testing or direct access if needed
-    public int getTextColor() {
-        return textColor;
-    }
-
-    public int getTextAppearance() {
-        return textAppearance;
-    }
-
-    public int getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    public int getCornerRadius() {
-        return cornerRadius;
-    }
-
     public int getStrokeWidth() {
         return strokeWidth;
     }
@@ -261,11 +268,7 @@ public class CometChatActionBubble extends MaterialCardView {
         return strokeColor;
     }
 
-    public Drawable getBackgroundDrawable() {
-        return backgroundDrawable;
-    }
 
-    public int getStyle() {
-        return style;
-    }
+
+
 }

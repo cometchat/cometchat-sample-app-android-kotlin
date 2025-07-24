@@ -17,6 +17,7 @@
 
         <TextView
             android:id="@+id/tv_create_conversation"
+            style="?attr/cometchatTextAppearanceBodyRegular"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="@dimen/cometchat_padding_2"
@@ -69,6 +70,7 @@
             android:layout_height="@dimen/cometchat_1dp"
             android:layout_gravity="center"
             android:background="?attr/cometchatStrokeColorDefault" />
+
 
         <TextView
             android:id="@+id/tv_version"

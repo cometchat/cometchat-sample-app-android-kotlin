@@ -62,10 +62,42 @@ public class HomeActivity extends AppCompatActivity implements OnItemClickListen
 
         AppUtils.requestNotificationPermission(this);
 
-        handleDeepLinking();
         configureBottomNavigation();
-
         configureVoIP();
+        handleDeepLinking();
+    }
+
+    /**
+     * Configures the bottom navigation view and its item selection listener.
+     * Updates the displayed fragment based on user selection.
+     */
+    /**
+     * Configures the bottom navigation view and its item selection listener.
+     * Updates the displayed fragment based on user selection.
+     */
+    private void configureBottomNavigation() {
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (currentFragment == item.getItemId()) {
+                return true; // No action needed if the fragment is already selected
+            }
+            currentFragment = item.getItemId();
+            loadFragment(getFragment(currentFragment));
+            return true;
+        });
+
+        // Create a ColorStateList for icon and text color based on the checked state
+        ColorStateList colorStateList = new ColorStateList(
+                new int[][]{new int[]{android.R.attr.state_checked}, new int[]{}},
+                new int[]{CometChatTheme.getIconTintHighlight(this), CometChatTheme.getIconTintSecondary(this)}
+        );
+
+        binding.bottomNavigationView.setItemIconTintList(colorStateList);
+        binding.bottomNavigationView.setItemTextColor(colorStateList);
+    }
+
+    private void configureVoIP() {
+        CometChatVoIP.init(this, getApplicationInfo().loadLabel(getPackageManager()).toString());
+        launchVoIP();
     }
 
     private void handleDeepLinking() {
@@ -93,41 +125,12 @@ public class HomeActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     /**
-     * Configures the bottom navigation view and its item selection listener.
-     * Updates the displayed fragment based on user selection.
-     */
-    private void configureBottomNavigation() {
-        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (currentFragment == item.getItemId()) {
-                return true; // No action needed if the fragment is already selected
-            }
-            currentFragment = item.getItemId();
-            loadFragment(getFragment(currentFragment));
-            return true;
-        });
-
-        // Create a ColorStateList for icon and text color based on the checked state
-        ColorStateList colorStateList = new ColorStateList(
-            new int[][]{new int[]{android.R.attr.state_checked}, new int[]{}},
-            new int[]{CometChatTheme.getIconTintHighlight(this), CometChatTheme.getIconTintSecondary(this)}
-        );
-
-        binding.bottomNavigationView.setItemIconTintList(colorStateList);
-        binding.bottomNavigationView.setItemTextColor(colorStateList);
-    }
-
-    private void configureVoIP() {
-        CometChatVoIP.init(this, getApplicationInfo().loadLabel(getPackageManager()).toString());
-        launchVoIP();
-    }
-
-    /**
      * Loads the specified fragment into the fragment container.
      *
      * @param fragment The fragment to be loaded.
      */
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
     }
 
     /**
@@ -229,5 +232,4 @@ public class HomeActivity extends AppCompatActivity implements OnItemClickListen
                 break;
         }
     }
-
 }

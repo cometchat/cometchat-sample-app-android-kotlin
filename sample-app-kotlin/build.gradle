@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.cometchat.sampleapp.kotlin"
         minSdk 26
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "5.0.1"
 
@@ -43,8 +43,8 @@ dependencies {
     implementation libs.constraintlayout
 
     // CometChat Dependencies
-//    implementation project(':chatuikit')
-    implementation(libs.cometchat.ui.kit)
+    //implementation project(':chatuikit')
+    implementation libs.cometchat.ui.kit
     implementation libs.chat.sdk.android
     implementation libs.calls.sdk.android
 

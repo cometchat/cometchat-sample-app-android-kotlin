@@ -1,6 +1,7 @@
 package com.cometchat.sampleapp.kotlin.ui.fragments
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +12,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.Group
+import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick
-import com.cometchat.chatuikit.shared.resources.utils.AnimationUtils
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.CreateGroupLayoutBinding
@@ -70,7 +71,7 @@ class GroupsFragment : Fragment() {
             viewLifecycleOwner
         ) { status: DialogState -> this.setDialogState(status) }
 
-        binding.group.setOnItemClick(object : OnItemClick<Group> {
+        binding.group.onItemClick = object : OnItemClick<Group> {
             override fun click(view: View, position: Int, group: Group) {
                 if (group.isJoined) {
                     openGroupChat(group)
@@ -88,8 +89,7 @@ class GroupsFragment : Fragment() {
                     }
                 }
             }
-        })
-        setOverFlowMenu()
+        }
     }
 
     /**
@@ -112,6 +112,7 @@ class GroupsFragment : Fragment() {
         val overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(
             layoutInflater
         )
+        overflowMenuLayoutBinding.ivMenu.imageTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(context))
         overflowMenuLayoutBinding.ivMenu.setOnClickListener {
             if (bottomSheetDialog == null) {
                 bottomSheetDialog = BottomSheetDialog(requireActivity(), R.style.DialogStyle)
@@ -136,6 +137,44 @@ class GroupsFragment : Fragment() {
         ).setBottomLeftCorner(CornerFamily.ROUNDED, 0f).setBottomRightCorner(CornerFamily.ROUNDED, 0f).build()
         createGroupLayoutBinding.createGroupCard.shapeAppearanceModel = shapeAppearanceModel
         val groupType = AtomicReference(UIKitConstants.GroupType.PUBLIC)
+
+
+        createGroupLayoutBinding.createGroupCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(context))
+        createGroupLayoutBinding.dragHandle.setCardBackgroundColor(CometChatTheme.getNeutralColor500(context))
+        createGroupLayoutBinding.ivScopeChange.imageTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(context))
+        createGroupLayoutBinding.ivScopeChangeCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor2(context))
+        createGroupLayoutBinding.cometchatScopeChangeTitle.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        createGroupLayoutBinding.scopeType.setTextColor(CometChatTheme.getTextColorPrimary(context))
+
+        val selectedColor = CometChatTheme.getPrimaryColor(context)
+        val unselectedColor = CometChatTheme.getTextColorSecondary(context)
+        updateRadioButtonTextColors(createGroupLayoutBinding, selectedColor, unselectedColor)
+        createGroupLayoutBinding.tvName.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        createGroupLayoutBinding.groupNameCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor2(context))
+        createGroupLayoutBinding.etName.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        createGroupLayoutBinding.etName.setHintTextColor(CometChatTheme.getTextColorTertiary(context))
+        createGroupLayoutBinding.tvPassword.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        createGroupLayoutBinding.groupPasswordCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor2(context))
+        createGroupLayoutBinding.groupPasswordCard.setStrokeColor(
+            ColorStateList.valueOf(
+                CometChatTheme.getStrokeColorLight(
+                    context
+                )
+            )
+        )
+        createGroupLayoutBinding.etPassword.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        createGroupLayoutBinding.etPassword.setHintTextColor(CometChatTheme.getTextColorTertiary(context))
+        createGroupLayoutBinding.tvError.setTextColor(CometChatTheme.getErrorColor(context))
+        createGroupLayoutBinding.createGroupBtn.setCardBackgroundColor(CometChatTheme.getPrimaryColor(context))
+        createGroupLayoutBinding.createGroupBtnText.setTextColor(CometChatTheme.getColorWhite(context))
+        createGroupLayoutBinding.createGroupProgress.indeterminateTintList = ColorStateList.valueOf(
+            CometChatTheme.getIconTintSecondary(
+                context
+            )
+        )
+
+
+
         createGroupLayoutBinding.toggle.setOnCheckedChangeListener { radio: RadioGroup?, i: Int ->
             when (i) {
                 R.id.radio_public -> {
@@ -189,13 +228,43 @@ class GroupsFragment : Fragment() {
     }
 
     /**
+     * Updates the text color of radio buttons in the group type toggle.
+     *
+     * @param binding         The create group layout binding
+     * @param selectedColor   The color to use for the selected state
+     * @param unselectedColor The color to use for the unselected state
+     */
+    private fun updateRadioButtonTextColors(binding: CreateGroupLayoutBinding, selectedColor: Int, unselectedColor: Int) {
+        // Create a color state list for the radio buttons
+        val states = arrayOf(
+            intArrayOf(android.R.attr.state_checked),  // checked state
+            intArrayOf(-android.R.attr.state_checked) // unchecked state
+        )
+
+        val colors = intArrayOf(
+            selectedColor,
+            unselectedColor
+        )
+
+        val colorStateList = ColorStateList(states, colors)
+
+        // Apply the color state list to all radio buttons
+        binding.radioPublic.setTextColor(colorStateList)
+        binding.radioPrivate.setTextColor(colorStateList)
+        binding.radioPassword.setTextColor(colorStateList)
+    }
+
+
+    /**
      * Hides the password field in the create group dialog.
      *
      * @param createGroupLayoutBinding
      * The binding object for the create group layout.
      */
     private fun hidePasswordField(createGroupLayoutBinding: CreateGroupLayoutBinding) {
-        AnimationUtils.animateVisibilityGone(createGroupLayoutBinding.groupPasswordCard)
+        createGroupLayoutBinding.groupPasswordCard.visibility = View.GONE
+        createGroupLayoutBinding.etPassword.visibility = View.GONE
+        createGroupLayoutBinding.tvPassword.visibility = View.GONE
     }
 
     /**
@@ -205,7 +274,9 @@ class GroupsFragment : Fragment() {
      * The binding object for the create group layout.
      */
     private fun showPasswordField(createGroupLayoutBinding: CreateGroupLayoutBinding) {
-        AnimationUtils.animateVisibilityVisible(createGroupLayoutBinding.groupPasswordCard)
+        createGroupLayoutBinding.groupPasswordCard.visibility = View.VISIBLE
+        createGroupLayoutBinding.etPassword.visibility = View.VISIBLE
+        createGroupLayoutBinding.tvPassword.visibility = View.VISIBLE
     }
 
     /**
@@ -230,6 +301,31 @@ class GroupsFragment : Fragment() {
         joinPasswordGroupLayoutBinding.tvMemberCount.text =
             if (group.membersCount > 1) (group.membersCount.toString() + " " + resources.getString(com.cometchat.chatuikit.R.string.cometchat_members))
             else (group.membersCount.toString() + " " + resources.getString(com.cometchat.chatuikit.R.string.cometchat_member))
+
+        joinPasswordGroupLayoutBinding.dragHandle.setCardBackgroundColor(CometChatTheme.getNeutralColor500(context))
+        joinPasswordGroupLayoutBinding.joinGroupCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(context))
+        joinPasswordGroupLayoutBinding.tvJoinGroupTitle.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        joinPasswordGroupLayoutBinding.tvGroupName.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        joinPasswordGroupLayoutBinding.tvMemberCount.setTextColor(CometChatTheme.getTextColorSecondary(context))
+        joinPasswordGroupLayoutBinding.tvPassword.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        joinPasswordGroupLayoutBinding.groupPasswordCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor2(context))
+        joinPasswordGroupLayoutBinding.groupPasswordCard.setStrokeColor(
+            ColorStateList.valueOf(
+                CometChatTheme.getStrokeColorLight(
+                    context
+                )
+            )
+        )
+        joinPasswordGroupLayoutBinding.etPassword.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        joinPasswordGroupLayoutBinding.etPassword.setHintTextColor(CometChatTheme.getTextColorTertiary(context))
+        joinPasswordGroupLayoutBinding.tvError.setTextColor(CometChatTheme.getErrorColor(context))
+        joinPasswordGroupLayoutBinding.joinButton.setCardBackgroundColor(CometChatTheme.getPrimaryColor(context))
+        joinPasswordGroupLayoutBinding.joinGroupBtnText.setTextColor(CometChatTheme.getColorWhite(context))
+        joinPasswordGroupLayoutBinding.joinGroupProgress.indeterminateTintList = ColorStateList.valueOf(
+            CometChatTheme.getIconTintSecondary(
+                context
+            )
+        )
         joinPasswordGroupLayoutBinding.joinButton.setOnClickListener { view: View? ->
             viewModel.joinPasswordGroup(group, joinPasswordGroupLayoutBinding.etPassword.text.toString().trim { it <= ' ' })
         }

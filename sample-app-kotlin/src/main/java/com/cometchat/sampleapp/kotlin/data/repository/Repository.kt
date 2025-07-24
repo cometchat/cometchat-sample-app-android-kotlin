@@ -438,7 +438,7 @@ object Repository {
     }
 
     fun fetchMessageInformation(
-        id: Int, callbackListener: CometChat.CallbackListener<BaseMessage>
+        id: Long, callbackListener: CometChat.CallbackListener<BaseMessage>
     ) {
         CometChat.getMessageDetails(id, object : CometChat.CallbackListener<BaseMessage>() {
             override fun onSuccess(message: BaseMessage) {

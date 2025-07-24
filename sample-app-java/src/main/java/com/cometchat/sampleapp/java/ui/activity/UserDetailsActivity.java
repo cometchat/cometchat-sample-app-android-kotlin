@@ -1,14 +1,21 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -38,9 +45,49 @@ public class UserDetailsActivity extends AppCompatActivity {
         binding = ActivityUserDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        applyWindowInsets();
+        adjustWindowSettings();
+
         initViewModel();
 
         initClickListeners();
+    }
+
+    /**
+     * This method is used to apply window insets to the main view.
+     * It sets the padding of the main view based on the system bars insets.
+     */
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+                );
+
+                return insets;
+            }
+        });
+    }
+
+    /**
+     * This method is used to set the window settings for the activity.
+     * It sets the soft input mode to adjust the resize of the window.
+     */
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 
     private void initViewModel() {
@@ -79,6 +126,14 @@ public class UserDetailsActivity extends AppCompatActivity {
     }
 
     private void setUserHeader(User user) {
+        binding.tvVideoCall.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
+        binding.tvVoiceCall.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.toolbarTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tvSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.tvVoiceCall.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.tvVideoCall.setTextColor(CometChatTheme.getTextColorSecondary(this));
+
         binding.avatar.setAvatar(user.getName(), user.getAvatar());
         binding.tvTitle.setText(user.getName());
         if (!Utils.isBlocked(user)) {
@@ -171,7 +226,9 @@ public class UserDetailsActivity extends AppCompatActivity {
 
     @NonNull
     private Observer<String> onCallStartError() {
-        return msg -> AppUtils.customToast(this, getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong), CometChatTheme.getErrorColor(this));
+        return msg -> AppUtils.customToast(this,
+                                           getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong),
+                                           CometChatTheme.getErrorColor(this));
     }
 
     private void blockUser() {

@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatAiSmartRepliesBinding;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -269,26 +270,31 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
             setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesTitleTextAppearance, 0));
-            setTitleTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesTitleTextColor, 0));
+            setTitleTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesTitleTextColor,
+                                                  CometChatTheme.getTextColorPrimary(getContext())));
             setCloseIcon(typedArray.getDrawable(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesCloseIconDrawable));
-            setCloseIconTint(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesCloseIconTint, 0));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesBackgroundColor, 0));
+            setCloseIconTint(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesCloseIconTint,
+                                                 CometChatTheme.getIconTintPrimary(getContext())));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor1(getContext())));
             setBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesBackgroundDrawable));
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesStrokeWidth, 0));
             setStrokeColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesStrokeColor, 0));
-            setItemBackgroundColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemBackgroundColor, 0));
+            setItemBackgroundColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor1(getContext())));
             setItemBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemBackgroundDrawable));
             setItemCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemCornerRadius, 0));
             setItemStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemStrokeWidth, 0));
-            setItemStrokeColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemStrokeColor, 0));
-            setItemTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemTextColor, 0));
+            setItemStrokeColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemStrokeColor,
+                                                   CometChatTheme.getStrokeColorLight(getContext())));
             setItemTextAppearance(typedArray.getResourceId(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemTextAppearance, 0));
-            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesErrorStateTextColor, 0));
-            setErrorStateTextAppearance(typedArray.getResourceId(
-                R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesErrorStateTextAppearance,
-                0
-            ));
+            setItemTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesItemTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext())));
+            setErrorStateTextAppearance(typedArray.getResourceId(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesErrorStateTextAppearance,
+                                                                 0));
+            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatAISmartReplies_cometchatAISmartRepliesErrorStateTextColor,
+                                                       CometChatTheme.getTextColorSecondary(getContext())));
         } finally {
             typedArray.recycle();
         }
@@ -450,15 +456,6 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
      */
     public void setOnClick(@NonNull OnClick onClick) {
         this.onClick = onClick;
-    }    /**
-     * Sets the stroke width for the view.
-     *
-     * @param strokeWidth Dimension integer for the stroke width in DP.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -477,6 +474,15 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
      */
     public int getBackgroundColor() {
         return backgroundColor;
+    }    /**
+     * Sets the stroke width for the view.
+     *
+     * @param strokeWidth Dimension integer for the stroke width in DP.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -488,15 +494,6 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
     public void setBackgroundColor(@ColorInt int backgroundColor) {
         this.backgroundColor = backgroundColor;
         super.setCardBackgroundColor(backgroundColor);
-    }    /**
-     * Sets the stroke color for the view.
-     *
-     * @param strokeColor Color integer for the stroke color.
-     */
-    @Override
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -537,6 +534,15 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
     public void setCornerRadius(@Dimension int cornerRadius) {
         this.cornerRadius = cornerRadius;
         super.setRadius(cornerRadius);
+    }    /**
+     * Sets the stroke color for the view.
+     *
+     * @param strokeColor Color integer for the stroke color.
+     */
+    @Override
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        super.setStrokeColor(strokeColor);
     }
 
     /**
@@ -774,14 +780,6 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
      */
     public int getErrorStateTextAppearance() {
         return errorStateTextAppearance;
-    }    /**
-     * Returns the stroke width of the view.
-     *
-     * @return Stroke width in pixels.
-     */
-    @Override
-    public int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -814,14 +812,6 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
             TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAISmartReplies);
             extractAttributesAndApplyDefaults(typedArray);
         }
-    }    /**
-     * Returns the stroke color of the view.
-     *
-     * @return Stroke color as an integer.
-     */
-    @Override
-    public int getStrokeColor() {
-        return strokeColor;
     }
 
     /**
@@ -854,6 +844,14 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
      */
     public int getLoadingViewLayout() {
         return loadingViewLayout;
+    }    /**
+     * Returns the stroke width of the view.
+     *
+     * @return Stroke width in pixels.
+     */
+    @Override
+    public int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -912,6 +910,14 @@ public class CometChatAISmartRepliesView extends MaterialCardView {
          * @param view The clicked close icon view.
          */
         void onClick(View view);
+    }    /**
+     * Returns the stroke color of the view.
+     *
+     * @return Stroke color as an integer.
+     */
+    @Override
+    public int getStrokeColor() {
+        return strokeColor;
     }
 
 

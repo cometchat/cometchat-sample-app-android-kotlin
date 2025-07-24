@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.cometchat.chat.exceptions.CometChatException;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatStickerViewBinding;
 import com.cometchat.chatuikit.extensions.Extensions;
@@ -264,22 +265,25 @@ public class CometChatStickerKeyboard extends MaterialCardView implements Sticke
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardBackgroundColor, 0));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor1(getContext())));
             setBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardBackgroundDrawable));
-            setSeparatorColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardSeparatorColor, 0));
+            setSeparatorColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardSeparatorColor,
+                                                  CometChatTheme.getStrokeColorDefault(getContext())));
 
             setEmptyStateTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardEmptyStateTitleTextAppearance,
                                                                       0));
             setEmptyStateSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardEmptyStateSubtitleTextAppearance,
                                                                          0));
             setEmptyStateTitleTextColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardEmptyStateTitleTextColor,
-                                                            0));
+                                                            CometChatTheme.getTextColorPrimary(getContext())));
             setEmptyStateSubtitleTextColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardEmptyStateSubtitleTextColor,
-                                                               0));
+                                                               CometChatTheme.getTextColorSecondary(getContext())));
 
             setErrorStateTextAppearance(typedArray.getResourceId(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardErrorStateTextAppearance,
                                                                  0));
-            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardErrorStateTextColor, 0));
+            setErrorStateTextColor(typedArray.getColor(R.styleable.CometChatStickerKeyboard_cometchatStickerKeyboardErrorStateTextColor,
+                                                       CometChatTheme.getTextColorSecondary(getContext())));
 
         } finally {
             typedArray.recycle();

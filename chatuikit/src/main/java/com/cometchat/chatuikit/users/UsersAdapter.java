@@ -74,19 +74,16 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public UsersAdapter(Context context) {
         this.context = context;
         userList = new ArrayList<>();
-        selectUser(new HashMap<>());
+        selectedUsers = new HashMap<>();
     }
 
     /**
-     * Selects users based on the provided map and refreshes the view.
+     * Sets the selected users map for the adapter.
      *
-     * @param hashMap a map of users and their selection status
+     * @param selectedUsers a HashMap containing User objects as keys and Boolean values indicating selection status
      */
-    public void selectUser(HashMap<User, Boolean> hashMap) {
-        if (hashMap != null) {
-            this.selectedUsers = hashMap;
-        }
-        notifyDataSetChanged();
+    public void setSelectedUsersMap(HashMap<User, Boolean> selectedUsers) {
+        this.selectedUsers = selectedUsers;
     }
 
     /**
@@ -513,7 +510,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         // Update marginStart of the sticky header text programmatically
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.binding.tvTitle.getLayoutParams();
         if (isSelectionEnabled) {
-            layoutParams.setMarginStart(context.getResources().getDimensionPixelSize(R.dimen.cometchat_padding_8));
+            layoutParams.setMarginStart(context.getResources().getDimensionPixelSize(R.dimen.cometchat_padding_5));
         } else {
             // Checkbox is not visible, align to avatar directly
             layoutParams.setMarginStart(context.getResources().getDimensionPixelSize(R.dimen.cometchat_padding_4));
@@ -660,7 +657,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
                     binding.tvTitle.setTextAppearance(itemTitleTextAppearance);
                     binding.tvTitle.setTextColor(itemTitleTextColor);
                 }
-                
+
                 if (isSelectionEnabled) {
                     Utils.initMaterialCard(binding.checkboxView);
                     binding.ivCheckbox.setImageDrawable(checkBoxSelectIcon);

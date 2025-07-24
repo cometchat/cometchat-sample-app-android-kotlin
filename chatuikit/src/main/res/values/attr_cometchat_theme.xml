@@ -109,8 +109,8 @@
     <attr name="cometchatTextAppearanceLinkRegular" format="reference" />
 
     <!-- Font: Family -->
-    <attr name="cometchatFontBold" format="string" />
-    <attr name="cometchatFontMedium" format="string" />
-    <attr name="cometchatFontRegular" format="string" />
+    <attr name="cometchatFontBold" format="reference" />
+    <attr name="cometchatFontMedium" format="reference" />
+    <attr name="cometchatFontRegular" format="reference" />
 
 </resources>

@@ -93,8 +93,8 @@ import com.cometchat.chatuikit.shared.models.interactivemessage.CustomInteractiv
 import com.cometchat.chatuikit.shared.models.interactivemessage.FormMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.InteractiveConstants;
 import com.cometchat.chatuikit.shared.models.interactivemessage.SchedulerMessage;
-import com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity;
 import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
+import com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -159,7 +159,7 @@ public class Utils {
 
             return bitmap;
         } catch (Exception e) {
-            e.printStackTrace();
+            CometChatLogger.e(TAG, "Error capturing screen: " + e.getMessage());
             return null;
         }
     }
@@ -173,7 +173,7 @@ public class Utils {
             rootView.setDrawingCacheEnabled(false);
             return bitmap;
         } catch (Exception e) {
-            e.printStackTrace();
+            CometChatLogger.e(TAG, "Error capturing screen: " + e.getMessage());
             return null;
         }
     }

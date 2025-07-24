@@ -25,6 +25,7 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.utils.CallUtils;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
@@ -143,7 +144,7 @@ public class ConversationsUtils {
                     subtitleView.setTypingIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextAppearance,
                                                                                            0));
                     subtitleView.setTypingIndicatorTextColor(typedArray.getColor(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextColor,
-                                                                                 0));
+                                                                                 CometChatTheme.getTextColorHighlight(context)));
                 }
                 if (typingIndicator.getReceiverType().equalsIgnoreCase(CometChatConstants.RECEIVER_TYPE_USER)) {
                     subtitleView.setTypingIndicatorText(context.getString(R.string.cometchat_typing));

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cometchat.chat.core.GroupsRequest;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.Group;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatGroupListBinding;
 import com.cometchat.chatuikit.logger.CometChatLogger;
@@ -434,63 +435,88 @@ public class CometChatGroups extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            backgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsBackgroundColor, 0);
-            titleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsTitleTextColor, 0);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            titleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()));
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsTitleTextAppearance, 0);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsStrokeWidth, 0);
             strokeColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsStrokeColor, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsCornerRadius, 0);
             backIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsBackIcon);
-            backIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsBackIconTint, 0);
-            separatorColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSeparatorColor, 0);
+            backIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsBackIconTint,
+                                               CometChatTheme.getIconTintPrimary(getContext()));
+            separatorColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSeparatorColor,
+                                                 CometChatTheme.getStrokeColorLight(getContext()));
             discardSelectionIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsDiscardSelectionIcon);
-            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsDiscardSelectionIconTint, 0);
+            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsDiscardSelectionIconTint,
+                                                           CometChatTheme.getIconTintPrimary(getContext()));
             submitSelectionIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsSubmitSelectionIcon);
-            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSubmitSelectionIconTint, 0);
+            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSubmitSelectionIconTint,
+                                                          CometChatTheme.getIconTintPrimary(getContext()));
             searchInputEndIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsSearchInputEndIcon);
-            searchInputEndIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputEndIconTint, 0);
+            searchInputEndIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputEndIconTint,
+                                                         CometChatTheme.getIconTintSecondary(getContext()));
             searchInputStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsSearchInputStrokeWidth, 0);
             searchInputStrokeColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputStrokeColor, 0);
             searchInputCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsSearchInputCornerRadius, 0);
-            searchInputBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputBackgroundColor, 0);
+            searchInputBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputBackgroundColor,
+                                                             CometChatTheme.getBackgroundColor3(getContext()));
             searchInputTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsSearchInputTextAppearance, 0);
-            searchInputTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputTextColor, 0);
+            searchInputTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputTextColor,
+                                                       CometChatTheme.getTextColorPrimary(getContext()));
             searchInputPlaceHolderTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsSearchInputPlaceHolderTextAppearance,
                                                                             0);
-            searchInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputPlaceHolderTextColor, 0);
+            searchInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputPlaceHolderTextColor,
+                                                                  CometChatTheme.getTextColorTertiary(getContext()));
             searchInputIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsSearchInputIcon);
-            searchInputIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputIconTint, 0);
+            searchInputIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSearchInputIconTint,
+                                                      CometChatTheme.getIconTintSecondary(getContext()));
             avatar = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsAvatarStyle, 0);
             itemTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsItemTitleTextAppearance, 0);
-            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemTitleTextColor, 0);
-            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemBackgroundColor, 0);
+            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemTitleTextColor,
+                                                     CometChatTheme.getTextColorPrimary(getContext()));
+            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemBackgroundColor,
+                                                      CometChatTheme.getBackgroundColor1(getContext()));
             statusIndicatorStyle = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsStatusIndicator, 0);
-            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemSelectedBackgroundColor, 0);
+            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsItemSelectedBackgroundColor,
+                                                              CometChatTheme.getBackgroundColor4(getContext()));
             checkBoxStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsCheckBoxStrokeWidth, 0);
             checkBoxCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsCheckBoxCornerRadius, 0);
-            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxStrokeColor, 0);
-            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxBackgroundColor, 0);
-            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxSelectIconTint, 0);
+            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxStrokeColor,
+                                                      CometChatTheme.getStrokeColorDefault(getContext()));
+            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxBackgroundColor,
+                                                          CometChatTheme.getBackgroundColor1(getContext()));
+            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxSelectIconTint,
+                                                         CometChatTheme.getColorWhite(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsCheckBoxSelectIcon);
-            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxCheckedBackgroundColor, 0);
+            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxCheckedBackgroundColor,
+                                                                 CometChatTheme.getIconTintHighlight(getContext()));
             emptyStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsEmptyStateTextAppearance, 0);
-            emptyStateTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsEmptyStateTextColor, 0);
+            emptyStateTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsEmptyStateTextColor,
+                                                      CometChatTheme.getPrimaryColor(getContext()));
             emptyStateSubTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsEmptyStateSubTitleTextAppearance,
                                                                         0);
-            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsEmptyStateSubtitleTextColor, 0);
+            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsEmptyStateSubtitleTextColor,
+                                                              CometChatTheme.getTextColorSecondary(getContext()));
             errorStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsErrorStateTextAppearance, 0);
-            errorStateTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsErrorStateTextColor, 0);
+            errorStateTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsErrorStateTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext()));
             errorStateSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsErrorStateSubtitleTextAppearance,
                                                                         0);
-            errorStateSubtitleColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsErrorStateSubtitleColor, 0);
-            retryButtonTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsRetryButtonTextColor, 0);
+            errorStateSubtitleColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsErrorStateSubtitleColor,
+                                                          CometChatTheme.getTextColorSecondary(getContext()));
+            retryButtonTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsRetryButtonTextColor,
+                                                       CometChatTheme.getColorWhite(getContext()));
             retryButtonTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsRetryButtonTextAppearance, 0);
-            retryButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsRetryButtonBackgroundColor, 0);
+            retryButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsRetryButtonBackgroundColor,
+                                                             CometChatTheme.getPrimaryButtonBackgroundColor(getContext()));
             retryButtonStrokeColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsRetryButtonStrokeColor, 0);
             retryButtonStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsRetryButtonStrokeWidth, 0);
             retryButtonCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatGroups_cometchatGroupsRetryButtonCornerRadius, 0);
             subtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsSubtitleTextAppearance, 0);
-            subtitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSubtitleColor, 0);
+            subtitleTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSubtitleColor,
+                                                    CometChatTheme.getTextColorSecondary(getContext()));
 
             // Apply default styles
             updateUI();
@@ -814,13 +840,6 @@ public class CometChatGroups extends MaterialCardView {
      */
     public @ColorInt int getBackIconTint() {
         return backIconTint;
-    }    /**
-     * Gets the stroke width.
-     *
-     * @return the stroke width.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -831,6 +850,13 @@ public class CometChatGroups extends MaterialCardView {
     public void setBackIconTint(@ColorInt int backIconTint) {
         this.backIconTint = backIconTint;
         binding.ivBack.setImageTintList(ColorStateList.valueOf(backIconTint));
+    }    /**
+     * Gets the stroke width.
+     *
+     * @return the stroke width.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     public @ColorInt int getSeparatorColor() {
@@ -1087,14 +1113,6 @@ public class CometChatGroups extends MaterialCardView {
     public void setSearchInputIcon(Drawable searchInputIcon) {
         this.searchInputIcon = searchInputIcon;
         binding.searchBox.setSearchInputStartIcon(searchInputIcon);
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth the stroke width to set.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1114,6 +1132,14 @@ public class CometChatGroups extends MaterialCardView {
     public void setSearchInputIconTint(@ColorInt int searchInputIconTint) {
         this.searchInputIconTint = searchInputIconTint;
         binding.searchBox.setSearchInputStartIconTint(searchInputIconTint);
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth the stroke width to set.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2336,15 +2362,6 @@ public class CometChatGroups extends MaterialCardView {
      */
     public int getErrorStateVisibility() {
         return errorStateVisibility;
-    }    /**
-     * Called when the view is attached to a window. Adds listeners and fetches
-     * groups.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        groupsViewModel.addListeners();
-        groupsViewModel.fetchGroup();
     }
 
     /**
@@ -2377,6 +2394,15 @@ public class CometChatGroups extends MaterialCardView {
     public void setGroupTypeVisibility(int groupTypeVisibility) {
         this.groupTypeVisibility = groupTypeVisibility;
         groupsAdapter.hideGroupType(groupTypeVisibility != VISIBLE);
+    }    /**
+     * Called when the view is attached to a window. Adds listeners and fetches
+     * groups.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        groupsViewModel.addListeners();
+        groupsViewModel.fetchGroup();
     }
 
     /**

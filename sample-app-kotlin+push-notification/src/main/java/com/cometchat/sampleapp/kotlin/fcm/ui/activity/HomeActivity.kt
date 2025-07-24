@@ -48,9 +48,9 @@ class HomeActivity : AppCompatActivity(), OnItemClickListener {
 
         AppUtils.requestNotificationPermission(this)
 
-        handleDeepLinking()
         configureBottomNavigation()
         configureVoIP()
+        handleDeepLinking()
     }
 
     /**
@@ -60,7 +60,7 @@ class HomeActivity : AppCompatActivity(), OnItemClickListener {
      * The fragment to be loaded.
      */
     private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commitAllowingStateLoss()
     }
 
     /**

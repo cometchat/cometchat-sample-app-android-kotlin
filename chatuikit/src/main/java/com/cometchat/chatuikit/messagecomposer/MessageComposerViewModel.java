@@ -47,7 +47,7 @@ public class MessageComposerViewModel extends ViewModel {
     public String type;
     public HashMap<String, String> idMap;
     public MutableLiveData<String> composeText;
-    public int parentMessageId = -1;
+    public long parentMessageId = -1;
     public MutableLiveData<Void> closeBottomPanel;
     public MutableLiveData<Void> closeTopPanel;
     public MutableLiveData<Function1<Context, View>> showTopPanel;
@@ -112,36 +112,11 @@ public class MessageComposerViewModel extends ViewModel {
         return user;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public HashMap<String, String> getIdMap() {
-        return idMap;
-    }
-
     public void setUser(@Nullable User user) {
         if (user != null) {
             this.user = user;
             this.id = user.getUid();
             this.type = UIKitConstants.ReceiverType.USER;
-            setIdMap();
-        }
-    }
-
-    public void setGroup(Group group) {
-        if (group != null) {
-            this.group = group;
-            this.id = group.getGuid();
-            this.type = UIKitConstants.ReceiverType.GROUP;
             setIdMap();
         }
     }
@@ -159,7 +134,32 @@ public class MessageComposerViewModel extends ViewModel {
         mutableHashMap.setValue(idMap);
     }
 
-    public void setParentMessageId(int id) {
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        if (group != null) {
+            this.group = group;
+            this.id = group.getGuid();
+            this.type = UIKitConstants.ReceiverType.GROUP;
+            setIdMap();
+        }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public HashMap<String, String> getIdMap() {
+        return idMap;
+    }
+
+    public void setParentMessageId(long id) {
         this.parentMessageId = id;
         setIdMap();
     }
@@ -235,9 +235,34 @@ public class MessageComposerViewModel extends ViewModel {
         });
     }
 
+    public MediaMessage getMediaMessage(File file, String contentType) {
+        if (file != null && contentType != null) {
+            MediaMessage mediaMessage = new MediaMessage(id, file, contentType, type);
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(UIKitConstants.IntentStrings.PATH, file.getAbsolutePath());
+            } catch (Exception e) {
+                CometChatLogger.e(TAG, e.toString());
+            }
+            if (parentMessageId > -1) mediaMessage.setParentMessageId(parentMessageId);
+            mediaMessage.setMetadata(jsonObject);
+            return mediaMessage;
+        }
+        return null;
+    }
+
     public void sendTextMessage(String text) {
         TextMessage textMessage = getTextMessage(text);
         sendTextMessage(textMessage);
+    }
+
+    public TextMessage getTextMessage(String text) {
+        if (text != null && !text.isEmpty()) {
+            TextMessage message = new TextMessage(id, text.trim(), type);
+            if (parentMessageId > -1) message.setParentMessageId(parentMessageId);
+            return message;
+        }
+        return null;
     }
 
     public void sendTextMessage(TextMessage textMessage) {
@@ -255,8 +280,8 @@ public class MessageComposerViewModel extends ViewModel {
     }
 
     public void editMessage(TextMessage textMessage) {
-        if(textMessage.getMetadata()!=null){
-            if(textMessage.getMetadata().has(ExtensionConstants.ExtensionJSONField.MESSAGE_TRANSLATED)){
+        if (textMessage.getMetadata() != null) {
+            if (textMessage.getMetadata().has(ExtensionConstants.ExtensionJSONField.MESSAGE_TRANSLATED)) {
                 textMessage.getMetadata().remove(ExtensionConstants.ExtensionJSONField.MESSAGE_TRANSLATED);
             }
         }
@@ -274,30 +299,5 @@ public class MessageComposerViewModel extends ViewModel {
                 CometChatUIKitHelper.onMessageEdited(textMessage, MessageStatus.ERROR);
             }
         });
-    }
-
-    public TextMessage getTextMessage(String text) {
-        if (text != null && !text.isEmpty()) {
-            TextMessage message = new TextMessage(id, text.trim(), type);
-            if (parentMessageId > -1) message.setParentMessageId(parentMessageId);
-            return message;
-        }
-        return null;
-    }
-
-    public MediaMessage getMediaMessage(File file, String contentType) {
-        if (file != null && contentType != null) {
-            MediaMessage mediaMessage = new MediaMessage(id, file, contentType, type);
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put(UIKitConstants.IntentStrings.PATH, file.getAbsolutePath());
-            } catch (Exception e) {
-                CometChatLogger.e(TAG, e.toString());
-            }
-            if (parentMessageId > -1) mediaMessage.setParentMessageId(parentMessageId);
-            mediaMessage.setMetadata(jsonObject);
-            return mediaMessage;
-        }
-        return null;
     }
 }

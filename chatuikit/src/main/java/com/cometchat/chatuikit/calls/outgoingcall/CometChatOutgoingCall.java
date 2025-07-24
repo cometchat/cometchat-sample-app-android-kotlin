@@ -30,6 +30,7 @@ import com.cometchat.calls.core.CometChatCalls;
 import com.cometchat.chat.core.Call;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatOutgoingCallLayoutBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -268,17 +269,21 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setTitleTextColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallTitleTextColor, 0));
+            setTitleTextColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallTitleTextColor,
+                                                  CometChatTheme.getTextColorPrimary(getContext())));
             setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallTitleTextAppearance, 0));
-            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallSubtitleTextColor, 0));
+            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallSubtitleTextColor,
+                                                     CometChatTheme.getTextColorSecondary(getContext())));
             setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallSubtitleTextAppearance, 0));
             setEndCallIcon(typedArray.getDrawable(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallEndCallIcon));
-            setEndCallIconTint(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallEndCallIconTint, 0));
+            setEndCallIconTint(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallEndCallIconTint,
+                                                   CometChatTheme.getColorWhite(getContext())));
             setEndCallButtonBackgroundColor(typedArray.getColor(
                 R.styleable.CometChatOutgoingCall_cometchatOutgoingCallEndCallButtonBackgroundColor,
-                0
+                CometChatTheme.getErrorColor(getContext())
             ));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallBackgroundColor, 0));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor3(getContext())));
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallStrokeWidth, 0));
             setStrokeColor(typedArray.getColor(R.styleable.CometChatOutgoingCall_cometchatOutgoingCallStrokeColor, 0));
@@ -626,15 +631,6 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
      */
     public ColorStateList getStokeColor() {
         return ColorStateList.valueOf(strokeColor);
-    }    /**
-     * Plays the outgoing call sound if sound notifications are not disabled. It
-     * uses the custom sound resource if provided; otherwise, it defaults to the
-     * standard outgoing call sound.
-     */
-    private void playSound() {
-        if (!disableSoundForCall) {
-            soundManager.play(Sound.outgoingCall, customSoundForCalls);
-        }
     }
 
     /**
@@ -653,6 +649,15 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
             wakeLock = null;
+        }
+    }    /**
+     * Plays the outgoing call sound if sound notifications are not disabled. It
+     * uses the custom sound resource if provided; otherwise, it defaults to the
+     * standard outgoing call sound.
+     */
+    private void playSound() {
+        if (!disableSoundForCall) {
+            soundManager.play(Sound.outgoingCall, customSoundForCalls);
         }
     }
 
@@ -727,6 +732,7 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         viewModel.rejectCall(call);
         ((Activity) getContext()).finish();
     }
+
 
 
 

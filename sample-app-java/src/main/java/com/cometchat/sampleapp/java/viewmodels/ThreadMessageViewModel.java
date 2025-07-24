@@ -18,10 +18,10 @@ import java.util.HashMap;
 public class ThreadMessageViewModel extends ViewModel {
 
     private final MutableLiveData<BaseMessage> parentMessage;
-    private int id;
     private final String LISTENER_ID;
     private final MutableLiveData<User> updateUser;
     private final MutableLiveData<UIKitConstants.DialogState> unblockButtonState;
+    private long id;
     private User mUser;
 
     public ThreadMessageViewModel() {
@@ -31,7 +31,7 @@ public class ThreadMessageViewModel extends ViewModel {
         LISTENER_ID = System.currentTimeMillis() + this.getClass().getSimpleName();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -39,7 +39,7 @@ public class ThreadMessageViewModel extends ViewModel {
         return parentMessage;
     }
 
-    public void fetchMessageDetails(int id) {
+    public void fetchMessageDetails(long id) {
         this.id = id;
         Repository.fetchMessageInformation(id, new CometChat.CallbackListener<BaseMessage>() {
             @Override
@@ -49,6 +49,7 @@ public class ThreadMessageViewModel extends ViewModel {
 
             @Override
             public void onError(CometChatException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -73,7 +74,7 @@ public class ThreadMessageViewModel extends ViewModel {
         });
     }
 
-    public void addUserListener(){
+    public void addUserListener() {
         CometChatUserEvents.addUserListener(LISTENER_ID, new CometChatUserEvents() {
             @Override
             public void ccUserBlocked(User user) {

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.GroupMember
+import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.sampleapp.kotlin.databinding.BannedMemberRowBinding
 
 /**
@@ -107,6 +108,8 @@ class BannedMembersAdapter(
          * The group member data to bind.
          */
         fun bindView(groupMember: GroupMember) {
+            binding.tvMemberTitle.setTextColor(CometChatTheme.getTextColorPrimary(itemView.context)) // Set the text color for the member's name
+            binding.ivUnbanMember.setColorFilter(CometChatTheme.getIconTintSecondary(itemView.context)) // Set the color filter for the unban icon
             binding.memberAvatar.setAvatar(
                 groupMember.name, groupMember.avatar
             ) // Set the member's avatar

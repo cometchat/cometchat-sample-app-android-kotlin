@@ -422,7 +422,7 @@ public class Repository {
         });
     }
 
-    public static void fetchMessageInformation(int id, CometChat.CallbackListener<BaseMessage> callbackListener) {
+    public static void fetchMessageInformation(long id, CometChat.CallbackListener<BaseMessage> callbackListener) {
         CometChat.getMessageDetails(id, new CometChat.CallbackListener<BaseMessage>() {
             @Override
             public void onSuccess(BaseMessage message) {

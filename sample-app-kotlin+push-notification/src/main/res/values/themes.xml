@@ -19,5 +19,4 @@
     <style name="AvatarPlaceHolderTextAppearance" parent="CometChatTextAppearanceHeading2.Bold">
         <item name="android:textSize">@dimen/cometchat_48sp</item>
     </style>
-
 </resources>

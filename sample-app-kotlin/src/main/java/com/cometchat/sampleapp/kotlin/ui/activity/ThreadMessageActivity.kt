@@ -1,9 +1,9 @@
 package com.cometchat.sampleapp.kotlin.ui.activity
 
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -13,11 +13,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
+import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.resources.utils.Utils
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityThreadMessageBinding
 import com.cometchat.sampleapp.kotlin.viewmodels.ThreadMessageViewModel
@@ -32,19 +32,20 @@ class ThreadMessageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityThreadMessageBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setUpTheme()
         adjustWindowSettings()
         windowInsetsListener()
 
         // Create an instance of the MessagesViewModel
         val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
-        viewModel.fetchMessageDetails(intent.getIntExtra(getString(R.string.app_message_id), -1))
+        viewModel.fetchMessageDetails(intent.getLongExtra(getString(R.string.app_message_id), -1))
         user = Gson().fromJson(intent.getStringExtra("user"), User::class.java)
 
         viewModel.addUserListener()
         viewModel.parentMessage.observe(this, this::setParentMessage)
         viewModel.userBlockStatus.observe(this, this::updateUserBlockStatus)
         viewModel.unblockButtonState.observe(this, this::setUnblockButtonState)
-        viewModel.parentMessage.observe(this) { parentMessage: BaseMessage -> this.setParentMessage(parentMessage) }
 
         if (user != null)
             viewModel.setUser(user!!)
@@ -54,10 +55,34 @@ class ThreadMessageActivity : AppCompatActivity() {
         setupUI()
     }
 
+    private fun setUpTheme() {
+        binding.backIcon.setColorFilter(CometChatTheme.getIconTintPrimary(this))
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.tvSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.unblockText.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.unblockBtn.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(this))
+        binding.unblockBtn.strokeColor = CometChatTheme.getStrokeColorDark(this)
+        binding.progress.indeterminateTintList = ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this))
+    }
+
     private fun windowInsetsListener() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val bottomPadding = maxOf(imeInsets.bottom, navBarInsets.bottom)
+            val isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+
+            if (binding.messageComposer.messageInput.composeBox.isFocused && isImeVisible) {
+                if (binding.messageList.atBottom()) {
+                    binding.messageList.scrollToBottom()
+                }
+            }
+            v.setPadding(
+                insets.getInsets(WindowInsetsCompat.Type.systemBars()).left,
+                insets.getInsets(WindowInsetsCompat.Type.systemBars()).top,
+                insets.getInsets(WindowInsetsCompat.Type.systemBars()).right,
+                bottomPadding
+            )
             insets
         }
     }
@@ -93,25 +118,21 @@ class ThreadMessageActivity : AppCompatActivity() {
 
     private fun setParentMessage(parentMessage: BaseMessage) {
         if (UIKitConstants.ReceiverType.USER.equals(parentMessage.receiverType, ignoreCase = true)) {
-            user = if (parentMessage.sender.uid.equals(CometChatUIKit.getLoggedInUser().uid, ignoreCase = true)) parentMessage.receiver as User else parentMessage.sender
+            user = if (parentMessage.sender.uid.equals(
+                    CometChatUIKit.getLoggedInUser().uid,
+                    ignoreCase = true
+                )
+            ) parentMessage.receiver as User else parentMessage.sender
         } else if (UIKitConstants.ReceiverType.GROUP.equals(parentMessage.receiverType, ignoreCase = true)) {
             group = parentMessage.receiver as Group
         }
 
-        KeyBoardUtils.setKeyboardVisibilityListener(this, binding.root) { keyboardVisible: Boolean ->
-            if (binding.messageComposer.messageInput.composeBox.isFocused && keyboardVisible) {
-                if (binding.messageList.atBottom()) {
-                    binding.messageList.scrollToBottom()
-                }
-            }
-        }
-
         binding.tvSubtitle.text = if (user != null) user!!.name else if (group != null) group!!.name else ""
         binding.tvSubtitle.visibility = if (binding.tvSubtitle.text.toString().isEmpty()) View.GONE else View.VISIBLE
-
         binding.messageList.setParentMessage(parentMessage.id)
         binding.messageComposer.parentMessageId = parentMessage.id
         binding.threadHeader.parentMessage = parentMessage
+        binding.threadHeader.reactionVisibility = View.GONE
 
         // Set user or group data to the message header and composer
         if (user != null) {

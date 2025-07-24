@@ -371,6 +371,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 } else if (groupMember.getUid().equals(group.getOwner())) {
                     binding.scopeCard.setCardBackgroundColor(ownerScopeChipBackgroundColor);
                     binding.tvScope.setTextColor(ownerScopeChipTextColor);
+                    binding.scopeCard.setStrokeColor(scopeChipStrokeColor);
                     binding.tvScope.setText(context.getResources().getString(R.string.cometchat_owner));
                 } else if (UIKitConstants.GroupMemberScope.ADMIN.equals(groupMember.getScope())) {
                     binding.scopeCard.setCardBackgroundColor(scopeChipBackgroundColor);

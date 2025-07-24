@@ -24,6 +24,7 @@ import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManag
 import com.cometchat.chatuikit.shared.resources.soundmanager.Sound
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.fcm.data.repository.Repository
+import com.cometchat.sampleapp.kotlin.fcm.ui.activity.SplashActivity
 import com.cometchat.sampleapp.kotlin.fcm.viewmodels.SplashViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.FirebaseApp
@@ -74,20 +75,22 @@ class MyApplication : Application() {
             }
 
             override fun onActivityStarted(activity: Activity) {
-                if (CometChatUIKit.isSDKInitialized() && isConnectedToWebSockets.compareAndSet(false, true)) {
-                    CometChat.connect(object : CometChat.CallbackListener<String?>() {
-                        override fun onSuccess(s: String?) {
-                            isConnectedToWebSockets.set(true)
-                        }
+                if (activity !is SplashActivity) {
+                    if (CometChatUIKit.isSDKInitialized() && isConnectedToWebSockets.compareAndSet(false, true)) {
+                        CometChat.connect(object : CometChat.CallbackListener<String?>() {
+                            override fun onSuccess(s: String?) {
+                                isConnectedToWebSockets.set(true)
+                            }
 
-                        override fun onError(e: CometChatException) {
-                            isConnectedToWebSockets.set(false)
-                        }
-                    })
-                }
-                currentActivity = activity
-                if (++activityReferences == 1 && !isActivityChangingConfigurations) {
-                    isAppInForeground = true
+                            override fun onError(e: CometChatException) {
+                                isConnectedToWebSockets.set(false)
+                            }
+                        })
+                    }
+                    currentActivity = activity
+                    if (++activityReferences == 1 && !isActivityChangingConfigurations) {
+                        isAppInForeground = true
+                    }
                 }
             }
 
@@ -95,27 +98,28 @@ class MyApplication : Application() {
                 currentActivity = activity
                 if (snackBar != null && tempCall != null) {
                     showTopSnackBar(tempCall)
-                } else
-                    dismissTopSnackBar()
+                } else dismissTopSnackBar()
             }
 
             override fun onActivityPaused(activity: Activity) {
             }
 
             override fun onActivityStopped(activity: Activity) {
-                isActivityChangingConfigurations = activity.isChangingConfigurations
-                if (--activityReferences == 0 && !isActivityChangingConfigurations) {
-                    isAppInForeground = false
-                }
-                if (CometChatUIKit.isSDKInitialized() && !isAppInForeground) {
-                    CometChat.disconnect(object : CometChat.CallbackListener<String?>() {
-                        override fun onSuccess(s: String?) {
-                            isConnectedToWebSockets.set(false)
-                        }
+                if (activity !is SplashActivity) {
+                    isActivityChangingConfigurations = activity.isChangingConfigurations
+                    if (--activityReferences == 0 && !isActivityChangingConfigurations) {
+                        isAppInForeground = false
+                    }
+                    if (CometChatUIKit.isSDKInitialized() && !isAppInForeground) {
+                        CometChat.disconnect(object : CometChat.CallbackListener<String?>() {
+                            override fun onSuccess(s: String?) {
+                                isConnectedToWebSockets.set(false)
+                            }
 
-                        override fun onError(e: CometChatException) {
-                        }
-                    })
+                            override fun onError(e: CometChatException) {
+                            }
+                        })
+                    }
                 }
             }
 
@@ -185,6 +189,7 @@ class MyApplication : Application() {
         val cometChatIncomingCall = CometChatIncomingCall(currentActivity)
         cometChatIncomingCall.disableSoundForCalls(true)
         cometChatIncomingCall.call = call!!
+        cometChatIncomingCall.fitsSystemWindows = true
         cometChatIncomingCall.onError = OnError { cometchatException: CometChatException? -> dismissTopSnackBar() }
 
 
@@ -194,10 +199,7 @@ class MyApplication : Application() {
         params.gravity = Gravity.TOP
         params.topMargin = Utils.convertDpToPx(this, 35)
         layout.setLayoutParams(params)
-        layout.setBackgroundColor(
-            currentActivity!!.resources.getColor(android.R.color.transparent, null)
-        )
-
+        layout.setBackgroundColor(currentActivity!!.resources.getColor(android.R.color.transparent, null))
         layout.addView(cometChatIncomingCall, 0)
 
         for (popupWindow in popupWindows) {

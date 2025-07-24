@@ -291,7 +291,8 @@ public class CometChatThreadHeader extends MaterialCardView {
                                                                    0));
             setOutgoingMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatThreadHeader_cometchatThreadHeaderOutgoingMessageBubbleStyle,
                                                                    0));
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderBackgroundColor, 0));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor3(getContext())));
             setStrokeColor(ColorStateList.valueOf(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderStrokeColor, 0)));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatThreadHeader_cometchatThreadHeaderStrokeWidth, 0));
             setRadius(typedArray.getDimension(R.styleable.CometChatThreadHeader_cometchatThreadHeaderCornerRadius, 0));
@@ -300,7 +301,8 @@ public class CometChatThreadHeader extends MaterialCardView {
             setReplyCountBackgroundColor(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderReplyCountBackgroundColor,
                                                              CometChatTheme.getExtendedPrimaryColor100(getContext())));
             setReplyCountTextAppearance(typedArray.getResourceId(R.styleable.CometChatThreadHeader_cometchatThreadHeaderReplyCountTextAppearance, 0));
-            setReplyCountTextColor(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderReplyCountTextColor, 0));
+            setReplyCountTextColor(typedArray.getColor(R.styleable.CometChatThreadHeader_cometchatThreadHeaderReplyCountTextColor,
+                                                       CometChatTheme.getTextColorSecondary(getContext())));
         } finally {
             typedArray.recycle();
         }
@@ -469,9 +471,11 @@ public class CometChatThreadHeader extends MaterialCardView {
      */
     private void updateReplyCount(Integer integer) {
         binding.tvReplies.setText(
-                integer == 0 ? integer + " " + getContext().getResources().getString(R.string.cometchat_replies) : integer + " " + getContext().getResources().getString(integer < 2
-                        ? R.string.cometchat_reply
-                        : R.string.cometchat_replies)
+            integer == 0 ? integer + " " + getContext().getResources().getString(R.string.cometchat_replies) : integer + " " + getContext()
+                .getResources()
+                .getString(integer < 2
+                               ? R.string.cometchat_reply
+                               : R.string.cometchat_replies)
         );
     }
 

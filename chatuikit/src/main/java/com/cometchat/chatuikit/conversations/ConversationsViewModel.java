@@ -672,6 +672,7 @@ public class ConversationsViewModel extends ViewModel {
     private boolean isAddToConversationList(Conversation conversation) {
         if (conversation != null && conversationsRequest != null) {
             if (conversationsRequest.getConversationType() == null) return true;
+            if (conversationsRequest.getConversationType().equalsIgnoreCase(UIKitConstants.ConversationType.BOTH)) return true;
             else return conversation.getConversationType().equalsIgnoreCase(conversationsRequest.getConversationType());
         }
         return false;

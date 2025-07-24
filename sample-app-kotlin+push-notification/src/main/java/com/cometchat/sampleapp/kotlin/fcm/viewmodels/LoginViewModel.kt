@@ -10,7 +10,7 @@ import com.cometchat.sampleapp.kotlin.fcm.data.repository.Repository
 
 class LoginViewModel : ViewModel() {
     val loginStatus: MutableLiveData<Boolean> = MutableLiveData()
-    val selectedUser: MutableLiveData<User> = MutableLiveData()
+    val selectedUser: MutableLiveData<User?> = MutableLiveData()
     val users: MutableLiveData<List<User>> = MutableLiveData()
     private val onError = MutableLiveData<CometChatException>()
 
@@ -48,6 +48,13 @@ class LoginViewModel : ViewModel() {
             override fun onSuccess(user: User?) {
                 Repository.registerFCMToken(object : CometChat.CallbackListener<String>() {
                     override fun onSuccess(s: String) {
+                        CometChat.connect(object : CometChat.CallbackListener<String?>() {
+                            override fun onSuccess(s: String?) {
+                            }
+
+                            override fun onError(e: CometChatException) {
+                            }
+                        })
                         loginStatus.value = true
                     }
 

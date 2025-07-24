@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +24,7 @@ import com.cometchat.chatuikit.calls.CometChatCallActivity;
 import com.cometchat.chatuikit.calls.calllogs.CallLogsAdapter;
 import com.cometchat.chatuikit.calls.calllogs.CometChatCallLogs;
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
+import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.sampleapp.java.fcm.databinding.FragmentCallsBinding;
 import com.cometchat.sampleapp.java.fcm.ui.activity.CallDetailsActivity;
 import com.cometchat.sampleapp.java.fcm.utils.AppUtils;
@@ -106,9 +106,9 @@ public class CallsFragment extends Fragment {
             public void onCallIconClick(View view, CallLogsAdapter.CallLogsViewHolder holder, int position, CallLog callLog) {
                 View callView = holder.getBinding().tailView.getChildAt(0);
                 View progressBarView = AppUtils.getProgressBar(
-                        requireContext(),
-                        requireContext().getResources().getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_30dp),
-                        CometChatTheme.getTextColorPrimary(requireContext())
+                    requireContext(),
+                    requireContext().getResources().getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_30dp),
+                    CometChatTheme.getTextColorPrimary(requireContext())
                 );
                 if (!isCallActive) {
                     isCallActive = true;
@@ -137,7 +137,6 @@ public class CallsFragment extends Fragment {
                 }
             }
         });
-
     }
 
     private Observer<Call> onCallStart() {
@@ -148,7 +147,7 @@ public class CallsFragment extends Fragment {
 
     private Observer<CometChatException> onError() {
         return e -> {
-            Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            Utils.showToast(getContext(), e.getMessage(), CometChatTheme.getWarningColor(getContext()));
         };
     }
 }

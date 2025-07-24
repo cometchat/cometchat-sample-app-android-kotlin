@@ -1,7 +1,6 @@
 package com.cometchat.sampleapp.kotlin.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.cometchat.chat.constants.CometChatConstants
@@ -9,10 +8,12 @@ import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.core.CometChat.GroupListener
 import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.Action
+import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.GroupMember
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
+import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.events.CometChatGroupEvents
 import com.cometchat.sampleapp.kotlin.R
@@ -61,6 +62,11 @@ class GroupDetailsViewModel : ViewModel() {
      */
     val updatedGroup: MutableLiveData<Group?> = MutableLiveData()
     private var group: Group? = null
+
+    /**The BaseMessage object representing the message associated with the group.
+     * This is used to handle message-related operations and updates.
+     */
+    private var baseMessage: BaseMessage? = null
 
     /**
      * Sets the group for which details are being managed.
@@ -349,5 +355,26 @@ class GroupDetailsViewModel : ViewModel() {
         groupMember.name = user.name
         groupMember.status = user.status
         return groupMember
+    }
+
+    fun deleteChat() {
+        confirmDialogState.value = DialogState.INITIATED
+        Repository.deleteChat(
+            group!!.guid,
+            baseMessage,
+            UIKitConstants.ReceiverType.GROUP,
+            object : CometChat.CallbackListener<String>() {
+                override fun onSuccess(s: String) {
+                    confirmDialogState.value = DialogState.SUCCESS
+                }
+
+                override fun onError(e: CometChatException) {
+                    confirmDialogState.value = DialogState.FAILURE
+                }
+            })
+    }
+
+    fun setBaseMessage(baseMessage: BaseMessage?) {
+        this.baseMessage = baseMessage
     }
 }

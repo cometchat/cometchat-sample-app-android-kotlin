@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cometchat.chat.core.UsersRequest;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatUserListBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -60,7 +61,6 @@ import java.util.List;
  */
 public class CometChatUsers extends MaterialCardView {
     private static final String TAG = CometChatUsers.class.getSimpleName();
-    private final HashMap<User, Boolean> hashMap = new HashMap<>();
     private int toolbarVisibility = VISIBLE;
     private int loadingStateVisibility = VISIBLE;
     private int searchBoxVisibility = VISIBLE;
@@ -291,8 +291,8 @@ public class CometChatUsers extends MaterialCardView {
      * Initializes the view components and sets up listeners.
      */
     private void init() {
-        initRecyclerView();
         initViewModels();
+        initRecyclerView();
         initClickEvents();
     }
 
@@ -301,6 +301,7 @@ public class CometChatUsers extends MaterialCardView {
      */
     private void initRecyclerView() {
         usersAdapter = new UsersAdapter(getContext());
+        usersAdapter.setSelectedUsersMap(usersViewModel.getSelectedUsers());
         stickyHeaderDecoration = new StickyHeaderDecoration(usersAdapter);
 
         binding.recyclerViewList.setAdapter(usersAdapter);
@@ -308,7 +309,7 @@ public class CometChatUsers extends MaterialCardView {
         binding.recyclerViewList.setLayoutManager(layoutManager);
 
         binding.recyclerViewList.addItemDecoration(stickyHeaderDecoration, 0);
-
+        binding.recyclerViewList.setItemAnimator(null);
         binding.recyclerViewList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -433,59 +434,85 @@ public class CometChatUsers extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            backgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersBackgroundColor, 0);
-            titleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersTitleTextColor, 0);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            titleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()));
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersTitleTextAppearance, 0);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersStrokeWidth, 0);
             strokeColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersStrokeColor, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersCornerRadius, 0);
             backIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersBackIcon);
-            backIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersBackIconTint, 0);
-            separatorColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSeparatorColor, 0);
+            backIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersBackIconTint,
+                                               CometChatTheme.getIconTintPrimary(getContext()));
+            separatorColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSeparatorColor,
+                                                 CometChatTheme.getStrokeColorLight(getContext()));
             discardSelectionIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersDiscardSelectionIcon);
-            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersDiscardSelectionIconTint, 0);
+            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersDiscardSelectionIconTint,
+                                                           CometChatTheme.getIconTintPrimary(getContext()));
             submitSelectionIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersSubmitSelectionIcon);
-            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSubmitSelectionIconTint, 0);
+            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSubmitSelectionIconTint,
+                                                          CometChatTheme.getIconTintPrimary(getContext()));
             searchInputEndIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersSearchInputEndIcon);
-            searchInputEndIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputEndIconTint, 0);
+            searchInputEndIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputEndIconTint,
+                                                         CometChatTheme.getIconTintSecondary(getContext()));
             searchInputStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersSearchInputStrokeWidth, 0);
             searchInputStrokeColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputStrokeColor, 0);
             searchInputCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersSearchInputCornerRadius, 0);
-            searchInputBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputBackgroundColor, 0);
+            searchInputBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputBackgroundColor,
+                                                             CometChatTheme.getBackgroundColor3(getContext()));
             searchInputTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersSearchInputTextAppearance, 0);
-            searchInputTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputTextColor, 0);
+            searchInputTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputTextColor,
+                                                       CometChatTheme.getTextColorPrimary(getContext()));
             searchInputPlaceHolderTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersSearchInputPlaceHolderTextAppearance,
                                                                             0);
-            searchInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputPlaceHolderTextColor, 0);
+            searchInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputPlaceHolderTextColor,
+                                                                  CometChatTheme.getTextColorTertiary(getContext()));
             searchInputIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersSearchInputIcon);
-            searchInputIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputIconTint, 0);
-            stickyTitleColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersStickyTitleColor, 0);
+            searchInputIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSearchInputIconTint,
+                                                      CometChatTheme.getIconTintSecondary(getContext()));
+            stickyTitleColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersStickyTitleColor,
+                                                   CometChatTheme.getTextColorHighlight(getContext()));
             stickyTitleAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersStickyTitleAppearance, 0);
-            stickyTitleBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersStickyTitleBackgroundColor, 0);
+            stickyTitleBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersStickyTitleBackgroundColor,
+                                                             CometChatTheme.getBackgroundColor1(getContext()));
             avatar = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersAvatarStyle, 0);
             itemTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersItemTitleTextAppearance, 0);
-            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemTitleTextColor, 0);
-            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemBackgroundColor, 0);
+            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemTitleTextColor,
+                                                     CometChatTheme.getTextColorPrimary(getContext()));
+            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemBackgroundColor,
+                                                      CometChatTheme.getBackgroundColor1(getContext()));
             statusIndicatorStyle = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersStatusIndicator, 0);
-            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemSelectedBackgroundColor, 0);
+            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersItemSelectedBackgroundColor,
+                                                              CometChatTheme.getBackgroundColor4(getContext()));
             checkBoxStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersCheckBoxStrokeWidth, 0);
             checkBoxCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersCheckBoxCornerRadius, 0);
-            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxStrokeColor, 0);
-            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxBackgroundColor, 0);
-            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxSelectIconTint, 0);
+            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxStrokeColor,
+                                                      CometChatTheme.getStrokeColorDefault(getContext()));
+            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxBackgroundColor,
+                                                          CometChatTheme.getBackgroundColor1(getContext()));
+            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxSelectIconTint,
+                                                         CometChatTheme.getColorWhite(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersCheckBoxSelectIcon);
-            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxCheckedBackgroundColor, 0);
+            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxCheckedBackgroundColor,
+                                                                 CometChatTheme.getIconTintHighlight(getContext()));
             emptyStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersEmptyStateTextAppearance, 0);
-            emptyStateTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersEmptyStateTextColor, 0);
+            emptyStateTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersEmptyStateTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext()));
             emptyStateSubTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersEmptyStateSubTitleTextAppearance, 0);
-            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersEmptyStateSubtitleTextColor, 0);
+            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersEmptyStateSubtitleTextColor,
+                                                              CometChatTheme.getTextColorSecondary(getContext()));
             errorStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersErrorStateTextAppearance, 0);
-            errorStateTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersErrorStateTextColor, 0);
+            errorStateTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersErrorStateTextColor,
+                                                      CometChatTheme.getTextColorPrimary(getContext()));
             errorStateSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersErrorStateSubtitleTextAppearance, 0);
-            errorStateSubtitleColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersErrorStateSubtitleColor, 0);
-            retryButtonTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersRetryButtonTextColor, 0);
+            errorStateSubtitleColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersErrorStateSubtitleColor,
+                                                          CometChatTheme.getTextColorSecondary(getContext()));
+            retryButtonTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersRetryButtonTextColor,
+                                                       CometChatTheme.getColorWhite(getContext()));
             retryButtonTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersRetryButtonTextAppearance, 0);
-            retryButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersRetryButtonBackgroundColor, 0);
+            retryButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersRetryButtonBackgroundColor,
+                                                             CometChatTheme.getPrimaryButtonBackgroundColor(getContext()));
             retryButtonStrokeColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersRetryButtonStrokeColor, 0);
             retryButtonStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersRetryButtonStrokeWidth, 0);
             retryButtonCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatUsers_cometchatUsersRetryButtonCornerRadius, 0);
@@ -596,7 +623,7 @@ public class CometChatUsers extends MaterialCardView {
             binding.ivDiscardSelection.setVisibility(View.GONE);
             setBackIconVisibility(backIconVisibility);
         } else {
-            if (!hashMap.isEmpty()) {
+            if (!usersViewModel.getSelectedUsers().isEmpty()) {
                 binding.ivDiscardSelection.setVisibility(View.VISIBLE);
                 binding.ivBack.setVisibility(View.GONE);
             }
@@ -628,7 +655,7 @@ public class CometChatUsers extends MaterialCardView {
         if (visibility == GONE) {
             binding.tvSelectionCount.setVisibility(GONE);
         } else {
-            if (!hashMap.isEmpty()) {
+            if (!usersViewModel.getSelectedUsers().isEmpty()) {
                 binding.tvSelectionCount.setVisibility(VISIBLE);
                 setTitleVisibility(GONE);
             }
@@ -1051,13 +1078,6 @@ public class CometChatUsers extends MaterialCardView {
     public void setSearchInputPlaceHolderTextAppearance(@StyleRes int searchInputPlaceHolderTextAppearance) {
         this.searchInputPlaceHolderTextAppearance = searchInputPlaceHolderTextAppearance;
         binding.searchBox.setSearchInputPlaceHolderTextAppearance(searchInputPlaceHolderTextAppearance);
-    }    /**
-     * Gets the stroke width.
-     *
-     * @return the stroke width.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -1067,6 +1087,13 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @ColorInt int getSearchInputPlaceHolderTextColor() {
         return searchInputPlaceHolderTextColor;
+    }    /**
+     * Gets the stroke width.
+     *
+     * @return the stroke width.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -1411,14 +1438,6 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @ColorInt int getEmptyStateTextColor() {
         return emptyStateTextColor;
-    }    /**
-     * Sets the stroke width.
-     *
-     * @param strokeWidth the stroke width to set.
-     */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1438,6 +1457,14 @@ public class CometChatUsers extends MaterialCardView {
      */
     public @StyleRes int getEmptyStateSubTitleTextAppearance() {
         return emptyStateSubTitleTextAppearance;
+    }    /**
+     * Sets the stroke width.
+     *
+     * @param strokeWidth the stroke width to set.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1670,7 +1697,7 @@ public class CometChatUsers extends MaterialCardView {
      */
     public List<User> getSelectedUsers() {
         List<User> userList = new ArrayList<>();
-        for (HashMap.Entry<User, Boolean> entry : hashMap.entrySet()) {
+        for (HashMap.Entry<User, Boolean> entry : usersViewModel.getSelectedUsers().entrySet()) {
             userList.add(entry.getKey());
         }
         return userList;
@@ -1682,13 +1709,13 @@ public class CometChatUsers extends MaterialCardView {
      * to deselect any selected users.
      */
     public void clearSelection() {
-        hashMap.clear();
+        usersViewModel.clearSelection();
         setSelectionCount(0);
         setDiscardSelectionVisibility(GONE);
         setTitleVisibility(VISIBLE);
         setSelectionCountVisibility(GONE);
         setSubmitSelectionIconVisibility(GONE);
-        usersAdapter.selectUser(hashMap);
+        usersAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -2098,30 +2125,32 @@ public class CometChatUsers extends MaterialCardView {
         if (mode != null && user != null) {
             this.selectionMode = mode;
             if (UIKitConstants.SelectionMode.SINGLE.equals(selectionMode)) {
-                hashMap.clear();
-                hashMap.put(user, true);
-                usersAdapter.selectUser(hashMap);
+                usersViewModel.clearSelection();
+                usersViewModel.selectUser(user, true);
             } else if (UIKitConstants.SelectionMode.MULTIPLE.equals(selectionMode)) {
-                if (hashMap.containsKey(user)) {
-                    hashMap.remove(user);
+                if (usersViewModel.isSelected(user)) {
+                    usersViewModel.selectUser(user, false);
                 } else {
                     if (isFurtherSelectionEnabled) {
-                        hashMap.put(user, true);
+                        usersViewModel.selectUser(user, true);
                     }
                 }
-                if (hashMap.isEmpty()) {
-                    setDiscardSelectionVisibility(GONE);
-                    setSubmitSelectionIconVisibility(GONE);
-                    setSelectionCountVisibility(GONE);
-                    setTitleVisibility(VISIBLE);
-                } else {
-                    setSelectionCount(hashMap.size());
-                    setDiscardSelectionVisibility(VISIBLE);
-                    setSubmitSelectionIconVisibility(submitSelectionIconVisibility == VISIBLE ? VISIBLE : GONE);
-                    setSelectionCountVisibility(VISIBLE);
-                }
-                usersAdapter.selectUser(hashMap);
+                updateSelectionUI();
             }
+        }
+    }
+
+    private void updateSelectionUI() {
+        if (usersViewModel.getSelectedUsers().isEmpty()) {
+            setDiscardSelectionVisibility(GONE);
+            setSubmitSelectionIconVisibility(GONE);
+            setSelectionCountVisibility(GONE);
+            setTitleVisibility(VISIBLE);
+        } else {
+            setSelectionCount(usersViewModel.getSelectedUsers().size());
+            setDiscardSelectionVisibility(VISIBLE);
+            setSubmitSelectionIconVisibility(submitSelectionIconVisibility == VISIBLE ? VISIBLE : GONE);
+            setSelectionCountVisibility(VISIBLE);
         }
     }
 
@@ -2532,8 +2561,7 @@ public class CometChatUsers extends MaterialCardView {
      * @param selectionMode The selection mode to set.
      */
     public void setSelectionMode(@NonNull UIKitConstants.SelectionMode selectionMode) {
-        hashMap.clear();
-        usersAdapter.selectUser(hashMap);
+        usersViewModel.clearSelection();
         this.selectionMode = selectionMode;
         if (UIKitConstants.SelectionMode.MULTIPLE.equals(selectionMode) || UIKitConstants.SelectionMode.SINGLE.equals(selectionMode)) {
             isFurtherSelectionEnabled = true;

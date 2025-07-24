@@ -148,4 +148,5 @@
     <string name="participant_scope_without_group" translatable="true">
     Only group admins can perform this action. User %1$s has a scope \'participant\'.
     </string>
+    <string name="scan_qr_code">Load settings</string>
 </resources>

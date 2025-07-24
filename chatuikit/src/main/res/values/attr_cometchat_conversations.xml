@@ -53,6 +53,7 @@
         <attr name="cometchatConversationsReceiptStyle" format="reference" />
         <attr name="cometchatConversationsTypingIndicatorStyle" format="reference" />
         <attr name="cometchatConversationsMentionsStyle" format="reference" />
+        <attr name="cometchatConversationsOptionListStyle" format="reference" />
 
         <!-- Drawable Attributes -->
         <attr name="cometchatConversationsBackIcon" format="reference" />

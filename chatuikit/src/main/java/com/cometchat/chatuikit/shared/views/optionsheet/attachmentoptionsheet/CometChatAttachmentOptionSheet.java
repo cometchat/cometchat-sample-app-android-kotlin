@@ -3,7 +3,6 @@ package com.cometchat.chatuikit.shared.views.optionsheet.attachmentoptionsheet;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatAttachmentOptionSheetBinding;
 import com.cometchat.chatuikit.shared.interfaces.OptionSheetClickListener;
@@ -35,11 +35,9 @@ import java.util.List;
  */
 public class CometChatAttachmentOptionSheet extends MaterialCardView {
     private static final String TAG = CometChatAttachmentOptionSheet.class.getSimpleName();
-
-    private CometchatAttachmentOptionSheetBinding binding;
-
-    private OptionSheetAdapter adapter;
     private final List<OptionSheetMenuItem> attachmentItems = new ArrayList<>();
+    private CometchatAttachmentOptionSheetBinding binding;
+    private OptionSheetAdapter adapter;
     private OptionSheetClickListener attachmentOptionClickListener;
 
     private @StyleRes int titleTextAppearance;
@@ -106,28 +104,41 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
     }
 
     /**
+     * Initializes the RecyclerView, sets up the adapter, and adds an item touch
+     * listener.
+     */
+    private void initRecyclerView() {
+        adapter = new OptionSheetAdapter(getContext(), attachmentItems);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
+        binding.recyclerView.scheduleLayoutAnimation();
+        binding.recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerView, new ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                view.setBackgroundColor(getContext().getResources().getColor(R.color.cometchat_color_background4, getContext().getTheme()));
+                OptionSheetMenuItem item = (OptionSheetMenuItem) view.getTag(R.string.cometchat_action_item);
+                if (attachmentOptionClickListener != null) {
+                    attachmentOptionClickListener.onOptionSheetItemClick(item);
+                }
+            }
+        }));
+    }
+
+    /**
      * Applies the style attributes from XML to the view.
      *
      * @param attrs        The attribute set to use for styling.
      * @param defStyleAttr The default style attribute.
      */
     private void applyStyleAttributes(AttributeSet attrs, int defStyleAttr) {
-        TypedArray directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatAttachmentOptionSheet, defStyleAttr, 0);
+        TypedArray directAttributes = getContext()
+            .getTheme()
+            .obtainStyledAttributes(attrs, R.styleable.CometChatAttachmentOptionSheet, defStyleAttr, 0);
         @StyleRes int styleResId = directAttributes.getResourceId(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetStyle, 0);
-        directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatAttachmentOptionSheet, defStyleAttr, styleResId);
+        directAttributes = getContext()
+            .getTheme()
+            .obtainStyledAttributes(attrs, R.styleable.CometChatAttachmentOptionSheet, defStyleAttr, styleResId);
         extractAttributesAndApplyDefaults(directAttributes);
-    }
-
-    /**
-     * Sets the style for the attachment option sheet.
-     *
-     * @param style The style resource ID to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAttachmentOptionSheet);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
     }
 
     /**
@@ -139,11 +150,16 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetTitleTextAppearance, 0);
-            titleColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetTitleColor, 0);
-            iconTint = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetIconTint, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetBackgroundColor, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetStrokeColor, 0);
+            titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetTitleTextAppearance,
+                                                           0);
+            titleColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetTitleColor,
+                                             CometChatTheme.getTextColorPrimary(getContext()));
+            iconTint = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetIconTint,
+                                           CometChatTheme.getIconTintHighlight(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            strokeColor = typedArray.getColor(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(getContext()));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetStrokeWidth, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatAttachmentOptionSheet_cometchatAttachmentOptionSheetCornerRadius, 0);
             // Call setters
@@ -168,24 +184,36 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
     }
 
     /**
-     * Initializes the RecyclerView, sets up the adapter, and adds an item touch
-     * listener.
+     * Sets the stroke color for the attachment option sheet.
+     *
+     * @param strokeColor The stroke color to set as an integer.
      */
-    private void initRecyclerView() {
-        adapter = new OptionSheetAdapter(getContext(), attachmentItems);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(adapter);
-        binding.recyclerView.scheduleLayoutAnimation();
-        binding.recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerView, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                view.setBackgroundColor(getContext().getResources().getColor(R.color.cometchat_color_background4, getContext().getTheme()));
-                OptionSheetMenuItem item = (OptionSheetMenuItem) view.getTag(R.string.cometchat_action_item);
-                if (attachmentOptionClickListener != null) {
-                    attachmentOptionClickListener.onOptionSheetItemClick(item);
-                }
-            }
-        }));
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        if (binding != null) {
+            binding.viewBottomSheet.setStrokeColor(strokeColor);
+        }
+    }
+
+    /**
+     * Gets the stroke color of the attachment option sheet.
+     *
+     * @return The stroke color as an integer.
+     */
+    public ColorStateList getStrokeColorStateList() {
+        return ColorStateList.valueOf(strokeColor);
+    }
+
+    /**
+     * Sets the style for the attachment option sheet.
+     *
+     * @param style The style resource ID to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatAttachmentOptionSheet);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
     }
 
     /**
@@ -193,6 +221,17 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
      */
     public void textAlignCenter() {
         mTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+    }
+
+    /**
+     * Sets the text alignment for the attachment option items.
+     *
+     * @param alignment The alignment to apply.
+     */
+    private void mTextAlignment(int alignment) {
+        if (adapter != null) {
+            adapter.setItemTextAlignment(alignment);
+        }
     }
 
     /**
@@ -210,23 +249,19 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
     }
 
     /**
-     * Sets the text alignment for the attachment option items.
-     *
-     * @param alignment The alignment to apply.
-     */
-    private void mTextAlignment(int alignment) {
-        if (adapter != null) {
-            adapter.setItemTextAlignment(alignment);
-        }
-    }
-
-    /**
      * Gets the corner radius of the attachment option sheet.
      *
      * @return The corner radius in pixels.
      */
     public @Dimension int getCornerRadius() {
         return cornerRadius;
+    }    /**
+     * Gets the stroke width of the attachment option sheet.
+     *
+     * @return The stroke width in pixels.
+     */
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -237,21 +272,16 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
     public void setCornerRadius(@Dimension int cornerRadius) {
         this.cornerRadius = cornerRadius;
         if (binding != null) {
-            ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel().toBuilder().setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius).setTopRightCorner(CornerFamily.ROUNDED, cornerRadius).setBottomLeftCorner(CornerFamily.ROUNDED, 0).setBottomRightCorner(CornerFamily.ROUNDED, 0).build();
+            ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+                .toBuilder()
+                .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+                .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+                .setBottomLeftCorner(CornerFamily.ROUNDED, 0)
+                .setBottomRightCorner(CornerFamily.ROUNDED, 0)
+                .build();
             binding.viewBottomSheet.setShapeAppearanceModel(shapeAppearanceModel);
         }
-    }
-
-    /**
-     * Gets the stroke width of the attachment option sheet.
-     *
-     * @return The stroke width in pixels.
-     */
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    /**
+    }    /**
      * Sets the stroke width for the attachment option sheet.
      *
      * @param strokeWidth The stroke width to set in pixels.
@@ -260,27 +290,6 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
         this.strokeWidth = strokeWidth;
         if (binding != null) {
             binding.viewBottomSheet.setStrokeWidth(strokeWidth);
-        }
-    }
-
-    /**
-     * Gets the stroke color of the attachment option sheet.
-     *
-     * @return The stroke color as an integer.
-     */
-    public ColorStateList getStrokeColorStateList() {
-        return ColorStateList.valueOf(strokeColor);
-    }
-
-    /**
-     * Sets the stroke color for the attachment option sheet.
-     *
-     * @param strokeColor The stroke color to set as an integer.
-     */
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        if (binding != null) {
-            binding.viewBottomSheet.setStrokeColor(strokeColor);
         }
     }
 
@@ -417,4 +426,8 @@ public class CometChatAttachmentOptionSheet extends MaterialCardView {
     public void setAttachmentOptionClickListener(OptionSheetClickListener attachmentOptionClickListener) {
         this.attachmentOptionClickListener = attachmentOptionClickListener;
     }
+
+
+
+
 }

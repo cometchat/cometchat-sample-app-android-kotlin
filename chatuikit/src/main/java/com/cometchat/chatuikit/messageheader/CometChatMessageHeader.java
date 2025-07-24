@@ -19,6 +19,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageHeaderBinding;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -264,7 +265,7 @@ public class CometChatMessageHeader extends MaterialCardView {
                 showUserStatusAndLastSeen(user);
             } else {
                 binding.messageHeaderStatusIndicatorView.setVisibility(GONE);
-                binding.tvMessageHeaderSubtitle.setVisibility(GONE);
+                binding.messageHeaderSubtitleLayout.setVisibility(GONE);
             }
         }
     }
@@ -292,10 +293,14 @@ public class CometChatMessageHeader extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderTitleTextColor, 0);
-            subtitleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderSubtitleTextColor, 0);
-            backIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackIconTint, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackgroundColor, 0);
+            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()));
+            subtitleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderSubtitleTextColor,
+                                                    CometChatTheme.getTextColorSecondary(getContext()));
+            backIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackIconTint,
+                                               CometChatTheme.getIconTintPrimary(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
             strokeColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderStrokeColor, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageHeader_cometchatMessageHeaderCornerRadius, 0);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageHeader_cometchatMessageHeaderStrokeWidth, 0);
@@ -595,9 +600,7 @@ public class CometChatMessageHeader extends MaterialCardView {
         this.typingIndicatorStyle = typingIndicatorStyle;
         try (TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(typingIndicatorStyle, R.styleable.CometChatTypingIndicator)) {
             binding.tvMessageHeaderTypingIndicator.setTextAppearance(typedArray.getResourceId(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextColor,
-                                                                                              0));
-            binding.tvMessageHeaderTypingIndicator.setTextColor(typedArray.getColor(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextColor,
-                                                                                    0));
+                                                                                              CometChatTheme.getTextColorHighlight(getContext())));
         }
     }
 

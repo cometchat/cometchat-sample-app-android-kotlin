@@ -152,27 +152,23 @@ public class UserDetailsViewModel extends ViewModel {
     }
 
     public void deleteChat() {
-        if (user.getValue() != null) {
-            Repository.deleteChat(
-                user.getValue().getUid(),
-                baseMessage.getValue(),
-                CometChatConstants.RECEIVER_TYPE_USER,
-                new CometChat.CallbackListener<String>() {
-                    @Override
-                    public void onSuccess(String s) {
-                        isChatDeleted.setValue(true);
-                    }
-
-                    @Override
-                    public void onError(CometChatException e) {
-                        e.getMessage();
-                        isChatDeleted.setValue(false);
-                    }
+        Repository.deleteChat(
+            user.getValue().getUid(),
+            baseMessage.getValue(),
+            CometChatConstants.RECEIVER_TYPE_USER,
+            new CometChat.CallbackListener<String>() {
+                @Override
+                public void onSuccess(String s) {
+                    isChatDeleted.setValue(true);
                 }
-            );
-        } else {
-            isChatDeleted.setValue(false);
-        }
+
+                @Override
+                public void onError(CometChatException e) {
+                    e.getMessage();
+                    isChatDeleted.setValue(false);
+                }
+            }
+        );
     }
 
     public void startCall(String callType) {

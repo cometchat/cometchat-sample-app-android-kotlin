@@ -3,15 +3,22 @@ package com.cometchat.sampleapp.java.ui.activity;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.cometchat.calls.constants.CometChatCallsConstants;
 import com.cometchat.calls.model.CallLog;
@@ -41,6 +48,9 @@ public class CallDetailsActivity extends AppCompatActivity {
         binding = ActivityCallDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        applyWindowInsets();
+        adjustWindowSettings();
+
         callLog = new Gson().fromJson(getIntent().getStringExtra("callLog"), CallLog.class);
         callLog.setInitiator(new Gson().fromJson(getIntent().getStringExtra("initiator"), CallUser.class));
         callLog.setReceiver(new Gson().fromJson(getIntent().getStringExtra("receiver"), CallUser.class));
@@ -50,6 +60,48 @@ public class CallDetailsActivity extends AppCompatActivity {
         initTabFragment();
 
         initClickListeners();
+
+        binding.parentLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.toolbarBackIcon.setColorFilter(CometChatTheme.getIconTintPrimary(this));
+        binding.toolbarTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.toolbarDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+        binding.messageHeaderDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+        binding.infoLayout.setBackgroundColor(CometChatTheme.getBackgroundColor2(this));
+        binding.tvInfoTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tvInfoCallDuration.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.infoLayoutDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+    }
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.parentLayout, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+                );
+
+                return insets;
+            }
+        });
+    }
+
+    /**
+     * This method is used to set the window settings for the activity.
+     * It sets the soft input mode to adjust the resize of the window.
+     */
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 
     private void initViewModel() {
@@ -66,6 +118,8 @@ public class CallDetailsActivity extends AppCompatActivity {
         });
 
         viewModel.getReceiverUser().observe(this, user -> {
+            binding.messageHeader.setVideoCallButtonVisibility(user.isHasBlockedMe() || user.isBlockedByMe() ? View.GONE : View.VISIBLE);
+            binding.messageHeader.setVoiceCallButtonVisibility(user.isHasBlockedMe() || user.isBlockedByMe() ? View.GONE : View.VISIBLE);
             binding.messageHeader.setUser(user);
             binding.messageHeader.setUserStatusVisibility(View.GONE);
             binding.messageHeader.setBackIconVisibility(View.GONE);

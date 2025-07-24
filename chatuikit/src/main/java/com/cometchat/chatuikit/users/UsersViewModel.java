@@ -13,6 +13,7 @@ import com.cometchat.chatuikit.shared.events.CometChatUserEvents;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,6 +36,7 @@ public class UsersViewModel extends ViewModel {
     public boolean connectionListerAttached;
     public boolean hasMore = true;
     private UsersRequest usersRequest;
+    private final HashMap<User, Boolean> selectedUsers;
 
     /**
      * Initializes the ViewModel and sets up initial values for user requests and
@@ -52,6 +54,7 @@ public class UsersViewModel extends ViewModel {
         usersRequestBuilder = new UsersRequest.UsersRequestBuilder().setLimit(limit);
         searchUsersRequestBuilder = new UsersRequest.UsersRequestBuilder();
         usersRequest = usersRequestBuilder.build();
+        selectedUsers = new HashMap<>();
     }
 
     /**
@@ -153,6 +156,27 @@ public class UsersViewModel extends ViewModel {
                 updateUser(user);
             }
         });
+    }
+
+    public HashMap<User, Boolean> getSelectedUsers() {
+        return selectedUsers;
+    }
+
+    public void selectUser(User user, boolean isSelected) {
+        if (isSelected) {
+            selectedUsers.put(user, true);
+        } else {
+            selectedUsers.remove(user);
+        }
+        updateUser.postValue(userArrayList.indexOf(user));
+    }
+
+    public void clearSelection() {
+        selectedUsers.clear();
+    }
+
+    public boolean isSelected(User user) {
+        return selectedUsers.containsKey(user);
     }
 
     /**

@@ -25,6 +25,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.MediaUtils;
@@ -140,6 +141,10 @@ public class CometChatVideoBubble extends MaterialCardView {
         extractAttributesAndApplyDefaults(typedArray);
     }
 
+    private void openMediaViewActivity() {
+        MediaUtils.openMediaInPlayer(getContext(), videoUrl, "video/*");
+    }
+
     /**
      * Extract attributes from the typed array and apply them to the view.
      *
@@ -151,131 +156,12 @@ public class CometChatVideoBubble extends MaterialCardView {
             setVideoCardStrokeColor((int) typedArray.getDimension(R.styleable.CometChatVideoBubble_cometchatVideoBubbleVideoStrokeColor, 0));
             setVideoCardStrokeWidth((int) typedArray.getDimension(R.styleable.CometChatVideoBubble_cometchatVideoBubbleVideoStrokeWidth, 0));
             setPlayIconBackgroundColor(typedArray.getColor(R.styleable.CometChatVideoBubble_cometchatVideoBubblePlayIconBackgroundColor, 0));
-            setPlayIconTint(typedArray.getColor(R.styleable.CometChatVideoBubble_cometchatVideoBubblePlayIconTint, 0));
-            setProgressIndeterminateTint(typedArray.getColor(R.styleable.CometChatVideoBubble_cometchatVideoBubbleProgressIndeterminateTint, 0));
+            setPlayIconTint(typedArray.getColor(R.styleable.CometChatVideoBubble_cometchatVideoBubblePlayIconTint,
+                                                CometChatTheme.getColorWhite(getContext())));
+            setProgressIndeterminateTint(typedArray.getColor(R.styleable.CometChatVideoBubble_cometchatVideoBubbleProgressIndeterminateTint,
+                                                             CometChatTheme.getIconTintSecondary(getContext())));
         } finally {
             typedArray.recycle();
-        }
-    }
-
-    /**
-     * Set the style for the file bubble.
-     *
-     * @param style The resource ID of the style to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        this.style = style;
-        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatVideoBubble);
-        extractAttributesAndApplyDefaults(typedArray);
-    }
-
-    /**
-     * Sets the video URL and placeholder image for the video thumbnail.
-     *
-     * @param videoUrl The URL of the video.
-     */
-    public void setVideoUrl(File file, String videoUrl) {
-        this.videoUrl = videoUrl;
-        loadBitmapIntoImageView(file, videoUrl);
-    }
-
-    private void loadBitmapIntoImageView(File file, String url) {
-        RequestBuilder<Bitmap> builder = Glide.with(getContext()).asBitmap();
-        builder.diskCacheStrategy(DiskCacheStrategy.DATA).placeholder(0).skipMemoryCache(false).load(file != null && file.exists() ? file : url).addListener(new RequestListener<Bitmap>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object o, @NonNull Target<Bitmap> target, boolean b) {
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(@NonNull Bitmap bitmap, @NonNull Object o, Target<Bitmap> target, @NonNull DataSource dataSource, boolean b) {
-                progressBar.setVisibility(View.GONE);
-                playButtonLayout.setVisibility(View.VISIBLE);
-                return false;
-            }
-        }).into(shapeableImageView);
-    }
-
-    /**
-     * Sets the thumbnail URL and placeholder image for the video thumbnail.
-     *
-     * @param thumbnailUrl     The URL of the thumbnail image.
-     * @param placeHolderImage The placeholder image resource ID.
-     */
-    public void setThumbnailUrl(String thumbnailUrl, @DrawableRes int placeHolderImage) {
-        loadBitmapIntoImageView(null, thumbnailUrl);
-    }
-
-    private void openMediaViewActivity() {
-        MediaUtils.openMediaInPlayer(getContext(), videoUrl, "video/*");
-    }
-
-    /**
-     * Sets the corner radius for the video card.
-     *
-     * @param radius The corner radius to be set.
-     */
-    public void setVideoCardRadius(@Dimension int radius) {
-        this.videoCardRadius = radius;
-        videoCard.setRadius(radius);
-    }
-
-    /**
-     * Sets the stroke color for the video card.
-     *
-     * @param color The stroke color to be set.
-     */
-    public void setVideoCardStrokeColor(@ColorInt int color) {
-        this.videoCardStrokeColor = color;
-        videoCard.setStrokeColor(color);
-    }
-
-    /**
-     * Sets the stroke width for the video card.
-     *
-     * @param width The stroke width to be set.
-     */
-    public void setVideoCardStrokeWidth(@Dimension int width) {
-        this.videoCardStrokeWidth = width;
-        videoCard.setStrokeWidth(width);
-    }
-
-    /**
-     * Sets the onClick listener for the play button.
-     *
-     * @param onClick The onClick listener to be set.
-     */
-    public void setOnClick(OnClick onClick) {
-        this.onClick = onClick;
-    }
-
-    /**
-     * Sets the play icon resource for the play button.
-     *
-     * @param playIcon The play icon resource ID.
-     */
-    public void setPlayIcon(@DrawableRes int playIcon) {
-        if (playIcon != 0) videoPlayImageView.setImageResource(playIcon);
-    }
-
-    /**
-     * Sets the tint color for the progress bar.
-     *
-     * @param progressIndeterminateTint The color value to be set.
-     */
-    public void setProgressIndeterminateTint(@ColorInt int progressIndeterminateTint) {
-        progressBar.getIndeterminateDrawable().setColorFilter(progressIndeterminateTint, android.graphics.PorterDuff.Mode.SRC_IN);
-    }
-
-    /**
-     * Sets the tint color for the play button icon.
-     *
-     * @param color The tint color to be applied.
-     */
-    public void setPlayIconTint(@ColorInt int color) {
-        if (color != 0) {
-            this.playIconTint = color;
-            videoPlayImageView.setImageTintList(ColorStateList.valueOf(color));
         }
     }
 
@@ -291,7 +177,70 @@ public class CometChatVideoBubble extends MaterialCardView {
         }
     }
 
-    // Getters for testing or direct access if needed
+    /**
+     * Sets the tint color for the progress bar.
+     *
+     * @param progressIndeterminateTint The color value to be set.
+     */
+    public void setProgressIndeterminateTint(@ColorInt int progressIndeterminateTint) {
+        progressBar.getIndeterminateDrawable().setColorFilter(progressIndeterminateTint, android.graphics.PorterDuff.Mode.SRC_IN);
+    }
+
+    /**
+     * Sets the video URL and placeholder image for the video thumbnail.
+     *
+     * @param videoUrl The URL of the video.
+     */
+    public void setVideoUrl(File file, String videoUrl) {
+        this.videoUrl = videoUrl;
+        loadBitmapIntoImageView(file, videoUrl);
+    }
+
+    private void loadBitmapIntoImageView(File file, String url) {
+        RequestBuilder<Bitmap> builder = Glide.with(getContext()).asBitmap();
+        builder
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .placeholder(0)
+            .skipMemoryCache(false)
+            .load(file != null && file.exists() ? file : url)
+            .addListener(new RequestListener<Bitmap>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object o, @NonNull Target<Bitmap> target, boolean b) {
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(@NonNull Bitmap bitmap,
+                                               @NonNull Object o,
+                                               Target<Bitmap> target,
+                                               @NonNull DataSource dataSource,
+                                               boolean b) {
+                    progressBar.setVisibility(View.GONE);
+                    playButtonLayout.setVisibility(View.VISIBLE);
+                    return false;
+                }
+            })
+            .into(shapeableImageView);
+    }
+
+    /**
+     * Sets the thumbnail URL and placeholder image for the video thumbnail.
+     *
+     * @param thumbnailUrl     The URL of the thumbnail image.
+     * @param placeHolderImage The placeholder image resource ID.
+     */
+    public void setThumbnailUrl(String thumbnailUrl, @DrawableRes int placeHolderImage) {
+        loadBitmapIntoImageView(null, thumbnailUrl);
+    }
+
+    /**
+     * Sets the play icon resource for the play button.
+     *
+     * @param playIcon The play icon resource ID.
+     */
+    public void setPlayIcon(@DrawableRes int playIcon) {
+        if (playIcon != 0) videoPlayImageView.setImageResource(playIcon);
+    }
 
     public LinearLayout getView() {
         return parentLayout;
@@ -313,20 +262,73 @@ public class CometChatVideoBubble extends MaterialCardView {
         return onClick;
     }
 
+    /**
+     * Sets the onClick listener for the play button.
+     *
+     * @param onClick The onClick listener to be set.
+     */
+    public void setOnClick(OnClick onClick) {
+        this.onClick = onClick;
+    }
+
+    // Getters for testing or direct access if needed
+
     public @ColorInt int getPlayIconTint() {
         return playIconTint;
+    }
+
+    /**
+     * Sets the tint color for the play button icon.
+     *
+     * @param color The tint color to be applied.
+     */
+    public void setPlayIconTint(@ColorInt int color) {
+        if (color != 0) {
+            this.playIconTint = color;
+            videoPlayImageView.setImageTintList(ColorStateList.valueOf(color));
+        }
     }
 
     public @Dimension int getVideoCardRadius() {
         return videoCardRadius;
     }
 
+    /**
+     * Sets the corner radius for the video card.
+     *
+     * @param radius The corner radius to be set.
+     */
+    public void setVideoCardRadius(@Dimension int radius) {
+        this.videoCardRadius = radius;
+        videoCard.setRadius(radius);
+    }
+
     public @ColorInt int getVideoCardStrokeColor() {
         return videoCardStrokeColor;
     }
 
+    /**
+     * Sets the stroke color for the video card.
+     *
+     * @param color The stroke color to be set.
+     */
+    public void setVideoCardStrokeColor(@ColorInt int color) {
+        this.videoCardStrokeColor = color;
+        videoCard.setStrokeColor(color);
+    }
+
     public @Dimension int getVideoCardStrokeWidth() {
         return videoCardStrokeWidth;
+    }
+
+    /**
+     * Sets the stroke width for the video card.
+     *
+     * @param width The stroke width to be set.
+     */
+    public void setVideoCardStrokeWidth(@Dimension int width) {
+        this.videoCardStrokeWidth = width;
+        videoCard.setStrokeWidth(width);
     }
 
     public int getPlayButtonBackgroundColor() {
@@ -339,5 +341,16 @@ public class CometChatVideoBubble extends MaterialCardView {
 
     public int getStyle() {
         return style;
+    }
+
+    /**
+     * Set the style for the file bubble.
+     *
+     * @param style The resource ID of the style to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        this.style = style;
+        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatVideoBubble);
+        extractAttributesAndApplyDefaults(typedArray);
     }
 }

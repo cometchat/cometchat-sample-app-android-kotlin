@@ -9,9 +9,9 @@ import com.cometchat.sampleapp.kotlin.fcm.data.repository.Repository
 
 class ThreadMessageViewModel : ViewModel() {
     val parentMessage: MutableLiveData<BaseMessage> = MutableLiveData()
-    private var id: Int = 0
+    private var id: Long = 0
 
-    fun fetchMessageDetails(id: Int) {
+    fun fetchMessageDetails(id: Long) {
         this.id = id
         Repository.fetchMessageInformation(id, object : CometChat.CallbackListener<BaseMessage>() {
             override fun onSuccess(message: BaseMessage) {

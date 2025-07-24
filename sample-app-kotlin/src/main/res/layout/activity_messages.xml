@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
-    android:fitsSystemWindows="true"
     android:background="?attr/cometchatBackgroundColor1"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context="ui.activity.MessagesActivity">
 
@@ -36,6 +36,7 @@
         android:visibility="gone">
 
         <View
+            android:id="@+id/separator"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?attr/cometchatStrokeColorLight" />
@@ -65,6 +66,7 @@
         android:visibility="gone">
 
         <TextView
+            android:id="@+id/unblock_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_unblock_message"

@@ -323,21 +323,21 @@ public class CometChatReactionList extends MaterialCardView {
         try {
             // Extract attributes or apply default values
             reactionListBackgroundColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListBackgroundColor,
-                                                              reactionListBackgroundColor);
+                                                              CometChatTheme.getBackgroundColor1(getContext()));
             reactionListStrokeColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListStrokeColor,
-                                                          reactionListStrokeColor);
+                                                          CometChatTheme.getStrokeColorLight(getContext()));
             reactionListTitleTextColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListTitleTextColor,
-                                                             reactionListTitleTextColor);
+                                                             CometChatTheme.getTextColorPrimary(getContext()));
             reactionListTabTextColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListTabTextColor,
-                                                           reactionListTabTextColor);
+                                                           CometChatTheme.getTextColorSecondary(getContext()));
             reactionListTabTextActiveColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListTabTextActiveColor,
-                                                                 reactionListTabTextActiveColor);
+                                                                 CometChatTheme.getTextColorHighlight(getContext()));
             reactionListTabActiveIndicatorColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListTabActiveIndicatorColor,
-                                                                      reactionListTabActiveIndicatorColor);
+                                                                      CometChatTheme.getPrimaryColor(getContext()));
             reactionListSubTitleTextColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListSubTitleTextColor,
-                                                                reactionListSubTitleTextColor);
+                                                                CometChatTheme.getTextColorSecondary(getContext()));
             reactionListErrorTextColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListErrorTextColor,
-                                                             reactionListErrorTextColor);
+                                                             CometChatTheme.getErrorColor(getContext()));
             reactionListAvatarStyle = typedArray.getResourceId(R.styleable.CometChatReactionList_cometchatReactionListAvatarStyle,
                                                                reactionListAvatarStyle);
             reactionListStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatReactionList_cometchatReactionListStrokeWidth,
@@ -354,7 +354,8 @@ public class CometChatReactionList extends MaterialCardView {
                                                                           reactionListSubTitleTextAppearance);
             reactionListErrorTextAppearance = typedArray.getResourceId(R.styleable.CometChatReactionList_cometchatReactionListErrorTextApAppearance,
                                                                        reactionListErrorTextAppearance);
-            reactionListSeparatorColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListSeparatorColor, 0);
+            reactionListSeparatorColor = typedArray.getColor(R.styleable.CometChatReactionList_cometchatReactionListSeparatorColor,
+                                                             CometChatTheme.getNeutralColor300(getContext()));
 
             updateUI();
         } finally {

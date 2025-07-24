@@ -146,10 +146,14 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
         if (typedArray == null) return;
         try {
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetTitleTextAppearance, 0);
-            titleColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetTitleColor, 0);
-            iconTint = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetIconTint, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetBackgroundColor, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetStrokeColor, 0);
+            titleColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetTitleColor,
+                                             CometChatTheme.getTextColorPrimary(getContext()));
+            iconTint = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetIconTint,
+                                           CometChatTheme.getIconTintSecondary(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            strokeColor = typedArray.getColor(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(getContext()));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetStrokeWidth, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetCornerRadius, 0);
             emojiPickerIcon = typedArray.getDrawable(R.styleable.CometChatMessageOptionSheet_cometchatMessageOptionSheetEmojiPickerIcon);
@@ -378,13 +382,6 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
         if (adapter != null) {
             adapter.updateOptionItem(actionItem);
         }
-    }    /**
-     * Called when the view is attached to a window.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        configureReactions();
     }
 
     /**
@@ -394,6 +391,13 @@ public class CometChatMessageOptionSheet extends MaterialCardView {
      */
     public List<OptionSheetMenuItem> getMessageOptionItems() {
         return messageOptionItems;
+    }    /**
+     * Called when the view is attached to a window.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        configureReactions();
     }
 
     /**

@@ -30,6 +30,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.cometchat.chat.models.Attachment;
 import com.cometchat.chat.models.MediaMessage;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
@@ -148,8 +149,8 @@ public class CometChatImageBubble extends MaterialCardView {
         }
         Utils.openImageViewer(shapeableImageView,
                               Collections.singletonList(imageUrl),
-                              Collections.singletonList(mediaMessage.getAttachment().getFileMimeType()),
-                              Collections.singletonList(mediaMessage.getAttachment().getFileName()));
+                              Collections.singletonList(mediaMessage.getAttachment() == null ? "" : mediaMessage.getAttachment().getFileMimeType()),
+                              Collections.singletonList(mediaMessage.getAttachment() == null ? "" : mediaMessage.getAttachment().getFileName()));
     }
 
     /**
@@ -178,7 +179,8 @@ public class CometChatImageBubble extends MaterialCardView {
             setStrokeWidth((int) typedArray.getDimension(R.styleable.CometChatImageBubble_cometchatImageBubbleImageStrokeWidth, 0));
             setCaptionTextAppearance(typedArray.getResourceId(R.styleable.CometChatImageBubble_cometchatImageBubbleCaptionTextAppearance, 0));
             setCaptionTextColor(typedArray.getColor(R.styleable.CometChatImageBubble_cometchatImageBubbleCaptionTextColor, 0));
-            setProgressIndeterminateTint(typedArray.getColor(R.styleable.CometChatImageBubble_cometchatImageBubbleProgressIndeterminateTint, 0));
+            setProgressIndeterminateTint(typedArray.getColor(R.styleable.CometChatImageBubble_cometchatImageBubbleProgressIndeterminateTint,
+                                                             CometChatTheme.getIconTintSecondary(getContext())));
         } finally {
             typedArray.recycle();
         }
@@ -411,15 +413,6 @@ public class CometChatImageBubble extends MaterialCardView {
     public void setProgressIndeterminateTint(int progressIndeterminateTint) {
         this.progressIndeterminateTint = progressIndeterminateTint;
         progressBar.getIndeterminateDrawable().setColorFilter(progressIndeterminateTint, android.graphics.PorterDuff.Mode.SRC_IN);
-    }    /**
-     * Sets the stroke width for the image view container card.
-     *
-     * @param width The width of the stroke to be set.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int width) {
-        this.strokeWidth = width;
-        this.imageViewContainerCard.setStrokeWidth(strokeWidth);
     }
 
     public int getStyle() {
@@ -435,6 +428,15 @@ public class CometChatImageBubble extends MaterialCardView {
         this.style = styleResId;
         TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(styleResId, R.styleable.CometChatImageBubble);
         extractAttributesAndApplyDefaults(typedArray);
+    }    /**
+     * Sets the stroke width for the image view container card.
+     *
+     * @param width The width of the stroke to be set.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int width) {
+        this.strokeWidth = width;
+        this.imageViewContainerCard.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -586,8 +588,9 @@ public class CometChatImageBubble extends MaterialCardView {
     }
 
 
-    // Getters for testing or direct access if needed
 
+
+    // Getters for testing or direct access if needed
 
 
     @Override

@@ -76,8 +76,7 @@ class MyApplication : Application() {
                 currentActivity = activity
                 if (snackBar != null && tempCall != null) {
                     showTopSnackBar(tempCall)
-                } else
-                    dismissTopSnackBar()
+                } else dismissTopSnackBar()
             }
 
             override fun onActivityPaused(activity: Activity) {
@@ -156,6 +155,7 @@ class MyApplication : Application() {
         val cometChatIncomingCall = CometChatIncomingCall(currentActivity)
         cometChatIncomingCall.disableSoundForCalls(true)
         cometChatIncomingCall.call = call!!
+        cometChatIncomingCall.fitsSystemWindows = true
         cometChatIncomingCall.onError = OnError { cometchatException: CometChatException? -> dismissTopSnackBar() }
 
 
@@ -165,10 +165,7 @@ class MyApplication : Application() {
         params.gravity = Gravity.TOP
         params.topMargin = Utils.convertDpToPx(this, 35)
         layout.setLayoutParams(params)
-        layout.setBackgroundColor(
-            currentActivity!!.resources.getColor(android.R.color.transparent, null)
-        )
-
+        layout.setBackgroundColor(currentActivity!!.resources.getColor(android.R.color.transparent, null))
         layout.addView(cometChatIncomingCall, 0)
 
         for (popupWindow in popupWindows) {

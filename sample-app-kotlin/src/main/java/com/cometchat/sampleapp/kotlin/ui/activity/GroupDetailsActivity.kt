@@ -1,6 +1,7 @@
 package com.cometchat.sampleapp.kotlin.ui.activity
 
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -14,6 +15,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.GroupMember
 import com.cometchat.chatuikit.CometChatTheme
@@ -34,6 +36,7 @@ import com.google.gson.Gson
 
 class GroupDetailsActivity : AppCompatActivity() {
     private lateinit var group: Group
+    private var baseMessage: BaseMessage? = null
     private lateinit var binding: ActivityGroupDetailsBinding
     private lateinit var addMembersLayoutBinding: AddMembersLayoutBinding
     private lateinit var dialog: Dialog
@@ -60,6 +63,7 @@ class GroupDetailsActivity : AppCompatActivity() {
         group = Gson().fromJson(
             intent.getStringExtra(getString(R.string.app_group)), Group::class.java
         )
+        baseMessage = Gson().fromJson(intent.getStringExtra(getString(R.string.app_base_message)), BaseMessage::class.java)
 
         initViewModel()
 
@@ -97,8 +101,13 @@ class GroupDetailsActivity : AppCompatActivity() {
             this
         ) { state: DialogState -> this.setTransferOwnershipDialogStateObserver(state) }
         viewModel.setGroup(group)
+        viewModel.setBaseMessage(baseMessage)
 
         viewModel.addListeners()
+    }
+
+    private fun setDeleteChatVisibility(baseMessage: BaseMessage?) {
+        binding.tvDeleteChat.visibility = if (baseMessage != null) View.VISIBLE else View.GONE
     }
 
     private fun setHeaderData(group: Group) {
@@ -107,7 +116,50 @@ class GroupDetailsActivity : AppCompatActivity() {
         binding.tvMemberCount.text = if (group.membersCount > 1) group.membersCount.toString() + " " + resources.getString(
             com.cometchat.chatuikit.R.string.cometchat_members
         ) else group.membersCount.toString() + " " + resources.getString(com.cometchat.chatuikit.R.string.cometchat_member)
+
+        binding.main.setBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.ivBack.imageTintList = ColorStateList.valueOf(CometChatTheme.getIconTintPrimary(this))
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.viewSeparator.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
+        binding.infoMessage.setBackgroundColor(CometChatTheme.getWarningColor(this))
+        binding.ivInfo.imageTintList = ColorStateList.valueOf(CometChatTheme.getTextColorPrimary(this))
+        binding.tvInfoMessage.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.tvGroupName.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.tvMemberCount.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.viewMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.viewMembersCard.strokeColor = CometChatTheme.getStrokeColorLight(this)
+        binding.tvViewMembers.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.tvViewMembers.compoundDrawableTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this))
+        binding.viewAddMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.viewAddMembersCard.strokeColor = CometChatTheme.getStrokeColorLight(this)
+        binding.tvAddMembers.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.tvAddMembers.compoundDrawableTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this))
+        binding.viewBannedMembersCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.viewBannedMembersCard.strokeColor = CometChatTheme.getStrokeColorLight(this)
+        binding.tvBannedMembers.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.tvBannedMembers.compoundDrawableTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this))
+        binding.viewDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
+        binding.ivLeaveGroup.imageTintList = ColorStateList.valueOf(CometChatTheme.getErrorColor(this))
+        binding.tvLeaveGroup.setTextColor(CometChatTheme.getErrorColor(this))
+        binding.ivDeleteGroup.imageTintList = ColorStateList.valueOf(CometChatTheme.getErrorColor(this))
+        binding.tvDeleteGroup.setTextColor(CometChatTheme.getErrorColor(this))
+
+
         setOptionsVisibility()
+        setDeleteChatVisibility(baseMessage)
+
+        binding.tvDeleteChat.setOnClickListener { view: View? ->
+            showAlertDialog(
+                getString(R.string.app_delete_chat_title),
+                getString(R.string.app_delete_chat_subtitle),
+                getString(R.string.app_delete_chat_negative_button),
+                getString(R.string.app_delete_chat_positive_button),
+                false,
+                CometChatTheme.getErrorColor(this),
+                R.drawable.ic_delete,
+                GroupAction.DELETE_CHAT
+            )
+        }
 
         if (group.isJoined) {
             binding.infoMessage.visibility = View.GONE
@@ -196,9 +248,12 @@ class GroupDetailsActivity : AppCompatActivity() {
         confirmDialog!!.onPositiveButtonClick = View.OnClickListener { v: View? ->
             if (GroupAction.LEAVE == groupAction) {
                 viewModel.leaveGroup(group)
+            } else if (GroupAction.DELETE_CHAT == groupAction) {
+                viewModel.deleteChat()
             } else if (GroupAction.DELETE == groupAction) {
                 viewModel.deleteGroup(group)
             } else if (GroupAction.SHOW_OWNERSHIP_TRANSFER == groupAction) {
+                confirmDialog!!.dismiss()
                 showTransferOwnership()
             } else if (GroupAction.TRANSFER_OWNERSHIP == groupAction) {
                 if (group.membersCount > 2) {
@@ -253,6 +308,7 @@ class GroupDetailsActivity : AppCompatActivity() {
                 }
             }
         }
+
     }
 
     private fun bannedMembersSetup() {
@@ -301,6 +357,7 @@ class GroupDetailsActivity : AppCompatActivity() {
         )
         dialog.show()
         viewMembersLayoutBinding.viewMembers.setOnBackPressListener { dialog.dismiss() }
+
     }
 
     private fun addMemberSetup() {
@@ -313,6 +370,11 @@ class GroupDetailsActivity : AppCompatActivity() {
                 this, R.layout.add_members_layout, null
             )
         )
+
+        addMembersLayoutBinding.addMembersBtn.setCardBackgroundColor(CometChatTheme.getPrimaryColor(this))
+        addMembersLayoutBinding.tvAddMembers.setTextColor(CometChatTheme.getColorWhite(this))
+        addMembersLayoutBinding.progress.indeterminateTintList = ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this))
+
         tvError = addMembersLayoutBinding.tvError
         progressBar = addMembersLayoutBinding.progress
         btnText = addMembersLayoutBinding.tvAddMembers
@@ -327,7 +389,8 @@ class GroupDetailsActivity : AppCompatActivity() {
 
 
         addMembersLayoutBinding.addMembersBtn.setOnClickListener {
-            viewModel.addMembersToGroup(this,
+            viewModel.addMembersToGroup(
+                this,
                 addMembersLayoutBinding.addMembers.selectedUsers
             )
         }
@@ -345,6 +408,7 @@ class GroupDetailsActivity : AppCompatActivity() {
         )
         dialog.show()
         addMembersLayoutBinding.addMembers.setOnBackPressListener { dialog.dismiss() }
+
     }
 
     private fun showTransferOwnership() {
@@ -353,6 +417,15 @@ class GroupDetailsActivity : AppCompatActivity() {
                 this, R.layout.transfer_ownership_layout, null
             )
         )
+
+        transferOwnershipLayoutBinding.transferOwnershipBtn.setCardBackgroundColor(CometChatTheme.getPrimaryColor(this))
+        transferOwnershipLayoutBinding.tvOwnership.setTextColor(CometChatTheme.getColorWhite(this))
+        transferOwnershipLayoutBinding.progress.indeterminateTintList = ColorStateList.valueOf(
+            CometChatTheme.getIconTintSecondary(
+                this
+            )
+        )
+
         transferOwnershipLayoutBinding.transferOwnership.setTitleText(getString(R.string.app_transfer_ownership))
         transferOwnershipLayoutBinding.transferOwnership.excludeOwner(true)
         transferOwnershipLayoutBinding.transferOwnership.setGroup(group)

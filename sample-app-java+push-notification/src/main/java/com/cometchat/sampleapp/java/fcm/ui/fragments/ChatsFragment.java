@@ -34,6 +34,7 @@ import com.cometchat.sampleapp.java.fcm.ui.activity.MessagesActivity;
 import com.cometchat.sampleapp.java.fcm.ui.activity.SplashActivity;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.utils.MyApplication;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 
 /**
@@ -90,9 +91,8 @@ public class ChatsFragment extends Fragment {
             }
         });
         // Set the overflow menu (Logout button) in the Conversations view
-        binding.cometchatConversations.setOverflowMenu(getLogoutView());
-
         handleDeepLinking();
+        binding.cometchatConversations.setOverflowMenu(getLogoutView());
     }
 
     @Override
@@ -158,6 +158,7 @@ public class ChatsFragment extends Fragment {
                         public void onSuccess(String s) {
                             startActivity(new Intent(getContext(), SplashActivity.class));
                             requireActivity().finish();
+                            FirebaseAuth.getInstance().signOut();
                         }
 
                         @Override
@@ -198,14 +199,14 @@ public class ChatsFragment extends Fragment {
                     Repository.getUser(uid, new CometChat.CallbackListener<User>() {
                         @Override
                         public void onSuccess(User user) {
-                            Intent intent = new Intent(getContext(), MessagesActivity.class);
+                            Intent intent = new Intent(requireContext(), MessagesActivity.class);
                             intent.putExtra(getString(R.string.app_user), new Gson().toJson(user));
                             startActivity(intent);
                         }
 
                         @Override
                         public void onError(CometChatException e) {
-                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                             CometChatLogger.e(TAG, e.toString());
                         }
                     });

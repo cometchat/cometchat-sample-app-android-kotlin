@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.widget.AppCompatImageView;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 
 /**
@@ -122,15 +123,15 @@ public class CometChatMessageReceipt extends AppCompatImageView {
             messageReceiptErrorIcon = typedArray.getDrawable(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptErrorIcon);
             // Colors
             messageReceiptWaitIconTint = typedArray.getColor(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptWaitIconTint,
-                                                             messageReceiptWaitIconTint);
+                                                             CometChatTheme.getIconTintSecondary(getContext()));
             messageReceiptSentIconTint = typedArray.getColor(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptSentIconTint,
-                                                             messageReceiptSentIconTint);
+                                                             CometChatTheme.getIconTintSecondary(getContext()));
             messageReceiptDeliveredIconTint = typedArray.getColor(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptDeliveredIconTint,
-                                                                  messageReceiptDeliveredIconTint);
+                                                                  CometChatTheme.getIconTintSecondary(getContext()));
             messageReceiptReadIconTint = typedArray.getColor(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptReadIconTint,
-                                                             messageReceiptReadIconTint);
+                                                             CometChatTheme.getMessageReadColor(getContext()));
             messageReceiptErrorIconTint = typedArray.getColor(R.styleable.CometChatMessageReceipt_cometchatMessageReceiptErrorIconTint,
-                                                              messageReceiptErrorIconTint);
+                                                              CometChatTheme.getErrorColor(getContext()));
             // Apply default styles
             applyDefault();
         } finally {

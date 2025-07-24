@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCreatePollBinding;
 import com.cometchat.chatuikit.logger.CometChatLogger;
@@ -33,151 +34,12 @@ import java.util.List;
 
 public class CometChatCreatePoll extends MaterialCardView {
     private static final String TAG = CometChatCreatePoll.class.getSimpleName();
-
+    private final int progressVisibility = View.GONE;
     /**
      * UI components and their states.
      */
     private CometchatCreatePollBinding binding;
-
     private PollOptionsAdapter adapter;
-    private OnSubmitClickListener onSubmitClickListener;
-    private OnClickListener backClickListener;
-    private MutableLiveData<Boolean> isOptionsFilled;
-
-    /**
-     * Visibility states for various UI components.
-     */
-    private int sendButtonTextVisibility = View.VISIBLE;
-
-    private final int progressVisibility = View.GONE;
-    private int errorStateVisibility = View.GONE;
-
-    /**
-     * Enable or disable states for interactive elements.
-     */
-    private boolean sendButtonEnabled = true;
-
-    /**
-     * General poll appearance attributes.
-     */
-    private @StyleRes int titleTextAppearance;
-
-    private @ColorInt int titleTextColor;
-    private @ColorInt int backgroundColor;
-    private Drawable backgroundDrawable;
-    private @Dimension int cornerRadius;
-    private @Dimension int strokeWidth;
-    private @ColorInt int strokeColor;
-
-    /**
-     * Poll option appearance attributes.
-     */
-    private @StyleRes int optionTitleTextAppearance;
-
-    private @ColorInt int optionTitleTextColor;
-    private @StyleRes int optionTextAppearance;
-    private @ColorInt int optionTextColor;
-    private @ColorInt int optionHintColor;
-    private @Dimension int optionCornerRadius;
-    private @Dimension int optionStrokeWidth;
-    private @ColorInt int optionStrokeColor;
-
-    /**
-     * Poll question appearance attributes.
-     */
-    private @StyleRes int questionTitleTexAppearance;
-
-    private @ColorInt int questionTitleTextColor;
-    private @StyleRes int questionTextAppearance;
-    private @ColorInt int questionTextColor;
-    private @ColorInt int questionHintColor;
-    private @Dimension int questionCornerRadius;
-    private @Dimension int questionStrokeWidth;
-    private @ColorInt int questionStrokeColor;
-
-    /**
-     * Icons and their properties.
-     */
-    private Drawable dragIcon;
-
-    private @ColorInt int dragIconTint;
-    private Drawable backIcon;
-    private @ColorInt int backIconTint;
-
-    /**
-     * Separator and error text appearance attributes.
-     */
-    private @ColorInt int separatorColor;
-
-    private @ColorInt int errorTextColor;
-    private @StyleRes int errorTextAppearance;
-
-    /**
-     * Submit button appearance attributes.
-     */
-    private @ColorInt int submitButtonBackgroundColor;
-
-    private @ColorInt int disableSubmitButtonBackgroundColor;
-    private @Dimension int submitButtonCornerRadius;
-    private @Dimension int submitButtonStrokeWidth;
-    private @ColorInt int submitButtonStrokeColor;
-    private @ColorInt int submitButtonTextColor;
-    private @StyleRes int submitButtonTextAppearance;
-
-    /**
-     * Progress indicator attributes.
-     */
-    private @ColorInt int progressIndeterminateTint;
-
-    /**
-     * Toolbar visibility attribute.
-     */
-    private boolean hideToolBar;
-
-    /**
-     * Overall style attribute for the poll view.
-     */
-    private @StyleRes int style;
-
-    /**
-     * Constructor to initialize CometChatCreatePoll with the given context.
-     *
-     * @param context The context in which the view is running, used to access resources
-     *                and theme attributes.
-     */
-    public CometChatCreatePoll(Context context) {
-        this(context, null);
-    }
-
-    /**
-     * Constructor to initialize CometChatCreatePoll with the given context and
-     * attribute set.
-     *
-     * @param context The context in which the view is running, used to access resources
-     *                and theme attributes.
-     * @param attrs   A collection of attributes, as found associated with a tag in the
-     *                XML that is inflating the view.
-     */
-    public CometChatCreatePoll(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.cometchatCreatePollStyle);
-    }
-
-    /**
-     * Constructor to initialize CometChatCreatePoll with the given context,
-     * attribute set, and default style attribute.
-     *
-     * @param context      The context in which the view is running, used to access resources
-     *                     and theme attributes.
-     * @param attrs        A collection of attributes, as found associated with a tag in the
-     *                     XML that is inflating the view.
-     * @param defStyleAttr An attribute in the current theme that contains a reference to a
-     *                     style resource that supplies default values for the view.
-     */
-    public CometChatCreatePoll(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(attrs, defStyleAttr, 0);
-    }
-
     /**
      * Initializes an ItemTouchHelper to handle drag-and-drop functionality in the
      * RecyclerView.
@@ -213,7 +75,9 @@ public class CometChatCreatePoll extends MaterialCardView {
          *         otherwise.
          */
         @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        public boolean onMove(@NonNull RecyclerView recyclerView,
+                              @NonNull RecyclerView.ViewHolder viewHolder,
+                              @NonNull RecyclerView.ViewHolder target) {
             int fromPosition = viewHolder.getBindingAdapterPosition();
             int toPosition = target.getBindingAdapterPosition();
 
@@ -225,6 +89,16 @@ public class CometChatCreatePoll extends MaterialCardView {
 
             // Move the item in the adapter
             adapter.moveItem(fromPosition, toPosition);
+            return true;
+        }
+
+        /**
+         * Determines whether long-press drag is enabled for this RecyclerView.
+         *
+         * @return True to enable long-press drag, false otherwise.
+         */
+        @Override
+        public boolean isLongPressDragEnabled() {
             return true;
         }
 
@@ -241,18 +115,69 @@ public class CometChatCreatePoll extends MaterialCardView {
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             // No action needed for swipe
         }
-
-        /**
-         * Determines whether long-press drag is enabled for this RecyclerView.
-         *
-         * @return True to enable long-press drag, false otherwise.
-         */
-        @Override
-        public boolean isLongPressDragEnabled() {
-            return true;
-        }
     });
-
+    private OnSubmitClickListener onSubmitClickListener;
+    private OnClickListener backClickListener;
+    private MutableLiveData<Boolean> isOptionsFilled;
+    /**
+     * Visibility states for various UI components.
+     */
+    private int sendButtonTextVisibility = View.VISIBLE;
+    private int errorStateVisibility = View.GONE;
+    /**
+     * Enable or disable states for interactive elements.
+     */
+    private boolean sendButtonEnabled = true;
+    /**
+     * General poll appearance attributes.
+     */
+    private @StyleRes int titleTextAppearance;
+    private @ColorInt int titleTextColor;
+    private @ColorInt int backgroundColor;
+    private Drawable backgroundDrawable;
+    private @Dimension int cornerRadius;
+    private @Dimension int strokeWidth;
+    private @ColorInt int strokeColor;
+    /**
+     * Poll option appearance attributes.
+     */
+    private @StyleRes int optionTitleTextAppearance;
+    private @ColorInt int optionTitleTextColor;
+    private @StyleRes int optionTextAppearance;
+    private @ColorInt int optionTextColor;
+    private @ColorInt int optionHintColor;
+    private @Dimension int optionCornerRadius;
+    private @Dimension int optionStrokeWidth;
+    private @ColorInt int optionStrokeColor;
+    /**
+     * Poll question appearance attributes.
+     */
+    private @StyleRes int questionTitleTexAppearance;
+    private @ColorInt int questionTitleTextColor;
+    private @StyleRes int questionTextAppearance;
+    private @ColorInt int questionTextColor;
+    private @ColorInt int questionHintColor;
+    private @Dimension int questionCornerRadius;
+    private @Dimension int questionStrokeWidth;
+    private @ColorInt int questionStrokeColor;
+    /**
+     * Icons and their properties.
+     */
+    private Drawable dragIcon;
+    private @ColorInt int dragIconTint;
+    private Drawable backIcon;
+    private @ColorInt int backIconTint;
+    /**
+     * Separator and error text appearance attributes.
+     */
+    private @ColorInt int separatorColor;
+    private @ColorInt int errorTextColor;
+    private @StyleRes int errorTextAppearance;
+    /**
+     * Submit button appearance attributes.
+     */
+    private @ColorInt int submitButtonBackgroundColor;
+    private @ColorInt int disableSubmitButtonBackgroundColor;
     /**
      * A TextWatcher that listens for changes in the text of an EditText and updates
      * the send button state accordingly.
@@ -305,6 +230,62 @@ public class CometChatCreatePoll extends MaterialCardView {
             // No action needed after the text changes
         }
     };
+    private @Dimension int submitButtonCornerRadius;
+    private @Dimension int submitButtonStrokeWidth;
+    private @ColorInt int submitButtonStrokeColor;
+    private @ColorInt int submitButtonTextColor;
+    private @StyleRes int submitButtonTextAppearance;
+    /**
+     * Progress indicator attributes.
+     */
+    private @ColorInt int progressIndeterminateTint;
+    /**
+     * Toolbar visibility attribute.
+     */
+    private boolean hideToolBar;
+    /**
+     * Overall style attribute for the poll view.
+     */
+    private @StyleRes int style;
+
+    /**
+     * Constructor to initialize CometChatCreatePoll with the given context.
+     *
+     * @param context The context in which the view is running, used to access resources
+     *                and theme attributes.
+     */
+    public CometChatCreatePoll(Context context) {
+        this(context, null);
+    }
+
+    /**
+     * Constructor to initialize CometChatCreatePoll with the given context and
+     * attribute set.
+     *
+     * @param context The context in which the view is running, used to access resources
+     *                and theme attributes.
+     * @param attrs   A collection of attributes, as found associated with a tag in the
+     *                XML that is inflating the view.
+     */
+    public CometChatCreatePoll(Context context, AttributeSet attrs) {
+        this(context, attrs, R.attr.cometchatCreatePollStyle);
+    }
+
+    /**
+     * Constructor to initialize CometChatCreatePoll with the given context,
+     * attribute set, and default style attribute.
+     *
+     * @param context      The context in which the view is running, used to access resources
+     *                     and theme attributes.
+     * @param attrs        A collection of attributes, as found associated with a tag in the
+     *                     XML that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a reference to a
+     *                     style resource that supplies default values for the view.
+     */
+    public CometChatCreatePoll(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(attrs, defStyleAttr, 0);
+    }
 
     /**
      * Initializes the CometChatCreatePoll view and sets up its components,
@@ -350,15 +331,26 @@ public class CometChatCreatePoll extends MaterialCardView {
     }
 
     /**
-     * Sets the style of the CometChatCreatePoll view.
+     * Updates the state of the send button based on the input in the question
+     * EditText and whether the options are filled.
      *
-     * @param style The style resource ID to be applied to the view.
+     * <p>
+     * The send button is enabled only if the question EditText is not empty and the
+     * options are filled. If the conditions are not met, the button is disabled and
+     * its background color is set to indicate it cannot be pressed.
      */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            this.style = style;
-            TypedArray typedArray = getContext().obtainStyledAttributes(style, R.styleable.CometChatCreatePoll);
-            extractAttributesAndApplyDefaults(typedArray);
+    private void setSendButtonState() {
+        if (binding.etQuestion.getText().toString().trim().isEmpty()) {
+            binding.submitBtn.setEnabled(false);
+            binding.submitBtn.setCardBackgroundColor(disableSubmitButtonBackgroundColor);
+        } else {
+            if (Boolean.TRUE.equals(isOptionsFilled.getValue())) {
+                binding.submitBtn.setEnabled(true);
+                binding.submitBtn.setCardBackgroundColor(submitButtonBackgroundColor);
+            } else {
+                binding.submitBtn.setEnabled(false);
+                binding.submitBtn.setCardBackgroundColor(disableSubmitButtonBackgroundColor);
+            }
         }
     }
 
@@ -399,48 +391,68 @@ public class CometChatCreatePoll extends MaterialCardView {
         if (typedArray == null) return;
         try {
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollTitleTextAppearance, 0);
-            titleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollTitleTextColor, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollBackgroundColor, 0);
+            titleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollTitleTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
             backgroundDrawable = typedArray.getDrawable(R.styleable.CometChatCreatePoll_cometchatCreatePollBackgroundDrawable);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollStrokeWidth, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollStrokeColor, 0);
+            strokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(getContext()));
 
             optionTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTitleTextAppearance, 0);
-            optionTitleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTitleTextColor, 0);
+            optionTitleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTitleTextColor,
+                                                       CometChatTheme.getTextColorPrimary(getContext()));
             optionTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTextAppearance, 0);
-            optionTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTextColor, 0);
-            optionHintColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionHintColor, 0);
+            optionTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionTextColor,
+                                                  CometChatTheme.getTextColorPrimary(getContext()));
+            optionHintColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionHintColor,
+                                                  CometChatTheme.getTextColorTertiary(getContext()));
             optionCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionCornerRadius, 0);
             optionStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionStrokeWidth, 0);
-            optionStrokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionStrokeColor, 0);
+            optionStrokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollOptionStrokeColor,
+                                                    CometChatTheme.getStrokeColorLight(getContext()));
 
             dragIcon = typedArray.getDrawable(R.styleable.CometChatCreatePoll_cometchatCreatePollDragIcon);
-            dragIconTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollDragIconTint, 0);
+            dragIconTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollDragIconTint,
+                                               CometChatTheme.getIconTintSecondary(getContext()));
             questionTitleTexAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTitleTextAppearance, 0);
-            questionTitleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTitleTextColor, 0);
+            questionTitleTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTitleTextColor,
+                                                         CometChatTheme.getTextColorPrimary(getContext()));
             questionTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTextAppearance, 0);
-            questionTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTextColor, 0);
-            questionHintColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionHintColor, 0);
+            questionTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionTextColor,
+                                                    CometChatTheme.getTextColorPrimary(getContext()));
+            questionHintColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionHintColor,
+                                                    CometChatTheme.getTextColorTertiary(getContext()));
             questionCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionCornerRadius, 0);
             questionStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionStrokeWidth, 0);
-            questionStrokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionStrokeColor, 0);
+            questionStrokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollQuestionStrokeColor,
+                                                      CometChatTheme.getStrokeColorLight(getContext()));
 
-            separatorColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSeparatorColor, 0);
-            submitButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonBackgroundColor, 0);
-            disableSubmitButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollDisabledSubmitButtonBackgroundColor, 0);
-            submitButtonCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonCornerRadius, 0);
+            separatorColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSeparatorColor,
+                                                 CometChatTheme.getStrokeColorDefault(getContext()));
+            submitButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonBackgroundColor,
+                                                              CometChatTheme.getPrimaryColor(getContext()));
+            disableSubmitButtonBackgroundColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollDisabledSubmitButtonBackgroundColor,
+                                                                     CometChatTheme.getBackgroundColor4(getContext()));
+            submitButtonCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonCornerRadius,
+                                                                        0);
             submitButtonStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonStrokeWidth, 0);
             submitButtonStrokeColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonStrokeColor, 0);
-            submitButtonTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonTextColor, 0);
+            submitButtonTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonTextColor,
+                                                        CometChatTheme.getColorWhite(getContext()));
             submitButtonTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollSubmitButtonTextAppearance, 0);
-            progressIndeterminateTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollProgressIndeterminateTint, 0);
+            progressIndeterminateTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollProgressIndeterminateTint,
+                                                            CometChatTheme.getIconTintSecondary(getContext()));
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatCreatePoll_cometchatCreatePollCornerRadius, 0);
 
-            errorTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollErrorTextColor, 0);
+            errorTextColor = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollErrorTextColor,
+                                                 CometChatTheme.getErrorColor(getContext()));
             errorTextAppearance = typedArray.getResourceId(R.styleable.CometChatCreatePoll_cometchatCreatePollErrorTextAppearance, 0);
 
             backIcon = typedArray.getDrawable(R.styleable.CometChatCreatePoll_cometchatCreatePollBackIcon);
-            backIconTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollBackIconTint, 0);
+            backIconTint = typedArray.getColor(R.styleable.CometChatCreatePoll_cometchatCreatePollBackIconTint,
+                                               CometChatTheme.getIconTintPrimary(getContext()));
 
             applyStyle();
 
@@ -519,55 +531,94 @@ public class CometChatCreatePoll extends MaterialCardView {
     }
 
     /**
-     * Updates the state of the send button based on the input in the question
-     * EditText and whether the options are filled.
+     * Sets the stroke color for the poll parent card.
      *
      * <p>
-     * The send button is enabled only if the question EditText is not empty and the
-     * options are filled. If the conditions are not met, the button is disabled and
-     * its background color is set to indicate it cannot be pressed.
+     * This method updates the color of the stroke applied to the border of the
+     * poll's parent card, enabling visual customization to match the application's
+     * theme.
+     *
+     * @param strokeColor The color to set for the stroke of the poll parent card.
      */
-    private void setSendButtonState() {
-        if (binding.etQuestion.getText().toString().trim().isEmpty()) {
-            binding.submitBtn.setEnabled(false);
-            binding.submitBtn.setCardBackgroundColor(disableSubmitButtonBackgroundColor);
+    public void setStrokeColor(@ColorInt int strokeColor) {
+        this.strokeColor = strokeColor;
+        binding.pollParentCard.setStrokeColor(strokeColor);
+    }
+
+    @Nullable
+    @Override
+    public ColorStateList getStrokeColorStateList() {
+        return super.getStrokeColorStateList();
+    }
+
+    /**
+     * Sets the background color for the poll options.
+     *
+     * <p>
+     * This method updates the background color of the option cards in the poll,
+     * allowing for visual customization that enhances the overall design and user
+     * experience.
+     *
+     * @param backgroundColor The color to set as the background for the poll options.
+     */
+    public void setOptionBackgroundColor(@ColorInt int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        adapter.setOptionBackgroundColor(backgroundColor);
+    }
+
+    // Getters for testing or direct access if needed
+    public int getSendButtonTextVisibility() {
+        return sendButtonTextVisibility;
+    }
+
+    /**
+     * Sets the visibility of the send button text.
+     *
+     * <p>
+     * This method controls the visibility of the text displayed on the send button.
+     * It allows for customization of the button's appearance based on the current
+     * state of the UI, such as when waiting for a response or displaying an error
+     * message.
+     *
+     * @param visibility The visibility state to set for the send button text. It should be
+     *                   one of the constants from the View class (e.g., View.VISIBLE,
+     *                   View.GONE).
+     */
+    public void setSendButtonTextVisibility(int visibility) {
+        this.sendButtonTextVisibility = visibility;
+        binding.tvSend.setVisibility(visibility);
+    }
+
+    public int getProgressVisibility() {
+        return progressVisibility;
+    }
+
+    /**
+     * Sets the visibility of the progress indicator.
+     *
+     * <p>
+     * This method controls the visibility of the progress indicator displayed in
+     * the UI. When the progress indicator is visible, the send button text is
+     * hidden, and the send button is disabled. When the progress indicator is
+     * hidden, the send button text is shown, and the send button is enabled.
+     *
+     * @param visibility The visibility state to set for the progress indicator. It should
+     *                   be one of the constants from the View class (e.g., View.VISIBLE,
+     *                   View.GONE).
+     */
+    public void setProgressVisibility(int visibility) {
+        binding.progress.setVisibility(visibility);
+        if (visibility == View.VISIBLE) {
+            binding.tvSend.setVisibility(View.GONE);
+            setSendButtonEnabled(false);
         } else {
-            if (Boolean.TRUE.equals(isOptionsFilled.getValue())) {
-                binding.submitBtn.setEnabled(true);
-                binding.submitBtn.setCardBackgroundColor(submitButtonBackgroundColor);
-            } else {
-                binding.submitBtn.setEnabled(false);
-                binding.submitBtn.setCardBackgroundColor(disableSubmitButtonBackgroundColor);
-            }
+            binding.tvSend.setVisibility(View.VISIBLE);
+            setSendButtonEnabled(true);
         }
     }
 
-    /**
-     * Sets the back icon drawable for the back button.
-     *
-     * <p>
-     * This method updates the back icon displayed in the UI with the provided
-     * drawable. It also stores the drawable for future reference.
-     *
-     * @param backIcon The drawable to set as the back icon.
-     */
-    public void setBackIcon(Drawable backIcon) {
-        this.backIcon = backIcon;
-        binding.imgBack.setImageDrawable(backIcon);
-    }
-
-    /**
-     * Sets the tint color for the back icon.
-     *
-     * <p>
-     * This method updates the color filter applied to the back icon, allowing for
-     * customization of its appearance to fit the theme of the application.
-     *
-     * @param backIconTint The color to apply as a tint to the back icon.
-     */
-    public void setBackIconTint(@ColorInt int backIconTint) {
-        this.backIconTint = backIconTint;
-        binding.imgBack.setColorFilter(backIconTint);
+    public int getErrorStateVisibility() {
+        return errorStateVisibility;
     }
 
     /**
@@ -587,33 +638,57 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.tvError.setVisibility(errorStateVisibility);
     }
 
-    /**
-     * Sets the text color for the error message displayed in the UI.
+    public boolean isSendButtonEnabled() {
+        return sendButtonEnabled;
+    }    /**
+     * Sets the background drawable for the poll UI elements.
      *
      * <p>
-     * This method updates the text color of the error text view to visually
-     * indicate errors to the user. The provided color will be applied immediately.
+     * This method applies a drawable background to the poll's UI elements. If the
+     * provided drawable is not null, it updates the background of the adapter
+     * options as well.
      *
-     * @param errorTextColor The color to set for the error text view.
+     * @param backgroundDrawable The drawable to set as the background. Can be null to clear the
+     *                           background.
      */
-    public void setErrorTextColor(@ColorInt int errorTextColor) {
-        this.errorTextColor = errorTextColor;
-        binding.tvError.setTextColor(errorTextColor);
+    @Override
+    public void setBackground(Drawable backgroundDrawable) {
+        if (backgroundDrawable != null) {
+            this.backgroundDrawable = backgroundDrawable;
+            adapter.setBackgroundDrawable(backgroundDrawable);
+        }
     }
 
     /**
-     * Sets the text appearance style for the error message.
+     * Enables or disables the send button.
      *
      * <p>
-     * This method applies a specified text appearance style resource to the error
-     * text view. It allows for customization of font size, style, and other text
-     * attributes to ensure the error message is clearly visible to the user.
+     * This method updates the enabled state of the send button, allowing for
+     * control over whether the button can be interacted with by the user. Disabling
+     * the button is useful when waiting for an operation to complete or validating
+     * input.
      *
-     * @param errorTextAppearance The style resource to apply to the error text view.
+     * @param enabled True to enable the send button; false to disable it.
      */
-    public void setErrorTextAppearance(@StyleRes int errorTextAppearance) {
-        this.errorTextAppearance = errorTextAppearance;
-        binding.tvError.setTextAppearance(errorTextAppearance);
+    private void setSendButtonEnabled(boolean enabled) {
+        this.sendButtonEnabled = enabled;
+        binding.submitBtn.setEnabled(enabled);
+    }    /**
+     * Sets the stroke width for the poll parent card.
+     *
+     * <p>
+     * This method updates the stroke width applied to the border of the poll's
+     * parent card, allowing for customization of the card's appearance.
+     *
+     * @param strokeWidth The width of the stroke in pixels.
+     */
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        binding.pollParentCard.setStrokeWidth(strokeWidth);
+    }
+
+    public int getTitleTextAppearance() {
+        return titleTextAppearance;
     }
 
     /**
@@ -631,6 +706,10 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.tvTitle.setTextAppearance(titleTextAppearance);
     }
 
+    public int getTitleTextColor() {
+        return titleTextColor;
+    }
+
     /**
      * Sets the text color for the title displayed in the UI.
      *
@@ -643,6 +722,10 @@ public class CometChatCreatePoll extends MaterialCardView {
     public void setTitleTextColor(@ColorInt int titleTextColor) {
         this.titleTextColor = titleTextColor;
         binding.tvTitle.setTextColor(titleTextColor);
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
     }
 
     /**
@@ -663,387 +746,31 @@ public class CometChatCreatePoll extends MaterialCardView {
         adapter.setOptionBackgroundColor(backgroundColor);
     }
 
-    /**
-     * Sets the background drawable for the poll UI elements.
-     *
-     * <p>
-     * This method applies a drawable background to the poll's UI elements. If the
-     * provided drawable is not null, it updates the background of the adapter
-     * options as well.
-     *
-     * @param backgroundDrawable The drawable to set as the background. Can be null to clear the
-     *                           background.
-     */
-    @Override
-    public void setBackground(Drawable backgroundDrawable) {
-        if (backgroundDrawable != null) {
-            this.backgroundDrawable = backgroundDrawable;
-            adapter.setBackgroundDrawable(backgroundDrawable);
-        }
+    public Drawable getBackgroundDrawable() {
+        return backgroundDrawable;
+    }
+
+    public int getCornerRadius() {
+        return cornerRadius;
     }
 
     /**
-     * Sets the stroke width for the poll parent card.
+     * Sets the corner radius for the poll parent card.
      *
      * <p>
-     * This method updates the stroke width applied to the border of the poll's
-     * parent card, allowing for customization of the card's appearance.
+     * This method updates the corner radius of the poll parent card, allowing for
+     * visual customization that enhances the overall aesthetics and design
+     * consistency of the poll interface.
      *
-     * @param strokeWidth The width of the stroke in pixels.
+     * @param cornerRadius The radius to set for the corners of the poll parent card.
      */
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        binding.pollParentCard.setStrokeWidth(strokeWidth);
+    public void setCornerRadius(@Dimension int cornerRadius) {
+        this.cornerRadius = cornerRadius;
+        binding.pollParentCard.setRadius(cornerRadius);
     }
 
-    /**
-     * Sets the stroke color for the poll parent card.
-     *
-     * <p>
-     * This method updates the color of the stroke applied to the border of the
-     * poll's parent card, enabling visual customization to match the application's
-     * theme.
-     *
-     * @param strokeColor The color to set for the stroke of the poll parent card.
-     */
-    public void setStrokeColor(@ColorInt int strokeColor) {
-        this.strokeColor = strokeColor;
-        binding.pollParentCard.setStrokeColor(strokeColor);
-    }
-
-    /**
-     * Sets the text appearance style for the poll options.
-     *
-     * <p>
-     * This method applies a specified text appearance style resource to the options
-     * in the poll. It allows customization of font size, style, and other text
-     * attributes for better readability and design consistency.
-     *
-     * @param optionTextAppearance The style resource to apply to the poll option text views.
-     */
-    public void setOptionTextAppearance(@StyleRes int optionTextAppearance) {
-        this.optionTextAppearance = optionTextAppearance;
-        adapter.setOptionTextAppearance(optionTextAppearance);
-    }
-
-    /**
-     * Sets the text color for the poll options.
-     *
-     * <p>
-     * This method updates the text color of the options in the poll, allowing for
-     * customization to enhance readability and visual appeal.
-     *
-     * @param optionTextColor The color to set for the text of the poll options.
-     */
-    public void setOptionTextColor(@ColorInt int optionTextColor) {
-        this.optionTextColor = optionTextColor;
-        adapter.setOptionTextColor(optionTextColor);
-    }
-
-    /**
-     * Sets the hint color for the option text fields in the poll.
-     *
-     * <p>
-     * This method updates the color of the hint text displayed in the option text
-     * fields, providing a visual cue to users on what information is expected.
-     *
-     * @param optionHintColor The color to set for the hint text of the option fields.
-     */
-    public void setOptionHintColor(@ColorInt int optionHintColor) {
-        this.optionHintColor = optionHintColor;
-        adapter.setOptionHintColor(optionHintColor);
-    }
-
-    /**
-     * Sets the corner radius for the option cards in the poll.
-     *
-     * <p>
-     * This method defines the curvature of the corners of the option cards,
-     * allowing for a more modern and visually appealing design.
-     *
-     * @param optionCornerRadius The radius in pixels for the corners of the option cards.
-     */
-    public void setOptionCornerRadius(@Dimension int optionCornerRadius) {
-        this.optionCornerRadius = optionCornerRadius;
-        adapter.setOptionCornerRadius(optionCornerRadius);
-    }
-
-    /**
-     * Sets the stroke width for the option cards in the poll.
-     *
-     * <p>
-     * This method updates the stroke width applied to the border of the option
-     * cards, allowing for customization of their appearance in the UI.
-     *
-     * @param optionStrokeWidth The width of the stroke in pixels for the option cards.
-     */
-    public void setOptionStrokeWidth(@Dimension int optionStrokeWidth) {
-        this.optionStrokeWidth = optionStrokeWidth;
-        adapter.setOptionStrokeWidth(optionStrokeWidth);
-    }
-
-    /**
-     * Sets the background color for the poll options.
-     *
-     * <p>
-     * This method updates the background color of the option cards in the poll,
-     * allowing for visual customization that enhances the overall design and user
-     * experience.
-     *
-     * @param backgroundColor The color to set as the background for the poll options.
-     */
-    public void setOptionBackgroundColor(@ColorInt int backgroundColor) {
-        this.backgroundColor = backgroundColor;
-        adapter.setOptionBackgroundColor(backgroundColor);
-    }
-
-    /**
-     * Sets the stroke color for the poll options.
-     *
-     * <p>
-     * This method updates the stroke color applied to the borders of the option
-     * cards, enabling customization for visual appeal and coherence with the
-     * application's theme.
-     *
-     * @param optionStrokeColor The color to set for the stroke of the poll option cards.
-     */
-    public void setOptionStrokeColor(@ColorInt int optionStrokeColor) {
-        this.optionStrokeColor = optionStrokeColor;
-        adapter.setOptionStrokeColor(optionStrokeColor);
-    }
-
-    /**
-     * Sets the drag icon for the poll options.
-     *
-     * <p>
-     * This method defines the icon used for dragging the poll options within the
-     * RecyclerView, enhancing the user interface's interactivity and usability.
-     *
-     * @param dragIcon The drawable resource to be used as the drag icon.
-     */
-    public void setDragIcon(Drawable dragIcon) {
-        this.dragIcon = dragIcon;
-        adapter.setDragIcon(dragIcon);
-    }
-
-    /**
-     * Sets the tint color for the drag icon.
-     *
-     * <p>
-     * This method applies a color tint to the drag icon, allowing for customization
-     * to match the application's design language.
-     *
-     * @param color The color to tint the drag icon.
-     */
-    public void setDragIconTint(@ColorInt int color) {
-        this.dragIconTint = color;
-        adapter.setDragIconTint(color);
-    }
-
-    /**
-     * Sets the text appearance style for the question input field.
-     *
-     * <p>
-     * This method applies a specified text appearance style resource to the
-     * question input field, allowing for customization of font size, style, and
-     * other text attributes to improve readability and user experience.
-     *
-     * @param questionTextAppearance The style resource to apply to the question text view.
-     */
-    public void setQuestionTextAppearance(@StyleRes int questionTextAppearance) {
-        this.questionTextAppearance = questionTextAppearance;
-        binding.etQuestion.setTextAppearance(questionTextAppearance);
-    }
-
-    /**
-     * Sets the text color for the question input field.
-     *
-     * <p>
-     * This method updates the text color of the question input field, enhancing
-     * visibility and consistency with the application's theme.
-     *
-     * @param questionTextColor The color to set for the text in the question input field.
-     */
-    public void setQuestionTextColor(@ColorInt int questionTextColor) {
-        this.questionTextColor = questionTextColor;
-        binding.etQuestion.setTextColor(questionTextColor);
-    }
-
-    /**
-     * Sets the hint color for the question input field.
-     *
-     * <p>
-     * This method updates the color of the hint text displayed in the question
-     * input field, providing a visual cue to users about the expected input.
-     *
-     * @param questionHintColor The color to set for the hint text in the question input field.
-     */
-    public void setQuestionHintColor(@ColorInt int questionHintColor) {
-        this.questionHintColor = questionHintColor;
-        binding.etQuestion.setHintTextColor(questionHintColor);
-    }
-
-    /**
-     * Sets the corner radius for the question card.
-     *
-     * <p>
-     * This method updates the corner radius of the question card, allowing for
-     * visual customization to enhance the overall aesthetics of the poll interface.
-     *
-     * @param questionCornerRadius The radius to set for the corners of the question card.
-     */
-    public void setQuestionCornerRadius(@Dimension int questionCornerRadius) {
-        this.questionCornerRadius = questionCornerRadius;
-        binding.questionCard.setRadius(questionCornerRadius);
-    }
-
-    /**
-     * Sets the stroke width for the question card.
-     *
-     * <p>
-     * This method updates the stroke width applied to the border of the question
-     * card, enabling customization for visual clarity and appeal within the poll
-     * UI.
-     *
-     * @param questionStrokeWidth The width to set for the stroke of the question card.
-     */
-    public void setQuestionStrokeWidth(@Dimension int questionStrokeWidth) {
-        this.questionStrokeWidth = questionStrokeWidth;
-        binding.questionCard.setStrokeWidth(questionStrokeWidth);
-    }
-
-    /**
-     * Sets the stroke color for the question card.
-     *
-     * <p>
-     * This method updates the stroke color applied to the borders of the question
-     * card, allowing for a cohesive look and feel that matches the application's
-     * design.
-     *
-     * @param questionStrokeColor The color to set for the stroke of the question card.
-     */
-    public void setQuestionStrokeColor(@ColorInt int questionStrokeColor) {
-        this.questionStrokeColor = questionStrokeColor;
-        binding.questionCard.setStrokeColor(questionStrokeColor);
-    }
-
-    /**
-     * Sets the color of the separator between UI elements.
-     *
-     * <p>
-     * This method updates the background color of the separator, allowing for
-     * customization that can improve the visual structure of the poll interface.
-     *
-     * @param separatorColor The color to set for the separator.
-     */
-    public void setSeparatorColor(@ColorInt int separatorColor) {
-        this.separatorColor = separatorColor;
-        binding.separator.setBackgroundColor(separatorColor);
-    }
-
-    /**
-     * Sets the background color for the submit button.
-     *
-     * <p>
-     * This method updates the background color of the submit button, enhancing its
-     * visibility and coherence with the overall theme of the poll interface.
-     *
-     * @param submitButtonBackgroundColor The color to set as the background for the submit button.
-     */
-    public void setSubmitButtonBackgroundColor(@ColorInt int submitButtonBackgroundColor) {
-        this.submitButtonBackgroundColor = submitButtonBackgroundColor;
-        binding.submitBtn.setCardBackgroundColor(submitButtonBackgroundColor);
-    }
-
-    /**
-     * Sets the corner radius for the submit button.
-     *
-     * <p>
-     * This method updates the corner radius of the submit button, allowing for
-     * design consistency with the poll's visual theme.
-     *
-     * @param submitButtonCornerRadius The radius to set for the corners of the submit button.
-     */
-    public void setSubmitButtonCornerRadius(@Dimension int submitButtonCornerRadius) {
-        this.submitButtonCornerRadius = submitButtonCornerRadius;
-        binding.submitBtn.setRadius(submitButtonCornerRadius);
-    }
-
-    /**
-     * Sets the stroke width for the submit button.
-     *
-     * <p>
-     * This method updates the stroke width applied to the border of the submit
-     * button, enabling visual customization that enhances its appearance and
-     * usability.
-     *
-     * @param submitButtonStrokeWidth The width to set for the stroke of the submit button.
-     */
-    public void setSubmitButtonStrokeWidth(@Dimension int submitButtonStrokeWidth) {
-        this.submitButtonStrokeWidth = submitButtonStrokeWidth;
-        binding.submitBtn.setStrokeWidth(submitButtonStrokeWidth);
-    }
-
-    /**
-     * Sets the stroke color for the submit button.
-     *
-     * <p>
-     * This method updates the stroke color applied to the borders of the submit
-     * button, allowing for a cohesive look and feel that matches the application's
-     * design.
-     *
-     * @param submitButtonStrokeColor The color to set for the stroke of the submit button.
-     */
-    public void setSubmitButtonStrokeColor(@ColorInt int submitButtonStrokeColor) {
-        this.submitButtonStrokeColor = submitButtonStrokeColor;
-        binding.submitBtn.setStrokeColor(submitButtonStrokeColor);
-    }
-
-    /**
-     * Sets the text color for the submit button.
-     *
-     * <p>
-     * This method updates the text color of the submit button, allowing for
-     * customization that enhances its visibility and overall aesthetics within the
-     * poll interface.
-     *
-     * @param submitButtonTextColor The color to set for the text of the submit button.
-     */
-    public void setSubmitButtonTextColor(@ColorInt int submitButtonTextColor) {
-        this.submitButtonTextColor = submitButtonTextColor;
-        binding.tvSend.setTextColor(submitButtonTextColor);
-    }
-
-    /**
-     * Sets the text appearance for the submit button.
-     *
-     * <p>
-     * This method applies a specified text appearance style to the submit button's
-     * text, enabling developers to customize the font size, style, and other text
-     * attributes for better integration with the overall UI design.
-     *
-     * @param submitButtonTextAppearance The style resource ID to set for the submit button's text
-     *                                   appearance.
-     */
-    public void setSubmitButtonTextAppearance(@StyleRes int submitButtonTextAppearance) {
-        this.submitButtonTextAppearance = submitButtonTextAppearance;
-        binding.tvSend.setTextAppearance(submitButtonTextAppearance);
-    }
-
-    /**
-     * Sets the tint color for the indeterminate progress indicator.
-     *
-     * <p>
-     * This method updates the tint of the progress indicator when it is in an
-     * indeterminate state, allowing for better visibility and alignment with the
-     * application's theme.
-     *
-     * @param progressIndeterminateTint The color to set as the tint for the indeterminate progress
-     *                                  indicator.
-     */
-    public void setProgressIndeterminateTint(@ColorInt int progressIndeterminateTint) {
-        this.progressIndeterminateTint = progressIndeterminateTint;
-        binding.progress.setIndeterminateTintList(ColorStateList.valueOf(progressIndeterminateTint));
+    public int getOptionTitleTextAppearance() {
+        return optionTitleTextAppearance;
     }
 
     /**
@@ -1061,6 +788,10 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.tvOptions.setTextAppearance(optionTitleTextAppearance);
     }
 
+    public int getOptionTitleTextColor() {
+        return optionTitleTextColor;
+    }
+
     /**
      * Sets the text color for the option title.
      *
@@ -1074,6 +805,120 @@ public class CometChatCreatePoll extends MaterialCardView {
     public void setOptionTitleTextColor(@ColorInt int optionTitleTextColor) {
         this.optionTitleTextColor = optionTitleTextColor;
         binding.tvOptions.setTextColor(optionTitleTextColor);
+    }
+
+    public int getOptionTextAppearance() {
+        return optionTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance style for the poll options.
+     *
+     * <p>
+     * This method applies a specified text appearance style resource to the options
+     * in the poll. It allows customization of font size, style, and other text
+     * attributes for better readability and design consistency.
+     *
+     * @param optionTextAppearance The style resource to apply to the poll option text views.
+     */
+    public void setOptionTextAppearance(@StyleRes int optionTextAppearance) {
+        this.optionTextAppearance = optionTextAppearance;
+        adapter.setOptionTextAppearance(optionTextAppearance);
+    }
+
+    public int getOptionTextColor() {
+        return optionTextColor;
+    }
+
+    /**
+     * Sets the text color for the poll options.
+     *
+     * <p>
+     * This method updates the text color of the options in the poll, allowing for
+     * customization to enhance readability and visual appeal.
+     *
+     * @param optionTextColor The color to set for the text of the poll options.
+     */
+    public void setOptionTextColor(@ColorInt int optionTextColor) {
+        this.optionTextColor = optionTextColor;
+        adapter.setOptionTextColor(optionTextColor);
+    }
+
+    public int getOptionHintColor() {
+        return optionHintColor;
+    }
+
+    /**
+     * Sets the hint color for the option text fields in the poll.
+     *
+     * <p>
+     * This method updates the color of the hint text displayed in the option text
+     * fields, providing a visual cue to users on what information is expected.
+     *
+     * @param optionHintColor The color to set for the hint text of the option fields.
+     */
+    public void setOptionHintColor(@ColorInt int optionHintColor) {
+        this.optionHintColor = optionHintColor;
+        adapter.setOptionHintColor(optionHintColor);
+    }
+
+    public int getOptionCornerRadius() {
+        return optionCornerRadius;
+    }
+
+    /**
+     * Sets the corner radius for the option cards in the poll.
+     *
+     * <p>
+     * This method defines the curvature of the corners of the option cards,
+     * allowing for a more modern and visually appealing design.
+     *
+     * @param optionCornerRadius The radius in pixels for the corners of the option cards.
+     */
+    public void setOptionCornerRadius(@Dimension int optionCornerRadius) {
+        this.optionCornerRadius = optionCornerRadius;
+        adapter.setOptionCornerRadius(optionCornerRadius);
+    }
+
+    public int getOptionStrokeWidth() {
+        return optionStrokeWidth;
+    }
+
+    /**
+     * Sets the stroke width for the option cards in the poll.
+     *
+     * <p>
+     * This method updates the stroke width applied to the border of the option
+     * cards, allowing for customization of their appearance in the UI.
+     *
+     * @param optionStrokeWidth The width of the stroke in pixels for the option cards.
+     */
+    public void setOptionStrokeWidth(@Dimension int optionStrokeWidth) {
+        this.optionStrokeWidth = optionStrokeWidth;
+        adapter.setOptionStrokeWidth(optionStrokeWidth);
+    }
+
+    public int getOptionStrokeColor() {
+        return optionStrokeColor;
+    }
+
+    /**
+     * Sets the stroke color for the poll options.
+     *
+     * <p>
+     * This method updates the stroke color applied to the borders of the option
+     * cards, enabling customization for visual appeal and coherence with the
+     * application's theme.
+     *
+     * @param optionStrokeColor The color to set for the stroke of the poll option cards.
+     */
+    public void setOptionStrokeColor(@ColorInt int optionStrokeColor) {
+        this.optionStrokeColor = optionStrokeColor;
+        adapter.setOptionStrokeColor(optionStrokeColor);
+    }
+
+    public int getQuestionTitleTexAppearance() {
+        return questionTitleTexAppearance;
     }
 
     /**
@@ -1092,6 +937,10 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.tvQuestion.setTextAppearance(questionTitleTexAppearance);
     }
 
+    public int getQuestionTitleTextColor() {
+        return questionTitleTextColor;
+    }
+
     /**
      * Sets the text color for the question title.
      *
@@ -1107,19 +956,400 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.tvQuestion.setTextColor(questionTitleTextColor);
     }
 
+    public int getQuestionTextAppearance() {
+        return questionTextAppearance;
+    }
+
     /**
-     * Sets the corner radius for the poll parent card.
+     * Sets the text appearance style for the question input field.
      *
      * <p>
-     * This method updates the corner radius of the poll parent card, allowing for
-     * visual customization that enhances the overall aesthetics and design
-     * consistency of the poll interface.
+     * This method applies a specified text appearance style resource to the
+     * question input field, allowing for customization of font size, style, and
+     * other text attributes to improve readability and user experience.
      *
-     * @param cornerRadius The radius to set for the corners of the poll parent card.
+     * @param questionTextAppearance The style resource to apply to the question text view.
      */
-    public void setCornerRadius(@Dimension int cornerRadius) {
-        this.cornerRadius = cornerRadius;
-        binding.pollParentCard.setRadius(cornerRadius);
+    public void setQuestionTextAppearance(@StyleRes int questionTextAppearance) {
+        this.questionTextAppearance = questionTextAppearance;
+        binding.etQuestion.setTextAppearance(questionTextAppearance);
+    }
+
+    public int getQuestionTextColor() {
+        return questionTextColor;
+    }
+
+    /**
+     * Sets the text color for the question input field.
+     *
+     * <p>
+     * This method updates the text color of the question input field, enhancing
+     * visibility and consistency with the application's theme.
+     *
+     * @param questionTextColor The color to set for the text in the question input field.
+     */
+    public void setQuestionTextColor(@ColorInt int questionTextColor) {
+        this.questionTextColor = questionTextColor;
+        binding.etQuestion.setTextColor(questionTextColor);
+    }
+
+    public int getQuestionHintColor() {
+        return questionHintColor;
+    }
+
+    /**
+     * Sets the hint color for the question input field.
+     *
+     * <p>
+     * This method updates the color of the hint text displayed in the question
+     * input field, providing a visual cue to users about the expected input.
+     *
+     * @param questionHintColor The color to set for the hint text in the question input field.
+     */
+    public void setQuestionHintColor(@ColorInt int questionHintColor) {
+        this.questionHintColor = questionHintColor;
+        binding.etQuestion.setHintTextColor(questionHintColor);
+    }
+
+    public int getQuestionCornerRadius() {
+        return questionCornerRadius;
+    }
+
+    /**
+     * Sets the corner radius for the question card.
+     *
+     * <p>
+     * This method updates the corner radius of the question card, allowing for
+     * visual customization to enhance the overall aesthetics of the poll interface.
+     *
+     * @param questionCornerRadius The radius to set for the corners of the question card.
+     */
+    public void setQuestionCornerRadius(@Dimension int questionCornerRadius) {
+        this.questionCornerRadius = questionCornerRadius;
+        binding.questionCard.setRadius(questionCornerRadius);
+    }
+
+    public int getQuestionStrokeWidth() {
+        return questionStrokeWidth;
+    }
+
+    /**
+     * Sets the stroke width for the question card.
+     *
+     * <p>
+     * This method updates the stroke width applied to the border of the question
+     * card, enabling customization for visual clarity and appeal within the poll
+     * UI.
+     *
+     * @param questionStrokeWidth The width to set for the stroke of the question card.
+     */
+    public void setQuestionStrokeWidth(@Dimension int questionStrokeWidth) {
+        this.questionStrokeWidth = questionStrokeWidth;
+        binding.questionCard.setStrokeWidth(questionStrokeWidth);
+    }
+
+    public int getQuestionStrokeColor() {
+        return questionStrokeColor;
+    }
+
+    /**
+     * Sets the stroke color for the question card.
+     *
+     * <p>
+     * This method updates the stroke color applied to the borders of the question
+     * card, allowing for a cohesive look and feel that matches the application's
+     * design.
+     *
+     * @param questionStrokeColor The color to set for the stroke of the question card.
+     */
+    public void setQuestionStrokeColor(@ColorInt int questionStrokeColor) {
+        this.questionStrokeColor = questionStrokeColor;
+        binding.questionCard.setStrokeColor(questionStrokeColor);
+    }
+
+    public Drawable getDragIcon() {
+        return dragIcon;
+    }
+
+    /**
+     * Sets the drag icon for the poll options.
+     *
+     * <p>
+     * This method defines the icon used for dragging the poll options within the
+     * RecyclerView, enhancing the user interface's interactivity and usability.
+     *
+     * @param dragIcon The drawable resource to be used as the drag icon.
+     */
+    public void setDragIcon(Drawable dragIcon) {
+        this.dragIcon = dragIcon;
+        adapter.setDragIcon(dragIcon);
+    }
+
+    public int getDragIconTint() {
+        return dragIconTint;
+    }
+
+    /**
+     * Sets the tint color for the drag icon.
+     *
+     * <p>
+     * This method applies a color tint to the drag icon, allowing for customization
+     * to match the application's design language.
+     *
+     * @param color The color to tint the drag icon.
+     */
+    public void setDragIconTint(@ColorInt int color) {
+        this.dragIconTint = color;
+        adapter.setDragIconTint(color);
+    }
+
+    public int getSeparatorColor() {
+        return separatorColor;
+    }    @Override
+    public int getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    /**
+     * Sets the color of the separator between UI elements.
+     *
+     * <p>
+     * This method updates the background color of the separator, allowing for
+     * customization that can improve the visual structure of the poll interface.
+     *
+     * @param separatorColor The color to set for the separator.
+     */
+    public void setSeparatorColor(@ColorInt int separatorColor) {
+        this.separatorColor = separatorColor;
+        binding.separator.setBackgroundColor(separatorColor);
+    }
+
+    public int getErrorTextColor() {
+        return errorTextColor;
+    }
+
+    /**
+     * Sets the text color for the error message displayed in the UI.
+     *
+     * <p>
+     * This method updates the text color of the error text view to visually
+     * indicate errors to the user. The provided color will be applied immediately.
+     *
+     * @param errorTextColor The color to set for the error text view.
+     */
+    public void setErrorTextColor(@ColorInt int errorTextColor) {
+        this.errorTextColor = errorTextColor;
+        binding.tvError.setTextColor(errorTextColor);
+    }
+
+    public int getErrorTextAppearance() {
+        return errorTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance style for the error message.
+     *
+     * <p>
+     * This method applies a specified text appearance style resource to the error
+     * text view. It allows for customization of font size, style, and other text
+     * attributes to ensure the error message is clearly visible to the user.
+     *
+     * @param errorTextAppearance The style resource to apply to the error text view.
+     */
+    public void setErrorTextAppearance(@StyleRes int errorTextAppearance) {
+        this.errorTextAppearance = errorTextAppearance;
+        binding.tvError.setTextAppearance(errorTextAppearance);
+    }
+
+    public Drawable getBackIcon() {
+        return backIcon;
+    }
+
+    /**
+     * Sets the back icon drawable for the back button.
+     *
+     * <p>
+     * This method updates the back icon displayed in the UI with the provided
+     * drawable. It also stores the drawable for future reference.
+     *
+     * @param backIcon The drawable to set as the back icon.
+     */
+    public void setBackIcon(Drawable backIcon) {
+        this.backIcon = backIcon;
+        binding.imgBack.setImageDrawable(backIcon);
+    }
+
+    public int getBackIconTint() {
+        return backIconTint;
+    }
+
+    /**
+     * Sets the tint color for the back icon.
+     *
+     * <p>
+     * This method updates the color filter applied to the back icon, allowing for
+     * customization of its appearance to fit the theme of the application.
+     *
+     * @param backIconTint The color to apply as a tint to the back icon.
+     */
+    public void setBackIconTint(@ColorInt int backIconTint) {
+        this.backIconTint = backIconTint;
+        binding.imgBack.setColorFilter(backIconTint);
+    }
+
+    public int getSubmitButtonBackgroundColor() {
+        return submitButtonBackgroundColor;
+    }
+
+    /**
+     * Sets the background color for the submit button.
+     *
+     * <p>
+     * This method updates the background color of the submit button, enhancing its
+     * visibility and coherence with the overall theme of the poll interface.
+     *
+     * @param submitButtonBackgroundColor The color to set as the background for the submit button.
+     */
+    public void setSubmitButtonBackgroundColor(@ColorInt int submitButtonBackgroundColor) {
+        this.submitButtonBackgroundColor = submitButtonBackgroundColor;
+        binding.submitBtn.setCardBackgroundColor(submitButtonBackgroundColor);
+    }
+
+    public int getDisableSubmitButtonBackgroundColor() {
+        return disableSubmitButtonBackgroundColor;
+    }
+
+    /**
+     * Sets the background color for the disabled state of the submit button.
+     *
+     * <p>
+     * This method updates the background color of the submit button when it is in a
+     * disabled state, allowing for visual feedback to the user that the button
+     * cannot be interacted with.
+     *
+     * @param disableSubmitButtonBackgroundColor The color to set for the disabled submit button background.
+     */
+    public void setDisableSubmitButtonBackgroundColor(@ColorInt int disableSubmitButtonBackgroundColor) {
+        this.disableSubmitButtonBackgroundColor = disableSubmitButtonBackgroundColor;
+    }
+
+    public int getSubmitButtonCornerRadius() {
+        return submitButtonCornerRadius;
+    }
+
+    /**
+     * Sets the corner radius for the submit button.
+     *
+     * <p>
+     * This method updates the corner radius of the submit button, allowing for
+     * design consistency with the poll's visual theme.
+     *
+     * @param submitButtonCornerRadius The radius to set for the corners of the submit button.
+     */
+    public void setSubmitButtonCornerRadius(@Dimension int submitButtonCornerRadius) {
+        this.submitButtonCornerRadius = submitButtonCornerRadius;
+        binding.submitBtn.setRadius(submitButtonCornerRadius);
+    }
+
+    public int getSubmitButtonStrokeWidth() {
+        return submitButtonStrokeWidth;
+    }
+
+    /**
+     * Sets the stroke width for the submit button.
+     *
+     * <p>
+     * This method updates the stroke width applied to the border of the submit
+     * button, enabling visual customization that enhances its appearance and
+     * usability.
+     *
+     * @param submitButtonStrokeWidth The width to set for the stroke of the submit button.
+     */
+    public void setSubmitButtonStrokeWidth(@Dimension int submitButtonStrokeWidth) {
+        this.submitButtonStrokeWidth = submitButtonStrokeWidth;
+        binding.submitBtn.setStrokeWidth(submitButtonStrokeWidth);
+    }
+
+    public int getSubmitButtonStrokeColor() {
+        return submitButtonStrokeColor;
+    }
+
+    /**
+     * Sets the stroke color for the submit button.
+     *
+     * <p>
+     * This method updates the stroke color applied to the borders of the submit
+     * button, allowing for a cohesive look and feel that matches the application's
+     * design.
+     *
+     * @param submitButtonStrokeColor The color to set for the stroke of the submit button.
+     */
+    public void setSubmitButtonStrokeColor(@ColorInt int submitButtonStrokeColor) {
+        this.submitButtonStrokeColor = submitButtonStrokeColor;
+        binding.submitBtn.setStrokeColor(submitButtonStrokeColor);
+    }
+
+    public int getSubmitButtonTextColor() {
+        return submitButtonTextColor;
+    }
+
+    /**
+     * Sets the text color for the submit button.
+     *
+     * <p>
+     * This method updates the text color of the submit button, allowing for
+     * customization that enhances its visibility and overall aesthetics within the
+     * poll interface.
+     *
+     * @param submitButtonTextColor The color to set for the text of the submit button.
+     */
+    public void setSubmitButtonTextColor(@ColorInt int submitButtonTextColor) {
+        this.submitButtonTextColor = submitButtonTextColor;
+        binding.tvSend.setTextColor(submitButtonTextColor);
+    }
+
+    public int getSubmitButtonTextAppearance() {
+        return submitButtonTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the submit button.
+     *
+     * <p>
+     * This method applies a specified text appearance style to the submit button's
+     * text, enabling developers to customize the font size, style, and other text
+     * attributes for better integration with the overall UI design.
+     *
+     * @param submitButtonTextAppearance The style resource ID to set for the submit button's text
+     *                                   appearance.
+     */
+    public void setSubmitButtonTextAppearance(@StyleRes int submitButtonTextAppearance) {
+        this.submitButtonTextAppearance = submitButtonTextAppearance;
+        binding.tvSend.setTextAppearance(submitButtonTextAppearance);
+    }
+
+    public int getProgressIndeterminateTint() {
+        return progressIndeterminateTint;
+    }
+
+    /**
+     * Sets the tint color for the indeterminate progress indicator.
+     *
+     * <p>
+     * This method updates the tint of the progress indicator when it is in an
+     * indeterminate state, allowing for better visibility and alignment with the
+     * application's theme.
+     *
+     * @param progressIndeterminateTint The color to set as the tint for the indeterminate progress
+     *                                  indicator.
+     */
+    public void setProgressIndeterminateTint(@ColorInt int progressIndeterminateTint) {
+        this.progressIndeterminateTint = progressIndeterminateTint;
+        binding.progress.setIndeterminateTintList(ColorStateList.valueOf(progressIndeterminateTint));
+    }
+
+    public boolean isHideToolBar() {
+        return hideToolBar;
     }
 
     /**
@@ -1139,18 +1369,25 @@ public class CometChatCreatePoll extends MaterialCardView {
         binding.imgBack.setVisibility(hideToolBar ? View.GONE : View.VISIBLE);
     }
 
+    public int getStyle() {
+        return style;
+    }
+
     /**
-     * Sets the background color for the disabled state of the submit button.
+     * Sets the style of the CometChatCreatePoll view.
      *
-     * <p>
-     * This method updates the background color of the submit button when it is in a
-     * disabled state, allowing for visual feedback to the user that the button
-     * cannot be interacted with.
-     *
-     * @param disableSubmitButtonBackgroundColor The color to set for the disabled submit button background.
+     * @param style The style resource ID to be applied to the view.
      */
-    public void setDisableSubmitButtonBackgroundColor(@ColorInt int disableSubmitButtonBackgroundColor) {
-        this.disableSubmitButtonBackgroundColor = disableSubmitButtonBackgroundColor;
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            this.style = style;
+            TypedArray typedArray = getContext().obtainStyledAttributes(style, R.styleable.CometChatCreatePoll);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
+    }
+
+    public OnSubmitClickListener getOnSubmitClickListener() {
+        return onSubmitClickListener;
     }
 
     /**
@@ -1185,6 +1422,10 @@ public class CometChatCreatePoll extends MaterialCardView {
         }
     }
 
+    public OnClickListener getBackClickListener() {
+        return backClickListener;
+    }
+
     /**
      * Sets a listener for back button click events.
      *
@@ -1200,252 +1441,6 @@ public class CometChatCreatePoll extends MaterialCardView {
             this.backClickListener = backClickListener;
             binding.imgBack.setOnClickListener(backClickListener);
         }
-    }
-
-    /**
-     * Sets the visibility of the send button text.
-     *
-     * <p>
-     * This method controls the visibility of the text displayed on the send button.
-     * It allows for customization of the button's appearance based on the current
-     * state of the UI, such as when waiting for a response or displaying an error
-     * message.
-     *
-     * @param visibility The visibility state to set for the send button text. It should be
-     *                   one of the constants from the View class (e.g., View.VISIBLE,
-     *                   View.GONE).
-     */
-    public void setSendButtonTextVisibility(int visibility) {
-        this.sendButtonTextVisibility = visibility;
-        binding.tvSend.setVisibility(visibility);
-    }
-
-    /**
-     * Enables or disables the send button.
-     *
-     * <p>
-     * This method updates the enabled state of the send button, allowing for
-     * control over whether the button can be interacted with by the user. Disabling
-     * the button is useful when waiting for an operation to complete or validating
-     * input.
-     *
-     * @param enabled True to enable the send button; false to disable it.
-     */
-    private void setSendButtonEnabled(boolean enabled) {
-        this.sendButtonEnabled = enabled;
-        binding.submitBtn.setEnabled(enabled);
-    }
-
-    /**
-     * Sets the visibility of the progress indicator.
-     *
-     * <p>
-     * This method controls the visibility of the progress indicator displayed in
-     * the UI. When the progress indicator is visible, the send button text is
-     * hidden, and the send button is disabled. When the progress indicator is
-     * hidden, the send button text is shown, and the send button is enabled.
-     *
-     * @param visibility The visibility state to set for the progress indicator. It should
-     *                   be one of the constants from the View class (e.g., View.VISIBLE,
-     *                   View.GONE).
-     */
-    public void setProgressVisibility(int visibility) {
-        binding.progress.setVisibility(visibility);
-        if (visibility == View.VISIBLE) {
-            binding.tvSend.setVisibility(View.GONE);
-            setSendButtonEnabled(false);
-        } else {
-            binding.tvSend.setVisibility(View.VISIBLE);
-            setSendButtonEnabled(true);
-        }
-    }
-
-    // Getters for testing or direct access if needed
-    public int getSendButtonTextVisibility() {
-        return sendButtonTextVisibility;
-    }
-
-    public int getProgressVisibility() {
-        return progressVisibility;
-    }
-
-    public int getErrorStateVisibility() {
-        return errorStateVisibility;
-    }
-
-    public boolean isSendButtonEnabled() {
-        return sendButtonEnabled;
-    }
-
-    public int getTitleTextAppearance() {
-        return titleTextAppearance;
-    }
-
-    public int getTitleTextColor() {
-        return titleTextColor;
-    }
-
-    public int getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    public Drawable getBackgroundDrawable() {
-        return backgroundDrawable;
-    }
-
-    public int getCornerRadius() {
-        return cornerRadius;
-    }
-
-    @Override
-    public int getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    @Nullable
-    @Override
-    public ColorStateList getStrokeColorStateList() {
-        return super.getStrokeColorStateList();
-    }
-
-    public int getOptionTitleTextAppearance() {
-        return optionTitleTextAppearance;
-    }
-
-    public int getOptionTitleTextColor() {
-        return optionTitleTextColor;
-    }
-
-    public int getOptionTextAppearance() {
-        return optionTextAppearance;
-    }
-
-    public int getOptionTextColor() {
-        return optionTextColor;
-    }
-
-    public int getOptionHintColor() {
-        return optionHintColor;
-    }
-
-    public int getOptionCornerRadius() {
-        return optionCornerRadius;
-    }
-
-    public int getOptionStrokeWidth() {
-        return optionStrokeWidth;
-    }
-
-    public int getOptionStrokeColor() {
-        return optionStrokeColor;
-    }
-
-    public int getQuestionTitleTexAppearance() {
-        return questionTitleTexAppearance;
-    }
-
-    public int getQuestionTitleTextColor() {
-        return questionTitleTextColor;
-    }
-
-    public int getQuestionTextAppearance() {
-        return questionTextAppearance;
-    }
-
-    public int getQuestionTextColor() {
-        return questionTextColor;
-    }
-
-    public int getQuestionHintColor() {
-        return questionHintColor;
-    }
-
-    public int getQuestionCornerRadius() {
-        return questionCornerRadius;
-    }
-
-    public int getQuestionStrokeWidth() {
-        return questionStrokeWidth;
-    }
-
-    public int getQuestionStrokeColor() {
-        return questionStrokeColor;
-    }
-
-    public Drawable getDragIcon() {
-        return dragIcon;
-    }
-
-    public int getDragIconTint() {
-        return dragIconTint;
-    }
-
-    public int getSeparatorColor() {
-        return separatorColor;
-    }
-
-    public int getErrorTextColor() {
-        return errorTextColor;
-    }
-
-    public int getErrorTextAppearance() {
-        return errorTextAppearance;
-    }
-
-    public Drawable getBackIcon() {
-        return backIcon;
-    }
-
-    public int getBackIconTint() {
-        return backIconTint;
-    }
-
-    public int getSubmitButtonBackgroundColor() {
-        return submitButtonBackgroundColor;
-    }
-
-    public int getDisableSubmitButtonBackgroundColor() {
-        return disableSubmitButtonBackgroundColor;
-    }
-
-    public int getSubmitButtonCornerRadius() {
-        return submitButtonCornerRadius;
-    }
-
-    public int getSubmitButtonStrokeWidth() {
-        return submitButtonStrokeWidth;
-    }
-
-    public int getSubmitButtonStrokeColor() {
-        return submitButtonStrokeColor;
-    }
-
-    public int getSubmitButtonTextColor() {
-        return submitButtonTextColor;
-    }
-
-    public int getSubmitButtonTextAppearance() {
-        return submitButtonTextAppearance;
-    }
-
-    public int getProgressIndeterminateTint() {
-        return progressIndeterminateTint;
-    }
-
-    public boolean isHideToolBar() {
-        return hideToolBar;
-    }
-
-    public int getStyle() {
-        return style;
-    }
-
-    public OnSubmitClickListener getOnSubmitClickListener() {
-        return onSubmitClickListener;
-    }
-
-    public OnClickListener getBackClickListener() {
-        return backClickListener;
     }
 
     /**
@@ -1467,4 +1462,10 @@ public class CometChatCreatePoll extends MaterialCardView {
          */
         void onSubmitClick(String question, JSONArray options);
     }
+
+
+
+
+
+
 }

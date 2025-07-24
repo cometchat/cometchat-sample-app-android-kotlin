@@ -23,6 +23,7 @@ import com.airbnb.lottie.model.KeyPath;
 import com.airbnb.lottie.value.LottieValueCallback;
 import com.cometchat.chat.models.Attachment;
 import com.cometchat.chat.models.MediaMessage;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.AudioPlayer;
@@ -263,10 +264,14 @@ public class CometChatAudioBubble extends MaterialCardView {
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setPlayIconTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubblePlayIconTint, 0));
-            setPauseIconTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubblePauseIconTint, 0));
-            setButtonTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubbleButtonBackgroundColor, 0));
-            setAudioWaveColor(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubbleAudioWaveColor, 0));
+            setPlayIconTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubblePlayIconTint,
+                                                CometChatTheme.getPrimaryColor(getContext())));
+            setPauseIconTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubblePauseIconTint,
+                                                 CometChatTheme.getPrimaryColor(getContext())));
+            setButtonTint(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubbleButtonBackgroundColor,
+                                              CometChatTheme.getColorWhite(getContext())));
+            setAudioWaveColor(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubbleAudioWaveColor,
+                                                  CometChatTheme.getPrimaryColor(getContext())));
             setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatAudioBubble_cometchatAudioBubbleSubtitleTextAppearance, 0));
             setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatAudioBubble_cometchatAudioBubbleSubtitleTextColor, 0));
         } finally {

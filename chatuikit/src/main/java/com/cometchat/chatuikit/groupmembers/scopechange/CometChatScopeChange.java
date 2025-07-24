@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatScopeChangeLayoutBinding;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -34,35 +35,28 @@ import java.util.Arrays;
 public class CometChatScopeChange extends MaterialCardView {
     private static final String TAG = CometChatScopeChange.class.getSimpleName();
     /**
+     * Default role titles used in the layout.
+     */
+    private final String admin = "Admin";
+    private final String moderator = "Moderator";
+    private final String participant = "Participant";
+    /**
      * View binding for the scope change layout.
      */
     private CometchatScopeChangeLayoutBinding binding;
-
     /**
      * Adapter for displaying available scopes.
      */
     private ScopeAdapter scopeAdapter;
-
     /**
      * ViewModel to manage scope change data.
      */
     private ScopeChangeViewModel viewModel;
-
     /**
      * Click listeners for negative and positive button actions.
      */
     private OnClick onNegativeButtonClick;
-
     private OnClick onPositiveButtonClick;
-
-    /**
-     * Default role titles used in the layout.
-     */
-    private final String admin = "Admin";
-
-    private final String moderator = "Moderator";
-    private final String participant = "Participant";
-
     /**
      * Callback for when the scope change action is successful.
      */
@@ -206,53 +200,6 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
-     * Extracts attributes from the given {@link TypedArray} and applies default
-     * values.
-     *
-     * @param typedArray The TypedArray containing the view's attributes.
-     */
-    private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
-        try {
-            setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeTitleTextAppearance, 0));
-            setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeSubtitleTextAppearance, 0));
-            setTitleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeTitleColor, 0));
-            setSubtitleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeSubtitleColor, 0));
-            setScopeIcon(typedArray.getDrawable(R.styleable.CometChatScopeChange_cometchatScopeChangeIcon));
-            setIconTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeIconTint, 0));
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeBackgroundColor, 0));
-            setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatScopeChange_cometchatScopeChangeCornerRadius, 0));
-            setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatScopeChange_cometchatScopeChangeStrokeWidth, 0));
-            setStrokeColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeStrokeColor, 0));
-            setItemTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemTextColor, 0));
-            setItemTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeItemTextAppearance, 0));
-            setItemRadioButtonTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemRadioButtonTint, 0));
-            setItemDisableRadioButtonTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemDisableRadioButtonTint, 0));
-            setDisableItemTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeDisableItemTextColor, 0));
-            setDragHandleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeDragHandleColor, 0));
-            setPositiveButtonTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonTextColor, 0));
-            setNegativeButtonTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeNegativeButtonTextColor, 0));
-            setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeButtonTextAppearance, 0));
-            setPositiveButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonBackgroundColor, 0));
-            setNegativeButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeNegativeButtonBackgroundColor, 0));
-        } finally {
-            typedArray.recycle();
-        }
-    }
-
-    /**
-     * Sets the style of the text bubble from a specific style resource.
-     *
-     * @param style The resource ID of the style to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            this.style = style;
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatScopeChange);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
-    }
-
-    /**
      * Sets the dialog state based on the provided state.
      *
      * @param state The state of the dialog.
@@ -272,86 +219,51 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
-     * Sets the title text appearance.
+     * Extracts attributes from the given {@link TypedArray} and applies default
+     * values.
      *
-     * @param titleTextAppearance The style resource for the title text appearance.
+     * @param typedArray The TypedArray containing the view's attributes.
      */
-    public void setTitleTextAppearance(@StyleRes int titleTextAppearance) {
-        this.titleTextAppearance = titleTextAppearance;
-        binding.cometchatScopeChangeTitle.setTextAppearance(titleTextAppearance);
-    }
-
-    /**
-     * Sets the subtitle text appearance.
-     *
-     * @param subtitleTextAppearance The style resource for the subtitle text appearance.
-     */
-    public void setSubtitleTextAppearance(@StyleRes int subtitleTextAppearance) {
-        this.subtitleTextAppearance = subtitleTextAppearance;
-        binding.cometchatScopeChangeSubtitle.setTextAppearance(subtitleTextAppearance);
-    }
-
-    /**
-     * Sets the title color.
-     *
-     * @param titleColor The color of the title text.
-     */
-    public void setTitleColor(@ColorInt int titleColor) {
-        this.titleColor = titleColor;
-        binding.cometchatScopeChangeTitle.setTextColor(titleColor);
-    }
-
-    /**
-     * Sets the subtitle color.
-     *
-     * @param subtitleColor The color of the subtitle text.
-     */
-    public void setSubtitleColor(@ColorInt int subtitleColor) {
-        this.subtitleColor = subtitleColor;
-        binding.cometchatScopeChangeSubtitle.setTextColor(subtitleColor);
-    }
-
-    /**
-     * Sets the icon for the scope.
-     *
-     * @param scopeIcon The drawable for the scope icon.
-     */
-    public void setScopeIcon(Drawable scopeIcon) {
-        this.scopeIcon = scopeIcon;
-        binding.ivScopeChange.setImageDrawable(scopeIcon);
-    }
-
-    /**
-     * Sets the tint for the icon.
-     *
-     * @param iconTint The color tint for the icon.
-     */
-    public void setIconTint(@ColorInt int iconTint) {
-        this.iconTint = iconTint;
-        binding.ivScopeChange.setColorFilter(iconTint);
-    }
-
-    @Override
-    public void setCardBackgroundColor(@ColorInt int backgroundColor) {
-        this.backgroundColor = backgroundColor;
-        super.setCardBackgroundColor(backgroundColor);
-    }
-
-    /**
-     * Sets the corner radius of the card.
-     *
-     * @param cornerRadius The corner radius value in pixels.
-     */
-    public void setCornerRadius(@Dimension int cornerRadius) {
-        this.cornerRadius = cornerRadius;
-        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel().toBuilder().setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius).setTopRightCorner(CornerFamily.ROUNDED, cornerRadius).setBottomLeftCorner(CornerFamily.ROUNDED, 0).setBottomRightCorner(CornerFamily.ROUNDED, 0).build();
-        super.setShapeAppearanceModel(shapeAppearanceModel);
-    }
-
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
+    private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
+        try {
+            setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeTitleTextAppearance, 0));
+            setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeSubtitleTextAppearance, 0));
+            setTitleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeTitleColor,
+                                              CometChatTheme.getTextColorPrimary(getContext())));
+            setSubtitleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeSubtitleColor,
+                                                 CometChatTheme.getTextColorSecondary(getContext())));
+            setScopeIcon(typedArray.getDrawable(R.styleable.CometChatScopeChange_cometchatScopeChangeIcon));
+            setIconTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeIconTint,
+                                            CometChatTheme.getPrimaryColor(getContext())));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor1(getContext())));
+            setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatScopeChange_cometchatScopeChangeCornerRadius, 0));
+            setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatScopeChange_cometchatScopeChangeStrokeWidth, 0));
+            setStrokeColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeStrokeColor,
+                                               CometChatTheme.getStrokeColorLight(getContext())));
+            setItemTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemTextColor,
+                                                 CometChatTheme.getTextColorPrimary(getContext())));
+            setItemTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeItemTextAppearance, 0));
+            setItemRadioButtonTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemRadioButtonTint,
+                                                       CometChatTheme.getPrimaryColor(getContext())));
+            setItemDisableRadioButtonTint(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeItemDisableRadioButtonTint,
+                                                              CometChatTheme.getStrokeColorDefault(getContext())));
+            setDisableItemTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeDisableItemTextColor,
+                                                        CometChatTheme.getTextColorSecondary(getContext())));
+            setDragHandleColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeDragHandleColor,
+                                                   CometChatTheme.getNeutralColor500(getContext())));
+            setPositiveButtonTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonTextColor,
+                                                           CometChatTheme.getColorWhite(getContext())));
+            setNegativeButtonTextColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeNegativeButtonTextColor,
+                                                           CometChatTheme.getPrimaryColor(getContext())));
+            setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeButtonTextAppearance, 0));
+            setPositiveButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonBackgroundColor,
+                                                                 CometChatTheme.getPrimaryColor(getContext())));
+            setNegativeButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeNegativeButtonBackgroundColor,
+                                                                 CometChatTheme.getBackgroundColor1(getContext())));
+        } finally {
+            typedArray.recycle();
+        }
     }
 
     @Override
@@ -361,114 +273,14 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
-     * Sets the text color for the item.
+     * Gets the stroke color as a ColorStateList.
      *
-     * @param itemTextColor The color of the item text.
+     * @return A ColorStateList representing the stroke color, or null if not set.
      */
-    public void setItemTextColor(@ColorInt int itemTextColor) {
-        this.itemTextColor = itemTextColor;
-        scopeAdapter.setItemTextColor(itemTextColor);
-    }
-
-    /**
-     * Sets the text appearance for the item.
-     *
-     * @param itemTextAppearance The style resource for the item text appearance.
-     */
-    public void setItemTextAppearance(@StyleRes int itemTextAppearance) {
-        this.itemTextAppearance = itemTextAppearance;
-        scopeAdapter.setItemTextAppearance(itemTextAppearance);
-    }
-
-    /**
-     * Sets the disabled item text color.
-     *
-     * @param disableItemTextColor The color of the disabled item text.
-     */
-    public void setDisableItemTextColor(int disableItemTextColor) {
-        this.disableItemTextColor = disableItemTextColor;
-        scopeAdapter.setDisableItemTextColor(disableItemTextColor);
-    }
-
-    /**
-     * Sets the tint for the item radio button.
-     *
-     * @param itemRadioButtonTint The color tint for the item radio button.
-     */
-    public void setItemRadioButtonTint(@ColorInt int itemRadioButtonTint) {
-        this.itemRadioButtonTint = itemRadioButtonTint;
-        scopeAdapter.setRadioButtonTint(itemRadioButtonTint);
-    }
-
-    /**
-     * Sets the tint for the disabled item radio button.
-     *
-     * @param itemDisableRadioButtonTint The color tint for the disabled item radio button.
-     */
-    public void setItemDisableRadioButtonTint(@ColorInt int itemDisableRadioButtonTint) {
-        this.itemDisableRadioButtonTint = itemDisableRadioButtonTint;
-        scopeAdapter.setDisableRadioButtonTint(itemDisableRadioButtonTint);
-    }
-
-    /**
-     * Sets the color for the drag handle.
-     *
-     * @param dragHandleColor The color of the drag handle.
-     */
-    public void setDragHandleColor(@ColorInt int dragHandleColor) {
-        this.dragHandleColor = dragHandleColor;
-        binding.cometchatScopeChangeDragHandle.setCardBackgroundColor(dragHandleColor);
-    }
-
-    /**
-     * Sets the positive button text color.
-     *
-     * @param positiveButtonTextColor The color of the positive button text.
-     */
-    public void setPositiveButtonTextColor(@ColorInt int positiveButtonTextColor) {
-        this.positiveButtonTextColor = positiveButtonTextColor;
-        binding.cometchatScopeChangeSaveText.setTextColor(positiveButtonTextColor);
-    }
-
-    /**
-     * Sets the negative button text color.
-     *
-     * @param negativeButtonTextColor The color of the negative button text.
-     */
-    public void setNegativeButtonTextColor(@ColorInt int negativeButtonTextColor) {
-        this.negativeButtonTextColor = negativeButtonTextColor;
-        binding.cometchatScopeChangeCancelText.setTextColor(negativeButtonTextColor);
-    }
-
-    /**
-     * Sets the text appearance for buttons.
-     *
-     * @param buttonTextAppearance The style resource for button text appearance.
-     */
-    public void setButtonTextAppearance(@StyleRes int buttonTextAppearance) {
-        this.buttonTextAppearance = buttonTextAppearance;
-        binding.cometchatScopeChangeCancelText.setTextAppearance(buttonTextAppearance);
-        binding.cometchatScopeChangeSaveText.setTextAppearance(buttonTextAppearance);
-    }
-
-    /**
-     * Sets the background color for the positive button.
-     *
-     * @param positiveButtonBackgroundColor The background color of the positive button.
-     */
-    public void setPositiveButtonBackgroundColor(@ColorInt int positiveButtonBackgroundColor) {
-        this.positiveButtonBackgroundColor = positiveButtonBackgroundColor;
-        binding.cometchatScopeChangeSaveButton.setCardBackgroundColor(positiveButtonBackgroundColor);
-    }
-
-    /**
-     * Sets the background color for the negative button.
-     *
-     * @param negativeButtonBackgroundColor The background color of the negative button.
-     */
-    public void setNegativeButtonBackgroundColor(@ColorInt int negativeButtonBackgroundColor) {
-        this.negativeButtonBackgroundColor = negativeButtonBackgroundColor;
-        binding.cometchatScopeChangeCancelButton.setCardBackgroundColor(negativeButtonBackgroundColor);
+    @Nullable
+    @Override
+    public ColorStateList getStrokeColorStateList() {
+        return ColorStateList.valueOf(strokeColor);
     }
 
     /**
@@ -480,36 +292,6 @@ public class CometChatScopeChange extends MaterialCardView {
     public void setRoleData(Group group, GroupMember groupMember) {
         viewModel.setGroupData(group, groupMember);
         scopeAdapter.setGroupData(new ArrayList<>(Arrays.asList(admin, moderator, participant)), groupMember, group);
-    }
-
-    /**
-     * Sets the scope change callback.
-     *
-     * @param scopeChangeCallback The callback listener for scope changes.
-     */
-    public void setScopeChangeCallback(CometChat.CallbackListener<GroupMember> scopeChangeCallback) {
-        if (scopeChangeCallback != null) {
-            this.scopeChangeCallback = scopeChangeCallback;
-            viewModel.setScopeChangeCallback(scopeChangeCallback);
-        }
-    }
-
-    /**
-     * Sets the click listener for the positive button.
-     *
-     * @param onPositiveButtonClick The click listener for the positive button.
-     */
-    public void setOnPositiveButtonClick(OnClick onPositiveButtonClick) {
-        this.onPositiveButtonClick = onPositiveButtonClick;
-    }
-
-    /**
-     * Sets the click listener for the negative button.
-     *
-     * @param onNegativeButtonClick The click listener for the negative button.
-     */
-    public void setOnNegativeButtonClick(OnClick onNegativeButtonClick) {
-        this.onNegativeButtonClick = onNegativeButtonClick;
     }
 
     /**
@@ -540,12 +322,34 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the click listener for the negative button.
+     *
+     * @param onNegativeButtonClick The click listener for the negative button.
+     */
+    public void setOnNegativeButtonClick(OnClick onNegativeButtonClick) {
+        this.onNegativeButtonClick = onNegativeButtonClick;
+    }
+
+    /**
      * Gets the OnClick listener for the positive button.
      *
      * @return The OnClick listener for the positive button.
      */
     public OnClick getOnPositiveButtonClick() {
         return onPositiveButtonClick;
+    }
+
+    /**
+     * Sets the click listener for the positive button.
+     *
+     * @param onPositiveButtonClick The click listener for the positive button.
+     */
+    public void setOnPositiveButtonClick(OnClick onPositiveButtonClick) {
+        this.onPositiveButtonClick = onPositiveButtonClick;
+    }    @Override
+    public void setCardBackgroundColor(@ColorInt int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        super.setCardBackgroundColor(backgroundColor);
     }
 
     /**
@@ -573,6 +377,10 @@ public class CometChatScopeChange extends MaterialCardView {
      */
     public String getParticipant() {
         return participant;
+    }    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -585,12 +393,34 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the scope change callback.
+     *
+     * @param scopeChangeCallback The callback listener for scope changes.
+     */
+    public void setScopeChangeCallback(CometChat.CallbackListener<GroupMember> scopeChangeCallback) {
+        if (scopeChangeCallback != null) {
+            this.scopeChangeCallback = scopeChangeCallback;
+            viewModel.setScopeChangeCallback(scopeChangeCallback);
+        }
+    }
+
+    /**
      * Gets the title text appearance style.
      *
      * @return The style resource ID for the title text appearance.
      */
     public int getTitleTextAppearance() {
         return titleTextAppearance;
+    }
+
+    /**
+     * Sets the title text appearance.
+     *
+     * @param titleTextAppearance The style resource for the title text appearance.
+     */
+    public void setTitleTextAppearance(@StyleRes int titleTextAppearance) {
+        this.titleTextAppearance = titleTextAppearance;
+        binding.cometchatScopeChangeTitle.setTextAppearance(titleTextAppearance);
     }
 
     /**
@@ -603,12 +433,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the subtitle text appearance.
+     *
+     * @param subtitleTextAppearance The style resource for the subtitle text appearance.
+     */
+    public void setSubtitleTextAppearance(@StyleRes int subtitleTextAppearance) {
+        this.subtitleTextAppearance = subtitleTextAppearance;
+        binding.cometchatScopeChangeSubtitle.setTextAppearance(subtitleTextAppearance);
+    }
+
+    /**
      * Gets the title color.
      *
      * @return The color of the title text.
      */
     public int getTitleColor() {
         return titleColor;
+    }
+
+    /**
+     * Sets the title color.
+     *
+     * @param titleColor The color of the title text.
+     */
+    public void setTitleColor(@ColorInt int titleColor) {
+        this.titleColor = titleColor;
+        binding.cometchatScopeChangeTitle.setTextColor(titleColor);
     }
 
     /**
@@ -621,6 +471,16 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the subtitle color.
+     *
+     * @param subtitleColor The color of the subtitle text.
+     */
+    public void setSubtitleColor(@ColorInt int subtitleColor) {
+        this.subtitleColor = subtitleColor;
+        binding.cometchatScopeChangeSubtitle.setTextColor(subtitleColor);
+    }
+
+    /**
      * Gets the scope icon drawable.
      *
      * @return The drawable used for the scope icon.
@@ -630,12 +490,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the icon for the scope.
+     *
+     * @param scopeIcon The drawable for the scope icon.
+     */
+    public void setScopeIcon(Drawable scopeIcon) {
+        this.scopeIcon = scopeIcon;
+        binding.ivScopeChange.setImageDrawable(scopeIcon);
+    }
+
+    /**
      * Gets the icon tint color.
      *
      * @return The tint color applied to the icon.
      */
     public int getIconTint() {
         return iconTint;
+    }
+
+    /**
+     * Sets the tint for the icon.
+     *
+     * @param iconTint The color tint for the icon.
+     */
+    public void setIconTint(@ColorInt int iconTint) {
+        this.iconTint = iconTint;
+        binding.ivScopeChange.setColorFilter(iconTint);
     }
 
     /**
@@ -657,24 +537,20 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
-     * Gets the stroke width of the card.
+     * Sets the corner radius of the card.
      *
-     * @return The stroke width of the card.
+     * @param cornerRadius The corner radius value in pixels.
      */
-    @Override
-    public int getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    /**
-     * Gets the stroke color as a ColorStateList.
-     *
-     * @return A ColorStateList representing the stroke color, or null if not set.
-     */
-    @Nullable
-    @Override
-    public ColorStateList getStrokeColorStateList() {
-        return ColorStateList.valueOf(strokeColor);
+    public void setCornerRadius(@Dimension int cornerRadius) {
+        this.cornerRadius = cornerRadius;
+        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+            .toBuilder()
+            .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+            .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, 0)
+            .setBottomRightCorner(CornerFamily.ROUNDED, 0)
+            .build();
+        super.setShapeAppearanceModel(shapeAppearanceModel);
     }
 
     /**
@@ -687,12 +563,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the text color for the item.
+     *
+     * @param itemTextColor The color of the item text.
+     */
+    public void setItemTextColor(@ColorInt int itemTextColor) {
+        this.itemTextColor = itemTextColor;
+        scopeAdapter.setItemTextColor(itemTextColor);
+    }
+
+    /**
      * Gets the text color for the disabled item.
      *
      * @return The color of the disabled item text.
      */
     public int getDisableItemTextColor() {
         return disableItemTextColor;
+    }
+
+    /**
+     * Sets the disabled item text color.
+     *
+     * @param disableItemTextColor The color of the disabled item text.
+     */
+    public void setDisableItemTextColor(int disableItemTextColor) {
+        this.disableItemTextColor = disableItemTextColor;
+        scopeAdapter.setDisableItemTextColor(disableItemTextColor);
     }
 
     /**
@@ -705,12 +601,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the text appearance for the item.
+     *
+     * @param itemTextAppearance The style resource for the item text appearance.
+     */
+    public void setItemTextAppearance(@StyleRes int itemTextAppearance) {
+        this.itemTextAppearance = itemTextAppearance;
+        scopeAdapter.setItemTextAppearance(itemTextAppearance);
+    }
+
+    /**
      * Gets the tint color for the item radio button.
      *
      * @return The tint color for the item radio button.
      */
     public int getItemRadioButtonTint() {
         return itemRadioButtonTint;
+    }
+
+    /**
+     * Sets the tint for the item radio button.
+     *
+     * @param itemRadioButtonTint The color tint for the item radio button.
+     */
+    public void setItemRadioButtonTint(@ColorInt int itemRadioButtonTint) {
+        this.itemRadioButtonTint = itemRadioButtonTint;
+        scopeAdapter.setRadioButtonTint(itemRadioButtonTint);
     }
 
     /**
@@ -723,12 +639,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the tint for the disabled item radio button.
+     *
+     * @param itemDisableRadioButtonTint The color tint for the disabled item radio button.
+     */
+    public void setItemDisableRadioButtonTint(@ColorInt int itemDisableRadioButtonTint) {
+        this.itemDisableRadioButtonTint = itemDisableRadioButtonTint;
+        scopeAdapter.setDisableRadioButtonTint(itemDisableRadioButtonTint);
+    }
+
+    /**
      * Gets the drag handle color.
      *
      * @return The color of the drag handle.
      */
     public int getDragHandleColor() {
         return dragHandleColor;
+    }
+
+    /**
+     * Sets the color for the drag handle.
+     *
+     * @param dragHandleColor The color of the drag handle.
+     */
+    public void setDragHandleColor(@ColorInt int dragHandleColor) {
+        this.dragHandleColor = dragHandleColor;
+        binding.cometchatScopeChangeDragHandle.setCardBackgroundColor(dragHandleColor);
     }
 
     /**
@@ -741,6 +677,16 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the positive button text color.
+     *
+     * @param positiveButtonTextColor The color of the positive button text.
+     */
+    public void setPositiveButtonTextColor(@ColorInt int positiveButtonTextColor) {
+        this.positiveButtonTextColor = positiveButtonTextColor;
+        binding.cometchatScopeChangeSaveText.setTextColor(positiveButtonTextColor);
+    }
+
+    /**
      * Gets the text color for the negative button.
      *
      * @return The color of the negative button text.
@@ -750,12 +696,41 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the negative button text color.
+     *
+     * @param negativeButtonTextColor The color of the negative button text.
+     */
+    public void setNegativeButtonTextColor(@ColorInt int negativeButtonTextColor) {
+        this.negativeButtonTextColor = negativeButtonTextColor;
+        binding.cometchatScopeChangeCancelText.setTextColor(negativeButtonTextColor);
+    }
+
+    /**
      * Gets the button text appearance style.
      *
      * @return The style resource ID for the button text appearance.
      */
     public int getButtonTextAppearance() {
         return buttonTextAppearance;
+    }    /**
+     * Gets the stroke width of the card.
+     *
+     * @return The stroke width of the card.
+     */
+    @Override
+    public int getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    /**
+     * Sets the text appearance for buttons.
+     *
+     * @param buttonTextAppearance The style resource for button text appearance.
+     */
+    public void setButtonTextAppearance(@StyleRes int buttonTextAppearance) {
+        this.buttonTextAppearance = buttonTextAppearance;
+        binding.cometchatScopeChangeCancelText.setTextAppearance(buttonTextAppearance);
+        binding.cometchatScopeChangeSaveText.setTextAppearance(buttonTextAppearance);
     }
 
     /**
@@ -768,12 +743,32 @@ public class CometChatScopeChange extends MaterialCardView {
     }
 
     /**
+     * Sets the background color for the positive button.
+     *
+     * @param positiveButtonBackgroundColor The background color of the positive button.
+     */
+    public void setPositiveButtonBackgroundColor(@ColorInt int positiveButtonBackgroundColor) {
+        this.positiveButtonBackgroundColor = positiveButtonBackgroundColor;
+        binding.cometchatScopeChangeSaveButton.setCardBackgroundColor(positiveButtonBackgroundColor);
+    }
+
+    /**
      * Gets the background color for the negative button.
      *
      * @return The background color of the negative button.
      */
     public int getNegativeButtonBackgroundColor() {
         return negativeButtonBackgroundColor;
+    }
+
+    /**
+     * Sets the background color for the negative button.
+     *
+     * @param negativeButtonBackgroundColor The background color of the negative button.
+     */
+    public void setNegativeButtonBackgroundColor(@ColorInt int negativeButtonBackgroundColor) {
+        this.negativeButtonBackgroundColor = negativeButtonBackgroundColor;
+        binding.cometchatScopeChangeCancelButton.setCardBackgroundColor(negativeButtonBackgroundColor);
     }
 
     /**
@@ -784,4 +779,25 @@ public class CometChatScopeChange extends MaterialCardView {
     public int getStyle() {
         return style;
     }
+
+    /**
+     * Sets the style of the text bubble from a specific style resource.
+     *
+     * @param style The resource ID of the style to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            this.style = style;
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatScopeChange);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
+    }
+
+
+
+
+
+
+
+
 }

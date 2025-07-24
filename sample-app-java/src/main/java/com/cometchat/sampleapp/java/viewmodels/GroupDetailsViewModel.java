@@ -11,6 +11,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.Action;
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chat.models.User;
@@ -39,6 +40,7 @@ public class GroupDetailsViewModel extends ViewModel {
     private final MutableLiveData<UIKitConstants.DialogState> transferOwnershipDialogState;
     private final MutableLiveData<String> errorMessage;
     private final MutableLiveData<Group> updatedGroup;
+    private final MutableLiveData<BaseMessage> baseMessage;
     private Group group;
 
     /**
@@ -47,10 +49,19 @@ public class GroupDetailsViewModel extends ViewModel {
     public GroupDetailsViewModel() {
         dialogState = new MutableLiveData<>();
         confirmDialogState = new MutableLiveData<>();
+        baseMessage = new MutableLiveData<>();
         transferOwnershipDialogState = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
         updatedGroup = new MutableLiveData<>();
         GROUP_LISTENER_ID = System.currentTimeMillis() + "_" + this.getClass().getSimpleName();
+    }
+
+    public MutableLiveData<BaseMessage> getBaseMessage() {
+        return baseMessage;
+    }
+
+    public void setBaseMessage(BaseMessage message) {
+        baseMessage.setValue(message);
     }
 
     /**
@@ -242,6 +253,24 @@ public class GroupDetailsViewModel extends ViewModel {
         });
     }
 
+    /**
+     * Converts a User object to a GroupMember object.
+     *
+     * @param user          The User to be converted.
+     * @param isScopeUpdate Indicates if this is a scope update.
+     * @param newScope      The new scope if it is a scope update.
+     * @return The converted GroupMember.
+     */
+    public GroupMember userToGroupMember(User user, boolean isScopeUpdate, String newScope) {
+        GroupMember groupMember;
+        if (isScopeUpdate) groupMember = new GroupMember(user.getUid(), newScope);
+        else groupMember = new GroupMember(user.getUid(), CometChatConstants.SCOPE_PARTICIPANT);
+        groupMember.setAvatar(user.getAvatar());
+        groupMember.setName(user.getName());
+        groupMember.setStatus(user.getStatus());
+        return groupMember;
+    }
+
     private void handleError(Context context, String error) {
         Matcher matcher = Pattern.compile("UID (\\w+) .*?GUID (\\w+)").matcher(error);
 
@@ -271,6 +300,10 @@ public class GroupDetailsViewModel extends ViewModel {
         });
     }
 
+    private void postGenericError(Context context) {
+        errorMessage.setValue(context.getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong));
+    }
+
     private void fetchGroupAndPostErrorMessage(Context context, User user, String guid) {
         Repository.getGroup(guid, new CometChat.CallbackListener<Group>() {
             @Override
@@ -287,32 +320,10 @@ public class GroupDetailsViewModel extends ViewModel {
 
     private void postCompleteError(Context context, String groupName, String userName) {
         String message = groupName != null
-                ? context.getString(R.string.participant_scope_with_group, userName, groupName)
-                : context.getString(R.string.participant_scope_without_group, userName);
+            ? context.getString(R.string.participant_scope_with_group, userName, groupName)
+            : context.getString(R.string.participant_scope_without_group, userName);
 
         errorMessage.setValue(message);
-    }
-
-    private void postGenericError(Context context) {
-        errorMessage.setValue(context.getString(com.cometchat.chatuikit.R.string.cometchat_something_went_wrong));
-    }
-
-    /**
-     * Converts a User object to a GroupMember object.
-     *
-     * @param user          The User to be converted.
-     * @param isScopeUpdate Indicates if this is a scope update.
-     * @param newScope      The new scope if it is a scope update.
-     * @return The converted GroupMember.
-     */
-    public GroupMember userToGroupMember(User user, boolean isScopeUpdate, String newScope) {
-        GroupMember groupMember;
-        if (isScopeUpdate) groupMember = new GroupMember(user.getUid(), newScope);
-        else groupMember = new GroupMember(user.getUid(), CometChatConstants.SCOPE_PARTICIPANT);
-        groupMember.setAvatar(user.getAvatar());
-        groupMember.setName(user.getName());
-        groupMember.setStatus(user.getStatus());
-        return groupMember;
     }
 
     /**
@@ -394,6 +405,21 @@ public class GroupDetailsViewModel extends ViewModel {
             @Override
             public void onError(CometChatException e) {
                 transferOwnershipDialogState.setValue(UIKitConstants.DialogState.FAILURE);
+            }
+        });
+    }
+
+    public void deleteChat() {
+        confirmDialogState.setValue(UIKitConstants.DialogState.INITIATED);
+        Repository.deleteChat(group.getGuid(), baseMessage.getValue(), UIKitConstants.ReceiverType.GROUP, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                confirmDialogState.setValue(UIKitConstants.DialogState.SUCCESS);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                confirmDialogState.setValue(UIKitConstants.DialogState.FAILURE);
             }
         });
     }

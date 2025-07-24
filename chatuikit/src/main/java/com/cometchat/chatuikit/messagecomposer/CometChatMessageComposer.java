@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,6 +50,7 @@ import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.ai.AIOptionsStyle;
 import com.cometchat.chatuikit.databinding.CometchatAiButtonLayoutBinding;
@@ -177,7 +180,7 @@ public class CometChatMessageComposer extends MaterialCardView {
     private PermissionHandlerBuilder permissionHandlerBuilder;
     private ActivityResultHandlerBuilder activityResultHandlerBuilder;
     private PermissionResultListener permissionResultListener;
-    private int parentMessageId = -1;
+    private long parentMessageId = -1;
     private String RESULT_TO_BE_OPEN = "";
     /**
      * UI elements and appearance customization.
@@ -738,10 +741,14 @@ public class CometChatMessageComposer extends MaterialCardView {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (!editable.toString().isEmpty()) {
-                    sendButtonLayoutBinding.ivSendBtn.setBackground(activeSendButtonDrawable);
+                if (editMessage != null && editable.toString().trim().equals(editMessage.getText().trim())) {
+                    inactiveSendButton();
                 } else {
-                    sendButtonLayoutBinding.ivSendBtn.setBackground(inactiveSendButtonDrawable);
+                    if (!editable.toString().isEmpty()) {
+                        activeSendButton();
+                    } else {
+                        inactiveSendButton();
+                    }
                 }
                 if (typingTimer == null) {
                     typingTimer = new Timer();
@@ -1224,13 +1231,6 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void sendMediaMessage(File file, String contentType) {
         composerViewModel.sendMediaMessage(file, contentType);
-    }    /**
-     * @param color The new color to set for the card background
-     */
-    @Override
-    public void setCardBackgroundColor(@ColorInt int color) {
-        this.backgroundColor = color;
-        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -1307,6 +1307,13 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void requestCameraPermission() {
         permissionHandlerBuilder.withPermissions(new String[]{Manifest.permission.CAMERA}).check();
+    }    /**
+     * @param color The new color to set for the card background
+     */
+    @Override
+    public void setCardBackgroundColor(@ColorInt int color) {
+        this.backgroundColor = color;
+        super.setCardBackgroundColor(color);
     }
 
     /**
@@ -1457,10 +1464,25 @@ public class CometChatMessageComposer extends MaterialCardView {
             binding.messageInput.getComposeBox().setFocusable(true);
             binding.editPreviewLayout.ivMessageClose.setOnClickListener(view1 -> {
                 editMessage = null;
+                animateClearMessageInput();
                 animateVisibilityGone(binding.editPreviewLayout.editMessageLayout);
             });
             animateVisibilityVisible(binding.editPreviewLayout.editMessageLayout);
         }
+    }
+
+    private void animateClearMessageInput() {
+        binding.messageInput.getComposeBox().animate()
+                            .alpha(0f)
+                            .translationX(-30f)
+                            .setDuration(250)
+                            .setInterpolator(new AccelerateDecelerateInterpolator())
+                            .withEndAction(() -> {
+                                binding.messageInput.getComposeBox().setText("");
+                                binding.messageInput.getComposeBox().setAlpha(1f);
+                                binding.messageInput.getComposeBox().setTranslationX(0f);
+                            })
+                            .start();
     }
 
     /**
@@ -1522,6 +1544,9 @@ public class CometChatMessageComposer extends MaterialCardView {
             } else {
                 String processedText = getProcessedText().trim();
                 if (!processedText.isEmpty()) {
+                    if (editMessage != null && editMessage.getText().equals(processedText)) {
+                        return;
+                    }
                     if (editMessage != null) {
                         editMessage.setText(getProcessedText());
                         handleMessagePreSend(editMessage);
@@ -2174,7 +2199,7 @@ public class CometChatMessageComposer extends MaterialCardView {
      *
      * @return The parent message ID, or `0` if it's not a reply.
      */
-    public int getParentMessageId() {
+    public long getParentMessageId() {
         return parentMessageId;
     }
 
@@ -2183,7 +2208,7 @@ public class CometChatMessageComposer extends MaterialCardView {
      *
      * @param parentMessageId The parent message ID.
      */
-    public void setParentMessageId(int parentMessageId) {
+    public void setParentMessageId(long parentMessageId) {
         this.parentMessageId = parentMessageId;
         composerViewModel.setParentMessageId(parentMessageId);
     }
@@ -2479,13 +2504,6 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public TextView getInfoMessage() {
         return binding.tagInfoMessage;
-    }    /**
-     * @param strokeWidth The new width to set for the stroke
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2592,6 +2610,13 @@ public class CometChatMessageComposer extends MaterialCardView {
     public void setComposeBoxCornerRadius(@Dimension int cornerRadius) {
         this.composeBoxCornerRadius = cornerRadius;
         binding.composeBoxCard.setRadius(cornerRadius);
+    }    /**
+     * @param strokeWidth The new width to set for the stroke
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -2751,7 +2776,7 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void setActiveSendButtonDrawable(Drawable activeSendButtonDrawable) {
         this.activeSendButtonDrawable = activeSendButtonDrawable;
-        sendButtonLayoutBinding.ivSendBtn.setBackground(activeSendButtonDrawable);
+        activeSendButton();
     }
 
     /**
@@ -2768,7 +2793,7 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void setInactiveSendButtonDrawable(Drawable inactiveSendButtonDrawable) {
         this.inactiveSendButtonDrawable = inactiveSendButtonDrawable;
-        sendButtonLayoutBinding.ivSendBtn.setBackground(inactiveSendButtonDrawable);
+        inactiveSendButton();
     }
 
     /**
@@ -3179,47 +3204,56 @@ public class CometChatMessageComposer extends MaterialCardView {
 
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerStrokeWidth, 0));
             setStrokeColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerStrokeColor, 0));
-            setSeparatorColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerSeparatorColor, 0));
+            setSeparatorColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerSeparatorColor,
+                                                  CometChatTheme.getStrokeColorDefault(getContext())));
             setVoiceRecordingIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerVoiceRecordingIcon));
-            setInactiveStickerIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInactiveStickerIconTint, 0));
-            setVoiceRecordingIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerVoiceRecordingIconTint, 0));
+            setInactiveStickerIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInactiveStickerIconTint,
+                                                           CometChatTheme.getIconTintSecondary(getContext())));
+            setVoiceRecordingIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerVoiceRecordingIconTint,
+                                                          CometChatTheme.getIconTintSecondary(getContext())));
             setEditPreviewTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewTitleTextAppearance,
                                                                        0));
-            setInfoTextColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoTextColor, 0));
-            setInfoBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoBackgroundColor, 0));
+            setInfoTextColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoTextColor,
+                                                 CometChatTheme.getErrorColor(getContext())));
+            setInfoBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor3(getContext())));
             setInfoCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoCornerRadius, 0));
             setInfoStrokeColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoStrokeColor, 0));
             setInfoStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoStrokeWidth, 0));
 
             setBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerBackgroundDrawable));
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerBackgroundColor, 0));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerBackgroundColor,
+                                                       CometChatTheme.getBackgroundColor3(getContext())));
             setRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerCornerRadius, 0));
             setComposeBoxCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxBackgroundColor,
-                                                                 0));
+                                                                 CometChatTheme.getBackgroundColor1(getContext())));
             setComposeBoxStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxStrokeWidth,
                                                                       0));
             setMessageInputStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageInputStyle, 0));
-            setComposeBoxStrokeColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxStrokeColor, 0));
+            setComposeBoxStrokeColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxStrokeColor,
+                                                         CometChatTheme.getStrokeColorDefault(getContext())));
             setComposeBoxCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxCornerRadius,
                                                                        0));
             setComposeBoxBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerComposeBoxBackgroundDrawable));
             setActiveSendButtonDrawable(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveSendButtonDrawable));
             setInactiveSendButtonDrawable(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerInactiveSendButtonDrawable));
             setAttachmentIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerAttachmentIcon));
-            setAttachmentIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerAttachmentIconTint, 0));
+            setAttachmentIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerAttachmentIconTint,
+                                                      CometChatTheme.getIconTintSecondary(getContext())));
             setAIIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerAIIcon));
             setAIIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerAIIconTint, 0));
             setInactiveStickerIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerInactiveStickerIcon));
             setActiveStickerIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveStickerIcon));
-            setActiveStickerIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveStickerIconTint, 0));
+            setActiveStickerIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveStickerIconTint,
+                                                         CometChatTheme.getIconTintHighlight(getContext())));
             setEditPreviewMessageTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewMessageTextAppearance,
                                                                          0));
             setEditPreviewTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewTitleTextColor,
-                                                             0));
+                                                             CometChatTheme.getTextColorPrimary(getContext())));
             setEditPreviewMessageTextColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewMessageTextColor,
-                                                               0));
+                                                               CometChatTheme.getTextColorSecondary(getContext())));
             setEditPreviewBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewBackgroundColor,
-                                                              0));
+                                                              CometChatTheme.getBackgroundColor3(getContext())));
             setEditPreviewCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewCornerRadius,
                                                                         0));
             setEditPreviewStrokeColor(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewStrokeColor, 0));
@@ -3227,9 +3261,10 @@ public class CometChatMessageComposer extends MaterialCardView {
                                                                        0));
             setEditPreviewCloseIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewCloseIcon));
             setEditPreviewCloseIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerEditPreviewCloseIconTint,
-                                                            0));
+                                                            CometChatTheme.getIconTintPrimary(getContext())));
             setInfoIcon(typedArray.getDrawable(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoIcon));
-            setInfoIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoIconTint, 0));
+            setInfoIconTint(typedArray.getColor(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoIconTint,
+                                                CometChatTheme.getErrorColor(getContext())));
             setInfoTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerInfoTextAppearance, 0));
             setMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerMentionsStyle, 0));
             setSuggestionListStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerSuggestionListStyle, 0));
@@ -3270,6 +3305,36 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     public void setActiveStickerIconTint(@ColorInt int activeStickerIconTint) {
         additionParameter.setActiveAuxiliaryIconTint(activeStickerIconTint);
+    }
+
+    private void activeSendButton() {
+        if (sendButtonLayoutBinding != null) {
+            if (activeSendButtonDrawable != null) {
+                sendButtonLayoutBinding.sendButtonCard.setVisibility(GONE);
+                sendButtonLayoutBinding.ivSendBtn.setBackground(activeSendButtonDrawable);
+            } else {
+                sendButtonLayoutBinding.sendButtonCard.setVisibility(VISIBLE);
+                sendButtonLayoutBinding.sendButtonCard.setCardBackgroundColor(CometChatTheme.getPrimaryColor(getContext()));
+                sendButtonLayoutBinding.ivSendBtn.setBackground(ResourcesCompat.getDrawable(getResources(),
+                                                                                            R.drawable.cometchat_ic_send_active,
+                                                                                            getContext().getTheme()));
+            }
+        }
+    }
+
+    private void inactiveSendButton() {
+        if (sendButtonLayoutBinding != null) {
+            if (inactiveSendButtonDrawable != null) {
+                sendButtonLayoutBinding.sendButtonCard.setVisibility(GONE);
+                sendButtonLayoutBinding.ivSendBtn.setBackground(inactiveSendButtonDrawable);
+            } else {
+                sendButtonLayoutBinding.sendButtonCard.setVisibility(VISIBLE);
+                sendButtonLayoutBinding.sendButtonCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(getContext()));
+                sendButtonLayoutBinding.ivSendBtn.setBackground(ResourcesCompat.getDrawable(getResources(),
+                                                                                            R.drawable.cometchat_ic_send_inactive,
+                                                                                            getContext().getTheme()));
+            }
+        }
     }
 
     @Nullable

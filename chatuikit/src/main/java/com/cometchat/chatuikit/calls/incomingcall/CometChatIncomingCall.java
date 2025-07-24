@@ -25,6 +25,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CometChatOngoingCallActivity;
 import com.cometchat.chatuikit.databinding.CometchatIncomingCallComponentBinding;
@@ -159,24 +160,30 @@ public class CometChatIncomingCall extends MaterialCardView {
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setTitleTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallTitleTextColor, 0));
+            setTitleTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallTitleTextColor,
+                                                  CometChatTheme.getTextColorPrimary(getContext())));
             setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatIncomingCall_cometchatIncomingCallTitleTextAppearance, 0));
-            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallSubtitleTextColor, 0));
+            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallSubtitleTextColor,
+                                                     CometChatTheme.getTextColorSecondary(getContext())));
             setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatIncomingCall_cometchatIncomingCallSubtitleTextAppearance, 0));
-            setIconTint(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallIconTint, 0));
+            setIconTint(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallIconTint,
+                                            CometChatTheme.getIconTintSecondary(getContext())));
             setVoiceCallIcon(typedArray.getDrawable(R.styleable.CometChatIncomingCall_cometchatIncomingCallVoiceCallIcon));
             setVideoCallIcon(typedArray.getDrawable(R.styleable.CometChatIncomingCall_cometchatIncomingCallVideoCallIcon));
             setAcceptCallButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallAcceptButtonBackgroundColor,
-                                                                   0));
+                                                                   CometChatTheme.getSuccessColor(getContext())));
             setRejectCallButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallRejectButtonBackgroundColor,
-                                                                   0));
-            setBackgroundColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallBackgroundColor, 0));
+                                                                   CometChatTheme.getErrorColor(getContext())));
+            setBackgroundColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallBackgroundColor,
+                                                   CometChatTheme.getBackgroundColor3(getContext())));
             setCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatIncomingCall_cometchatIncomingCallCornerRadius, 0));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatIncomingCall_cometchatIncomingCallStrokeWidth, 0));
             setStrokeColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallStrokeColor, 0));
             setAvatarStyle(typedArray.getResourceId(R.styleable.CometChatIncomingCall_cometchatIncomingCallAvatarStyle, 0));
-            setAcceptButtonTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallAcceptButtonTextColor, 0));
-            setRejectButtonTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallRejectButtonTextColor, 0));
+            setAcceptButtonTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallAcceptButtonTextColor,
+                                                         CometChatTheme.getColorWhite(getContext())));
+            setRejectButtonTextColor(typedArray.getColor(R.styleable.CometChatIncomingCall_cometchatIncomingCallRejectButtonTextColor,
+                                                         CometChatTheme.getColorWhite(getContext())));
             setAcceptButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatIncomingCall_cometchatIncomingCallAcceptButtonTextAppearance,
                                                                    0));
             setRejectButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatIncomingCall_cometchatIncomingCallRejectButtonTextAppearance,
@@ -525,6 +532,13 @@ public class CometChatIncomingCall extends MaterialCardView {
     public void setRejectCallButtonBackgroundColor(@ColorInt int rejectCallButtonBackgroundColor) {
         this.rejectCallButtonBackgroundColor = rejectCallButtonBackgroundColor;
         binding.declineButton.setBackgroundColor(rejectCallButtonBackgroundColor);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        viewModel.removeListeners();
+        pauseSound();
     }    /**
      * Sets the stroke width for this component.
      *
@@ -533,13 +547,6 @@ public class CometChatIncomingCall extends MaterialCardView {
     public void setStrokeWidth(@Dimension int strokeWidth) {
         this.strokeWidth = strokeWidth;
         binding.incomingCallComponent.setStrokeWidth(strokeWidth);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        viewModel.removeListeners();
-        pauseSound();
     }
 
     /**

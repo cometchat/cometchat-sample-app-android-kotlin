@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -32,6 +35,7 @@ public class CometChatWebViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cometchat_activity_cometchat_webview);
+        adjustWindowInsets();
         WebView webView = findViewById(R.id.web_view);
         ImageView backIcon = findViewById(R.id.iv_back);
         TextView textView = findViewById(R.id.tv_title);
@@ -56,5 +60,13 @@ public class CometChatWebViewActivity extends AppCompatActivity {
             });
             webView.loadUrl(url);
         }
+    }
+
+    private void adjustWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return insets;
+        });
     }
 }

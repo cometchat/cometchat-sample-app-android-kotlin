@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/send_button"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/send_button_card"
+        android:layout_width="@dimen/cometchat_32dp"
+        android:layout_height="@dimen/cometchat_32dp"
+        android:layout_centerInParent="true"
+        app:cardBackgroundColor="?attr/cometchatPrimaryColor"
+        app:cardCornerRadius="@dimen/cometchat_radius_max"
+        app:cardElevation="@dimen/cometchat_0dp"
+        app:strokeColor="@color/cometchat_color_transparent"
+        app:strokeWidth="@dimen/cometchat_0dp">
+
+    </com.google.android.material.card.MaterialCardView>
 
     <ImageView
         android:id="@+id/iv_send_btn"
         android:layout_width="32dp"
         android:layout_height="32dp"
+        android:layout_centerInParent="true"
         android:importantForAccessibility="no" />
-
-</LinearLayout>
+</RelativeLayout>

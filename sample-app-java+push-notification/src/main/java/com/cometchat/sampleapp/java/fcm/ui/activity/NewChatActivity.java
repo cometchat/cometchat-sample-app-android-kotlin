@@ -1,14 +1,22 @@
 package com.cometchat.sampleapp.java.fcm.ui.activity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.cometchat.chat.core.GroupsRequest;
 import com.cometchat.chat.core.UsersRequest;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityNewChatBinding;
@@ -23,6 +31,8 @@ public class NewChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityNewChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        applyWindowInsets();
+        adjustWindowSettings();
 
         binding.users.setToolbarVisibility(View.GONE);
         binding.groups.setToolbarVisibility(View.GONE);
@@ -73,5 +83,35 @@ public class NewChatActivity extends AppCompatActivity {
         });
 
         binding.ivBack.setOnClickListener(v -> finish());
+
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tabLayout.setTabTextColors(CometChatTheme.getTextColorSecondary(this), CometChatTheme.getPrimaryColor(this));
+    }
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.newChatMain, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+
+                return insets;
+            }
+        });
+    }
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    private void updateRadioButtonTextColors(ActivityNewChatBinding binding, int selectedColor, int unselectedColor) {
+        // Apply the color state list to all radio buttons
+
     }
 }

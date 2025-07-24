@@ -34,6 +34,7 @@ import com.cometchat.chatuikit.shared.models.interactivemessage.CustomInteractiv
 import com.cometchat.chatuikit.shared.models.interactivemessage.FormMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.SchedulerMessage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,280 +42,326 @@ public class CometChatUIKitHelper {
     private static final String TAG = CometChatUIKitHelper.class.getSimpleName();
 
     public static void onMessageSent(BaseMessage message, @MessageStatus int status) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.ccMessageSent(message, status);
         }
     }
 
     public static void onMessageEdited(BaseMessage message, @MessageStatus int status) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.ccMessageEdited(message, status);
         }
     }
 
     public static void onMessageDeleted(BaseMessage message) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.ccMessageDeleted(message);
         }
     }
 
     public static void onMessageRead(BaseMessage message) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.ccMessageRead(message);
         }
     }
 
     public static void onTextMessageReceived(TextMessage textMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onTextMessageReceived(textMessage);
         }
     }
 
     public static void onMediaMessageReceived(MediaMessage mediaMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMediaMessageReceived(mediaMessage);
         }
     }
 
     public static void onCustomMessageReceived(CustomMessage customMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onCustomMessageReceived(customMessage);
         }
     }
 
     public static void onTypingStarted(TypingIndicator typingIndicator) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onTypingStarted(typingIndicator);
         }
     }
 
     public static void onTypingEnded(TypingIndicator typingIndicator) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onTypingEnded(typingIndicator);
         }
     }
 
     public static void onMessagesDelivered(MessageReceipt messageReceipt) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessagesDelivered(messageReceipt);
         }
     }
 
     public static void onMessagesRead(MessageReceipt messageReceipt) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessagesRead(messageReceipt);
         }
     }
 
     public static void onInteractionGoalCompleted(InteractionReceipt interactionReceipt) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onInteractionGoalCompleted(interactionReceipt);
         }
     }
 
     public static void onMessageEdited(BaseMessage message) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessageEdited(message);
         }
     }
 
     public static void onTransientMessageReceived(TransientMessage message) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onTransientMessageReceived(message);
         }
     }
 
     public static void onFormMessageReceived(FormMessage formMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onFormMessageReceived(formMessage);
         }
     }
 
     public static void onSchedulerMessageReceived(SchedulerMessage schedulerMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onSchedulerMessageReceived(schedulerMessage);
         }
     }
 
     public static void onCardMessageReceived(CardMessage cardMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onCardMessageReceived(cardMessage);
         }
     }
 
     public static void onCustomInteractiveMessageReceived(CustomInteractiveMessage customInteractiveMessage) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onCustomInteractiveMessageReceived(customInteractiveMessage);
         }
     }
 
     public static void onMessageReactionAdded(ReactionEvent reactionEvent) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessageReactionAdded(reactionEvent);
         }
     }
 
     public static void onMessageReactionRemoved(ReactionEvent reactionEvent) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessageReactionRemoved(reactionEvent);
         }
     }
 
     public static void onMessagesDeliveredToAll(MessageReceipt messageReceipt) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessagesDeliveredToAll(messageReceipt);
         }
     }
 
     public static void onMessagesReadByAll(MessageReceipt messageReceipt) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.onMessagesReadByAll(messageReceipt);
         }
     }
 
     public static void onLiveReaction(@DrawableRes int icon) {
-        for (CometChatMessageEvents event : CometChatMessageEvents.messageEvents.values()) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
             event.ccLiveReaction(icon);
         }
     }
 
     public static void onUserBlocked(User user) {
-        for (CometChatUserEvents events : CometChatUserEvents.userEvents.values()) {
-            events.ccUserBlocked(user);
+        List<CometChatUserEvents> events = new ArrayList<>(CometChatUserEvents.userEvents.values());
+        for (CometChatUserEvents event : events) {
+            event.ccUserBlocked(user);
         }
     }
 
     public static void onUserUnblocked(User user) {
-        for (CometChatUserEvents events : CometChatUserEvents.userEvents.values()) {
-            events.ccUserUnblocked(user);
+        List<CometChatUserEvents> events = new ArrayList<>(CometChatUserEvents.userEvents.values());
+        for (CometChatUserEvents event : events) {
+            event.ccUserUnblocked(user);
         }
     }
 
     public static void onGroupCreated(Group group) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupCreated(group);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupCreated(group);
         }
     }
 
     public static void onGroupDeleted(Group group) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupDeleted(group);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupDeleted(group);
         }
     }
 
     public static void onGroupLeft(Action message, User leftUser, Group leftGroup) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupLeft(message, leftUser, leftGroup);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupLeft(message, leftUser, leftGroup);
         }
     }
 
     public static void onGroupMemberScopeChanged(Action message, User updatedUser, String scopeChangedTo, String scopeChangedFrom, Group group) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberScopeChanged(message, updatedUser, scopeChangedTo, scopeChangedFrom, group);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberScopeChanged(message, updatedUser, scopeChangedTo, scopeChangedFrom, group);
         }
     }
 
     public static void onGroupMemberBanned(Action message, User bannedUser, User bannedBy, Group bannedFrom) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberBanned(message, bannedUser, bannedBy, bannedFrom);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberBanned(message, bannedUser, bannedBy, bannedFrom);
         }
     }
 
     public static void onGroupMemberKicked(Action message, User kickedUser, User kickedBy, Group kickedFrom) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberKicked(message, kickedUser, kickedBy, kickedFrom);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberKicked(message, kickedUser, kickedBy, kickedFrom);
         }
     }
 
     public static void onGroupMemberUnbanned(Action message, User unbannedUser, User unbannedBy, Group unbannedFrom) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberUnBanned(message, unbannedUser, unbannedBy, unbannedFrom);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberUnBanned(message, unbannedUser, unbannedBy, unbannedFrom);
         }
     }
 
     public static void onGroupMemberJoined(User joinedUser, Group joinedGroup) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberJoined(joinedUser, joinedGroup);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberJoined(joinedUser, joinedGroup);
         }
     }
 
     public static void onGroupMemberAdded(List<Action> messages, List<User> usersAdded, Group groupAddedIn, User addedBy) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccGroupMemberAdded(messages, usersAdded, groupAddedIn, addedBy);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccGroupMemberAdded(messages, usersAdded, groupAddedIn, addedBy);
         }
     }
 
     public static void onOwnershipChanged(Group group, GroupMember newOwner) {
-        for (CometChatGroupEvents events : CometChatGroupEvents.groupEvents.values()) {
-            events.ccOwnershipChanged(group, newOwner);
+        List<CometChatGroupEvents> events = new ArrayList<>(CometChatGroupEvents.groupEvents.values());
+        for (CometChatGroupEvents event : events) {
+            event.ccOwnershipChanged(group, newOwner);
         }
     }
 
     public static void showPanel(HashMap<String, String> id, UIKitConstants.CustomUIPosition alignment, Function1<Context, View> view) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.showPanel(id, alignment, view);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.showPanel(id, alignment, view);
         }
     }
 
     public static void hidePanel(HashMap<String, String> id, UIKitConstants.CustomUIPosition alignment) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.hidePanel(id, alignment);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.hidePanel(id, alignment);
         }
     }
 
     public static void onActiveChatChanged(HashMap<String, String> id, BaseMessage message, User user, Group group) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.ccActiveChatChanged(id, message, user, group);
-            events.ccActiveChatChanged(id, message, user, group, 0);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.ccActiveChatChanged(id, message, user, group);
+            event.ccActiveChatChanged(id, message, user, group, 0);
         }
     }
 
     public static void onActiveChatChanged(HashMap<String, String> id, BaseMessage message, User user, Group group, int unreadCount) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.ccActiveChatChanged(id, message, user, group, unreadCount);
-            events.ccActiveChatChanged(id, message, user, group);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.ccActiveChatChanged(id, message, user, group, unreadCount);
+            event.ccActiveChatChanged(id, message, user, group);
         }
     }
 
     public static void onComposeMessage(String id, String text) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.ccComposeMessage(id, text);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.ccComposeMessage(id, text);
         }
     }
 
     public static void onOpenChat(User user, Group group) {
-        for (CometChatUIEvents events : CometChatUIEvents.uiEvents.values()) {
-            events.ccOpenChat(user, group);
+        List<CometChatUIEvents> events = new ArrayList<>(CometChatUIEvents.uiEvents.values());
+        for (CometChatUIEvents event : events) {
+            event.ccOpenChat(user, group);
         }
     }
 
     public static void onOutgoingCall(Call call) {
-        for (CometChatCallEvents events : CometChatCallEvents.callingEvents.values()) {
-            events.ccOutgoingCall(call);
+        List<CometChatCallEvents> events = new ArrayList<>(CometChatCallEvents.callingEvents.values());
+        for (CometChatCallEvents event : events) {
+            event.ccOutgoingCall(call);
         }
     }
 
     public static void onCallAccepted(Call call) {
-        for (CometChatCallEvents events : CometChatCallEvents.callingEvents.values()) {
-            events.ccCallAccepted(call);
+        List<CometChatCallEvents> events = new ArrayList<>(CometChatCallEvents.callingEvents.values());
+        for (CometChatCallEvents event : events) {
+            event.ccCallAccepted(call);
         }
     }
 
     public static void onCallRejected(Call call) {
-        for (CometChatCallEvents events : CometChatCallEvents.callingEvents.values()) {
-            events.ccCallRejected(call);
+        List<CometChatCallEvents> events = new ArrayList<>(CometChatCallEvents.callingEvents.values());
+        for (CometChatCallEvents event : events) {
+            event.ccCallRejected(call);
         }
     }
 
     public static void onCallEnded(Call call) {
-        for (CometChatCallEvents events : CometChatCallEvents.callingEvents.values()) {
-            events.ccCallEnded(call);
+        List<CometChatCallEvents> events = new ArrayList<>(CometChatCallEvents.callingEvents.values());
+        for (CometChatCallEvents event : events) {
+            event.ccCallEnded(call);
         }
     }
 
     public static void onConversationDeleted(Conversation conversation) {
-        for (CometChatConversationEvents events : CometChatConversationEvents.conversationEvents.values()) {
-            events.ccConversationDeleted(conversation);
+        List<CometChatConversationEvents> events = new ArrayList<>(CometChatConversationEvents.conversationEvents.values());
+        for (CometChatConversationEvents event : events) {
+            event.ccConversationDeleted(conversation);
         }
     }
 }

@@ -1,9 +1,14 @@
 package com.cometchat.sampleapp.java.fcm.ui.activity;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.sampleapp.java.fcm.R;
@@ -21,10 +26,35 @@ public class AppCredentialsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityAppCredentialsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        applyWindowInsets();
+        adjustWindowSettings();
         initViewModel();
-
         initClickListeners();
+    }
+
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    /**
+     * Applies window insets to the parent view to handle system UI visibility.
+     */
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    ime.bottom
+            );
+            return insets;
+        });
     }
 
     private void initViewModel() {

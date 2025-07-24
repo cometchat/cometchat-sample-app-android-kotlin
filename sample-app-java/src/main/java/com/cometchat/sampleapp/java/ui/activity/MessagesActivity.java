@@ -1,21 +1,29 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.sampleapp.java.R;
 import com.cometchat.sampleapp.java.databinding.ActivityMessagesBinding;
 import com.cometchat.sampleapp.java.databinding.OverflowMenuLayoutBinding;
@@ -37,6 +45,9 @@ public class MessagesActivity extends AppCompatActivity {
         binding = ActivityMessagesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        adjustWindowSettings();
+        applyWindowInsets();
+        setUpTheme();
         // Create an instance of the MessagesViewModel
         viewModel = new ViewModelProvider.NewInstanceFactory().create(MessagesViewModel.class);
 
@@ -73,10 +84,68 @@ public class MessagesActivity extends AppCompatActivity {
 
         binding.messageList.setOnThreadRepliesClick((context, baseMessage, cometchatMessageTemplate) -> {
             Intent intent = new Intent(context, ThreadMessageActivity.class);
+
+            if (user != null)
+                intent.putExtra("user", new Gson().toJson(user));
+
             intent.putExtra(getString(R.string.app_message_id), baseMessage.getId());
             context.startActivity(intent);
         });
+    }
 
+    /**
+     * Sets the window settings for the activity.
+     */
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    /**
+     * Applies window insets to the parent view to handle system UI visibility.
+     */
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view), new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+                Insets nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+                int bottomInset = Math.max(ime.bottom, nav.bottom);
+
+                if (isImeVisible && binding.messageComposer.getMessageInput().getComposeBox().isFocused() && binding.messageList.atBottom()) {
+                    binding.messageList.scrollToBottom();
+                }
+
+                v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    bottomInset
+                );
+
+                return insets;
+            }
+        });
+    }
+
+    private void setUpTheme() {
+        binding.parentView.setBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.infoLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(this));
+        binding.separator.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
+        binding.infoText.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.unblockTitle.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.unblockText.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.unblockBtn.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(this));
+        binding.unblockBtn.setStrokeColor(CometChatTheme.getStrokeColorDark(this));
+        binding.progress.setIndeterminateTintList(ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this)));
     }
 
     /**
@@ -158,14 +227,6 @@ public class MessagesActivity extends AppCompatActivity {
      * Initializes UI components and sets up the keyboard visibility listener.
      */
     private void addViews() {
-        KeyBoardUtils.setKeyboardVisibilityListener(this, binding.getRoot(), keyboardVisible -> {
-            if (binding.messageComposer.getMessageInput().getComposeBox().isFocused() && keyboardVisible) {
-                if (binding.messageList.atBottom()) {
-                    binding.messageList.scrollToBottom();
-                }
-            }
-        });
-
         // Set user or group data to the message header and composer
         if (user != null) {
             binding.messageHeader.setUser(user);
@@ -223,6 +284,7 @@ public class MessagesActivity extends AppCompatActivity {
         } else if (group != null) {
             intent = new Intent(this, GroupDetailsActivity.class);
             intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+            intent.putExtra(getString(R.string.app_base_message), new Gson().toJson(binding.messageList.getViewModel().getLastMessage()));
         }
         startActivity(intent);
     }

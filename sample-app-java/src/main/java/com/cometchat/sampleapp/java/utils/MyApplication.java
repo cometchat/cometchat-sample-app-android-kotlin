@@ -28,6 +28,7 @@ import com.cometchat.chatuikit.shared.resources.soundmanager.Sound;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.sampleapp.java.R;
 import com.cometchat.sampleapp.java.data.repository.Repository;
+import com.cometchat.sampleapp.java.ui.activity.SplashActivity;
 import com.cometchat.sampleapp.java.viewmodels.SplashViewModel;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -191,6 +192,7 @@ public class MyApplication extends Application {
             CometChatIncomingCall cometChatIncomingCall = new CometChatIncomingCall(currentActivity);
             cometChatIncomingCall.disableSoundForCalls(true);
             cometChatIncomingCall.setCall(call);
+            cometChatIncomingCall.setFitsSystemWindows(true);
             cometChatIncomingCall.setOnError((cometchatException) -> dismissTopSnackBar());
 
             snackbar = Snackbar.make(rootView, " ", Snackbar.LENGTH_INDEFINITE);
@@ -203,8 +205,7 @@ public class MyApplication extends Application {
             layout.addView(cometChatIncomingCall, 0);
 
             for (PopupWindow popupWindow : popupWindows) {
-                if (popupWindow.isShowing())
-                    popupWindow.dismiss();
+                if (popupWindow.isShowing()) popupWindow.dismiss();
             }
             popupWindows.clear();
 
@@ -220,8 +221,7 @@ public class MyApplication extends Application {
     public void launchIncomingCallPopup(@Nonnull Call call) {
         if (call.getCallInitiator() instanceof User) {
             User callInitiator = (User) call.getCallInitiator();
-            if (CometChatUIKit.getLoggedInUser().getUid().equalsIgnoreCase(callInitiator.getUid()))
-                return;
+            if (CometChatUIKit.getLoggedInUser().getUid().equalsIgnoreCase(callInitiator.getUid())) return;
         }
 
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {

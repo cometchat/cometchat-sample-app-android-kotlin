@@ -1,6 +1,7 @@
 package com.cometchat.sampleapp.kotlin.ui.customviews
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -96,8 +97,26 @@ class CometChatBannedMembers @JvmOverloads constructor(
         initRecyclerView() // Initialize the ViewModel and observe various live data updates
         initViewModel() // Handle click events within the view
         clickEvents()
-
+        setUpColors() // Set up the colors for the view based on the CometChat theme
         super.setCardBackgroundColor(CometChatTheme.getBackgroundColor1(context))
+    }
+
+    private fun setUpColors() {
+        binding.parentLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(context))
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        binding.ivBack.setColorFilter(CometChatTheme.getIconTintPrimary(context))
+        binding.viewSeparator.setBackgroundColor(CometChatTheme.getStrokeColorLight(context))
+        binding.groupMemberSearchCard.setStrokeColor(ColorStateList.valueOf(CometChatTheme.getStrokeColorLight(context)))
+        binding.ivSearch.setColorFilter(CometChatTheme.getIconTintSecondary(context))
+        binding.ivClear.setColorFilter(CometChatTheme.getIconTintSecondary(context))
+        binding.etSearch.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        binding.etSearch.setHintTextColor(CometChatTheme.getTextColorSecondary(context))
+        binding.tvEmptyGroupMembersTitle.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        binding.tvEmptyGroupMembersSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(context))
+        binding.tvErrorGroupMembersTitle.setTextColor(CometChatTheme.getTextColorPrimary(context))
+        binding.tvErrorGroupMembersSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(context))
+        binding.retryBtn.setTextColor(CometChatTheme.getColorWhite(context))
+        binding.retryBtn.backgroundTintList = ColorStateList.valueOf(CometChatTheme.getPrimaryColor(context))
     }
 
     /**

@@ -7,9 +7,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
@@ -126,7 +123,9 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
      * @param defStyleRes  The default style resource.
      */
     private void applyStyleAttributes(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatCollaborativeBubble, defStyleAttr, defStyleRes);
+        TypedArray typedArray = getContext()
+            .getTheme()
+            .obtainStyledAttributes(attrs, R.styleable.CometChatCollaborativeBubble, defStyleAttr, defStyleRes);
         @StyleRes int style = typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleStyle, 0);
         typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatCollaborativeBubble, defStyleAttr, style);
         extractAttributesAndApplyDefaults(typedArray);
@@ -140,35 +139,34 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleTitleTextAppearance, 0));
+            setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleTitleTextAppearance,
+                                                            0));
             setTitleTextColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleTitleTextColor, 0));
-            setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleSubtitleTextAppearance, 0));
+            setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleSubtitleTextAppearance,
+                                                               0));
             setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleSubtitleTextColor, 0));
             setIcon(typedArray.getDrawable(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleIconDrawable));
-            setIconTint(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleIconTint, 0));
+            setIconTint(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleIconTint,
+                                            CometChatTheme.getIconTintHighlight(getContext())));
             setIconDrawable(typedArray.getDrawable(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleIconDrawable));
-            setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleButtonTextAppearance, 0));
-            setButtonTextColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleButtonTextColor, 0));
-            setSeparatorColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleSeparatorColor, CometChatTheme.getExtendedPrimaryColor800(getContext())));
+            setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleButtonTextAppearance,
+                                                             0));
+            setButtonTextColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleButtonTextColor,
+                                                   CometChatTheme.getPrimaryColor(getContext())));
+            setSeparatorColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleSeparatorColor,
+                                                  CometChatTheme.getExtendedPrimaryColor800(getContext())));
             setImageStrokeColor(typedArray.getColor(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleImageStrokeColor, 0));
-            setImageStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleImageStrokeWidth, 0));
-            setImageCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleImageCornerRadius, 0));
+            setImageStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleImageStrokeWidth,
+                                                                 0));
+            setImageCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatCollaborativeBubble_cometchatCollaborativeBubbleImageCornerRadius,
+                                                                  0));
         } finally {
             typedArray.recycle();
         }
     }
 
-    /**
-     * Sets the style of the text bubble from a specific style resource.
-     *
-     * @param style The resource ID of the style to apply.
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            this.style = style;
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatCollaborativeBubble);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
+    public @StyleRes int getTitleTextAppearance() {
+        return titleTextAppearance;
     }
 
     /**
@@ -184,6 +182,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.title.setTextAppearance(titleTextAppearance);
     }
 
+    public @ColorInt int getTitleTextColor() {
+        return titleTextColor;
+    }
+
     /**
      * Sets the text color for the title.
      *
@@ -195,6 +197,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
     public void setTitleTextColor(@ColorInt int titleTextColor) {
         this.titleTextColor = titleTextColor;
         binding.title.setTextColor(titleTextColor);
+    }
+
+    public @StyleRes int getSubtitleTextAppearance() {
+        return subtitleTextAppearance;
     }
 
     /**
@@ -210,6 +216,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.tvLastMessageText.setTextAppearance(subtitleTextAppearance);
     }
 
+    public @ColorInt int getSubtitleTextColor() {
+        return subtitleTextColor;
+    }
+
     /**
      * Sets the text color for the subtitle.
      *
@@ -221,6 +231,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
     public void setSubtitleTextColor(@ColorInt int subtitleTextColor) {
         this.subtitleTextColor = subtitleTextColor;
         binding.tvLastMessageText.setTextColor(subtitleTextColor);
+    }
+
+    public @ColorInt int getIconTint() {
+        return iconTint;
     }
 
     /**
@@ -236,6 +250,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.icon.setImageTintList(ColorStateList.valueOf(iconTint));
     }
 
+    public Drawable getIconDrawable() {
+        return iconDrawable;
+    }
+
     /**
      * Sets the drawable for the icon.
      *
@@ -247,6 +265,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
     public void setIconDrawable(Drawable iconDrawable) {
         this.iconDrawable = iconDrawable;
         binding.icon.setImageDrawable(iconDrawable);
+    }
+
+    public @StyleRes int getButtonTextAppearance() {
+        return buttonTextAppearance;
     }
 
     /**
@@ -262,6 +284,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.joinButton.setTextAppearance(buttonTextAppearance);
     }
 
+    public @ColorInt int getButtonTextColor() {
+        return buttonTextColor;
+    }
+
     /**
      * Sets the text color for the button.
      *
@@ -273,6 +299,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
     public void setButtonTextColor(@ColorInt int buttonTextColor) {
         this.buttonTextColor = buttonTextColor;
         binding.joinButton.setTextColor(buttonTextColor);
+    }
+
+    public @ColorInt int getSeparatorColor() {
+        return separatorColor;
     }
 
     /**
@@ -288,6 +318,12 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.separator.setBackgroundColor(separatorColor);
     }
 
+    public @ColorInt int getImageStrokeColor() {
+        return imageStrokeColor;
+    }
+
+    // Getters for testing or direct access if needed
+
     /**
      * Sets the stroke color for the image container.
      *
@@ -301,6 +337,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.bubbleImageContainer.setStrokeColor(imageStrokeColor);
     }
 
+    public @Dimension int getImageStrokeWidth() {
+        return imageStrokeWidth;
+    }
+
     /**
      * Sets the stroke width for the image container.
      *
@@ -312,6 +352,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
     public void setImageStrokeWidth(@Dimension int imageStrokeWidth) {
         this.imageStrokeWidth = imageStrokeWidth;
         binding.bubbleImageContainer.setStrokeWidth(imageStrokeWidth);
+    }
+
+    public @Dimension int getImageCornerRadius() {
+        return imageCornerRadius;
     }
 
     /**
@@ -328,6 +372,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.bubbleImageContainer.setRadius(imageCornerRadius);
     }
 
+    public Drawable getIcon() {
+        return binding.icon.getDrawable();
+    }
+
     /**
      * Sets the drawable for the icon.
      *
@@ -338,6 +386,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
      */
     public void setIcon(Drawable drawable) {
         binding.icon.setImageDrawable(drawable);
+    }
+
+    public String getTitle() {
+        return binding.title.getText().toString();
     }
 
     /**
@@ -355,6 +407,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         }
     }
 
+    public String getSubTitle() {
+        return binding.tvLastMessageText.getText().toString();
+    }
+
     /**
      * Sets the subtitle text.
      *
@@ -365,6 +421,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
      */
     public void setSubTitle(String subTitle) {
         this.binding.tvLastMessageText.setText(subTitle);
+    }
+
+    public String getButtonText() {
+        return binding.joinButton.getText().toString();
     }
 
     /**
@@ -379,6 +439,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         binding.joinButton.setText(buttonText);
     }
 
+    public String getBoardUrl() {
+        return url;
+    }
+
     /**
      * Sets the URL for the board.
      *
@@ -389,6 +453,10 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
      */
     public void setBoardUrl(String url) {
         this.url = url;
+    }
+
+    public OnClick getOnClick() {
+        return onClick;
     }
 
     /**
@@ -403,81 +471,20 @@ public class CometChatCollaborativeBubble extends MaterialCardView {
         this.onClick = onClick;
     }
 
-    // Getters for testing or direct access if needed
-
-    public @StyleRes int getTitleTextAppearance() {
-        return titleTextAppearance;
-    }
-
-    public @ColorInt int getTitleTextColor() {
-        return titleTextColor;
-    }
-
-    public @StyleRes int getSubtitleTextAppearance() {
-        return subtitleTextAppearance;
-    }
-
-    public @ColorInt int getSubtitleTextColor() {
-        return subtitleTextColor;
-    }
-
-    public @ColorInt int getIconTint() {
-        return iconTint;
-    }
-
-    public Drawable getIconDrawable() {
-        return iconDrawable;
-    }
-
-    public @StyleRes int getButtonTextAppearance() {
-        return buttonTextAppearance;
-    }
-
-    public @ColorInt int getButtonTextColor() {
-        return buttonTextColor;
-    }
-
-    public @ColorInt int getSeparatorColor() {
-        return separatorColor;
-    }
-
-    public @ColorInt int getImageStrokeColor() {
-        return imageStrokeColor;
-    }
-
-    public @Dimension int getImageStrokeWidth() {
-        return imageStrokeWidth;
-    }
-
-    public @Dimension int getImageCornerRadius() {
-        return imageCornerRadius;
-    }
-
-    public Drawable getIcon() {
-        return binding.icon.getDrawable();
-    }
-
-    public String getTitle() {
-        return binding.title.getText().toString();
-    }
-
-    public String getSubTitle() {
-        return binding.tvLastMessageText.getText().toString();
-    }
-
-    public String getButtonText() {
-        return binding.joinButton.getText().toString();
-    }
-
-    public String getBoardUrl() {
-        return url;
-    }
-
-    public OnClick getOnClick() {
-        return onClick;
-    }
-
     public @StyleRes int getStyle() {
         return style;
+    }
+
+    /**
+     * Sets the style of the text bubble from a specific style resource.
+     *
+     * @param style The resource ID of the style to apply.
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            this.style = style;
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatCollaborativeBubble);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
     }
 }

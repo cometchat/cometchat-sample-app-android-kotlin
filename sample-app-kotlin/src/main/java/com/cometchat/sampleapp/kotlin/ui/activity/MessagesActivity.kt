@@ -2,6 +2,7 @@ package com.cometchat.sampleapp.kotlin.ui.activity
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -15,19 +16,19 @@ import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
+import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator
-import com.cometchat.chatuikit.shared.interfaces.Function3
 import com.cometchat.chatuikit.shared.models.AdditionParameter
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
 import com.cometchat.chatuikit.shared.resources.utils.Utils
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.databinding.OverflowMenuLayoutBinding
 import com.cometchat.sampleapp.kotlin.utils.MyApplication
 import com.cometchat.sampleapp.kotlin.viewmodels.MessagesViewModel
 import com.google.gson.Gson
+import kotlin.math.max
 
 class MessagesActivity : AppCompatActivity() {
     private var user: User? = null
@@ -38,32 +39,20 @@ class MessagesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMessagesBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityMessagesBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setUpTheme()
         adjustWindowSettings()
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        applyWindowInsets()
 
         // Create an instance of the MessagesViewModel
-        viewModel = ViewModelProvider
-            .NewInstanceFactory()
-            .create(
-                MessagesViewModel::class.java
-            )
+        viewModel = ViewModelProvider.NewInstanceFactory().create(MessagesViewModel::class.java)
 
         // Deserialize the user and group data from the Intent
-        user = Gson().fromJson(
-            intent.getStringExtra(getString(R.string.app_user)), User::class.java
-        )
+        user = Gson().fromJson(intent.getStringExtra(getString(R.string.app_user)), User::class.java)
 
-        group = Gson().fromJson(
-            intent.getStringExtra(getString(R.string.app_group)), Group::class.java
-        )
+        group = Gson().fromJson(intent.getStringExtra(getString(R.string.app_group)), Group::class.java)
 
         MyApplication.currentOpenChatId = if (group != null) group!!.guid else user?.uid
 
@@ -74,42 +63,24 @@ class MessagesActivity : AppCompatActivity() {
         // Add listeners for ViewModel updates
         viewModel.addListener()
 
-        viewModel.updatedGroup.observe(
-            this
-        ) { group: Group ->
-            this.updateGroupJoinedStatus(
-                group
-            )
+        viewModel.updatedGroup.observe(this) { group: Group ->
+            this.updateGroupJoinedStatus(group)
         }
 
-        viewModel.baseMessage.observe(
-            this
-        ) { baseMessage: BaseMessage? ->
+        viewModel.baseMessage.observe(this) { baseMessage: BaseMessage? ->
             if (baseMessage != null) {
                 this.setBaseMessage(baseMessage)
             }
         }
 
-        viewModel.updateUser.observe(
-            this
-        ) { user: User ->
+        viewModel.updateUser.observe(this) { user: User ->
             this.user = user
             this.updateUserBlockStatus(user)
         }
 
-        viewModel
-            .openUserChat()
-            .observe(
-                this
-            ) { user: User? -> this.openUserChat(user) }
-
-        viewModel.isExitActivity.observe(
-            this
-        ) { exit: Boolean -> this.exitActivity(exit) }
-
-        viewModel.unblockButtonState.observe(
-            this
-        ) { dialogState: DialogState -> this.setUnblockButtonState(dialogState) }
+        viewModel.openUserChat().observe(this) { user: User? -> this.openUserChat(user) }
+        viewModel.isExitActivity.observe(this) { exit: Boolean -> this.exitActivity(exit) }
+        viewModel.unblockButtonState.observe(this) { dialogState: DialogState -> this.setUnblockButtonState(dialogState) }
 
         // Initialize UI components
         addViews()
@@ -119,22 +90,30 @@ class MessagesActivity : AppCompatActivity() {
         binding.unblockBtn.setOnClickListener { view: View? -> viewModel.unblockUser() }
 
         binding.messageList.mentionsFormatter.setOnMentionClick { context: Context, user: User? ->
-            val intent = Intent(
-                context, MessagesActivity::class.java
-            )
+            val intent = Intent(context, MessagesActivity::class.java)
             intent.putExtra(context.getString(R.string.app_user), Gson().toJson(user))
             context.startActivity(intent)
         }
 
         binding.messageList.setOnThreadRepliesClick { context: Context, baseMessage: BaseMessage, cometchatMessageTemplate: CometChatMessageTemplate? ->
-            val intent = Intent(
-                context, ThreadMessageActivity::class.java
-            )
+            val intent = Intent(context, ThreadMessageActivity::class.java)
             if (user != null)
                 intent.putExtra("user", Gson().toJson(user))
             intent.putExtra(getString(R.string.app_message_id), baseMessage.id)
             context.startActivity(intent)
         }
+    }
+
+    private fun setUpTheme() {
+        binding.parentView.setBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.infoLayout.setBackgroundColor(CometChatTheme.getBackgroundColor1(this))
+        binding.separator.setBackgroundColor(CometChatTheme.getStrokeColorLight(this))
+        binding.infoText.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.unblockTitle.setTextColor(CometChatTheme.getTextColorSecondary(this))
+        binding.unblockText.setTextColor(CometChatTheme.getTextColorPrimary(this))
+        binding.unblockBtn.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(this))
+        binding.unblockBtn.strokeColor = CometChatTheme.getStrokeColorDark(this)
+        binding.progress.indeterminateTintList = ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this))
     }
 
     /**
@@ -146,6 +125,28 @@ class MessagesActivity : AppCompatActivity() {
             window.setDecorFitsSystemWindows(true)
         } else {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        }
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.parentView) { v, insets ->
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val bottomInset = max(ime.bottom.toDouble(), nav.bottom.toDouble()).toInt()
+
+            if (isImeVisible && binding.messageComposer.messageInput.composeBox.isFocused) {
+                binding.messageList.scrollToBottom()
+            }
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                bottomInset
+            )
+            insets
         }
     }
 
@@ -231,13 +232,11 @@ class MessagesActivity : AppCompatActivity() {
 
     /** Configures the overflow menu for additional actions.  */
     private fun setOverFlowMenu() {
-        binding.messageHeader.auxiliaryButtonView = Function3 { context: Context?, user: User?, group: Group? ->
+        binding.messageHeader.setAuxiliaryButtonView { context: Context?, user: User?, group: Group? ->
             val linearLayout = LinearLayout(context)
             val view = ChatConfigurator
                 .getDataSource()
-                .getAuxiliaryHeaderMenu(
-                    context, user, group, AdditionParameter()
-                )
+                .getAuxiliaryHeaderMenu(context, user, group, AdditionParameter())
 
             val overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(layoutInflater)
             overflowMenuLayoutBinding.ivMenu.setImageResource(R.drawable.ic_info)
@@ -246,15 +245,17 @@ class MessagesActivity : AppCompatActivity() {
 
             if ((group != null && group.isJoined) || (user != null && !Utils.isBlocked(user))) {
                 if (view != null) {
-                    linearLayout.addView(view)
+                    if (group != null) {
+                        linearLayout.addView(view)
+                    } else {
+                        linearLayout.addView(view)
+                    }
                 }
                 linearLayout.addView(overflowMenuLayoutBinding.root)
             }
 
             overflowMenuLayoutBinding.ivMenu.setOnClickListener { view1: View? ->
-                openDetailScreen(
-                    group
-                )
+                openDetailScreen(group)
             }
             linearLayout
         }
@@ -270,22 +271,13 @@ class MessagesActivity : AppCompatActivity() {
         } else if (group != null) {
             intent = Intent(this, GroupDetailsActivity::class.java)
             intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+            intent.putExtra(getString(R.string.app_base_message), Gson().toJson(binding.messageList.viewModel.lastMessage))
         }
         startActivity(intent)
     }
 
-    /** Initializes UI components and sets up the keyboard visibility listener.  */
+    /** Initializes UI components */
     private fun addViews() {
-        KeyBoardUtils.setKeyboardVisibilityListener(
-            this, binding.root
-        ) { keyboardVisible: Boolean ->
-            if (binding.messageComposer.messageInput.composeBox.isFocused && keyboardVisible) {
-                if (binding.messageList.atBottom()) {
-                    binding.messageList.scrollToBottom()
-                }
-            }
-        }
-
         // Set user or group data to the message header and composer
         if (user != null) {
             binding.messageHeader.user = user!!
@@ -301,9 +293,7 @@ class MessagesActivity : AppCompatActivity() {
 
         // Set up back button behavior
         binding.messageHeader.setOnBackButtonPressed {
-            Utils.hideKeyBoard(
-                this, binding.root
-            )
+            Utils.hideKeyBoard(this, binding.root)
             finish()
         }
     }

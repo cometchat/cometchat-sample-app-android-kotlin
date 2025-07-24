@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.chat.models.BaseMessage;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatQuickReactionViewBinding;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -105,13 +106,18 @@ class CometChatMessagePopupMenu {
         try {
             elevation = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuElevation, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuCornerRadius, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuBackgroundColor, 0);
-            textColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextColor, 0);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(context));
+            textColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextColor,
+                                            CometChatTheme.getTextColorPrimary(context));
             textAppearance = typedArray.getResourceId(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemTextAppearance, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeColor, 0);
+            strokeColor = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(context));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatPopupMenu_cometchatPopupMenuStrokeWidth, 0);
-            startIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemStartIconTint, 0);
-            endIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemEndIconTint, 0);
+            startIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemStartIconTint,
+                                                CometChatTheme.getIconTintSecondary(context));
+            endIconTint = typedArray.getColor(R.styleable.CometChatPopupMenu_cometchatPopupMenuItemEndIconTint,
+                                              CometChatTheme.getIconTintSecondary(context));
         } finally {
             typedArray.recycle();
         }

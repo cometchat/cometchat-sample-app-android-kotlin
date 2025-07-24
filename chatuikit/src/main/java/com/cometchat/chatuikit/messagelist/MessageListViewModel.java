@@ -79,6 +79,7 @@ public class MessageListViewModel extends ViewModel {
     public boolean firstFetch = true;
     public Void aVoid;
     public HashMap<String, String> idMap;
+    public MutableLiveData<BaseMessage> onMessageDeleted;
     public MutableLiveData<HashMap<String, String>> mutableHashMap;
     public MutableLiveData<Function1<Context, View>> showTopPanel;
     public MutableLiveData<Function1<Context, View>> showBottomPanel;
@@ -102,7 +103,7 @@ public class MessageListViewModel extends ViewModel {
     private boolean hideDeleteMessage;
     private List<String> messagesTypes;
     private List<String> messagesCategories;
-    private int parentMessageId = -1;
+    private long parentMessageId = -1;
     private String conversationId;
     private boolean disableReactions;
     private List<String> smartRepliesKeywords;
@@ -114,6 +115,7 @@ public class MessageListViewModel extends ViewModel {
         mutableMessageList = new MutableLiveData<>();
         mutableMessagesRangeChanged = new MutableLiveData<>();
         updateMessage = new MutableLiveData<>();
+        onMessageDeleted = new MutableLiveData<>();
         removeMessage = new MutableLiveData<>();
         readMessage = new MutableLiveData<>();
         addMessage = new MutableLiveData<>();
@@ -185,6 +187,10 @@ public class MessageListViewModel extends ViewModel {
         return updateMessage;
     }
 
+    public MutableLiveData<BaseMessage> getOnMessageDeleted() {
+        return onMessageDeleted;
+    }
+
     public MutableLiveData<Integer> removeMessage() {
         return removeMessage;
     }
@@ -245,7 +251,7 @@ public class MessageListViewModel extends ViewModel {
         this.messageTemplateHashMap = messageTemplateHashMap;
     }
 
-    public void setGroup(Group group, List<String> messagesTypes, List<String> messagesCategories, int parentMessageId) {
+    public void setGroup(Group group, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId) {
         if (group != null) {
             this.group = group;
             this.type = UIKitConstants.ReceiverType.GROUP;
@@ -282,7 +288,7 @@ public class MessageListViewModel extends ViewModel {
         messagesRequest = messagesRequestBuilder.setGUID(id).build();
     }
 
-    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, int parentMessageId) {
+    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId) {
         if (user != null) {
             this.user = user;
             this.id = user.getUid();
@@ -305,28 +311,6 @@ public class MessageListViewModel extends ViewModel {
             if (parentMessageId > -1) messagesRequestBuilder.setParentMessageId(parentMessageId);
         }
         messagesRequest = messagesRequestBuilder.setUID(id).build();
-    }
-
-    private void fetchConversationStarter() {
-        if (enableConversationStarter && parentMessageId == -1)
-            conversationStarterUIState.postValue(UIKitConstants.States.LOADING);
-        CometChat.getConversationStarter(
-            user != null ? user.getUid() : group != null ? group.getGuid() : "",
-            user != null ? UIKitConstants.ReceiverType.USER : group != null ? UIKitConstants.ReceiverType.GROUP : "",
-            null,
-            new CometChat.CallbackListener<List<String>>() {
-                @Override
-                public void onSuccess(List<String> list) {
-                    mutableConversationStarterReplies.setValue(list);
-                }
-
-                @Override
-                public void onError(CometChatException e) {
-                    CometChatLogger.e(TAG, e.toString());
-                    conversationStarterUIState.setValue(UIKitConstants.States.ERROR);
-                    cometchatException.setValue(e);
-                }
-            });
     }
 
     public void setSmartReplyKeywords(List<String> keywords) {
@@ -392,6 +376,7 @@ public class MessageListViewModel extends ViewModel {
                                                   String scopeChangedTo,
                                                   String scopeChangedFrom,
                                                   Group group) {
+                updateGroupScope(group, updatedUser, scopeChangedTo);
                 onMessageReceived(action);
             }
 
@@ -416,6 +401,7 @@ public class MessageListViewModel extends ViewModel {
 
             @Override
             public void ccMessageDeleted(BaseMessage baseMessage) {
+                onMessageDeleted.setValue(baseMessage);
                 if (hideDeleteMessage) removeMessage(baseMessage);
                 else updateMessage(baseMessage);
             }
@@ -453,6 +439,7 @@ public class MessageListViewModel extends ViewModel {
 
             @Override
             public void onMessageDeleted(BaseMessage message) {
+                onMessageDeleted.setValue(message);
                 if (hideDeleteMessage) removeMessage(message);
                 else updateMessage(message);
             }
@@ -612,6 +599,16 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
+    private void updateGroupScope(Group group, User user, String scopeChangedTo) {
+        if (this.group != null) {
+            if (group.getGuid().equalsIgnoreCase(this.group.getGuid())) {
+                if (user.getUid().equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
+                    this.group.setScope(scopeChangedTo);
+                }
+            }
+        }
+    }
+
     public void setInteractions(InteractionReceipt interactionReceipt) {
         if (interactionReceipt != null && interactionReceipt.getSender().getUid().equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
             for (int i = messageArrayList.size() - 1; i >= 0; i--) {
@@ -627,7 +624,7 @@ public class MessageListViewModel extends ViewModel {
     }
 
     private void onReactionAdded(ReactionEvent reactionEvent) {
-        if (conversationId != null && reactionEvent.getConversationId().equals(conversationId)) {
+        if (reactionEvent.getConversationId().equals(conversationId)) {
             for (int i = messageArrayList.size() - 1; i >= 0; i--) {
                 BaseMessage baseMessage = messageArrayList.get(i);
                 if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
@@ -642,7 +639,7 @@ public class MessageListViewModel extends ViewModel {
     }
 
     private void onReactionRemoved(ReactionEvent reactionEvent) {
-        if (conversationId != null && reactionEvent.getConversationId().equals(conversationId)) {
+        if (reactionEvent.getConversationId().equals(conversationId)) {
             for (int i = messageArrayList.size() - 1; i >= 0; i--) {
                 BaseMessage baseMessage = messageArrayList.get(i);
                 if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
@@ -653,95 +650,6 @@ public class MessageListViewModel extends ViewModel {
                     break;
                 }
             }
-        }
-    }
-
-    public void addConnectionListener() {
-        CometChat.addConnectionListener(LISTENERS_TAG, new CometChat.ConnectionListener() {
-            @Override
-            public void onConnected() {
-                fetchMissedMessages();
-            }
-
-            @Override
-            public void onConnecting() {
-            }
-
-            @Override
-            public void onDisconnected() {
-            }
-
-            @Override
-            public void onFeatureThrottled() {
-            }
-
-            @Override
-            public void onConnectionError(CometChatException e) {
-            }
-        });
-    }
-
-    public void fetchMissedMessages() {
-        Thread fetchMissedThread = new Thread(() -> {
-            updateListByActionMessages();
-            fetchNextMessages();
-        });
-        fetchMissedThread.start();
-    }
-
-    public void updateListByActionMessages() {
-        if (!messageArrayList.isEmpty()) {
-            MessagesRequest.MessagesRequestBuilder actionRequestBuilder = new MessagesRequest.MessagesRequestBuilder()
-                .setMessageId(messageArrayList.get(messageArrayList.size() - 1).getId())
-                .setTypes(actionMessageTypes)
-                .setCategories(actionCategories);
-            if (user != null) actionMessagesRequest = actionRequestBuilder.setUID(user.getUid()).build();
-            else if (group != null) actionMessagesRequest = actionRequestBuilder.setGUID(group.getGuid()).build();
-            if (actionMessagesRequest != null) {
-                actionMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
-                    @Override
-                    public void onSuccess(List<BaseMessage> baseMessages) {
-                        for (BaseMessage baseMessage : baseMessages) {
-                            if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_ACTION)) {
-                                if (baseMessage instanceof Action && ((Action) baseMessage).getActionOn() != null && ((Action) baseMessage).getActionOn() instanceof BaseMessage) {
-                                    BaseMessage actionOn = (BaseMessage) ((Action) baseMessage).getActionOn();
-                                    updateMessage(Utils.convertToUIKitMessage(actionOn));
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onError(CometChatException e) {
-                        CometChatLogger.e(TAG, e.toString());
-                    }
-                });
-            }
-        }
-    }
-
-    public void fetchNextMessages() {
-        if (!messageArrayList.isEmpty()) {
-            MessagesRequest fetchNextMessagesRequest = messagesRequestBuilder
-                .setMessageId(messageArrayList.get(messageArrayList.size() - 1).getId())
-                .build();
-            fetchNextMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
-                @Override
-                public void onSuccess(List<BaseMessage> baseMessages) {
-                    if (!baseMessages.isEmpty()) {
-                        for (BaseMessage baseMessage : baseMessages) {
-                            addMessage(Utils.convertToUIKitMessage(baseMessage));
-                        }
-                        fetchNextMessages();
-                    } else {
-                        CometChatUIKitHelper.onActiveChatChanged(getIdMap(), messageArrayList.get(messageArrayList.size() - 1), user, group);
-                    }
-                }
-
-                @Override
-                public void onError(CometChatException e) {
-                }
-            });
         }
     }
 
@@ -776,19 +684,6 @@ public class MessageListViewModel extends ViewModel {
         CometChatUIKitHelper.onMessageEdited(baseMessage, MessageStatus.IN_PROGRESS);
     }
 
-    public HashMap<String, String> getIdMap() {
-        HashMap<String, String> idMap = new HashMap<>();
-        if (parentMessageId > 0) idMap.put(UIKitConstants.MapId.PARENT_MESSAGE_ID, String.valueOf(parentMessageId));
-        if (user != null) {
-            idMap.put(UIKitConstants.MapId.RECEIVER_ID, user.getUid());
-            idMap.put(UIKitConstants.MapId.RECEIVER_TYPE, UIKitConstants.ReceiverType.USER);
-        } else if (group != null) {
-            idMap.put(UIKitConstants.MapId.RECEIVER_ID, group.getGuid());
-            idMap.put(UIKitConstants.MapId.RECEIVER_TYPE, UIKitConstants.ReceiverType.GROUP);
-        }
-        return idMap;
-    }
-
     public void updateMessageFromMUID(BaseMessage baseMessage) {
         for (int i = messageArrayList.size() - 1; i >= 0; i--) {
             String mUid = messageArrayList.get(i).getMuid();
@@ -800,7 +695,7 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
-    public void updateReplyCount(int parentMessageId) {
+    public void updateReplyCount(long parentMessageId) {
         for (int i = 0; i < messageArrayList.size(); i++) {
             BaseMessage baseMessage = messageArrayList.get(i);
             int replyCount = baseMessage.getReplyCount();
@@ -814,11 +709,9 @@ public class MessageListViewModel extends ViewModel {
 
     public void setMessageReceipt(MessageReceipt messageReceipt) {
         if (messageReceipt.getReceivertype().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-            if (messageReceipt.getReceivertype().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                if (messageReceipt.getSender().getUid().equals(id)) {
-                    if (messageReceipt.getReceiptType().equals(MessageReceipt.RECEIPT_TYPE_DELIVERED)) setDeliveryReceipts(messageReceipt);
-                    else if (messageReceipt.getReceiptType().equals(MessageReceipt.RECEIPT_TYPE_READ)) setReadReceipts(messageReceipt);
-                }
+            if (messageReceipt.getSender().getUid().equals(id)) {
+                if (messageReceipt.getReceiptType().equals(MessageReceipt.RECEIPT_TYPE_DELIVERED)) setDeliveryReceipts(messageReceipt);
+                else if (messageReceipt.getReceiptType().equals(MessageReceipt.RECEIPT_TYPE_READ)) setReadReceipts(messageReceipt);
             }
         } else if (messageReceipt.getReceivertype().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
             if (messageReceipt.getReceiverId().equals(id)) {
@@ -858,47 +751,6 @@ public class MessageListViewModel extends ViewModel {
 
     public void fetchMessages() {
         fetchMessages(0);
-    }
-
-    public void fetchMessagesWithUnreadCount() {
-        states.setValue(UIKitConstants.States.LOADING);
-        if (user != null) {
-            CometChat.getUnreadMessageCountForUser(user.getUid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
-                @Override
-                public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {
-                    int unreadCount = 0;
-                    if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(user.getUid())) {
-                        Integer count = stringIntegerHashMap.get(user.getUid());
-                        unreadCount = (count != null) ? count : 0;
-                    }
-                    fetchMessages(unreadCount);
-                }
-
-                @Override
-                public void onError(CometChatException e) {
-                    CometChatLogger.e(TAG, e.toString());
-                    fetchMessages(0);
-                }
-            });
-        } else if (group != null) {
-            CometChat.getUnreadMessageCountForGroup(group.getGuid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
-                @Override
-                public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {
-                    int unreadCount = 0;
-                    if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(group.getGuid())) {
-                        Integer count = stringIntegerHashMap.get(group.getGuid());
-                        unreadCount = (count != null) ? count : 0;
-                    }
-                    fetchMessages(unreadCount);
-                }
-
-                @Override
-                public void onError(CometChatException e) {
-                    CometChatLogger.e(TAG, e.toString());
-                    fetchMessages(0);
-                }
-            });
-        }
     }
 
     public void fetchMessages(int unreadCount) {
@@ -957,6 +809,70 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
+    public void processMessageList(List<BaseMessage> messageList) {
+        messageList.replaceAll(Utils::convertToUIKitMessage);
+    }
+
+    public HashMap<String, String> getIdMap() {
+        HashMap<String, String> idMap = new HashMap<>();
+        if (parentMessageId > 0) idMap.put(UIKitConstants.MapId.PARENT_MESSAGE_ID, String.valueOf(parentMessageId));
+        if (user != null) {
+            idMap.put(UIKitConstants.MapId.RECEIVER_ID, user.getUid());
+            idMap.put(UIKitConstants.MapId.RECEIVER_TYPE, UIKitConstants.ReceiverType.USER);
+        } else if (group != null) {
+            idMap.put(UIKitConstants.MapId.RECEIVER_ID, group.getGuid());
+            idMap.put(UIKitConstants.MapId.RECEIVER_TYPE, UIKitConstants.ReceiverType.GROUP);
+        }
+        return idMap;
+    }
+
+    public void addConnectionListener() {
+        CometChat.addConnectionListener(LISTENERS_TAG, new CometChat.ConnectionListener() {
+            @Override
+            public void onConnected() {
+                fetchMissedMessages();
+            }
+
+            @Override
+            public void onConnecting() {
+            }
+
+            @Override
+            public void onDisconnected() {
+            }
+
+            @Override
+            public void onFeatureThrottled() {
+            }
+
+            @Override
+            public void onConnectionError(CometChatException e) {
+            }
+        });
+    }
+
+    private void fetchConversationStarter() {
+        if (enableConversationStarter && parentMessageId == -1)
+            conversationStarterUIState.postValue(UIKitConstants.States.LOADING);
+        CometChat.getConversationStarter(
+            user != null ? user.getUid() : group != null ? group.getGuid() : "",
+            user != null ? UIKitConstants.ReceiverType.USER : group != null ? UIKitConstants.ReceiverType.GROUP : "",
+            null,
+            new CometChat.CallbackListener<List<String>>() {
+                @Override
+                public void onSuccess(List<String> list) {
+                    mutableConversationStarterReplies.setValue(list);
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                    CometChatLogger.e(TAG, e.toString());
+                    conversationStarterUIState.setValue(UIKitConstants.States.ERROR);
+                    cometchatException.setValue(e);
+                }
+            });
+    }
+
     public void fetchSmartRepliesWithDelay(TextMessage textMessage) {
         if (isMessageForCurrentChat(textMessage) && !textMessage
             .getSender()
@@ -973,6 +889,19 @@ public class MessageListViewModel extends ViewModel {
                 }, smartRepliesDelayDuration);
             }
         }
+    }
+
+    public UIKitConstants.States checkIsEmpty(List<BaseMessage> baseMessageList) {
+        if (baseMessageList.isEmpty()) return UIKitConstants.States.EMPTY;
+        return UIKitConstants.States.NON_EMPTY;
+    }
+
+    public void fetchMissedMessages() {
+        Thread fetchMissedThread = new Thread(() -> {
+            updateListByActionMessages();
+            fetchNextMessages();
+        });
+        fetchMissedThread.start();
     }
 
     private boolean isMessageForCurrentChat(BaseMessage baseMessage) {
@@ -1008,6 +937,62 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
+    public void updateListByActionMessages() {
+        if (!messageArrayList.isEmpty()) {
+            MessagesRequest.MessagesRequestBuilder actionRequestBuilder = new MessagesRequest.MessagesRequestBuilder()
+                .setMessageId(messageArrayList.get(messageArrayList.size() - 1).getId())
+                .setTypes(actionMessageTypes)
+                .setCategories(actionCategories);
+            if (user != null) actionMessagesRequest = actionRequestBuilder.setUID(user.getUid()).build();
+            else if (group != null) actionMessagesRequest = actionRequestBuilder.setGUID(group.getGuid()).build();
+            if (actionMessagesRequest != null) {
+                actionMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
+                    @Override
+                    public void onSuccess(List<BaseMessage> baseMessages) {
+                        for (BaseMessage baseMessage : baseMessages) {
+                            if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_ACTION)) {
+                                if (baseMessage instanceof Action && ((Action) baseMessage).getActionOn() != null && ((Action) baseMessage).getActionOn() instanceof BaseMessage) {
+                                    BaseMessage actionOn = (BaseMessage) ((Action) baseMessage).getActionOn();
+                                    updateMessage(Utils.convertToUIKitMessage(actionOn));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(CometChatException e) {
+                        CometChatLogger.e(TAG, e.toString());
+                    }
+                });
+            }
+        }
+    }
+
+    public void fetchNextMessages() {
+        if (!messageArrayList.isEmpty()) {
+            MessagesRequest fetchNextMessagesRequest = messagesRequestBuilder
+                .setMessageId(messageArrayList.get(messageArrayList.size() - 1).getId())
+                .build();
+            fetchNextMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
+                @Override
+                public void onSuccess(List<BaseMessage> baseMessages) {
+                    if (!baseMessages.isEmpty()) {
+                        for (BaseMessage baseMessage : baseMessages) {
+                            addMessage(Utils.convertToUIKitMessage(baseMessage));
+                        }
+                        fetchNextMessages();
+                    } else {
+                        CometChatUIKitHelper.onActiveChatChanged(getIdMap(), messageArrayList.get(messageArrayList.size() - 1), user, group);
+                    }
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                }
+            });
+        }
+    }
+
     public void fetchSmartReplies() {
         smartReplayUIState.postValue(UIKitConstants.States.LOADING);
         CometChat.getSmartReplies(
@@ -1029,8 +1014,14 @@ public class MessageListViewModel extends ViewModel {
             });
     }
 
-    public void processMessageList(List<BaseMessage> messageList) {
-        messageList.replaceAll(Utils::convertToUIKitMessage);
+    public void addMessage(BaseMessage message) {
+        if (message != null) {
+            removeConversationStarter.setValue(Boolean.TRUE);
+            if (messageArrayList.isEmpty()) addList(messageArrayList);
+            messageArrayList.add(message);
+            addMessage.setValue(message);
+            states.setValue(checkIsEmpty(messageArrayList));
+        }
     }
 
     public void addList(List<BaseMessage> messageList) {
@@ -1043,9 +1034,45 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
-    public UIKitConstants.States checkIsEmpty(List<BaseMessage> baseMessageList) {
-        if (baseMessageList.isEmpty()) return UIKitConstants.States.EMPTY;
-        return UIKitConstants.States.NON_EMPTY;
+    public void fetchMessagesWithUnreadCount() {
+        states.setValue(UIKitConstants.States.LOADING);
+        if (user != null) {
+            CometChat.getUnreadMessageCountForUser(user.getUid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
+                @Override
+                public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {
+                    int unreadCount = 0;
+                    if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(user.getUid())) {
+                        Integer count = stringIntegerHashMap.get(user.getUid());
+                        unreadCount = (count != null) ? count : 0;
+                    }
+                    fetchMessages(unreadCount);
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                    CometChatLogger.e(TAG, e.toString());
+                    fetchMessages(0);
+                }
+            });
+        } else if (group != null) {
+            CometChat.getUnreadMessageCountForGroup(group.getGuid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
+                @Override
+                public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {
+                    int unreadCount = 0;
+                    if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(group.getGuid())) {
+                        Integer count = stringIntegerHashMap.get(group.getGuid());
+                        unreadCount = (count != null) ? count : 0;
+                    }
+                    fetchMessages(unreadCount);
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                    CometChatLogger.e(TAG, e.toString());
+                    fetchMessages(0);
+                }
+            });
+        }
     }
 
     public void markLastMessageAsRead(BaseMessage lastMessage) {
@@ -1104,16 +1131,6 @@ public class MessageListViewModel extends ViewModel {
             int index = messageArrayList.indexOf(message);
             removeMessage.setValue(index);
             messageArrayList.remove(message);
-            states.setValue(checkIsEmpty(messageArrayList));
-        }
-    }
-
-    public void addMessage(BaseMessage message) {
-        if (message != null) {
-            removeConversationStarter.setValue(Boolean.TRUE);
-            if (messageArrayList.isEmpty()) addList(messageArrayList);
-            messageArrayList.add(message);
-            addMessage.setValue(message);
             states.setValue(checkIsEmpty(messageArrayList));
         }
     }

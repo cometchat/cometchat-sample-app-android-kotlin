@@ -1,23 +1,31 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.sampleapp.java.R;
 import com.cometchat.sampleapp.java.databinding.ActivityThreadMessageBinding;
 import com.cometchat.sampleapp.java.viewmodels.ThreadMessageViewModel;
+import com.google.gson.Gson;
 
 public class ThreadMessageActivity extends AppCompatActivity {
     private ActivityThreadMessageBinding binding;
@@ -31,9 +39,14 @@ public class ThreadMessageActivity extends AppCompatActivity {
         binding = ActivityThreadMessageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setUpTheme();
+        adjustWindowSettings();
+        applyWindowInsets();
+
         // Create an instance of the MessagesViewModel
         ThreadMessageViewModel viewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel.class);
-        viewModel.fetchMessageDetails(getIntent().getIntExtra(getString(R.string.app_message_id), -1));
+        viewModel.fetchMessageDetails(getIntent().getLongExtra(getString(R.string.app_message_id), -1));
+        user = new Gson().fromJson(getIntent().getStringExtra("user"), User.class);
 
         viewModel.addUserListener();
         viewModel.getParentMessage().observe(this, this::setParentMessage);
@@ -46,21 +59,50 @@ public class ThreadMessageActivity extends AppCompatActivity {
         setupUI();
     }
 
-    private void setupUI() {
-        // Set up back button behavior
-        binding.backIcon.setOnClickListener((v) -> {
-            Utils.hideKeyBoard(this, binding.getRoot());
-            finish();
+    private void setUpTheme() {
+        binding.backIcon.setColorFilter(CometChatTheme.getIconTintPrimary(this));
+        binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.tvSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(this));
+        binding.unblockText.setTextColor(CometChatTheme.getTextColorPrimary(this));
+        binding.unblockBtn.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(this));
+        binding.unblockBtn.setStrokeColor(CometChatTheme.getStrokeColorDark(this));
+        binding.progress.setIndeterminateTintList(ColorStateList.valueOf(CometChatTheme.getIconTintSecondary(this)));
+    }
+
+    private void adjustWindowSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.parentView, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+                Insets nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                int bottomInset = Math.max(ime.bottom, nav.bottom);
+                boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+
+                if (binding.messageComposer.getMessageInput().getComposeBox().isFocused() && isImeVisible) {
+                    if (binding.messageList.atBottom()) {
+                        binding.messageList.scrollToBottom();
+                    }
+                }
+
+                v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    bottomInset
+                );
+                return insets;
+            }
         });
-
-        // Get the screen height
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int screenHeight = displayMetrics.heightPixels;
-
-        // Calculate 25% of the screen height
-        int requiredHeight = (int) (screenHeight * 0.35);
-        binding.threadHeader.setMaxHeight(requiredHeight);
     }
 
     private void setParentMessage(BaseMessage parentMessage) {
@@ -73,24 +115,16 @@ public class ThreadMessageActivity extends AppCompatActivity {
             group = (Group) parentMessage.getReceiver();
         }
 
-        KeyBoardUtils.setKeyboardVisibilityListener(this, binding.getRoot(), keyboardVisible -> {
-            if (binding.messageComposer.getMessageInput().getComposeBox().isFocused() && keyboardVisible) {
-                if (binding.messageList.atBottom()) {
-                    binding.messageList.scrollToBottom();
-                }
-            }
-        });
-
         binding.messageList.setParentMessage(parentMessage.getId());
         binding.messageComposer.setParentMessageId(parentMessage.getId());
         binding.threadHeader.setParentMessage(parentMessage);
+        binding.threadHeader.setReactionVisibility(View.GONE);
         binding.tvSubtitle.setText(user != null ? user.getName() : group != null ? group.getName() : "");
         binding.tvSubtitle.setVisibility(binding.tvSubtitle.getText().toString().isEmpty() ? View.GONE : View.VISIBLE);
         // Set user or group data to the message header and composer
         if (user != null) {
             binding.messageList.setUser(user);
             binding.messageComposer.setUser(user);
-            updateUserBlockStatus(user);
         } else if (group != null) {
             binding.messageList.setGroup(group);
             binding.messageComposer.setGroup(group);
@@ -115,5 +149,24 @@ public class ThreadMessageActivity extends AppCompatActivity {
             binding.unblockText.setVisibility(View.VISIBLE);
             binding.progress.setVisibility(View.GONE);
         }
+    }
+
+    private void setupUI() {
+        // Set up back button behavior
+        binding.backIcon.setOnClickListener((v) -> {
+            Utils.hideKeyBoard(this, binding.getRoot());
+            finish();
+        });
+
+        // Get the screen height
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenHeight = displayMetrics.heightPixels;
+
+        // Calculate 25% of the screen height
+        int requiredHeight = (int) (screenHeight * 0.35);
+        binding.threadHeader.setMaxHeight(requiredHeight);
+
+        if (user != null) updateUserBlockStatus(user);
     }
 }

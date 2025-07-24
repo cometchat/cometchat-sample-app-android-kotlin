@@ -42,6 +42,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class PollsExtensionDecorator extends DataSourceDecorator {
     private static final String TAG = PollsExtensionDecorator.class.getSimpleName();
@@ -84,6 +85,7 @@ public class PollsExtensionDecorator extends DataSourceDecorator {
                                                    ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                                                               ViewGroup.LayoutParams.MATCH_PARENT);
                                                    chatCreatePoll.setLayoutParams(params);
+                                                   chatCreatePoll.setFitsSystemWindows(true);
                                                    alertDialog.setView(chatCreatePoll);
                                                    Dialog dialog = alertDialog.create();
                                                    Utils.setDialogStatusBarColor(dialog, CometChatTheme.getBackgroundColor1(context));
@@ -118,7 +120,7 @@ public class PollsExtensionDecorator extends DataSourceDecorator {
                                                            CometChatLogger.e(TAG, e.toString());
                                                        }
                                                    });
-
+                                                   Objects.requireNonNull(dialog.getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                                                    dialog.show();
                                                }));
             return messageComposerActions;

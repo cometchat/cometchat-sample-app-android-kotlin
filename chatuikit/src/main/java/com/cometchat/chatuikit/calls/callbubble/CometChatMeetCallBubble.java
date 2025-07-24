@@ -221,16 +221,21 @@ public class CometChatMeetCallBubble extends MaterialCardView {
             setIncomingVoiceCallIcon(typedArray.getDrawable(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleIncomingVoiceCallIcon));
             setOutgoingVideoCallIcon(typedArray.getDrawable(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleOutgoingVideoCallIcon));
             setOutgoingVoiceCallIcon(typedArray.getDrawable(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleOutgoingVoiceCallIcon));
-            setIconBackgroundColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleIconBackgroundColor, 0));
-            setCallIconTint(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleCallIconTint, 0));
+            setIconBackgroundColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleIconBackgroundColor,
+                                                       CometChatTheme.getColorWhite(getContext())));
+            setCallIconTint(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleCallIconTint,
+                                                CometChatTheme.getIconTintHighlight(getContext())));
             setSeparatorColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleSeparatorColor,
                                                   CometChatTheme.getExtendedPrimaryColor800(getContext())
             ));
-            setTitleTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleTitleTextColor, 0));
+            setTitleTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleTitleTextColor,
+                                                  CometChatTheme.getTextColorPrimary(getContext())));
             setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleTitleTextAppearance, 0));
-            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleSubtitleTextColor, 0));
+            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleSubtitleTextColor,
+                                                     CometChatTheme.getTextColorSecondary(getContext())));
             setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleSubtitleTextAppearance, 0));
-            setButtonTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleJoinButtonTextColor, 0));
+            setButtonTextColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleJoinButtonTextColor,
+                                                   CometChatTheme.getPrimaryColor(getContext())));
             setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleJoinButtonTextAppearance, 0));
 
             setBackgroundColor(typedArray.getColor(R.styleable.CometChatMeetCallBubble_cometchatMeetCallBubbleBackgroundColor, 0));
@@ -515,15 +520,6 @@ public class CometChatMeetCallBubble extends MaterialCardView {
     public void setTitleTextColor(@ColorInt int color) {
         this.titleTextColor = color;
         binding.titleText.setTextColor(color);
-    }    /**
-     * Sets the width of the card's border stroke.
-     *
-     * @param strokeWidth The width, in pixels, to set for the card's stroke.
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -533,6 +529,15 @@ public class CometChatMeetCallBubble extends MaterialCardView {
      */
     public int getTitleTextAppearance() {
         return titleTextAppearance;
+    }    /**
+     * Sets the width of the card's border stroke.
+     *
+     * @param strokeWidth The width, in pixels, to set for the card's stroke.
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**

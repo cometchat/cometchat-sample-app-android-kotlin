@@ -20,6 +20,7 @@ import androidx.annotation.StyleRes;
 
 import com.cometchat.chat.models.Attachment;
 import com.cometchat.chat.models.MediaMessage;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
@@ -185,9 +186,11 @@ public class CometChatFileBubble extends MaterialCardView {
         try {
             // Apply text styles and colors for title and subtitle
             setTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatFileBubble_cometchatFileBubbleTitleTextAppearance, 0));
-            setTitleTextColor(typedArray.getColor(R.styleable.CometChatFileBubble_cometchatFileBubbleTitleColor, 0));
+            setTitleTextColor(typedArray.getColor(R.styleable.CometChatFileBubble_cometchatFileBubbleTitleColor,
+                                                  CometChatTheme.getNeutralColor900(getContext())));
             setSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatFileBubble_cometchatFileBubbleSubTitleTextAppearance, 0));
-            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatFileBubble_cometchatFileBubbleSubTitleColor, 0));
+            setSubtitleTextColor(typedArray.getColor(R.styleable.CometChatFileBubble_cometchatFileBubbleSubTitleColor,
+                                                     CometChatTheme.getNeutralColor600(getContext())));
 
             // Apply tint color for the download icon
             setDownloadIconTintColor(typedArray.getColor(R.styleable.CometChatFileBubble_cometchatFileBubbleFileDownloadIconTint, 0));

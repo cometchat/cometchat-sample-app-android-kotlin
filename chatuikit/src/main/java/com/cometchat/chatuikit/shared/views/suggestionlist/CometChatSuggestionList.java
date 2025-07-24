@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatSuggestionListBinding;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -112,24 +113,45 @@ public class CometChatSuggestionList extends MaterialCardView {
     }
 
     /**
+     * Applies the style attributes defined in the XML or by default.
+     *
+     * @param attrs        the set of attributes associated with the view
+     * @param defStyleAttr the default style to apply to this view
+     */
+    private void applyStyleAttributes(AttributeSet attrs, int defStyleAttr) {
+        TypedArray directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatSuggestionList, defStyleAttr, 0);
+        @StyleRes int styleResId = directAttributes.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListStyle, 0);
+        directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatSuggestionList, defStyleAttr, styleResId);
+        extractAttributesAndApplyDefaults(directAttributes);
+    }
+
+    /**
      * Configures the item touch listener and scroll listener for the recycler view.
      */
     private void configureRecyclerViewListeners() {
-        binding.recyclerViewSuggestionList.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerViewSuggestionList, new ClickListener() {
-            @Override
-            public void onClick(@NonNull View view, int position) {
-                SuggestionItem suggestionItem = (SuggestionItem) view.getTag(R.string.cometchat_tag_item);
-                if (onItemClickListener != null)
-                    onItemClickListener.OnItemClick(suggestionItem, position);
-            }
+        binding.recyclerViewSuggestionList.addOnItemTouchListener(new RecyclerTouchListener(getContext(),
+                                                                                            binding.recyclerViewSuggestionList,
+                                                                                            new ClickListener() {
+                                                                                                @Override
+                                                                                                public void onClick(@NonNull View view,
+                                                                                                                    int position) {
+                                                                                                    SuggestionItem suggestionItem = (SuggestionItem) view.getTag(
+                                                                                                        R.string.cometchat_tag_item);
+                                                                                                    if (onItemClickListener != null)
+                                                                                                        onItemClickListener.OnItemClick(suggestionItem,
+                                                                                                                                        position);
+                                                                                                }
 
-            @Override
-            public void onLongClick(View view, int position) {
-                SuggestionItem suggestionItem = (SuggestionItem) view.getTag(R.string.cometchat_tag_item);
-                if (onItemClickListener != null)
-                    onItemClickListener.OnItemLongClick(suggestionItem, position);
-            }
-        }));
+                                                                                                @Override
+                                                                                                public void onLongClick(View view, int position) {
+                                                                                                    SuggestionItem suggestionItem = (SuggestionItem) view.getTag(
+                                                                                                        R.string.cometchat_tag_item);
+                                                                                                    if (onItemClickListener != null)
+                                                                                                        onItemClickListener.OnItemLongClick(
+                                                                                                            suggestionItem,
+                                                                                                            position);
+                                                                                                }
+                                                                                            }));
 
         binding.recyclerViewSuggestionList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -146,31 +168,6 @@ public class CometChatSuggestionList extends MaterialCardView {
     }
 
     /**
-     * Applies the style attributes defined in the XML or by default.
-     *
-     * @param attrs        the set of attributes associated with the view
-     * @param defStyleAttr the default style to apply to this view
-     */
-    private void applyStyleAttributes(AttributeSet attrs, int defStyleAttr) {
-        TypedArray directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatSuggestionList, defStyleAttr, 0);
-        @StyleRes int styleResId = directAttributes.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListStyle, 0);
-        directAttributes = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CometChatSuggestionList, defStyleAttr, styleResId);
-        extractAttributesAndApplyDefaults(directAttributes);
-    }
-
-    /**
-     * Sets the style of the suggestion list using a specified style resource.
-     *
-     * @param style the style resource to apply to the suggestion list
-     */
-    public void setStyle(@StyleRes int style) {
-        if (style != 0) {
-            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatSuggestionList);
-            extractAttributesAndApplyDefaults(typedArray);
-        }
-    }
-
-    /**
      * Extracts style attributes from the provided TypedArray and applies default
      * values where necessary.
      *
@@ -179,13 +176,17 @@ public class CometChatSuggestionList extends MaterialCardView {
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         if (typedArray == null) return;
         try {
-            suggestionListBackgroundColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListBackgroundColor, 0);
-            suggestionListStrokeColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListStrokeColor, 0);
+            suggestionListBackgroundColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListBackgroundColor,
+                                                                CometChatTheme.getBackgroundColor1(getContext()));
+            suggestionListStrokeColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListStrokeColor,
+                                                            CometChatTheme.getStrokeColorLight(getContext()));
             suggestionListStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatSuggestionList_cometchatSuggestionListStrokeWidth, 0);
             suggestionListCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatSuggestionList_cometchatSuggestionListCornerRadius, 0);
             suggestionListItemAvatarStyle = typedArray.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemAvatarStyle, 0);
-            suggestionListItemTextAppearance = typedArray.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemTextAppearance, 0);
-            suggestionListItemTextColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemTextColor, 0);
+            suggestionListItemTextAppearance = typedArray.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemTextAppearance,
+                                                                        0);
+            suggestionListItemTextColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemTextColor,
+                                                              CometChatTheme.getTextColorPrimary(getContext()));
             updateUI();
         } finally {
             typedArray.recycle();
@@ -204,6 +205,18 @@ public class CometChatSuggestionList extends MaterialCardView {
         setSuggestionListItemAvatarStyle(suggestionListItemAvatarStyle);
         setSuggestionListItemTextAppearance(suggestionListItemTextAppearance);
         setSuggestionListItemTextColor(suggestionListItemTextColor);
+    }
+
+    /**
+     * Sets the style of the suggestion list using a specified style resource.
+     *
+     * @param style the style resource to apply to the suggestion list
+     */
+    public void setStyle(@StyleRes int style) {
+        if (style != 0) {
+            TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(style, R.styleable.CometChatSuggestionList);
+            extractAttributesAndApplyDefaults(typedArray);
+        }
     }
 
     /**

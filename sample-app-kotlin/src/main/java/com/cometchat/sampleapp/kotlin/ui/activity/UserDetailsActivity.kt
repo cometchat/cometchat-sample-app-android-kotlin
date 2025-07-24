@@ -1,5 +1,6 @@
 package com.cometchat.sampleapp.kotlin.ui.activity
 
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
@@ -177,6 +178,14 @@ class UserDetailsActivity : AppCompatActivity() {
     private fun setUserHeader(): Observer<in User?> {
         return Observer { user: User? ->
             if (user != null) {
+                binding!!.tvVideoCall.compoundDrawableTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this))
+                binding!!.tvVoiceCall.compoundDrawableTintList = ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this))
+                binding!!.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+                binding!!.toolbarTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
+                binding!!.tvSubtitle.setTextColor(CometChatTheme.getTextColorSecondary(this))
+                binding!!.tvVoiceCall.setTextColor(CometChatTheme.getTextColorSecondary(this))
+                binding!!.tvVideoCall.setTextColor(CometChatTheme.getTextColorSecondary(this))
+
                 binding!!.avatar.setAvatar(user.name, user.avatar)
                 binding!!.tvTitle.text = user.name
                 if (!Utils.isBlocked(user)) {

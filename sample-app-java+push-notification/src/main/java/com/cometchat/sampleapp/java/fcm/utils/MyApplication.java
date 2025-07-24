@@ -26,10 +26,10 @@ import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManag
 import com.cometchat.chatuikit.shared.resources.soundmanager.Sound;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.sampleapp.java.fcm.data.repository.Repository;
+import com.cometchat.sampleapp.java.fcm.ui.activity.SplashActivity;
 import com.cometchat.sampleapp.java.fcm.viewmodels.SplashViewModel;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,8 +66,7 @@ public class MyApplication extends Application {
 
     public static void setTempCall(Call call) {
         tempCall = call;
-        if (tempCall == null && soundManager != null)
-            soundManager.pauseSilently();
+        if (tempCall == null && soundManager != null) soundManager.pauseSilently();
     }
 
     /**
@@ -81,7 +80,6 @@ public class MyApplication extends Application {
             SplashViewModel viewModel = new SplashViewModel();
             viewModel.initUIKit(this);
         }
-
         LISTENER_ID = String.valueOf(System.currentTimeMillis());
 
         FirebaseApp.initializeApp(this);
@@ -108,22 +106,24 @@ public class MyApplication extends Application {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-                if (CometChatUIKit.isSDKInitialized() && isConnectedToWebSockets.compareAndSet(false, true)) {
-                    CometChat.connect(new CometChat.CallbackListener<String>() {
-                        @Override
-                        public void onSuccess(String s) {
-                            isConnectedToWebSockets.set(true);
-                        }
+                if (!(activity instanceof SplashActivity)) {
+                    if (CometChatUIKit.isSDKInitialized() && isConnectedToWebSockets.compareAndSet(false, true)) {
+                        CometChat.connect(new CometChat.CallbackListener<String>() {
+                            @Override
+                            public void onSuccess(String s) {
+                                isConnectedToWebSockets.set(true);
+                            }
 
-                        @Override
-                        public void onError(CometChatException e) {
-                            isConnectedToWebSockets.set(false);
-                        }
-                    });
-                }
-                currentActivity = activity;
-                if (++activityReferences == 1 && !isActivityChangingConfigurations) {
-                    isAppInForeground = true;
+                            @Override
+                            public void onError(CometChatException e) {
+                                isConnectedToWebSockets.set(false);
+                            }
+                        });
+                    }
+                    currentActivity = activity;
+                    if (++activityReferences == 1 && !isActivityChangingConfigurations) {
+                        isAppInForeground = true;
+                    }
                 }
             }
 
@@ -132,8 +132,7 @@ public class MyApplication extends Application {
                 currentActivity = activity;
                 if (snackbar != null && tempCall != null) {
                     showTopSnackBar(tempCall);
-                } else
-                    dismissTopSnackBar();
+                } else dismissTopSnackBar();
             }
 
             @Override
@@ -142,22 +141,24 @@ public class MyApplication extends Application {
 
             @Override
             public void onActivityStopped(@NonNull Activity activity) {
-                isActivityChangingConfigurations = activity.isChangingConfigurations();
-                if (--activityReferences == 0 && !isActivityChangingConfigurations) {
-                    isAppInForeground = false;
-                }
-                if (CometChatUIKit.isSDKInitialized() && !isAppInForeground) {
-                    CometChat.disconnect(new CometChat.CallbackListener<String>() {
-                        @Override
-                        public void onSuccess(String s) {
-                            isConnectedToWebSockets.set(false);
-                        }
+                if (!(activity instanceof SplashActivity)) {
+                    isActivityChangingConfigurations = activity.isChangingConfigurations();
+                    if (--activityReferences == 0 && !isActivityChangingConfigurations) {
+                        isAppInForeground = false;
+                    }
+                    if (CometChatUIKit.isSDKInitialized() && !isAppInForeground) {
+                        CometChat.disconnect(new CometChat.CallbackListener<String>() {
+                            @Override
+                            public void onSuccess(String s) {
+                                isConnectedToWebSockets.set(false);
+                            }
 
-                        @Override
-                        public void onError(CometChatException e) {
+                            @Override
+                            public void onError(CometChatException e) {
 
-                        }
-                    });
+                            }
+                        });
+                    }
                 }
             }
 
@@ -236,6 +237,7 @@ public class MyApplication extends Application {
             CometChatIncomingCall cometChatIncomingCall = new CometChatIncomingCall(currentActivity);
             cometChatIncomingCall.disableSoundForCalls(true);
             cometChatIncomingCall.setCall(call);
+            cometChatIncomingCall.setFitsSystemWindows(true);
             cometChatIncomingCall.setOnError((cometchatException) -> dismissTopSnackBar());
 
             snackbar = Snackbar.make(rootView, " ", Snackbar.LENGTH_INDEFINITE);
@@ -248,8 +250,7 @@ public class MyApplication extends Application {
             layout.addView(cometChatIncomingCall, 0);
 
             for (PopupWindow popupWindow : popupWindows) {
-                if (popupWindow.isShowing())
-                    popupWindow.dismiss();
+                if (popupWindow.isShowing()) popupWindow.dismiss();
             }
             popupWindows.clear();
 
@@ -265,8 +266,7 @@ public class MyApplication extends Application {
     public void launchIncomingCallPopup(@Nonnull Call call) {
         if (call.getCallInitiator() instanceof User) {
             User callInitiator = (User) call.getCallInitiator();
-            if (CometChatUIKit.getLoggedInUser().getUid().equalsIgnoreCase(callInitiator.getUid()))
-                return;
+            if (CometChatUIKit.getLoggedInUser().getUid().equalsIgnoreCase(callInitiator.getUid())) return;
         }
 
         if (CometChat.getActiveCall() == null && CallingExtension.getActiveCall() == null && !CallingExtension.isActiveMeeting()) {

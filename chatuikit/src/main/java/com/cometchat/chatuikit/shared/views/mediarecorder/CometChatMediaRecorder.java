@@ -4,8 +4,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -21,6 +22,7 @@ import androidx.annotation.Dimension;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMediarecorderBinding;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
@@ -104,6 +106,8 @@ public class CometChatMediaRecorder extends MaterialCardView {
     private @ColorInt int messageBubbleStrokeColor;
     private Drawable messageBubbleBackgroundDrawable;
     private MediaRecorder recorder;
+    private AudioManager audioManager;
+    private AudioFocusRequest audioFocusRequest;
     private String recordedFilePath;
     private boolean isRecording = false;
     private boolean isAutoPermissionCheck = true;
@@ -124,7 +128,11 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public CometChatMediaRecorder(Context context) {
         this(context, null);
-    }
+    }    private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT || focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            stopRecording();
+        }
+    };
 
     /**
      * Constructs a new CometChatMediaRecorder instance.
@@ -166,8 +174,8 @@ public class CometChatMediaRecorder extends MaterialCardView {
         binding.audioRippleEffect.setRadius(1000);
 
         // Initialization
-        checkMicrophonePermission();
         setUpAudioManager();
+        checkMicrophonePermission();
 
         // Apply style attributes
         applyStyleAttributes(attrs, defStyleAttr);
@@ -210,10 +218,25 @@ public class CometChatMediaRecorder extends MaterialCardView {
      * deleted.
      */
     private void setUpAudioManager() {
-        AudioManager audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager.isMusicActive()) {
-            audioManager.requestAudioFocus(focusChange -> {
-            }, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (getContext() == null) return;
+        audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+            audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                .setAudioAttributes(audioAttributes)
+                .setOnAudioFocusChangeListener(focusChangeListener)
+                .setAcceptsDelayedFocusGain(true)
+                .build();
+            audioManager.requestAudioFocus(audioFocusRequest);
+        } else {
+            audioManager.requestAudioFocus(
+                focusChange -> {},
+                AudioManager.STREAM_VOICE_CALL,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+            );
         }
     }
 
@@ -289,59 +312,81 @@ public class CometChatMediaRecorder extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            backgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderBackgroundColor, Color.TRANSPARENT);
+            backgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderBackgroundColor,
+                                                  CometChatTheme.getBackgroundColor1(getContext()));
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStrokeWidth, 0);
-            strokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStrokeColor, Color.TRANSPARENT);
+            strokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStrokeColor,
+                                              CometChatTheme.getStrokeColorLight(getContext()));
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderCornerRadius, 0);
             recordingIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRecordingIcon);
-            recordingIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRecordingIconTint, 0);
+            recordingIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRecordingIconTint,
+                                                    CometChatTheme.getColorWhite(getContext()));
             recordingIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRecordingIconBackgroundColor,
-                                                               0);
+                                                               CometChatTheme.getIconTintHighlight(getContext()));
             textAppearance = typedArray.getResourceId(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderTextAppearance, 0);
-            textColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderTextColor, 0);
+            textColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderTextColor,
+                                            CometChatTheme.getTextColorPrimary(getContext()));
             deleteIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIcon);
-            deleteIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconTint, 0);
-            deleteIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconBackgroundColor, 0);
+            deleteIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconTint,
+                                                 CometChatTheme.getIconTintSecondary(getContext()));
+            deleteIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconBackgroundColor,
+                                                            CometChatTheme.getBackgroundColor1(getContext()));
             deleteIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconRadius, 0);
             deleteIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconStrokeWidth,
                                                                      0);
-            deleteIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconStrokeColor, 0);
+            deleteIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconStrokeColor,
+                                                        CometChatTheme.getStrokeColorLight(getContext()));
             deleteIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderDeleteIconElevation, 0);
             startIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIcon);
-            startIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconTint, 0);
-            startIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconBackgroundColor, 0);
+            startIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconTint,
+                                                CometChatTheme.getErrorColor(getContext()));
+            startIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconBackgroundColor,
+                                                           CometChatTheme.getBackgroundColor1(getContext()));
             startIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconRadius, 0);
             startIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconStrokeWidth, 0);
-            startIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconStrokeColor, 0);
+            startIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconStrokeColor,
+                                                       CometChatTheme.getStrokeColorLight(getContext()));
             startIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStartIconElevation, 0);
             pauseIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIcon);
-            pauseIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconTint, 0);
-            pauseIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconBackgroundColor, 0);
+            pauseIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconTint,
+                                                CometChatTheme.getErrorColor(getContext()));
+            pauseIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconBackgroundColor,
+                                                           CometChatTheme.getBackgroundColor1(getContext()));
             pauseIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconRadius, 0);
             pauseIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconStrokeWidth, 0);
-            pauseIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconStrokeColor, 0);
+            pauseIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconStrokeColor,
+                                                       CometChatTheme.getStrokeColorLight(getContext()));
             pauseIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderPauseIconElevation, 0);
             stopIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIcon);
-            stopIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconTint, 0);
-            stopIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconBackgroundColor, 0);
+            stopIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconTint,
+                                               CometChatTheme.getIconTintSecondary(getContext()));
+            stopIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconBackgroundColor,
+                                                          CometChatTheme.getBackgroundColor1(getContext()));
             stopIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconRadius, 0);
             stopIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconStrokeWidth, 0);
-            stopIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconStrokeColor, 0);
+            stopIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconStrokeColor,
+                                                      CometChatTheme.getStrokeColorLight(getContext()));
             stopIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderStopIconElevation, 0);
             sendIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIcon);
-            sendIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconTint, 0);
-            sendIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconBackgroundColor, 0);
+            sendIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconTint,
+                                               CometChatTheme.getIconTintHighlight(getContext()));
+            sendIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconBackgroundColor,
+                                                          CometChatTheme.getBackgroundColor1(getContext()));
             sendIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconRadius, 0);
             sendIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconStrokeWidth, 0);
-            sendIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconStrokeColor, 0);
+            sendIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconStrokeColor,
+                                                      CometChatTheme.getStrokeColorLight(getContext()));
             sendIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderSendIconElevation, 0);
             restartIcon = typedArray.getDrawable(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIcon);
-            restartIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconTint, 0);
-            restartIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconBackgroundColor, 0);
+            restartIconTint = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconTint,
+                                                  CometChatTheme.getIconTintSecondary(getContext()));
+            restartIconBackgroundColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconBackgroundColor,
+                                                             CometChatTheme.getBackgroundColor1(getContext()));
             restartIconRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconRadius, 0);
             restartIconStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconStrokeWidth,
                                                                       0);
-            restartIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconStrokeColor, 0);
+            restartIconStrokeColor = typedArray.getColor(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconStrokeColor,
+                                                         CometChatTheme.getStrokeColorLight(getContext()));
             restartIconElevation = typedArray.getDimensionPixelSize(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderRestartIconElevation, 0);
             outgoingMessageBubbleStyle = typedArray.getResourceId(R.styleable.CometChatMediaRecorder_cometchatMediaRecorderOutgoingMessageBubbleStyle,
                                                                   0);
@@ -678,14 +723,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getDeleteIconTint() {
         return deleteIconTint;
-    }    /**
-     * Returns the current stroke width of the media recorder.
-     *
-     * @return the stroke width
-     */
-    @Override
-    public @Dimension int getStrokeWidth() {
-        return strokeWidth;
     }
 
     /**
@@ -705,6 +742,14 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @ColorInt int getDeleteIconBackgroundColor() {
         return deleteIconBackgroundColor;
+    }    /**
+     * Returns the current stroke width of the media recorder.
+     *
+     * @return the stroke width
+     */
+    @Override
+    public @Dimension int getStrokeWidth() {
+        return strokeWidth;
     }
 
     /**
@@ -859,15 +904,6 @@ public class CometChatMediaRecorder extends MaterialCardView {
      */
     public @Dimension int getStartIconRadius() {
         return startIconRadius;
-    }    /**
-     * Sets the stroke width of the media recorder.
-     *
-     * @param strokeWidth the stroke width to set
-     */
-    @Override
-    public void setStrokeWidth(@Dimension int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -897,6 +933,15 @@ public class CometChatMediaRecorder extends MaterialCardView {
     public void setStartIconStrokeWidth(@Dimension int startIconStrokeWidth) {
         this.startIconStrokeWidth = startIconStrokeWidth;
         binding.btnCenter.setStrokeWidth(startIconStrokeWidth);
+    }    /**
+     * Sets the stroke width of the media recorder.
+     *
+     * @param strokeWidth the stroke width to set
+     */
+    @Override
+    public void setStrokeWidth(@Dimension int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        super.setStrokeWidth(strokeWidth);
     }
 
     /**
@@ -1488,7 +1533,7 @@ public class CometChatMediaRecorder extends MaterialCardView {
         if (messageBubbleStyle != 0) {
             this.outgoingMessageBubbleStyle = messageBubbleStyle;
             try (TypedArray typedArray = getContext().obtainStyledAttributes(messageBubbleStyle, R.styleable.CometChatMessageBubble)) {
-                messageBubbleBackgroundColor = typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor, 0);
+                messageBubbleBackgroundColor = typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor, CometChatTheme.getPrimaryColor(getContext()));
                 messageBubbleCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleCornerRadius,
                                                                              0);
                 messageBubbleStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeWidth, 0);
@@ -1599,6 +1644,7 @@ public class CometChatMediaRecorder extends MaterialCardView {
      * MediaRecorder resources and resets the UI elements.
      */
     public void stopRecording() {
+        abandonAudioFocus();
         AudioPlayer.getInstance().reset();
         recordingStateHandler(RecordingState.STOPPED);
         if (recorder != null) {
@@ -1612,8 +1658,19 @@ public class CometChatMediaRecorder extends MaterialCardView {
                 timerHandler.removeCallbacks(timerRunnable);
             } catch (Exception ignored) {
             }
-
         }
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (audioFocusRequest != null) {
+                audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            }
+        } else {
+            audioManager.abandonAudioFocus(focusChangeListener);
+        }
+        audioFocusRequest = null;
     }
 
     /**
@@ -1793,6 +1850,8 @@ public class CometChatMediaRecorder extends MaterialCardView {
          */
         STOPPED,
     }
+
+
 
 
 

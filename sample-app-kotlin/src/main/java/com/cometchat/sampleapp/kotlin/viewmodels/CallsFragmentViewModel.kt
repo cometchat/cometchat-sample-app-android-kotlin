@@ -37,16 +37,11 @@ class CallsFragmentViewModel : ViewModel() {
         Repository.getUser(user.uid, object : CometChat.CallbackListener<User>() {
             override fun onSuccess(userObj: User) {
                 if (userObj.isBlockedByMe) {
-                    listener.onError(
-                        CometChatException(
-                            "BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"
-                        )
-                    )
-                    onError.setValue(
-                        CometChatException(
-                            "BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"
-                        )
-                    )
+                    listener.onError(CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"))
+                    onError.setValue(CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user is blocked"))
+                } else if (userObj.isHasBlockedMe) {
+                    listener.onError(CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user has blocked you"))
+                    onError.setValue(CometChatException("BLOCKED_BY_ME", "Call cannot be initiated as user has blocked you"))
                 } else {
                     startCall(callType, userObj, listener)
                 }

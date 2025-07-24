@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +17,7 @@ import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.R
 import com.cometchat.chatuikit.calls.CometChatCallActivity
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick
+import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.databinding.FragmentCallsBinding
 import com.cometchat.sampleapp.kotlin.ui.activity.CallDetailsActivity
 import com.cometchat.sampleapp.kotlin.utils.AppUtils.getProgressBar
@@ -44,6 +44,7 @@ class CallsFragment : Fragment() {
         initViewModel()
 
         initClickListeners()
+
     }
 
     override fun onResume() {
@@ -77,7 +78,7 @@ class CallsFragment : Fragment() {
 
     private fun onError(): Observer<CometChatException> {
         return Observer { e: CometChatException ->
-            Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
+            Utils.showToast(context, e.message, CometChatTheme.getWarningColor(context))
         }
     }
 
@@ -105,16 +106,16 @@ class CallsFragment : Fragment() {
                 val listener: CometChat.CallbackListener<Void> = object : CometChat.CallbackListener<Void>() {
                     override fun onSuccess(unused: Void?) {
                         isCallActive = false
-                        holder.binding.tailView.removeAllViews();
+                        holder.binding.tailView.removeAllViews()
                         if (callView != null)
-                            holder.binding.tailView.addView(callView);
+                            holder.binding.tailView.addView(callView)
                     }
 
                     override fun onError(e: CometChatException) {
                         isCallActive = false
-                        holder.binding.tailView.removeAllViews();
+                        holder.binding.tailView.removeAllViews()
                         if (callView != null)
-                            holder.binding.tailView.addView(callView);
+                            holder.binding.tailView.addView(callView)
                     }
                 }
                 if (callLog.type == CometChatCallsConstants.CALL_TYPE_AUDIO) {

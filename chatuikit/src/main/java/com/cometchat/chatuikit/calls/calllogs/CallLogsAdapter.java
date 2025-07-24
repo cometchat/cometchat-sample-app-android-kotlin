@@ -760,6 +760,7 @@ public class CallLogsAdapter extends RecyclerView.Adapter<CallLogsAdapter.CallLo
                                                                   .getAuthSettings()
                                                                   .getDateTimeFormatterCallback() : dateTimeFormatter));
             cometchatDate.setStyle(dateStyle);
+            cometchatDate.setDateTextColor(itemSubtitleTextColor);
             return cometchatDate;
         }
 

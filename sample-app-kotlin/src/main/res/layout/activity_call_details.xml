@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/cometchatBackgroundColor1"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <LinearLayout
@@ -49,6 +50,7 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/toolbar_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />
@@ -69,11 +71,13 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/message_header_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />
 
     <LinearLayout
+        android:id="@+id/info_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -128,6 +132,7 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/info_layout_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />

@@ -10,7 +10,7 @@ import com.cometchat.sampleapp.kotlin.data.repository.Repository
 
 class LoginViewModel : ViewModel() {
     val loginStatus: MutableLiveData<Boolean> = MutableLiveData()
-    val selectedUser: MutableLiveData<User> = MutableLiveData()
+    val selectedUser: MutableLiveData<User?> = MutableLiveData()
     val users: MutableLiveData<List<User>> = MutableLiveData()
     private val onError = MutableLiveData<CometChatException>()
 
