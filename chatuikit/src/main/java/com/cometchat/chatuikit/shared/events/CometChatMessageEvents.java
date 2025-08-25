@@ -128,6 +128,9 @@ public abstract class CometChatMessageEvents {
     public void onMessagesReadByAll(MessageReceipt messageReceipt) {
     }
 
+    public void onMessageModerated(BaseMessage baseMessage) {
+    }
+
     /**
      * Adds a message event listener with the specified tag.
      *

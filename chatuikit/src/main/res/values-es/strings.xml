@@ -211,4 +211,5 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_storage_permission_warning">Se requiere permiso de almacenamiento para acceder a los archivos.</string>
     <string name="cometchat_cancel_button">Cancelar</string>
     <string name="cometchat_settings_button">Configuración</string>
+    <string name="cometchat_moderation_block_message">Tu mensaje fue bloqueado debido a las políticas de moderación.</string>
 </resources>

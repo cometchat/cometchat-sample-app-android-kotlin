@@ -44,6 +44,7 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
 import com.cometchat.chat.core.MessagesRequest;
 import com.cometchat.chat.core.ReactionsRequest;
+import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
@@ -150,7 +151,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private int messageReactionOptionVisibility = VISIBLE;
     private int avatarVisibility = VISIBLE;
     private int receiptsVisibility = VISIBLE;
-
     // User and Group
     private User user;
     private Group group;
@@ -764,6 +764,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                                                                                           0));
                 setOutgoingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle,
                                                                                0));
+                setModerationViewStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatModerationViewStyle, 0));
             }
         } finally {
             typedArray.recycle();
@@ -1952,7 +1953,8 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                             BaseMessage baseMessage,
                             CometChatMessageTemplate cometchatMessageTemplate,
                             CometChatMessageBubble cometchatMessageBubble) {
-        if (baseMessage != null && baseMessage.getId() != 0) {
+        ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
+        if (baseMessage != null && baseMessage.getId() != 0 && !UIKitConstants.ModerationConstants.PENDING.equals(moderationStatus)) {
             this.customOption = list;
             this.baseMessage = baseMessage;
             this.messageBubble = cometchatMessageBubble;
@@ -1969,7 +1971,8 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void openMessageOptionBottomSheet(List<OptionSheetMenuItem> items) {
         cometchatPopUpMenuMessage.setStyle(messageOptionSheetStyle);
         cometchatPopUpMenuMessage.setAddReactionIcon(addReactionIcon);
-        if (UIKitConstants.MessageCategory.INTERACTIVE.equals(baseMessage.getCategory()) || messageReactionOptionVisibility != View.VISIBLE) {
+        ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
+        if (UIKitConstants.MessageCategory.INTERACTIVE.equals(baseMessage.getCategory()) || messageReactionOptionVisibility != View.VISIBLE || UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)) {
             cometchatPopUpMenuMessage.setQuickReactionsVisibility(GONE);
         }
 
@@ -2429,6 +2432,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             messageAdapter.setOutgoingMessageBubbleStyle(outgoingMessageBubbleStyle);
             this.outgoingMessageBubbleStyle = outgoingMessageBubbleStyle;
         }
+    }
+
+    public void setModerationViewStyle(@StyleRes int moderationViewStyle) {
+        messageAdapter.setModerationViewStyle(moderationViewStyle);
     }
 
     /**
@@ -2924,6 +2931,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void setMessageReactionOptionVisibility(int messageReactionOptionVisibility) {
         this.messageReactionOptionVisibility = messageReactionOptionVisibility;
+    }
+
+    public void setModerationViewVisibility(int visibility) {
+        messageAdapter.setModerationViewVisibility(visibility != View.VISIBLE);
     }
 
     /**

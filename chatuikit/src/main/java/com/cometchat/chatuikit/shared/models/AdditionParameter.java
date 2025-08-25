@@ -38,6 +38,7 @@ public class AdditionParameter {
     private int deleteMessageOptionVisibility = View.VISIBLE;
     private int messageInfoOptionVisibility = View.VISIBLE;
     private int groupActionMessageVisibility = View.VISIBLE;
+    private int moderationViewVisibility = View.VISIBLE;
 
 
     private @StyleRes int incomingDeleteBubbleStyle;
@@ -543,5 +544,13 @@ public class AdditionParameter {
 
     public void setGroupActionMessageVisibility(int groupActionMessageVisibility) {
         this.groupActionMessageVisibility = groupActionMessageVisibility;
+    }
+
+    public void setModerationViewVisibility(int visibility) {
+        this.moderationViewVisibility = visibility;
+    }
+
+    public int getModerationViewVisibility() {
+        return moderationViewVisibility;
     }
 }

@@ -39,19 +39,11 @@ public class ThreadMessageViewModel extends ViewModel {
         return parentMessage;
     }
 
-    public void fetchMessageDetails(long id) {
-        this.id = id;
-        Repository.fetchMessageInformation(id, new CometChat.CallbackListener<BaseMessage>() {
-            @Override
-            public void onSuccess(BaseMessage message) {
-                parentMessage.setValue(message);
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                e.printStackTrace();
-            }
-        });
+    public void setParentMessage(BaseMessage parentMessage) {
+        if (parentMessage != null) {
+            this.id = parentMessage.getId();
+            this.parentMessage.setValue(parentMessage);
+        }
     }
 
     public void unblockUser() {

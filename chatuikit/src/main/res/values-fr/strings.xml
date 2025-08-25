@@ -207,4 +207,5 @@
     <string name="cometchat_storage_permission_warning">L\'autorisation de stockage est requise pour accéder aux fichiers.</string>
     <string name="cometchat_cancel_button">Annuler</string>
     <string name="cometchat_settings_button">Paramètres</string>
+    <string name="cometchat_moderation_block_message">Votre message a été bloqué en raison des politiques de modération.</string>
 </resources>

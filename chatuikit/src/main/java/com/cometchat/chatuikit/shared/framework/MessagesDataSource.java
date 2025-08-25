@@ -1,5 +1,7 @@
 package com.cometchat.chatuikit.shared.framework;
 
+import static com.cometchat.chatuikit.shared.resources.utils.Utils.isNotParticipant;
+
 import android.content.Context;
 import android.text.SpannableString;
 import android.view.View;
@@ -9,6 +11,7 @@ import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.chat.constants.CometChatConstants;
+import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
@@ -66,7 +69,13 @@ public class MessagesDataSource implements DataSource {
                                                                  Group group,
                                                                  AdditionParameter additionParameter) {
         List<CometChatMessageOption> cometchatOptions = new ArrayList<>();
+        ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
         if (baseMessage.getDeletedAt() == 0) {
+            if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)) {
+                if (additionParameter.getCopyMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getCopyOption(context));
+                if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getDeleteOption(context));
+                return cometchatOptions;
+            }
             if (baseMessage.getParentMessageId() == 0) {
                 if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getReplyInThreadOption(context));
             }
@@ -74,12 +83,12 @@ public class MessagesDataSource implements DataSource {
             if (additionParameter.getCopyMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getCopyOption(context));
             if (_isCommon(baseMessage, group)) {
                 if (isMyMessage(baseMessage)) {
-                    if (additionParameter.getEditMessageOptionVisibility() == View.VISIBLE) {
-                        cometchatOptions.add(_getEditOption(context));
-                    }
                     if (additionParameter.getMessageInfoOptionVisibility() == View.VISIBLE) {
                         cometchatOptions.add(_getMessageInformation(context));
                     }
+                }
+                if (additionParameter.getEditMessageOptionVisibility() == View.VISIBLE) {
+                    cometchatOptions.add(_getEditOption(context));
                 }
                 if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) {
                     cometchatOptions.add(_getDeleteOption(context));
@@ -156,10 +165,6 @@ public class MessagesDataSource implements DataSource {
                                           context.getString(R.string.cometchat_message_privately),
                                           R.drawable.cometchat_ic_send_message_privately,
                                           null);
-    }
-
-    private boolean isNotParticipant(Group group) {
-        return group != null && group.getScope() != null && !CometChatConstants.SCOPE_PARTICIPANT.equalsIgnoreCase(group.getScope());
     }
 
     @Override
@@ -549,23 +554,6 @@ public class MessagesDataSource implements DataSource {
                                                     position,
                                                     additionParameter);
                 }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit.getDataSource().bindBottomView(context, createdView, message, alignment, holder, messageList, position, null);
-                }
             });
     }
 
@@ -613,25 +601,6 @@ public class MessagesDataSource implements DataSource {
                                                     position,
                                                     additionParameter);
                 }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                }
             });
     }
 
@@ -678,25 +647,6 @@ public class MessagesDataSource implements DataSource {
                                                     messageList,
                                                     position,
                                                     additionParameter);
-                }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
                 }
             });
     }
@@ -772,25 +722,6 @@ public class MessagesDataSource implements DataSource {
                                                    position,
                                                    additionParameter);
                 }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                }
             });
     }
 
@@ -836,25 +767,6 @@ public class MessagesDataSource implements DataSource {
                                                    messageList,
                                                    position,
                                                    additionParameter);
-                }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
                 }
             });
     }
@@ -946,25 +858,6 @@ public class MessagesDataSource implements DataSource {
                                                    position,
                                                    additionParameter);
                 }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                }
             });
     }
 
@@ -1011,25 +904,6 @@ public class MessagesDataSource implements DataSource {
                                                         position,
                                                         additionParameter);
                 }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                }
             });
     }
 
@@ -1075,25 +949,6 @@ public class MessagesDataSource implements DataSource {
                                                    messageList,
                                                    position,
                                                    additionParameter);
-                }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
-                        .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
                 }
             });
     }
@@ -1254,23 +1109,30 @@ public class MessagesDataSource implements DataSource {
                                                            AdditionParameter additionParameter) {
         List<CometChatMessageOption> messageOptions = new ArrayList<>();
         if (baseMessage.getDeletedAt() == 0) {
-            if (isMyMessage(baseMessage)) {
-                if (additionParameter.getMessageInfoOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessageInformation(context));
-            }
-            if (baseMessage.getParentMessageId() == 0) {
-                if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyInThreadOption(context));
-            }
-            if (baseMessage instanceof TextMessage || baseMessage instanceof MediaMessage) {
-                if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getShareOption(context));
-            }
-            if (_isCommon(baseMessage, group)) {
-                if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getDeleteOption(context));
-            }
-            if (baseMessage.getReceiverType().equalsIgnoreCase(UIKitConstants.ReceiverType.GROUP) && !baseMessage
-                .getSender()
-                .getUid()
-                .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
-                if (additionParameter.getMessagePrivatelyOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessagePrivatelyOption(context));
+            ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
+            if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)){
+                if (_isCommon(baseMessage, group)) {
+                    if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getDeleteOption(context));
+                }
+            } else {
+                if (isMyMessage(baseMessage)) {
+                    if (additionParameter.getMessageInfoOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessageInformation(context));
+                }
+                if (baseMessage.getParentMessageId() == 0) {
+                    if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyInThreadOption(context));
+                }
+                if (baseMessage instanceof TextMessage || baseMessage instanceof MediaMessage) {
+                    if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getShareOption(context));
+                }
+                if (_isCommon(baseMessage, group)) {
+                    if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getDeleteOption(context));
+                }
+                if (baseMessage.getReceiverType().equalsIgnoreCase(UIKitConstants.ReceiverType.GROUP) && !baseMessage
+                        .getSender()
+                        .getUid()
+                        .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
+                    if (additionParameter.getMessagePrivatelyOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessagePrivatelyOption(context));
+                }
             }
         }
         return messageOptions;

@@ -304,6 +304,7 @@
         <item name="cometchatPollBubbleStyle">@style/CometChatOutgoingPollBubbleStyle</item>
         <item name="cometchatCollaborativeBubbleStyle">@style/CometChatOutgoingCollaborativeBubbleStyle</item>
         <item name="cometchatMeetCallBubbleStyle">@style/CometChatOutgoingMeetCallBubbleStyle</item>
+        <item name="cometchatModerationViewStyle">@style/CometChatModerationViewStyle</item>
     </style>
 
     <style name="CometChatIncomingMessageBubbleStyle">
@@ -899,6 +900,10 @@
         <item name="cometchatAIConversationSummaryErrorStateTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
 
+    <style name="CometChatModerationViewStyle">
+        <item name="cometchatModerationViewBackgroundColor">@color/cometchat_color_error_100</item>
+        <item name="cometchatModerationViewTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
+    </style>
 
     <!-- ########################################## Typography ########################################## -->
     <!-- Typography: Title -->

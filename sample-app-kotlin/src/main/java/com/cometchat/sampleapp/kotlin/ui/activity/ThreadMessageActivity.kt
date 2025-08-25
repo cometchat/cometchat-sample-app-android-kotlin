@@ -21,7 +21,9 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityThreadMessageBinding
 import com.cometchat.sampleapp.kotlin.viewmodels.ThreadMessageViewModel
-import com.google.gson.Gson
+import com.cometchat.sampleapp.kotlin.utils.AppConstants
+import org.json.JSONException
+import org.json.JSONObject
 
 class ThreadMessageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityThreadMessageBinding
@@ -37,11 +39,16 @@ class ThreadMessageActivity : AppCompatActivity() {
         adjustWindowSettings()
         windowInsetsListener()
 
-        // Create an instance of the MessagesViewModel
         val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
-        viewModel.fetchMessageDetails(intent.getLongExtra(getString(R.string.app_message_id), -1))
-        user = Gson().fromJson(intent.getStringExtra("user"), User::class.java)
-
+        val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
+        try {
+            if (rawMessage != null) {
+                val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
+                viewModel.setParentMessage(parentMessage)
+            }
+        } catch (e: JSONException) {
+            throw RuntimeException(e)
+        }
         viewModel.addUserListener()
         viewModel.parentMessage.observe(this, this::setParentMessage)
         viewModel.userBlockStatus.observe(this, this::updateUserBlockStatus)

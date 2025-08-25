@@ -488,6 +488,11 @@ public class MessageListViewModel extends ViewModel {
             public void onMessagesReadByAll(MessageReceipt messageReceipt) {
                 setMessageReceipt(messageReceipt);
             }
+
+            @Override
+            public void onMessageModerated(BaseMessage baseMessage) {
+                 updateMessageFromMUID(baseMessage);
+            }
         });
 
         CometChatGroupEvents.addGroupListener(LISTENERS_TAG, new CometChatGroupEvents() {
@@ -1105,12 +1110,15 @@ public class MessageListViewModel extends ViewModel {
 
     public void updateMessage(BaseMessage message) {
         if (message != null) {
-            if (messageArrayList.contains(message)) {
-                int index = messageArrayList.indexOf(message);
-                BaseMessage oldMessage = messageArrayList.get(index);
-                messageArrayList.remove(oldMessage);
-                messageArrayList.add(index, message);
-                updateMessage.setValue(index);
+            for (int i = messageArrayList.size() - 1; i >= 0; i--) {
+                BaseMessage baseMessage = messageArrayList.get(i);
+                if (baseMessage.getId() == message.getId()) {
+                    messageArrayList.remove(i);
+                    messageArrayList.add(i, message);
+                    updateMessage.setValue(i);
+                    notifyUpdate.setValue(unused);
+                    return;
+                }
             }
         }
     }

@@ -208,4 +208,5 @@
     <string name="cometchat_storage_permission_warning">फ़ाइलों तक पहुंचने के लिए संग्रहण अनुमति आवश्यक है।</string>
     <string name="cometchat_cancel_button">रद्द करें</string>
     <string name="cometchat_settings_button">सेटिंग्स</string>
+    <string name="cometchat_moderation_block_message">आपका संदेश मोडरेशन नीतियों के कारण ब्लॉक कर दिया गया।</string>
 </resources>

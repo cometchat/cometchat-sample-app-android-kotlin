@@ -1,6 +1,5 @@
 package com.cometchat.sampleapp.kotlin.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,18 +30,11 @@ class ThreadMessageViewModel : ViewModel() {
 
     fun getMessageId(): Long = messageId
 
-    fun fetchMessageDetails(id: Long) {
-        this.messageId = id
-        Repository.fetchMessageInformation(id, object : CometChat.CallbackListener<BaseMessage>() {
-            override fun onSuccess(message: BaseMessage?) {
-                Log.i("TAG", "onSuccess: $message")
-                message?.let { _parentMessage.postValue(it) }
-            }
-
-            override fun onError(e: CometChatException?) {
-                Log.i("TAG", "onError: 1234 " + e?.message)
-            }
-        })
+    fun setParentMessage(parentMessage: BaseMessage?) {
+        if (parentMessage != null) {
+            this.messageId = parentMessage.getId()
+            _parentMessage.value = parentMessage
+        }
     }
 
     fun unblockUser() {

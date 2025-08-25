@@ -45,7 +45,6 @@ dependencies {
 
     // Firebase BOM
     implementation platform(libs.firebase.bom)
-    implementation libs.google.firebase.auth
     implementation libs.firebase.messaging
 
     // Other Dependencies

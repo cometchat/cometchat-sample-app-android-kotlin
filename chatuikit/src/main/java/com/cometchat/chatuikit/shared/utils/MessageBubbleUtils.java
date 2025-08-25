@@ -1,5 +1,8 @@
 package com.cometchat.chatuikit.shared.utils;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -46,6 +49,7 @@ import com.cometchat.chatuikit.shared.views.imagebubble.CometChatImageBubble;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
 import com.cometchat.chatuikit.shared.views.messagereceipt.CometChatMessageReceipt;
 import com.cometchat.chatuikit.shared.views.messagereceipt.Receipt;
+import com.cometchat.chatuikit.shared.views.moderationview.CometChatModerationView;
 import com.cometchat.chatuikit.shared.views.reaction.CometChatMessageReaction;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnAddMoreReactionsClick;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionClick;
@@ -191,6 +195,44 @@ public class MessageBubbleUtils {
                 deletedBubble.setVisibility(View.VISIBLE);
                 deletedBubble.setStyle(deleteBubbleStyle);
             }
+        }
+    }
+
+    public static View getBottomView(Context context) {
+        return View.inflate(context, R.layout.cometchat_moderation_view, null);
+    }
+
+    public static void bindBottomView(View view, BaseMessage message, @StyleRes int moderationViewStyle) {
+        if (view != null) {
+            CometChatModerationView moderationView = view.findViewById(R.id.cometchat_moderation_view);
+            moderationView.setStyle(moderationViewStyle);
+            View parent = (View) view.getParent();
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) parent.getLayoutParams();
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(textMessage.getModerationStatus())) {
+                        int length = textMessage.getText() != null ? textMessage.getText().length() : 0;
+                        if (length < 15) {
+                            params.width = Utils.convertDpToPx(view.getContext(), 200);
+                        } else {
+                            params.width = MATCH_PARENT;
+                        }
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        params.width = WRAP_CONTENT;
+                        view.setVisibility(View.GONE);
+                    }
+                } else if (message instanceof MediaMessage) {
+                    MediaMessage mediaMessage = (MediaMessage) message;
+                    if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(mediaMessage.getModerationStatus())) {
+                        params.width = MATCH_PARENT;
+                        moderationView.setVisibility(View.VISIBLE);
+                    } else {
+                        params.width = WRAP_CONTENT;
+                        moderationView.setVisibility(View.GONE);
+                    }
+                }
+                parent.setLayoutParams(params);
         }
     }
 

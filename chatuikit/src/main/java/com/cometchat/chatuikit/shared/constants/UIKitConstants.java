@@ -1,6 +1,7 @@
 package com.cometchat.chatuikit.shared.constants;
 
 import com.cometchat.chat.constants.CometChatConstants;
+import com.cometchat.chat.enums.ModerationStatus;
 
 public final class UIKitConstants {
     private static final String TAG = UIKitConstants.class.getSimpleName();
@@ -82,6 +83,7 @@ public final class UIKitConstants {
         public static final String INTERNAL_STATUS_INFO_VIEW = "internal_status_info_view";
         public static final String INTERNAL_THREAD_VIEW = "internal_thread_view";
         public static final String INTERNAL_LEADING_VIEW = "internal_leading_view";
+        public static final String INTERNAL_BOTTOM_VIEW = "internal_bottom_view";
     }
 
     public static final class IntentStrings {
@@ -303,5 +305,12 @@ public final class UIKitConstants {
     public static final class CallingJSONConstants {
         public static final String CALL_TYPE = "callType";
         public static final String CALL_SESSION_ID = "sessionID";
+    }
+
+    public static final class ModerationConstants {
+        public static final ModerationStatus UNMODERATED = ModerationStatus.UNMODERATED;
+        public static final ModerationStatus PENDING = ModerationStatus.PENDING;
+        public static final ModerationStatus APPROVED = ModerationStatus.APPROVED;
+        public static final ModerationStatus DISAPPROVED = ModerationStatus.DISAPPROVED;
     }
 }

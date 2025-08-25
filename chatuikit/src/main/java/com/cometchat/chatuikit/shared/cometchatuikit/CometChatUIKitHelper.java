@@ -195,6 +195,13 @@ public class CometChatUIKitHelper {
         }
     }
 
+    public static void onMessageModerated(BaseMessage baseMessage) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
+            event.onMessageModerated(baseMessage);
+        }
+    }
+
     public static void onLiveReaction(@DrawableRes int icon) {
         List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
         for (CometChatMessageEvents event : events) {

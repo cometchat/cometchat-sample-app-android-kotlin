@@ -67,6 +67,7 @@ import androidx.core.content.FileProvider;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
+import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.helpers.Logger;
 import com.cometchat.chat.models.Action;
@@ -79,6 +80,7 @@ import com.cometchat.chat.models.Interaction;
 import com.cometchat.chat.models.InteractiveMessage;
 import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.MessageReceipt;
+import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCustomToastLayoutBinding;
@@ -414,6 +416,10 @@ public class Utils {
             }
         }
         return message;
+    }
+
+    public static boolean isNotParticipant(Group group) {
+        return group != null && group.getScope() != null && !CometChatConstants.SCOPE_PARTICIPANT.equalsIgnoreCase(group.getScope());
     }
 
     public static boolean isLoggedInUser(User user) {
@@ -1141,6 +1147,16 @@ public class Utils {
             }
         }
         return baseMessage;
+    }
+
+    public static ModerationStatus getModerationStatus(BaseMessage baseMessage) {
+        if (baseMessage instanceof TextMessage) {
+            return ((TextMessage) baseMessage).getModerationStatus();
+        }
+        if (baseMessage instanceof MediaMessage){
+            return ((MediaMessage) baseMessage).getModerationStatus();
+        }
+        return UIKitConstants.ModerationConstants.APPROVED;
     }
 
     public static Call getDirectCallData(BaseMessage baseMessage) {

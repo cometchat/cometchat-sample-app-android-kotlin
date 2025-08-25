@@ -8,11 +8,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,12 +19,11 @@ import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
-import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityMessagesBinding;
 import com.cometchat.sampleapp.java.fcm.databinding.OverflowMenuLayoutBinding;
+import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.utils.MyApplication;
 import com.cometchat.sampleapp.java.fcm.viewmodels.MessagesViewModel;
 import com.google.gson.Gson;
@@ -49,19 +45,15 @@ public class MessagesActivity extends AppCompatActivity {
         adjustWindowSettings();
         applyWindowInsets();
         setUpTheme();
-        // Create an instance of the MessagesViewModel
         viewModel = new ViewModelProvider.NewInstanceFactory().create(MessagesViewModel.class);
 
-        // Deserialize the user and group data from the Intent
         user = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_user)), User.class);
         group = new Gson().fromJson(getIntent().getStringExtra(getString(R.string.app_group)), Group.class);
         MyApplication.currentOpenChatId = group != null ? group.getGuid() : user != null ? user.getUid() : null;
 
-        // Set the user and group in the ViewModel
         viewModel.setUser(user);
         viewModel.setGroup(group);
 
-        // Add listeners for ViewModel updates
         viewModel.addListener();
         viewModel.getUpdatedGroup().observe(this, this::updateGroupJoinedStatus);
         viewModel.getBaseMessage().observe(this, this::setBaseMessage);
@@ -70,11 +62,9 @@ public class MessagesActivity extends AppCompatActivity {
         viewModel.getIsExitActivity().observe(this, this::exitActivity);
         viewModel.getUnblockButtonState().observe(this, this::setUnblockButtonState);
 
-        // Initialize UI components
         addViews();
         setOverFlowMenu();
 
-        // Set click listener for the unblock button
         binding.unblockBtn.setOnClickListener(view -> viewModel.unblockUser());
 
         binding.messageList.getMentionsFormatter().setOnMentionClick((context, user) -> {
@@ -85,11 +75,7 @@ public class MessagesActivity extends AppCompatActivity {
 
         binding.messageList.setOnThreadRepliesClick((context, baseMessage, cometchatMessageTemplate) -> {
             Intent intent = new Intent(context, ThreadMessageActivity.class);
-
-            if (user != null)
-                intent.putExtra("user", new Gson().toJson(user));
-
-            intent.putExtra(getString(R.string.app_message_id), baseMessage.getId());
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString());
             context.startActivity(intent);
         });
     }
@@ -111,29 +97,25 @@ public class MessagesActivity extends AppCompatActivity {
      */
 
     private void applyWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view), new OnApplyWindowInsetsListener() {
-            @NonNull
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
-                Insets nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
-                int bottomInset = Math.max(ime.bottom, nav.bottom);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view), (v, insets) -> {
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            Insets nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            int bottomInset = Math.max(ime.bottom, nav.bottom);
 
-                if (isImeVisible && binding.messageComposer.getMessageInput().getComposeBox().isFocused() && binding.messageList.atBottom()) {
-                    binding.messageList.scrollToBottom();
-                }
-
-                v.setPadding(
-                    systemBars.left,
-                    systemBars.top,
-                    systemBars.right,
-                    bottomInset
-                );
-
-                return insets;
+            if (isImeVisible && binding.messageComposer.getMessageInput().getComposeBox().isFocused() && binding.messageList.atBottom()) {
+                binding.messageList.scrollToBottom();
             }
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                bottomInset
+            );
+
+            return insets;
         });
     }
 
@@ -252,9 +234,8 @@ public class MessagesActivity extends AppCompatActivity {
      * Configures the overflow menu for additional actions.
      */
     private void setOverFlowMenu() {
-        binding.messageHeader.setAuxiliaryButtonView((context, user, group) -> {
+        binding.messageHeader.setTrailingView((context, user, group) -> {
             LinearLayout linearLayout = new LinearLayout(context);
-            View view = ChatConfigurator.getDataSource().getAuxiliaryHeaderMenu(context, user, group, binding.messageHeader.getAdditionParameter());
 
             OverflowMenuLayoutBinding overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(getLayoutInflater());
             overflowMenuLayoutBinding.ivMenu.setImageResource(R.drawable.ic_info);
@@ -262,9 +243,6 @@ public class MessagesActivity extends AppCompatActivity {
             linearLayout.setGravity(Gravity.CENTER_VERTICAL);
 
             if ((group != null && group.isJoined()) || (user != null && !Utils.isBlocked(user))) {
-                if (view != null) {
-                    linearLayout.addView(view);
-                }
                 linearLayout.addView(overflowMenuLayoutBinding.getRoot());
             }
 

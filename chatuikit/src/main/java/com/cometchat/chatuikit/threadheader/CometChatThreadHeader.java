@@ -825,6 +825,7 @@ public class CometChatThreadHeader extends MaterialCardView {
                                         outgoingMessageBubbleStyle);
             extractAttributesAndApplyBubbleDefaults(typedArray, false);
             adapter.setOutgoingMessageBubbleStyle(outgoingMessageBubbleStyle);
+            adapter.setModerationViewVisibility(true);
             this.outgoingMessageBubbleStyle = outgoingMessageBubbleStyle;
         }
     }

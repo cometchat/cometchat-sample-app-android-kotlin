@@ -18,13 +18,12 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
-import com.cometchat.chatuikit.shared.framework.ChatConfigurator
-import com.cometchat.chatuikit.shared.models.AdditionParameter
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.databinding.OverflowMenuLayoutBinding
+import com.cometchat.sampleapp.kotlin.utils.AppConstants
 import com.cometchat.sampleapp.kotlin.utils.MyApplication
 import com.cometchat.sampleapp.kotlin.viewmodels.MessagesViewModel
 import com.google.gson.Gson
@@ -97,9 +96,7 @@ class MessagesActivity : AppCompatActivity() {
 
         binding.messageList.setOnThreadRepliesClick { context: Context, baseMessage: BaseMessage, cometchatMessageTemplate: CometChatMessageTemplate? ->
             val intent = Intent(context, ThreadMessageActivity::class.java)
-            if (user != null)
-                intent.putExtra("user", Gson().toJson(user))
-            intent.putExtra(getString(R.string.app_message_id), baseMessage.id)
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString())
             context.startActivity(intent)
         }
     }
@@ -232,31 +229,18 @@ class MessagesActivity : AppCompatActivity() {
 
     /** Configures the overflow menu for additional actions.  */
     private fun setOverFlowMenu() {
-        binding.messageHeader.setAuxiliaryButtonView { context: Context?, user: User?, group: Group? ->
+        binding.messageHeader.setTrailingView { context, user, group ->
             val linearLayout = LinearLayout(context)
-            val view = ChatConfigurator
-                .getDataSource()
-                .getAuxiliaryHeaderMenu(context, user, group, AdditionParameter())
-
             val overflowMenuLayoutBinding = OverflowMenuLayoutBinding.inflate(layoutInflater)
             overflowMenuLayoutBinding.ivMenu.setImageResource(R.drawable.ic_info)
             linearLayout.orientation = LinearLayout.HORIZONTAL
             linearLayout.gravity = Gravity.CENTER_VERTICAL
 
             if ((group != null && group.isJoined) || (user != null && !Utils.isBlocked(user))) {
-                if (view != null) {
-                    if (group != null) {
-                        linearLayout.addView(view)
-                    } else {
-                        linearLayout.addView(view)
-                    }
-                }
-                linearLayout.addView(overflowMenuLayoutBinding.root)
+                linearLayout.addView(overflowMenuLayoutBinding.getRoot())
             }
 
-            overflowMenuLayoutBinding.ivMenu.setOnClickListener { view1: View? ->
-                openDetailScreen(group)
-            }
+            overflowMenuLayoutBinding.ivMenu.setOnClickListener({ view1 -> openDetailScreen(group) })
             linearLayout
         }
     }

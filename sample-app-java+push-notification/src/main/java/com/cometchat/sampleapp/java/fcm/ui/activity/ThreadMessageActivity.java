@@ -25,8 +25,10 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityThreadMessageBinding;
+import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.viewmodels.ThreadMessageViewModel;
-import com.google.gson.Gson;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ThreadMessageActivity extends AppCompatActivity {
     private ActivityThreadMessageBinding binding;
@@ -44,10 +46,15 @@ public class ThreadMessageActivity extends AppCompatActivity {
         adjustWindowSettings();
         applyWindowInsets();
 
-        // Create an instance of the MessagesViewModel
         ThreadMessageViewModel viewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel.class);
-        viewModel.fetchMessageDetails(getIntent().getLongExtra(getString(R.string.app_message_id), -1));
-        user = new Gson().fromJson(getIntent().getStringExtra("user"), User.class);
+        String rawMessage = getIntent().getStringExtra(AppConstants.JSONConstants.RAW_JSON);
+
+        try {
+            BaseMessage parentMessage = BaseMessage.processMessage(new JSONObject(rawMessage));
+            viewModel.setParentMessage(parentMessage);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         viewModel.addUserListener();
         viewModel.getParentMessage().observe(this, this::setParentMessage);

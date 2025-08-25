@@ -109,6 +109,11 @@ final class SDKEventInitializer {
             public void onMessagesReadByAll(MessageReceipt messageReceipt) {
                 CometChatUIKitHelper.onMessagesReadByAll(messageReceipt);
             }
+
+            @Override
+            public void onMessageModerated(BaseMessage baseMessage) {
+                CometChatUIKitHelper.onMessageModerated(baseMessage);
+            }
         });
     }
 }

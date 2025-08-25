@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize
 import com.cometchat.sampleapp.kotlin.R
@@ -17,14 +20,27 @@ class AppCredentialsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAppCredentialsBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityAppCredentialsBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
-
+        applyWindowInsets()
         initViewModel()
-
         initClickListeners()
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding!!.main) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+
+            v.setPadding(
+                v.paddingLeft,
+                systemBars.top,
+                v.paddingRight,
+                systemBars.bottom
+            )
+
+            insets
+        }
     }
 
     private fun initViewModel() {

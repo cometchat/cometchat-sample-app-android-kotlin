@@ -34,6 +34,7 @@
         <attr name="cometchatSchedulerBubbleStyle" />
         <attr name="cometchatCollaborativeBubbleStyle" />
         <attr name="cometchatMeetCallBubbleStyle" />
+        <attr name="cometchatModerationViewStyle"/>
     </declare-styleable>
 
 </resources>

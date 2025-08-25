@@ -23,6 +23,7 @@ import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUti
 import com.cometchat.sampleapp.kotlin.fcm.R
 import com.cometchat.sampleapp.kotlin.fcm.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.fcm.databinding.OverflowMenuLayoutBinding
+import com.cometchat.sampleapp.kotlin.fcm.utils.AppConstants
 import com.cometchat.sampleapp.kotlin.fcm.utils.MyApplication
 import com.cometchat.sampleapp.kotlin.fcm.viewmodels.MessagesViewModel
 import com.google.gson.Gson
@@ -43,7 +44,8 @@ class MessagesActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.parent_view)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, imeInsets.bottom)
             insets
         }
 
@@ -122,10 +124,8 @@ class MessagesActivity : AppCompatActivity() {
         }
 
         binding.messageList.setOnThreadRepliesClick { context: Context, baseMessage: BaseMessage, cometchatMessageTemplate: CometChatMessageTemplate? ->
-            val intent = Intent(
-                context, ThreadMessageActivity::class.java
-            )
-            intent.putExtra(getString(R.string.app_message_id), baseMessage.id)
+            val intent = Intent(context, ThreadMessageActivity::class.java)
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString())
             context.startActivity(intent)
         }
     }

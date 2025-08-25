@@ -18,6 +18,7 @@
     <color name="cometchat_color_success">#09C26F</color>
     <color name="cometchat_color_warning">#FFAB00</color>
     <color name="cometchat_color_error">#F44649</color>
+    <color name="cometchat_color_error_100">#F9EAEF</color>
     <color name="cometchat_color_message_read">#56E8A7</color>
     <!-- Color: Background -->
     <color name="cometchat_color_background1">@color/cometchat_color_neutral_50</color>

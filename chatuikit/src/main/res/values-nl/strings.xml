@@ -206,5 +206,5 @@
     <string name="cometchat_storage_permission_warning">Toestemming voor opslag is vereist om bestanden te openen.</string>
     <string name="cometchat_cancel_button">Annuleren</string>
     <string name="cometchat_settings_button">Instellingen</string>
-
+    <string name="cometchat_moderation_block_message">Je bericht werd geblokkeerd vanwege het moderatiebeleid.</string>
 </resources>

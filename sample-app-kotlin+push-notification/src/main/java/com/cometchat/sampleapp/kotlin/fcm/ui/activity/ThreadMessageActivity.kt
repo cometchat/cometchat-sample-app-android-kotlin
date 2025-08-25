@@ -5,6 +5,9 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
@@ -13,9 +16,11 @@ import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils
-import com.cometchat.sampleapp.kotlin.fcm.R
 import com.cometchat.sampleapp.kotlin.fcm.databinding.ActivityThreadMessageBinding
+import com.cometchat.sampleapp.kotlin.fcm.utils.AppConstants
 import com.cometchat.sampleapp.kotlin.fcm.viewmodels.ThreadMessageViewModel
+import org.json.JSONException
+import org.json.JSONObject
 
 class ThreadMessageActivity : AppCompatActivity() {
     private var binding: ActivityThreadMessageBinding? = null
@@ -25,26 +30,27 @@ class ThreadMessageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        binding = ActivityThreadMessageBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityThreadMessageBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+        applyWindowInsets()
 
         // Create an instance of the MessagesViewModel
-        val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(
-            ThreadMessageViewModel::class.java
-        )
-        viewModel.parentMessage.observe(
-            this
-        ) { parentMessage: BaseMessage -> this.setParentMessage(parentMessage) }
-        val messageId = intent.getLongExtra(getString(R.string.app_message_id), -1)
-        viewModel.fetchMessageDetails(messageId)
+        val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
+        viewModel.parentMessage.observe(this) { parentMessage: BaseMessage -> this.setParentMessage(parentMessage) }
+
+        val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
+        try {
+            if (rawMessage != null) {
+                val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
+                viewModel.setParentMessage(parentMessage)
+            }
+        } catch (e: JSONException) {
+            throw RuntimeException(e)
+        }
 
         // Set up back button behavior
         binding!!.backIcon.setOnClickListener { v: View? ->
-            Utils.hideKeyBoard(
-                this, binding!!.root
-            )
+            Utils.hideKeyBoard(this, binding!!.root)
             finish()
         }
 
@@ -56,6 +62,22 @@ class ThreadMessageActivity : AppCompatActivity() {
         // Calculate 25% of the screen height
         val requiredHeight = (screenHeight * 0.35).toInt()
         binding!!.threadHeader.setMaxHeight(requiredHeight)
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding!!.main) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                imeInsets.bottom
+            )
+
+            insets
+        }
     }
 
     private fun setParentMessage(parentMessage: BaseMessage) {

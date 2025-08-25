@@ -22,5 +22,6 @@ class AppConstants {
         const val UID: String = "uid"
         const val NAME: String = "name"
         const val AVATAR: String = "avatar"
+        const val RAW_JSON: String = "raw_json"
     }
 }

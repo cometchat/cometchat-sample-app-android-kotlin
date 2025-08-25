@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.databinding.CometchatTailBinding;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.badge.CometChatBadge;
@@ -67,6 +68,7 @@ public class ConversationTailView extends MaterialCardView {
         setStrokeWidth(0);
         binding = CometchatTailBinding.inflate(LayoutInflater.from(getContext()), this, true); // Inflates the layout
         binding.date.setDateTextAlignment(View.TEXT_ALIGNMENT_VIEW_END); // Aligns the date text to the end
+        binding.date.setDateTextColor(CometChatTheme.getTextColorSecondary(getContext()));
     }
 
     /**

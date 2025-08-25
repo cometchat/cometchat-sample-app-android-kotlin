@@ -70,6 +70,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     // Interaction and Configuration
     private CometChatMessageList.ThreadReplyClick threadReplyClick;
     private boolean disableReadReceipt;
+    private boolean hideModerationView;
     private UIKitConstants.MessageListAlignment listAlignment = UIKitConstants.MessageListAlignment.STANDARD;
     private boolean showAvatar = false;
     private boolean showLeftBubbleUserAvatar = false;
@@ -178,6 +179,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private @ColorInt int outgoingTextBubbleThreadIndicatorIconTint;
     private @StyleRes int outgoingTextBubbleSenderNameTextAppearance;
     private @ColorInt int outgoingTextBubbleSenderNameTextColor;
+
+    // Moderation view customization
+    private @StyleRes int moderationViewStyle;
 
     // Incoming Image Bubble Customization
     private @ColorInt int incomingImageBubbleBackgroundColor;
@@ -873,6 +877,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @param threadView             The view for displaying thread information, if applicable.
      * @param leadingView            The view for displaying leading information (e.g., sender profile
      *                               picture), if applicable.
+     * @param bottomView
      */
     private void applyBubbleStyle(BaseMessage message,
                                   boolean isIncomingMessage,
@@ -883,7 +888,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                   View headerView,
                                   View statusInfoView,
                                   View threadView,
-                                  View leadingView) {
+                                  View leadingView,
+                                  View bottomView) {
         String bubbleId = message.getCategory() + "_" + message.getType();
         if (message.getDeletedAt() == 0) {
             switch (bubbleId) {
@@ -4148,6 +4154,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.outgoingMessageBubbleSenderNameTextColor = outgoingMessageBubbleSenderNameTextColor;
     }
 
+    public void setModerationViewStyle(@StyleRes int moderationViewStyle) {
+        this.moderationViewStyle = moderationViewStyle;
+    }
+
     /**
      * Sets the style resource for the outgoing delete message bubble and applies
      * the corresponding attributes. This method takes a style resource for the
@@ -6516,6 +6526,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    public void setModerationViewVisibility(boolean hideModerationView) {
+        this.hideModerationView = hideModerationView;
+        notifyDataSetChanged();
+    }
+
     /**
      * Interface definition for a callback to be invoked when a message is
      * long-clicked.
@@ -6665,7 +6680,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                      headerView,
                                      statusInfoView,
                                      threadView,
-                                     leadingView);
+                                     leadingView, bottomView);
 
                     // Bind content view if available
                     if (template.getContentView() != null) {
@@ -6807,6 +6822,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     }
                     if (template.getBottomView() != null) {
                         bottomView = template.getBottomView().createView(context, cometchatMessageBubble, alignment);
+                    } else {
+                        if (!hideModerationView && UIKitConstants.MessageCategory.MESSAGE.equalsIgnoreCase(template.getCategory())) {
+                            bottomView = MessageBubbleUtils.getBottomView(context);
+                            bottomView.setTag(UIKitConstants.ViewTag.INTERNAL_BOTTOM_VIEW);
+                        } else {
+                            bottomView = null;
+                        }
                     }
                     if (template.getStatusInfoView() != null) {
                         statusInfoView = template.getStatusInfoView().createView(context, cometchatMessageBubble, alignment);
@@ -6861,15 +6883,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .getUid()
                         .equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
                     applyBubbleStyle(baseMessage,
-                                     isIncoming,
-                                     alignment,
-                                     cometchatMessageBubble,
-                                     showReadReceipt,
-                                     hideName,
-                                     headerView,
-                                     statusInfoView,
-                                     threadView,
-                                     leadingView);
+                            isIncoming,
+                            alignment,
+                            cometchatMessageBubble,
+                            showReadReceipt,
+                            hideName,
+                            headerView,
+                            statusInfoView,
+                            threadView,
+                            leadingView,
+                            bottomView);
 
                     // Bind content view if available
                     if (template.getContentView() != null) {
@@ -6890,10 +6913,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                     // Bind bottom view if available
                     if (template.getBottomView() != null) {
-                        cometchatMessageBubble.setBottomViewVisibility(View.VISIBLE);
                         template.getBottomView().bindView(context, bottomView, baseMessage, alignment, this, baseMessageList, position);
                     } else {
-                        cometchatMessageBubble.setBottomViewVisibility(View.GONE);
+                        if (bottomView != null) {
+                            MessageBubbleUtils.bindBottomView(bottomView, baseMessage, moderationViewStyle);
+                        }
                     }
 
                     // Bind status info view if available
@@ -6909,18 +6933,24 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     if (template.getFooterView() != null) {
                         template.getFooterView().bindView(context, footerView, baseMessage, alignment, this, baseMessageList, position);
                     } else {
-                        adjustFooterAndContentView(footerView,
-                                                   contentView,
-                                                   cometchatMessageBubble,
-                                                   baseMessage,
-                                                   isIncoming ? incomingMessageBubbleReactionStyle : outgoingMessageBubbleReactionStyle,
-                                                   onReactionClick,
-                                                   onReactionLongClick,
-                                                   onAddMoreReactionsClick);
+                        if (!UIKitConstants.ModerationConstants.DISAPPROVED.equals(Utils.getModerationStatus(baseMessage))) {
+                            cometchatMessageBubble.setFooterViewVisibility(View.VISIBLE);
+                            adjustFooterAndContentView(footerView,
+                                    contentView,
+                                    cometchatMessageBubble,
+                                    baseMessage,
+                                    isIncoming ? incomingMessageBubbleReactionStyle : outgoingMessageBubbleReactionStyle,
+                                    onReactionClick,
+                                    onReactionLongClick,
+                                    onAddMoreReactionsClick);
+                        } else {
+                            cometchatMessageBubble.setFooterViewVisibility(View.GONE);
+                            cometchatMessageBubble.setFooterView(null);
+                        }
                     }
 
                     // Handle thread view visibility for replies
-                    if (baseMessage.getReplyCount() > 0 && baseMessage.getDeletedAt() == 0) {
+                    if (baseMessage.getReplyCount() > 0 && baseMessage.getDeletedAt() == 0 && !UIKitConstants.ModerationConstants.DISAPPROVED.equals(Utils.getModerationStatus(baseMessage))) {
                         cometchatMessageBubble.setThreadViewVisibility(View.VISIBLE);
                         if (threadView != null) {
                             threadView.setOnClickListener(view1 -> {

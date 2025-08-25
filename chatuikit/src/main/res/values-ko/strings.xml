@@ -206,5 +206,5 @@
     <string name="cometchat_storage_permission_warning">파일에 접근하려면 저장소 권한이 필요합니다.</string>
     <string name="cometchat_cancel_button">취소</string>
     <string name="cometchat_settings_button">설정</string>
-
+    <string name="cometchat_moderation_block_message">귀하의 메시지는 관리 정책으로 인해 차단되었습니다.</string>
 </resources>

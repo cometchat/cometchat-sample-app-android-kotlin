@@ -204,4 +204,5 @@
     <string name="cometchat_storage_permission_warning">A permissão de armazenamento é necessária para acessar arquivos.</string>
     <string name="cometchat_cancel_button">Cancelar</string>
     <string name="cometchat_settings_button">Configurações</string>
+    <string name="cometchat_moderation_block_message">Sua mensagem foi bloqueada devido às políticas de moderação.</string>
 </resources>

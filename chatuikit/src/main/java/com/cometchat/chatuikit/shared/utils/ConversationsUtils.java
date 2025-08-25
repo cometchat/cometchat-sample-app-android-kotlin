@@ -314,7 +314,9 @@ public class ConversationsUtils {
                                                    context.getString(R.string.cometchat_message_collaborative_whiteboard));
                     case ExtensionConstants.ExtensionType.MEETING:
                         String senderName = Utils.getMessagePrefix(lastMessage, context);
-                        senderName = senderName.substring(0, senderName.indexOf(":"));
+                        if (!senderName.isEmpty()){
+                            senderName = senderName.substring(0, senderName.indexOf(":"));
+                        }
                         if (senderName.equals(context.getString(R.string.cometchat_you))) {
                             return new LastMessageData(MessageType.DEFAULT,
                                                        "",

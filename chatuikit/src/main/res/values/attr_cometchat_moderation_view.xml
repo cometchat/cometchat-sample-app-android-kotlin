@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatModerationView">
+        <attr name="cometchatModerationViewStyle" format="reference" />
+        <attr name="cometchatModerationViewBackgroundColor" format="color" />
+        <attr name="cometchatModerationViewTextAppearance" format="reference" />
+        <attr name="cometchatModerationViewTextColor" format="color" />
+        <attr name="cometchatModerationViewIconTint" format="color" />
+    </declare-styleable>
+</resources>

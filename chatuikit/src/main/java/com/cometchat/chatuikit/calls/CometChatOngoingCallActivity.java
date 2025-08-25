@@ -7,9 +7,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Rational;
+import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
@@ -56,7 +62,7 @@ public class CometChatOngoingCallActivity extends AppCompatActivity {
         // Inflate the layout using View Binding
         CometchatOngoingCallActivityBinding binding = CometchatOngoingCallActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        applyWindowInsets(binding);
         CallActivityViewModel callActivityViewModel = new ViewModelProvider(this).get(CallActivityViewModel.class);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(UIKitConstants.IntentStrings.STORE_INSTANCE)) {
@@ -83,6 +89,25 @@ public class CometChatOngoingCallActivity extends AppCompatActivity {
             @Override
             public void handleOnBackPressed() {
                 startPictureInPictureMode();
+            }
+        });
+    }
+
+    private void applyWindowInsets(CometchatOngoingCallActivityBinding binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                v.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
+
+                return insets;
             }
         });
     }

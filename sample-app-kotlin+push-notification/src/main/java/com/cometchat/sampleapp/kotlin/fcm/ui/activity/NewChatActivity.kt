@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.cometchat.chat.core.GroupsRequest.GroupsRequestBuilder
 import com.cometchat.chat.core.UsersRequest.UsersRequestBuilder
 import com.cometchat.chat.models.Group
@@ -19,10 +22,9 @@ class NewChatActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityNewChatBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityNewChatBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+        applyWindowInsets()
 
         binding!!.users.toolbarVisibility = View.GONE
         binding!!.groups.toolbarVisibility = View.GONE
@@ -91,5 +93,20 @@ class NewChatActivity : AppCompatActivity() {
         })
 
         binding!!.ivBack.setOnClickListener { v: View? -> finish() }
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding!!.newChatMain) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+
+            insets
+        }
     }
 }

@@ -11,15 +11,10 @@ class ThreadMessageViewModel : ViewModel() {
     val parentMessage: MutableLiveData<BaseMessage> = MutableLiveData()
     private var id: Long = 0
 
-    fun fetchMessageDetails(id: Long) {
-        this.id = id
-        Repository.fetchMessageInformation(id, object : CometChat.CallbackListener<BaseMessage>() {
-            override fun onSuccess(message: BaseMessage) {
-                parentMessage.value = message
-            }
-
-            override fun onError(e: CometChatException) {
-            }
-        })
+    fun setParentMessage(parentMessage: BaseMessage?) {
+        if (parentMessage != null) {
+            this.id = parentMessage.id
+            this.parentMessage.value = parentMessage
+        }
     }
 }

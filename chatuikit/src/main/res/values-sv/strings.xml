@@ -211,4 +211,5 @@ Vänligen försök igen.</string>
     <string name="cometchat_storage_permission_warning">Lagringsbehörighet krävs för att komma åt filer.</string>
     <string name="cometchat_cancel_button">Avbryt</string>
     <string name="cometchat_settings_button">Inställningar</string>
+    <string name="cometchat_moderation_block_message">Ditt meddelande blockerades på grund av modereringspolicyer.</string>
 </resources>
