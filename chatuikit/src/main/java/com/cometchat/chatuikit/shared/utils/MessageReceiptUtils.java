@@ -1,7 +1,10 @@
 package com.cometchat.chatuikit.shared.utils;
 
+import android.util.Log;
+
 import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.models.BaseMessage;
+import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -34,24 +37,14 @@ public class MessageReceiptUtils {
     }
 
     private static Receipt getReceipt(BaseMessage baseMessage) {
-        if (baseMessage.getId() == 0) {
-            return Receipt.IN_PROGRESS;
-        }
         ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
         if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)) {
             return Receipt.ERROR;
-        } else {
-            if (baseMessage.getReadAt() != 0) {
-                return Receipt.READ;
-            } else if (baseMessage.getDeliveredAt() != 0) {
-                return Receipt.DELIVERED;
-            } else if (baseMessage.getSentAt() > 0) {
-                if (UIKitConstants.ModerationConstants.APPROVED.equals(moderationStatus) || UIKitConstants.ModerationConstants.UNMODERATED.equals(moderationStatus)) {
-                    return Receipt.SENT;
-                } else return Receipt.IN_PROGRESS;
-            }
-        }
-        return Receipt.IN_PROGRESS;
+        } else if (baseMessage.getId() == 0) return Receipt.IN_PROGRESS;
+        else if (baseMessage.getReadAt() != 0) return Receipt.READ;
+        else if (baseMessage.getDeliveredAt() != 0) return Receipt.DELIVERED;
+        else if (baseMessage.getSentAt() > 0 || UIKitConstants.ModerationConstants.PENDING.equals(moderationStatus)) return Receipt.SENT;
+        else return Receipt.IN_PROGRESS;
     }
 
     public static boolean hideReceipt(BaseMessage baseMessage) {

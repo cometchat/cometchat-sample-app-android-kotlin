@@ -46,7 +46,7 @@ dependencies {
     implementation libs.constraintlayout
 
     // CometChat Dependencies
-    //implementation project(':chatuikit')
+//    implementation project(':chatuikit')
     implementation libs.cometchat.ui.kit
     implementation libs.chat.sdk.android
     implementation libs.calls.sdk.android

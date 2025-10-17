@@ -654,6 +654,7 @@ public class ConversationsViewModel extends ViewModel {
         CometChat.removeUserListener(LISTENERS_TAG);
         CometChat.removeGroupListener(LISTENERS_TAG);
         CometChat.removeCallListener(LISTENERS_TAG);
+        CometChatMessageEvents.removeListener(LISTENERS_TAG);
         CometChatConversationEvents.removeListener(LISTENERS_TAG);
         CometChatGroupEvents.removeListener(LISTENERS_TAG);
         CometChatUserEvents.removeListener(LISTENERS_TAG);

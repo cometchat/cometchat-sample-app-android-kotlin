@@ -2,6 +2,10 @@ package com.cometchat.sampleapp.kotlin.fcm.utils
 
 class AppConstants {
 
+    companion object {
+        var IS_QR_SCANNED: Boolean = false
+    }
+
     /** Error messages used throughout the application.  */
     object ErrorConstants {
         const val USER_NOT_FOUND: String = "ERR_UID_NOT_FOUND"

@@ -207,4 +207,10 @@
     <string name="cometchat_cancel_button">Annulla</string>
     <string name="cometchat_settings_button">Impostazioni</string>
     <string name="cometchat_moderation_block_message">Il tuo messaggio è stato bloccato a causa delle politiche di moderazione.</string>
+    <string name="cometchat_no_conversations_history_title">Nessun storico delle conversazioni trovato</string>
+    <string name="cometchat_ask_anything">Chiedi qualsiasi cosa</string>
+    <string name="cometchat_something_went_wrong_try_again">Qualcosa è andato storto da parte nostra. Per favore, riprova</string>
+    <string name="cometchat_no_conversations_history_subtitle">Inizia una chat toccando il pulsante \'Nuova conversazione\'</string>
+    <string name="cometchat_new_chat">Nuova conversazione</string>
+    <string name="cometchat_chat_history">Cronologia delle conversazioni</string>
 </resources>

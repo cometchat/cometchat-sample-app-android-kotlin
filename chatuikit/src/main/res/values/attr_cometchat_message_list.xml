@@ -15,6 +15,20 @@
         <attr name="cometchatMessageListErrorStateSubtitleTextColor" format="color" />
         <attr name="cometchatMessageListDeleteDialogStyle" format="reference" />
 
+        <attr name="cometchatMessageListEmptyChatGreetingTitleTextColor" format="color" />
+        <attr name="cometchatMessageListEmptyChatGreetingTitleTextAppearance" format="reference" />
+        <attr name="cometchatMessageListEmptyChatGreetingSubtitleTextColor" format="color" />
+        <attr name="cometchatMessageListEmptyChatGreetingSubtitleTextAppearance" format="reference" />
+
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageTextAppearance" format="reference" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageTextColor" format="color" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageCornerRadius" format="dimension" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageStrokeColor" format="color" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageBackgroundColor" format="color" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageEndIcon" format="reference" />
+        <attr name="cometchatMessageListAIAssistantSuggestedMessageEndIconTint" format="color" />
+
         <attr name="cometchatMessageListStrokeWidth" format="dimension" />
         <attr name="cometchatMessageListStrokeColor" format="color" />
         <attr name="cometchatMessageListCornerRadius" format="dimension" />

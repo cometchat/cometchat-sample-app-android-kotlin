@@ -1,0 +1,54 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace 'com.cometchat.ai.sampleapp'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.cometchat.ai.sampleapp'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "5.1.2"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    viewBinding {
+        enabled = true
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+dependencies {
+    implementation libs.core.ktx
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+
+    // CometChat Dependencies
+//    implementation project(':chatuikit')
+    implementation libs.cometchat.ui.kit
+    implementation libs.chat.sdk.android
+
+    // Other Dependencies
+    implementation libs.lottie
+    implementation libs.glide
+    implementation libs.gson
+}

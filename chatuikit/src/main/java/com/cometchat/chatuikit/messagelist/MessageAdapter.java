@@ -9,20 +9,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.databinding.CometchatStreamBubbleBinding;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -30,6 +29,7 @@ import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.models.CometChatMessageOption;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
+import com.cometchat.chatuikit.shared.models.StreamMessage;
 import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderAdapter;
@@ -43,7 +43,6 @@ import com.cometchat.chatuikit.shared.views.reaction.CometChatReaction;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnAddMoreReactionsClick;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionClick;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionLongClick;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +54,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final String LEFT_MESSAGE = "1";
     private static final String RIGHT_MESSAGE = "2";
     private static final String CENTER_MESSAGE = "3";
+    private static final String STREAM_MESSAGE = "4";
     private static final String IGNORE_MESSAGE = "10000";
     // Context and Message List
     private final Context context;
@@ -92,6 +92,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private int plusReactionChipSize = 0;
     private boolean disableReactions;
     private int threadVisibility = View.VISIBLE;
+
+    // Flag to check if user is agent
+    private boolean isAgentChat;
 
     // Date Separator and General Styles
     private @StyleRes int dateSeparatorStyle;
@@ -474,6 +477,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private @StyleRes int incomingMeetCallBubbleSenderNameTextAppearance;
     private boolean hideGroupActionMessage;
 
+    // AI Assistant Bubble Customization
+    private @ColorInt int aiAssistantBubbleBackgroundColor;
+    private @StyleRes int aiAssistantBubbleAvatarStyle;
+    private Drawable aiAssistantBubbleBackgroundDrawable;
+    private @Dimension int aiAssistantBubbleCornerRadius;
+    private @Dimension int aiAssistantBubbleStrokeWidth;
+    private @ColorInt int aiAssistantBubbleStrokeColor;
+    private @StyleRes int aiAssistantBubbleStyle;
+
     /**
      * Constructor for the MessageAdapter class.
      *
@@ -537,6 +549,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (viewTypeString.endsWith(IGNORE_MESSAGE)) {
             // Create a ViewHolder for an empty row
             return new EmptyRowHolder(LinearLayout.inflate(context, R.layout.cometchat_empty_view_holder_row, null));
+        } else if (viewTypeString.equals(STREAM_MESSAGE)) {
+            // Create a ViewHolder for stream messages
+            return new CometChatStreamBubbleViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.cometchat_stream_bubble, parent, false));
         } else {
             // Default case: Create a ViewHolder for left-aligned messages
             return new LeftViewHolder(getLeftView(parent), viewTypeTemplateHashMap.get(viewType));
@@ -598,6 +613,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((RightViewHolder) holder).bindBubble(baseMessage, position); // Bind data for right-aligned messages
         } else if (holder instanceof CenterViewHolder) {
             ((CenterViewHolder) holder).bindBubble(baseMessage, position); // Bind data for center-aligned messages
+        } else if (holder instanceof CometChatStreamBubbleViewHolder) {
+            ((CometChatStreamBubbleViewHolder) holder).bind((StreamMessage) baseMessage, position); // Bind data for center-aligned messages
         } else {
             // Log an error if the ViewHolder type is unknown
             Log.e("", "onBindViewHolder: Unknown ViewHolder");
@@ -627,6 +644,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         BaseMessage baseMessage = baseMessageList.get(position);
         String type;
 
+        if (UIKitConstants.MessageCategory.STREAM.equals(baseMessage.getCategory()) && UIKitConstants.MessageType.STREAM.equalsIgnoreCase(baseMessage.getType())) {
+            return Integer.parseInt(STREAM_MESSAGE);
+        }
         // Retrieve the template based on category and type
         CometChatMessageTemplate template = messageTemplateHashMap.get(baseMessage.getCategory() + "_" + baseMessage.getType());
 
@@ -698,7 +718,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @return A new DateItemHolder for the date header.
      */
     @Override
-    public MessageAdapter.DateItemHolder onCreateHeaderViewHolder(ViewGroup var1) {
+    public DateItemHolder onCreateHeaderViewHolder(ViewGroup var1) {
         return new DateItemHolder(LayoutInflater.from(var1.getContext()).inflate(R.layout.cometchat_message_date_header, var1, false));
     }
 
@@ -711,7 +731,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @param var3 The ID for the date item (not used in this implementation).
      */
     @Override
-    public void onBindHeaderViewHolder(MessageAdapter.DateItemHolder var1, int var2, long var3) {
+    public void onBindHeaderViewHolder(DateItemHolder var1, int var2, long var3) {
         // Check if the provided index is valid for the baseMessageList
         if (baseMessageList.size() > var2) {
             BaseMessage baseMessage = baseMessageList.get(var2); // Retrieve the message for the header
@@ -893,6 +913,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         String bubbleId = message.getCategory() + "_" + message.getType();
         if (message.getDeletedAt() == 0) {
             switch (bubbleId) {
+                case UIKitConstants.MessageTemplateId.ASSISTANT:
+                    if (isIncomingMessage) {
+                        setMessageBubbleStyle(aiAssistantBubbleBackgroundColor, aiAssistantBubbleCornerRadius, aiAssistantBubbleStrokeWidth, aiAssistantBubbleStrokeColor, aiAssistantBubbleBackgroundDrawable, cometchatMessageBubble);
+                        bindLeadingView(leadingView, message, messageBubbleAlignment, aiAssistantBubbleAvatarStyle);
+                    }
+                    break;
                 case UIKitConstants.MessageTemplateId.TEXT:
                     if (isIncomingMessage) {
                         setMessageBubbleStyle(incomingTextBubbleBackgroundColor,
@@ -1895,29 +1921,19 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (messageBubbleStyle != 0) {
             TypedArray typedArray = context.obtainStyledAttributes(messageBubbleStyle, R.styleable.CometChatMessageBubble);
             try {
-                setIncomingMessageBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor,
-                                                                            CometChatTheme.getNeutralColor300(context)));
-                setIncomingMessageBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleCornerRadius,
-                                                                                      0));
-                setIncomingMessageBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeWidth,
-                                                                                     0));
+                setIncomingMessageBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundColor, CometChatTheme.getNeutralColor300(context)));
+                setIncomingMessageBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleCornerRadius, 0));
+                setIncomingMessageBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeWidth, 0));
                 setIncomingMessageBubbleStrokeColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleStrokeColor, 0));
                 setIncomingMessageBubbleBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatMessageBubble_cometchatMessageBubbleBackgroundDrawable));
                 setIncomingMessageBubbleDateStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleDateStyle, 0));
-                setIncomingMessageBubbleReceiptStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMessageReceiptStyle,
-                                                                              0));
-                setIncomingMessageBubbleAvatarStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleAvatarStyle,
-                                                                             0));
-                setIncomingMessageBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextAppearance,
-                                                                                               0));
-                setIncomingMessageBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextColor,
-                                                                                     CometChatTheme.getTextColorPrimary(context)));
-                setIncomingMessageBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorIconTint,
-                                                                                    CometChatTheme.getIconTintSecondary(context)));
-                setIncomingMessageBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextAppearance,
-                                                                                          0));
-                setIncomingMessageBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextColor,
-                                                                                CometChatTheme.getPrimaryColor(context)));
+                setIncomingMessageBubbleReceiptStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMessageReceiptStyle, 0));
+                setIncomingMessageBubbleAvatarStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleAvatarStyle, 0));
+                setIncomingMessageBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextAppearance, 0));
+                setIncomingMessageBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorTextColor, CometChatTheme.getTextColorPrimary(context)));
+                setIncomingMessageBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleThreadIndicatorIconTint, CometChatTheme.getIconTintSecondary(context)));
+                setIncomingMessageBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextAppearance, 0));
+                setIncomingMessageBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatMessageBubble_cometchatMessageBubbleSenderNameTextColor, CometChatTheme.getPrimaryColor(context)));
                 setIncomingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle, 0));
                 setIncomingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
                 setIncomingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle, 0));
@@ -1928,16 +1944,57 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 setIncomingSchedulerBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatSchedulerBubbleStyle, 0));
                 setIncomingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle, 0));
                 setIncomingStickerBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatStickerBubbleStyle, 0));
-                setIncomingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle,
-                                                                             0));
+                setIncomingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle, 0));
                 setIncomingMessageBubbleReactionStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatReactionStyle, 0));
                 setIncomingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle, 0));
+                setAIAssistantBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAIAssistantBubbleStyle, 0));
             } finally {
                 typedArray.recycle();
             }
             notifyDataSetChanged();
         }
     }
+
+    private void setAIAssistantBubbleStyle(@StyleRes int style) {
+        this.aiAssistantBubbleStyle = style;
+        TypedArray typedArray = context.obtainStyledAttributes(style, R.styleable.CometChatAIAssistantBubble);
+        try {
+            setAiAssistantBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatAIAssistantBubble_cometChatAIAssistantBubbleBackgroundColor, Color.TRANSPARENT));
+            setAiAssistantBubbleAvatarStyle(typedArray.getResourceId(R.styleable.CometChatAIAssistantBubble_cometchatAIAssistantBubbleAvatarStyle, incomingMessageBubbleAvatarStyle));
+            setAiAssistantBubbleBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatAIAssistantBubble_cometchatAIAssistantBubbleBackgroundDrawable));
+            setAiAssistantBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatAIAssistantBubble_cometchatAIAssistantBubbleCornerRadius, 0));
+            setAiAssistantBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatAIAssistantBubble_cometchatAIAssistantBubbleStrokeWidth, 0));
+            setAiAssistantBubbleStrokeColor(typedArray.getColor(R.styleable.CometChatAIAssistantBubble_cometchatAIAssistantBubbleStrokeColor, 0));
+        } finally {
+            typedArray.recycle();
+        }
+    }
+
+    private void setAiAssistantBubbleAvatarStyle(@StyleRes int style) {
+        this.aiAssistantBubbleAvatarStyle = style;
+    }
+
+    private void setAiAssistantBubbleBackgroundColor(@ColorInt int color) {
+        this.aiAssistantBubbleBackgroundColor = color;
+    }
+
+    private void setAiAssistantBubbleBackgroundDrawable(Drawable drawable) {
+        this.aiAssistantBubbleBackgroundDrawable = drawable;
+    }
+
+    private void setAiAssistantBubbleCornerRadius(@Dimension int cornerRadius) {
+        this.aiAssistantBubbleCornerRadius = cornerRadius;
+    }
+
+    private void setAiAssistantBubbleStrokeWidth(@Dimension int strokeWidth) {
+        this.aiAssistantBubbleStrokeWidth = strokeWidth;
+    }
+
+    private void setAiAssistantBubbleStrokeColor(@ColorInt int strokeColor) {
+        this.aiAssistantBubbleStrokeColor = strokeColor;
+    }
+
+
 
     /**
      * Sets the background color for the incoming message bubble.
@@ -2110,31 +2167,19 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void setIncomingTextBubbleStyle(@StyleRes int style) {
         TypedArray typedArray = context.obtainStyledAttributes(style, R.styleable.CometChatTextBubble);
         try {
-            setIncomingTextBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleBackgroundColor,
-                                                                     incomingMessageBubbleBackgroundColor));
-            setIncomingTextBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatTextBubble_cometchatTextBubbleCornerRadius,
-                                                                               incomingMessageBubbleCornerRadius));
-            setIncomingTextBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatTextBubble_cometchatTextBubbleStrokeWidth,
-                                                                              incomingMessageBubbleStrokeWidth));
-            setIncomingTextBubbleStrokeColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleStrokeColor,
-                                                                 incomingMessageBubbleStrokeColor));
+            setIncomingTextBubbleBackgroundColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleBackgroundColor, incomingMessageBubbleBackgroundColor));
+            setIncomingTextBubbleCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatTextBubble_cometchatTextBubbleCornerRadius, incomingMessageBubbleCornerRadius));
+            setIncomingTextBubbleStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatTextBubble_cometchatTextBubbleStrokeWidth, incomingMessageBubbleStrokeWidth));
+            setIncomingTextBubbleStrokeColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleStrokeColor, incomingMessageBubbleStrokeColor));
             setIncomingTextBubbleBackgroundDrawable(typedArray.getDrawable(R.styleable.CometChatTextBubble_cometchatTextBubbleBackgroundDrawable));
-            setIncomingTextBubbleDateStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleDateStyle,
-                                                                    incomingMessageBubbleDateStyle));
-            setIncomingTextBubbleReceiptStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleMessageReceiptStyle,
-                                                                       incomingMessageBubbleReceiptStyle));
-            setIncomingTextBubbleAvatarStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleAvatarStyle,
-                                                                      incomingMessageBubbleAvatarStyle));
-            setIncomingTextBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorTextAppearance,
-                                                                                        incomingMessageBubbleThreadIndicatorTextAppearance));
-            setIncomingTextBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorTextColor,
-                                                                              incomingMessageBubbleThreadIndicatorTextColor));
-            setIncomingTextBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorIconTint,
-                                                                             incomingMessageBubbleThreadIndicatorIconTint));
-            setIncomingTextBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleSenderNameTextAppearance,
-                                                                                   incomingMessageBubbleSenderNameTextAppearance));
-            setIncomingTextBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleSenderNameTextColor,
-                                                                         incomingMessageBubbleSenderNameTextColor));
+            setIncomingTextBubbleDateStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleDateStyle, incomingMessageBubbleDateStyle));
+            setIncomingTextBubbleReceiptStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleMessageReceiptStyle, incomingMessageBubbleReceiptStyle));
+            setIncomingTextBubbleAvatarStyle(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleAvatarStyle, incomingMessageBubbleAvatarStyle));
+            setIncomingTextBubbleThreadIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorTextAppearance, incomingMessageBubbleThreadIndicatorTextAppearance));
+            setIncomingTextBubbleThreadIndicatorTextColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorTextColor, incomingMessageBubbleThreadIndicatorTextColor));
+            setIncomingTextBubbleThreadIndicatorIconTint(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleThreadIndicatorIconTint, incomingMessageBubbleThreadIndicatorIconTint));
+            setIncomingTextBubbleSenderNameTextAppearance(typedArray.getResourceId(R.styleable.CometChatTextBubble_cometchatTextBubbleSenderNameTextAppearance, incomingMessageBubbleSenderNameTextAppearance));
+            setIncomingTextBubbleSenderNameTextColor(typedArray.getColor(R.styleable.CometChatTextBubble_cometchatTextBubbleSenderNameTextColor, incomingMessageBubbleSenderNameTextColor));
         } finally {
             typedArray.recycle();
         }
@@ -6348,6 +6393,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      */
     public void setUser(User user) {
         this.user = user;
+        this.isAgentChat = Utils.isAgentChat(user);
+        if (isAgentChat) {
+            this.showLeftBubbleUserAvatar = true;
+        }
     }
 
     /**
@@ -6613,8 +6662,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     if (template.getHeaderView() != null) {
                         headerView = template.getHeaderView().createView(context, cometchatMessageBubble, alignment);
                     } else {
-                        headerView = MessageBubbleUtils.getHeaderViewContainer(context);
-                        headerView.setTag(UIKitConstants.ViewTag.INTERNAL_HEADER_VIEW);
+                        if (!isAgentChat) {
+                            headerView = MessageBubbleUtils.getHeaderViewContainer(context);
+                            headerView.setTag(UIKitConstants.ViewTag.INTERNAL_HEADER_VIEW);
+                        }
                     }
                     if (template.getBottomView() != null) {
                         bottomView = template.getBottomView().createView(context, cometchatMessageBubble, alignment);
@@ -6720,14 +6771,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     if (template.getFooterView() != null) {
                         template.getFooterView().bindView(context, footerView, baseMessage, alignment, this, baseMessageList, position);
                     } else {
-                        adjustFooterAndContentView(footerView,
-                                                   contentView,
-                                                   cometchatMessageBubble,
-                                                   baseMessage,
-                                                   isIncoming ? incomingMessageBubbleReactionStyle : outgoingMessageBubbleReactionStyle,
-                                                   onReactionClick,
-                                                   onReactionLongClick,
-                                                   onAddMoreReactionsClick);
+                        if (!isAgentChat) {
+                            adjustFooterAndContentView(footerView,
+                                    contentView,
+                                    cometchatMessageBubble,
+                                    baseMessage,
+                                    isIncoming ? incomingMessageBubbleReactionStyle : outgoingMessageBubbleReactionStyle,
+                                    onReactionClick,
+                                    onReactionLongClick,
+                                    onAddMoreReactionsClick);
+                        } else footerView.setVisibility(View.GONE);
                     }
 
                     // Handle thread view visibility for replies
@@ -6748,7 +6801,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 // Set long click listener for message options
                 parent.setOnLongClickListener(view -> {
                     List<CometChatMessageOption> options = template.getOptions(context, baseMessage, group);
-                    if (baseMessage.getDeletedAt() == 0) {
+                    if (baseMessage.getDeletedAt() == 0 && !isAgentChat) {
                         onMessageLongClick.onLongClick(options,
                                                        baseMessage,
                                                        template,
@@ -6843,7 +6896,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             footerView = MessageBubbleUtils.getReactionsViewContainer(context, alignment);
                         }
                     }
-                    if (threadVisibility == View.VISIBLE) {
+                    if (threadVisibility == View.VISIBLE && !isAgentChat) {
                         threadView = MessageBubbleUtils.getThreadViewContainer(context);
                         threadView.setTag(UIKitConstants.ViewTag.INTERNAL_THREAD_VIEW);
                     }
@@ -6967,7 +7020,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 // Set long click listener for message options
                 parent.setOnLongClickListener(view -> {
                     List<CometChatMessageOption> options = template.getOptions(context, baseMessage, group);
-                    if (baseMessage.getDeletedAt() == 0) {
+                    if (baseMessage.getDeletedAt() == 0 && !isAgentChat) {
                         onMessageLongClick.onLongClick(options,
                                                        baseMessage,
                                                        template,
@@ -7096,6 +7149,28 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         DateItemHolder(@NonNull View itemView) {
             super(itemView);
             txtMessageDate = itemView.findViewById(R.id.txt_message_date); // Initialize date text view
+        }
+    }
+
+    public class CometChatStreamBubbleViewHolder extends RecyclerView.ViewHolder {
+        private final CometchatStreamBubbleBinding binding;
+
+        public CometChatStreamBubbleViewHolder(View rootView) {
+            super(rootView);
+            binding = CometchatStreamBubbleBinding.bind(rootView);
+        }
+
+        public void bind(StreamMessage streamMessage, int position) {
+            if (streamMessage != null && streamMessage.getDeletedAt() == 0) {
+                binding.streamBubble.setStyle(aiAssistantBubbleStyle);
+                binding.streamBubble.setStreamMessage(streamMessage);
+                binding.streamBubble.setBackgroundColor(aiAssistantBubbleBackgroundColor);
+                binding.streamBubble.setAvatar(streamMessage.getSender().getName(), streamMessage.getSender().getAvatar());
+                binding.streamBubble.setAvatarStyle(aiAssistantBubbleAvatarStyle);
+                binding.streamBubble.setVisibility(View.VISIBLE);
+            } else {
+                binding.streamBubble.setVisibility(View.GONE);
+            }
         }
     }
 }

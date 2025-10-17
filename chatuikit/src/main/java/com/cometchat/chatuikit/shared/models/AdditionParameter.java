@@ -89,6 +89,7 @@ public class AdditionParameter {
     private @ColorInt int inactiveAuxiliaryIconTint;
     private Drawable activeStickerIcon;
     private @ColorInt int activeAuxiliaryIconTint;
+    private @StyleRes int aiAssistantMessageBubbleStyle;
 
     public @StyleRes int getIncomingTextBubbleStyle() {
         return incomingTextBubbleStyle;
@@ -552,5 +553,13 @@ public class AdditionParameter {
 
     public int getModerationViewVisibility() {
         return moderationViewVisibility;
+    }
+
+    public int getAIAssistantMessageBubbleStyle() {
+        return aiAssistantMessageBubbleStyle;
+    }
+
+    public void setAIAssistantMessageBubbleStyle(int aiAssistantMessageBubbleStyle) {
+        this.aiAssistantMessageBubbleStyle = aiAssistantMessageBubbleStyle;
     }
 }

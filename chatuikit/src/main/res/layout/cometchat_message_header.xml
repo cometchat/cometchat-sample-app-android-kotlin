@@ -136,6 +136,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:id="@+id/iv_new_chat"
+                android:layout_width="@dimen/cometchat_32dp"
+                android:layout_height="@dimen/cometchat_32dp"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                tools:ignore="ContentDescription"
+                android:minWidth="@dimen/cometchat_24dp"
+                android:minHeight="@dimen/cometchat_24dp"/>
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="@dimen/cometchat_5dp"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/iv_chat_history"
+                android:layout_width="@dimen/cometchat_32dp"
+                android:layout_height="@dimen/cometchat_32dp"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                tools:ignore="ContentDescription"
+                android:minWidth="@dimen/cometchat_24dp"
+                android:minHeight="@dimen/cometchat_24dp"/>
+
             <LinearLayout
                 android:id="@+id/message_header_auxiliary_view"
                 android:layout_width="wrap_content"

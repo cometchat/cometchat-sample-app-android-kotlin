@@ -11,9 +11,11 @@ import com.cometchat.chat.models.Conversation
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
+import com.cometchat.chatuikit.shared.constants.MessageStatus
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.events.CometChatConversationEvents
 import com.cometchat.chatuikit.shared.events.CometChatGroupEvents
+import com.cometchat.chatuikit.shared.events.CometChatMessageEvents
 import com.cometchat.chatuikit.shared.events.CometChatUIEvents
 import com.cometchat.chatuikit.shared.events.CometChatUserEvents
 import com.cometchat.sampleapp.kotlin.data.repository.Repository
@@ -21,9 +23,24 @@ import com.cometchat.sampleapp.kotlin.utils.AppConstants
 
 /** ViewModel for managing the state and data of messages in a group chat.  */
 class MessagesViewModel : ViewModel() {
-    private val LISTENER_ID = System.currentTimeMillis().toString() + javaClass.simpleName
+    private val listenerId = System.currentTimeMillis().toString() + javaClass.simpleName
     private var mUser: User? = null
     private var mGroup: Group? = null
+
+    /**
+     * Gets the LiveData for sent messages.
+     *
+     * @return MutableLiveData object containing sent BaseMessage data.
+     */
+    private var _sentMessage: MutableLiveData<Boolean> = MutableLiveData()
+    val sentMessage : MutableLiveData<Boolean>
+        get() = _sentMessage
+
+    /**
+     * Gets the LiveData for the base message.
+     *
+     * @return MutableLiveData object containing the BaseMessage data.
+     */
     val baseMessage: MutableLiveData<BaseMessage?> = MutableLiveData()
 
     /**
@@ -39,7 +56,7 @@ class MessagesViewModel : ViewModel() {
      * @return MutableLiveData object containing updated User data.
      */
     val updateUser: MutableLiveData<User> = MutableLiveData()
-    private val openUserChat = MutableLiveData<User>()
+    private val openUserChat = MutableLiveData<User?>()
 
     /**
      * Gets the LiveData that indicates whether to exit the activity.
@@ -61,7 +78,7 @@ class MessagesViewModel : ViewModel() {
      *
      * @return MutableLiveData object containing the User data for the chat to be opened.
      */
-    fun openUserChat(): MutableLiveData<User> {
+    fun openUserChat(): MutableLiveData<User?> {
         return openUserChat
     }
 
@@ -87,7 +104,14 @@ class MessagesViewModel : ViewModel() {
 
     /** Adds listeners for group and user events.  */
     fun addListener() {
-        CometChat.addGroupListener(LISTENER_ID, object : GroupListener() {
+        CometChatMessageEvents.addListener(listenerId, object : CometChatMessageEvents() {
+            override fun ccMessageSent(baseMessage: BaseMessage?, status: Int) {
+                if (baseMessage != null && status == MessageStatus.IN_PROGRESS) {
+                    sentMessage.value = true
+                }
+            }
+        })
+        CometChat.addGroupListener(listenerId, object : GroupListener() {
             override fun onGroupMemberLeft(
                 action: Action, user: User, group: Group
             ) {
@@ -119,7 +143,7 @@ class MessagesViewModel : ViewModel() {
             }
         })
 
-        CometChatGroupEvents.addGroupListener(LISTENER_ID, object : CometChatGroupEvents() {
+        CometChatGroupEvents.addGroupListener(listenerId, object : CometChatGroupEvents() {
             override fun ccGroupDeleted(group: Group) {
                 isExitActivity.value = true
             }
@@ -131,7 +155,7 @@ class MessagesViewModel : ViewModel() {
             }
         })
 
-        CometChatUserEvents.addUserListener(LISTENER_ID, object : CometChatUserEvents() {
+        CometChatUserEvents.addUserListener(listenerId, object : CometChatUserEvents() {
             override fun ccUserBlocked(user: User) {
                 updateUser.value = user
             }
@@ -141,7 +165,7 @@ class MessagesViewModel : ViewModel() {
             }
         })
 
-        CometChatUIEvents.addListener(LISTENER_ID, object : CometChatUIEvents() {
+        CometChatUIEvents.addListener(listenerId, object : CometChatUIEvents() {
             override fun ccActiveChatChanged(
                 id: HashMap<String, String>, message: BaseMessage?, user: User?, group: Group?
             ) {
@@ -155,7 +179,7 @@ class MessagesViewModel : ViewModel() {
             }
         })
 
-        CometChatConversationEvents.addListener(LISTENER_ID, object : CometChatConversationEvents() {
+        CometChatConversationEvents.addListener(listenerId, object : CometChatConversationEvents() {
             override fun ccConversationDeleted(conversation: Conversation) {
                 isExitActivity.value = true
             }
@@ -164,10 +188,10 @@ class MessagesViewModel : ViewModel() {
 
     /** Removes listeners for group and user events.  */
     fun removeListener() {
-        CometChat.removeGroupListener(LISTENER_ID)
-        CometChatGroupEvents.removeListener(LISTENER_ID)
-        CometChatUserEvents.removeListener(LISTENER_ID)
-        CometChatUIEvents.removeListener(LISTENER_ID)
+        CometChat.removeGroupListener(listenerId)
+        CometChatGroupEvents.removeListener(listenerId)
+        CometChatUserEvents.removeListener(listenerId)
+        CometChatUIEvents.removeListener(listenerId)
     }
 
     /**
@@ -199,9 +223,9 @@ class MessagesViewModel : ViewModel() {
                         resultMap[mUser!!.uid], ignoreCase = true
                     )
                 ) {
-                    unblockButtonState.setValue(DialogState.SUCCESS)
+                    unblockButtonState.value = DialogState.SUCCESS
                 } else {
-                    unblockButtonState.setValue(DialogState.FAILURE)
+                    unblockButtonState.value = DialogState.FAILURE
                 }
             }
 

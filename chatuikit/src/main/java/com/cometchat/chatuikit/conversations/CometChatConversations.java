@@ -2269,7 +2269,7 @@ public class CometChatConversations extends MaterialCardView {
      */
     public void setUserStatusVisibility(int userStatusVisibility) {
         this.userStatusVisibility = userStatusVisibility;
-        conversationsAdapter.hideUserStatus(receiptsVisibility != VISIBLE);
+        conversationsAdapter.hideUserStatus(userStatusVisibility != VISIBLE);
     }
 
     /**

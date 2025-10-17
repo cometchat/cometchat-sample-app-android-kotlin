@@ -15,6 +15,7 @@ import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.shared.ai.CometChatAIStreamService;
 import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -41,6 +42,7 @@ public class MessageComposerViewModel extends ViewModel {
     public MutableLiveData<CometChatException> exception;
     public MutableLiveData<BaseMessage> successEdit;
     public MutableLiveData<HashMap<String, String>> mutableHashMap;
+    public MutableLiveData<Boolean> isAIAssistantGenerating;
     public User user;
     public Group group;
     public String id;
@@ -53,6 +55,7 @@ public class MessageComposerViewModel extends ViewModel {
     public MutableLiveData<Function1<Context, View>> showTopPanel;
     public MutableLiveData<Function1<Context, View>> showBottomPanel;
     public Void aVoid;
+    private boolean isAgentChat;
 
     public MessageComposerViewModel() {
         sentMessage = new MutableLiveData<>();
@@ -66,6 +69,11 @@ public class MessageComposerViewModel extends ViewModel {
         showBottomPanel = new MutableLiveData<>();
         composeText = new MutableLiveData<>();
         idMap = new HashMap<>();
+        isAIAssistantGenerating = new MutableLiveData<>();
+    }
+
+    public MutableLiveData<Boolean> getIsAIAssistantGenerating() {
+        return isAIAssistantGenerating;
     }
 
     public MutableLiveData<String> getComposeText() {
@@ -117,6 +125,7 @@ public class MessageComposerViewModel extends ViewModel {
             this.user = user;
             this.id = user.getUid();
             this.type = UIKitConstants.ReceiverType.USER;
+            this.isAgentChat = Utils.isAgentChat(user);
             setIdMap();
         }
     }
@@ -174,6 +183,19 @@ public class MessageComposerViewModel extends ViewModel {
                 }
             }
         });
+
+        CometChatAIStreamService.setOnStreamCallBack(new CometChatAIStreamService.OnStreamCallBack() {
+            @Override
+            public void onStreamCompleted() {
+                isAIAssistantGenerating.setValue(false);
+            }
+
+            @Override
+            public void onStreamInterrupted() {
+                isAIAssistantGenerating.setValue(false);
+            }
+        });
+
         CometChatUIEvents.addListener(LISTENERS_TAG, new CometChatUIEvents() {
             @Override
             public void showPanel(HashMap<String, String> id, UIKitConstants.CustomUIPosition alignment, Function1<Context, View> view) {
@@ -269,6 +291,10 @@ public class MessageComposerViewModel extends ViewModel {
         CometChatUIKit.sendTextMessage(textMessage, new CometChat.CallbackListener<TextMessage>() {
             @Override
             public void onSuccess(TextMessage textMessage) {
+                if (isAgentChat) {
+                    if (parentMessageId == -1) parentMessageId = textMessage.getId();
+                    isAIAssistantGenerating.setValue(true);
+                }
                 sentMessage.setValue(textMessage);
             }
 

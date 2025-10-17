@@ -18,6 +18,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.chat.constants.CometChatConstants;
+import com.cometchat.chat.models.AppEntity;
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.TypingIndicator;
@@ -900,6 +902,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
         // Custom or default views for subtitle and tail.
         private SubtitleView subtitleView;
         private ConversationTailView tailView;
+        private boolean isAgent;
         private View customView, customLeadingView, customTitleView, customSubtitleView, customTailView;
 
         /**
@@ -954,6 +957,14 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
          * @param position     The position of the item in the list.
          */
         public void bindView(Conversation conversation, int position) {
+            boolean isAgentChat = false;
+            AppEntity conversationWith = conversation.getConversationWith();
+            if (conversationWith != null) {
+                if (conversationWith instanceof User) {
+                    isAgentChat = Utils.isAgentChat((User) conversationWith);
+                }
+            }
+
             // Set avatar style
             binding.conversationsAvatar.setStyle(conversationsAvatarStyle);
 
@@ -1020,33 +1031,43 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if (subtitleViewHolder != null) {
                     subtitleViewHolder.bindView(context, customSubtitleView, conversation, this, conversationsList, position);
                 } else {
-                    ConversationsUtils.bindSubtitleView(
-                        context,
-                        subtitleView,
-                        conversation,
-                        typingIndicatorHashMap,
-                        hideReceipts,
-                        formatters,
-                        conversationsItemSubtitleTextAppearance,
-                        conversationsItemSubtitleTextColor,
-                        conversationsItemMessageTypeIconTint,
-                        conversationsReceiptStyle,
-                        conversationsTypingIndicatorStyle
-                    );
+                    if (!isAgentChat) {
+                        ConversationsUtils.bindSubtitleView(
+                                context,
+                                subtitleView,
+                                conversation,
+                                typingIndicatorHashMap,
+                                hideReceipts,
+                                formatters,
+                                conversationsItemSubtitleTextAppearance,
+                                conversationsItemSubtitleTextColor,
+                                conversationsItemMessageTypeIconTint,
+                                conversationsReceiptStyle,
+                                conversationsTypingIndicatorStyle
+                        );
+                        subtitleView.setVisibility(View.VISIBLE);
+                    } else {
+                        subtitleView.setVisibility(View.GONE);
+                    }
                 }
 
                 // Bind tail view
                 if (trailingViewHolder != null) {
                     trailingViewHolder.bindView(context, customTailView, conversation, this, conversationsList, position);
                 } else {
-                    ConversationsUtils.bindConversationTailView(
-                        tailView,
-                        dateFormat,
-                        dateTimeFormatter,
-                        conversation,
-                        conversationsBadgeStyle,
-                        conversationsDateStyle
-                    );
+                    if (!isAgentChat) {
+                        ConversationsUtils.bindConversationTailView(
+                                tailView,
+                                dateFormat,
+                                dateTimeFormatter,
+                                conversation,
+                                conversationsBadgeStyle,
+                                conversationsDateStyle
+                        );
+                        tailView.setVisibility(View.VISIBLE);
+                    } else {
+                        tailView.setVisibility(View.GONE);
+                    }
                 }
             }
 
@@ -1062,7 +1083,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
          */
         private void handleUserPresence(Conversation conversation) {
             if (((User) conversation.getConversationWith()).getStatus().equalsIgnoreCase(CometChatConstants.USER_STATUS_ONLINE)) {
-                if (!Utils.isBlocked(((User) conversation.getConversationWith()))) {
+                if (!Utils.isBlocked(((User) conversation.getConversationWith())) && !isAgent) {
                     binding.conversationsStatusAndTypeIndicator.setStatusIndicator(hideUserStatus ? StatusIndicator.OFFLINE : StatusIndicator.ONLINE);
                 } else {
                     binding.conversationsStatusAndTypeIndicator.setStatusIndicator(StatusIndicator.OFFLINE);

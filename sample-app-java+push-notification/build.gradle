@@ -38,13 +38,14 @@ dependencies {
     implementation libs.constraintlayout
 
     // CometChat Dependencies
-    //implementation project(':chatuikit')
+//    implementation project(':chatuikit')
     implementation libs.cometchat.ui.kit
     implementation libs.chat.sdk.android
     implementation libs.calls.sdk.android
 
     // Firebase BOM
     implementation platform(libs.firebase.bom)
+    implementation libs.google.firebase.auth
     implementation libs.firebase.messaging
 
     // Other Dependencies

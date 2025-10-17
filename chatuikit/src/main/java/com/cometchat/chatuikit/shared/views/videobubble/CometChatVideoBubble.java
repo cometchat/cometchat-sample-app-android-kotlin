@@ -58,6 +58,7 @@ public class CometChatVideoBubble extends MaterialCardView {
     private @ColorInt int videoCardStrokeColor;
     private @Dimension int videoCardStrokeWidth;
     private ProgressBar progressBar;
+    private File file;
 
     /**
      * Constructs a new CometChatVideoBubble with the provided context.
@@ -142,7 +143,11 @@ public class CometChatVideoBubble extends MaterialCardView {
     }
 
     private void openMediaViewActivity() {
-        MediaUtils.openMediaInPlayer(getContext(), videoUrl, "video/*");
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            MediaUtils.openMediaInPlayer(getContext(), videoUrl, "video/*");
+        } else {
+            MediaUtils.openFile(getContext(), file);
+        }
     }
 
     /**
@@ -193,6 +198,7 @@ public class CometChatVideoBubble extends MaterialCardView {
      */
     public void setVideoUrl(File file, String videoUrl) {
         this.videoUrl = videoUrl;
+        this.file = file;
         loadBitmapIntoImageView(file, videoUrl);
     }
 

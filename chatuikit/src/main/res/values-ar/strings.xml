@@ -205,4 +205,10 @@
     <string name="cometchat_cancel_button">إلغاء</string>
     <string name="cometchat_settings_button">الإعدادات</string>
     <string name="cometchat_moderation_block_message">تم حظر رسالتك بسبب سياسات الاعتدال.</string>
+    <string name="cometchat_no_conversations_history_title">لم يتم العثور على تاريخ المحادثة</string>
+    <string name="cometchat_no_conversations_history_subtitle">ابدأ دردشة بالنقر على زر \"دردشة جديدة\"</string>
+    <string name="cometchat_new_chat">دردشة جديدة</string>
+    <string name="cometchat_chat_history">سجل الدردشة</string>
+    <string name="cometchat_ask_anything">اسأل أي شيء</string>
+    <string name="cometchat_something_went_wrong_try_again">حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى</string>
 </resources>

@@ -15,11 +15,14 @@ import androidx.fragment.app.Fragment
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
+import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.logger.CometChatLogger
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick
+import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
 import com.cometchat.sampleapp.kotlin.fcm.BuildConfig
 import com.cometchat.sampleapp.kotlin.fcm.R
@@ -64,7 +67,8 @@ class ChatsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState) // Set up item click listener for the conversations view
+        super.onViewCreated(view, savedInstanceState)
+        // Set up item click listener for the conversations view
         binding.cometchatConversations.onItemClick = OnItemClick { view, position, conversation ->
             if (conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP) {
                 val group = conversation.conversationWith as Group
@@ -93,20 +97,14 @@ class ChatsFragment : Fragment() {
             val user: User? = CometChatUIKit.getLoggedInUser()
             if (user != null) {
                 val cometchatAvatar = CometChatAvatar(requireContext())
-                cometchatAvatar.setAvatar(
-                    user.name, user.avatar
-                )
-                val layoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
-                    resources.getDimensionPixelSize(
+                cometchatAvatar.setAvatar(user.name, user.avatar)
+                val layoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(resources.getDimensionPixelSize(
                         com.cometchat.chatuikit.R.dimen.cometchat_40dp
-                    ), resources.getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_40dp)
-                )
+                    ), resources.getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_40dp))
                 layoutParams.layoutDirection = Gravity.CENTER_VERTICAL
                 cometchatAvatar.setLayoutParams(layoutParams)
                 cometchatAvatar.setOnClickListener { v: View ->
-                    showCustomMenu(
-                        binding.cometchatConversations.binding.toolbar
-                    )
+                    showCustomMenu(binding.cometchatConversations.binding.toolbar)
                 }
                 return cometchatAvatar
             }
@@ -160,6 +158,10 @@ class ChatsFragment : Fragment() {
             })
             popupWindow.dismiss()
         }
+
+        popupMenuBinding.tvUserName.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()))
+        popupMenuBinding.tvCreateConversation.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()))
+        popupMenuBinding.tvUserName.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()))
 
         popupWindow.elevation = 5f
         val endMargin = resources.getDimensionPixelSize(com.cometchat.chatuikit.R.dimen.cometchat_margin_2)

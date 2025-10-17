@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
 import com.cometchat.chat.models.Group;
@@ -215,6 +216,17 @@ public interface DataSource {
                                     int position,
                                     @NonNull AdditionParameter additionParameter);
 
+    View getAIAssistantBubbleContentView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment);
+
+    void bindAIAssistantBubbleContentView(Context context,
+                                          View createdView,
+                                          AIAssistantMessage message,
+                                          UIKitConstants.MessageBubbleAlignment alignment,
+                                          RecyclerView.ViewHolder holder,
+                                          List<BaseMessage> messageList,
+                                          int position,
+                                          @NonNull AdditionParameter additionParameter);
+
     CometChatMessageTemplate getAudioTemplate(@NonNull AdditionParameter additionParameter);
 
     CometChatMessageTemplate getVideoTemplate(@NonNull AdditionParameter additionParameter);
@@ -234,6 +246,8 @@ public interface DataSource {
     CometChatMessageTemplate getCardTemplate(@NonNull AdditionParameter additionParameter);
 
     List<CometChatMessageTemplate> getMessageTemplates(@NonNull AdditionParameter additionParameter);
+
+    CometChatMessageTemplate getAIAssistantTemplate(@NonNull AdditionParameter additionParameter);
 
     /**
      * Returns the message template for the specified category and type.

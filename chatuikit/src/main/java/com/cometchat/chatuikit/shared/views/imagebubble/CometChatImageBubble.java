@@ -147,10 +147,20 @@ public class CometChatImageBubble extends MaterialCardView {
             CometChatLogger.e(TAG, "MediaMessage is null and imageUrl is empty");
             return;
         }
+
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            File localFile = Utils.getFileFromLocalPath(mediaMessage);
+            if (localFile != null && localFile.exists()) {
+                imageUrl = localFile.getAbsolutePath();
+            }
+        }
+
+        String fileName = mediaMessage != null && mediaMessage.getAttachment() != null ? mediaMessage.getAttachment().getFileName() : "";
+        String fileMimeType = mediaMessage != null && mediaMessage.getAttachment() != null ? mediaMessage.getAttachment().getFileMimeType() : "";
         Utils.openImageViewer(shapeableImageView,
                               Collections.singletonList(imageUrl),
-                              Collections.singletonList(mediaMessage.getAttachment() == null ? "" : mediaMessage.getAttachment().getFileMimeType()),
-                              Collections.singletonList(mediaMessage.getAttachment() == null ? "" : mediaMessage.getAttachment().getFileName()));
+                              Collections.singletonList(fileMimeType),
+                              Collections.singletonList(fileName));
     }
 
     /**

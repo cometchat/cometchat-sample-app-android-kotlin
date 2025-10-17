@@ -37,6 +37,9 @@
         android:theme="@style/KotlinSampleApp.v5"
         tools:replace="android:theme">
         <activity
+            android:name=".ai.AIAssistantUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.NewChatActivity"
             android:exported="false" />
         <activity
@@ -66,7 +69,15 @@
         <activity
             android:name=".ui.activity.MessagesActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            />
+        <activity
+            android:name=".ai.AIAssistantChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            />
 
         <activity
             android:name=".ui.activity.GroupDetailsActivity"

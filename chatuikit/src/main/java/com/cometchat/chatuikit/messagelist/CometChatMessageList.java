@@ -11,7 +11,10 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Dimension;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
@@ -55,6 +59,8 @@ import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.shared.interfaces.ToolCallListener;
+import com.cometchat.chatuikit.shared.ai.CometChatAIStreamService;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.messageinformation.CometChatMessageInformation;
 import com.cometchat.chatuikit.reactionlist.CometChatReactionList;
@@ -86,6 +92,7 @@ import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatCon
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderDecoration;
 import com.cometchat.chatuikit.shared.views.aiconversationstarter.CometChatAIConversationStarterView;
 import com.cometchat.chatuikit.shared.views.aismartreplies.CometChatAISmartRepliesView;
+import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar;
 import com.cometchat.chatuikit.shared.views.badge.CometChatBadge;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
 import com.cometchat.chatuikit.shared.views.optionsheet.OptionSheetMenuItem;
@@ -98,8 +105,12 @@ import com.cometchat.chatuikit.shimmer.CometChatShimmerAdapter;
 import com.cometchat.chatuikit.shimmer.CometChatShimmerFrameLayout;
 import com.cometchat.chatuikit.shimmer.CometChatShimmerUtils;
 import com.cometchat.chatuikit.threadheader.CometChatThreadHeader;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -170,6 +181,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private MessageAdapter messageAdapter;
     private StickyHeaderDecoration stickyHeaderDecoration;
     private boolean autoFetch = true;
+    private boolean isAgentChat = false;
     private boolean hasMore;
     private boolean isScrolling;
     private boolean isInProgress;
@@ -184,12 +196,20 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private View customEmptyView;
     private View customErrorView;
     private View customLoadingView;
+    private View customAIAssistantEmptyChatGreetingView;
     private int errorStateVisibility = VISIBLE;
+    private CometChatAvatar aiAssistantEmptyChatGreetingImageView;
+    private TextView aiAssistantEmptyChatGreetingTextView, aiAssistantEmptyChatGreetingSubtitleTextView;
+    private @ColorInt int aiAssistantEmptyChatTitleTextColor;
+    private @ColorInt int aiAssistantEmptyChatSubtitleTextColor;
+    private @StyleRes int aiAssistantEmptyChatTitleTextAppearance;
+    private @StyleRes int aiAssistantEmptyChatSubtitleTextAppearance;
     private TextView errorTextView, errorSubtitleTextView;
     private @ColorInt int errorStateTitleTextColor;
     private @ColorInt int errorStateSubtitleTextColor;
     private @StyleRes int errorStateTitleTextAppearance;
     private @StyleRes int errorStateSubtitleTextAppearance;
+
     // Shimmer Layouts and Adapters
     private LinearLayout shimmerParentLayout;
     private RecyclerView shimmerRecyclerviewMessageListList;
@@ -236,7 +256,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     };
     private DateTimeFormatterCallback dateTimeFormatter;
     // Layout Components
-    private LinearLayout customViewLayout, errorViewLayout;
+    private LinearLayout customViewLayout, errorViewLayout, aiAssistantEmptyChatGreetingLayout;
     private LinearLayout parent;
     private ImageView paginationLoadingIcon;
     // Styles
@@ -322,6 +342,28 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private @StyleRes int smartRepliesStyle = 0;
     private @StyleRes int conversationStarterStyle = 0;
 
+    private List<String> aiAssistantSuggestedMessages;
+    private int aiAssistantSuggestedMessagesVisibility = VISIBLE;
+    private HashMap<String, ToolCallListener> toolCallListenerHashMap = new HashMap<>();
+    private int streamingSpeed;
+
+    // Flex box for ai assistant suggested messages
+    private FlexboxLayout aiAssistantSuggestedMessageContainer;
+
+    // AI Assistant styling
+    private @ColorInt int aiAssistantSuggestedMessageStrokeColor;
+    private @Dimension int aiAssistantSuggestedMessageStrokeWidth;
+    private @Dimension float aiAssistantSuggestedMessageCornerRadius;
+    private @ColorInt int aiAssistantSuggestedMessageBackgroundColor;
+    private @ColorInt int aiAssistantSuggestedMessageTextColor;
+    private @StyleRes int aiAssistantSuggestedMessageTextAppearance;
+    private Drawable aiAssistantSuggestedMessageEndIcon;
+    private @ColorInt int aiAssistantSuggestedMessageEndIconTint;
+
+    private AttributeSet attrs;
+    private @StyleRes int defStyleAttr;
+    private @StyleRes int style;
+
     /**
      * Constructs a new {@link CometChatMessageList} with the specified context.
      *
@@ -404,6 +446,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         // Add the inflated view to the parent layout
         addView(view);
 
+        this.attrs = attrs;
+        this.defStyleAttr = defStyleAttr;
+
         // Apply additional style attributes
         applyStyleAttributes(attrs, defStyleAttr, 0);
     }
@@ -448,6 +493,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         errorTextView = view.findViewById(R.id.tv_error_message_list);
         errorSubtitleTextView = view.findViewById(R.id.tv_error_message_list_subtitle);
         customViewLayout = view.findViewById(R.id.customView_lay);
+
+        // Initialize empty chat greeting layout and text components
+        aiAssistantEmptyChatGreetingLayout = view.findViewById(R.id.empty_message_list_layout);
+        aiAssistantEmptyChatGreetingImageView = view.findViewById(R.id.iv_empty_message_list);
+        aiAssistantEmptyChatGreetingTextView = view.findViewById(R.id.tv_empty_message_list);
+        aiAssistantEmptyChatGreetingSubtitleTextView = view.findViewById(R.id.tv_empty_message_list_subtitle);
+
+        // Initialize flex box for ai assistant suggested messages
+        aiAssistantSuggestedMessageContainer = view.findViewById(R.id.ai_assistant_suggested_messages_container);
 
         // Initialize shimmer loading effect components
         shimmerParentLayout = view.findViewById(R.id.shimmer_parent_layout);
@@ -518,7 +572,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getMutableMessageList().observe((LifecycleOwner) getContext(), this::setList);
         messageListViewModel.messagesRangeChanged().observe((LifecycleOwner) getContext(), this::notifyRangeChanged);
         messageListViewModel.updateMessage().observe((LifecycleOwner) getContext(), this::updateMessage);
-        messageListViewModel.getOnMessageDeleted().observe((LifecycleOwner) getContext(), this::dismissMessagePopupMenu);
+        messageListViewModel.getOnMessageDeleted().observe((LifecycleOwner) getContext(), this::messageDeleted);
         messageListViewModel.addMessage().observe((LifecycleOwner) getContext(), this::addMessage);
         messageListViewModel.getCometChatException().observe((LifecycleOwner) getContext(), this::throwError);
         messageListViewModel.removeMessage().observe((LifecycleOwner) getContext(), this::removeMessage);
@@ -538,10 +592,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getSmartRepliesUIState().observe((LifecycleOwner) getContext(), this::handleAISmartRepliesUIState);
     }
 
-    private void dismissMessagePopupMenu(BaseMessage message) {
+    private void messageDeleted(BaseMessage message) {
         if (baseMessage != null && message != null && baseMessage.getId() == message.getId()) {
             if (cometchatPopUpMenuMessage != null && message.getDeletedAt() > 0) {
                 cometchatPopUpMenuMessage.dismiss();
+            }
+        } else {
+            if (isAgentChat && message != null && messageListViewModel.getParentMessageId() == message.getId()) {
+                if (user != null)
+                    CometChatUIKitHelper.onOpenChat(user, null);
             }
         }
     }
@@ -676,36 +735,38 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         try {
-            setIncomingMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListIncomingMessageBubbleStyle,
-                                                                   0));
-            setOutgoingMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListOutgoingMessageBubbleStyle,
-                                                                   0));
+            setIncomingMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListIncomingMessageBubbleStyle, 0));
+            setOutgoingMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListOutgoingMessageBubbleStyle, 0));
             setMessageInformationStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListMessageInformationStyle, 0));
             setMessageOptionSheetStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListMessageOptionSheetStyle, 0));
             setDateSeparatorStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListDateSeparatorStyle, 0));
-            additionParameter.setActionBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListActionBubbleStyle,
-                                                                            0));
-            additionParameter.setCallActionBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListCallActionBubbleStyle,
-                                                                                0));
+            additionParameter.setActionBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListActionBubbleStyle, 0));
+            additionParameter.setCallActionBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListCallActionBubbleStyle, 0));
             setDeleteDialogStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListDeleteDialogStyle, 0));
-            setErrorStateTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextAppearance,
-                                                                      0));
-            setErrorStateSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextAppearance,
-                                                                         0));
-            setErrorStateTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextColor,
-                                                            CometChatTheme.getTextColorPrimary(getContext())));
-            setErrorStateSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextColor,
-                                                               CometChatTheme.getTextColorSecondary(getContext())));
-            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListBackgroundColor,
-                                                       CometChatTheme.getBackgroundColor3(getContext())));
+            setErrorStateTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextAppearance, 0));
+            setErrorStateSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextAppearance, 0));
+            setErrorStateTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateTitleTextColor, CometChatTheme.getTextColorPrimary(getContext())));
+            setErrorStateSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListErrorStateSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext())));
+            setAiAssistantEmptyChatTitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListEmptyChatGreetingTitleTextColor, CometChatTheme.getTextColorPrimary(getContext())));
+            setAiAssistantEmptyChatTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListEmptyChatGreetingTitleTextAppearance, 0));
+            setAiAssistantEmptyChatSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListEmptyChatGreetingSubtitleTextColor, CometChatTheme.getNeutralColor500(getContext())));
+            setAiAssistantEmptyChatSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListEmptyChatGreetingSubtitleTextAppearance, 0));
+            setAiAssistantSuggestedMessageBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageBackgroundColor,0));
+            setAiAssistantSuggestedMessageTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageTextColor, 0));
+            setAiAssistantSuggestedMessageTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageTextAppearance, 0));
+            setAiAssistantSuggestedMessageStrokeColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageStrokeColor,0));
+            setAiAssistantSuggestedMessageStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageStrokeWidth, 0));
+            setAiAssistantSuggestedMessageCornerRadius(typedArray.getDimension(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageCornerRadius, 0));
+            setAiAssistantSuggestedMessageEndIcon(typedArray.getDrawable(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageEndIcon));
+            setAiAssistantSuggestedMessageEndIconTint(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageEndIconTint,0));
+            setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListBackgroundColor, CometChatTheme.getBackgroundColor3(getContext())));
             setStrokeColor(ColorStateList.valueOf(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListStrokeColor, 0)));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageList_cometchatMessageListStrokeWidth, 0));
             setRadius(typedArray.getDimension(R.styleable.CometChatMessageList_cometchatMessageListCornerRadius, 0));
             Drawable backgroundDrawable = typedArray.getDrawable(R.styleable.CometChatMessageList_cometchatMessageListBackgroundDrawable);
             setReactionListStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListReactionListStyle, 0));
             setAISmartRepliesStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAISmartRepliesStyle, 0));
-            setAIConversationStarterStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAIConversationStarterStyle,
-                                                                   0));
+            setAIConversationStarterStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAIConversationStarterStyle, 0));
             if (backgroundDrawable != null) setBackgroundDrawable(backgroundDrawable);
         } finally {
             typedArray.recycle();
@@ -723,47 +784,28 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void extractAttributesAndApplyBubbleDefaults(TypedArray typedArray, boolean isIncoming) {
         try {
             if (isIncoming) {
-                additionParameter.setIncomingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle,
-                                                                                      0));
-                additionParameter.setIncomingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle,
-                                                                                       0));
-                additionParameter.setIncomingFileBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatFileBubbleStyle,
-                                                                                      0));
-                additionParameter.setIncomingAudioBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAudioBubbleStyle,
-                                                                                       0));
-                additionParameter.setIncomingVideoBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatVideoBubbleStyle,
-                                                                                       0));
-                additionParameter.setIncomingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle,
-                                                                                        0));
-                additionParameter.setIncomingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle,
-                                                                                      0));
-                additionParameter.setIncomingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle,
-                                                                                               0));
-                additionParameter.setIncomingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle,
-                                                                                          0));
-                setIncomingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle,
-                                                                               0));
+                additionParameter.setIncomingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
+                additionParameter.setIncomingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle, 0));
+                additionParameter.setIncomingFileBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatFileBubbleStyle, 0));
+                additionParameter.setIncomingAudioBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAudioBubbleStyle, 0));
+                additionParameter.setIncomingVideoBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatVideoBubbleStyle, 0));
+                additionParameter.setIncomingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle, 0));
+                additionParameter.setIncomingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle, 0));
+                additionParameter.setIncomingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle, 0));
+                additionParameter.setIncomingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle, 0));
+                additionParameter.setAIAssistantMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAIAssistantBubbleStyle, 0));
+                setIncomingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle, 0));
             } else {
-                additionParameter.setOutgoingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle,
-                                                                                      0));
-                additionParameter.setOutgoingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle,
-                                                                                       0));
-                additionParameter.setOutgoingFileBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatFileBubbleStyle,
-                                                                                      0));
-                additionParameter.setOutgoingAudioBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAudioBubbleStyle,
-                                                                                       0));
-                additionParameter.setOutgoingVideoBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatVideoBubbleStyle,
-                                                                                       0));
-                additionParameter.setOutgoingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle,
-                                                                                        0));
-                additionParameter.setOutgoingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle,
-                                                                                      0));
-                additionParameter.setOutgoingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle,
-                                                                                               0));
-                additionParameter.setOutgoingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle,
-                                                                                          0));
-                setOutgoingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle,
-                                                                               0));
+                additionParameter.setOutgoingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
+                additionParameter.setOutgoingImageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatImageBubbleStyle, 0));
+                additionParameter.setOutgoingFileBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatFileBubbleStyle, 0));
+                additionParameter.setOutgoingAudioBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAudioBubbleStyle, 0));
+                additionParameter.setOutgoingVideoBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatVideoBubbleStyle, 0));
+                additionParameter.setOutgoingDeleteBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatDeleteBubbleStyle, 0));
+                additionParameter.setOutgoingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle, 0));
+                additionParameter.setOutgoingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle, 0));
+                additionParameter.setOutgoingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle, 0));
+                setOutgoingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle, 0));
                 setModerationViewStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatModerationViewStyle, 0));
             }
         } finally {
@@ -882,6 +924,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * @param styleResId The style resource ID to be applied.
      */
     public void setStyle(@StyleRes int styleResId) {
+        this.style = styleResId;
         if (styleResId != 0) {
             TypedArray finalTypedArray = getContext().getTheme().obtainStyledAttributes(styleResId, R.styleable.CometChatMessageList);
             extractAttributesAndApplyDefaults(finalTypedArray);
@@ -1226,6 +1269,22 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
+     * Sets the layout resource for the empty state view.
+     *
+     * @param id The resource ID of the layout for the empty state view.
+     */
+    public void setAIAssistantEmptyChatGreetingView(@LayoutRes int id) {
+        if (id != 0) {
+            try {
+                customAIAssistantEmptyChatGreetingView = View.inflate(getContext(), id, null);
+            } catch (Exception e) {
+                customAIAssistantEmptyChatGreetingView = null;
+                CometChatLogger.e(TAG, e.toString());
+            }
+        }
+    }
+
+    /**
      * Sets the layout resource for the error state view.
      *
      * @param id The resource ID of the layout for the error state view.
@@ -1487,6 +1546,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             customViewLayout.removeAllViews();
             customViewLayout.addView(customLoadingView);
         } else {
+            setAIAssistantEmptyStateVisibility();
             CometChatShimmerAdapter adapter = new CometChatShimmerAdapter(2, R.layout.cometchat_shimmer_message_list);
             shimmerRecyclerviewMessageListList.setAdapter(adapter);
             shimmerRecyclerviewMessageListList.setLayoutManager(new LinearLayoutManager(getContext()) {
@@ -1498,6 +1558,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             shimmerParentLayout.setVisibility(View.VISIBLE);
             shimmerEffectFrame.setShimmer(CometChatShimmerUtils.getCometChatShimmerConfig(getContext()));
             shimmerEffectFrame.startShimmer();
+        }
+    }
+
+    private void setAIAssistantEmptyStateVisibility() {
+        if (isAgentChat) {
+            aiAssistantEmptyChatGreetingLayout.setVisibility(View.GONE);
         }
     }
 
@@ -1526,6 +1592,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void hideAllStates() {
         customViewLayout.setVisibility(View.GONE);
         errorViewLayout.setVisibility(View.GONE);
+        aiAssistantEmptyChatGreetingLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -1560,15 +1627,171 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     private void handleEmptyState() {
         if (onEmpty != null) onEmpty.onEmpty();
-        if (customEmptyView != null) {
-            customViewLayout.setVisibility(View.VISIBLE);
-            customViewLayout.removeAllViews();
-            customViewLayout.addView(customEmptyView);
+        if (isAgentChat) {
+            if (customAIAssistantEmptyChatGreetingView != null) {
+                aiAssistantEmptyChatGreetingLayout.removeAllViews();
+                aiAssistantEmptyChatGreetingLayout.addView(customAIAssistantEmptyChatGreetingView);
+                aiAssistantEmptyChatGreetingLayout.setVisibility(VISIBLE);
+            } else {
+                hideShimmer();
+                hideErrorState();
+                setUpAIAssistantGreetingView();
+            }
+            messageListLayout.setVisibility(View.GONE);
         } else {
-            hideShimmer();
-            hideErrorState();
+            if (customEmptyView != null) {
+                customViewLayout.setVisibility(View.VISIBLE);
+                customViewLayout.removeAllViews();
+                customViewLayout.addView(customEmptyView);
+            } else {
+                hideShimmer();
+                hideErrorState();
+            }
+            messageListLayout.setVisibility(View.GONE);
         }
-        messageListLayout.setVisibility(View.GONE);
+    }
+
+    private void setUpAIAssistantGreetingView() {
+        JSONObject metadata = user.getMetadata();
+        String greetingTitle = extractStringFromMetadata(metadata, UIKitConstants.AIAssistantJsonConstants.GREETING_MESSAGE);
+        String greetingSubtitle = extractStringFromMetadata(metadata, UIKitConstants.AIAssistantJsonConstants.INTRODUCTORY_MESSAGE);
+        List<String> suggestedMessages;
+        if (aiAssistantSuggestedMessages != null && !aiAssistantSuggestedMessages.isEmpty()) {
+            suggestedMessages = aiAssistantSuggestedMessages;
+        } else suggestedMessages = extractSuggestedMessages(metadata);
+        setupSuggestedMessages(suggestedMessages);
+        showAIAgentGreetingView(greetingTitle, greetingSubtitle, suggestedMessages);
+    }
+
+    private void showAIAgentGreetingView(String greetingTitle, String greetingSubtitle, List<String> suggestedMessages) {
+        aiAssistantEmptyChatGreetingTextView.setText(!greetingTitle.isEmpty() ? greetingTitle : getResources().getString(R.string.cometchat_empty_chat_title));
+        aiAssistantEmptyChatGreetingSubtitleTextView.setText(!greetingSubtitle.isEmpty() ? greetingSubtitle : getResources().getString(R.string.cometchat_empty_chat_subtitle));
+        aiAssistantEmptyChatGreetingLayout.setVisibility(View.VISIBLE);
+        aiAssistantEmptyChatGreetingImageView.setAvatar(user.getName(), user.getAvatar());
+        aiAssistantEmptyChatGreetingImageView.setVisibility(VISIBLE);
+    }
+
+    private String extractStringFromMetadata(JSONObject metadata, String key) {
+        if (metadata == null) return "";
+
+        try {
+            return metadata.optString(key, "");
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, e.getMessage());
+            return "";
+        }
+    }
+
+    private List<String> extractSuggestedMessages(JSONObject metadata) {
+        List<String> messages = new ArrayList<>();
+        if (metadata == null) return messages;
+
+        try {
+            if (metadata.has(UIKitConstants.AIAssistantJsonConstants.SUGGESTED_MESSAGES)) {
+                JSONArray suggestedMessagesArray = metadata.getJSONArray(UIKitConstants.AIAssistantJsonConstants.SUGGESTED_MESSAGES);
+                for (int i = 0; i < suggestedMessagesArray.length(); i++) {
+                    String message = suggestedMessagesArray.getString(i).trim();
+                    if (!message.isEmpty()) {
+                        messages.add(message);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+        return messages;
+    }
+
+    private void setupSuggestedMessages(List<String> suggestedMessages) {
+        if (!suggestedMessages.isEmpty()) {
+            aiAssistantSuggestedMessageContainer.removeAllViews();
+
+            for (int i = 0; i < suggestedMessages.size(); i++) {
+                MaterialCardView suggestedMessagesCard = new MaterialCardView(getContext());
+                Utils.initMaterialCard(suggestedMessagesCard);
+                MarginLayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                int margin = getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_margin_1);
+                layoutParams.setMargins(margin, margin, margin, margin);
+                suggestedMessagesCard.setLayoutParams(layoutParams);
+
+                LinearLayout suggestedMessagesContainer = new LinearLayout(getContext());
+                suggestedMessagesContainer.setOrientation(LinearLayout.HORIZONTAL);
+                suggestedMessagesContainer.setGravity(Gravity.CENTER_VERTICAL);
+                suggestedMessagesContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
+                suggestedMessagesContainer.setPadding(
+                        getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_padding_4),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_padding_2),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_padding_4),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_padding_2)
+                );
+
+                TextView tvSuggestedMessage = getSuggestedMessageTextView(i, suggestedMessages);
+                ImageView suggestedMessageEndIcon = getSuggestedMessageEndIcon(i);
+                setSuggestedMessagesStyle(suggestedMessagesCard, suggestedMessageEndIcon, tvSuggestedMessage);
+
+                // Add Views
+                suggestedMessagesContainer.addView(tvSuggestedMessage);
+                suggestedMessagesContainer.addView(suggestedMessageEndIcon);
+
+                suggestedMessagesCard.addView(suggestedMessagesContainer);
+
+                aiAssistantSuggestedMessageContainer.addView(suggestedMessagesCard);
+                if (aiAssistantSuggestedMessagesVisibility == VISIBLE) {
+                    aiAssistantSuggestedMessageContainer.setVisibility(View.VISIBLE);
+                } else {
+                    aiAssistantSuggestedMessageContainer.setVisibility(View.GONE);
+                }
+
+                // OnClick behavior
+                String composeMessage = suggestedMessages.get(i);
+                suggestedMessagesCard.setOnClickListener(v -> {
+                    CometChatUIKitHelper.onComposeMessage(user.getUid(), composeMessage);
+                });
+            }
+        }
+    }
+
+    private ImageView getSuggestedMessageEndIcon(int i) {
+        ImageView suggestedMessageEndIcon = new ImageView(getContext());
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
+                getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_18dp),
+                getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_18dp)
+        );
+        iconParams.setMarginStart(getContext().getResources().getDimensionPixelSize(R.dimen.cometchat_margin_2));
+        suggestedMessageEndIcon.setLayoutParams(iconParams);
+        suggestedMessageEndIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        suggestedMessageEndIcon.setImageDrawable(aiAssistantSuggestedMessageEndIcon);
+        return suggestedMessageEndIcon;
+    }
+
+    private TextView getSuggestedMessageTextView(int i, List<String> suggestedMessages) {
+        TextView tvSuggestedMessage = new TextView(getContext());
+        tvSuggestedMessage.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+        );
+        tvSuggestedMessage.setLayoutParams(textParams);
+        tvSuggestedMessage.setEllipsize(TextUtils.TruncateAt.END);
+        tvSuggestedMessage.setText(suggestedMessages.get(i));
+        return tvSuggestedMessage;
+    }
+
+    private void setSuggestedMessagesStyle(MaterialCardView suggestedMessagesCard, ImageView suggestedMessageEndIcon, TextView tvSuggestedMessage) {
+        tvSuggestedMessage.setTextColor(aiAssistantSuggestedMessageTextColor);
+        tvSuggestedMessage.setTextAppearance(aiAssistantSuggestedMessageTextAppearance);
+        suggestedMessageEndIcon.setImageTintList(ColorStateList.valueOf(aiAssistantSuggestedMessageEndIconTint));
+        suggestedMessagesCard.setCardBackgroundColor(aiAssistantSuggestedMessageBackgroundColor);
+        suggestedMessagesCard.setStrokeColor(aiAssistantSuggestedMessageStrokeColor);
+        suggestedMessagesCard.setStrokeWidth(aiAssistantSuggestedMessageStrokeWidth);
+        suggestedMessagesCard.setRadius(aiAssistantSuggestedMessageCornerRadius);
     }
 
     /**
@@ -1621,11 +1844,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void updateMessage(int index) {
         messageAdapter.notifyItemChanged(index, messageListViewModel.getMessageList().get(index));
-        if (index == messageListViewModel.getMessageList().size() - 1) {
-            if (atBottom()) {
-                scrollToBottom();
-            }
-        }
     }
 
     /**
@@ -1953,13 +2171,18 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                             BaseMessage baseMessage,
                             CometChatMessageTemplate cometchatMessageTemplate,
                             CometChatMessageBubble cometchatMessageBubble) {
-        ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
-        if (baseMessage != null && baseMessage.getId() != 0 && !UIKitConstants.ModerationConstants.PENDING.equals(moderationStatus)) {
+        if (baseMessage != null && baseMessage.getId() != 0) {
             this.customOption = list;
             this.baseMessage = baseMessage;
             this.messageBubble = cometchatMessageBubble;
             this.messageTemplate = cometchatMessageTemplate;
-            openMessageOptionBottomSheet(getActionItems());
+
+            boolean hasOptions = list != null && !list.isEmpty();
+            boolean reactionsVisible = messageReactionOptionVisibility == VISIBLE;
+
+            if (hasOptions || reactionsVisible) {
+                openMessageOptionBottomSheet(getActionItems());
+            }
         }
     }
 
@@ -1971,6 +2194,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void openMessageOptionBottomSheet(List<OptionSheetMenuItem> items) {
         cometchatPopUpMenuMessage.setStyle(messageOptionSheetStyle);
         cometchatPopUpMenuMessage.setAddReactionIcon(addReactionIcon);
+        cometchatPopUpMenuMessage.setReceiptsVisibility(receiptsVisibility);
         ModerationStatus moderationStatus = Utils.getModerationStatus(baseMessage);
         if (UIKitConstants.MessageCategory.INTERACTIVE.equals(baseMessage.getCategory()) || messageReactionOptionVisibility != View.VISIBLE || UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)) {
             cometchatPopUpMenuMessage.setQuickReactionsVisibility(GONE);
@@ -2332,16 +2556,20 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         if (user != null) {
             this.user = user;
             this.group = null;
+            this.isAgentChat = Utils.isAgentChat(user);
             messageAdapter.setType(UIKitConstants.ReceiverType.USER);
             messageAdapter.setUser(user);
             messageListViewModel.setUser(user,
                                          new ArrayList<>(messageTypesToRetrieve.values()),
                                          new ArrayList<>(messageCategoriesToRetrieve.values()),
-                                         parentMessageId);
+                                         parentMessageId, isAgentChat);
             if (autoFetch) messageListViewModel.fetchMessagesWithUnreadCount();
             aiConversationStarterView.setUid(user.getUid());
             aiSmartRepliesView.setUid(user.getUid());
             processFormatters();
+            if (isAgentChat) {
+                setStickyDateVisibility(View.GONE);
+            }
         }
     }
 
@@ -2567,6 +2795,215 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
+     * Returns the text appearance resource ID for the empty chat subtitle. This
+     * appearance defines the style for the subtitle text in the empty chat state.
+     *
+     * @return the resource ID for the empty chat subtitle text appearance
+     */
+    public @StyleRes int getAiAssistantEmptyChatSubtitleTextAppearance() {
+        return aiAssistantEmptyChatSubtitleTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the empty chat subtitle text of the message list.
+     *
+     * @param resourceId The style resource for the empty chat subtitle text appearance.
+     */
+    private void setAiAssistantEmptyChatSubtitleTextAppearance(@StyleRes int resourceId) {
+        this.aiAssistantEmptyChatSubtitleTextAppearance = resourceId;
+        aiAssistantEmptyChatGreetingSubtitleTextView.setTextAppearance(resourceId);
+    }
+
+    /**
+     * Returns the color integer for the empty chat subtitle text. This color
+     * customizes the subtitle text color in the empty chat state.
+     *
+     * @return the color for the empty chat subtitle text
+     */
+    public @ColorInt int getAiAssistantEmptyChatSubtitleTextColor() {
+        return aiAssistantEmptyChatSubtitleTextColor;
+    }
+
+    /**
+     * Sets the color for the empty chat subtitle text.
+     *
+     * @param color The color to be set for the empty chat subtitle text.
+     */
+    private void setAiAssistantEmptyChatSubtitleTextColor(@ColorInt int color) {
+        this.aiAssistantEmptyChatSubtitleTextColor = color;
+        aiAssistantEmptyChatGreetingSubtitleTextView.setTextColor(color);
+    }
+
+    /**
+     * Returns the text appearance resource ID for the empty chat title. This
+     * appearance defines the style for the title text in the empty chat state.
+     *
+     * @return the resource ID for the empty chat title text appearance
+     */
+    public @StyleRes int getAiAssistantEmptyChatTitleTextAppearance() {
+        return aiAssistantEmptyChatTitleTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the empty chat title text of the message list.
+     *
+     * @param resourceId The style resource for the empty chat title text appearance.
+     */
+    private void setAiAssistantEmptyChatTitleTextAppearance(@StyleRes int resourceId) {
+        this.aiAssistantEmptyChatTitleTextAppearance = resourceId;
+        aiAssistantEmptyChatGreetingTextView.setTextAppearance(resourceId);
+    }
+
+    /**
+     * Returns the color integer for the empty chat title text. This color
+     * customizes the title text color in the empty chat state.
+     *
+     * @return the color for the empty chat title text
+     */
+    public @ColorInt int getAiAssistantEmptyChatTitleTextColor() {
+        return aiAssistantEmptyChatTitleTextColor;
+    }
+
+    /**
+     * Sets the color for the empty chat title text.
+     *
+     * @param color The color to be set for the empty chat title text.
+     */
+    private void setAiAssistantEmptyChatTitleTextColor(@ColorInt int color) {
+        this.aiAssistantEmptyChatTitleTextColor = color;
+        aiAssistantEmptyChatGreetingTextView.setTextColor(color);
+    }
+
+    /** Returns the corner radius for the AI assistant suggested message bubble.
+     *
+     * @return the corner radius in pixels
+     */
+    public float getAiAssistantSuggestedMessageCornerRadius() {
+        return aiAssistantSuggestedMessageCornerRadius;
+    }
+
+    /** Sets the corner radius for the AI assistant suggested message bubble.
+     *
+     * @param dimension The corner radius in pixels.
+     */
+    private void setAiAssistantSuggestedMessageCornerRadius(float dimension) {
+        this.aiAssistantSuggestedMessageCornerRadius = dimension;
+    }
+
+    /** Returns the stroke width for the AI assistant suggested message bubble.
+     *
+     * @return the stroke width in pixels
+     */
+    public int getAiAssistantSuggestedMessageStrokeWidth() {
+        return aiAssistantSuggestedMessageStrokeWidth;
+    }
+
+    /** Sets the stroke width for the AI assistant suggested message bubble.
+     *
+     * @param dimensionPixelSize The stroke width in pixels.
+     */
+    private void setAiAssistantSuggestedMessageStrokeWidth(int dimensionPixelSize) {
+        this.aiAssistantSuggestedMessageStrokeWidth = dimensionPixelSize;
+    }
+
+    /** Returns the resource ID for the end icon of the AI assistant suggested message.
+     *
+     * @return the resource ID of the end icon
+     */
+    public Drawable getAiAssistantSuggestedMessageEndIcon() {
+        return aiAssistantSuggestedMessageEndIcon;
+    }
+
+    /** Sets the drawable for the end icon of the AI assistant suggested message.
+     *
+     * @param drawable The drawable to be set for the end icon.
+     */
+    private void setAiAssistantSuggestedMessageEndIcon(Drawable drawable) {
+        this.aiAssistantSuggestedMessageEndIcon = drawable;
+    }
+
+    /** Returns the color integer for the end icon tint of the AI assistant suggested message.
+     *
+     * @return the color for the end icon tint
+     */
+    public @ColorInt int getAiAssistantSuggestedMessageEndIconTint() {
+        return aiAssistantSuggestedMessageEndIconTint;
+    }
+
+    /** Sets the color for the end icon tint of the AI assistant suggested message.
+     *
+     * @param color The color to be set for the end icon tint.
+     */
+    private void setAiAssistantSuggestedMessageEndIconTint(@ColorInt int color) {
+        this.aiAssistantSuggestedMessageEndIconTint = color;
+    }
+
+    /** Returns the background color integer for the AI assistant suggested message bubble.
+     *
+     * @return the background color for the suggested message bubble
+     */
+    public @ColorInt int getAiAssistantSuggestedMessageBackgroundColor() {
+        return aiAssistantSuggestedMessageBackgroundColor;
+    }
+
+    /** Sets the background color for the AI assistant suggested message bubble.
+     *
+     * @param color The color to be set for the suggested message bubble background.
+     */
+    private void setAiAssistantSuggestedMessageBackgroundColor(@ColorInt int color) {
+        this.aiAssistantSuggestedMessageBackgroundColor = color;
+    }
+
+    /** Returns the stroke color integer for the AI assistant suggested message bubble.
+     *
+     * @return the stroke color for the suggested message bubble
+     */
+    public int getAiAssistantSuggestedMessageStrokeColor() {
+        return aiAssistantSuggestedMessageStrokeColor;
+    }
+
+    /** Sets the stroke color for the AI assistant suggested message bubble.
+     *
+     * @param color The color to be set for the suggested message bubble stroke.
+     */
+    private void setAiAssistantSuggestedMessageStrokeColor(@ColorInt int color) {
+        this.aiAssistantSuggestedMessageStrokeColor = color;
+    }
+
+    /** Returns the text appearance resource ID for the AI assistant suggested message.
+     *
+     * @return the resource ID for the suggested message text appearance
+     */
+    public @StyleRes int getAiAssistantSuggestedMessageTextAppearance() {
+        return aiAssistantSuggestedMessageTextAppearance;
+    }
+
+    /** Sets the text appearance for the AI assistant suggested message.
+     *
+     * @param textAppearance The style resource for the suggested message text appearance.
+     */
+    private void setAiAssistantSuggestedMessageTextAppearance(@StyleRes int textAppearance) {
+        this.aiAssistantSuggestedMessageTextAppearance = textAppearance;
+    }
+
+    /** Returns the text color integer for the AI assistant suggested message.
+     *
+     * @return the text color for the suggested message
+     */
+    public @ColorInt int getAiAssistantSuggestedMessageTextColor() {
+        return aiAssistantSuggestedMessageTextColor;
+    }
+
+    /** Sets the text color for the AI assistant suggested message.
+     *
+     * @param color The color to be set for the suggested message text.
+     */
+    private void setAiAssistantSuggestedMessageTextColor(@ColorInt int color) {
+        this.aiAssistantSuggestedMessageTextColor = color;
+    }
+
+
+    /**
      * Sets the style resource for message information.
      *
      * @param messageInformationStyle the style resource ID to set.
@@ -2609,6 +3046,47 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void setReactionListStyle(@StyleRes int reactionListStyle) {
         this.reactionListStyle = reactionListStyle;
+    }
+
+    /** Sets the suggested messages for the AI assistant.
+     *
+     * @param suggestedMessages The list of suggested messages to set.
+     */
+    public void setAIAssistantSuggestedMessages(List<String> suggestedMessages) {
+        this.aiAssistantSuggestedMessages = suggestedMessages;
+    }
+
+    /** Sets the visibility of the AI assistant suggested messages.
+     *
+     * @param aiAssistantSuggestedMessagesVisibility true to show, false to hide.
+     */
+    public void setAiAssistantSuggestedMessagesVisibility(int aiAssistantSuggestedMessagesVisibility) {
+        this.aiAssistantSuggestedMessagesVisibility = aiAssistantSuggestedMessagesVisibility;
+
+    }
+
+    /** Sets the tools available for the AI assistant.
+     *
+     * @param aiAssistantTools A HashMap containing tool names as keys and their corresponding ToolCallListener as values.
+     */
+    public void setAiAssistantTools(@NonNull HashMap<String,ToolCallListener> aiAssistantTools) {
+        this.toolCallListenerHashMap = aiAssistantTools;
+        CometChatAIStreamService.setAiAssistantTools(aiAssistantTools);
+    }
+
+    public void refreshStyle() {
+        if (style != 0) {
+            setStyle(style);
+        } else applyStyleAttributes(attrs, defStyleAttr, 0);
+    }
+
+    /** Sets the streaming speed for AI responses.
+     *
+     * @param streamingSpeed The speed at which AI responses are streamed, in milliseconds.
+     */
+    public void setStreamingSpeed(Integer streamingSpeed) {
+        this.streamingSpeed = streamingSpeed;
+        CometChatAIStreamService.setStreamDelay(streamingSpeed);
     }
 
     /**

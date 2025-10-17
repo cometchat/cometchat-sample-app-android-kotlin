@@ -302,12 +302,6 @@ public class Utils {
 
     public static void openImageViewer(View imageView, List<String> imageUrls, List<String> mimeTypes, List<String> names) {
         Context context = imageView.getContext();
-//        Rect visibleRect = new Rect();
-//        boolean isFullyVisible = view.getGlobalVisibleRect(visibleRect);
-//        if (isFullyVisible && visibleRect.height() == view.getHeight()) {
-//            context.startActivity(CometChatImageViewerActivity.createIntent(context, imageUrl, 0),
-//                                  getActivityOption(view).toBundle());
-//        } else {
         context.startActivity(CometChatImageViewerActivity.createIntent(
             context,
             imageUrls,
@@ -315,7 +309,6 @@ public class Utils {
             names
         ));
         ((Activity) context).overridePendingTransition(R.anim.cometchat_fade_in_fast, R.anim.cometchat_fade_out_fast);
-//        }
     }
 
     private static ActivityOptionsCompat getActivityOption(View targetView) {
@@ -423,7 +416,11 @@ public class Utils {
     }
 
     public static boolean isLoggedInUser(User user) {
-        return user.getUid().equals(CometChatUIKit.getLoggedInUser().getUid());
+        return user != null && CometChatUIKit.getLoggedInUser() != null && user.getUid().equals(CometChatUIKit.getLoggedInUser().getUid());
+    }
+
+    public static boolean isAgentChat(User user) {
+        return user != null && UIKitConstants.AIConstants.AGENTIC_USER.equalsIgnoreCase(user.getRole());
     }
 
     public static void handleView(ViewGroup layout, View view, boolean hideIfNull) {

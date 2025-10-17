@@ -72,6 +72,7 @@ class CometChatMessagePopupMenu {
     private UIKitConstants.MessageListAlignment messageAlignment = UIKitConstants.MessageListAlignment.STANDARD;
     private @StyleRes int style;
     private @DrawableRes int addReactionIcon;
+    private int receiptsVisibility = View.VISIBLE;
 
     public CometChatMessagePopupMenu(Context context, @StyleRes int style) {
         this.context = context;
@@ -165,6 +166,13 @@ class CometChatMessagePopupMenu {
         this.quickReactionsVisibility = visibility;
     }
 
+    public void setReceiptsVisibility(int receiptsVisibility) {
+        this.receiptsVisibility = receiptsVisibility;
+    }
+    public int getReceiptsVisibility() {
+        return receiptsVisibility;
+    }
+
     // Method to show the popup menu
     public void show(View anchorView, View parentView, BaseMessage baseMessage) {
         // Inflate the layout for the popup window
@@ -190,6 +198,7 @@ class CometChatMessagePopupMenu {
         messagePreview.setCardBackgroundColor(Color.TRANSPARENT);
         messagePreview.setReplyCountBarVisibility(View.GONE);
         messagePreview.setMaxHeight(Utils.convertDpToPx(context, 350));
+        messagePreview.setReceiptsVisibility(receiptsVisibility);
 
         int margin = context.getResources().getDimensionPixelSize(R.dimen.cometchat_margin);
         int cardRadius = context.getResources().getDimensionPixelSize(R.dimen.cometchat_radius_max);

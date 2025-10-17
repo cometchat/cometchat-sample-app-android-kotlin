@@ -214,4 +214,10 @@
     <string name="cometchat_cancel_button">Отмена</string>
     <string name="cometchat_settings_button">Настройки</string>
     <string name="cometchat_moderation_block_message">Ваше сообщение было заблокировано из-за политик модерации.</string>
+    <string name="cometchat_no_conversations_history_title">История чатов не найдена</string>
+    <string name="cometchat_ask_anything">Спрашивайте все</string>
+    <string name="cometchat_something_went_wrong_try_again">Что-то пошло не так с нашей стороны. Пожалуйста, попробуйте снова</string>
+    <string name="cometchat_no_conversations_history_subtitle">Начните чат, нажав кнопку \'Новый чат\'</string>
+    <string name="cometchat_new_chat">Новый чат</string>
+    <string name="cometchat_chat_history">История чатов</string>
 </resources>

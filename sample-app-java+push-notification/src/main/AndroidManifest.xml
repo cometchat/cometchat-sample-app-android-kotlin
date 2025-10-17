@@ -8,9 +8,7 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!--  VoIP  -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- VoIP -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -22,7 +20,6 @@
     <uses-feature
         android:name="android.hardware.sensor.proximity"
         android:required="false" />
-
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
@@ -37,6 +34,14 @@
         android:supportsRtl="true"
         android:theme="@style/JavaSampleApp.v5"
         tools:replace="android:theme">
+        <activity
+            android:name=".ai.AIAssistantUsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ai.AIAssistantChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="screenSize|orientation|keyboardHidden"/>
         <activity
             android:name=".fcm.IncomingCallActivity"
             android:exported="false"
@@ -92,7 +97,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
             android:name=".voip.CometChatVoIPConnectionService"
             android:exported="true"

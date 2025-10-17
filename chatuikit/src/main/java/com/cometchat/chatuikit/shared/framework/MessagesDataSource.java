@@ -1,17 +1,17 @@
 package com.cometchat.chatuikit.shared.framework;
 
 import static com.cometchat.chatuikit.shared.resources.utils.Utils.isNotParticipant;
-
 import android.content.Context;
 import android.text.SpannableString;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.enums.ModerationStatus;
+import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
@@ -41,7 +41,6 @@ import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.viewholders.MessagesViewHolderListener;
 import com.cometchat.chatuikit.shared.views.audiobubble.CometChatAudioBubble;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -97,7 +96,9 @@ public class MessagesDataSource implements DataSource {
             if (baseMessage.getReceiverType().equalsIgnoreCase(UIKitConstants.ReceiverType.GROUP) && !baseMessage
                 .getSender()
                 .getUid()
-                .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) cometchatOptions.add(_getMessagePrivatelyOption(context));
+                .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid()) && additionParameter.getMessagePrivatelyOptionVisibility() == View.VISIBLE) {
+                cometchatOptions.add(_getMessagePrivatelyOption(context));
+            }
         }
         return cometchatOptions;
     }
@@ -509,6 +510,16 @@ public class MessagesDataSource implements DataSource {
                 }
             }
         });
+    }
+
+    @Override
+    public View getAIAssistantBubbleContentView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+        return MessageBubbleUtils.getAIAssistantBubbleContentView(context);
+    }
+
+    @Override
+    public void bindAIAssistantBubbleContentView(Context context, View createdView, AIAssistantMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, @NonNull AdditionParameter additionParameter) {
+        MessageBubbleUtils.bindAIAssistantBubbleContentView(context, createdView, message, alignment, additionParameter);
     }
 
     @Override
@@ -962,28 +973,76 @@ public class MessagesDataSource implements DataSource {
         return new ArrayList<>(getDefaultMessageTemplatesHashMap(additionParameter).values());
     }
 
+    @Override
+    public CometChatMessageTemplate getAIAssistantTemplate(@NonNull AdditionParameter additionParameter) {
+        return _getAIAssistantTemplate(additionParameter);
+    }
+
+    private CometChatMessageTemplate _getAIAssistantTemplate(AdditionParameter additionParameter) {
+        return new CometChatMessageTemplate()
+                .setCategory(CometChatConstants.CATEGORY_AGENTIC)
+                .setType(CometChatConstants.MESSAGE_TYPE_ASSISTANT)
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getAIAssistantBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit.getDataSource()
+                                .bindAIAssistantBubbleContentView(context,
+                                        createdView,
+                                        (AIAssistantMessage) message,
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                })
+                .setStatusInfoView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return LinearLayout.inflate(context, R.layout.cometchat_empty_view_holder_row, null);
+                    }
+
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+
+                    }
+                })
+                .setFooterView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return MessageBubbleUtils.getMessageOptionsViewContainer(context);
+                    }
+
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        MessageBubbleUtils.bindAIAssistantMessageOptions(context, createdView, message);
+                    }
+                });
+    }
+
     public HashMap<String, CometChatMessageTemplate> getDefaultMessageTemplatesHashMap(AdditionParameter additionParameter) {
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.TEXT,
-                                            ChatConfigurator.getDataSource().getTextTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.IMAGE,
-                                            ChatConfigurator.getDataSource().getImageTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.VIDEO,
-                                            ChatConfigurator.getDataSource().getVideoTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.AUDIO,
-                                            ChatConfigurator.getDataSource().getAudioTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.FILE,
-                                            ChatConfigurator.getDataSource().getFileTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.TEXT, ChatConfigurator.getDataSource().getTextTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.IMAGE, ChatConfigurator.getDataSource().getImageTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.VIDEO, ChatConfigurator.getDataSource().getVideoTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.AUDIO, ChatConfigurator.getDataSource().getAudioTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.FILE, ChatConfigurator.getDataSource().getFileTemplate(additionParameter));
         if (additionParameter.getGroupActionMessageVisibility() == View.VISIBLE)
-            cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.GROUP_ACTION,
-                                                ChatConfigurator
-                                                    .getDataSource()
-                                                    .getGroupActionsTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.FORM,
-                                            ChatConfigurator.getDataSource().getFormTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.SCHEDULER,
-                                            ChatConfigurator.getDataSource().getSchedulerTemplate(additionParameter));
-        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.CARD,
-                                            ChatConfigurator.getDataSource().getCardTemplate(additionParameter));
+            cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.GROUP_ACTION, ChatConfigurator.getDataSource().getGroupActionsTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.FORM, ChatConfigurator.getDataSource().getFormTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.SCHEDULER, ChatConfigurator.getDataSource().getSchedulerTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.CARD, ChatConfigurator.getDataSource().getCardTemplate(additionParameter));
+        cometchatMessageTemplateHashMap.put(UIKitConstants.MessageTemplateId.ASSISTANT, ChatConfigurator.getDataSource().getAIAssistantTemplate(additionParameter));
         return cometchatMessageTemplateHashMap;
     }
 

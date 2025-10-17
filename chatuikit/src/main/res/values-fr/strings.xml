@@ -208,4 +208,10 @@
     <string name="cometchat_cancel_button">Annuler</string>
     <string name="cometchat_settings_button">Paramètres</string>
     <string name="cometchat_moderation_block_message">Votre message a été bloqué en raison des politiques de modération.</string>
+    <string name="cometchat_no_conversations_history_title">Aucun historique de conversation trouvé</string>
+    <string name="cometchat_ask_anything">Demandez n\'importe quoi</string>
+    <string name="cometchat_something_went_wrong_try_again">Quelque chose a mal tourné de notre côté. Veuillez réessayer</string>
+    <string name="cometchat_no_conversations_history_subtitle">Commencez un chat en appuyant sur le bouton \'Nouvelle conversation\'</string>
+    <string name="cometchat_new_chat">Nouvelle conversation</string>
+    <string name="cometchat_chat_history">Historique des chats</string>
 </resources>

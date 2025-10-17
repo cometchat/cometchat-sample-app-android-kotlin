@@ -14,8 +14,11 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
 import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.core.MessagesRequest;
+import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.helpers.CometChatHelper;
+import com.cometchat.chat.models.AIAssistantBaseEvent;
+import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
@@ -40,11 +43,16 @@ import com.cometchat.chatuikit.shared.events.CometChatMessageEvents;
 import com.cometchat.chatuikit.shared.events.CometChatUIEvents;
 import com.cometchat.chatuikit.shared.interfaces.Function1;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
+import com.cometchat.chatuikit.shared.models.StreamMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.CardMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.CustomInteractiveMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.FormMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.SchedulerMessage;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
+import com.cometchat.chatuikit.shared.ai.CometChatAIStreamService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,6 +118,7 @@ public class MessageListViewModel extends ViewModel {
     private Timer smartReplyDelayTimer;
     private boolean enableConversationStarter = false;
     private boolean enableSmartReplies = false;
+    private boolean isAgentChat;
 
     public MessageListViewModel() {
         mutableMessageList = new MutableLiveData<>();
@@ -247,6 +256,10 @@ public class MessageListViewModel extends ViewModel {
         return showBottomPanel;
     }
 
+    public long getParentMessageId() {
+        return parentMessageId;
+    }
+
     public void setMessageTemplateHashMap(HashMap<String, CometChatMessageTemplate> messageTemplateHashMap) {
         this.messageTemplateHashMap = messageTemplateHashMap;
     }
@@ -288,7 +301,7 @@ public class MessageListViewModel extends ViewModel {
         messagesRequest = messagesRequestBuilder.setGUID(id).build();
     }
 
-    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId) {
+    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId, boolean isAgentChat) {
         if (user != null) {
             this.user = user;
             this.id = user.getUid();
@@ -296,7 +309,12 @@ public class MessageListViewModel extends ViewModel {
             this.messagesTypes = messagesTypes;
             this.messagesCategories = messagesCategories;
             this.parentMessageId = parentMessageId;
+            this.isAgentChat = isAgentChat;
             setIdMap();
+        }
+        if (isAgentChat && parentMessageId == -1) {
+            states.setValue(UIKitConstants.States.EMPTY);
+            return;
         }
         initializeUserRequestBuilder();
     }
@@ -306,9 +324,14 @@ public class MessageListViewModel extends ViewModel {
             messagesRequestBuilder = new MessagesRequest.MessagesRequestBuilder()
                 .setTypes(this.messagesTypes)
                 .setLimit(limit)
-                .setCategories(this.messagesCategories)
-                .hideReplies(true);
-            if (parentMessageId > -1) messagesRequestBuilder.setParentMessageId(parentMessageId);
+                .setCategories(this.messagesCategories);
+            if (parentMessageId > -1) {
+                messagesRequestBuilder.setParentMessageId(parentMessageId);
+                if (isAgentChat) {
+                    messagesRequestBuilder.hideReplies(true);
+                    messagesRequestBuilder.withParent(true);
+                }
+            } else messagesRequestBuilder.hideReplies(true);
         }
         messagesRequest = messagesRequestBuilder.setUID(id).build();
     }
@@ -333,7 +356,10 @@ public class MessageListViewModel extends ViewModel {
         this.messagesTypes = messagesTypes;
         this.messagesCategories = messagesCategories;
         messageArrayList.clear();
-        if (user != null) initializeUserRequestBuilder();
+        if (user != null) {
+            if (isAgentChat) states.setValue(UIKitConstants.States.EMPTY);
+            else initializeUserRequestBuilder();
+        }
         else if (group != null) initializeGroupRequestBuilder();
     }
 
@@ -342,7 +368,25 @@ public class MessageListViewModel extends ViewModel {
     }
 
     public void addListener() {
+        CometChatAIStreamService.attachListener(LISTENERS_TAG);
 
+        CometChat.addAIAssistantListener(LISTENERS_TAG, new CometChat.AIAssistantListener() {
+            @Override
+            public void onAIAssistantEventReceived(AIAssistantBaseEvent aiAssistantBaseEvent) {
+                if (parentMessageId != -1) {
+                    if (UIKitConstants.AIAssistantEventType.RUN_STARTED.equals(aiAssistantBaseEvent.getType())) {
+                        updateAIStreamMessages(aiAssistantBaseEvent.getId());
+                    } else if (UIKitConstants.AIAssistantEventType.RUN_FINISHED.equals(aiAssistantBaseEvent.getType())) {
+                        CometChatAIStreamService.setQueueCompletionCallback(aiAssistantBaseEvent.getId(), (aiAssistantMessage, aiToolResultMessage, aiToolArgumentMessage) -> {
+                            if (aiAssistantMessage != null) {
+                                updateStreamIntoAIAssistantMessage(aiAssistantMessage, aiAssistantMessage.getRunId());
+                                CometChatAIStreamService.removeQueueCompletionCallback(aiAssistantMessage.getRunId());
+                            }
+                        });
+                    }
+                }
+            }
+        });
         CometChat.addGroupListener(LISTENERS_TAG, new CometChat.GroupListener() {
             @Override
             public void onGroupMemberJoined(Action action, User joinedUser, Group joinedGroup) {
@@ -390,8 +434,18 @@ public class MessageListViewModel extends ViewModel {
             @Override
             public void ccMessageSent(BaseMessage message, int status) {
                 if (status == MessageStatus.IN_PROGRESS) {
-                    if (isThreadedMessageForTheCurrentChat(message)) addMessage(message);
-                } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) updateOptimisticMessage(message);
+                    if (isThreadedMessageForTheCurrentChat(message)) {
+                        addMessage(message);
+                    }
+                } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) {
+                    updateOptimisticMessage(message);
+                    if (isAgentChat && parentMessageId == -1 && !messageArrayList.isEmpty() && status == MessageStatus.SUCCESS) {
+                        parentMessageId = message.getId();
+                    }
+                    if (parentMessageId != -1 && status == MessageStatus.SUCCESS && message instanceof TextMessage && isAgentChat) {
+                        addStreamMessage((TextMessage) message);
+                    }
+                }
             }
 
             @Override
@@ -402,7 +456,7 @@ public class MessageListViewModel extends ViewModel {
             @Override
             public void ccMessageDeleted(BaseMessage baseMessage) {
                 onMessageDeleted.setValue(baseMessage);
-                if (hideDeleteMessage) removeMessage(baseMessage);
+                if (hideDeleteMessage || isAgentChat) removeMessage(baseMessage);
                 else updateMessage(baseMessage);
             }
 
@@ -491,7 +545,7 @@ public class MessageListViewModel extends ViewModel {
 
             @Override
             public void onMessageModerated(BaseMessage baseMessage) {
-                 updateMessageFromMUID(baseMessage);
+                updateMessageFromMUID(baseMessage);
             }
         });
 
@@ -545,6 +599,7 @@ public class MessageListViewModel extends ViewModel {
                 else if (UIKitConstants.CustomUIPosition.MESSAGE_LIST_TOP.equals(alignment) && idMap.equals(id)) closeTopPanel.setValue(aVoid);
             }
         });
+
         if (isCallingAdded()) {
             CometChatCallEvents.addListener(LISTENERS_TAG, new CometChatCallEvents() {
                 @Override
@@ -667,7 +722,7 @@ public class MessageListViewModel extends ViewModel {
     public boolean isThreadedMessageForTheCurrentChat(BaseMessage baseMessage) {
         if (baseMessage.getParentMessageId() == 0 && parentMessageId == -1) {
             return true;
-        } else return parentMessageId > -1 && parentMessageId == baseMessage.getParentMessageId();
+        } else return parentMessageId > -1 && parentMessageId == baseMessage.getParentMessageId(); // True in case of Thread messages.
     }
 
     public void hideDeleteMessages(boolean hide) {
@@ -693,9 +748,27 @@ public class MessageListViewModel extends ViewModel {
         for (int i = messageArrayList.size() - 1; i >= 0; i--) {
             String mUid = messageArrayList.get(i).getMuid();
             if (mUid != null && mUid.equals(baseMessage.getMuid())) {
-                messageArrayList.remove(i);
-                messageArrayList.add(i, baseMessage);
-                updateMessage.setValue(i);
+                BaseMessage message = messageArrayList.get(i);
+                ModerationStatus moderationStatus = Utils.getModerationStatus(message);
+                if (message instanceof TextMessage || message instanceof MediaMessage) {
+                    if (!UIKitConstants.ModerationConstants.DISAPPROVED.equals(moderationStatus)) {
+                        messageArrayList.remove(i);
+                        messageArrayList.add(i, baseMessage);
+                        updateMessage.setValue(i);
+                    } else {
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) baseMessage;
+                            textMessage.setModerationStatus(UIKitConstants.ModerationConstants.DISAPPROVED);
+                        } else {
+                            MediaMessage mediaMessage = (MediaMessage) baseMessage;
+                            mediaMessage.setModerationStatus(UIKitConstants.ModerationConstants.DISAPPROVED);
+                        }
+                    }
+                } else {
+                    messageArrayList.remove(i);
+                    messageArrayList.add(i, baseMessage);
+                    updateMessage.setValue(i);
+                }
             }
         }
     }
@@ -810,6 +883,8 @@ public class MessageListViewModel extends ViewModel {
                         states.setValue(UIKitConstants.States.ERROR);
                     }
                 });
+            } else {
+                states.setValue(UIKitConstants.States.EMPTY);
             }
         }
     }
@@ -835,7 +910,7 @@ public class MessageListViewModel extends ViewModel {
         CometChat.addConnectionListener(LISTENERS_TAG, new CometChat.ConnectionListener() {
             @Override
             public void onConnected() {
-                fetchMissedMessages();
+                if (!isAgentChat) fetchMissedMessages();
             }
 
             @Override
@@ -1023,9 +1098,22 @@ public class MessageListViewModel extends ViewModel {
         if (message != null) {
             removeConversationStarter.setValue(Boolean.TRUE);
             if (messageArrayList.isEmpty()) addList(messageArrayList);
+            removeInterruptedStreamMessage();
             messageArrayList.add(message);
             addMessage.setValue(message);
             states.setValue(checkIsEmpty(messageArrayList));
+        }
+    }
+
+    private void removeInterruptedStreamMessage() {
+        if (!messageArrayList.isEmpty()) {
+            BaseMessage lastMessage = messageArrayList.get(messageArrayList.size() - 1);
+            if (lastMessage instanceof StreamMessage) {
+                StreamMessage streamMessage = (StreamMessage) lastMessage;
+                if (streamMessage.isStreamingInterrupted()) {
+                    removeMessage(streamMessage);
+                }
+            }
         }
     }
 
@@ -1191,6 +1279,8 @@ public class MessageListViewModel extends ViewModel {
     }
 
     public void removeListener() {
+        CometChatAIStreamService.detachListener(LISTENERS_TAG);
+        CometChat.removeAIAssistantListener(LISTENERS_TAG);
         CometChat.removeGroupListener(LISTENERS_TAG);
         CometChatMessageEvents.removeListener(LISTENERS_TAG);
         CometChatGroupEvents.removeListener(LISTENERS_TAG);
@@ -1275,5 +1365,52 @@ public class MessageListViewModel extends ViewModel {
                 CometChatUIKitHelper.onMessageEdited(newBaseMessage, MessageStatus.SUCCESS);
             }
         });
+    }
+
+    private void updateStreamIntoAIAssistantMessage(AIAssistantMessage aiAssistantMessage, long runId) {
+        for (int i = messageArrayList.size() - 1; i >= 0; i--) {
+            BaseMessage oldMessage = messageArrayList.get(i);
+            if (oldMessage instanceof StreamMessage) {
+                StreamMessage streamMessage = (StreamMessage) oldMessage;
+                if (streamMessage.getRunId() == aiAssistantMessage.getRunId()) {
+                    messageArrayList.remove(i);
+                    messageArrayList.add(i, aiAssistantMessage);
+                    updateMessage.setValue(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void updateAIStreamMessages(long eventId) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(UIKitConstants.AIConstants.AI_ASSISTANT_EVENT_TYPE, UIKitConstants.AIAssistantEventType.RUN_STARTED);
+        } catch (JSONException e) {
+            CometChatLogger.e(TAG, e.getMessage());
+        }
+        for (int i = messageArrayList.size() - 1; i >= 0; i--) {
+            BaseMessage baseMessage = messageArrayList.get(i);
+            if (baseMessage instanceof StreamMessage) {
+                StreamMessage streamMessage = (StreamMessage) baseMessage;
+                if (streamMessage.getRunId() == eventId) {
+                    streamMessage.setMetadata(jsonObject);
+                    messageArrayList.remove(i);
+                    messageArrayList.add(i, streamMessage);
+                    updateMessage.setValue(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void addStreamMessage(TextMessage textMessage) {
+        StreamMessage streamMessage = new StreamMessage(CometChatUIKit.getLoggedInUser().getUid(), CometChatConstants.RECEIVER_TYPE_USER, null);
+        streamMessage.setId(textMessage.getId());
+        streamMessage.setRunId(textMessage.getId());
+        streamMessage.setSender(user);
+        streamMessage.setSentAt(System.currentTimeMillis() / 1000);
+        streamMessage.setReceiver(CometChatUIKit.getLoggedInUser());
+        addMessage(streamMessage);
     }
 }

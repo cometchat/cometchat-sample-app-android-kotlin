@@ -1,0 +1,63 @@
+<resources>
+
+    <style name="AIAssistantSampleApp.v5" parent="CometChatTheme.DayNight" />
+
+    <style name="ConfirmationDialogStyle" parent="CometChatConfirmDialogStyle" />
+
+    <style name="CustomMessageHeaderStyle">
+        <item name="cometchatMessageHeaderStrokeWidth">1dp</item>
+        <item name="cometchatMessageHeaderStrokeColor">@color/black</item>
+    </style>
+
+    <style name="CustomCometChatMessageListStyle" parent="CometChatMessageListStyle">
+        <item name="cometchatMessageListOutgoingMessageBubbleStyle">@style/CustomOutgoingMessageBubbleStyle</item>
+    </style>
+
+    <style name="CustomOutgoingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleBackgroundColor">?attr/cometchatBackgroundColor4</item>
+        <item name="cometchatMessageBubbleCornerRadius">@dimen/cometchat_radius_3</item>
+        <item name="cometchatTextBubbleStyle">@style/CustomTextBubbleStyle</item>
+        <item name="cometchatMessageBubbleDateStyle">@style/CustomOutgoingMessageDateStyle</item>
+    </style>
+
+    <style name="CustomOutgoingMessageDateStyle">
+        <item name="cometchatDateTextAppearance">?attr/cometchatTextAppearanceCaption2Regular</item>
+        <item name="cometchatDateTextColor">?attr/cometchatTextColorSecondary</item>
+    </style>
+
+    <style name="CustomMessageComposerStyle">
+        <item name="cometchatMessageComposerComposeBoxStrokeWidth">@dimen/cometchat_1dp</item>
+        <item name="cometchatMessageComposerComposeBoxCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatMessageInputStyle">?attr/cometchatMessageInputStyle</item>
+    </style>
+
+    <style name="CustomTextBubbleStyle">
+        <item name="cometchatTextBubbleTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometchatTextBubbleLinkPreviewBackgroundColor">?attr/cometchatNeutralColor400</item>
+        <item name="cometchatTextBubbleLinkPreviewLinkAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
+        <item name="cometchatTextBubbleLinkPreviewDescriptionColor">?attr/cometchatNeutralColor900</item>
+        <item name="cometchatTextBubbleLinkPreviewTitleAppearance">?attr/cometchatTextAppearanceBodyBold</item>
+        <item name="cometchatTextBubbleLinkPreviewTitleColor">?attr/cometchatNeutralColor900</item>
+        <item name="cometchatTextBubbleLinkPreviewDescriptionAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
+        <item name="cometchatTextBubbleLinkPreviewLinkColor">?attr/cometchatNeutralColor900</item>
+        <item name="cometchatTextBubbleLinkPreviewCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatTextBubbleTextLinkColor">?attr/cometchatInfoColor</item>
+    </style>
+
+    <style name="DetailsAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarPlaceHolderTextAppearance">
+            @style/AvatarPlaceHolderTextAppearance
+        </item>
+    </style>
+
+    <style name="DialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="AvatarPlaceHolderTextAppearance" parent="CometChatTextAppearanceHeading2.Bold">
+        <item name="android:textSize">@dimen/cometchat_48sp</item>
+    </style>
+
+</resources>

@@ -72,18 +72,12 @@ class NewChatActivity : AppCompatActivity() {
                 .joinedOnly(true)
                 .setLimit(30)
         )
-        binding.groups.onItemClick = object : OnItemClick<Group?> {
-            override fun click(
-                view: View?,
-                position: Int,
-                group: Group?
 
-            ) {
-                val intent = Intent(this@NewChatActivity, MessagesActivity::class.java)
-                intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
-                startActivity(intent)
-                finish()
-            }
+        binding.groups.onItemClick = OnItemClick { view, position, group ->
+            val intent = Intent(this@NewChatActivity, MessagesActivity::class.java)
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+            startActivity(intent)
+            finish()
         }
 
         binding.ivBack.setOnClickListener { v: View? -> finish() }

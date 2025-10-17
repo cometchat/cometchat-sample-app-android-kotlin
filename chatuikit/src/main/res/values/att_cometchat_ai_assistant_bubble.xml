@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatAIAssistantBubble">
+        <attr name="cometchatAIAssistantBubbleStyle" format="reference" />
+        <attr name="cometchatAIAssistantBubbleAvatarStyle" format="reference" />
+        <attr name="cometChatAIAssistantBubbleBackgroundColor" format="color" />
+        <attr name="cometChatAIAssistantBubbleTextColor" format="color" />
+        <attr name="cometChatAIAssistantBubbleTextAppearance" format="reference"/>
+        
+        <attr name="cometchatAIAssistantBubbleCornerRadius" format="dimension" />
+        <attr name="cometchatAIAssistantBubbleStrokeWidth" format="dimension" />
+        <attr name="cometchatAIAssistantBubbleStrokeColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleBackgroundDrawable" format="reference" />
+    </declare-styleable>
+</resources>

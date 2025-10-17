@@ -2,6 +2,9 @@ package com.cometchat.chatuikit.shared.events;
 
 import androidx.annotation.DrawableRes;
 
+import com.cometchat.chat.models.AIAssistantMessage;
+import com.cometchat.chat.models.AIToolArgumentMessage;
+import com.cometchat.chat.models.AIToolResultMessage;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chat.models.InteractionReceipt;
@@ -129,6 +132,15 @@ public abstract class CometChatMessageEvents {
     }
 
     public void onMessageModerated(BaseMessage baseMessage) {
+    }
+
+    public void onAIToolArgumentsReceived(AIToolArgumentMessage aiToolArgumentMessage) {
+    }
+
+    public void onAIToolResultReceived(AIToolResultMessage aiToolResultMessage) {
+    }
+
+    public void onAIAssistantMessageReceived(AIAssistantMessage aiAssistantMessage) {
     }
 
     /**

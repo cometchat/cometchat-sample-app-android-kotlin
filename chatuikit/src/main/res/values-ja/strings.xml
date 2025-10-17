@@ -207,4 +207,10 @@
     <string name="cometchat_cancel_button">キャンセル</string>
     <string name="cometchat_settings_button">設定</string>
     <string name="cometchat_moderation_block_message">あなたのメッセージはモデレーションポリシーによりブロックされました。</string>
+    <string name="cometchat_no_conversations_history_title">チャット履歴が見つかりません</string>
+    <string name="cometchat_ask_anything">何でも聞いてください</string>
+    <string name="cometchat_something_went_wrong_try_again">当社側で問題が発生しました。もう一度試してください</string>
+    <string name="cometchat_no_conversations_history_subtitle">\'新しいチャット\' ボタンをタップしてチャットを開始します</string>
+    <string name="cometchat_new_chat">新しいチャット</string>
+    <string name="cometchat_chat_history">チャット履歴</string>
 </resources>

@@ -1,9 +1,15 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.sampleapp.java.R;
@@ -22,9 +28,24 @@ public class AppCredentialsActivity extends AppCompatActivity {
         binding = ActivityAppCredentialsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        applyWindowInsets();
+
         initViewModel();
 
         initClickListeners();
+    }
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    systemBars.top,
+                    v.getPaddingRight(),
+                    systemBars.bottom
+            );
+            return insets;
+        });
     }
 
     private void initViewModel() {

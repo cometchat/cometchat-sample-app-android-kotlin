@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -18,10 +17,13 @@ import androidx.fragment.app.Fragment;
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
+import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
+import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar;
 import com.cometchat.sampleapp.java.fcm.BuildConfig;
 import com.cometchat.sampleapp.java.fcm.R;
@@ -118,9 +120,7 @@ public class ChatsFragment extends Fragment {
             );
             layoutParams.setLayoutDirection(Gravity.CENTER_VERTICAL);
             cometchatAvatar.setLayoutParams(layoutParams);
-            cometchatAvatar.setOnClickListener(v -> {
-                showCustomMenu(binding.cometchatConversations.getBinding().toolbar);
-            });
+            cometchatAvatar.setOnClickListener(v -> showCustomMenu(binding.cometchatConversations.getBinding().toolbar));
             return cometchatAvatar;
         }
         return null;
@@ -176,6 +176,10 @@ public class ChatsFragment extends Fragment {
 
             popupWindow.dismiss();
         });
+
+        popupMenuBinding.tvUserName.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()));
+        popupMenuBinding.tvCreateConversation.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()));
+        popupMenuBinding.tvVersion.setTextColor(CometChatTheme.getTextColorPrimary(requireContext()));
 
         popupWindow.setElevation(5);
 

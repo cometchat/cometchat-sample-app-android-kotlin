@@ -213,4 +213,10 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_cancel_button">Atšaukti</string>
     <string name="cometchat_settings_button">Nustatymai</string>
     <string name="cometchat_moderation_block_message">Jūsų pranešimas buvo užblokuotas dėl moderavimo politikos.</string>
+    <string name="cometchat_no_conversations_history_title">Pokalbių istorija nerasta</string>
+    <string name="cometchat_ask_anything">Klauskite bet ko</string>
+    <string name="cometchat_something_went_wrong_try_again">Kažkas nepavyko iš mūsų pusės. Pabandykite dar kartą</string>
+    <string name="cometchat_no_conversations_history_subtitle">Pradėkite pokalbį paspaudę „Naujas pokalbis“ mygtuką</string>
+    <string name="cometchat_new_chat">Naujas pokalbis</string>
+    <string name="cometchat_chat_history">Pokalbių istorija</string>
 </resources>

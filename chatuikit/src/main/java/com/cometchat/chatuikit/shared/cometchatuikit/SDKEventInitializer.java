@@ -1,6 +1,9 @@
 package com.cometchat.chatuikit.shared.cometchatuikit;
 
 import com.cometchat.chat.core.CometChat;
+import com.cometchat.chat.models.AIAssistantMessage;
+import com.cometchat.chat.models.AIToolArgumentMessage;
+import com.cometchat.chat.models.AIToolResultMessage;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chat.models.InteractionReceipt;
@@ -113,6 +116,21 @@ final class SDKEventInitializer {
             @Override
             public void onMessageModerated(BaseMessage baseMessage) {
                 CometChatUIKitHelper.onMessageModerated(baseMessage);
+            }
+
+            @Override
+            public void onAIAssistantMessageReceived(AIAssistantMessage aiAssistantMessage) {
+                CometChatUIKitHelper.onAIAssistantMessageReceived(aiAssistantMessage);
+            }
+
+            @Override
+            public void onAIToolResultReceived(AIToolResultMessage aiToolResultMessage) {
+                CometChatUIKitHelper.onAIToolResultReceived(aiToolResultMessage);
+            }
+
+            @Override
+            public void onAIToolArgumentsReceived(AIToolArgumentMessage aiToolArgumentMessage) {
+                CometChatUIKitHelper.onAIToolArgumentsReceived(aiToolArgumentMessage);
             }
         });
     }

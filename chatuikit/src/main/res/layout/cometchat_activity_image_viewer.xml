@@ -5,6 +5,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/cometchat_color_black"
         android:fitsSystemWindows="true">
 
         <androidx.viewpager.widget.ViewPager
@@ -44,6 +45,17 @@
                 android:contentDescription="Share"
                 app:tint="@color/cometchat_color_white" />
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            android:indeterminateTint="?attr/cometchatIconTintSecondary"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

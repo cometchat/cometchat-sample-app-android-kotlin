@@ -49,6 +49,7 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private LinearLayout topBar;
     private ImageView shareBtn;
+    private View progressBar;
 
     public static Intent createIntent(Context context, List<String> urls, List<String> mimeType, List<String> filenames) {
         Intent intent = new Intent(context, CometChatImageViewerActivity.class);
@@ -68,16 +69,13 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         topBar = findViewById(R.id.top_bar_container);
         shareBtn = findViewById(R.id.button_share);
+        progressBar = findViewById(R.id.progress_bar);
 
         urls = (List<String>) getIntent().getSerializableExtra(ARGS_IMAGE_URLS);
         mimeTypes = (List<String>) getIntent().getSerializableExtra(MIME_TYPE_URL);
         filenames = (List<String>) getIntent().getSerializableExtra(ARGS_FILE_NAME);
 
-        initToolbar();
-        initViewPager();
-
-        shareBtn.setOnClickListener(v -> shareMessage());
-
+        initViews();
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -87,6 +85,13 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void initViews() {
+        toggleProgressBarVisibility(View.VISIBLE);
+        initToolbar();
+        initViewPager();
+        shareBtn.setOnClickListener(v -> shareMessage());
     }
 
 
@@ -115,6 +120,10 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
                                            filenames.get(adapter.currentPos),
                                            mimeTypes.get(adapter.currentPos),
                                            UIKitConstants.files.SHARE);
+    }
+
+    private void toggleProgressBarVisibility(int visibility) {
+        progressBar.setVisibility(visibility);
     }
 
     @Override
@@ -194,7 +203,6 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
         }
 
         private void loadImage(ImageView image, ViewGroup container, int position) {
-
             Glide.with(image.getContext())
                  .load(urls.get(position))
                  .listener(new RequestListener<Drawable>() {
@@ -210,6 +218,7 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
                                                     Target<Drawable> target,
                                                     DataSource dataSource,
                                                     boolean isFirstResource) {
+                         toggleProgressBarVisibility(View.GONE);
                          CometChatImagePreview cometChatImagePreview = createImagePreview(image, container);
                          cometChatImagePreview.setOnViewTranslateListener(new CometChatImagePreview.OnViewTranslateListener() {
                              @Override
@@ -234,31 +243,12 @@ public class CometChatImageViewerActivity extends AppCompatActivity {
                          });
                          previewMap.put(position, cometChatImagePreview);
                          if (position == initialPos) {
-                             //if need to add bounce back animation for image bubble
-//                             setEnterSharedElementCallback(new SharedElementCallback() {
-//                                 @Override
-//                                 public void onMapSharedElements(@Nullable List<String> names, @Nullable Map<String, View> sharedElements) {
-//                                     if (names == null) return;
-//
-//                                     View view = views.get(currentPos);
-//                                     if (view == null) return;
-//
-//                                     int currentPosition = currentPos;
-//                                     view.setTransitionName(context.getString(R.string.cometchat_shared_image_transition, currentPosition));
-//
-//                                     if (sharedElements != null) {
-//                                         sharedElements.clear();
-//                                         sharedElements.put(view.getTransitionName(), view);
-//                                     }
-//                                 }
-//                             });
-
                              startPostponedEnterTransition();
                          }
                          return false;
                      }
                  })
-                 .into(image);
+                    .into(image);
         }
 
 

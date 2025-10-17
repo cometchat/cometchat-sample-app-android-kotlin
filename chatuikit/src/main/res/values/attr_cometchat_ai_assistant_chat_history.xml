@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatAIAssistantChatHistory">
+        <attr name="cometChatAIAssistantChatHistoryStyle" format="reference"/>
+
+        <attr name="cometChatAIAssistantChatHistoryBackgroundColor" format="color"/>
+
+        <attr name="cometChatAIAssistantChatHistoryHeaderBackgroundColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryHeaderTextColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryHeaderTextAppearance" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryHeaderCloseIcon" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryHeaderCloseIconTint" format="color"/>
+
+        <attr name="cometChatAIAssistantChatHistoryNewChatBackgroundColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryNewChatTextColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryNewChatTextAppearance" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryNewChatIcon" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryNewChatIconTint" format="color"/>
+
+        <attr name="cometChatAIAssistantChatHistoryDateSeparatorBackgroundColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryDateSeparatorTextColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryDateSeparatorTextAppearance" format="reference"/>
+
+        <attr name="cometChatAIAssistantChatHistoryItemBackgroundColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryItemTextColor" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryItemTextAppearance" format="reference"/>
+
+        <attr name="cometChatAIAssistantChatHistoryDeleteOptionIcon" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryDeleteOptionIconTint" format="color"/>
+        <attr name="cometChatAIAssistantChatHistoryDeleteOptionTextAppearance" format="reference"/>
+        <attr name="cometChatAIAssistantChatHistoryDeleteOptionTextColor" format="color"/>
+    </declare-styleable>
+</resources>

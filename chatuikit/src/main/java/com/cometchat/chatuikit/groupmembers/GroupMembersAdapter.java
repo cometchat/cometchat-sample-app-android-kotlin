@@ -333,7 +333,9 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     if (groupMember.getStatus().equalsIgnoreCase(CometChatConstants.USER_STATUS_ONLINE)) {
                         if (!Utils.isBlocked(groupMember)) {
                             binding.memberStatusIndicator.setStatusIndicator(StatusIndicator.ONLINE);
-                            binding.memberStatusIndicator.setVisibility(hideUserStatus ? View.GONE : View.VISIBLE);
+                            binding.memberStatusIndicator.setStatusIndicator(groupMember
+                                    .getStatus()
+                                    .equalsIgnoreCase(CometChatConstants.USER_STATUS_ONLINE) && !hideUserStatus ? StatusIndicator.ONLINE : StatusIndicator.OFFLINE);
                         } else binding.memberStatusIndicator.setVisibility(View.GONE);
                     } else {
                         binding.memberStatusIndicator.setVisibility(View.GONE);

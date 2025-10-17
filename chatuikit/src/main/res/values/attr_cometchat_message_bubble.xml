@@ -24,6 +24,7 @@
         <attr name="cometchatDeleteBubbleStyle" />
         <attr name="cometchatMessageBubbleMentionsStyle" format="reference" />
         <attr name="cometchatTextBubbleStyle" />
+        <attr name="cometchatAIAssistantBubbleStyle" />
         <attr name="cometchatImageBubbleStyle" />
         <attr name="cometchatVideoBubbleStyle" />
         <attr name="cometchatFileBubbleStyle" />

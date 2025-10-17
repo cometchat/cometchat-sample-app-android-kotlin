@@ -16,5 +16,10 @@
         <attr name="cometchatMessageHeaderStatusIndicatorStyle" format="reference" />
         <attr name="cometchatMessageHeaderTypingIndicatorStyle" format="reference" />
         <attr name="cometchatMessageHeaderCallButtonsStyle" format="reference" />
+
+        <attr name="cometchatMessageHeaderNewChatButtonIcon" format="reference" />
+        <attr name="cometchatMessageHeaderNewChatButtonIconTint" format="color" />
+        <attr name="cometchatMessageHeaderChatHistoryButtonIcon" format="reference" />
+        <attr name="cometchatMessageHeaderChatHistoryButtonIconTint" format="color" />
     </declare-styleable>
 </resources>

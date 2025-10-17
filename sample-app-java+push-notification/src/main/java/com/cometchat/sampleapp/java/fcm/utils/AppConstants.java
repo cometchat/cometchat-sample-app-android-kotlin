@@ -2,6 +2,7 @@ package com.cometchat.sampleapp.java.fcm.utils;
 
 public class AppConstants {
 
+    public static Boolean isQRScanned = false;
     /**
      * Error messages used throughout the application.
      */

@@ -205,4 +205,10 @@
     <string name="cometchat_cancel_button">Cancelar</string>
     <string name="cometchat_settings_button">Configurações</string>
     <string name="cometchat_moderation_block_message">Sua mensagem foi bloqueada devido às políticas de moderação.</string>
+    <string name="cometchat_no_conversations_history_title">Nenhum histórico de conversa encontrado</string>
+    <string name="cometchat_ask_anything">Pergunte qualquer coisa</string>
+    <string name="cometchat_something_went_wrong_try_again">Algo deu errado da nossa parte. Por favor, tente novamente</string>
+    <string name="cometchat_no_conversations_history_subtitle">Inicie um chat tocando no botão \'Nova conversa\'</string>
+    <string name="cometchat_new_chat">Nova conversa</string>
+    <string name="cometchat_chat_history">Histórico de chat</string>
 </resources>

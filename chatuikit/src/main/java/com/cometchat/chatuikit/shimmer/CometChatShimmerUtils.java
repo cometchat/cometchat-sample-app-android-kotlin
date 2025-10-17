@@ -35,8 +35,6 @@ public class CometChatShimmerUtils {
             shimmer = new CometChatShimmer.ColorHighlightBuilder()
                     .setBaseAlpha(1f)
                     .setTilt(1)
-                    .setBaseColor(context.getResources().getColor(R.color.cometchat_color_error, context.getTheme()))
-                    .setHighlightColor(context.getResources().getColor(R.color.cometchat_color_success, context.getTheme()))
                     .build();
         }
         shimmerFrameLayout.setShimmer(shimmer);

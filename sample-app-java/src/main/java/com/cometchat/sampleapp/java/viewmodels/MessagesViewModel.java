@@ -13,9 +13,11 @@ import com.cometchat.chat.models.Conversation;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
+import com.cometchat.chatuikit.shared.constants.MessageStatus;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.events.CometChatConversationEvents;
 import com.cometchat.chatuikit.shared.events.CometChatGroupEvents;
+import com.cometchat.chatuikit.shared.events.CometChatMessageEvents;
 import com.cometchat.chatuikit.shared.events.CometChatUIEvents;
 import com.cometchat.chatuikit.shared.events.CometChatUserEvents;
 import com.cometchat.sampleapp.java.data.repository.Repository;
@@ -31,6 +33,7 @@ public class MessagesViewModel extends ViewModel {
     private final String LISTENER_ID;
     @NonNull
     private final MutableLiveData<BaseMessage> baseMessage;
+    private final MutableLiveData<BaseMessage> sentMessage;
     private final MutableLiveData<Group> updatedGroup;
     private final MutableLiveData<User> updateUser;
     private final MutableLiveData<User> openUserChat;
@@ -50,6 +53,16 @@ public class MessagesViewModel extends ViewModel {
         unblockButtonState = new MutableLiveData<>();
         baseMessage = new MutableLiveData<>();
         LISTENER_ID = System.currentTimeMillis() + this.getClass().getSimpleName();
+        sentMessage = new MutableLiveData<>();
+    }
+
+    /**
+     * Gets the LiveData for sent messages.
+     *
+     * @return MutableLiveData object containing sent BaseMessage data.
+     */
+    public MutableLiveData<BaseMessage> getSentMessage() {
+        return sentMessage;
     }
 
     /**
@@ -125,6 +138,14 @@ public class MessagesViewModel extends ViewModel {
      * Adds listeners for group and user events.
      */
     public void addListener() {
+        CometChatMessageEvents.addListener(LISTENER_ID, new CometChatMessageEvents() {
+            @Override
+            public void ccMessageSent(BaseMessage baseMessage, int status) {
+                if(baseMessage != null && status == MessageStatus.IN_PROGRESS) {
+                    sentMessage.setValue(baseMessage);
+                }
+            }
+        });
         CometChat.addGroupListener(LISTENER_ID, new CometChat.GroupListener() {
             @Override
             public void onGroupMemberJoined(Action action, User user, Group group) {

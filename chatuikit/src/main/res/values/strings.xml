@@ -207,4 +207,13 @@
     <string name="cometchat_cancel_button">Cancel</string>
     <string name="cometchat_settings_button">Settings</string>
     <string name="cometchat_moderation_block_message" translatable="true">Your message was blocked due to moderation policies</string>
+    <string name="cometchat_empty_chat_title" translatable="false">Hey, How can I help?</string>
+    <string name="cometchat_empty_chat_subtitle" translatable="false">You can ask me anything…</string>
+    <string name="cometchat_no_conversations_history_title" translatable="true">No conversation history found</string>
+    <string name="cometchat_no_conversations_history_subtitle" translatable="true">Start a chat by tapping the \'New Chat\' button</string>
+    <string name="cometchat_new_chat" translatable="true">New Chat</string>
+    <string name="cometchat_chat_history" translatable="true">Chat History</string>
+    <string name="cometchat_thinking" translatable="false">Thinking...</string>
+    <string name="cometchat_ask_anything" translatable="true">Ask anything…</string>
+    <string name="cometchat_something_went_wrong_try_again" translatable="true">Something went wrong on our end. Please try again. </string>
 </resources>

@@ -6,6 +6,9 @@ import android.view.View;
 import androidx.annotation.DrawableRes;
 
 import com.cometchat.chat.core.Call;
+import com.cometchat.chat.models.AIAssistantMessage;
+import com.cometchat.chat.models.AIToolArgumentMessage;
+import com.cometchat.chat.models.AIToolResultMessage;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
@@ -369,6 +372,27 @@ public class CometChatUIKitHelper {
         List<CometChatConversationEvents> events = new ArrayList<>(CometChatConversationEvents.conversationEvents.values());
         for (CometChatConversationEvents event : events) {
             event.ccConversationDeleted(conversation);
+        }
+    }
+
+    public static void onAIToolArgumentsReceived(AIToolArgumentMessage aiToolArgumentMessage) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
+            event.onAIToolArgumentsReceived(aiToolArgumentMessage);
+        }
+    }
+
+    public static void onAIToolResultReceived(AIToolResultMessage aiToolResultMessage) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
+            event.onAIToolResultReceived(aiToolResultMessage);
+        }
+    }
+
+    public static void onAIAssistantMessageReceived(AIAssistantMessage aiAssistantMessage) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
+            event.onAIAssistantMessageReceived(aiAssistantMessage);
         }
     }
 }

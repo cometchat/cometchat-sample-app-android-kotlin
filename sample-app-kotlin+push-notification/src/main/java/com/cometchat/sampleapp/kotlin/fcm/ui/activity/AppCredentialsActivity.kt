@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.sampleapp.kotlin.fcm.R
 import com.cometchat.sampleapp.kotlin.fcm.databinding.ActivityAppCredentialsBinding
 import com.cometchat.sampleapp.kotlin.fcm.viewmodels.AppCredentialsViewModel
 import com.google.android.material.card.MaterialCardView
 import java.util.Locale
+import kotlin.math.max
 
 class AppCredentialsActivity : AppCompatActivity() {
     private var binding: ActivityAppCredentialsBinding? = null
@@ -21,10 +24,25 @@ class AppCredentialsActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding!!.root)
+        applyWindowInsets()
 
         initViewModel()
 
         initClickListeners()
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding!!.main) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.setPadding(
+                v.paddingLeft,
+                systemBars.top,
+                v.paddingRight,
+                systemBars.bottom
+            )
+            insets
+        }
     }
 
     private fun initViewModel() {

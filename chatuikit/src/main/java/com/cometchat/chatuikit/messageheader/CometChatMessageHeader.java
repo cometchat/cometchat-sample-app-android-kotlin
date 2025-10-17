@@ -28,6 +28,7 @@ import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.Function3;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
+import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.models.AdditionParameter;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -61,6 +62,8 @@ public class CometChatMessageHeader extends MaterialCardView {
     private @ColorInt int backIconTint;
     private @ColorInt int backgroundColor;
     private @ColorInt int strokeColor;
+    private @ColorInt int newChatIconTint;
+    private @ColorInt int chatHistoryIconTint;
     private @Dimension int cornerRadius;
     private @Dimension int strokeWidth;
     private @StyleRes int titleTextAppearance;
@@ -69,6 +72,8 @@ public class CometChatMessageHeader extends MaterialCardView {
     private @StyleRes int statusIndicatorStyle;
     private @StyleRes int typingIndicatorStyle;
     private @StyleRes int callButtonsStyle;
+    private Drawable newChatIcon;
+    private Drawable chatHistoryIcon;
     private Drawable backIcon;
     private AdditionParameter additionParameter;
     private OnError onError;
@@ -77,7 +82,13 @@ public class CometChatMessageHeader extends MaterialCardView {
     private int groupStatusVisibility = VISIBLE;
     private int videoCallButtonVisibility = VISIBLE;
     private int voiceCallButtonVisibility = VISIBLE;
+    private int newChatButtonVisibility = VISIBLE;
+    private int chatHistoryButtonVisibility = VISIBLE;
     private DateTimeFormatterCallback dateTimeFormatter;
+
+    private OnClick onChatHistoryButtonClick;
+    private OnClick onNewChatButtonClick;
+    private boolean isAgentChat = false;
 
     /**
      * Constructs a new CometChatMessageHeader with a given context.
@@ -150,6 +161,21 @@ public class CometChatMessageHeader extends MaterialCardView {
         });
         messageHeaderViewModel.getTyping().observe((LifecycleOwner) getContext(), this::setTypingIndicator);
         configureBackIcon();
+        aiAssistantButtonClickListeners();
+    }
+
+    private void aiAssistantButtonClickListeners() {
+        binding.ivChatHistory.setOnClickListener(view -> {
+            if (onChatHistoryButtonClick != null) {
+                onChatHistoryButtonClick.onClick();
+            }
+        });
+
+        binding.ivNewChat.setOnClickListener(view -> {
+            if (onNewChatButtonClick != null) {
+                onNewChatButtonClick.onClick();
+            }
+        });
     }
 
     /**
@@ -197,7 +223,7 @@ public class CometChatMessageHeader extends MaterialCardView {
                             .getName() + " " + getContext().getString(R.string.cometchat_is_typing);
                         binding.tvMessageHeaderTypingIndicator.setText(typingMessage);
                     } else {
-                        binding.tvMessageHeaderSubtitle.setVisibility(VISIBLE);
+                        binding.tvMessageHeaderSubtitle.setVisibility(userStatusVisibility);
                         binding.tvMessageHeaderTypingIndicator.setVisibility(GONE);
                     }
                 }
@@ -293,14 +319,10 @@ public class CometChatMessageHeader extends MaterialCardView {
         if (typedArray == null) return;
         try {
             // Extract attributes or apply default values
-            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderTitleTextColor,
-                                                 CometChatTheme.getTextColorPrimary(getContext()));
-            subtitleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderSubtitleTextColor,
-                                                    CometChatTheme.getTextColorSecondary(getContext()));
-            backIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackIconTint,
-                                               CometChatTheme.getIconTintPrimary(getContext()));
-            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackgroundColor,
-                                                  CometChatTheme.getBackgroundColor1(getContext()));
+            titleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderTitleTextColor, CometChatTheme.getTextColorPrimary(getContext()));
+            subtitleTextColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext()));
+            backIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackIconTint, CometChatTheme.getIconTintPrimary(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
             strokeColor = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderStrokeColor, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageHeader_cometchatMessageHeaderCornerRadius, 0);
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatMessageHeader_cometchatMessageHeaderStrokeWidth, 0);
@@ -311,6 +333,10 @@ public class CometChatMessageHeader extends MaterialCardView {
             typingIndicatorStyle = typedArray.getResourceId(R.styleable.CometChatMessageHeader_cometchatMessageHeaderTypingIndicatorStyle, 0);
             backIcon = typedArray.getDrawable(R.styleable.CometChatMessageHeader_cometchatMessageHeaderBackIcon);
             callButtonsStyle = typedArray.getResourceId(R.styleable.CometChatMessageHeader_cometchatMessageHeaderCallButtonsStyle, 0);
+            newChatIcon = typedArray.getDrawable(R.styleable.CometChatMessageHeader_cometchatMessageHeaderNewChatButtonIcon);
+            newChatIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderNewChatButtonIconTint, CometChatTheme.getIconTintSecondary(getContext()));
+            chatHistoryIcon = typedArray.getDrawable(R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryButtonIcon);
+            chatHistoryIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryButtonIconTint, CometChatTheme.getIconTintSecondary(getContext()));
             // Apply default styles
             applyDefault();
         } finally {
@@ -336,6 +362,34 @@ public class CometChatMessageHeader extends MaterialCardView {
         setTypingIndicatorStyle(typingIndicatorStyle);
         setCallButtonsStyle(callButtonsStyle);
         setBackButtonView(backIcon);
+        setNewChatIcon(newChatIcon);
+        setNewChatIconTint(newChatIconTint);
+        setChatHistoryIcon(chatHistoryIcon);
+        setChatHistoryIconTint(chatHistoryIconTint);
+    }
+
+    public void setChatHistoryIconTint(@ColorInt int chatHistoryIconTint) {
+        this.chatHistoryIconTint = chatHistoryIconTint;
+        binding.ivChatHistory.setColorFilter(chatHistoryIconTint);
+    }
+
+    public void setChatHistoryIcon(Drawable chatHistoryIcon) {
+        this.chatHistoryIcon = chatHistoryIcon;
+        if (chatHistoryIcon != null) {
+            binding.ivChatHistory.setImageDrawable(chatHistoryIcon);
+        }
+    }
+
+    public void setNewChatIconTint(@ColorInt int newChatIconTint) {
+        this.newChatIconTint = newChatIconTint;
+        binding.ivNewChat.setColorFilter(newChatIconTint);
+    }
+
+    public void setNewChatIcon(Drawable newChatIcon) {
+        this.newChatIcon = newChatIcon;
+        if (newChatIcon != null) {
+            binding.ivNewChat.setImageDrawable(newChatIcon);
+        }
     }
 
     @Override
@@ -678,6 +732,7 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setUser(@NonNull User user) {
         this.user = user;
         this.group = null;
+        this.isAgentChat = Utils.isAgentChat(user);
         messageHeaderViewModel.setUser(user);
         setHeaderData(user);
         invokeViewCallbacks();
@@ -836,10 +891,18 @@ public class CometChatMessageHeader extends MaterialCardView {
             if (isRequiredObjectPresent())
                 Utils.handleView(binding.messageHeaderAuxiliaryView, auxiliaryButtonView.apply(getContext(), user, group), true);
         } else {
-            if (isRequiredObjectPresent())
-                Utils.handleView(binding.messageHeaderAuxiliaryView,
-                                 ChatConfigurator.getDataSource().getAuxiliaryHeaderMenu(getContext(), user, group, additionParameter),
-                                 true);
+            if (!isAgentChat) {
+                if (isRequiredObjectPresent())
+                    Utils.handleView(binding.messageHeaderAuxiliaryView,
+                            ChatConfigurator.getDataSource().getAuxiliaryHeaderMenu(getContext(), user, group, additionParameter),
+                            true);
+            } else {
+                if (newChatButtonVisibility == View.VISIBLE) setNewChatButtonVisibility(VISIBLE);
+                else setNewChatButtonVisibility(View.GONE);
+
+                if (chatHistoryButtonVisibility == View.VISIBLE) setChatHistoryButtonVisibility(VISIBLE);
+                else setChatHistoryButtonVisibility(View.GONE);
+            }
         }
     }
 
@@ -1038,6 +1101,61 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setVideoCallButtonVisibility(int visibility) {
         this.videoCallButtonVisibility = visibility;
         additionParameter.setVideoCallButtonVisibility(visibility);
+    }
+
+    /**
+     * Retrieves the visibility status of the new chat button.
+     *
+     * @return An integer representing the visibility of the new chat button.
+     * Possible values include {@code View.VISIBLE}, {@code View.INVISIBLE}, and {@code View.GONE}.
+     */
+    public int getNewChatButtonVisibility() {
+        return newChatButtonVisibility;
+    }
+
+    public void setNewChatButtonClick(OnClick onNewChatButtonClick) {
+        this.onNewChatButtonClick = onNewChatButtonClick;
+    }
+
+    public void setChatHistoryButtonClick(OnClick onChatHistoryButtonClick) {
+        this.onChatHistoryButtonClick = onChatHistoryButtonClick;
+    }
+
+    /**
+     * Sets the visibility of the new chat button.
+     * Also updates the visibility in the {@code additionParameter} instance.
+     *
+     * @param visibility An integer representing the visibility status of the new chat button.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setNewChatButtonVisibility(int visibility) {
+        this.newChatButtonVisibility = visibility;
+        binding.ivNewChat.setVisibility(visibility);
+    }
+
+    /**
+     * Retrieves the visibility status of the chat history button.
+     *
+     * @return An integer representing the visibility of the chat history button.
+     * Possible values include {@code View.VISIBLE}, {@code View.INVISIBLE}, and {@code View.GONE}.
+     */
+
+    public int getChatHistoryButtonVisibility() {
+        return chatHistoryButtonVisibility;
+    }
+
+    /**
+     * Sets the visibility of the chat history button.
+     * Also updates the visibility in the {@code additionParameter} instance.
+     *
+     * @param visibility An integer representing the visibility status of the chat history button.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setChatHistoryButtonVisibility(int visibility) {
+        this.chatHistoryButtonVisibility = visibility;
+        binding.ivChatHistory.setVisibility(visibility);
     }
 
     /**

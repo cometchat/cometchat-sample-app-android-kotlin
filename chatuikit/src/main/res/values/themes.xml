@@ -156,6 +156,7 @@
         <item name="cometchatAIConversationStarterStyle">@style/CometChatAIConversationStarterStyle</item>
         <item name="cometchatAISmartRepliesStyle">@style/CometChatAISmartRepliesStyle</item>
         <item name="cometchatAIConversationSummaryStyle">@style/CometChatAIConversationSummaryStyle</item>
+        <item name="cometChatAIAssistantChatHistoryStyle">@style/CometChatAIAssistantChatHistoryStyle</item>
     </style>
 
     <!-- ########################################## Start of Base Component Styles ########################################## -->
@@ -260,10 +261,21 @@
         <item name="cometchatMessageListCallActionBubbleStyle">@style/CometChatCallActionBubbleStyle</item>
         <item name="cometchatMessageListErrorStateTitleTextAppearance">?attr/cometchatTextAppearanceHeading3Bold</item>
         <item name="cometchatMessageListErrorStateSubtitleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatMessageListEmptyChatGreetingTitleTextAppearance">?attr/cometchatTextAppearanceHeading4Medium</item>
+        <item name="cometchatMessageListEmptyChatGreetingSubtitleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometchatMessageListDeleteDialogStyle">@style/CometChatConfirmDialogStyle</item>
         <item name="cometchatMessageListMessageInformationStyle">?attr/cometchatMessageInformationStyle</item>
         <item name="cometchatMessageListMessageOptionSheetStyle">?attr/cometchatPopupMenuStyle</item>
         <item name="cometchatMessageListReactionListStyle">?attr/cometchatReactionListStyle</item>
+
+        <item name="cometchatMessageListAIAssistantSuggestedMessageStrokeColor">?attr/cometchatStrokeColorDefault</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageStrokeWidth">@dimen/cometchat_1dp</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageCornerRadius">@dimen/cometchat_radius_max</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageBackgroundColor">?attr/cometchatBackgroundColor1</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageTextColor">?attr/cometchatTextColorSecondary</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageEndIcon">@drawable/cometchat_ic_arrow_forward</item>
+        <item name="cometchatMessageListAIAssistantSuggestedMessageEndIconTint">?attr/cometchatIconTintSecondary</item>
     </style>
 
     <style name="CometChatThreadHeaderStyle">
@@ -324,6 +336,7 @@
         <item name="cometchatPollBubbleStyle">@style/CometChatIncomingPollBubbleStyle</item>
         <item name="cometchatCollaborativeBubbleStyle">@style/CometChatIncomingCollaborativeBubbleStyle</item>
         <item name="cometchatMeetCallBubbleStyle">@style/CometChatIncomingMeetCallBubbleStyle</item>
+        <item name="cometchatAIAssistantBubbleStyle">@style/CometChatAIAssistantBubbleStyle</item>
     </style>
 
     <style name="CometChatOutgoingMessageBubbleReceiptStyle" parent="CometChatMessageReceiptStyle">
@@ -674,6 +687,8 @@
         <item name="cometchatMessageHeaderStatusIndicatorStyle">?attr/cometchatStatusIndicatorStyle</item>
         <item name="cometchatMessageHeaderTypingIndicatorStyle">?attr/cometchatTypingIndicatorStyle</item>
         <item name="cometchatMessageHeaderCallButtonsStyle">?attr/cometchatCallButtonsStyle</item>
+        <item name="cometchatMessageHeaderNewChatButtonIcon">@drawable/cometchat_ic_new_chat</item>
+        <item name="cometchatMessageHeaderChatHistoryButtonIcon">@drawable/cometchat_ic_chat_history</item>
     </style>
 
     <style name="CometChatProgressBarStyle" parent="Widget.MaterialComponents.CircularProgressIndicator">
@@ -903,6 +918,24 @@
     <style name="CometChatModerationViewStyle">
         <item name="cometchatModerationViewBackgroundColor">@color/cometchat_color_error_100</item>
         <item name="cometchatModerationViewTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
+    </style>
+
+    <style name="CometChatAIAssistantBubbleStyle">
+        <item name="cometChatAIAssistantBubbleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometChatAIAssistantBubbleTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometChatAIAssistantBubbleBackgroundColor">@color/cometchat_color_transparent</item>
+        <item name="cometchatAIAssistantBubbleAvatarStyle">@style/CometChatIncomingMessageAvatarStyle</item>
+    </style>
+
+    <style name="CometChatAIAssistantChatHistoryStyle">
+        <item name="cometChatAIAssistantChatHistoryHeaderTextAppearance">?attr/cometchatTextAppearanceHeading4Medium</item>
+        <item name="cometChatAIAssistantChatHistoryHeaderCloseIcon">@drawable/cometchat_ic_close</item>
+        <item name="cometChatAIAssistantChatHistoryNewChatTextAppearance">?attr/cometchatTextAppearanceButtonRegular</item>
+        <item name="cometChatAIAssistantChatHistoryNewChatIcon">@drawable/cometchat_ic_add</item>
+        <item name="cometChatAIAssistantChatHistoryDateSeparatorTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
+        <item name="cometChatAIAssistantChatHistoryItemTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometChatAIAssistantChatHistoryDeleteOptionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometChatAIAssistantChatHistoryDeleteOptionIcon">@drawable/cometchat_ic_delete</item>
     </style>
 
     <!-- ########################################## Typography ########################################## -->

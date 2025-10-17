@@ -3,6 +3,8 @@ package com.cometchat.chatuikit.shared.utils;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -22,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 
 import com.cometchat.chat.constants.CometChatConstants;
+import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.Attachment;
 import com.cometchat.chat.models.BaseMessage;
@@ -29,6 +32,7 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.shared.views.aiassistant.CometChatAIAssistantMessageBubble;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
 import com.cometchat.chatuikit.shared.models.AdditionParameter;
@@ -601,5 +605,56 @@ public class MessageBubbleUtils {
              * deletedBubble.setVisibility(View.VISIBLE); }
              */
         }
+    }
+
+    public static View getAIAssistantBubbleContentView(Context context) {
+        return View.inflate(context, R.layout.cometchat_ai_assistant_message_bubble, null);
+    }
+
+    public static void bindAIAssistantBubbleContentView(
+            Context context,
+            View createdView,
+            AIAssistantMessage message,
+            UIKitConstants.MessageBubbleAlignment alignment,
+            AdditionParameter additionParameter) {
+        CometChatAIAssistantMessageBubble aiAssistantMessageBubble = createdView.findViewById(R.id.ai_assistant_bubble);
+        aiAssistantMessageBubble.setAIAssistantMessage(message);
+        aiAssistantMessageBubble.setStyle(additionParameter.getAIAssistantMessageBubbleStyle());
+    }
+
+    public static View getMessageOptionsViewContainer(Context context) {
+        return View.inflate(context, R.layout.cometchat_option_view_container, null);
+    }
+
+    public static void bindAIAssistantMessageOptions(Context context, View view, BaseMessage baseMessage) {
+        LinearLayout parent = view.findViewById(R.id.options_view_container);
+        parent.removeAllViews();
+        parent.addView(getAIAssistantMessageOption(context, baseMessage));
+    }
+
+    private static ImageView getAIAssistantMessageOption(Context context, BaseMessage baseMessage) {
+        ImageView optionButton = new ImageView(context);
+        optionButton.setImageResource(R.drawable.cometchat_ic_copy_paste);
+
+        int sizeInPx = Utils.convertDpToPx(context, 20);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+
+        int margin = Utils.convertDpToPx(context, 10);
+        int marginLeft = Utils.convertDpToPx(context, 8);
+        params.setMargins(marginLeft, margin, 0, 0);
+
+        optionButton.setLayoutParams(params);
+
+        optionButton.setOnClickListener(view -> {
+            String message;
+            if (baseMessage instanceof AIAssistantMessage) {
+                message = ((AIAssistantMessage) baseMessage).getText();
+                ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clipData = ClipData.newPlainText("Messages", message);
+                clipboardManager.setPrimaryClip(clipData);
+            }
+        });
+
+        return optionButton;
     }
 }

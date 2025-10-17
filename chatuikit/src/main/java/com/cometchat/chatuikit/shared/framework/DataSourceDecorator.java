@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
 import com.cometchat.chat.models.Group;
@@ -506,6 +507,16 @@ public abstract class DataSourceDecorator implements DataSource {
                                               additionParameter);
     }
 
+    @Override
+    public View getAIAssistantBubbleContentView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+        return dataSource.getAIAssistantBubbleContentView(context, messageBubble, alignment);
+    }
+
+    @Override
+    public void bindAIAssistantBubbleContentView(Context context, View createdView, AIAssistantMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, @NonNull AdditionParameter additionParameter) {
+        dataSource.bindAIAssistantBubbleContentView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+    }
+
     /**
      * @param additionParameter
      * @return
@@ -594,6 +605,11 @@ public abstract class DataSourceDecorator implements DataSource {
     @Override
     public List<CometChatMessageTemplate> getMessageTemplates(@NonNull AdditionParameter additionParameter) {
         return dataSource.getMessageTemplates(additionParameter);
+    }
+
+    @Override
+    public CometChatMessageTemplate getAIAssistantTemplate(@NonNull AdditionParameter additionParameter) {
+        return dataSource.getAIAssistantTemplate(additionParameter);
     }
 
     /**

@@ -209,6 +209,7 @@ public final class UIKitConstants {
         public static final String INTERACTIVE = CometChatConstants.CATEGORY_INTERACTIVE;
         public static final String ACTION = CometChatConstants.CATEGORY_ACTION;
         public static final String CALL = CometChatConstants.CATEGORY_CALL;
+        public static final String STREAM = "stream_message";
     }
 
     public static final class MessageType {
@@ -217,6 +218,7 @@ public final class UIKitConstants {
         public static final String IMAGE = CometChatConstants.MESSAGE_TYPE_IMAGE;
         public static final String AUDIO = CometChatConstants.MESSAGE_TYPE_AUDIO;
         public static final String VIDEO = CometChatConstants.MESSAGE_TYPE_VIDEO;
+        public static final String STREAM = "ai_assistant_stream";
         public static final String SCHEDULER = "scheduler";
         public static final String MEETING = "meeting";
         public static final String FORM = "form";
@@ -235,6 +237,7 @@ public final class UIKitConstants {
         public static final String FORM = CometChatConstants.CATEGORY_INTERACTIVE + "_" + MessageType.FORM;
         public static final String SCHEDULER = CometChatConstants.CATEGORY_INTERACTIVE + "_" + MessageType.SCHEDULER;
         public static final String CARD = CometChatConstants.CATEGORY_INTERACTIVE + "_" + MessageType.CARD;
+        public static final String ASSISTANT = "agentic" + "_" + "assistant";
         public static final String CUSTOM_INTERACTIVE = CometChatConstants.CATEGORY_INTERACTIVE + "_" + MessageType.CUSTOM_INTERACTIVE;
         public static final String EXTENSION_POLL = "extension_poll";
         public static final String EXTENSION_STICKER = "extension_sticker";
@@ -312,5 +315,25 @@ public final class UIKitConstants {
         public static final ModerationStatus PENDING = ModerationStatus.PENDING;
         public static final ModerationStatus APPROVED = ModerationStatus.APPROVED;
         public static final ModerationStatus DISAPPROVED = ModerationStatus.DISAPPROVED;
+    }
+
+    public static final class AIAssistantEventType {
+        public static final String RUN_STARTED = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_RUN_STARTED;
+        public static final String RUN_FINISHED = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_RUN_FINISHED;
+        public static final String TOOL_CALL_START = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_TOOL_CALL_STARTED;
+        public static final String TOOL_CALL_END = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_TOOL_CALL_ENDED;
+        public static final String TEXT_MESSAGE_START = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_TEXT_MESSAGE_START;
+        public static final String TEXT_MESSAGE_END = CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_TEXT_MESSAGE_END;
+    }
+
+    public static final class AIConstants {
+        public static final String AGENTIC_USER = "@agentic";
+        public static final String AI_ASSISTANT_EVENT_TYPE = "ai_assistant_event_type";
+    }
+
+    public static final class AIAssistantJsonConstants {
+        public static final String SUGGESTED_MESSAGES = "suggestedMessages";
+        public static final String GREETING_MESSAGE = "greetingMessage";
+        public static final String INTRODUCTORY_MESSAGE = "introductoryMessage";
     }
 }

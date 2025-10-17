@@ -10,7 +10,7 @@ android {
     defaultConfig {
         minSdk 24
         versionCode 30
-        versionName "5.1.1"
+        versionName "5.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
@@ -167,6 +167,18 @@ dependencies {
     implementation libs.gson
     implementation libs.recyclerview
     implementation libs.lottie
+
+    // Markwon Dependencies for Markdown rendering
+    implementation libs.core
+    implementation libs.ext.strikethrough
+    implementation libs.ext.tables
+    implementation libs.html
+    implementation libs.recycler
+    implementation libs.recycler.table
+
+    implementation (libs.syntax.highlight) {
+        exclude group: "org.jetbrains", module: "annotations-java5"
+    }
 
     //CometChat Dependency
     implementation libs.chat.sdk.android
