@@ -80,6 +80,8 @@ public class CometChatGroupMembers extends MaterialCardView {
     private LinearLayoutManager layoutManager;
     // ViewModel for managing group members
     private GroupMembersViewModel groupMembersViewModel;
+    // LifecycleOwner for observer management
+    private LifecycleOwner lifecycleOwner;
     // Dialogs
     private CometChatConfirmDialog deleteAlertDialog;
     // Adapter for group members
@@ -255,15 +257,7 @@ public class CometChatGroupMembers extends MaterialCardView {
         clickEvents();
 
         // Initialize the ViewModel and observe various live data updates
-        groupMembersViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupMembersViewModel.class);
-        groupMembersViewModel.getMutableGroupMembersList().observe((LifecycleOwner) getContext(), this::setGroupMemberList);
-        groupMembersViewModel.getStates().observe((LifecycleOwner) getContext(), this::setStateChangeObserver);
-        groupMembersViewModel.insertAtTop().observe((LifecycleOwner) getContext(), this::notifyInsertedAt);
-        groupMembersViewModel.moveToTop().observe((LifecycleOwner) getContext(), this::notifyItemMovedToTop);
-        groupMembersViewModel.updateGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemChanged);
-        groupMembersViewModel.removeGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemRemoved);
-        groupMembersViewModel.getDialogState().observe((LifecycleOwner) getContext(), this::setDialogState);
-        groupMembersViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
+        initViewModel();
 
         // Set up the back button click event
         binding.ivBack.setOnClickListener(view -> {
@@ -332,6 +326,20 @@ public class CometChatGroupMembers extends MaterialCardView {
         // during
         // initialization
         applyStyleAttributes(attrs, defStyleAttr, 0);
+    }
+
+    private void initViewModel() {
+        groupMembersViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupMembersViewModel.class);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        groupMembersViewModel.getMutableGroupMembersList().observe(lifecycleOwner, this::setGroupMemberList);
+        groupMembersViewModel.getStates().observe(lifecycleOwner, this::setStateChangeObserver);
+        groupMembersViewModel.insertAtTop().observe(lifecycleOwner, this::notifyInsertedAt);
+        groupMembersViewModel.moveToTop().observe(lifecycleOwner, this::notifyItemMovedToTop);
+        groupMembersViewModel.updateGroupMember().observe(lifecycleOwner, this::notifyItemChanged);
+        groupMembersViewModel.removeGroupMember().observe(lifecycleOwner, this::notifyItemRemoved);
+        groupMembersViewModel.getDialogState().observe(lifecycleOwner, this::setDialogState);
+        groupMembersViewModel.getCometChatException().observe(lifecycleOwner, exceptionObserver);
     }
 
     /**
@@ -887,7 +895,25 @@ public class CometChatGroupMembers extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         groupMembersViewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            groupMembersViewModel.getMutableGroupMembersList().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getStates().removeObservers(lifecycleOwner);
+            groupMembersViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            groupMembersViewModel.moveToTop().removeObservers(lifecycleOwner);
+            groupMembersViewModel.updateGroupMember().removeObservers(lifecycleOwner);
+            groupMembersViewModel.removeGroupMember().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getDialogState().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+        groupMembersViewModel = null;
+        groupMembersAdapter = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 
     public int getUserStatusVisibility() {

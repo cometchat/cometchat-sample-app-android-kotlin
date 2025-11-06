@@ -45,6 +45,7 @@ import java.util.Map;
 public class CometChatMessageHeader extends MaterialCardView {
     private static final String TAG = CometChatMessageHeader.class.getSimpleName();
     private CometchatMessageHeaderBinding binding;
+    private LifecycleOwner lifecycleOwner;
     private User user;
     private Group group;
     private View backButtonView;
@@ -152,14 +153,16 @@ public class CometChatMessageHeader extends MaterialCardView {
      */
     private void init() {
         messageHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageHeaderViewModel.class);
-        messageHeaderViewModel.getMemberCount().observe((LifecycleOwner) getContext(), this::setMembersCount);
-        messageHeaderViewModel.getUserPresenceStatus().observe((LifecycleOwner) getContext(), this::showUserStatusAndLastSeen);
-        messageHeaderViewModel.getUpdatedGroup().observe((LifecycleOwner) getContext(), this::setGroup);
-        messageHeaderViewModel.getUpdatedUser().observe((LifecycleOwner) getContext(), this::setUser);
-        messageHeaderViewModel.getException().observe((LifecycleOwner) getContext(), e -> {
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        messageHeaderViewModel.getMemberCount().observe(lifecycleOwner, this::setMembersCount);
+        messageHeaderViewModel.getUserPresenceStatus().observe(lifecycleOwner, this::showUserStatusAndLastSeen);
+        messageHeaderViewModel.getUpdatedGroup().observe(lifecycleOwner, this::setGroup);
+        messageHeaderViewModel.getUpdatedUser().observe(lifecycleOwner, this::setUser);
+        messageHeaderViewModel.getException().observe(lifecycleOwner, e -> {
             if (onError != null) onError.onError(e);
         });
-        messageHeaderViewModel.getTyping().observe((LifecycleOwner) getContext(), this::setTypingIndicator);
+        messageHeaderViewModel.getTyping().observe(lifecycleOwner, this::setTypingIndicator);
         configureBackIcon();
         aiAssistantButtonClickListeners();
     }
@@ -395,7 +398,22 @@ public class CometChatMessageHeader extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         messageHeaderViewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            messageHeaderViewModel.getMemberCount().removeObservers(lifecycleOwner);
+            messageHeaderViewModel.getUserPresenceStatus().removeObservers(lifecycleOwner);
+            messageHeaderViewModel.getUpdatedGroup().removeObservers(lifecycleOwner);
+            messageHeaderViewModel.getUpdatedUser().removeObservers(lifecycleOwner);
+            messageHeaderViewModel.getException().removeObservers(lifecycleOwner);
+            messageHeaderViewModel.getTyping().removeObservers(lifecycleOwner);
+        }
+        messageHeaderViewModel = null;
+        lifecycleOwner = null;
+        binding = null;
     }
 
     /**
@@ -653,8 +671,8 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setTypingIndicatorStyle(@StyleRes int typingIndicatorStyle) {
         this.typingIndicatorStyle = typingIndicatorStyle;
         try (TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(typingIndicatorStyle, R.styleable.CometChatTypingIndicator)) {
-            binding.tvMessageHeaderTypingIndicator.setTextAppearance(typedArray.getResourceId(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextColor,
-                                                                                              CometChatTheme.getTextColorHighlight(getContext())));
+            binding.tvMessageHeaderTypingIndicator.setTextAppearance(typedArray.getResourceId(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextAppearance, 0));
+            binding.tvMessageHeaderTypingIndicator.setTextColor(typedArray.getColor(R.styleable.CometChatTypingIndicator_cometchatTypingIndicatorTextColor, CometChatTheme.getTextColorHighlight(getContext())));
         }
     }
 

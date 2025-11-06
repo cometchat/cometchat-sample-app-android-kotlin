@@ -312,11 +312,9 @@ public class MessageListViewModel extends ViewModel {
             this.isAgentChat = isAgentChat;
             setIdMap();
         }
-        if (isAgentChat && parentMessageId == -1) {
-            states.setValue(UIKitConstants.States.EMPTY);
-            return;
+        if (!isAgentChat || parentMessageId != -1) {
+            initializeUserRequestBuilder();
         }
-        initializeUserRequestBuilder();
     }
 
     public void initializeUserRequestBuilder() {
@@ -356,11 +354,9 @@ public class MessageListViewModel extends ViewModel {
         this.messagesTypes = messagesTypes;
         this.messagesCategories = messagesCategories;
         messageArrayList.clear();
-        if (user != null) {
-            if (isAgentChat) states.setValue(UIKitConstants.States.EMPTY);
-            else initializeUserRequestBuilder();
-        }
-        else if (group != null) initializeGroupRequestBuilder();
+        if (user != null && !isAgentChat) {
+            initializeUserRequestBuilder();
+        } else if (group != null) initializeGroupRequestBuilder();
     }
 
     public void setDisableReactions(boolean reactions) {
@@ -883,8 +879,6 @@ public class MessageListViewModel extends ViewModel {
                         states.setValue(UIKitConstants.States.ERROR);
                     }
                 });
-            } else {
-                states.setValue(UIKitConstants.States.EMPTY);
             }
         }
     }
@@ -1128,8 +1122,8 @@ public class MessageListViewModel extends ViewModel {
     }
 
     public void fetchMessagesWithUnreadCount() {
-        states.setValue(UIKitConstants.States.LOADING);
-        if (user != null) {
+        if (user != null && !isAgentChat) {
+            states.setValue(UIKitConstants.States.LOADING);
             CometChat.getUnreadMessageCountForUser(user.getUid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
                 @Override
                 public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {
@@ -1148,6 +1142,7 @@ public class MessageListViewModel extends ViewModel {
                 }
             });
         } else if (group != null) {
+            states.setValue(UIKitConstants.States.LOADING);
             CometChat.getUnreadMessageCountForGroup(group.getGuid(), new CometChat.CallbackListener<HashMap<String, Integer>>() {
                 @Override
                 public void onSuccess(HashMap<String, Integer> stringIntegerHashMap) {

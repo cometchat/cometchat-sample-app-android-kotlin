@@ -19,6 +19,8 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatListBaseItemsBinding;
 import com.cometchat.chatuikit.databinding.CometchatUserListStickyHeaderBinding;
+import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
+import com.cometchat.chatuikit.shared.interfaces.OnItemLongClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderAdapter;
 import com.cometchat.chatuikit.shared.viewholders.UsersViewHolderListener;
@@ -65,6 +67,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     private UsersViewHolderListener listItemView;
     private UsersViewHolderListener titleView;
     private UsersViewHolderListener leadingView;
+    private OnItemLongClick<User> onItemLongClick;
+    private OnItemClick<User> onItemClick;
 
     /**
      * Constructs a UsersAdapter with the given context.
@@ -579,6 +583,14 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         notifyDataSetChanged();
     }
 
+    public void setOnItemClick(OnItemClick<User> onItemClick) {
+        this.onItemClick = onItemClick;
+    }
+
+    public void setOnItemLongClick(OnItemLongClick<User> onItemLongClick) {
+        this.onItemLongClick = onItemLongClick;
+    }
+
     /**
      * ViewHolder for the sticky header in the RecyclerView.
      */
@@ -692,6 +704,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
                     tailView.bindView(context, customTailView, user, this, userList, position);
                 }
             }
+
+            binding.parentView.setOnClickListener(v -> {
+                if (onItemClick != null) {
+                    onItemClick.click(v, position, user);
+                }
+            });
+
+            binding.parentView.setOnLongClickListener(v -> {
+                if (onItemLongClick != null) {
+                    onItemLongClick.longClick(v, position, user);
+                }
+                return false;
+            });
+
             itemView.setTag(R.string.cometchat_user, user);
         }
     }

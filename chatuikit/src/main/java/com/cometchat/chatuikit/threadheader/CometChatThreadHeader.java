@@ -96,6 +96,9 @@ import java.util.List;
  */
 public class CometChatThreadHeader extends MaterialCardView {
     private static final String TAG = CometChatThreadHeader.class.getSimpleName();
+
+    private LifecycleOwner lifecycleOwner;
+
     /**
      * This class manages the thread header configuration and styling for displaying
      * messages.
@@ -257,8 +260,11 @@ public class CometChatThreadHeader extends MaterialCardView {
 
         // Initialize and set up the ViewModel
         threadHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadHeaderViewModel.class);
-        threadHeaderViewModel.getParentMessageListLiveData().observe((LifecycleOwner) getContext(), this::updateMessage);
-        threadHeaderViewModel.getReplyCount().observe((LifecycleOwner) getContext(), this::updateReplyCount);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner != null) {
+            threadHeaderViewModel.getParentMessageListLiveData().observe(lifecycleOwner, this::updateMessage);
+            threadHeaderViewModel.getReplyCount().observe(lifecycleOwner, this::updateReplyCount);
+        }
 
         // Apply additional style attributes to the view
         applyStyleAttributes(attrs, defStyleAttr, 0);
@@ -592,7 +598,18 @@ public class CometChatThreadHeader extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         threadHeaderViewModel.removeListener();
+        if (lifecycleOwner != null) {
+            threadHeaderViewModel.getParentMessageListLiveData().removeObservers(lifecycleOwner);
+            threadHeaderViewModel.getReplyCount().removeObservers(lifecycleOwner);
+        }
+        lifecycleOwner = null;
+        threadHeaderViewModel = null;
+        adapter = null;
     }
 
     /**

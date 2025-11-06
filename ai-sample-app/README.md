@@ -5,7 +5,8 @@
 
 # Android AI Agents Sample App by CometChat
 
-This is a reference application showcasing the integration of [CometChat's Android UI Kit](https://www.cometchat.com/docs/ui-kit/android/5.0/overview) in a native Android application. It demonstrates how to implement real-time messaging and voice/video calling features with ease.
+This reference application demonstrates how to seamlessly integrate CometChat’s [CometChat's Android UI Kit](https://www.cometchat.com/docs/ui-kit/android/overview) into a Android project. It showcases the implementation of AI-powered chat agents using the UI Kit, highlighting how developers can leverage its prebuilt components to create rich, interactive messaging experiences with minimal effort.
+
 
 <div style="display: flex; align-items: center; justify-content: center">
    <img src="../screenshots/ai-agents-overview.png" />

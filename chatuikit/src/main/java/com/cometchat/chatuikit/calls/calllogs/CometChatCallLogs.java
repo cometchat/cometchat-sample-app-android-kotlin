@@ -125,6 +125,7 @@ public class CometChatCallLogs extends MaterialCardView {
 
     private CallLogsViewModel callLogsViewModel;
     private CallLogsAdapter callLogsAdapter;
+    private LifecycleOwner lifecycleOwner;
     /**
      * Observer that updates a specific item in the recycler view when its position
      * is provided.
@@ -369,15 +370,17 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     private void initViewModel() {
         callLogsViewModel = new ViewModelProvider.NewInstanceFactory().create(CallLogsViewModel.class);
-        callLogsViewModel.getMutableCallsList().observe((LifecycleOwner) getContext(), listObserver);
-        callLogsViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
-        callLogsViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
-        callLogsViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
-        callLogsViewModel.updateCall().observe((LifecycleOwner) getContext(), update);
-        callLogsViewModel.removeCall().observe((LifecycleOwner) getContext(), remove);
-        callLogsViewModel.getInitiatedCall().observe((LifecycleOwner) getContext(), (call) -> {
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        callLogsViewModel.getMutableCallsList().observe(lifecycleOwner, listObserver);
+        callLogsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
+        callLogsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
+        callLogsViewModel.moveToTop().observe(lifecycleOwner, moveToTop);
+        callLogsViewModel.updateCall().observe(lifecycleOwner, update);
+        callLogsViewModel.removeCall().observe(lifecycleOwner, remove);
+        callLogsViewModel.getInitiatedCall().observe(lifecycleOwner, (call) -> {
         });
-        callLogsViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
+        callLogsViewModel.getCometChatException().observe(lifecycleOwner, exceptionObserver);
     }
 
     /**
@@ -586,7 +589,25 @@ public class CometChatCallLogs extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         callLogsViewModel.getCallsArrayList().clear();
+        if (lifecycleOwner != null) {
+            callLogsViewModel.getMutableCallsList().removeObservers(lifecycleOwner);
+            callLogsViewModel.getStates().removeObservers(lifecycleOwner);
+            callLogsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            callLogsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            callLogsViewModel.updateCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.removeCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.getInitiatedCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+        callLogsViewModel = null;
+        callLogsAdapter = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 
     /**

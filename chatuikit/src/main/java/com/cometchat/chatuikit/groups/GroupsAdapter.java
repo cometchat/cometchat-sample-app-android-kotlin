@@ -19,6 +19,8 @@ import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatListBaseItemsBinding;
+import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
+import com.cometchat.chatuikit.shared.interfaces.OnItemLongClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.viewholders.GroupsViewHolderListener;
 import com.cometchat.chatuikit.shared.views.statusindicator.StatusIndicator;
@@ -60,6 +62,8 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupViewH
     private @ColorInt int checkBoxCheckedBackgroundColor;
     private @ColorInt int checkBoxSelectIconTint;
     private Drawable checkBoxSelectIcon;
+    private OnItemClick<Group> onItemClick;
+    private OnItemLongClick<Group> onItemLongClick;
 
     /**
      * Constructor for GroupsAdapter.
@@ -507,6 +511,14 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupViewH
         notifyDataSetChanged();
     }
 
+    public void setOnItemClick(OnItemClick<Group> onItemClickListener) {
+        this.onItemClick = onItemClickListener;
+    }
+
+    public void setOnItemLongClick(OnItemLongClick<Group> onItemLongClickListener) {
+        this.onItemLongClick = onItemLongClickListener;
+    }
+
     /**
      * ViewHolder class for group items.
      */
@@ -615,6 +627,20 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupViewH
                     tailView.bindView(context, customTailView, group, this, groupList, position);
                 }
             }
+
+            binding.parentView.setOnClickListener( v -> {
+                if (onItemClick != null) {
+                    onItemClick.click(v, position, group);
+                }
+            });
+
+            binding.parentView.setOnLongClickListener(v -> {
+                if (onItemLongClick != null) {
+                    onItemLongClick.longClick(v, position, group);
+                }
+                return false;
+            });
+
             itemView.setTag(R.string.cometchat_group, group);
         }
 

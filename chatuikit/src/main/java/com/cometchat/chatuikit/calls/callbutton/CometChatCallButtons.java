@@ -70,6 +70,9 @@ public class CometChatCallButtons extends MaterialCardView {
     // ViewModel to manage the call buttons logic
     private CallButtonsViewModel callButtonsViewModel;
 
+    // LifecycleOwner for observer management
+    private LifecycleOwner lifecycleOwner;
+
     // Layout parameters for the buttons
     private LinearLayout.LayoutParams params;
 
@@ -150,8 +153,11 @@ public class CometChatCallButtons extends MaterialCardView {
         params.weight = 1;
 
         // Observe call status updates from ViewModel
-        callButtonsViewModel.getCallInitiated().observe((LifecycleOwner) context, this::callInitiated);
-        callButtonsViewModel.getStartDirectCall().observe((LifecycleOwner) context, this::startDirectCall);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner != null) {
+            callButtonsViewModel.getCallInitiated().observe(lifecycleOwner, this::callInitiated);
+            callButtonsViewModel.getStartDirectCall().observe(lifecycleOwner, this::startDirectCall);
+        }
 
         // Set click listeners for voice and video call buttons
         voiceCall.setOnClickListener(view12 -> {
@@ -342,8 +348,18 @@ public class CometChatCallButtons extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         // Remove listeners to prevent memory leaks when the view is detached
         callButtonsViewModel.removeListener();
+        if (lifecycleOwner != null) {
+            callButtonsViewModel.getCallInitiated().removeObservers(lifecycleOwner);
+            callButtonsViewModel.getStartDirectCall().removeObservers(lifecycleOwner);
+        }
+        callButtonsViewModel = null;
+        lifecycleOwner = null;
     }
 
     /**

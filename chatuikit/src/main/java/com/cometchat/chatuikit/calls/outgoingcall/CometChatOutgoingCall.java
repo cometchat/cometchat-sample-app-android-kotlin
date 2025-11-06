@@ -56,6 +56,8 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     private CometchatOutgoingCallLayoutBinding binding;
     private OutgoingViewModel viewModel;
 
+    private LifecycleOwner lifecycleOwner;
+
     private Call call;
     private User user;
 
@@ -136,10 +138,12 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         // Register the component as a LifecycleObserver
         ((AppCompatActivity) context).getLifecycle().addObserver(this);
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OutgoingViewModel.class);
-        viewModel.getAcceptedCall().observe((LifecycleOwner) context, this::acceptedCall);
-        viewModel.getRejectCall().observe((LifecycleOwner) context, this::rejectedCall);
-        viewModel.getException().observe((LifecycleOwner) context, this::triggerError);
-        viewModel.getDisableEndCallButton().observe((LifecycleOwner) context, this::setDisableEndCallButton);
+        lifecycleOwner = Utils.getLifecycleOwner(context);
+        if (lifecycleOwner == null) return;
+        viewModel.getAcceptedCall().observe(lifecycleOwner, this::acceptedCall);
+        viewModel.getRejectCall().observe(lifecycleOwner, this::rejectedCall);
+        viewModel.getException().observe(lifecycleOwner, this::triggerError);
+        viewModel.getDisableEndCallButton().observe(lifecycleOwner, this::setDisableEndCallButton);
 
         binding.endCall.getButton().setOnClickListener(view -> {
             binding.endCall.getButton().setEnabled(false);
@@ -640,6 +644,10 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         viewModel.removeListeners();
         soundManager.pauseSilently();
         stopProximitySensor();
@@ -650,7 +658,19 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
             wakeLock.release();
             wakeLock = null;
         }
-    }    /**
+        if (lifecycleOwner != null) {
+            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
+            viewModel.getRejectCall().removeObservers(lifecycleOwner);
+            viewModel.getException().removeObservers(lifecycleOwner);
+            viewModel.getDisableEndCallButton().removeObservers(lifecycleOwner);
+        }
+
+        viewModel = null;
+        binding = null;
+        lifecycleOwner = null;
+    }
+
+    /**
      * Plays the outgoing call sound if sound notifications are not disabled. It
      * uses the custom sound resource if provided; otherwise, it defaults to the
      * standard outgoing call sound.
@@ -733,9 +753,6 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         ((Activity) getContext()).finish();
     }
 
-
-
-
     /**
      * Sets the stroke width for the UI element.
      *
@@ -777,6 +794,4 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         }
         startProximitySensor();
     }
-
-
 }

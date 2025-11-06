@@ -11,6 +11,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -64,6 +65,7 @@ import androidx.annotation.StyleRes;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
@@ -434,6 +436,30 @@ public class Utils {
         }
     }
 
+    public static LifecycleOwner getLifecycleOwner(Context context) {
+        if (context == null) {
+            return null;
+        }
+
+        // Direct check first
+        if (context instanceof LifecycleOwner) {
+            return (LifecycleOwner) context;
+        }
+
+        // Traverse the context wrapper hierarchy (max 10 levels to prevent infinite loops)
+        Context currentContext = context;
+        int depth = 0;
+        while (currentContext instanceof ContextWrapper && depth < 100) {
+            currentContext = ((ContextWrapper) currentContext).getBaseContext();
+            if (currentContext instanceof LifecycleOwner) {
+                return (LifecycleOwner) currentContext;
+            }
+            depth++;
+        }
+
+        return null;
+    }
+
     public static void removeParentFromView(View view) {
         if (view != null && view.getParent() != null) {
             ViewGroup parent = (ViewGroup) view.getParent();
@@ -706,7 +732,7 @@ public class Utils {
      * This method is used to create group when called from layout. It uses
      * <code>Random.nextInt()
      * </code> to generate random number to use with group id and group icon. Any
-     * Random number between 10 to 1000 are choosen.
+     * Random number between 10 to 1000 are chosen.
      */
     public static String generateRandomString(int length) {
         if (length < 1) throw new IllegalArgumentException();

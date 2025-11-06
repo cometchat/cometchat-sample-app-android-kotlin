@@ -144,6 +144,7 @@ import java.util.List;
  */
 public class CometChatMessageList extends MaterialCardView implements MessageAdapter.OnMessageLongClick {
     private static final String TAG = CometChatMessageList.class.getSimpleName();
+    private LifecycleOwner lifecycleOwner;
     private final HashMap<String, Integer> messageViewTypes = new HashMap<>();
     private final HashMap<String, String> messageTypesToRetrieve = new HashMap<>();
     private final HashMap<String, String> messageCategoriesToRetrieve = new HashMap<>();
@@ -569,27 +570,29 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * Observes changes in the message list and other state changes using ViewModel.
      */
     private void observeMessageListChanges() {
-        messageListViewModel.getMutableMessageList().observe((LifecycleOwner) getContext(), this::setList);
-        messageListViewModel.messagesRangeChanged().observe((LifecycleOwner) getContext(), this::notifyRangeChanged);
-        messageListViewModel.updateMessage().observe((LifecycleOwner) getContext(), this::updateMessage);
-        messageListViewModel.getOnMessageDeleted().observe((LifecycleOwner) getContext(), this::messageDeleted);
-        messageListViewModel.addMessage().observe((LifecycleOwner) getContext(), this::addMessage);
-        messageListViewModel.getCometChatException().observe((LifecycleOwner) getContext(), this::throwError);
-        messageListViewModel.removeMessage().observe((LifecycleOwner) getContext(), this::removeMessage);
-        messageListViewModel.getMutableIsInProgress().observe((LifecycleOwner) getContext(), this::isInProgress);
-        messageListViewModel.getMutableHasMore().observe((LifecycleOwner) getContext(), this::hasMore);
-        messageListViewModel.notifyUpdate().observe((LifecycleOwner) getContext(), this::notifyDataChanged);
-        messageListViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
-        messageListViewModel.getMessageDeleteState().observe((LifecycleOwner) getContext(), messageDeleteObserver);
-        messageListViewModel.closeTopPanel().observe((LifecycleOwner) getContext(), this::closeInternalTopPanel);
-        messageListViewModel.closeBottomPanel().observe((LifecycleOwner) getContext(), this::closeInternalBottomPanel);
-        messageListViewModel.showTopPanel().observe((LifecycleOwner) getContext(), this::showInternalTopPanel);
-        messageListViewModel.showBottomPanel().observe((LifecycleOwner) getContext(), this::showInternalBottomPanel);
-        messageListViewModel.getMutableSmartReplies().observe((LifecycleOwner) getContext(), this::setSmartReplies);
-        messageListViewModel.getMutableConversationStarterReplies().observe((LifecycleOwner) getContext(), this::setConversationStarters);
-        messageListViewModel.getRemoveConversationStarter().observe((LifecycleOwner) getContext(), this::removeAIView);
-        messageListViewModel.getConversationStarterUIState().observe((LifecycleOwner) getContext(), this::handleConversationStarterUIState);
-        messageListViewModel.getSmartRepliesUIState().observe((LifecycleOwner) getContext(), this::handleAISmartRepliesUIState);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        messageListViewModel.getMutableMessageList().observe(lifecycleOwner, this::setList);
+        messageListViewModel.messagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
+        messageListViewModel.updateMessage().observe(lifecycleOwner, this::updateMessage);
+        messageListViewModel.getOnMessageDeleted().observe(lifecycleOwner, this::messageDeleted);
+        messageListViewModel.addMessage().observe(lifecycleOwner, this::addMessage);
+        messageListViewModel.getCometChatException().observe(lifecycleOwner, this::throwError);
+        messageListViewModel.removeMessage().observe(lifecycleOwner, this::removeMessage);
+        messageListViewModel.getMutableIsInProgress().observe(lifecycleOwner, this::isInProgress);
+        messageListViewModel.getMutableHasMore().observe(lifecycleOwner, this::hasMore);
+        messageListViewModel.notifyUpdate().observe(lifecycleOwner, this::notifyDataChanged);
+        messageListViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
+        messageListViewModel.getMessageDeleteState().observe(lifecycleOwner, messageDeleteObserver);
+        messageListViewModel.closeTopPanel().observe(lifecycleOwner, this::closeInternalTopPanel);
+        messageListViewModel.closeBottomPanel().observe(lifecycleOwner, this::closeInternalBottomPanel);
+        messageListViewModel.showTopPanel().observe(lifecycleOwner, this::showInternalTopPanel);
+        messageListViewModel.showBottomPanel().observe(lifecycleOwner, this::showInternalBottomPanel);
+        messageListViewModel.getMutableSmartReplies().observe(lifecycleOwner, this::setSmartReplies);
+        messageListViewModel.getMutableConversationStarterReplies().observe(lifecycleOwner, this::setConversationStarters);
+        messageListViewModel.getRemoveConversationStarter().observe(lifecycleOwner, this::removeAIView);
+        messageListViewModel.getConversationStarterUIState().observe(lifecycleOwner, this::handleConversationStarterUIState);
+        messageListViewModel.getSmartRepliesUIState().observe(lifecycleOwner, this::handleAISmartRepliesUIState);
     }
 
     private void messageDeleted(BaseMessage message) {
@@ -1479,8 +1482,38 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             bottomSheetDialog.dismiss();
         }
         super.onDetachedFromWindow();
-        messageListViewModel.removeListener();
         AudioPlayer.getInstance().stop();
+        dispose();
+    }
+
+    private void dispose() {
+        messageListViewModel.removeListener();
+        if (lifecycleOwner != null) {
+            messageListViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
+            messageListViewModel.messagesRangeChanged().removeObservers(lifecycleOwner);
+            messageListViewModel.updateMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getOnMessageDeleted().removeObservers(lifecycleOwner);
+            messageListViewModel.addMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getCometChatException().removeObservers(lifecycleOwner);
+            messageListViewModel.removeMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMore().removeObservers(lifecycleOwner);
+            messageListViewModel.notifyUpdate().removeObservers(lifecycleOwner);
+            messageListViewModel.getStates().removeObservers(lifecycleOwner);
+            messageListViewModel.getMessageDeleteState().removeObservers(lifecycleOwner);
+            messageListViewModel.closeTopPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.showTopPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.showBottomPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableSmartReplies().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableConversationStarterReplies().removeObservers(lifecycleOwner);
+            messageListViewModel.getRemoveConversationStarter().removeObservers(lifecycleOwner);
+            messageListViewModel.getConversationStarterUIState().removeObservers(lifecycleOwner);
+            messageListViewModel.getSmartRepliesUIState().removeObservers(lifecycleOwner);
+        }
+        messageListViewModel = null;
+        lifecycleOwner = null;
+        messageAdapter = null;
     }
 
     /**
@@ -2563,13 +2596,19 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                                          new ArrayList<>(messageTypesToRetrieve.values()),
                                          new ArrayList<>(messageCategoriesToRetrieve.values()),
                                          parentMessageId, isAgentChat);
-            if (autoFetch) messageListViewModel.fetchMessagesWithUnreadCount();
+            if (isAgentChat) {
+                handleEmptyState();
+                setStickyDateVisibility(View.GONE);
+                if (parentMessageId != -1) {
+                    messageListViewModel.fetchMessages();
+                }
+            } else {
+                if (autoFetch)
+                    messageListViewModel.fetchMessagesWithUnreadCount();
+            }
             aiConversationStarterView.setUid(user.getUid());
             aiSmartRepliesView.setUid(user.getUid());
             processFormatters();
-            if (isAgentChat) {
-                setStickyDateVisibility(View.GONE);
-            }
         }
     }
 

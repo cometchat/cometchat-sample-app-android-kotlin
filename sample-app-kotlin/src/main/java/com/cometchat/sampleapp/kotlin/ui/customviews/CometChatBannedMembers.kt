@@ -11,6 +11,7 @@ import android.view.View.OnClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -55,6 +56,7 @@ class CometChatBannedMembers @JvmOverloads constructor(
     private var groupMembersAdapter: BannedMembersAdapter? = null
     private var layoutManager: LinearLayoutManager? = null
     private var confirmDialog: CometChatConfirmDialog? = null
+    private var lifecycleOwner: LifecycleOwner? = null
 
     // Interaction listeners
     private var onBackPress: OnBackPress? = null
@@ -123,31 +125,34 @@ class CometChatBannedMembers @JvmOverloads constructor(
      * Initializes the ViewModel and sets up observers for LiveData.
      */
     private fun initViewModel() {
-        viewModel = ViewModelProvider.NewInstanceFactory().create(
-            BannedMembersViewModel::class.java
-        )
-        viewModel.mutableBannedGroupMembersList.observe(
-            (context as AppCompatActivity)
-        ) { list: List<GroupMember> -> this.setGroupMemberList(list) }
-        viewModel.states.observe(
-            (context as AppCompatActivity)
-        ) { states: States -> this.setStateChangeObserver(states) }
-        viewModel.insertAtTop().observe(
-            (context as AppCompatActivity)
-        ) { position: Int -> this.notifyInsertedAt(position) }
-        viewModel.moveToTop().observe(
-            (context as AppCompatActivity)
-        ) { position: Int -> this.notifyItemMovedToTop(position) }
-        viewModel.updateGroupMember().observe(
-            (context as AppCompatActivity)
-        ) { position: Int -> this.notifyItemChanged(position) }
-        viewModel.removeGroupMember().observe(
-            (context as AppCompatActivity)
-        ) { position: Int -> this.notifyItemRemoved(position) }
-        viewModel.cometChatException.observe((context as AppCompatActivity), exceptionObserver)
-        viewModel.dialogStates.observe(
-            (context as AppCompatActivity)
-        ) { state: DialogState -> this.setDialogState(state) } // Set up the back button click event
+        viewModel = ViewModelProvider.NewInstanceFactory().create(BannedMembersViewModel::class.java)
+        lifecycleOwner = Utils.getLifecycleOwner(context)
+        if (lifecycleOwner == null) return
+
+        viewModel.mutableBannedGroupMembersList.observe(lifecycleOwner!!) { list: List<GroupMember> ->
+            this.setGroupMemberList(list)
+        }
+        viewModel.states.observe(lifecycleOwner!!) { states: States ->
+            this.setStateChangeObserver(states)
+        }
+        viewModel.insertAtTop().observe(lifecycleOwner!!) { position: Int ->
+            this.notifyInsertedAt(position)
+        }
+        viewModel.moveToTop().observe(lifecycleOwner!!) { position: Int ->
+            this.notifyItemMovedToTop(position)
+        }
+        viewModel.updateGroupMember().observe(lifecycleOwner!!) { position: Int ->
+            this.notifyItemChanged(position)
+        }
+        viewModel.removeGroupMember().observe(lifecycleOwner!!) { position: Int ->
+            this.notifyItemRemoved(position)
+        }
+        viewModel.cometChatException.observe(lifecycleOwner!!, exceptionObserver)
+        viewModel.dialogStates.observe(lifecycleOwner!!) { state: DialogState ->
+            this.setDialogState(state)
+        }
+
+        // Set up the back button click event
         binding.ivBack.setOnClickListener { view: View? ->
             if (onBackPress != null) {
                 onBackPress!!.onBack()
@@ -245,7 +250,27 @@ class CometChatBannedMembers @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        dispose()
+    }
+
+    /**
+     * Disposes of all observers and clears references to prevent memory leaks.
+     */
+    private fun dispose() {
         viewModel.removeListeners()
+
+        if (lifecycleOwner != null) {
+            viewModel.mutableBannedGroupMembersList.removeObservers(lifecycleOwner!!)
+            viewModel.states.removeObservers(lifecycleOwner!!)
+            viewModel.insertAtTop().removeObservers(lifecycleOwner!!)
+            viewModel.moveToTop().removeObservers(lifecycleOwner!!)
+            viewModel.updateGroupMember().removeObservers(lifecycleOwner!!)
+            viewModel.removeGroupMember().removeObservers(lifecycleOwner!!)
+            viewModel.cometChatException.removeObservers(lifecycleOwner!!)
+            viewModel.dialogStates.removeObservers(lifecycleOwner!!)
+        }
+        lifecycleOwner = null
+        groupMembersAdapter = null
     }
 
     override fun onAttachedToWindow() {

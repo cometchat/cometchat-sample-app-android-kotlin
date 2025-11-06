@@ -47,10 +47,11 @@ import java.util.List;
 
 public class CometChatAIAssistantChatHistory extends MaterialCardView {
     private static final String TAG = "CometChatAIAssistChatHistory";
-    private final CometchatAiAssistantChatHistoryBinding binding;
-    private final CometChatAIAssistantChatHistoryViewModel viewModel;
+    private CometchatAiAssistantChatHistoryBinding binding;
+    private CometChatAIAssistantChatHistoryViewModel viewModel;
     private AIAssistantChatHistoryAdapter adapter;
     private LinearLayoutManager layoutManager;
+    private LifecycleOwner lifecycleOwner;
 
     private CometChatPopupMenu cometchatPopUpMenu;
     private Function2<Context, BaseMessage, List<CometChatPopupMenu.MenuItem>> addOptions;
@@ -172,10 +173,9 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
     public CometChatAIAssistantChatHistory(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         binding = CometchatAiAssistantChatHistoryBinding.inflate(LayoutInflater.from(getContext()), this, true);
-        viewModel = new ViewModelProvider.NewInstanceFactory().create(CometChatAIAssistantChatHistoryViewModel.class);
         Utils.initMaterialCard(this);
         setupRecyclerView();
-        setupObservers();
+        initViewModel();
         setupClickListeners();
         applyStyleAttributes(attrs, defStyleAttr);
     }
@@ -777,17 +777,18 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
     }
 
     // Sets up LiveData observers to monitor changes in chat history data and UI states.
-    private void setupObservers() {
-        if (getContext() instanceof LifecycleOwner) {
-            LifecycleOwner lifecycleOwner = (LifecycleOwner) getContext();
-            viewModel.getMessagesLiveData().observe(lifecycleOwner, this::onMessagesReceived);
-            viewModel.getStateLiveData().observe(lifecycleOwner, stateChangeObserver);
-            viewModel.getDeleteStateMutableLiveData().observe(lifecycleOwner, deleteStateObserver);
-            viewModel.getRemoveMessage().observe(lifecycleOwner, remove);
-            viewModel.getMutableMessagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
-            viewModel.getMutableHasMore().observe(lifecycleOwner, this::hasMore);
-            viewModel.getMutableIsInProgress().observe((LifecycleOwner) getContext(), this::isInProgress);
-        }
+    private void initViewModel() {
+        viewModel = new ViewModelProvider.NewInstanceFactory().create(CometChatAIAssistantChatHistoryViewModel.class);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        viewModel.getMessagesLiveData().observe(lifecycleOwner, this::onMessagesReceived);
+        viewModel.getStateLiveData().observe(lifecycleOwner, stateChangeObserver);
+        viewModel.getDeleteStateMutableLiveData().observe(lifecycleOwner, deleteStateObserver);
+        viewModel.getRemoveMessage().observe(lifecycleOwner, remove);
+        viewModel.getMutableMessagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
+        viewModel.getMutableHasMore().observe(lifecycleOwner, this::hasMore);
+        viewModel.getMutableIsInProgress().observe(lifecycleOwner, this::isInProgress);
+
     }
 
     private void hasMore(Boolean aBoolean) {
@@ -1004,5 +1005,30 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
     public void setOnItemLongClickListener(OnItemLongClick<BaseMessage> listener) {
         this.onItemLongClick = listener;
         adapter.setOnItemLongClickListener(listener);
+    }
+
+    /**
+     * Called when the view is detached from a window. Removes observers.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
+        if (lifecycleOwner != null && viewModel != null) {
+            viewModel.getMessagesLiveData().removeObservers(lifecycleOwner);
+            viewModel.getStateLiveData().removeObservers(lifecycleOwner);
+            viewModel.getDeleteStateMutableLiveData().removeObservers(lifecycleOwner);
+            viewModel.getRemoveMessage().removeObservers(lifecycleOwner);
+            viewModel.getMutableMessagesRangeChanged().removeObservers(lifecycleOwner);
+            viewModel.getMutableHasMore().removeObservers(lifecycleOwner);
+            viewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
+        }
+        viewModel = null;
+        adapter = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 }

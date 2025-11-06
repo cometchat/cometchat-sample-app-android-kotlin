@@ -53,6 +53,10 @@ public class CometChatScopeChange extends MaterialCardView {
      */
     private ScopeChangeViewModel viewModel;
     /**
+     * LifecycleOwner for observer management.
+     */
+    private LifecycleOwner lifecycleOwner;
+    /**
      * Click listeners for negative and positive button actions.
      */
     private OnClick onNegativeButtonClick;
@@ -169,7 +173,10 @@ public class CometChatScopeChange extends MaterialCardView {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(scopeAdapter);
         applyStyleAttributes(attrs, defStyleAttr, 0);
-        viewModel.getStates().observe((LifecycleOwner) getContext(), this::setDialogState);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner != null) {
+            viewModel.getStates().observe(lifecycleOwner, this::setDialogState);
+        }
         binding.cometchatScopeChangeCancelButton.setOnClickListener(v -> {
             if (onNegativeButtonClick != null) {
                 onNegativeButtonClick.onClick();
@@ -793,11 +800,22 @@ public class CometChatScopeChange extends MaterialCardView {
         }
     }
 
+    /**
+     * Called when the view is detached from a window. Removes observers.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        dispose();
+    }
 
-
-
-
-
-
-
+    private void dispose() {
+        if (lifecycleOwner != null && viewModel != null) {
+            viewModel.getStates().removeObservers(lifecycleOwner);
+        }
+        viewModel = null;
+        scopeAdapter = null;
+        binding = null;
+        lifecycleOwner = null;
+    }
 }

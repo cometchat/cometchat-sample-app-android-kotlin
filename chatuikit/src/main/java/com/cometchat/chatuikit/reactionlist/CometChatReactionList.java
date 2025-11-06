@@ -54,6 +54,8 @@ public class CometChatReactionList extends MaterialCardView {
 
     private CometchatReactionListBinding binding;
 
+    private LifecycleOwner lifecycleOwner;
+
     private String errorText;
     private String selectedReaction;
     private BaseMessage baseMessage;
@@ -192,12 +194,15 @@ public class CometChatReactionList extends MaterialCardView {
         reactionListViewModel.clearReactionRequestHashMap();
         reactionListViewModel.clearReactedUserCacheHashMap();
 
-        reactionListViewModel.getLoadingStateLiveData().observe((LifecycleOwner) getContext(), this::stateChangeObserver);
-        reactionListViewModel.getBaseMessageLiveData().observe((LifecycleOwner) getContext(), this::setBaseMessage);
-        reactionListViewModel.getReactionHeaderLiveData().observe((LifecycleOwner) getContext(), this::setReactionHeaderList);
-        reactionListViewModel.getSelectedReactionLiveData().observe((LifecycleOwner) getContext(), this::updatedSelectedReaction);
-        reactionListViewModel.getActiveTabIndexLiveData().observe((LifecycleOwner) getContext(), this::setActiveTab);
-        reactionListViewModel.getReactedUsersLiveData().observe((LifecycleOwner) getContext(), this::setReactedUsersList);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+
+        reactionListViewModel.getLoadingStateLiveData().observe(lifecycleOwner, this::stateChangeObserver);
+        reactionListViewModel.getBaseMessageLiveData().observe(lifecycleOwner, this::setBaseMessage);
+        reactionListViewModel.getReactionHeaderLiveData().observe(lifecycleOwner, this::setReactionHeaderList);
+        reactionListViewModel.getSelectedReactionLiveData().observe(lifecycleOwner, this::updatedSelectedReaction);
+        reactionListViewModel.getActiveTabIndexLiveData().observe(lifecycleOwner, this::setActiveTab);
+        reactionListViewModel.getReactedUsersLiveData().observe(lifecycleOwner, this::setReactedUsersList);
     }
 
     /**
@@ -955,5 +960,27 @@ public class CometChatReactionList extends MaterialCardView {
      */
     public void setReactionListErrorTextAppearance(int reactionListErrorTextAppearance) {
         this.reactionListErrorTextAppearance = reactionListErrorTextAppearance;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
+        reactionListViewModel.removeListener();
+
+        if (lifecycleOwner != null) {
+            reactionListViewModel.getLoadingStateLiveData().removeObservers(lifecycleOwner);
+            reactionListViewModel.getBaseMessageLiveData().removeObservers(lifecycleOwner);
+            reactionListViewModel.getReactionHeaderLiveData().removeObservers(lifecycleOwner);
+            reactionListViewModel.getSelectedReactionLiveData().removeObservers(lifecycleOwner);
+            reactionListViewModel.getActiveTabIndexLiveData().removeObservers(lifecycleOwner);
+            reactionListViewModel.getReactedUsersLiveData().removeObservers(lifecycleOwner);
+        }
+        reactionListViewModel = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 }

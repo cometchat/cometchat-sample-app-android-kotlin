@@ -236,11 +236,10 @@ public class SubtitleView extends MaterialCardView {
     public void setLastMessageText(SpannableString text) {
         if (text != null) {
             binding.tvLastMessageText.setVisibility(VISIBLE);
-            binding.tvLastMessageText.setText(text, TextView.BufferType.SPANNABLE);
+            binding.tvLastMessageText.setText(text);
             binding.tvLastMessageText.setMovementMethod(MentionMovementMethod.getInstance());
-            binding.tvLastMessageText.setSingleLine(true);
+            binding.tvLastMessageText.setMaxLines(1);
             binding.tvLastMessageText.setEllipsize(TextUtils.TruncateAt.END);
-            binding.tvLastMessageText.setText(text, TextView.BufferType.SPANNABLE);
         } else {
             binding.tvLastMessageText.setVisibility(GONE);
             binding.tvLastMessageText.setText("");

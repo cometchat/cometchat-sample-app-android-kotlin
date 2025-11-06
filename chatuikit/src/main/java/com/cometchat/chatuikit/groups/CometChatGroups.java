@@ -67,6 +67,7 @@ public class CometChatGroups extends MaterialCardView {
     private boolean isGroupListEmpty = true;
     private GroupsViewModel groupsViewModel;
     private GroupsAdapter groupsAdapter;
+    private LifecycleOwner lifecycleOwner;
     /**
      * Observer that updates an item in the list.
      */
@@ -326,13 +327,15 @@ public class CometChatGroups extends MaterialCardView {
      */
     private void initViewModels() {
         groupsViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupsViewModel.class);
-        groupsViewModel.getMutableGroupsList().observe((LifecycleOwner) getContext(), listObserver);
-        groupsViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
-        groupsViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
-        groupsViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
-        groupsViewModel.updateGroup().observe((LifecycleOwner) getContext(), update);
-        groupsViewModel.removeGroup().observe((LifecycleOwner) getContext(), remove);
-        groupsViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        groupsViewModel.getMutableGroupsList().observe(lifecycleOwner, listObserver);
+        groupsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
+        groupsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
+        groupsViewModel.moveToTop().observe(lifecycleOwner, moveToTop);
+        groupsViewModel.updateGroup().observe(lifecycleOwner, update);
+        groupsViewModel.removeGroup().observe(lifecycleOwner, remove);
+        groupsViewModel.getCometChatException().observe(lifecycleOwner, exceptionObserver);
     }
 
     /**
@@ -341,30 +344,23 @@ public class CometChatGroups extends MaterialCardView {
     private void initClickEvents() {
         cometchatPopUpMenu = new CometChatPopupMenu(getContext(), 0);
 
-        binding.recyclerViewList.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerViewList, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                Group group = (Group) view.getTag(R.string.cometchat_group);
-
-                if (onItemClick != null) {
-                    onItemClick.click(view, position, group);
-                } else {
-                    if (!UIKitConstants.SelectionMode.NONE.equals(selectionMode)) {
-                        selectGroup(group, selectionMode);
-                    }
+        groupsAdapter.setOnItemClick((view, position, group) -> {
+            if (onItemClick != null) {
+                onItemClick.click(view, position, group);
+            } else {
+                if (!UIKitConstants.SelectionMode.NONE.equals(selectionMode)) {
+                    selectGroup(group, selectionMode);
                 }
             }
+        });
 
-            @Override
-            public void onLongClick(@NonNull View view, int position) {
-                Group group = (Group) view.getTag(R.string.cometchat_group);
-                if (onItemLongClick != null) {
-                    onItemLongClick.longClick(view, position, group);
-                } else {
-                    preparePopupMenu(view, group);
-                }
+        groupsAdapter.setOnItemLongClick((view, position, group) -> {
+            if (onItemLongClick != null) {
+                onItemLongClick.longClick(view, position, group);
+            } else {
+                preparePopupMenu(view, group);
             }
-        }));
+        });
 
         binding.searchBox.addOnSearchListener((state, text) -> {
             if (state.equals(CometChatSearchBox.SearchState.TextChange)) {
@@ -693,7 +689,6 @@ public class CometChatGroups extends MaterialCardView {
             }
             cometchatPopUpMenu.dismiss();
         });
-
         cometchatPopUpMenu.show(view);
     }
 
@@ -1631,7 +1626,24 @@ public class CometChatGroups extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         groupsViewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            groupsViewModel.getMutableGroupsList().removeObservers(lifecycleOwner);
+            groupsViewModel.getStates().removeObservers(lifecycleOwner);
+            groupsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            groupsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            groupsViewModel.updateGroup().removeObservers(lifecycleOwner);
+            groupsViewModel.removeGroup().removeObservers(lifecycleOwner);
+            groupsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+        groupsViewModel = null;
+        groupsAdapter = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 
     /**
@@ -2564,12 +2576,4 @@ public class CometChatGroups extends MaterialCardView {
         this.groupsAdapter = adapter;
         binding.recyclerViewList.setAdapter(adapter);
     }
-
-
-
-
-
-
-
-
 }

@@ -41,6 +41,7 @@ public class CometChatIncomingCall extends MaterialCardView {
     private CometChatCalls.CallSettingsBuilder callSettingsBuilder;
     private CometChatSoundManager soundManager;
     private IncomingCallViewModel viewModel;
+    private LifecycleOwner lifecycleOwner;
     private OnError onError;
     private @StyleRes int style;
     private OnClick onAcceptClick, onRejectClick;
@@ -87,10 +88,7 @@ public class CometChatIncomingCall extends MaterialCardView {
         Utils.initMaterialCard(this);
         soundManager = new CometChatSoundManager(getContext());
         // Initialize ViewModel and observe call state
-        viewModel = new ViewModelProvider.NewInstanceFactory().create(IncomingCallViewModel.class);
-        viewModel.getAcceptedCall().observe((LifecycleOwner) getContext(), this::acceptedCall);
-        viewModel.getRejectCall().observe((LifecycleOwner) getContext(), this::rejectedCall);
-        viewModel.getException().observe((LifecycleOwner) getContext(), this::throwError);
+        initViewModel();
 
         binding.acceptButton.setOnClickListener(v -> {
             if (onAcceptClick != null) {
@@ -106,6 +104,15 @@ public class CometChatIncomingCall extends MaterialCardView {
         // Apply style attributes to customize the view
         applyStyleAttributes(attrs, defStyleAttr);
 
+    }
+
+    private void initViewModel() {
+        viewModel = new ViewModelProvider.NewInstanceFactory().create(IncomingCallViewModel.class);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        viewModel.getAcceptedCall().observe(lifecycleOwner, this::acceptedCall);
+        viewModel.getRejectCall().observe(lifecycleOwner, this::rejectedCall);
+        viewModel.getException().observe(lifecycleOwner, this::throwError);
     }
 
     /**
@@ -537,9 +544,23 @@ public class CometChatIncomingCall extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         viewModel.removeListeners();
         pauseSound();
-    }    /**
+        if (lifecycleOwner != null) {
+            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
+            viewModel.getRejectCall().removeObservers(lifecycleOwner);
+            viewModel.getException().removeObservers(lifecycleOwner);
+        }
+        viewModel = null;
+        binding = null;
+        lifecycleOwner = null;
+    }
+
+    /**
      * Sets the stroke width for this component.
      *
      * @param strokeWidth the width in pixels to set for the stroke.

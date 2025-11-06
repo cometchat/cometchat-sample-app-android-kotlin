@@ -99,7 +99,6 @@ public class CometChatAIAssistantChatHistoryViewModel extends ViewModel {
     public void setUser(User user) {
         this.user = user;
         initializeMessagesRequest();
-        states.setValue(UIKitConstants.States.LOADING);
         fetchMessages();
     }
 
@@ -130,6 +129,7 @@ public class CometChatAIAssistantChatHistoryViewModel extends ViewModel {
             return;
         }
         if (hasMore) {
+            if (messageArrayList.isEmpty()) states.setValue(UIKitConstants.States.LOADING);
             messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
                 @Override
                 public void onSuccess(List<BaseMessage> messages) {

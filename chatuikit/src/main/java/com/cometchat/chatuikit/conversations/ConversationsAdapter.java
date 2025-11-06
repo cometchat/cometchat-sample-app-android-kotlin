@@ -30,6 +30,8 @@ import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
+import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
+import com.cometchat.chatuikit.shared.interfaces.OnItemLongClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.utils.ConversationTailView;
 import com.cometchat.chatuikit.shared.utils.ConversationsUtils;
@@ -87,6 +89,8 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     private Drawable checkBoxSelectIcon;
     private @ColorInt int checkBoxSelectIconTint;
     private boolean isSelectionEnabled = false;
+    private OnItemClick<Conversation> onItemClick;
+    private OnItemLongClick<Conversation> onItemLongClick;
 
 
     /**
@@ -891,6 +895,24 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     /**
+     * Sets the item click listener for conversation items.
+     *
+     * @param onItemClick The listener to handle item click events.
+     */
+    public void setOnItemClick(OnItemClick<Conversation> onItemClick) {
+        this.onItemClick = onItemClick;
+    }
+
+    /**
+     * Sets the item long click listener for conversation items.
+     *
+     * @param onItemLongClick The listener to handle item long click events.
+     */
+    public void setOnLongClick(OnItemLongClick<Conversation> onItemLongClick) {
+        this.onItemLongClick = onItemLongClick;
+    }
+
+    /**
      * ViewHolder class for binding and displaying conversation items in a
      * RecyclerView.
      */
@@ -1070,6 +1092,19 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 }
             }
+
+            binding.parentLayout.setOnClickListener(v -> {
+                if (onItemClick != null) {
+                    onItemClick.click(v, position, conversation);
+                }
+            });
+
+            binding.parentLayout.setOnLongClickListener(v -> {
+                if (onItemLongClick != null) {
+                    onItemLongClick.longClick(v, position, conversation);
+                }
+                return false;
+            });
 
             // Set tag for the conversation
             itemView.setTag(R.string.cometchat_conversation, conversation);

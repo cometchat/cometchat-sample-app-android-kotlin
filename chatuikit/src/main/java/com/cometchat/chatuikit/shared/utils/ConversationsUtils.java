@@ -201,11 +201,11 @@ public class ConversationsUtils {
             subtitleView.setLastMessageText(lastMessageData.lastMessage);
         } else {
             SpannableString spannableString = SpannableString.valueOf(FormatterUtils.getFormattedText(context,
-                                                                                                      conversation.getLastMessage(),
-                                                                                                      UIKitConstants.FormattingType.CONVERSATIONS,
-                                                                                                      null,
-                                                                                                      lastMessageData.getLastMessage(),
-                                                                                                      formatters != null && !formatters.isEmpty() ? formatters : new ArrayList<>()));
+                    conversation.getLastMessage(),
+                    UIKitConstants.FormattingType.CONVERSATIONS,
+                    null,
+                    lastMessageData.getLastMessage(),
+                    formatters != null && !formatters.isEmpty() ? formatters : new ArrayList<>()));
             subtitleView.setLastMessageText(spannableString);
         }
     }

@@ -61,6 +61,9 @@ import java.util.List;
  */
 public class CometChatUsers extends MaterialCardView {
     private static final String TAG = CometChatUsers.class.getSimpleName();
+
+    private LifecycleOwner lifecycleOwner;
+
     private int toolbarVisibility = VISIBLE;
     private int loadingStateVisibility = VISIBLE;
     private int searchBoxVisibility = VISIBLE;
@@ -325,13 +328,15 @@ public class CometChatUsers extends MaterialCardView {
      */
     private void initViewModels() {
         usersViewModel = new ViewModelProvider.NewInstanceFactory().create(UsersViewModel.class);
-        usersViewModel.getMutableUsersList().observe((LifecycleOwner) getContext(), listObserver);
-        usersViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
-        usersViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
-        usersViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
-        usersViewModel.updateUser().observe((LifecycleOwner) getContext(), update);
-        usersViewModel.removeUser().observe((LifecycleOwner) getContext(), remove);
-        usersViewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        usersViewModel.getMutableUsersList().observe(lifecycleOwner, listObserver);
+        usersViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
+        usersViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
+        usersViewModel.moveToTop().observe(lifecycleOwner, moveToTop);
+        usersViewModel.updateUser().observe(lifecycleOwner, update);
+        usersViewModel.removeUser().observe(lifecycleOwner, remove);
+        usersViewModel.getCometChatException().observe(lifecycleOwner, exceptionObserver);
     }
 
     /**
@@ -340,30 +345,23 @@ public class CometChatUsers extends MaterialCardView {
     private void initClickEvents() {
         cometchatPopUpMenu = new CometChatPopupMenu(getContext(), 0);
 
-        binding.recyclerViewList.addOnItemTouchListener(new RecyclerTouchListener(getContext(), binding.recyclerViewList, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                User user = (User) view.getTag(R.string.cometchat_user);
-
-                if (onItemClick != null) {
-                    onItemClick.click(view, position, user);
-                } else {
-                    if (!UIKitConstants.SelectionMode.NONE.equals(selectionMode)) {
-                        selectUser(user, selectionMode);
-                    }
+        usersAdapter.setOnItemClick((view, position, user) -> {
+            if (onItemClick != null) {
+                onItemClick.click(view, position, user);
+            } else {
+                if (!UIKitConstants.SelectionMode.NONE.equals(selectionMode)) {
+                    selectUser(user, selectionMode);
                 }
             }
+        });
 
-            @Override
-            public void onLongClick(View view, int position) {
-                User user = (User) view.getTag(R.string.cometchat_user);
-                if (onItemLongClick != null) {
-                    onItemLongClick.longClick(view, position, user);
-                } else {
-                    preparePopupMenu(view, user);
-                }
+        usersAdapter.setOnItemLongClick((view, position, user) -> {
+            if (onItemLongClick != null) {
+                onItemLongClick.longClick(view, position, user);
+            } else {
+                preparePopupMenu(view, user);
             }
-        }));
+        });
 
         binding.searchBox.addOnSearchListener((state, text) -> {
             if (state.equals(CometChatSearchBox.SearchState.TextChange)) {
@@ -1721,7 +1719,24 @@ public class CometChatUsers extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         usersViewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            usersViewModel.getMutableUsersList().removeObservers(lifecycleOwner);
+            usersViewModel.getStates().removeObservers(lifecycleOwner);
+            usersViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            usersViewModel.moveToTop().removeObservers(lifecycleOwner);
+            usersViewModel.updateUser().removeObservers(lifecycleOwner);
+            usersViewModel.removeUser().removeObservers(lifecycleOwner);
+            usersViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+        lifecycleOwner = null;
+        usersViewModel = null;
+        binding = null;
+        usersAdapter = null;
     }
 
     public int getLoadingView() {
@@ -2623,17 +2638,10 @@ public class CometChatUsers extends MaterialCardView {
         if (onItemLongClick != null) this.onItemLongClick = onItemLongClick;
     }
 
-
-
-
-
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         usersViewModel.addListeners();
         usersViewModel.fetchUsers();
     }
-
-
 }

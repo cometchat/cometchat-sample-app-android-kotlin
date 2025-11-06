@@ -122,6 +122,8 @@ import kotlin.jvm.functions.Function4;
  */
 public class CometChatMessageComposer extends MaterialCardView {
     private static final String TAG = CometChatMessageComposer.class.getSimpleName();
+    private LifecycleOwner lifecycleOwner;
+
     /**
      * Action sheets and interaction handlers.
      */
@@ -413,16 +415,18 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     private void setupViewModel() {
         composerViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageComposerViewModel.class);
-        composerViewModel.sentMessage().observe((LifecycleOwner) getContext(), this::messageSentSuccess);
-        composerViewModel.getException().observe((LifecycleOwner) getContext(), this::messageSendException);
-        composerViewModel.processEdit().observe((LifecycleOwner) getContext(), this::showEditMessagePreview);
-        composerViewModel.successEdit().observe((LifecycleOwner) getContext(), this::onMessageEditSuccess);
-        composerViewModel.closeTopPanel().observe((LifecycleOwner) getContext(), this::closeInternalTopPanel);
-        composerViewModel.closeBottomPanel().observe((LifecycleOwner) getContext(), this::closeInternalBottomPanel);
-        composerViewModel.showTopPanel().observe((LifecycleOwner) getContext(), this::showInternalTopPanel);
-        composerViewModel.showBottomPanel().observe((LifecycleOwner) getContext(), this::showInternalBottomPanel);
-        composerViewModel.getComposeText().observe((LifecycleOwner) getContext(), this::setInitialComposerText);
-        composerViewModel.getIsAIAssistantGenerating().observe((LifecycleOwner) getContext(), this::updateComposerState);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        composerViewModel.sentMessage().observe(lifecycleOwner, this::messageSentSuccess);
+        composerViewModel.getException().observe(lifecycleOwner, this::messageSendException);
+        composerViewModel.processEdit().observe(lifecycleOwner, this::showEditMessagePreview);
+        composerViewModel.successEdit().observe(lifecycleOwner, this::onMessageEditSuccess);
+        composerViewModel.closeTopPanel().observe(lifecycleOwner, this::closeInternalTopPanel);
+        composerViewModel.closeBottomPanel().observe(lifecycleOwner, this::closeInternalBottomPanel);
+        composerViewModel.showTopPanel().observe(lifecycleOwner, this::showInternalTopPanel);
+        composerViewModel.showBottomPanel().observe(lifecycleOwner, this::showInternalBottomPanel);
+        composerViewModel.getComposeText().observe(lifecycleOwner, this::setInitialComposerText);
+        composerViewModel.getIsAIAssistantGenerating().observe(lifecycleOwner, this::updateComposerState);
     }
 
     private void updateComposerState(Boolean aBoolean) {
@@ -1526,7 +1530,26 @@ public class CometChatMessageComposer extends MaterialCardView {
             bottomSheetDialog.dismiss();
         }
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         composerViewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            composerViewModel.sentMessage().removeObservers(lifecycleOwner);
+            composerViewModel.getException().removeObservers(lifecycleOwner);
+            composerViewModel.processEdit().removeObservers(lifecycleOwner);
+            composerViewModel.successEdit().removeObservers(lifecycleOwner);
+            composerViewModel.closeTopPanel().removeObservers(lifecycleOwner);
+            composerViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
+            composerViewModel.showTopPanel().removeObservers(lifecycleOwner);
+            composerViewModel.showBottomPanel().removeObservers(lifecycleOwner);
+            composerViewModel.getComposeText().removeObservers(lifecycleOwner);
+            composerViewModel.getIsAIAssistantGenerating().removeObservers(lifecycleOwner);
+        }
+        composerViewModel = null;
+        lifecycleOwner = null;
+        binding = null;
     }
 
     /**
@@ -1999,10 +2022,13 @@ public class CometChatMessageComposer extends MaterialCardView {
         cometchatTextFormatterHashMap = new HashMap<>();
         for (CometChatTextFormatter formatter : cometchatTextFormatters) {
             if (formatter != null) {
-                formatter.getSuggestionItemList().observe((LifecycleOwner) getContext(), this::setTagList);
-                formatter.getTagInfoMessage().observe((LifecycleOwner) getContext(), this::setInfoMessage);
-                formatter.getTagInfoVisibility().observe((LifecycleOwner) getContext(), this::setInfoVisibility);
-                formatter.getShowLoadingIndicator().observe((LifecycleOwner) getContext(), this::setLoadingStateVisibility);
+                LifecycleOwner lifecycleOwner = Utils.getLifecycleOwner(getContext());
+                if (lifecycleOwner != null) {
+                    formatter.getSuggestionItemList().observe(lifecycleOwner, this::setTagList);
+                    formatter.getTagInfoMessage().observe(lifecycleOwner, this::setInfoMessage);
+                    formatter.getTagInfoVisibility().observe(lifecycleOwner, this::setInfoVisibility);
+                    formatter.getShowLoadingIndicator().observe(lifecycleOwner, this::setLoadingStateVisibility);
+                }
                 if (user != null) {
                     formatter.setUser(user);
                     formatter.setGroup(null);

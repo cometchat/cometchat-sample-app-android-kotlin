@@ -1,6 +1,7 @@
 package com.cometchat.chatuikit.conversations;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -71,6 +72,8 @@ public class CometChatConversations extends MaterialCardView {
     private boolean isConversationListEmpty = true;
     private boolean disableSoundForMessages;
     private ConversationsAdapter conversationsAdapter;
+    private LifecycleOwner lifecycleOwner;
+
     /**
      * Observer for updating a specific conversation in the list. Notifies the
      * adapter to refresh the item at the given position.
@@ -397,16 +400,19 @@ public class CometChatConversations extends MaterialCardView {
      */
     private void initViewModels() {
         conversationsViewModel = new ViewModelProvider.NewInstanceFactory().create(ConversationsViewModel.class);
-        conversationsViewModel.getMutableConversationList().observe((LifecycleOwner) getContext(), listObserver);
-        conversationsViewModel.getStates().observe((LifecycleOwner) getContext(), stateChangeObserver);
-        conversationsViewModel.insertAtTop().observe((LifecycleOwner) getContext(), insertAtTop);
-        conversationsViewModel.moveToTop().observe((LifecycleOwner) getContext(), moveToTop);
-        conversationsViewModel.getTyping().observe((LifecycleOwner) getContext(), typing);
-        conversationsViewModel.updateConversation().observe((LifecycleOwner) getContext(), updateConversation);
-        conversationsViewModel.playSound().observe((LifecycleOwner) getContext(), this::playSound);
-        conversationsViewModel.remove().observe((LifecycleOwner) getContext(), remove);
-        conversationsViewModel.progressState().observe((LifecycleOwner) getContext(), conversationDeleteObserver);
-        conversationsViewModel.getCometChatException().observe((LifecycleOwner) getContext(), cometchatExceptionObserver);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+
+        conversationsViewModel.getMutableConversationList().observe(lifecycleOwner, listObserver);
+        conversationsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
+        conversationsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
+        conversationsViewModel.moveToTop().observe(lifecycleOwner, moveToTop);
+        conversationsViewModel.getTyping().observe(lifecycleOwner, typing);
+        conversationsViewModel.updateConversation().observe(lifecycleOwner, updateConversation);
+        conversationsViewModel.playSound().observe(lifecycleOwner, this::playSound);
+        conversationsViewModel.remove().observe(lifecycleOwner, remove);
+        conversationsViewModel.progressState().observe(lifecycleOwner, conversationDeleteObserver);
+        conversationsViewModel.getCometChatException().observe(lifecycleOwner, cometchatExceptionObserver);
     }
 
     /**
@@ -417,44 +423,25 @@ public class CometChatConversations extends MaterialCardView {
     private void clickEvents() {
         cometchatPopUpMenu = new CometChatPopupMenu(getContext(), 0);
 
-        binding.recyclerviewConversationsList.addOnItemTouchListener(new RecyclerTouchListener(getContext(),
-                                                                                               binding.recyclerviewConversationsList,
-                                                                                               new ClickListener() {
-                                                                                                   @Override
-                                                                                                   public void onClick(View view, int position) {
-                                                                                                       Conversation conversation = (Conversation) view.getTag(
-                                                                                                           R.string.cometchat_conversation);
-
-                                                                                                       if (onItemClick != null) {
-                                                                                                           onItemClick.click(view,
-                                                                                                                             position,
-                                                                                                                             conversation);
-                                                                                                       } else {
-                                                                                                           if (!UIKitConstants.SelectionMode.NONE.equals(
-                                                                                                               selectionMode)) {
-                                                                                                               selectConversation(conversation,
-                                                                                                                                  selectionMode);
-                                                                                                           }
-                                                                                                       }
-                                                                                                   }
-
-                                                                                                   @Override
-                                                                                                   public void onLongClick(View view, int position) {
-                                                                                                       Conversation conversation = (Conversation) view.getTag(
-                                                                                                           R.string.cometchat_conversation);
-                                                                                                       if (onItemLongClick != null) {
-                                                                                                           onItemLongClick.longClick(view,
-                                                                                                                                     position,
-                                                                                                                                     conversation);
-                                                                                                       } else {
-                                                                                                           preparePopupMenu(view, conversation);
-                                                                                                       }
-                                                                                                   }
-                                                                                               }));
-
-        binding.ivDiscardSelection.setOnClickListener(v -> {
-            clearSelection();
+        conversationsAdapter.setOnItemClick((view, position, conversation) -> {
+            if (onItemClick != null) {
+                onItemClick.click(view, position, conversation);
+            } else {
+                if (!UIKitConstants.SelectionMode.NONE.equals(selectionMode)) {
+                    selectConversation(conversation, selectionMode);
+                }
+            }
         });
+
+        conversationsAdapter.setOnLongClick((view, position, conversation) -> {
+            if (onItemLongClick != null) {
+                onItemLongClick.longClick(view, position, conversation);
+            } else {
+                preparePopupMenu(view, conversation);
+            }
+        });
+
+        binding.ivDiscardSelection.setOnClickListener(v -> clearSelection());
 
         binding.ivSubmitSelection.setOnClickListener(v -> {
             if (onSelection != null) {
@@ -1578,7 +1565,27 @@ public class CometChatConversations extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         conversationsViewModel.removeListener();
+        if (lifecycleOwner != null) {
+            conversationsViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
+            conversationsViewModel.getStates().removeObservers(lifecycleOwner);
+            conversationsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            conversationsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            conversationsViewModel.getTyping().removeObservers(lifecycleOwner);
+            conversationsViewModel.updateConversation().removeObservers(lifecycleOwner);
+            conversationsViewModel.playSound().removeObservers(lifecycleOwner);
+            conversationsViewModel.remove().removeObservers(lifecycleOwner);
+            conversationsViewModel.progressState().removeObservers(lifecycleOwner);
+            conversationsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+        lifecycleOwner = null;
+        conversationsViewModel = null;
+        conversationsAdapter = null;
+        binding = null;
     }
 
     public @LayoutRes int getEmptyView() {

@@ -35,6 +35,7 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     private static final String TAG = CometChatOngoingCall.class.getSimpleName();
     private CometchatOngoingCallScreenBinding binding;
     private OngoingCallViewModel viewModel;
+    private LifecycleOwner lifecycleOwner;
     private UIKitConstants.CallWorkFlow callWorkFlow = UIKitConstants.CallWorkFlow.DEFAULT;
     private OnError onError;
     private String sessionId;
@@ -60,10 +61,12 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
 
     private void initViewModel() {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OngoingCallViewModel.class);
-        viewModel.getEndCall().observe((LifecycleOwner) getContext(), this::endCall);
-        viewModel.getException().observe((LifecycleOwner) getContext(), this::showError);
-        viewModel.hideProgressBar().observe((LifecycleOwner) getContext(), this::hideProgressBar);
-        viewModel.isJoined().observe((LifecycleOwner) getContext(), aBoolean -> ((AppCompatActivity) getContext()).runOnUiThread(() -> {
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        viewModel.getEndCall().observe(lifecycleOwner, this::endCall);
+        viewModel.getException().observe(lifecycleOwner, this::showError);
+        viewModel.hideProgressBar().observe(lifecycleOwner, this::hideProgressBar);
+        viewModel.isJoined().observe(lifecycleOwner, aBoolean -> ((AppCompatActivity) getContext()).runOnUiThread(() -> {
             if (((AppCompatActivity) getContext()).isInPictureInPictureMode()) {
                 CometChatCalls.enterPIPMode();
             }
@@ -140,10 +143,23 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         viewModel.removeListener();
         if (getContext() instanceof LifecycleOwner) {
             ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
         }
+        if (lifecycleOwner != null) {
+            viewModel.getEndCall().removeObservers(lifecycleOwner);
+            viewModel.getException().removeObservers(lifecycleOwner);
+            viewModel.hideProgressBar().removeObservers(lifecycleOwner);
+            viewModel.isJoined().removeObservers(lifecycleOwner);
+        }
+        viewModel = null;
+        binding = null;
+        lifecycleOwner = null;
     }
 
     @Override

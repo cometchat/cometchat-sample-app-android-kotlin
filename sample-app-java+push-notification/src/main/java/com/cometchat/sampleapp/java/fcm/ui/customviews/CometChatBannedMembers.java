@@ -54,6 +54,8 @@ public class CometChatBannedMembers extends MaterialCardView {
     private BannedMemberCustomViewBinding binding;
     private BannedMembersViewModel viewModel;
 
+    private LifecycleOwner lifecycleOwner;
+
     private BannedMembersAdapter groupMembersAdapter;
 
     private LinearLayoutManager layoutManager;
@@ -162,14 +164,16 @@ public class CometChatBannedMembers extends MaterialCardView {
      */
     private void initViewModel() {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(BannedMembersViewModel.class);
-        viewModel.getMutableBannedGroupMembersList().observe((LifecycleOwner) getContext(), this::setGroupMemberList);
-        viewModel.getStates().observe((LifecycleOwner) getContext(), this::setStateChangeObserver);
-        viewModel.insertAtTop().observe((LifecycleOwner) getContext(), this::notifyInsertedAt);
-        viewModel.moveToTop().observe((LifecycleOwner) getContext(), this::notifyItemMovedToTop);
-        viewModel.updateGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemChanged);
-        viewModel.removeGroupMember().observe((LifecycleOwner) getContext(), this::notifyItemRemoved);
-        viewModel.getCometChatException().observe((LifecycleOwner) getContext(), exceptionObserver);
-        viewModel.getDialogStates().observe((LifecycleOwner) getContext(), this::setDialogState);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
+        viewModel.getMutableBannedGroupMembersList().observe(lifecycleOwner, this::setGroupMemberList);
+        viewModel.getStates().observe(lifecycleOwner, this::setStateChangeObserver);
+        viewModel.insertAtTop().observe(lifecycleOwner, this::notifyInsertedAt);
+        viewModel.moveToTop().observe(lifecycleOwner, this::notifyItemMovedToTop);
+        viewModel.updateGroupMember().observe(lifecycleOwner, this::notifyItemChanged);
+        viewModel.removeGroupMember().observe(lifecycleOwner, this::notifyItemRemoved);
+        viewModel.getCometChatException().observe(lifecycleOwner, exceptionObserver);
+        viewModel.getDialogStates().observe(lifecycleOwner, this::setDialogState);
 
         // Set up the back button click event
         binding.ivBack.setOnClickListener(view -> {
@@ -488,7 +492,25 @@ public class CometChatBannedMembers extends MaterialCardView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        dispose();
+    }
+
+    private void dispose() {
         viewModel.removeListeners();
+        if (lifecycleOwner != null) {
+            viewModel.getMutableBannedGroupMembersList().removeObservers(lifecycleOwner);
+            viewModel.getStates().removeObservers(lifecycleOwner);
+            viewModel.insertAtTop().removeObservers(lifecycleOwner);
+            viewModel.moveToTop().removeObservers(lifecycleOwner);
+            viewModel.updateGroupMember().removeObservers(lifecycleOwner);
+            viewModel.removeGroupMember().removeObservers(lifecycleOwner);
+            viewModel.getCometChatException().removeObservers(lifecycleOwner);
+            viewModel.getDialogStates().removeObservers(lifecycleOwner);
+        }
+        groupMembersAdapter = null;
+        binding = null;
+        lifecycleOwner = null;
+        viewModel = null;
     }
 
     @Override
