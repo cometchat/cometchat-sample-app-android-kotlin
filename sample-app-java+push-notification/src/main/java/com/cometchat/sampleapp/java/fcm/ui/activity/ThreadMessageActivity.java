@@ -22,7 +22,6 @@ import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityThreadMessageBinding;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
@@ -34,6 +33,7 @@ public class ThreadMessageActivity extends AppCompatActivity {
     private ActivityThreadMessageBinding binding;
     private User user;
     private Group group;
+    private BaseMessage goToMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +48,12 @@ public class ThreadMessageActivity extends AppCompatActivity {
 
         ThreadMessageViewModel viewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel.class);
         String rawMessage = getIntent().getStringExtra(AppConstants.JSONConstants.RAW_JSON);
+        String goToMessageJson = getIntent().getStringExtra(getString(R.string.app_go_to_message));
 
         try {
+            if (goToMessageJson != null) {
+                goToMessage = BaseMessage.processMessage(new JSONObject(goToMessageJson));
+            }
             BaseMessage parentMessage = BaseMessage.processMessage(new JSONObject(rawMessage));
             viewModel.setParentMessage(parentMessage);
         } catch (JSONException e) {
@@ -123,6 +127,7 @@ public class ThreadMessageActivity extends AppCompatActivity {
             group = (Group) parentMessage.getReceiver();
         }
 
+        if (goToMessage != null) binding.messageList.gotoMessage(goToMessage.getId());
         binding.messageList.setParentMessage(parentMessage.getId());
         binding.messageComposer.setParentMessageId(parentMessage.getId());
         binding.threadHeader.setParentMessage(parentMessage);

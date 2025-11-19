@@ -211,6 +211,7 @@ public class CometChatTextBubble extends MaterialCardView {
                     message.getText(),
                     textFormatters != null ? textFormatters : new ArrayList<>()
             )));
+            linkPreviewContainer.setVisibility(GONE);
             editedTextView.setVisibility(message.getEditedAt() == 0 ? View.GONE : View.VISIBLE);
             HashMap<String, JSONObject> extensionList = Extensions.extensionCheck(message);
             if (extensionList != null) {

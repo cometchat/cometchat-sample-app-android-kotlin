@@ -213,4 +213,20 @@
     <string name="cometchat_no_conversations_history_subtitle">\'Yeni Sohbet\' butonuna tıklayarak sohbet başlatın</string>
     <string name="cometchat_new_chat">Yeni Sohbet</string>
     <string name="cometchat_chat_history">Sohbet Geçmişi</string>
+    <string name="cometchat_messages">Mesajlar</string>
+    <string name="cometchat_menu">Menü</string>
+    <string name="cometchat_menu_search">Ara</string>
+    <string name="cometchat_menu_conversation_summary">Sohbet Özeti</string>
+    <string name="cometchat_see_more">Daha Fazla Gör</string>
+    <string name="cometchat_no_results">Sonuç Yok</string>
+    <string name="cometchat_no_matches_found">Hiçbir eşleşme bulamadık. Lütfen farklı bir arama kelimesi deneyin.</string>
+    <string name="cometchat_start_your_search">Aramanızı Başlatın</string>
+    <string name="cometchat_search_for_conversations_or_messages">Yukarıya bir anahtar kelime yazarak sohbetler veya mesajlar arayın.</string>
+    <string name="cometchat_unread" translatable="true">Okunmadı</string>
+    <string name="cometchat_photos" translatable="true">Fotoğraflar</string>
+    <string name="cometchat_videos" translatable="true">Videolar</string>
+    <string name="cometchat_audio" translatable="true">Ses</string>
+    <string name="cometchat_documents" translatable="true">Belgeler</string>
+    <string name="cometchat_links" translatable="true">Bağlantılar</string>
+    <string name="cometchat_details" translatable="true">Detaylar</string>
 </resources>

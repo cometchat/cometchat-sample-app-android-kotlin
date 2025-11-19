@@ -25,6 +25,7 @@ import com.cometchat.chat.models.MessageReceipt;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageInformationBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
@@ -76,6 +77,7 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
     private MessageInformationAdapter adapter;
     private CometChatMessageTemplate template;
     private MessageInformationViewModel messageInformationViewModel;
+    private LifecycleOwner lifecycleOwner;
 
     private @StyleRes int titleTextAppearance;
     private @ColorInt int titleTextColor;
@@ -166,13 +168,15 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
      */
     private void initViewModel() {
         messageInformationViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageInformationViewModel.class);
+        lifecycleOwner = Utils.getLifecycleOwner(getContext());
+        if (lifecycleOwner == null) return;
         messageInformationViewModel.addListener();
-        messageInformationViewModel.getLiveListData().observe((LifecycleOwner) context, this::setList);
-        messageInformationViewModel.updateReceipt().observe((LifecycleOwner) context, this::notifyUpdateReceipt);
-        messageInformationViewModel.addReceipt().observe((LifecycleOwner) context, this::notifyAddReceipt);
-        messageInformationViewModel.exceptionMutableLiveData().observe((LifecycleOwner) context, this::showError);
-        messageInformationViewModel.clearList().observe((LifecycleOwner) context, this::clear);
-        messageInformationViewModel.getState().observe((LifecycleOwner) context, this::stateChangeObserver);
+        messageInformationViewModel.getLiveListData().observe(lifecycleOwner, this::setList);
+        messageInformationViewModel.updateReceipt().observe(lifecycleOwner, this::notifyUpdateReceipt);
+        messageInformationViewModel.addReceipt().observe(lifecycleOwner, this::notifyAddReceipt);
+        messageInformationViewModel.exceptionMutableLiveData().observe(lifecycleOwner, this::showError);
+        messageInformationViewModel.clearList().observe(lifecycleOwner, this::clear);
+        messageInformationViewModel.getState().observe(lifecycleOwner, this::stateChangeObserver);
         messageInformationViewModel.setMessage(message);
     }
 
@@ -433,10 +437,27 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
 
     @Override
     public void onDestroyView() {
+        try {
+            binding = null;
+            if (messageInformationViewModel != null) {
+                messageInformationViewModel.removeListener();
+            }
+            disposeObservers();
+            messageInformationViewModel = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDestroyView: " + e.getMessage());
+        }
         super.onDestroyView();
-        binding = null;
-        if (messageInformationViewModel != null) {
-            messageInformationViewModel.removeListener();
+    }
+
+    private void disposeObservers() {
+        if (lifecycleOwner != null) {
+            messageInformationViewModel.getLiveListData().removeObservers(lifecycleOwner);
+            messageInformationViewModel.updateReceipt().removeObservers(lifecycleOwner);
+            messageInformationViewModel.addReceipt().removeObservers(lifecycleOwner);
+            messageInformationViewModel.exceptionMutableLiveData().removeObservers(lifecycleOwner);
+            messageInformationViewModel.clearList().removeObservers(lifecycleOwner);
+            messageInformationViewModel.getState().removeObservers(lifecycleOwner);
         }
     }
 

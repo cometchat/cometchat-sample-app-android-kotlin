@@ -8,7 +8,9 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- VoIP -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--  VoIP  -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -42,6 +44,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="screenSize|orientation|keyboardHidden"/>
+        <activity
+            android:name=".ui.activity.SearchActivity"
+            android:exported="false" />
         <activity
             android:name=".fcm.IncomingCallActivity"
             android:exported="false"

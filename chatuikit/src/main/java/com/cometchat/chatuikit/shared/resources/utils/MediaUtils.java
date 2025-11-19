@@ -60,8 +60,6 @@ import java.util.Locale;
 public class MediaUtils {
     private static final String TAG = MediaUtils.class.getSimpleName();
 
-    private static Activity activity;
-
     public static String pictureImagePath;
 
     private static ProgressDialog mProgressDialog;
@@ -69,60 +67,6 @@ public class MediaUtils {
     private static BaseMessage baseMessage;
 
     public static Uri uri;
-
-    public static Intent getPickImageChooserIntent(Activity a) {
-        activity = a;
-        // Determine Uri of camera image to save.
-        Uri outputFileUri = getCaptureImageOutputUri();
-
-        List<Intent> allIntents = new ArrayList<>();
-        PackageManager packageManager = activity.getPackageManager();
-
-        // collect all camera intents
-        Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
-        for (ResolveInfo res : listCam) {
-            Intent intent = new Intent(captureIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            if (outputFileUri != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-            }
-            allIntents.add(intent);
-        }
-
-        // collect all gallery intents
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
-        for (ResolveInfo res : listGallery) {
-            Intent intent = new Intent(galleryIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            allIntents.add(intent);
-        }
-
-        // the main intent is the last in the list (fucking android) so pickup the
-        // useless one
-        Intent mainIntent = allIntents.get(allIntents.size() - 1);
-        for (Intent intent : allIntents) {
-            if (intent.getComponent() != null) {
-                if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
-                    mainIntent = intent;
-                    break;
-                }
-            }
-        }
-        allIntents.remove(mainIntent);
-
-        // Create a chooser from the main intent
-        Intent chooserIntent = Intent.createChooser(mainIntent, "Select source");
-
-        // Add all other intents
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[0]));
-
-        return chooserIntent;
-    }
 
     public static Intent getFileIntent() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -213,10 +157,9 @@ public class MediaUtils {
         return intent;
     }
 
-    public static Intent openAudio(Activity a) {
-        activity = a;
-        List<Intent> allIntents = new ArrayList();
-        PackageManager packageManager = activity.getPackageManager();
+    public static Intent openAudio(Context context) {
+        List<Intent> allIntents = new ArrayList<>();
+        PackageManager packageManager = context.getPackageManager();
         Intent audioIntent = new Intent(Intent.ACTION_GET_CONTENT);
         audioIntent.setType("audio/*");
         List<ResolveInfo> listGallery = packageManager.queryIntentActivities(audioIntent, 0);
@@ -258,30 +201,6 @@ public class MediaUtils {
         return pictureImagePath;
     }
 
-    public static File processImageIntentData(int resultCode, Intent data) {
-        Bitmap bitmap;
-        Uri picUri;
-        if (resultCode == Activity.RESULT_OK) {
-            if (getPickImageResultUri(data) != null) {
-                picUri = getPickImageResultUri(data);
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), picUri);
-                    return createFileFromBitmap(bitmap);
-                } catch (IOException e) {
-                    CometChatLogger.e(TAG, e.toString());
-                }
-            } else {
-                if (data.getExtras() != null) {
-                    bitmap = (Bitmap) data.getExtras().get("data");
-                    if (bitmap != null) {
-                        return createFileFromBitmap(bitmap);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     private static Uri getPickImageResultUri(@Nullable Intent data) {
         boolean isCamera = true;
         if (data != null) {
@@ -290,29 +209,6 @@ public class MediaUtils {
         }
 
         return isCamera ? getCaptureImageOutputUri() : data.getData();
-    }
-
-    private static File createFileFromBitmap(Bitmap bitmap) {
-        File f = new File(activity.getCacheDir(), String.valueOf(System.currentTimeMillis()));
-        try {
-            // Check if the file was successfully created
-            if (f.createNewFile()) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
-                byte[] bitmapData = bos.toByteArray();
-
-                FileOutputStream fos = new FileOutputStream(f);
-                fos.write(bitmapData);
-                fos.flush();
-                fos.close();
-            } else {
-                // Handle the case where the file could not be created
-                CometChatLogger.e(TAG, "Failed to create file: " + f.getAbsolutePath());
-            }
-        } catch (IOException e) {
-            CometChatLogger.e(TAG, e.toString());
-        }
-        return f;
     }
 
     public static File makeEmptyFileWithTitle(String title) {
@@ -667,29 +563,38 @@ public class MediaUtils {
     }
 
     private static void updateProgress(Context context, final int progress) {
-        ((Activity) context).runOnUiThread(() -> {
-            if (mProgressDialog != null) mProgressDialog.setProgress(progress);
-        });
+        Activity activity = Utils.getActivity(context);
+        if (Utils.isActivityUsable(activity)) {
+            activity.runOnUiThread(() -> {
+                if (mProgressDialog != null) mProgressDialog.setProgress(progress);
+            });
+        }
     }
 
     private static void handleDownloadSuccess(@NonNull Context context, String url, String mimeType, String Action, final File file) {
-        ((Activity) context).runOnUiThread(() -> {
-            if (mProgressDialog != null) mProgressDialog.dismiss();
-            if (UIKitConstants.files.OPEN.equals(Action)) {
-                openFile(url, context);
-            } else {
-                shareFile(mimeType, context, file);
-            }
-        });
+        Activity activity = Utils.getActivity(context);
+        if (Utils.isActivityUsable(activity)) {
+            activity.runOnUiThread(() -> {
+                if (mProgressDialog != null) mProgressDialog.dismiss();
+                if (UIKitConstants.files.OPEN.equals(Action)) {
+                    openFile(url, context);
+                } else {
+                    shareFile(mimeType, context, file);
+                }
+            });
+        }
     }
 
     private static void handleDownloadFailure(Context context) {
-        ((Activity) context).runOnUiThread(() -> {
-            if (mProgressDialog != null) mProgressDialog.dismiss();
-            // File download failed
-            // Handle the failure scenario
-            Toast.makeText(context, R.string.cometchat_file_download_failed, Toast.LENGTH_SHORT).show();
-        });
+        Activity activity = Utils.getActivity(context);
+        if (Utils.isActivityUsable(activity)) {
+            activity.runOnUiThread(() -> {
+                if (mProgressDialog != null) mProgressDialog.dismiss();
+                // File download failed
+                // Handle the failure scenario
+                Toast.makeText(context, R.string.cometchat_file_download_failed, Toast.LENGTH_SHORT).show();
+            });
+        }
     }
 
     private static void shareFile(String mimeType, Context context, File file) {

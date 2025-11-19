@@ -78,6 +78,7 @@ public class MessagesDataSource implements DataSource {
             if (baseMessage.getParentMessageId() == 0) {
                 if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getReplyInThreadOption(context));
             }
+            if (additionParameter.getReplyToMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getReplyToMessageOption(context));
             if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getShareOption(context));
             if (additionParameter.getCopyMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getCopyOption(context));
             if (_isCommon(baseMessage, group)) {
@@ -165,6 +166,13 @@ public class MessagesDataSource implements DataSource {
         return new CometChatMessageOption(UIKitConstants.MessageOption.MESSAGE_PRIVATELY,
                                           context.getString(R.string.cometchat_message_privately),
                                           R.drawable.cometchat_ic_send_message_privately,
+                                          null);
+    }
+
+    private CometChatMessageOption _getReplyToMessageOption(Context context) {
+        return new CometChatMessageOption(UIKitConstants.MessageOption.REPLY_TO_MESSAGE,
+                                          context.getString(R.string.cometchat_reply_to_message),
+                                          R.drawable.cometchat_ic_reply_to_message,
                                           null);
     }
 
@@ -748,6 +756,17 @@ public class MessagesDataSource implements DataSource {
             .setOptions((context, baseMessage, group) -> ChatConfigurator
                 .getDataSource()
                 .getTextMessageOptions(context, baseMessage, group, additionParameter))
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
+
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                    }
+                })
             .setContentView(new MessagesViewHolderListener() {
                 @Override
                 public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
@@ -1180,6 +1199,7 @@ public class MessagesDataSource implements DataSource {
                 if (baseMessage.getParentMessageId() == 0) {
                     if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyInThreadOption(context));
                 }
+                if (additionParameter.getReplyToMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyToMessageOption(context));
                 if (baseMessage instanceof TextMessage || baseMessage instanceof MediaMessage) {
                     if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getShareOption(context));
                 }
@@ -1191,6 +1211,9 @@ public class MessagesDataSource implements DataSource {
                         .getUid()
                         .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
                     if (additionParameter.getMessagePrivatelyOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessagePrivatelyOption(context));
+                }
+                if (_isCommon(baseMessage, group)) {
+                    if (additionParameter.getReplyToMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyToMessageOption(context));
                 }
             }
         }
@@ -1396,6 +1419,21 @@ public class MessagesDataSource implements DataSource {
         return _getTextFormatters(context);
     }
 
+    /**
+     * Returns the reply view container.
+     *
+     * @param context The context of the application.
+     * @return The reply view container.
+     */
+    @Override
+    public View getReplyViewContainer(Context context) {
+        return _getDefaultReplyViewContainer(context);
+    }
+
+    private View _getDefaultReplyViewContainer(Context context) {
+        return MessageBubbleUtils.getReplyViewContainer(context);
+    }
+
     private List<CometChatTextFormatter> _getTextFormatters(Context context) {
         CometChatMentionsFormatter cometchatMentionsFormatter = new CometChatMentionsFormatter(context);
         List<CometChatTextFormatter> list = new ArrayList<>();
@@ -1406,5 +1444,22 @@ public class MessagesDataSource implements DataSource {
     @Override
     public String getId() {
         return null;
+    }
+
+    /**
+     * Binds the reply view container with the provided message and other parameters.
+     *
+     * @param context           The context of the application.
+     * @param createdView       The created reply view container.
+     * @param message           The base message object.
+     * @param alignment         The message bubble alignment.
+     * @param holder            The RecyclerView ViewHolder.
+     * @param messageList       The list of base messages.
+     * @param position          The position of the message in the list.
+     * @param additionParameter Additional parameters for binding.
+     */
+    @Override
+    public void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter) {
+        MessageBubbleUtils.bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
     }
 }

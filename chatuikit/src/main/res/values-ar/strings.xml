@@ -211,4 +211,21 @@
     <string name="cometchat_chat_history">سجل الدردشة</string>
     <string name="cometchat_ask_anything">اسأل أي شيء</string>
     <string name="cometchat_something_went_wrong_try_again">حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى</string>
+    <string name="cometchat_messages">الرسائل</string>
+    <string name="cometchat_menu">القائمة</string>
+    <string name="cometchat_menu_search">بحث</string>
+    <string name="cometchat_menu_conversation_summary">ملخص المحادثة</string>
+    <string name="cometchat_see_more">عرض المزيد</string>
+    <string name="cometchat_no_results">لا توجد نتائج</string>
+    <string name="cometchat_no_matches_found">لم نتمكن من العثور على أي تطابقات. يرجى محاولة استخدام كلمة بحث مختلفة.</string>
+    <string name="cometchat_start_your_search">ابدأ بحثك</string>
+    <string name="cometchat_search_for_conversations_or_messages">ابحث عن المحادثات أو الرسائل عن طريق كتابة كلمة مفتاحية أعلاه.</string>
+    <string name="cometchat_unread" translatable="true">غير مقروء</string>
+    <string name="cometchat_photos" translatable="true">صور</string>
+    <string name="cometchat_videos" translatable="true">فيديوهات</string>
+    <string name="cometchat_audio" translatable="true">صوت</string>
+    <string name="cometchat_documents" translatable="true">مستندات</string>
+    <string name="cometchat_links" translatable="true">روابط</string>
+    <string name="cometchat_details" translatable="true">تفاصيل</string>
+
 </resources>

@@ -218,4 +218,20 @@ Vänligen försök igen.</string>
     <string name="cometchat_no_conversations_history_subtitle">Starta en chatt genom att trycka på knappen \'Ny chatt\'</string>
     <string name="cometchat_new_chat">Ny chatt</string>
     <string name="cometchat_chat_history">Chattens historik</string>
+    <string name="cometchat_messages">Meddelanden</string>
+    <string name="cometchat_menu">Meny</string>
+    <string name="cometchat_menu_search">Sök</string>
+    <string name="cometchat_menu_conversation_summary">Sammanfattning av konversation</string>
+    <string name="cometchat_see_more">Se mer</string>
+    <string name="cometchat_no_results">Inga resultat</string>
+    <string name="cometchat_no_matches_found">Vi kunde inte hitta några träffar. Försök med ett annat sökord.</string>
+    <string name="cometchat_start_your_search">Börja din sökning</string>
+    <string name="cometchat_search_for_conversations_or_messages">Sök efter konversationer eller meddelanden genom att skriva ett sökord ovan.</string>
+    <string name="cometchat_unread" translatable="true">Oläst</string>
+    <string name="cometchat_photos" translatable="true">Foton</string>
+    <string name="cometchat_videos" translatable="true">Videor</string>
+    <string name="cometchat_audio" translatable="true">Ljud</string>
+    <string name="cometchat_documents" translatable="true">Dokument</string>
+    <string name="cometchat_links" translatable="true">Länkar</string>
+    <string name="cometchat_details" translatable="true">Detaljer</string>
 </resources>

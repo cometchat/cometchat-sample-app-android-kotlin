@@ -87,6 +87,22 @@
         android:layout_gravity="center" />
 
     <LinearLayout
+        android:id="@+id/search_box_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/cometchat_padding_4"
+        android:paddingTop="@dimen/cometchat_padding_3"
+        android:paddingEnd="@dimen/cometchat_padding_4"
+        android:paddingBottom="@dimen/cometchat_padding_3">
+
+        <com.cometchat.chatuikit.shared.views.searchbox.CometChatSearchBox
+            android:id="@+id/search_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/empty_state_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

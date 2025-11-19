@@ -33,6 +33,7 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatOutgoingCallLayoutBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
@@ -57,6 +58,7 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     private OutgoingViewModel viewModel;
 
     private LifecycleOwner lifecycleOwner;
+    private Activity activity;
 
     private Call call;
     private User user;
@@ -130,13 +132,15 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
      */
     private void inflateAndInitializeView(Context context, AttributeSet attrs, int defStyleAttr) {
         Utils.initMaterialCard(this);
-        ((Activity) context).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        activity = Utils.getActivity(getContext());
         binding = CometchatOutgoingCallLayoutBinding.inflate(LayoutInflater.from(getContext()), this, true);
-
         initSensors(context);
         soundManager = new CometChatSoundManager(context);
         // Register the component as a LifecycleObserver
-        ((AppCompatActivity) context).getLifecycle().addObserver(this);
+        if (Utils.isActivityUsable(activity) && activity instanceof AppCompatActivity) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            ((AppCompatActivity) activity).getLifecycle().addObserver(this);
+        }
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OutgoingViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(context);
         if (lifecycleOwner == null) return;
@@ -195,7 +199,8 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         if (onBackPress != null) {
             onBackPress.onBack();
         } else {
-            ((Activity) getContext()).finish();
+            if (Utils.isActivityUsable(activity))
+                activity.finish();
         }
     }
 
@@ -208,7 +213,8 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
      */
     private void triggerError(CometChatException e) {
         if (onError == null) {
-            ((Activity) getContext()).finish();
+            if (Utils.isActivityUsable(activity))
+                activity.finish();
         } else {
             onError.onError(e);
         }
@@ -233,14 +239,15 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
 
     private void turnOffScreen() {
         if (getContext() instanceof Activity) {
-            Activity activity = (Activity) getContext();
-            PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-            if (powerManager != null) {
-                if (wakeLock == null) {
-                    wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "MyApp::ProximityWakeLock");
-                }
-                if (!wakeLock.isHeld()) {
-                    wakeLock.acquire();
+            if (Utils.isActivityUsable(activity)) {
+                PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+                if (powerManager != null) {
+                    if (wakeLock == null) {
+                        wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "MyApp::ProximityWakeLock");
+                    }
+                    if (!wakeLock.isHeld()) {
+                        wakeLock.acquire();
+                    }
                 }
             }
         }
@@ -643,20 +650,32 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
      */
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            if (activity != null) {
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                if (activity instanceof AppCompatActivity) ((AppCompatActivity) activity).getLifecycle().removeObserver(this);
+            }
+            viewModel.removeListeners();
+            soundManager.pauseSilently();
+            stopProximitySensor();
+            if (wakeLock != null && wakeLock.isHeld()) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+            disposeObservers();
+            activity = null;
+            viewModel = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        viewModel.removeListeners();
-        soundManager.pauseSilently();
-        stopProximitySensor();
+    private void disposeObservers() {
         if (getContext() instanceof AppCompatActivity) {
             ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
-        }
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-            wakeLock = null;
         }
         if (lifecycleOwner != null) {
             viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
@@ -664,10 +683,6 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
             viewModel.getException().removeObservers(lifecycleOwner);
             viewModel.getDisableEndCallButton().removeObservers(lifecycleOwner);
         }
-
-        viewModel = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 
     /**
@@ -741,7 +756,7 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     @Override
     public void onStop(@NonNull LifecycleOwner owner) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (((Activity) getContext()).isInPictureInPictureMode()) {
+            if (Utils.isActivityUsable(activity) && activity.isInPictureInPictureMode()) {
                 handlePiPExit();
             }
         }
@@ -750,7 +765,7 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     private void handlePiPExit() {
         viewModel.removeListeners();
         viewModel.rejectCall(call);
-        ((Activity) getContext()).finish();
+        activity.finish();
     }
 
     /**

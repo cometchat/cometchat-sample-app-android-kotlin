@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,6 +23,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.AIAssistantMessage;
@@ -32,6 +34,8 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.logger.CometChatLogger;
+import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.views.aiassistant.CometChatAIAssistantMessageBubble;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
@@ -51,6 +55,7 @@ import com.cometchat.chatuikit.shared.views.filebubble.CometChatFileBubble;
 import com.cometchat.chatuikit.shared.views.formbubble.CometChatFormBubble;
 import com.cometchat.chatuikit.shared.views.imagebubble.CometChatImageBubble;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
+import com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview;
 import com.cometchat.chatuikit.shared.views.messagereceipt.CometChatMessageReceipt;
 import com.cometchat.chatuikit.shared.views.messagereceipt.Receipt;
 import com.cometchat.chatuikit.shared.views.moderationview.CometChatModerationView;
@@ -61,11 +66,13 @@ import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionLongCl
 import com.cometchat.chatuikit.shared.views.schedulerbubble.CometChatSchedulerBubble;
 import com.cometchat.chatuikit.shared.views.textbubble.CometChatTextBubble;
 import com.cometchat.chatuikit.shared.views.videobubble.CometChatVideoBubble;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.card.MaterialCardView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class MessageBubbleUtils {
     private static final String TAG = MessageBubbleUtils.class.getSimpleName();
@@ -656,5 +663,64 @@ public class MessageBubbleUtils {
         });
 
         return optionButton;
+    }
+
+    public static View getReplyViewContainer(Context context) {
+        return LayoutInflater.from(context).inflate(R.layout.cometchat_message_preview_container, null);
+    }
+
+    public static void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter) {
+        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.message_preview_container_layout);
+        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+        if (messagePreview != null && message.getDeletedAt() == 0) {
+            BaseMessage quoteMessage = message.getQuotedMessage();
+            if (quoteMessage != null) {
+                messagePreview.setStyle(CometChatUIKit
+                        .getLoggedInUser()
+                        .getUid()
+                        .equals(message
+                                .getSender()
+                                .getUid()) ? additionParameter.getOutgoingReplyMessagePreviewStyle() : additionParameter.getIncomingReplyMessagePreviewStyle());
+                messagePreview.setCloseIconVisibility(View.GONE);
+                messagePreview.setVisibility(View.VISIBLE);
+                messagePreview.setOnMessagePreviewClickListener(() -> {
+                    if (additionParameter.getOnMessagePreviewClick() != null) {
+                        additionParameter.getOnMessagePreviewClick().click(createdView, position, quoteMessage);
+                    }
+                });
+                if (quoteMessage instanceof TextMessage) {
+                    String messageText = ((TextMessage) quoteMessage).getText();
+                    if (messageText != null && messageText.length() > 20) {
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                    } else {
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+
+                        messagePreview.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
+                        flexboxLayout.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
+                        parent.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
+                    }
+                }
+                messagePreview.setMessage(context, quoteMessage, messagePreview, additionParameter.getTextFormatters());
+            } else {
+                messagePreview.setVisibility(View.GONE);
+            }
+        } else {
+            if (messagePreview != null)
+                messagePreview.setVisibility(View.GONE);
+        }
     }
 }

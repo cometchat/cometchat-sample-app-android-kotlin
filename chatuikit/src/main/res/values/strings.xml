@@ -30,7 +30,7 @@
     <string name="cometchat_copy" translatable="true">Copy</string>
     <string name="cometchat_translate" translatable="true">Translate</string>
     <string name="cometchat_message_privately" translatable="true">Message Privately</string>
-    <string name="cometchat_reply_uppercase" translatable="true">Reply</string>
+    <string name="cometchat_reply_uppercase" translatable="true">Reply In Thread</string>
     <string name="cometchat_info" translatable="true">"Info"</string>
     <string name="cometchat_online" translatable="true">Online</string>
     <string name="cometchat_offline" translatable="true">Offline</string>
@@ -216,4 +216,25 @@
     <string name="cometchat_thinking" translatable="false">Thinking...</string>
     <string name="cometchat_ask_anything" translatable="true">Ask anything…</string>
     <string name="cometchat_something_went_wrong_try_again" translatable="true">Something went wrong on our end. Please try again. </string>
+    <string name="cometchat_reply_to_message" translatable="true">Reply</string>
+    <string name="cometchat_meeting">Meeting</string>
+    <string name="cometchat_messages">Messages</string>
+
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Search</string>
+    <string name="cometchat_menu_conversation_summary">Conversation Summary</string>
+    <string name="cometchat_see_more">See More</string>
+    <string name="cometchat_no_results">No Results</string>
+    <string name="cometchat_no_matches_found">We couldn’t find any matches.\nPlease try a different search keyword.</string>
+    <string name="cometchat_start_your_search">Start Your Search</string>
+    <string name="cometchat_search_for_conversations_or_messages">Search for conversations or messages by typing a keyword above.</string>
+
+    <string name="cometchat_unread" translatable="true">Unread</string>
+    <string name="cometchat_photos" translatable="true">Photos</string>
+    <string name="cometchat_videos" translatable="true">Videos</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Documents</string>
+    <string name="cometchat_links" translatable="true">Links</string>
+    <string name="cometchat_details" translatable="true">Details</string>
+    <string name="cometchat_search_in" translatable="true">Search in</string>
 </resources>

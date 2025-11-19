@@ -220,4 +220,20 @@
     <string name="cometchat_no_conversations_history_subtitle">Начните чат, нажав кнопку \'Новый чат\'</string>
     <string name="cometchat_new_chat">Новый чат</string>
     <string name="cometchat_chat_history">История чатов</string>
+    <string name="cometchat_messages">Сообщения</string>
+    <string name="cometchat_menu">Меню</string>
+    <string name="cometchat_menu_search">Поиск</string>
+    <string name="cometchat_menu_conversation_summary">Резюме разговора</string>
+    <string name="cometchat_see_more">Показать больше</string>
+    <string name="cometchat_no_results">Нет результатов</string>
+    <string name="cometchat_no_matches_found">Мы не смогли найти совпадений. Попробуйте использовать другое ключевое слово.</string>
+    <string name="cometchat_start_your_search">Начните свой поиск</string>
+    <string name="cometchat_search_for_conversations_or_messages">Ищите разговоры или сообщения, введя ключевое слово выше.</string>
+    <string name="cometchat_unread" translatable="true">Не прочитано</string>
+    <string name="cometchat_photos" translatable="true">Фотографии</string>
+    <string name="cometchat_videos" translatable="true">Видео</string>
+    <string name="cometchat_audio" translatable="true">Аудио</string>
+    <string name="cometchat_documents" translatable="true">Документы</string>
+    <string name="cometchat_links" translatable="true">Ссылки</string>
+    <string name="cometchat_details" translatable="true">Детали</string>
 </resources>

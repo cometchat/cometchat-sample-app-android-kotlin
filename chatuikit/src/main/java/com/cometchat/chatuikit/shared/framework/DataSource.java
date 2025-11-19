@@ -360,10 +360,33 @@ public interface DataSource {
     List<CometChatTextFormatter> getTextFormatters(Context context, @NonNull AdditionParameter additionParameter);
 
     /**
+     * Returns the reply view container.
+     *
+     * @param context The context of the application.
+     * @return The reply view container.
+     */
+    View getReplyViewContainer(Context context);
+
+
+    /**
      * Returns the ID of the data source.
      *
      * @return The ID of the data source.
      */
     @Nullable
     String getId();
+
+    /**
+     * Binds the reply view container with the provided message and other parameters.
+     *
+     * @param context        The context of the application.
+     * @param createdView    The created reply view container.
+     * @param message        The base message object.
+     * @param alignment      The message bubble alignment.
+     * @param holder         The RecyclerView ViewHolder.
+     * @param messageList    The list of base messages.
+     * @param position       The position of the message in the list.
+     * @param additionParameter Additional parameters for binding.
+     */
+    void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter);
 }

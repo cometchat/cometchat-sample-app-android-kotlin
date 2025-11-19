@@ -213,4 +213,20 @@
     <string name="cometchat_no_conversations_history_subtitle">\'新しいチャット\' ボタンをタップしてチャットを開始します</string>
     <string name="cometchat_new_chat">新しいチャット</string>
     <string name="cometchat_chat_history">チャット履歴</string>
+    <string name="cometchat_messages">メッセージ</string>
+    <string name="cometchat_menu">メニュー</string>
+    <string name="cometchat_menu_search">検索</string>
+    <string name="cometchat_menu_conversation_summary">会話の要約</string>
+    <string name="cometchat_see_more">さらに見る</string>
+    <string name="cometchat_no_results">結果がありません</string>
+    <string name="cometchat_no_matches_found">一致する結果は見つかりませんでした。別の検索キーワードをお試しください。</string>
+    <string name="cometchat_start_your_search">検索を開始</string>
+    <string name="cometchat_search_for_conversations_or_messages">上にキーワードを入力して、会話やメッセージを検索します。</string>
+    <string name="cometchat_unread" translatable="true">未読</string>
+    <string name="cometchat_photos" translatable="true">写真</string>
+    <string name="cometchat_videos" translatable="true">ビデオ</string>
+    <string name="cometchat_audio" translatable="true">オーディオ</string>
+    <string name="cometchat_documents" translatable="true">ドキュメント</string>
+    <string name="cometchat_links" translatable="true">リンク</string>
+    <string name="cometchat_details" translatable="true">詳細</string>
 </resources>

@@ -200,9 +200,11 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
             Utils.hideKeyBoard(context, view1);
 
             // Clear edit text focus if it still has
-            View currentFocus = ((Activity) context).getCurrentFocus();
-            if (currentFocus != null && currentFocus.getId() == R.id.cometchat_compose_box) {
-                currentFocus.clearFocus();
+            if (context instanceof Activity) {
+                View currentFocus = ((Activity) context).getCurrentFocus();
+                if (currentFocus != null && currentFocus.getId() == R.id.cometchat_compose_box) {
+                    currentFocus.clearFocus();
+                }
             }
 
             CometChatStickerKeyboard stickerKeyboard = getStickerKeyboard(context,

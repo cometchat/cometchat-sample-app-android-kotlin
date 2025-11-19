@@ -1,0 +1,370 @@
+[
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_users.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_users.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_join_password_group_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/join_password_group_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_group_members_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/group_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_overflow_menu_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/overflow_menu_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_start_conversation.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_start_conversation.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_tab_layout_background_active.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/tab_layout_background_active.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_curved_button_drawable.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/curved_button_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_info.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_info.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_leave_group.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_leave_group.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_chats.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_call_details_history_items.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/call_details_history_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_new_chat.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_new_chat.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_fragment_calls.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/fragment_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_select_radio_button_drawable.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/select_radio_button_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_notification_user_placeholder.png.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_notification_user_placeholder.png"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_call_details.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_call_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_users.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_users.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_user_profile.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_user_profile.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_chats.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_google_logo.png.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_google_logo.png"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_cometchat_logo.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_cometchat_logo.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_bottom_bar_groups.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_bottom_bar_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_user_details.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_user_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_play_recording.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_play_recording.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_call_details_participants_items.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/call_details_participants_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_notification_group_placeholder.png.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_notification_group_placeholder.png"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_banned_member_row.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/banned_member_row.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_cometchat_notification.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_cometchat_notification.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_fragment_call_details_tab.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/fragment_call_details_tab.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_incoming_call.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_incoming_call.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_custom_toast.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/custom_toast.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_call_details_recordings_items.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/call_details_recordings_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_messages.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_messages.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_splash.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_logout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_logout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_reply.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_reply.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_cometchat_logo.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_cometchat_logo.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_thread_message.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_thread_message.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_selector_radio_text_color.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/selector_radio_text_color.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_google_login.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_google_login.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable-night_ic_calls.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable-night/ic_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_rounded_edittext.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/rounded_edittext.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_fragment_groups.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/fragment_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_fragment_users.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/fragment_users.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_download_recording.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_download_recording.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_fragment_chats.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/fragment_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_flag_india.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_flag_india.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_add_members_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/add_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_dialog_feedback.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/dialog_feedback.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_banned_member_custom_view.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/banned_member_custom_view.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_app_credentials.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_app_credentials.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_home.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_logout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_logout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_user.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_user.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_flag_eu.png.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_flag_eu.png"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_delete.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_group_details.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_group_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_search.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_search.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_calls.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_create_group_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/create_group_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_sample_user_selection.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_sample_user_selection.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_tab_layout_bg.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/tab_layout_bg.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_banned_members.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_banned_members.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_banned_members_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/banned_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_bottom_bar_groups.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_bottom_bar_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_sample_user_items.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/sample_user_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_group.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_group.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_activity_login.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_toggle_widget_drawable.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/toggle_widget_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_user_profile_popup_menu_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/user_profile_popup_menu_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/layout_transfer_ownership_layout.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/layout/transfer_ownership_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_create_group.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_create_group.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_tab_background_state.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/tab_background_state.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-debug-58:/drawable_ic_flag_us.xml.flat",
+        "source": "com.cometchat.sampleapp.java.fcm.sample-app-java+push-notification-main-60:/drawable/ic_flag_us.xml"
+    }
+]

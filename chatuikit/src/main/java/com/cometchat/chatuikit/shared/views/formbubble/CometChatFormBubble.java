@@ -1,5 +1,6 @@
 package com.cometchat.chatuikit.shared.views.formbubble;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -102,6 +103,8 @@ public class CometChatFormBubble extends MaterialCardView {
     private MaterialCardView formCard;
     private QuickViewStyle quickViewStyle;
 
+    private Activity activity;
+
     public CometChatFormBubble(Context context) {
         super(context);
         init(context);
@@ -109,6 +112,7 @@ public class CometChatFormBubble extends MaterialCardView {
 
     private void init(Context context) {
         this.context = context;
+        activity = Utils.getActivity(context);
         responseJsonArray = new JSONArray();
         baseInputElements = new ArrayList<>();
         validateViews = new HashMap<>();
@@ -294,7 +298,7 @@ public class CometChatFormBubble extends MaterialCardView {
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
             if (elementEntity.getMode().equals(UIKitConstants.DateTimeMode.DATE_TIME)) {
-                if (!timePicker.isAdded())
+                if (!timePicker.isAdded() && Utils.isActivityUsable(activity) && activity instanceof FragmentActivity)
                     timePicker.show(((FragmentActivity) context).getSupportFragmentManager(), "TIME_PICKER");
             } else {
                 textInputEditText.setText(Utils.getDateFormat(elementEntity).format(selection));
@@ -334,11 +338,11 @@ public class CometChatFormBubble extends MaterialCardView {
 
         textInputEditText.setOnClickListener(view1 -> {
             if (!elementEntity.getMode().equals(UIKitConstants.DateTimeMode.TIME)) {
-                if (!datePicker.isAdded())
+                if (!datePicker.isAdded() && Utils.isActivityUsable(activity) && activity instanceof FragmentActivity)
                     datePicker.show(((FragmentActivity) context).getSupportFragmentManager(), "DATE_PICKER");
             } else {
-                if (!timePicker.isAdded())
-                    timePicker.show(((FragmentActivity) context).getSupportFragmentManager(), "TIME_PICKER");
+                if (!timePicker.isAdded() && Utils.isActivityUsable(activity) && activity instanceof FragmentActivity)
+                    timePicker.show(((FragmentActivity) activity).getSupportFragmentManager(), "TIME_PICKER");
             }
         });
 

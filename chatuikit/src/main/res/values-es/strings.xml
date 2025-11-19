@@ -218,4 +218,20 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_no_conversations_history_subtitle">Comienza un chat tocando el botón \'Nueva conversación\'</string>
     <string name="cometchat_new_chat">Nueva conversación</string>
     <string name="cometchat_chat_history">Historial de chat</string>
+    <string name="cometchat_messages">Mensajes</string>
+    <string name="cometchat_menu">Menú</string>
+    <string name="cometchat_menu_search">Buscar</string>
+    <string name="cometchat_menu_conversation_summary">Resumen de la conversación</string>
+    <string name="cometchat_see_more">Ver más</string>
+    <string name="cometchat_no_results">Sin resultados</string>
+    <string name="cometchat_no_matches_found">No pudimos encontrar ninguna coincidencia. Intente usar una palabra clave de búsqueda diferente.</string>
+    <string name="cometchat_start_your_search">Inicia tu búsqueda</string>
+    <string name="cometchat_search_for_conversations_or_messages">Busca conversaciones o mensajes escribiendo una palabra clave arriba.</string>
+    <string name="cometchat_unread" translatable="true">No leído</string>
+    <string name="cometchat_photos" translatable="true">Fotos</string>
+    <string name="cometchat_videos" translatable="true">Videos</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Documentos</string>
+    <string name="cometchat_links" translatable="true">Enlaces</string>
+    <string name="cometchat_details" translatable="true">Detalles</string>
 </resources>

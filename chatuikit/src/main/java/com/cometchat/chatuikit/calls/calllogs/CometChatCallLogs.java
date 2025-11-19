@@ -27,6 +27,7 @@ import com.cometchat.calls.model.CallLog;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCallLogsBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
@@ -588,13 +589,21 @@ public class CometChatCallLogs extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            callLogsViewModel.getCallsArrayList().clear();
+            dispose();
+            callLogsViewModel = null;
+            callLogsAdapter = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "Error while detaching from window: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
     private void dispose() {
-        callLogsViewModel.getCallsArrayList().clear();
-        if (lifecycleOwner != null) {
+        if (lifecycleOwner != null && callLogsViewModel != null) {
             callLogsViewModel.getMutableCallsList().removeObservers(lifecycleOwner);
             callLogsViewModel.getStates().removeObservers(lifecycleOwner);
             callLogsViewModel.insertAtTop().removeObservers(lifecycleOwner);
@@ -604,10 +613,6 @@ public class CometChatCallLogs extends MaterialCardView {
             callLogsViewModel.getInitiatedCall().removeObservers(lifecycleOwner);
             callLogsViewModel.getCometChatException().removeObservers(lifecycleOwner);
         }
-        callLogsViewModel = null;
-        callLogsAdapter = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 
     /**

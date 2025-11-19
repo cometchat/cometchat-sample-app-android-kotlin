@@ -29,6 +29,7 @@ import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CometChatOngoingCallActivity;
 import com.cometchat.chatuikit.databinding.CometchatIncomingCallComponentBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManager;
@@ -84,7 +85,10 @@ public class CometChatIncomingCall extends MaterialCardView {
 
     private void init(AttributeSet attrs, int defStyleAttr) {
         binding = CometchatIncomingCallComponentBinding.inflate(LayoutInflater.from(getContext()), this, true);
-        ((Activity) getContext()).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Activity activity = Utils.getActivity(getContext());
+        if (Utils.isActivityUsable(activity)) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         Utils.initMaterialCard(this);
         soundManager = new CometChatSoundManager(getContext());
         // Initialize ViewModel and observe call state
@@ -543,21 +547,25 @@ public class CometChatIncomingCall extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            viewModel.removeListeners();
+            pauseSound();
+            dispose();
+            viewModel = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(CometChatIncomingCall.class.getSimpleName(), "onDetachedFromWindow: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
     private void dispose() {
-        viewModel.removeListeners();
-        pauseSound();
-        if (lifecycleOwner != null) {
+        if (lifecycleOwner != null && viewModel != null) {
             viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
             viewModel.getRejectCall().removeObservers(lifecycleOwner);
             viewModel.getException().removeObservers(lifecycleOwner);
         }
-        viewModel = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 
     /**

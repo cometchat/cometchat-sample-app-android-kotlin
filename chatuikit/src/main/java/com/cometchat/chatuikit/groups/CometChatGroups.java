@@ -38,8 +38,6 @@ import com.cometchat.chatuikit.shared.interfaces.OnLoad;
 import com.cometchat.chatuikit.shared.interfaces.OnSelection;
 import com.cometchat.chatuikit.shared.models.CometChatOption;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.ClickListener;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.RecyclerTouchListener;
 import com.cometchat.chatuikit.shared.viewholders.GroupsViewHolderListener;
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
 import com.cometchat.chatuikit.shared.views.searchbox.CometChatSearchBox;
@@ -1625,13 +1623,21 @@ public class CometChatGroups extends MaterialCardView {
      */
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            groupsViewModel.removeListeners();
+            disposeObservers();
+            groupsViewModel = null;
+            groupsAdapter = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, e.toString());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        groupsViewModel.removeListeners();
-        if (lifecycleOwner != null) {
+    private void disposeObservers() {
+        if (groupsViewModel != null && lifecycleOwner != null) {
             groupsViewModel.getMutableGroupsList().removeObservers(lifecycleOwner);
             groupsViewModel.getStates().removeObservers(lifecycleOwner);
             groupsViewModel.insertAtTop().removeObservers(lifecycleOwner);
@@ -1640,10 +1646,6 @@ public class CometChatGroups extends MaterialCardView {
             groupsViewModel.removeGroup().removeObservers(lifecycleOwner);
             groupsViewModel.getCometChatException().removeObservers(lifecycleOwner);
         }
-        groupsViewModel = null;
-        groupsAdapter = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 
     /**

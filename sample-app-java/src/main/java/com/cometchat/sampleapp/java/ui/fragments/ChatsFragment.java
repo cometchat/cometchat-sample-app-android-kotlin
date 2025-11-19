@@ -34,6 +34,7 @@ import com.cometchat.sampleapp.java.data.repository.Repository;
 import com.cometchat.sampleapp.java.databinding.FragmentChatsBinding;
 import com.cometchat.sampleapp.java.databinding.UserProfilePopupMenuLayoutBinding;
 import com.cometchat.sampleapp.java.ui.activity.MessagesActivity;
+import com.cometchat.sampleapp.java.ui.activity.SearchActivity;
 import com.cometchat.sampleapp.java.ui.activity.SplashActivity;
 import com.cometchat.sampleapp.java.utils.MyApplication;
 import com.google.gson.Gson;
@@ -94,6 +95,10 @@ public class ChatsFragment extends Fragment {
         // Set the overflow menu (Logout button) in the Conversations view
         binding.cometchatConversations.setOverflowMenu(getLogoutView());
 
+        binding.cometchatConversations.setOnSearchClickListener(() -> {
+            Intent intent = new Intent(getContext(), SearchActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override

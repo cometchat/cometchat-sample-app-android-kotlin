@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/cometchatBackgroundColor1"
+    android:fitsSystemWindows="true"
+    tools:context="ui.activity.HomeActivity">
+
+    <LinearLayout
+        android:id="@+id/fragment_parent_layout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/view_separator_nav_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_1dp" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view_separator_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cometchat_1dp"
+        android:layout_gravity="center"
+        android:background="?attr/cometchatStrokeColorLight"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_container"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parent_layout" />
+
+    <FrameLayout
+        android:id="@+id/bottom_navigation_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_70dp"
+            android:background="?attr/cometchatBackgroundColor1"
+            android:fitsSystemWindows="true"
+            app:background="@android:color/transparent"
+            app:elevation="0dp"
+            app:itemHorizontalTranslationEnabled="false"
+            app:itemIconSize="@dimen/cometchat_32dp"
+            app:itemPaddingBottom="@dimen/cometchat_10dp"
+            app:itemPaddingTop="@dimen/cometchat_padding_3"
+            app:itemRippleColor="@android:color/transparent"
+            app:itemTextAppearanceActive="?attr/cometchatTextAppearanceCaption1Medium"
+            app:itemTextAppearanceInactive="?attr/cometchatTextAppearanceCaption1Regular"
+            app:menu="@menu/bottom_nav_menu" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

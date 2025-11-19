@@ -10,6 +10,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
@@ -17,9 +18,12 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
+import com.cometchat.chatuikit.logger.CometChatLogger
+import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
 import com.cometchat.chatuikit.shared.resources.utils.Utils
+import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.databinding.OverflowMenuLayoutBinding
@@ -27,14 +31,20 @@ import com.cometchat.sampleapp.kotlin.utils.AppConstants
 import com.cometchat.sampleapp.kotlin.utils.MyApplication
 import com.cometchat.sampleapp.kotlin.viewmodels.MessagesViewModel
 import com.google.gson.Gson
+import org.json.JSONException
+import org.json.JSONObject
 import kotlin.math.max
 
 class MessagesActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "MessagesActivity"
+    }
     private var user: User? = null
     private var group: Group? = null
     private var baseMessage: BaseMessage? = null
     private lateinit var viewModel: MessagesViewModel
     private lateinit var binding: ActivityMessagesBinding
+    private var goToMessage: BaseMessage? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +58,19 @@ class MessagesActivity : AppCompatActivity() {
         // Create an instance of the MessagesViewModel
         viewModel = ViewModelProvider.NewInstanceFactory().create(MessagesViewModel::class.java)
 
-        // Deserialize the user and group data from the Intent
-        user = Gson().fromJson(intent.getStringExtra(getString(R.string.app_user)), User::class.java)
-
+        // Deserialize group data from the Intent
         group = Gson().fromJson(intent.getStringExtra(getString(R.string.app_group)), Group::class.java)
+        try {
+            val rawParentMessage = intent.getStringExtra(getString(R.string.app_base_message))
+            val rawGoToMessage = intent.getStringExtra(getString(R.string.app_go_to_message))
+            val userJson = intent.getStringExtra(getString(R.string.app_user))
+            if (rawGoToMessage != null)
+                goToMessage = BaseMessage.processMessage(JSONObject(rawGoToMessage))
+            if (userJson != null)
+                user = User.fromJson(JSONObject(userJson).toString())
+        } catch (e: JSONException) {
+            CometChatLogger.e(TAG, e.message)
+        }
 
         MyApplication.currentOpenChatId = if (group != null) group!!.guid else user?.uid
 
@@ -83,8 +102,6 @@ class MessagesActivity : AppCompatActivity() {
 
         // Initialize UI components
         addViews()
-        setOverFlowMenu()
-
         // Set click listener for the unblock button
         binding.unblockBtn.setOnClickListener { view: View? -> viewModel.unblockUser() }
 
@@ -99,6 +116,65 @@ class MessagesActivity : AppCompatActivity() {
             intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString())
             context.startActivity(intent)
         }
+
+        if (!Utils.isAgentChat(user))
+            setUpMessageHeaderMenu()
+    }
+
+    private fun setUpMessageHeaderMenu() {
+        val options = getHeaderMenuOptions()
+        binding.messageHeader.options = options
+        binding.messageHeader.setPopupMenuStyle(R.style.CustomHeaderPopUpMenuStyle)
+    }
+
+    private fun getHeaderMenuOptions(): List<CometChatPopupMenu.MenuItem> {
+        val options = mutableListOf<CometChatPopupMenu.MenuItem>()
+        options.add(
+            CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.SEARCH,
+                getString(com.cometchat.chatuikit.R.string.cometchat_menu_search),
+                AppCompatResources.getDrawable(this@MessagesActivity, com.cometchat.chatuikit.R.drawable.cometchat_ic_search),
+                null,
+            ) { navigateToSearchActivity() }
+        )
+        options.add(
+            CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.CONVERSATION_SUMMARY,
+                getString(com.cometchat.chatuikit.R.string.cometchat_menu_conversation_summary),
+                AppCompatResources.getDrawable(
+                    this@MessagesActivity,
+                    com.cometchat.chatuikit.R.drawable.cometchat_ic_menu_conversation_summary
+                ),
+                null
+            ) { generateConversationSummary() }
+        )
+        options.add(
+            CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.DETAILS,
+                getString(com.cometchat.chatuikit.R.string.cometchat_details),
+                AppCompatResources.getDrawable(this@MessagesActivity, R.drawable.ic_info),
+                null
+            ) {
+                openDetailScreen()
+            }
+        )
+
+        return options
+    }
+
+    private fun generateConversationSummary() {
+        binding.messageList.generateConversationSummary()
+    }
+
+    private fun navigateToSearchActivity() {
+        val intent = Intent(this, SearchActivity::class.java)
+        intent.putExtra("isFromMessageScreen", true)
+        if (user != null)
+            intent.putExtra(getString(R.string.app_user), user?.toJson().toString())
+        else
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+        startActivity(intent)
+        finish()
     }
 
     private fun setUpTheme() {
@@ -240,13 +316,13 @@ class MessagesActivity : AppCompatActivity() {
                 linearLayout.addView(overflowMenuLayoutBinding.getRoot())
             }
 
-            overflowMenuLayoutBinding.ivMenu.setOnClickListener({ view1 -> openDetailScreen(group) })
+            overflowMenuLayoutBinding.ivMenu.setOnClickListener { view1 -> openDetailScreen() }
             linearLayout
         }
     }
 
     /** Opens the detail screen for the selected user or group.  */
-    private fun openDetailScreen(group: Group?) {
+    private fun openDetailScreen() {
         var intent: Intent? = null
         if (user != null) {
             intent = Intent(this, UserDetailsActivity::class.java)
@@ -263,6 +339,7 @@ class MessagesActivity : AppCompatActivity() {
     /** Initializes UI components */
     private fun addViews() {
         // Set user or group data to the message header and composer
+        if (goToMessage != null) binding.messageList.gotoMessage(goToMessage!!.id)
         if (user != null) {
             binding.messageHeader.user = user!!
             binding.messageList.user = user

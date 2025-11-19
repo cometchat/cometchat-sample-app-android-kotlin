@@ -61,6 +61,12 @@
                 android:layout_margin="@dimen/cometchat_margin_1"
                 android:visibility="gone" />
 
+            <com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview
+                android:id="@+id/message_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
             <LinearLayout
                 android:id="@+id/tag_info_parent_lay"
                 android:layout_width="match_parent"

@@ -56,6 +56,8 @@
 
         <attr name="cometchatMessageInputStyle" />
 
+        <attr name="cometChatMessagePreviewStyle" />
+
         <attr name="cometchatMessageComposerMentionsStyle" format="reference" />
 
         <attr name="cometchatMessageComposerAuxiliaryButtonIconTint" format="color" />

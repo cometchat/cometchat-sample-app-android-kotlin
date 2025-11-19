@@ -22,6 +22,7 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageHeaderBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
@@ -32,10 +33,12 @@ import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.models.AdditionParameter;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
+import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
 import com.cometchat.chatuikit.shared.views.statusindicator.StatusIndicator;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,6 +64,7 @@ public class CometChatMessageHeader extends MaterialCardView {
     private @ColorInt int titleTextColor;
     private @ColorInt int subtitleTextColor;
     private @ColorInt int backIconTint;
+    private @ColorInt int menuIconTint;
     private @ColorInt int backgroundColor;
     private @ColorInt int strokeColor;
     private @ColorInt int newChatIconTint;
@@ -76,6 +80,7 @@ public class CometChatMessageHeader extends MaterialCardView {
     private Drawable newChatIcon;
     private Drawable chatHistoryIcon;
     private Drawable backIcon;
+    private Drawable menuIcon;
     private AdditionParameter additionParameter;
     private OnError onError;
     private int backButtonVisibility = GONE;
@@ -85,11 +90,15 @@ public class CometChatMessageHeader extends MaterialCardView {
     private int voiceCallButtonVisibility = VISIBLE;
     private int newChatButtonVisibility = VISIBLE;
     private int chatHistoryButtonVisibility = VISIBLE;
+    private int menuIconVisibility = VISIBLE;
     private DateTimeFormatterCallback dateTimeFormatter;
+    private CometChatPopupMenu cometchatPopUpMenu;
+    private List<CometChatPopupMenu.MenuItem> options;
 
     private OnClick onChatHistoryButtonClick;
     private OnClick onNewChatButtonClick;
     private boolean isAgentChat = false;
+    private @StyleRes int popUpMenuStyle;
 
     /**
      * Constructs a new CometChatMessageHeader with a given context.
@@ -140,6 +149,7 @@ public class CometChatMessageHeader extends MaterialCardView {
         Utils.initMaterialCard(this);
         // setting addition parameter for data source
         additionParameter = new AdditionParameter();
+        cometchatPopUpMenu = new CometChatPopupMenu(getContext(), 0);
         // Init ViewModel
         init();
         // Apply style attributes
@@ -164,7 +174,44 @@ public class CometChatMessageHeader extends MaterialCardView {
         });
         messageHeaderViewModel.getTyping().observe(lifecycleOwner, this::setTypingIndicator);
         configureBackIcon();
+        configureMenuIcon();
         aiAssistantButtonClickListeners();
+    }
+
+    private void configureMenuIcon() {
+        binding.messageHeaderMenuIcon.setOnClickListener(view -> {
+            preparePopupMenu();
+        });
+    }
+
+    private void preparePopupMenu() {
+        if (options != null && !options.isEmpty()) {
+            cometchatPopUpMenu.setMenuItems(options);
+            cometchatPopUpMenu.setStyle(popUpMenuStyle);
+            cometchatPopUpMenu.show(binding.parentLayout);
+            cometchatPopUpMenu.setOnMenuItemClickListener((id, name) -> cometchatPopUpMenu.dismiss());
+        } else {
+            cometchatPopUpMenu.dismiss();
+        }
+    }
+
+    /** Gets the options set for the message header menu.
+     *
+     * @return A list of CometChatPopupMenu.MenuItem representing the options in the menu.
+     */
+    public List<CometChatPopupMenu.MenuItem> getOptions() {
+        return options;
+    }
+
+    /**
+     * Sets the options for the message header menu.
+     *
+     * @param options A list of CometChatPopupMenu.MenuItem to be displayed in the menu.
+     */
+    public void setOptions(List<CometChatPopupMenu.MenuItem> options) {
+        this.options = options;
+        if (options != null) setMenuIconVisibility(VISIBLE);
+        else setMenuIconVisibility(GONE);
     }
 
     private void aiAssistantButtonClickListeners() {
@@ -243,7 +290,10 @@ public class CometChatMessageHeader extends MaterialCardView {
         binding.ivMessageHeaderBack.setOnClickListener(view -> {
             if (onBackPress != null) onBackPress.onBack();
             else {
-                ((Activity) getContext()).onBackPressed();
+                Activity activity = Utils.getActivity(getContext());
+                if (Utils.isActivityUsable(activity)) {
+                    activity.onBackPressed();
+                }
             }
         });
     }
@@ -340,6 +390,8 @@ public class CometChatMessageHeader extends MaterialCardView {
             newChatIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderNewChatButtonIconTint, CometChatTheme.getIconTintSecondary(getContext()));
             chatHistoryIcon = typedArray.getDrawable(R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryButtonIcon);
             chatHistoryIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryButtonIconTint, CometChatTheme.getIconTintSecondary(getContext()));
+            menuIcon = typedArray.getDrawable(R.styleable.CometChatMessageHeader_cometchatMessageHeaderMenuIcon);
+            menuIconTint = typedArray.getColor(R.styleable.CometChatMessageHeader_cometchatMessageHeaderMenuIconTint, CometChatTheme.getIconTintPrimary(getContext()));
             // Apply default styles
             applyDefault();
         } finally {
@@ -365,6 +417,8 @@ public class CometChatMessageHeader extends MaterialCardView {
         setTypingIndicatorStyle(typingIndicatorStyle);
         setCallButtonsStyle(callButtonsStyle);
         setBackButtonView(backIcon);
+        setMenuIcon(menuIcon);
+        setMenuIconTint(menuIconTint);
         setNewChatIcon(newChatIcon);
         setNewChatIconTint(newChatIconTint);
         setChatHistoryIcon(chatHistoryIcon);
@@ -397,23 +451,31 @@ public class CometChatMessageHeader extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            messageHeaderViewModel.removeListeners();
+            disposeObservers();
+            messageHeaderViewModel = null;
+            lifecycleOwner = null;
+            binding = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        messageHeaderViewModel.removeListeners();
-        if (lifecycleOwner != null) {
-            messageHeaderViewModel.getMemberCount().removeObservers(lifecycleOwner);
-            messageHeaderViewModel.getUserPresenceStatus().removeObservers(lifecycleOwner);
-            messageHeaderViewModel.getUpdatedGroup().removeObservers(lifecycleOwner);
-            messageHeaderViewModel.getUpdatedUser().removeObservers(lifecycleOwner);
-            messageHeaderViewModel.getException().removeObservers(lifecycleOwner);
-            messageHeaderViewModel.getTyping().removeObservers(lifecycleOwner);
+    private void disposeObservers() {
+        try {
+            if (messageHeaderViewModel != null && lifecycleOwner != null) {
+                messageHeaderViewModel.getMemberCount().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUserPresenceStatus().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUpdatedGroup().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUpdatedUser().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getException().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getTyping().removeObservers(lifecycleOwner);
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "dispose: " + e.getMessage());
         }
-        messageHeaderViewModel = null;
-        lifecycleOwner = null;
-        binding = null;
     }
 
     /**
@@ -509,6 +571,26 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setBackIconTint(@ColorInt int backIconTint) {
         this.backIconTint = backIconTint;
         binding.ivMessageHeaderBack.setColorFilter(backIconTint);
+    }
+
+    /**
+     * Retrieves the tint color for the message header menu icon.
+     *
+     * @return The current tint color of the message header menu icon as an integer
+     * color value.
+     */
+    public @ColorInt int getMenuIconTint() {
+        return menuIconTint;
+    }
+
+    /**
+     * Sets the tint color for the message header menu icon.
+     *
+     * @param menuIconTint The desired tint color for the message header menu icon.
+     */
+    public void setMenuIconTint(@ColorInt int menuIconTint) {
+        this.menuIconTint = menuIconTint;
+        binding.messageHeaderMenuIcon.setColorFilter(menuIconTint);
     }
 
     /**
@@ -693,6 +775,27 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setBackIcon(@NonNull View backIcon) {
         this.backButtonView = backIcon;
         Utils.handleView(binding.messageHeaderBackIconLayout, backIcon, true);
+    }
+
+    /**
+     * Retrieves the drawable resource for the message header menu icon.
+     *
+     * @return The current drawable for the message header menu icon.
+     */
+    public Drawable getMenuIcon() {
+        return menuIcon;
+    }
+
+    /**
+     * Sets the drawable resource for the message header menu icon.
+     *
+     * @param menuIcon The desired drawable for the message header menu icon.
+     */
+    private void setMenuIcon(Drawable menuIcon) {
+        this.menuIcon = menuIcon;
+        if (menuIcon != null) {
+            binding.messageHeaderMenuIcon.setImageDrawable(menuIcon);
+        }
     }
 
     /**
@@ -1099,6 +1202,29 @@ public class CometChatMessageHeader extends MaterialCardView {
     }
 
     /**
+     * Retrieves the visibility status of the menu icon.
+     *
+     * @return An integer representing the visibility of the menu icon.
+     * Possible values include {@code View.VISIBLE}, {@code View.INVISIBLE}, and {@code View.GONE}.
+     */
+    public int getMenuIconVisibility() {
+        return menuIconVisibility;
+    }
+
+    /**
+     * Sets the visibility of the menu icon.
+     * Updates the visibility of the menu icon in the message header.
+     *
+     * @param visibility An integer representing the visibility status of the menu icon.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setMenuIconVisibility(int visibility) {
+        this.menuIconVisibility = visibility;
+        binding.messageHeaderMenuIcon.setVisibility(visibility);
+    }
+
+    /**
      * Retrieves the visibility status of the video call button.
      *
      * @return An integer representing the visibility of the video call button.
@@ -1197,5 +1323,9 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setVoiceCallButtonVisibility(int visibility) {
         this.voiceCallButtonVisibility = visibility;
         additionParameter.setVoiceCallButtonVisibility(visibility);
+    }
+
+    public void setPopupMenuStyle(@StyleRes int customHeaderPopUpMenuStyle) {
+        this.popUpMenuStyle = customHeaderPopUpMenuStyle;
     }
 }

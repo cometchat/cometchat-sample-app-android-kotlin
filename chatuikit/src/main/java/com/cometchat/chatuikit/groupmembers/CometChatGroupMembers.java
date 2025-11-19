@@ -894,13 +894,25 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            if (deleteAlertDialog != null && deleteAlertDialog.isShowing()) {
+                deleteAlertDialog.dismiss();
+                deleteAlertDialog = null;
+            }
+            groupMembersViewModel.removeListeners();
+            disposeObservers();
+            groupMembersViewModel = null;
+            groupMembersAdapter = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, e.toString());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        groupMembersViewModel.removeListeners();
-        if (lifecycleOwner != null) {
+    private void disposeObservers() {
+        if (groupMembersViewModel != null && lifecycleOwner != null) {
             groupMembersViewModel.getMutableGroupMembersList().removeObservers(lifecycleOwner);
             groupMembersViewModel.getStates().removeObservers(lifecycleOwner);
             groupMembersViewModel.insertAtTop().removeObservers(lifecycleOwner);
@@ -910,10 +922,6 @@ public class CometChatGroupMembers extends MaterialCardView {
             groupMembersViewModel.getDialogState().removeObservers(lifecycleOwner);
             groupMembersViewModel.getCometChatException().removeObservers(lifecycleOwner);
         }
-        groupMembersViewModel = null;
-        groupMembersAdapter = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 
     public int getUserStatusVisibility() {
@@ -2597,13 +2605,6 @@ public class CometChatGroupMembers extends MaterialCardView {
             binding.recyclerviewGroupMembersList.setAdapter(adapter);
         }
     }
-
-
-
-
-
-
-
 
     /**
      * Gets the stroke color.

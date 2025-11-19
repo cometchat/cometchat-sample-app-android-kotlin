@@ -59,5 +59,19 @@
         <attr name="cometchatConversationsBackIcon" format="reference" />
         <attr name="cometchatConversationsSeparatorHeight" format="dimension" />
         <attr name="cometchatConversationsSeparatorColor" format="reference" />
+
+        <!-- Search Attributes -->
+        <attr name="cometchatConversationsSearchInputBackgroundColor" format="color" />
+        <attr name="cometchatConversationsSearchInputTextColor" format="color" />
+        <attr name="cometchatConversationsSearchInputTextAppearance" format="reference" />
+        <attr name="cometchatConversationsSearchInputPlaceHolderTextAppearance" format="reference" />
+        <attr name="cometchatConversationsSearchInputPlaceHolderTextColor" format="color" />
+        <attr name="cometchatConversationsSearchInputEndIcon" format="reference" />
+        <attr name="cometchatConversationsSearchInputEndIconTint" format="color" />
+        <attr name="cometchatConversationsSearchInputStartIcon" format="reference" />
+        <attr name="cometchatConversationsSearchInputStartIconTint" format="color" />
+        <attr name="cometchatConversationsSearchInputCornerRadius" format="dimension" />
+        <attr name="cometchatConversationsSearchInputStrokeWidth" format="dimension" />
+        <attr name="cometchatConversationsSearchInputStrokeColor" format="color" />
     </declare-styleable>
 </resources>

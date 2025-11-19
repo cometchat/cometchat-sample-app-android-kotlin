@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatMessagePreview">
+        <attr name="cometChatMessagePreviewStyle" format="reference"/>
+        <attr name="cometChatMessagePreviewBackgroundColor" format="color"/>
+        <attr name="cometChatMessagePreviewStrokeWidth" format="dimension"/>
+        <attr name="cometChatMessagePreviewCornerRadius" format="dimension"/>
+        <attr name="cometChatMessagePreviewStrokeColor" format="color"/>
+        <attr name="cometChatMessagePreviewSeparatorColor" format="color"/>
+        <attr name="cometChatMessagePreviewTitleTextColor" format="color"/>
+        <attr name="cometChatMessagePreviewTitleTextAppearance" format="reference"/>
+        <attr name="cometChatMessagePreviewSubtitleTextColor" format="color"/>
+        <attr name="cometChatMessagePreviewSubtitleTextAppearance" format="reference"/>
+        <attr name="cometChatMessagePreviewCloseIcon" format="reference"/>
+        <attr name="cometChatMessagePreviewMessageIcon" format="reference"/>
+        <attr name="cometChatMessagePreviewCloseIconTint" format="color"/>
+        <attr name="cometChatMessagePreviewMessageIconTint" format="color"/>
+    </declare-styleable>
+</resources>

@@ -9,12 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
@@ -27,6 +29,7 @@ import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
+import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.models.CometChatMessageOption;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
 import com.cometchat.chatuikit.shared.models.StreamMessage;
@@ -43,6 +46,7 @@ import com.cometchat.chatuikit.shared.views.reaction.CometChatReaction;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnAddMoreReactionsClick;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionClick;
 import com.cometchat.chatuikit.shared.views.reaction.interfaces.OnReactionLongClick;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +70,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private OnAddMoreReactionsClick onAddMoreReactionsClick;
     private OnReactionClick onReactionClick;
     private OnReactionLongClick onReactionLongClick;
+    private OnClick onMessagePreviewClick;
     private List<BaseMessage> baseMessageList;
     // Interaction and Configuration
     private CometChatMessageList.ThreadReplyClick threadReplyClick;
@@ -476,6 +481,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private @StyleRes int outgoingMeetCallBubbleSenderNameTextAppearance;
     private @StyleRes int incomingMeetCallBubbleSenderNameTextAppearance;
     private boolean hideGroupActionMessage;
+    private long highlightedMessageId = -1;
+    private float highlightAlpha = 0f;
 
     // AI Assistant Bubble Customization
     private @ColorInt int aiAssistantBubbleBackgroundColor;
@@ -718,7 +725,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @return A new DateItemHolder for the date header.
      */
     @Override
-    public DateItemHolder onCreateHeaderViewHolder(ViewGroup var1) {
+    public MessageAdapter.DateItemHolder onCreateHeaderViewHolder(ViewGroup var1) {
         return new DateItemHolder(LayoutInflater.from(var1.getContext()).inflate(R.layout.cometchat_message_date_header, var1, false));
     }
 
@@ -731,7 +738,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @param var3 The ID for the date item (not used in this implementation).
      */
     @Override
-    public void onBindHeaderViewHolder(DateItemHolder var1, int var2, long var3) {
+    public void onBindHeaderViewHolder(MessageAdapter.DateItemHolder var1, int var2, long var3) {
         // Check if the provided index is valid for the baseMessageList
         if (baseMessageList.size() > var2) {
             BaseMessage baseMessage = baseMessageList.get(var2); // Retrieve the message for the header
@@ -1779,6 +1786,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return "";
     }
 
+    public int findPositionById(long id) {
+        for (int i = 0; i < baseMessageList.size(); i++) {
+            if (baseMessageList.get(i).getId() == id) return i;
+        }
+        return -1;
+    }
+
     /**
      * Binds the status info view with the provided details.
      *
@@ -1902,6 +1916,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void setOnReactionLongClick(OnReactionLongClick onReactionLongClick) {
         this.onReactionLongClick = onReactionLongClick;
+    }
+
+    public void setOnMessagePreviewClick(OnClick onMessagePreviewClick) {
+        this.onMessagePreviewClick = onMessagePreviewClick;
     }
 
     /**
@@ -6581,6 +6599,61 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     /**
+     * Sets the highlighted message by its ID. This method allows highlighting a
+     * specific message in the message list. When a message is highlighted, it may be
+     * visually distinguished from other messages to draw attention to it.
+     *
+     * @param messageId The id of the message to be highlighted.
+     * @param position The position of the message in the list.
+     */
+    public void setHighlightedMessage(long messageId, int position) {
+        this.highlightedMessageId = messageId;
+        notifyItemChanged(position);
+    }
+
+    /**
+     * Updates the highlight alpha for the message at the specified position. This
+     * method adjusts the transparency of the highlight effect applied to a message.
+     * A higher alpha value results in a more opaque highlight, while a lower value
+     * makes the highlight more transparent.
+     *
+     * @param alpha    The alpha value for the highlight.
+     * @param position The position of the message in the list.
+     */
+    public void updateHighlightAlpha(float alpha, int position) {
+        highlightAlpha = alpha;
+        notifyItemChanged(position);
+    }
+
+    /**
+     * Clears the highlight from the message at the specified position. This method
+     * removes any highlighting applied to a message, returning it to its normal
+     * appearance.
+     *
+     * @param position The position of the message in the list.
+     */
+    public void clearHighlight(int position) {
+        highlightedMessageId = -1;
+        highlightAlpha = 0f;
+        notifyItemChanged(position);
+    }
+
+    /** Calculates and returns the highlight color based on the base color and
+     * highlight alpha.
+     *
+     * @return the calculated highlight color
+     */
+    private int getHighlightColor() {
+        int baseColor = CometChatTheme.getExtendedPrimaryColor800(getContext());
+        return Color.argb(
+                (int) (Color.alpha(baseColor) * highlightAlpha),
+                Color.red(baseColor),
+                Color.green(baseColor),
+                Color.blue(baseColor)
+        );
+    }
+
+    /**
      * Interface definition for a callback to be invoked when a message is
      * long-clicked.
      *
@@ -6614,7 +6687,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public CometChatMessageBubble cometchatMessageBubble; // The message bubble view
         public CometChatMessageTemplate template; // The template used for customization
         public UIKitConstants.MessageBubbleAlignment alignment; // Alignment of the message bubble
-        public View contentView, headerView, footerView, threadView, bottomView, statusInfoView, leadingView, bubbleView; // Various views for different sections of the bubble
+        public View replyView, contentView, headerView, footerView, threadView, bottomView, statusInfoView, leadingView, bubbleView; // Various views for different sections of the bubble
 
         /**
          * Constructs a LeftViewHolder with the specified item view and message
@@ -6656,6 +6729,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 } else {
                     // Initialize content, header, bottom, status info, footer, thread, and leading
                     // views
+                    if (template.getReplyView() != null) {
+                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
+                    }
                     if (template.getContentView() != null) {
                         contentView = template.getContentView().createView(context, cometchatMessageBubble, alignment);
                     }
@@ -6691,6 +6767,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     leadingView.setTag(UIKitConstants.ViewTag.INTERNAL_LEADING_VIEW);
 
                     // Set all initialized views to the message bubble
+                    cometchatMessageBubble.setReplyView(replyView);
                     cometchatMessageBubble.setContentView(contentView);
                     cometchatMessageBubble.setBottomView(bottomView);
                     cometchatMessageBubble.setStatusInfoView(statusInfoView);
@@ -6718,20 +6795,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     // Bind custom bubble view if available
                     template.getBubbleView().bindView(context, bubbleView, baseMessage, alignment, this, baseMessageList, position);
                 } else {
-                    boolean isIncoming = !baseMessage
-                        .getSender()
-                        .getUid()
-                        .equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
-                    applyBubbleStyle(baseMessage,
-                                     isIncoming,
-                                     alignment,
-                                     cometchatMessageBubble,
-                                     showReadReceipt,
-                                     hideName,
-                                     headerView,
-                                     statusInfoView,
-                                     threadView,
-                                     leadingView, bottomView);
+                    boolean isIncoming = !baseMessage.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
+                    applyBubbleStyle(baseMessage, isIncoming, alignment, cometchatMessageBubble, showReadReceipt, hideName, headerView, statusInfoView, threadView, leadingView, bottomView);
+
+                    if (baseMessage.getId() == highlightedMessageId) {
+                        parent.setBackgroundColor(getHighlightColor());
+                    } else {
+                        parent.setBackgroundColor(Color.TRANSPARENT);
+                    }
+
+                    if (template.getReplyView() != null) {
+                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
+                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
+                    } else {
+                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
+                    }
 
                     // Bind content view if available
                     if (template.getContentView() != null) {
@@ -6822,7 +6900,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public CometChatMessageBubble cometchatMessageBubble; // The message bubble view
         public CometChatMessageTemplate template; // The template used for customization
         public UIKitConstants.MessageBubbleAlignment alignment; // Alignment of the message bubble
-        public View contentView, headerView, footerView, threadView, bottomView, statusInfoView, leadingView, bubbleView; // Various views for different sections of the bubble
+        public View replyView, contentView, headerView, footerView, threadView, bottomView, statusInfoView, leadingView, bubbleView; // Various views for different sections of the bubble
 
         /**
          * Constructs a RightViewHolder with the specified item view and message
@@ -6864,6 +6942,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 } else {
                     // Initialize content, header, bottom, status info, footer, thread, and leading
                     // views
+                    if (template.getReplyView() != null) {
+                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
+                    }
                     if (template.getContentView() != null) {
                         contentView = template.getContentView().createView(context, cometchatMessageBubble, alignment);
                     }
@@ -6904,6 +6985,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     leadingView.setTag(UIKitConstants.ViewTag.INTERNAL_LEADING_VIEW);
 
                     // Set all initialized views to the message bubble
+                    cometchatMessageBubble.setReplyView(replyView);
                     cometchatMessageBubble.setContentView(contentView);
                     cometchatMessageBubble.setBottomView(bottomView);
                     cometchatMessageBubble.setStatusInfoView(statusInfoView);
@@ -6931,21 +7013,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     // Bind custom bubble view if available
                     template.getBubbleView().bindView(context, bubbleView, baseMessage, alignment, this, baseMessageList, position);
                 } else {
-                    boolean isIncoming = !baseMessage
-                        .getSender()
-                        .getUid()
-                        .equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
-                    applyBubbleStyle(baseMessage,
-                            isIncoming,
-                            alignment,
-                            cometchatMessageBubble,
-                            showReadReceipt,
-                            hideName,
-                            headerView,
-                            statusInfoView,
-                            threadView,
-                            leadingView,
-                            bottomView);
+                    boolean isIncoming = !baseMessage.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
+                    applyBubbleStyle(baseMessage, isIncoming, alignment, cometchatMessageBubble, showReadReceipt, hideName, headerView, statusInfoView, threadView, leadingView, bottomView);
+
+                    if (template.getReplyView() != null) {
+                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
+                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
+                    } else {
+                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
+                    }
+
+                    if (baseMessage.getId() == highlightedMessageId) {
+                        parent.setBackgroundColor(getHighlightColor());
+                    } else {
+                        parent.setBackgroundColor(Color.TRANSPARENT);
+                    }
 
                     // Bind content view if available
                     if (template.getContentView() != null) {

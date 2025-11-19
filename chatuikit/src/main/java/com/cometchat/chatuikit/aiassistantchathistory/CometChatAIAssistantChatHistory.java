@@ -27,6 +27,7 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatAiAssistantChatHistoryBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
@@ -781,6 +782,7 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(CometChatAIAssistantChatHistoryViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+
         viewModel.getMessagesLiveData().observe(lifecycleOwner, this::onMessagesReceived);
         viewModel.getStateLiveData().observe(lifecycleOwner, stateChangeObserver);
         viewModel.getDeleteStateMutableLiveData().observe(lifecycleOwner, deleteStateObserver);
@@ -1012,23 +1014,27 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
      */
     @Override
     protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        dispose();
-    }
-
-    private void dispose() {
-        if (lifecycleOwner != null && viewModel != null) {
-            viewModel.getMessagesLiveData().removeObservers(lifecycleOwner);
-            viewModel.getStateLiveData().removeObservers(lifecycleOwner);
-            viewModel.getDeleteStateMutableLiveData().removeObservers(lifecycleOwner);
-            viewModel.getRemoveMessage().removeObservers(lifecycleOwner);
-            viewModel.getMutableMessagesRangeChanged().removeObservers(lifecycleOwner);
-            viewModel.getMutableHasMore().removeObservers(lifecycleOwner);
-            viewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
-        }
+        disposeObservers();
         viewModel = null;
         adapter = null;
         binding = null;
         lifecycleOwner = null;
+        super.onDetachedFromWindow();
+    }
+
+    private void disposeObservers() {
+        try {
+            if (lifecycleOwner != null && viewModel != null) {
+                viewModel.getMessagesLiveData().removeObservers(lifecycleOwner);
+                viewModel.getStateLiveData().removeObservers(lifecycleOwner);
+                viewModel.getDeleteStateMutableLiveData().removeObservers(lifecycleOwner);
+                viewModel.getRemoveMessage().removeObservers(lifecycleOwner);
+                viewModel.getMutableMessagesRangeChanged().removeObservers(lifecycleOwner);
+                viewModel.getMutableHasMore().removeObservers(lifecycleOwner);
+                viewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "Error in disposing observers: " + e.getMessage());
+        }
     }
 }

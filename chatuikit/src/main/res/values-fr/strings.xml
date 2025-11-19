@@ -207,6 +207,15 @@
     <string name="cometchat_storage_permission_warning">L\'autorisation de stockage est requise pour accéder aux fichiers.</string>
     <string name="cometchat_cancel_button">Annuler</string>
     <string name="cometchat_settings_button">Paramètres</string>
+    <string name="cometchat_messages">Berichten</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Recherche</string>
+    <string name="cometchat_menu_conversation_summary">Résumé de la conversation</string>
+    <string name="cometchat_see_more">Voir plus</string>
+    <string name="cometchat_no_results">Aucun résultat</string>
+    <string name="cometchat_no_matches_found">Nous n\'avons trouvé aucune correspondance. Veuillez essayer un mot-clé de recherche différent.</string>
+    <string name="cometchat_start_your_search">Commencez votre recherche</string>
+    <string name="cometchat_search_for_conversations_or_messages">Recherchez des conversations ou des messages en tapant un mot-clé ci-dessus.</string>
     <string name="cometchat_moderation_block_message">Votre message a été bloqué en raison des politiques de modération.</string>
     <string name="cometchat_no_conversations_history_title">Aucun historique de conversation trouvé</string>
     <string name="cometchat_ask_anything">Demandez n\'importe quoi</string>
@@ -214,4 +223,11 @@
     <string name="cometchat_no_conversations_history_subtitle">Commencez un chat en appuyant sur le bouton \'Nouvelle conversation\'</string>
     <string name="cometchat_new_chat">Nouvelle conversation</string>
     <string name="cometchat_chat_history">Historique des chats</string>
+    <string name="cometchat_unread" translatable="true">Non lu</string>
+    <string name="cometchat_photos" translatable="true">Photos</string>
+    <string name="cometchat_videos" translatable="true">Vidéos</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Documents</string>
+    <string name="cometchat_links" translatable="true">Liens</string>
+    <string name="cometchat_details" translatable="true">Détails</string>
 </resources>

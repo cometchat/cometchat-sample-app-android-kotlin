@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sticky_header_parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/cometchat_margin_4">
+
+    <com.cometchat.chatuikit.shared.views.date.CometChatDate
+        android:id="@+id/txt_message_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/cometchat_margin_3"/>
+
+</LinearLayout>

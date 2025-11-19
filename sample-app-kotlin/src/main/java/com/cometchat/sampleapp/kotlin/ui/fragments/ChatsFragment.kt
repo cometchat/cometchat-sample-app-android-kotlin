@@ -30,6 +30,7 @@ import com.cometchat.sampleapp.kotlin.data.repository.Repository
 import com.cometchat.sampleapp.kotlin.databinding.FragmentChatsBinding
 import com.cometchat.sampleapp.kotlin.databinding.UserProfilePopupMenuLayoutBinding
 import com.cometchat.sampleapp.kotlin.ui.activity.MessagesActivity
+import com.cometchat.sampleapp.kotlin.ui.activity.SearchActivity
 import com.cometchat.sampleapp.kotlin.ui.activity.SplashActivity
 import com.cometchat.sampleapp.kotlin.utils.MyApplication
 import com.google.gson.Gson
@@ -77,7 +78,14 @@ class ChatsFragment : Fragment() {
                 intent.putExtra(getString(R.string.app_user), Gson().toJson(user))
                 startActivity(intent)
             }
-        } // Set the overflow menu (Logout button) in the Conversations view
+        }
+
+        binding.cometchatConversations.setOnSearchClickListener {
+            val intent = Intent(context, SearchActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Set the overflow menu (Logout button) in the Conversations view
         binding.cometchatConversations.setOverflowMenu(logoutView)
     }
 

@@ -1,7 +1,6 @@
 package com.cometchat.chatuikit.conversations;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -32,6 +31,7 @@ import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatConversationsListViewBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
@@ -50,8 +50,6 @@ import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManag
 import com.cometchat.chatuikit.shared.resources.soundmanager.Sound;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatConfirmDialog;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.ClickListener;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.RecyclerTouchListener;
 import com.cometchat.chatuikit.shared.viewholders.ConversationsViewHolderListener;
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
 import com.cometchat.chatuikit.shimmer.CometChatShimmerAdapter;
@@ -73,6 +71,21 @@ public class CometChatConversations extends MaterialCardView {
     private boolean disableSoundForMessages;
     private ConversationsAdapter conversationsAdapter;
     private LifecycleOwner lifecycleOwner;
+
+    private Drawable searchInputStartIcon;
+    private Drawable searchInputEndIcon;
+    private @StyleRes int searchInputTextAppearance;
+    private @ColorInt int searchInputTextColor;
+    private @StyleRes int searchInputPlaceHolderTextAppearance;
+    private @ColorInt int searchInputPlaceHolderTextColor;
+    private @ColorInt int searchInputStartIconTint;
+    private @ColorInt int searchInputEndIconTint;
+    private @ColorInt int searchInputBackgroundColor;
+    private String searchPlaceholderText;
+    private int searchInputStrokeWidth;
+    private int searchInputStrokeColor;
+    private int searchInputCornerRadius;
+    private int searchBoxVisibility = VISIBLE;
 
     /**
      * Observer for updating a specific conversation in the list. Notifies the
@@ -116,6 +129,7 @@ public class CometChatConversations extends MaterialCardView {
     private int emptyStateVisibility = View.VISIBLE;
     private AdditionParameter additionParameter;
     private OnBackPress onBackPress;
+    private OnSearchClick onSearchClick;
     private Function2<Context, Conversation, List<CometChatPopupMenu.MenuItem>> addOptions;
     private Function2<Context, Conversation, List<CometChatPopupMenu.MenuItem>> options;
     private View overflowMenu = null;
@@ -456,6 +470,14 @@ public class CometChatConversations extends MaterialCardView {
                 onBackPress.onBack();
             }
         });
+
+        binding.searchBox.setOnSearchClick(() -> {
+            if (onSearchClick != null) {
+                onSearchClick.onSearchClick();
+            }
+        });
+
+        binding.searchBox.getBinding().etSearch.setFocusable(false);
     }
 
     /**
@@ -615,6 +637,288 @@ public class CometChatConversations extends MaterialCardView {
     }
 
     /**
+     * Sets the visibility of the search input end icon.
+     *
+     * @param visibility The visibility state (e.g., View.VISIBLE, View.GONE).
+     */
+    public void setSearchInputEndIconVisibility(int visibility) {
+        binding.searchBox.setSearchInputEndIconVisibility(visibility);
+    }
+
+    /**
+     * Sets the text of the search input field.
+     *
+     * @param text The text to be set in the search input field.
+     */
+    public void setSearchInputText(String text) {
+        binding.searchBox.setSearchInputText(text);
+    }
+
+    /**
+     * Retrieves the text from the search input field.
+     *
+     * @return The current text in the search input field.
+     */
+    public @StyleRes int getSearchInputTextAppearance() {
+        return searchInputTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance of the search input field.
+     * @param searchInputTextAppearance The style resource for the text appearance.
+     */
+    public void setSearchInputTextAppearance(@StyleRes int searchInputTextAppearance) {
+        this.searchInputTextAppearance = searchInputTextAppearance;
+        binding.searchBox.setSearchInputTextAppearance(searchInputTextAppearance);
+    }
+
+    /**
+     * Retrieves the text color of the search input field.
+     *
+     * @return The current text color of the search input field.
+     */
+    public @ColorInt int getSearchInputTextColor() {
+        return searchInputTextColor;
+    }
+
+    /**
+     * Sets the text color of the search input field.
+     * @param searchInputTextColor The color integer for the text color.
+     */
+    public void setSearchInputTextColor(@ColorInt int searchInputTextColor) {
+        this.searchInputTextColor = searchInputTextColor;
+        binding.searchBox.setSearchInputTextColor(searchInputTextColor);
+    }
+
+    /**
+     * Retrieves the placeholder text appearance of the search input field.
+     *
+     * @return The current placeholder text appearance of the search input field.
+     */
+    public @StyleRes int getSearchInputPlaceHolderTextAppearance() {
+        return searchInputPlaceHolderTextAppearance;
+    }
+
+    /**
+     * Sets the placeholder text appearance of the search input field.
+     * @param searchInputPlaceHolderTextAppearance The style resource for the placeholder text appearance.
+     */
+    public void setSearchInputPlaceHolderTextAppearance(@StyleRes int searchInputPlaceHolderTextAppearance) {
+        this.searchInputPlaceHolderTextAppearance = searchInputPlaceHolderTextAppearance;
+        binding.searchBox.setSearchInputPlaceHolderTextAppearance(searchInputPlaceHolderTextAppearance);
+    }
+
+    /**
+     * Retrieves the placeholder text color of the search input field.
+     *
+     * @return The current placeholder text color of the search input field.
+     */
+    public @ColorInt int getSearchInputPlaceHolderTextColor() {
+        return searchInputPlaceHolderTextColor;
+    }
+
+    /**
+     * Sets the placeholder text color of the search input field.
+     * @param searchInputPlaceHolderTextColor The color integer for the placeholder text color.
+     */
+    public void setSearchInputPlaceHolderTextColor(@ColorInt int searchInputPlaceHolderTextColor) {
+        this.searchInputPlaceHolderTextColor = searchInputPlaceHolderTextColor;
+        binding.searchBox.setSearchInputPlaceHolderTextColor(searchInputPlaceHolderTextColor);
+    }
+
+    /**
+     * Retrieves the start icon drawable of the search input field.
+     *
+     * @return The current start icon drawable of the search input field.
+     */
+    public Drawable getSearchInputStartIcon() {
+        return searchInputStartIcon;
+    }
+
+    /**
+     * Sets the start icon drawable of the search input field.
+     * @param searchInputStartIcon The drawable for the start icon.
+     */
+    public void setSearchInputStartIcon(Drawable searchInputStartIcon) {
+        this.searchInputStartIcon = searchInputStartIcon;
+        binding.searchBox.setSearchInputStartIcon(searchInputStartIcon);
+    }
+
+    /**
+     * Retrieves the start icon tint color of the search input field.
+     *
+     * @return The current start icon tint color of the search input field.
+     */
+    public @ColorInt int getSearchInputStartIconTint() {
+        return searchInputStartIconTint;
+    }
+
+    /**
+     * Sets the start icon tint color of the search input field.
+     * @param searchInputStartIconTint The color integer for the start icon tint.
+     */
+    public void setSearchInputStartIconTint(@ColorInt int searchInputStartIconTint) {
+        this.searchInputStartIconTint = searchInputStartIconTint;
+        binding.searchBox.setSearchInputStartIconTint(searchInputStartIconTint);
+    }
+
+    /**
+     * Retrieves the end icon drawable of the search input field.
+     *
+     * @return The current end icon drawable of the search input field.
+     */
+    public Drawable getSearchInputEndIcon() {
+        return searchInputEndIcon;
+    }
+
+    /**
+     * Sets the end icon drawable of the search input field.
+     * @param searchInputEndIcon The drawable for the end icon.
+     */
+    public void setSearchInputEndIcon(Drawable searchInputEndIcon) {
+        this.searchInputEndIcon = searchInputEndIcon;
+        binding.searchBox.setSearchInputEndIcon(searchInputEndIcon);
+    }
+
+    /**
+     * Retrieves the end icon tint color of the search input field.
+     *
+     * @return The current end icon tint color of the search input field.
+     */
+    public @ColorInt int getSearchInputEndIconTint() {
+        return searchInputEndIconTint;
+    }
+
+    /**
+     * Sets the end icon tint color of the search input field.
+     * @param searchInputEndIconTint The color integer for the end icon tint.
+     */
+    public void setSearchInputEndIconTint(@ColorInt int searchInputEndIconTint) {
+        this.searchInputEndIconTint = searchInputEndIconTint;
+        binding.searchBox.setSearchInputEndIconTint(searchInputEndIconTint);
+    }
+
+    /**
+     * Gets the placeholder text for the search input.
+     *
+     * @return The search placeholder text.
+     */
+    public String getSearchPlaceholderText() {
+        return searchPlaceholderText;
+    }
+
+    /**
+     * Sets the placeholder text for the search input field.
+     *
+     * @param placeholder The text to be set as the placeholder.
+     */
+    public void setSearchPlaceholderText(String placeholder) {
+        if (placeholder != null) {
+            binding.searchBox.setSearchPlaceholderText(placeholder);
+        }
+    }
+
+    /**
+     * Gets the stroke width for the search input.
+     *
+     * @return the stroke width for the search input.
+     */
+    public @Dimension int getSearchInputStrokeWidth() {
+        return searchInputStrokeWidth;
+    }
+
+    /**
+     * Sets the stroke width for the search input.
+     *
+     * @param searchInputStrokeWidth the stroke width for the search input to set.
+     */
+    public void setSearchInputStrokeWidth(@Dimension int searchInputStrokeWidth) {
+        this.searchInputStrokeWidth = searchInputStrokeWidth;
+        binding.searchBox.setStrokeWidth(searchInputStrokeWidth);
+    }
+
+    /**
+     * Gets the stroke color for the search input.
+     *
+     * @return the stroke color for the search input.
+     */
+    public @ColorInt int getSearchInputStrokeColor() {
+        return searchInputStrokeColor;
+    }
+
+    /**
+     * Sets the stroke color for the search input.
+     *
+     * @param searchInputStrokeColor the stroke color for the search input to set.
+     */
+    public void setSearchInputStrokeColor(@ColorInt int searchInputStrokeColor) {
+        this.searchInputStrokeColor = searchInputStrokeColor;
+        binding.searchBox.setStrokeColor(searchInputStrokeColor);
+    }
+
+    /**
+     * Gets the background color for the search input.
+     *
+     * @return the background color for the search input.
+     */
+    public @ColorInt int getSearchInputBackgroundColor() {
+        return searchInputBackgroundColor;
+    }
+
+    /**
+     * Sets the background color for the search input.
+     *
+     * @param searchInputBackgroundColor the background color for the search input to set.
+     */
+    public void setSearchInputBackgroundColor(@ColorInt int searchInputBackgroundColor) {
+        this.searchInputBackgroundColor = searchInputBackgroundColor;
+        binding.searchBox.setCardBackgroundColor(searchInputBackgroundColor);
+    }
+
+    /**
+     * Retrieves the visibility status of the search box.
+     *
+     * @return An integer representing the visibility of the search box.
+     */
+    public int getSearchBoxVisibility() {
+        return searchBoxVisibility;
+    }
+
+    /**
+     * Sets the visibility of the search box based on the provided visibility
+     * parameter. If {@code
+     * hideSearchBox} is true, the search box will be hidden (set to
+     * {@code View.GONE}). Otherwise, the visibility will be set according to the
+     * provided {@code visibility} parameter.
+     *
+     * @param visibility the desired visibility state of the search box.
+     */
+    public void setSearchBoxVisibility(int visibility) {
+        this.searchBoxVisibility = visibility;
+        binding.searchBox.setVisibility(visibility);
+
+    }
+
+    /**
+     * Sets the corner radius for the search input.
+     *
+     * @param searchInputCornerRadius the corner radius for the search input to set.
+     */
+    public void setSearchInputCornerRadius(@Dimension int searchInputCornerRadius) {
+        this.searchInputCornerRadius = searchInputCornerRadius;
+        binding.searchBox.setRadius(searchInputCornerRadius);
+    }
+
+    /**
+     * Gets the corner radius for the search input.
+     *
+     * @return the corner radius for the search input.
+     */
+    public @Dimension int getSearchInputCornerRadius() {
+        return searchInputCornerRadius;
+    }
+
+    /**
      * Sets the style for the CometChatConversations view by applying a style
      * resource.
      *
@@ -638,48 +942,31 @@ public class CometChatConversations extends MaterialCardView {
         try {
             // Extract attributes or apply default values
             // Colors
-            backIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsBackIconTint,
-                                               CometChatTheme.getIconTintPrimary(getContext()));
-            deleteOptionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionIconTint,
-                                                       CometChatTheme.getErrorColor(getContext()));
+            backIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsBackIconTint, CometChatTheme.getIconTintPrimary(getContext()));
+            deleteOptionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionIconTint, CometChatTheme.getErrorColor(getContext()));
             strokeColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsStrokeColor, 0);
-            backgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsBackgroundColor,
-                                                  CometChatTheme.getBackgroundColor1(getContext()));
-            titleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsTitleTextColor,
-                                                 CometChatTheme.getTextColorPrimary(getContext()));
-            emptyStateTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTitleTextColor,
-                                                           CometChatTheme.getTextColorPrimary(getContext()));
-            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsEmptyStateSubtitleTextColor,
-                                                              CometChatTheme.getTextColorSecondary(getContext()));
-            errorStateTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsErrorStateTitleTextColor,
-                                                           CometChatTheme.getTextColorPrimary(getContext()));
-            errorStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsErrorStateSubtitleTextColor,
-                                                              CometChatTheme.getTextColorSecondary(getContext()));
-            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemTitleTextColor,
-                                                     CometChatTheme.getTextColorPrimary(getContext()));
+            backgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
+            titleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsTitleTextColor, CometChatTheme.getTextColorPrimary(getContext()));
+            emptyStateTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTitleTextColor, CometChatTheme.getTextColorPrimary(getContext()));
+            emptyStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsEmptyStateSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext()));
+            errorStateTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsErrorStateTitleTextColor, CometChatTheme.getTextColorPrimary(getContext()));
+            errorStateSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsErrorStateSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext()));
+            itemTitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemTitleTextColor, CometChatTheme.getTextColorPrimary(getContext()));
             deleteOptionTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionTextColor, 0);
-            itemSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemSubtitleTextColor,
-                                                        CometChatTheme.getTextColorSecondary(getContext()));
-            itemMessageTypeIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemMessageTypeIconTint,
-                                                          CometChatTheme.getIconTintHighlight(getContext()));
+            itemSubtitleTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext()));
+            itemMessageTypeIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemMessageTypeIconTint, CometChatTheme.getIconTintHighlight(getContext()));
             // Dimensions
             strokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsStrokeWidth, 0);
             cornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsCornerRadius, 0);
             // Styles
             titleTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsTitleTextAppearance, 0);
-            emptyStateTextTitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTextTitleAppearance,
-                                                                     0);
-            deleteOptionTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionTextAppearance,
-                                                                  0);
-            emptyStateTextSubtitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTextSubtitleAppearance,
-                                                                        0);
-            errorStateTextTitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsErrorStateTextTitleAppearance,
-                                                                     0);
-            errorStateTextSubtitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsErrorStateTextSubtitleAppearance,
-                                                                        0);
+            emptyStateTextTitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTextTitleAppearance, 0);
+            deleteOptionTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionTextAppearance, 0);
+            emptyStateTextSubtitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsEmptyStateTextSubtitleAppearance, 0);
+            errorStateTextTitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsErrorStateTextTitleAppearance, 0);
+            errorStateTextSubtitleAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsErrorStateTextSubtitleAppearance, 0);
             itemTitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsItemTitleTextAppearance, 0);
-            itemSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsItemSubtitleTextAppearance,
-                                                                  0);
+            itemSubtitleTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsItemSubtitleTextAppearance, 0);
             avatarStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsAvatarStyle, 0);
             statusIndicatorStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsStatusIndicatorStyle, 0);
             dateStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsDateStyle, 0);
@@ -687,35 +974,40 @@ public class CometChatConversations extends MaterialCardView {
             receiptStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsReceiptStyle, 0);
             typingIndicatorStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsTypingIndicatorStyle, 0);
             mentionsStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsMentionsStyle, 0);
-            separatorColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSeparatorColor,
-                                                 CometChatTheme.getStrokeColorLight(getContext()));
+            separatorColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSeparatorColor, CometChatTheme.getStrokeColorLight(getContext()));
             separatorHeight = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsSeparatorHeight, 1);
 
             discardSelectionIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsDiscardSelectionIcon);
-            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDiscardSelectionIconTint,
-                                                           CometChatTheme.getIconTintPrimary(getContext()));
+            discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDiscardSelectionIconTint, CometChatTheme.getIconTintPrimary(getContext()));
             submitSelectionIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsSubmitSelectionIcon);
-            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSubmitSelectionIconTint,
-                                                          CometChatTheme.getIconTintPrimary(getContext()));
+            submitSelectionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSubmitSelectionIconTint, CometChatTheme.getIconTintPrimary(getContext()));
             checkBoxStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsCheckBoxStrokeWidth, 0);
             checkBoxCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsCheckBoxCornerRadius, 0);
-            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxStrokeColor,
-                                                      CometChatTheme.getStrokeColorDefault(getContext()));
-            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxBackgroundColor,
-                                                          CometChatTheme.getBackgroundColor1(getContext()));
-            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxCheckedBackgroundColor,
-                                                                 CometChatTheme.getIconTintHighlight(getContext()));
+            checkBoxStrokeColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxStrokeColor, CometChatTheme.getStrokeColorDefault(getContext()));
+            checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
+            checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxCheckedBackgroundColor, CometChatTheme.getIconTintHighlight(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIcon);
-            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIconTint,
-                                                         CometChatTheme.getWarningColor(getContext()));
-            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemSelectedBackgroundColor,
-                                                              CometChatTheme.getBackgroundColor4(getContext()));
-            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemBackgroundColor,
-                                                      CometChatTheme.getBackgroundColor1(getContext()));
+            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIconTint, CometChatTheme.getWarningColor(getContext()));
+            itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemSelectedBackgroundColor, CometChatTheme.getBackgroundColor4(getContext()));
+            itemBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
             // Drawables
             backIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsBackIcon);
             deleteOptionIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsDeleteOptionIcon);
             optionListStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsOptionListStyle, 0);
+
+            // Search
+            searchInputBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputBackgroundColor, CometChatTheme.getBackgroundColor3(getContext()));
+            searchInputTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputTextColor, CometChatTheme.getTextColorPrimary(getContext()));
+            searchInputTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsSearchInputTextAppearance, 0);
+            searchInputPlaceHolderTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputPlaceHolderTextColor, CometChatTheme.getTextColorTertiary(getContext()));
+            searchInputPlaceHolderTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsSearchInputPlaceHolderTextAppearance, 0);
+            searchInputEndIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsSearchInputEndIcon);
+            searchInputEndIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputEndIconTint, CometChatTheme.getIconTintSecondary(getContext()));
+            searchInputStartIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsSearchInputStartIcon);
+            searchInputStartIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputStartIconTint, CometChatTheme.getIconTintSecondary(getContext()));
+            searchInputCornerRadius = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsSearchInputCornerRadius, 0);
+            searchInputStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsSearchInputStrokeWidth, 0);
+            searchInputStrokeColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSearchInputStrokeColor, 0);
             // Apply default styles
             updateUI();
         } finally {
@@ -787,6 +1079,19 @@ public class CometChatConversations extends MaterialCardView {
         setBackIconVisibility(backIconVisibility);
         setDeleteOptionIcon(deleteOptionIcon);
         setOptionListStyle(optionListStyle);
+        setSearchInputBackgroundColor(searchInputBackgroundColor);
+        setSearchInputTextColor(searchInputTextColor);
+        setSearchInputTextAppearance(searchInputTextAppearance);
+        setSearchInputTextAppearance(searchInputTextAppearance);
+        setSearchInputPlaceHolderTextColor(searchInputPlaceHolderTextColor);
+        setSearchInputPlaceHolderTextAppearance(searchInputPlaceHolderTextAppearance);
+        setSearchInputEndIcon(searchInputEndIcon);
+        setSearchInputEndIconTint(searchInputEndIconTint);
+        setSearchInputStartIcon(searchInputStartIcon);
+        setSearchInputStartIconTint(searchInputStartIconTint);
+        setSearchInputCornerRadius(searchInputCornerRadius);
+        setSearchInputStrokeWidth(searchInputStrokeWidth);
+        setSearchInputStrokeColor(searchInputStrokeColor);
     }
 
     /**
@@ -1564,12 +1869,20 @@ public class CometChatConversations extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            conversationsViewModel.removeListener();
+            disposeObservers();
+            lifecycleOwner = null;
+            conversationsViewModel = null;
+            conversationsAdapter = null;
+            binding = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: ", e);
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        conversationsViewModel.removeListener();
+    private void disposeObservers() {
         if (lifecycleOwner != null) {
             conversationsViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
             conversationsViewModel.getStates().removeObservers(lifecycleOwner);
@@ -1582,10 +1895,6 @@ public class CometChatConversations extends MaterialCardView {
             conversationsViewModel.progressState().removeObservers(lifecycleOwner);
             conversationsViewModel.getCometChatException().removeObservers(lifecycleOwner);
         }
-        lifecycleOwner = null;
-        conversationsViewModel = null;
-        conversationsAdapter = null;
-        binding = null;
     }
 
     public @LayoutRes int getEmptyView() {
@@ -2124,6 +2433,10 @@ public class CometChatConversations extends MaterialCardView {
         this.onBackPress = onBackPress;
     }
 
+    public void setOnSearchClickListener(OnSearchClick onSearchClick) {
+        this.onSearchClick = onSearchClick;
+    }
+
     /**
      * Sets the ConversationsRequestBuilder for fetching conversations.
      *
@@ -2335,15 +2648,6 @@ public class CometChatConversations extends MaterialCardView {
         this.errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(View.VISIBLE);
     }
-
-
-
-
-
-
-
-
-
 
     @Override
     protected void onAttachedToWindow() {

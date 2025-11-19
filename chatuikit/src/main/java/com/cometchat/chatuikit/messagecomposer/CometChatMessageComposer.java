@@ -20,7 +20,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +47,7 @@ import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
+import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chat.models.User;
@@ -80,6 +80,7 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.itemclicklistener.OnItemClickListener;
 import com.cometchat.chatuikit.shared.spans.NonEditableSpan;
 import com.cometchat.chatuikit.shared.views.mediarecorder.CometChatMediaRecorder;
+import com.cometchat.chatuikit.shared.views.messageinput.CometChatEditText;
 import com.cometchat.chatuikit.shared.views.messageinput.CometChatMessageInput;
 import com.cometchat.chatuikit.shared.views.messageinput.CometChatTextWatcher;
 import com.cometchat.chatuikit.shared.views.optionsheet.OptionSheetMenuItem;
@@ -150,10 +151,11 @@ public class CometChatMessageComposer extends MaterialCardView {
     /**
      * Holds context, user, group, and messaging-related properties.
      */
-    private Activity activity;
     private MessageComposerViewModel composerViewModel;
     private User user;
     private Group group;
+    private BaseMessage quoteMessage;
+
     /**
      * Manages sound settings for messaging.
      */
@@ -275,6 +277,21 @@ public class CometChatMessageComposer extends MaterialCardView {
     private String[] microPhonePermissions;
     private boolean isAgentChat = false;
     private Boolean isAIAssistantGenerating = false;
+    /**
+     * Message preview appearance configurations.
+     */
+    private @ColorInt int messagePreviewSeparatorColor;
+    private @ColorInt int messagePreviewTitleTextColor;
+    private @StyleRes int messagePreviewTitleTextAppearance;
+    private @ColorInt int messagePreviewSubtitleTextColor;
+    private @StyleRes int messagePreviewSubtitleTextAppearance;
+    private @ColorInt int messagePreviewBackgroundColor;
+    private @Dimension int messagePreviewCornerRadius;
+    private @ColorInt int messagePreviewStrokeColor;
+    private @Dimension int messagePreviewStrokeWidth;
+    private Drawable messagePreviewCloseIcon;
+    private @ColorInt int messagePreviewCloseIconTint;
+    private int messagePreviewStyle;
 
     /**
      * The constructor for the CometChatMessageComposer class.
@@ -369,7 +386,6 @@ public class CometChatMessageComposer extends MaterialCardView {
      */
     private void initializeComponents() {
         additionParameter = new AdditionParameter();
-        activity = ((AppCompatActivity) getContext());
         soundManager = new CometChatSoundManager(getContext());
         composerViewModel = new MessageComposerViewModel();
         auxiliaryViewContainer = createAuxiliaryViewContainer();
@@ -427,6 +443,20 @@ public class CometChatMessageComposer extends MaterialCardView {
         composerViewModel.showBottomPanel().observe(lifecycleOwner, this::showInternalBottomPanel);
         composerViewModel.getComposeText().observe(lifecycleOwner, this::setInitialComposerText);
         composerViewModel.getIsAIAssistantGenerating().observe(lifecycleOwner, this::updateComposerState);
+        composerViewModel.successQuote().observe(lifecycleOwner, this::onMessageQuoteSuccess);
+        composerViewModel.processQuote().observe(lifecycleOwner, this::showQuoteMessagePreview);
+    }
+
+    /**
+     * Handles the success of message quoting.
+     *
+     * @param baseMessage The BaseMessage containing the quoted message.
+     */
+    private void onMessageQuoteSuccess(BaseMessage baseMessage) {
+        if (baseMessage != null) {
+            quoteMessage = null;
+            animateVisibilityGone(binding.messagePreview);
+        }
     }
 
     private void updateComposerState(Boolean aBoolean) {
@@ -1250,7 +1280,13 @@ public class CometChatMessageComposer extends MaterialCardView {
      *                    of content being sent (e.g., image, audio, video).
      */
     public void sendMediaMessage(File file, String contentType) {
-        composerViewModel.sendMediaMessage(file, contentType);
+        MediaMessage mediaMessage = composerViewModel.getMediaMessage(file, contentType);
+        if (quoteMessage != null) {
+            mediaMessage.setQuotedMessage(quoteMessage);
+            mediaMessage.setQuotedMessageId(quoteMessage.getId());
+            quoteMessage = null;
+        }
+        composerViewModel.sendMediaMessage(mediaMessage);
     }
 
     /**
@@ -1297,12 +1333,12 @@ public class CometChatMessageComposer extends MaterialCardView {
      * Opens an audio selection interface to choose audio files from the device.
      *
      * <p>
-     * This method uses {@link MediaUtils#openAudio(Activity)} (Context)} to create
+     * This method uses {@link MediaUtils#openAudio(Context)} (Context)} to create
      * an intent for selecting audio files. The user will be presented with an audio
      * picker UI to choose the desired audio files.
      */
     public void openAudio() {
-        activityResultHandlerBuilder.withIntent(MediaUtils.openAudio(activity)).launch();
+        activityResultHandlerBuilder.withIntent(MediaUtils.openAudio(getContext())).launch();
     }
 
     /**
@@ -1443,6 +1479,40 @@ public class CometChatMessageComposer extends MaterialCardView {
     }
 
     /**
+     * Shows a preview of the message to which the user is replying.
+     *
+     * <p>
+     * This method is intended to set up the UI for previewing a quoted message.
+     * However, the implementation is currently empty and does not perform any
+     * actions.
+     *
+     * @param baseMessage The message that is being quoted. It must be a non-null
+     *                    instance of {@link BaseMessage}.
+     */
+    private void showQuoteMessagePreview(BaseMessage baseMessage) {
+        this.quoteMessage = baseMessage;
+        if (baseMessage != null) {
+            binding.messagePreview.setMessage(getContext(), baseMessage, binding.messagePreview, cometchatTextFormatters);
+            binding.messagePreview.getSubtitleView().setMaxLines(1);
+            // Set up close listener
+            binding.messagePreview.setOnCloseClickListener(() -> {
+                quoteMessage = null;
+                animateClearMessageInput();
+                animateVisibilityGone(binding.messagePreview);
+            });
+            animateVisibilityVisible(binding.messagePreview);
+
+            binding.messageInput.post(() -> {
+                CometChatEditText composeBox = binding.messageInput.getComposeBox();
+                if (composeBox != null && !composeBox.hasFocus()) {
+                    composeBox.requestFocus();
+                }
+                Utils.showKeyBoard(getContext(), binding.messageInput.getComposeBox());
+            });
+        }
+    }
+
+    /**
      * Displays a preview of a message that is being edited.
      *
      * <p>
@@ -1526,16 +1596,39 @@ public class CometChatMessageComposer extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
-        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
-            bottomSheetDialog.dismiss();
+        try {
+            if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+                bottomSheetDialog.dismiss();
+            }
+            composerViewModel.removeListeners();
+            disposeObservers();
+            destroyTimers();
+            composerViewModel = null;
+            lifecycleOwner = null;
+            binding = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
         }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        composerViewModel.removeListeners();
-        if (lifecycleOwner != null) {
+    private void destroyTimers() {
+        if (typingTimer != null) {
+            typingTimer.cancel();
+            typingTimer = null;
+        }
+        if (queryTimer != null) {
+            queryTimer.cancel();
+            queryTimer = null;
+        }
+        if (operationTimer != null) {
+            operationTimer.cancel();
+            operationTimer = null;
+        }
+    }
+
+    private void disposeObservers() {
+        if (composerViewModel != null && lifecycleOwner != null) {
             composerViewModel.sentMessage().removeObservers(lifecycleOwner);
             composerViewModel.getException().removeObservers(lifecycleOwner);
             composerViewModel.processEdit().removeObservers(lifecycleOwner);
@@ -1546,10 +1639,9 @@ public class CometChatMessageComposer extends MaterialCardView {
             composerViewModel.showBottomPanel().removeObservers(lifecycleOwner);
             composerViewModel.getComposeText().removeObservers(lifecycleOwner);
             composerViewModel.getIsAIAssistantGenerating().removeObservers(lifecycleOwner);
+            composerViewModel.successQuote().removeObservers(lifecycleOwner);
+            composerViewModel.processQuote().removeObservers(lifecycleOwner);
         }
-        composerViewModel = null;
-        lifecycleOwner = null;
-        binding = null;
     }
 
     /**
@@ -1595,6 +1687,12 @@ public class CometChatMessageComposer extends MaterialCardView {
                         composerViewModel.editMessage(editMessage);
                     } else {
                         TextMessage textMessage1 = composerViewModel.getTextMessage(getProcessedText());
+                        if (quoteMessage != null) {
+                            textMessage1.setQuotedMessage(quoteMessage);
+                            textMessage1.setQuotedMessageId(quoteMessage.getId());
+                            quoteMessage = null;
+                            composerViewModel.onMessageReply(textMessage1);
+                        }
                         handleMessagePreSend(textMessage1);
                         composerViewModel.sendTextMessage(textMessage1);
                     }
@@ -3321,9 +3419,231 @@ public class CometChatMessageComposer extends MaterialCardView {
             setSuggestionListStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerSuggestionListStyle, 0));
             setAttachmentOptionSheetStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerAttachmentOptionSheetStyle, 0));
             setAIOptionSheetStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometchatMessageComposerAIOptionSheetStyle, 0));
+
+            setMessagePreviewStyle(typedArray.getResourceId(R.styleable.CometChatMessageComposer_cometChatMessagePreviewStyle, 0));
         } finally {
             typedArray.recycle();
         }
+    }
+
+    /**
+     * Gets the style resource ID for the message preview.
+     *
+     * @return The message preview style resource ID.
+     */
+    public @StyleRes int getMessagePreviewStyle() {
+        return messagePreviewStyle;
+    }
+
+    private void setMessagePreviewStyle(@StyleRes int resourceId) {
+        this.messagePreviewStyle = resourceId;
+        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(resourceId, R.styleable.CometChatMessagePreview);
+        try {
+            setMessagePreviewBackgroundColor(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewBackgroundColor, CometChatTheme.getBackgroundColor3(getContext())));
+            setMessagePreviewTitleTextColor(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewTitleTextColor, CometChatTheme.getTextColorHighlight(getContext())));
+            setMessagePreviewSubtitleTextColor(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewSubtitleTextColor, CometChatTheme.getTextColorSecondary(getContext())));
+            setMessagePreviewCloseIconTint(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewCloseIconTint, CometChatTheme.getIconTintPrimary(getContext())));
+            setMessagePreviewStrokeColor(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewStrokeColor, 0));
+            setMessagePreviewSeparatorColor(typedArray.getColor(R.styleable.CometChatMessagePreview_cometChatMessagePreviewSeparatorColor, CometChatTheme.getStrokeColorHighlight(getContext())));
+
+            setMessagePreviewTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessagePreview_cometChatMessagePreviewTitleTextAppearance, 0));
+            setMessagePreviewSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessagePreview_cometChatMessagePreviewSubtitleTextAppearance, 0));
+            Drawable closeIconDrawable = typedArray.getDrawable(R.styleable.CometChatMessagePreview_cometChatMessagePreviewCloseIcon);
+            if (closeIconDrawable != null) {
+                setMessagePreviewCloseIcon(closeIconDrawable);
+            }
+            setMessagePreviewStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessagePreview_cometChatMessagePreviewStrokeWidth, 0));
+            setMessagePreviewCornerRadius(typedArray.getDimensionPixelSize(R.styleable.CometChatMessagePreview_cometChatMessagePreviewCornerRadius, 0));
+        } finally {
+            typedArray.recycle();
+        }
+    }
+
+    /**
+     * Gets the tint color for the message preview close icon.
+     *
+     * @return The message preview close icon tint color.
+     */
+    public @ColorInt int getMessagePreviewCloseIconTint() {
+        return messagePreviewCloseIconTint;
+    }
+
+    /**
+     * @param color The new color to set for the message preview close icon
+     */
+    private void setMessagePreviewCloseIconTint(@ColorInt int color) {
+        messagePreviewCloseIconTint = color;
+        binding.messagePreview.setCloseIconTint(color);
+    }
+
+    /**
+     * Gets the drawable used for the message preview close icon.
+     *
+     * @return The message preview close icon drawable.
+     */
+    public Drawable getMessagePreviewCloseIcon() {
+        return messagePreviewCloseIcon;
+    }
+
+    /**
+     * @param drawable The new drawable to set for the message preview close icon
+     */
+    private void setMessagePreviewCloseIcon(Drawable drawable) {
+        messagePreviewCloseIcon = drawable;
+        binding.messagePreview.setCloseIcon(drawable);
+    }
+
+    /**
+     * Gets the stroke width for the message preview.
+     *
+     * @return The message preview stroke width.
+     */
+    public @Dimension int getMessagePreviewStrokeWidth() {
+        return messagePreviewStrokeWidth;
+    }
+
+    /**
+     * @param dimensionPixelSize The new width to set for the message preview stroke
+     */
+    private void setMessagePreviewStrokeWidth(@Dimension int dimensionPixelSize) {
+        messagePreviewStrokeWidth = dimensionPixelSize;
+        binding.messagePreview.setStrokeWidth(dimensionPixelSize);
+    }
+
+    /**
+     * Gets the stroke color for the message preview.
+     *
+     * @return The message preview stroke color.
+     */
+    public @ColorInt int getMessagePreviewStrokeColor() {
+        return messagePreviewStrokeColor;
+    }
+
+    /**
+     * @param color The new color to set for the message preview stroke
+     */
+    private void setMessagePreviewStrokeColor(@ColorInt int color) {
+        messagePreviewStrokeColor = color;
+        binding.messagePreview.setStrokeColor(color);
+    }
+
+    /**
+     * Gets the corner radius for the message preview.
+     *
+     * @return The message preview corner radius.
+     */
+    public @Dimension int getMessagePreviewCornerRadius() {
+        return messagePreviewCornerRadius;
+    }
+
+    /**
+     * @param dimensionPixelSize The new radius to set for the message preview card
+     */
+    private void setMessagePreviewCornerRadius(@Dimension int dimensionPixelSize) {
+        messagePreviewCornerRadius = dimensionPixelSize;
+        binding.messagePreview.setCornerRadius(dimensionPixelSize);
+    }
+
+    /**
+     * Gets the background color for the message preview.
+     *
+     * @return The message preview background color.
+     */
+    public @ColorInt int getMessagePreviewBackgroundColor() {
+        return messagePreviewBackgroundColor;
+    }
+
+    /**
+     * @param color The new color to set for the message preview background
+     */
+    private void setMessagePreviewBackgroundColor(@ColorInt int color) {
+        messagePreviewBackgroundColor = color;
+        binding.messagePreview.setBackgroundColor(color);
+    }
+
+    /**
+     * Gets the text appearance resource ID for the message preview subtitle.
+     *
+     * @return The message preview subtitle text appearance resource ID.
+     */
+    public @StyleRes int getMessagePreviewSubtitleTextAppearance() {
+        return messagePreviewSubtitleTextAppearance;
+    }
+
+    /**
+     * @param resourceId The new style to set for the message preview subtitle text appearance
+     */
+    private void setMessagePreviewSubtitleTextAppearance(@StyleRes int resourceId) {
+        messagePreviewSubtitleTextAppearance = resourceId;
+        binding.messagePreview.setSubtitleTextAppearance(resourceId);
+    }
+
+    /**
+     * Gets the text color for the message preview subtitle.
+     *
+     * @return The message preview subtitle text color.
+     */
+    public @ColorInt int getMessagePreviewSubtitleTextColor() {
+        return messagePreviewSubtitleTextColor;
+    }
+
+    /**
+     * @param color The new color to set for the message preview subtitle text color
+     */
+    private void setMessagePreviewSubtitleTextColor(@ColorInt int color) {
+        messagePreviewSubtitleTextColor = color;
+        binding.messagePreview.setSubtitleTextColor(color);
+    }
+
+    /**
+     * Gets the text appearance resource ID for the message preview title.
+     *
+     * @return The message preview title text appearance resource ID.
+     */
+    public @StyleRes int getMessagePreviewTitleTextAppearance() {
+        return messagePreviewTitleTextAppearance;
+    }
+
+    /**
+     * @param resourceId The new style to set for the message preview title text appearance
+     */
+    private void setMessagePreviewTitleTextAppearance(@StyleRes int resourceId) {
+        messagePreviewTitleTextAppearance = resourceId;
+        binding.messagePreview.setTitleTextAppearance(resourceId);
+    }
+
+    /**
+     * Gets the text color for the message preview title.
+     *
+     * @return The message preview title text color.
+     */
+    public @ColorInt int getMessagePreviewTitleTextColor() {
+        return messagePreviewTitleTextColor;
+    }
+
+    /**
+     * @param color The new color to set for the message preview title text color
+     */
+    private void setMessagePreviewTitleTextColor(@ColorInt int color) {
+        messagePreviewTitleTextColor = color;
+        binding.messagePreview.setTitleTextColor(color);
+    }
+
+    /**
+     * Gets the separator color for the message preview.
+     *
+     * @return The message preview separator color.
+     */
+    public @ColorInt int getMessagePreviewSeparatorColor() {
+        return messagePreviewSeparatorColor;
+    }
+
+    /**
+     * @param color The new color to set for the message preview separator
+     */
+    private void setMessagePreviewSeparatorColor(@ColorInt int color) {
+        messagePreviewSeparatorColor = color;
+        binding.messagePreview.setSeparatorColor(color);
     }
 
     /**
@@ -3641,22 +3961,14 @@ public class CometChatMessageComposer extends MaterialCardView {
         void onClick(Context context, BaseMessage message);
     }
 
-
-
-
-
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         composerViewModel.addListeners();
     }
 
-
     @Override
     public @Dimension int getStrokeWidth() {
         return strokeWidth;
     }
-
-
 }

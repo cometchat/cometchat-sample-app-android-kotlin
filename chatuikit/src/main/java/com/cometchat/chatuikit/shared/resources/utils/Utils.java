@@ -42,6 +42,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -62,10 +63,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
@@ -74,6 +79,7 @@ import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.helpers.Logger;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.AppEntity;
+import com.cometchat.chat.models.Attachment;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chat.models.Group;
@@ -86,9 +92,11 @@ import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatCustomToastLayoutBinding;
+import com.cometchat.chatuikit.extensions.ExtensionConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
 import com.cometchat.chatuikit.shared.models.interactiveelements.DateTimeElement;
@@ -99,6 +107,7 @@ import com.cometchat.chatuikit.shared.models.interactivemessage.InteractiveConst
 import com.cometchat.chatuikit.shared.models.interactivemessage.SchedulerMessage;
 import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity;
+import com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -125,6 +134,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -310,7 +320,8 @@ public class Utils {
             mimeTypes,
             names
         ));
-        ((Activity) context).overridePendingTransition(R.anim.cometchat_fade_in_fast, R.anim.cometchat_fade_out_fast);
+        if (context instanceof Activity)
+            ((Activity) context).overridePendingTransition(R.anim.cometchat_fade_in_fast, R.anim.cometchat_fade_out_fast);
     }
 
     private static ActivityOptionsCompat getActivityOption(View targetView) {
@@ -425,6 +436,96 @@ public class Utils {
         return user != null && UIKitConstants.AIConstants.AGENTIC_USER.equalsIgnoreCase(user.getRole());
     }
 
+    public static void setReplyMessagePreview(Context context, BaseMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters) {
+        try {
+            String sender = !Objects.equals(baseMessage.getSender().getUid(), CometChatUIKit.getLoggedInUser().getUid()) ? baseMessage.getSender().getName() : context.getString(R.string.cometchat_you);
+            if (baseMessage instanceof TextMessage) {
+                handleTextMessagePreview(context, sender, (TextMessage) baseMessage, messagePreview, cometchatTextFormatters);
+            } else if (baseMessage instanceof MediaMessage) {
+                handleMediaMessagePreview(context, sender, (MediaMessage) baseMessage, messagePreview);
+            } else if (baseMessage instanceof CustomMessage) {
+                handleCustomMessagePreview(context, sender, (CustomMessage) baseMessage, messagePreview);
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "setReplyMessagePreview: " + e.getMessage());
+        }
+    }
+
+    private static void handleTextMessagePreview(Context context, String sender, TextMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters) {
+        SpannableStringBuilder spannableStringBuilder;
+        if (baseMessage.getDeletedAt() == 0) {
+            spannableStringBuilder = new SpannableStringBuilder(baseMessage.getText());
+            for (CometChatTextFormatter textFormatter : cometchatTextFormatters) {
+                if (textFormatter != null)
+                    spannableStringBuilder = textFormatter.prepareMessageString(messagePreview.getContext(), baseMessage, spannableStringBuilder, null, UIKitConstants.FormattingType.MESSAGE_COMPOSER);
+            }
+        } else if (baseMessage.getDeletedAt() > 0) {
+            spannableStringBuilder = new SpannableStringBuilder(context.getString(R.string.cometchat_this_message_deleted));
+        } else {
+            spannableStringBuilder = new SpannableStringBuilder(context.getString(R.string.cometchat_this_message_type_is_not_supported));
+        }
+
+        messagePreview.setMessagePreviewTitleText(sender);
+        messagePreview.setMessagePreviewSubtitleText(spannableStringBuilder + "");
+        messagePreview.setMessageIconVisibility(View.GONE);
+    }
+
+    private static void handleCustomMessagePreview(Context context, String sender, CustomMessage baseMessage, CometChatMessagePreview messagePreview) {
+        switch (baseMessage.getType()) {
+            case ExtensionConstants.ExtensionType.EXTENSION_POLL:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_poll));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_poll);
+                break;
+            case ExtensionConstants.ExtensionType.STICKER:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_sticker));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_sticker);
+                break;
+            case ExtensionConstants.ExtensionType.LOCATION:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_location));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_location);
+                break;
+            case ExtensionConstants.ExtensionType.DOCUMENT:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_document));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_collaborative_document);
+                break;
+            case ExtensionConstants.ExtensionType.WHITEBOARD:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_collaborative_whiteboard));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_conversations_collabrative_document);
+                break;
+            case ExtensionConstants.ExtensionType.MEETING:
+                messagePreview.setMessagePreviewTitleText(sender);
+                messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_meeting));
+                messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_call);
+                break;
+            default:
+                break;
+        }
+        messagePreview.setMessageIconVisibility(VISIBLE);
+    }
+
+    public static void handleMediaMessagePreview(Context context, String sender, MediaMessage mediaMessage, CometChatMessagePreview messagePreview) {
+        if (UIKitConstants.MessageType.IMAGE.equalsIgnoreCase(mediaMessage.getType())) {
+            messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_image);
+        } else if (UIKitConstants.MessageType.VIDEO.equalsIgnoreCase(mediaMessage.getType())) {
+            messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_image);
+        } else if (UIKitConstants.MessageType.AUDIO.equalsIgnoreCase(mediaMessage.getType())) {
+            messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_audio_mic);
+        } else if (UIKitConstants.MessageType.FILE.equalsIgnoreCase(mediaMessage.getType())) {
+            messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_document);
+        }
+        messagePreview.setMessageIconVisibility(VISIBLE);
+        messagePreview.setMessagePreviewTitleText(sender);
+        Attachment attachment = mediaMessage.getAttachment();
+        if (attachment != null) {
+            messagePreview.setMessagePreviewSubtitleText(attachment.getFileName());
+        }
+    }
+
     public static void handleView(ViewGroup layout, View view, boolean hideIfNull) {
         if (view != null) {
             layout.removeAllViews();
@@ -446,7 +547,7 @@ public class Utils {
             return (LifecycleOwner) context;
         }
 
-        // Traverse the context wrapper hierarchy (max 10 levels to prevent infinite loops)
+        // Traverse the context wrapper hierarchy (max 100 levels to prevent infinite loops)
         Context currentContext = context;
         int depth = 0;
         while (currentContext instanceof ContextWrapper && depth < 100) {
@@ -458,6 +559,43 @@ public class Utils {
         }
 
         return null;
+    }
+
+    public static Activity getActivity(Context context) {
+        if (context == null) {
+            return null;
+        }
+
+        // Direct check first
+        if (context instanceof Activity) {
+            return (Activity) context;
+        }
+
+        // Traverse the context wrapper hierarchy
+        Context currentContext = context;
+        int depth = 0;
+        while (currentContext instanceof ContextWrapper && depth < 100) {
+            currentContext = ((ContextWrapper) currentContext).getBaseContext();
+            if (currentContext instanceof Activity) {
+                return (Activity) currentContext;
+            }
+            depth++;
+        }
+
+        return null;
+    }
+
+    public static boolean isActivityUsable(Activity activity) {
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
+
+    public static int getDP(float toDP, Context context){
+        if (toDP == 0){
+            return 0;
+        } else{
+            float density = context.getResources().getDisplayMetrics().density;
+            return (int) Math.ceil((density * toDP));
+        }
     }
 
     public static void removeParentFromView(View view) {
@@ -1229,8 +1367,8 @@ public class Utils {
         }
     }
 
-    public static void requestPermissions(Context context, String[] permissions, int requestCode) {
-        ActivityCompat.requestPermissions((Activity) context, permissions, requestCode);
+    public static void requestPermissions(Activity activity, String[] permissions, int requestCode) {
+        ActivityCompat.requestPermissions(activity, permissions, requestCode);
     }
 
     public static void setStatusBarColor(Activity activity, @ColorInt int color) {

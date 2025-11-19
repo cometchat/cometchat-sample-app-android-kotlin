@@ -1,5 +1,6 @@
 package com.cometchat.chatuikit.extensions.sticker.keyboard;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -119,7 +120,14 @@ public class CometChatStickerKeyboard extends MaterialCardView implements Sticke
 
         // Create an adapter for managing sticker tabs, using the fragment manager from
         // the context
-        adapter = new StickerTabAdapter(((FragmentActivity) getContext()).getSupportFragmentManager());
+        try {
+            Activity activity = Utils.getActivity(getContext());
+            if (Utils.isActivityUsable(activity) && activity instanceof FragmentActivity) {
+                adapter = new StickerTabAdapter(((FragmentActivity) activity).getSupportFragmentManager());
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, e.toString());
+        }
 
         // Disable ripple effect on tab layout
         binding.tabLayout.setTabRippleColor(null);
@@ -235,24 +243,26 @@ public class CometChatStickerKeyboard extends MaterialCardView implements Sticke
      */
     public void setData(HashMap<String, List<Sticker>> stickers) {
         this.stickerMap = stickers;
-        for (String str : stickerMap.keySet()) {
-            Bundle bundle = new Bundle();
-            StickerFragment stickersFragment = new StickerFragment();
-            bundle.putParcelableArrayList(STICKER_LIST_CONSTANT, (ArrayList<? extends Parcelable>) stickerMap.get(str));
-            stickersFragment.setArguments(bundle);
-            stickersFragment.setStickerClickListener(stickerClickListener);
+        if (adapter != null) {
+            for (String str : stickerMap.keySet()) {
+                Bundle bundle = new Bundle();
+                StickerFragment stickersFragment = new StickerFragment();
+                bundle.putParcelableArrayList(STICKER_LIST_CONSTANT, (ArrayList<? extends Parcelable>) stickerMap.get(str));
+                stickersFragment.setArguments(bundle);
+                stickersFragment.setStickerClickListener(stickerClickListener);
 
-            ArrayList<Sticker> stickerList = new ArrayList<>(stickerMap.get(str));
-            bundle.putParcelableArrayList(STICKER_LIST_CONSTANT, stickerList);
-            adapter.addFragment(stickersFragment, str, stickerList.get(0).getUrl());
-        }
-        binding.viewPager.setAdapter(adapter);
-        binding.tabLayout.setupWithViewPager(binding.viewPager);
+                ArrayList<Sticker> stickerList = new ArrayList<>(stickerMap.get(str));
+                bundle.putParcelableArrayList(STICKER_LIST_CONSTANT, stickerList);
+                adapter.addFragment(stickersFragment, str, stickerList.get(0).getUrl());
+            }
+            binding.viewPager.setAdapter(adapter);
+            binding.tabLayout.setupWithViewPager(binding.viewPager);
 
-        for (int i = 0; i < binding.tabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = binding.tabLayout.getTabAt(i);
-            if (tab != null) {
-                tab.setCustomView(createTabItemView(adapter.getPageIcon(i)));
+            for (int i = 0; i < binding.tabLayout.getTabCount(); i++) {
+                TabLayout.Tab tab = binding.tabLayout.getTabAt(i);
+                if (tab != null) {
+                    tab.setCustomView(createTabItemView(adapter.getPageIcon(i)));
+                }
             }
         }
     }

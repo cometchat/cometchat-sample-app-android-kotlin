@@ -3,7 +3,12 @@
     <style name="KotlinSampleApp.v5" parent="CometChatTheme.DayNight" />
 
     <style name="ConfirmationDialogStyle" parent="CometChatConfirmDialogStyle" />
-
+    <style name="CustomHeaderPopUpMenuStyle" parent="CometChatPopupMenuStyle">
+        <item name="cometchatPopupMenuItemTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatPopupMenuItemTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometchatPopupMenuStrokeColor">?attr/cometchatNeutralColor300</item>
+        <item name="cometchatPopupMenuItemStartIconTint">?attr/cometchatIconTintSecondary</item>
+    </style>
     <style name="DetailsAvatarStyle" parent="CometChatAvatarStyle">
         <item name="cometchatAvatarPlaceHolderTextAppearance">
             @style/AvatarPlaceHolderTextAppearance

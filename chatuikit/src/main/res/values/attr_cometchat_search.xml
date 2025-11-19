@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatSearch">
+        <!-- Component Style -->
+        <attr name="cometchatSearchStyle" format="reference" />
+        <attr name="cometchatSearchBackgroundColor" format="color" />
+
+        <!-- Search Bar Styling -->
+        <attr name="cometchatSearchBarBackgroundColor" format="color" />
+        <attr name="cometchatSearchBarStrokeWidth" format="dimension" />
+        <attr name="cometchatSearchBarStrokeColor" format="color" />
+        <attr name="cometchatSearchBarCornerRadius" format="dimension" />
+        <attr name="cometchatSearchBarTextColor" format="color" />
+        <attr name="cometchatSearchBarTextAppearance" format="reference" />
+        <attr name="cometchatSearchBarHintTextColor" format="color" />
+
+        <!-- Search Icons -->
+        <attr name="cometchatSearchBackIcon" format="reference" />
+        <attr name="cometchatSearchBackIconTint" format="color" />
+        <attr name="cometchatSearchClearIcon" format="reference" />
+        <attr name="cometchatSearchClearIconTint" format="color" />
+        <attr name="cometchatSearchIcon" format="reference" />
+        <attr name="cometchatSearchIconTint" format="color" />
+
+        <!-- Filter Chips -->
+        <attr name="cometchatSearchFilterChipBackgroundColor" format="color" />
+        <attr name="cometchatSearchFilterChipSelectedBackgroundColor" format="color" />
+        <attr name="cometchatSearchFilterChipTextColor" format="color" />
+        <attr name="cometchatSearchFilterChipSelectedTextColor" format="color" />
+        <attr name="cometchatSearchFilterChipTextAppearance" format="reference" />
+        <attr name="cometchatSearchFilterChipStrokeColor" format="color" />
+        <attr name="cometchatSearchFilterChipSelectedStrokeColor" format="color" />
+        <attr name="cometchatSearchFilterChipStrokeWidth" format="dimension" />
+        <attr name="cometchatSearchFilterChipCornerRadius" format="dimension" />
+
+        <!-- Section Headers -->
+        <attr name="cometchatSearchSectionHeaderTextColor" format="color" />
+        <attr name="cometchatSearchSectionHeaderTextAppearance" format="reference" />
+        <attr name="cometchatSearchSectionHeaderBackgroundColor" format="color" />
+
+        <!-- Conversation Items -->
+        <attr name="cometchatSearchConversationItemBackgroundColor" format="color" />
+        <attr name="cometchatSearchConversationTitleTextColor" format="color" />
+        <attr name="cometchatSearchConversationTitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchConversationSubtitleTextColor" format="color" />
+        <attr name="cometchatSearchConversationSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchConversationTimestampTextColor" format="color" />
+        <attr name="cometchatSearchConversationTimestampTextAppearance" format="reference" />
+        <attr name="cometchatSearchConversationSeparatorColor" format="color" />
+
+        <!-- Message Items -->
+        <attr name="cometchatSearchMessageItemBackgroundColor" format="color" />
+        <attr name="cometchatSearchMessageTitleTextColor" format="color" />
+        <attr name="cometchatSearchMessageTitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchMessageSubtitleTextColor" format="color" />
+        <attr name="cometchatSearchMessageSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchMessageTimestampTextColor" format="color" />
+        <attr name="cometchatSearchMessageTimestampTextAppearance" format="reference" />
+        <attr name="cometchatSearchMessageSeparatorColor" format="color" />
+        <attr name="cometchatSearchMessageLinkTextColor" format="color" />
+        <attr name="cometchatSearchMessageLinkTextAppearance" format="reference" />
+
+        <!-- Date Separator-->
+        <attr name="cometchatSearchDateSeparatorTextColor" format="color" />
+        <attr name="cometchatSearchDateSeparatorTextAppearance" format="reference" />
+        <attr name="cometchatSearchDateSeparatorBackgroundColor" format="color" />
+
+        <attr name="cometchatSearchMessageDateStyle" format="reference" />
+
+        <!-- Avatar Styling -->
+        <attr name="cometchatSearchAvatarStyle" format="reference" />
+
+        <!-- Badge Styling -->
+        <attr name="cometchatSearchBadgeStyle" format="reference" />
+
+        <!-- Empty State -->
+        <attr name="cometchatSearchEmptyStateTextColor" format="color" />
+        <attr name="cometchatSearchEmptyStateTextAppearance" format="reference" />
+        <attr name="cometchatSearchEmptyStateSubtitleTextColor" format="color" />
+        <attr name="cometchatSearchEmptyStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchEmptyStateIcon" format="reference" />
+        <attr name="cometchatSearchEmptyStateIconTint" format="color" />
+
+        <!-- Empty State -->
+        <attr name="cometchatSearchInitialStateTextColor" format="color" />
+        <attr name="cometchatSearchInitialStateTextAppearance" format="reference" />
+        <attr name="cometchatSearchInitialStateSubtitleTextColor" format="color" />
+        <attr name="cometchatSearchInitialStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchInitialStateIcon" format="reference" />
+        <attr name="cometchatSearchInitialStateIconTint" format="color" />
+
+        <!-- Error State -->
+        <attr name="cometchatSearchErrorStateTextColor" format="color" />
+        <attr name="cometchatSearchErrorStateTextAppearance" format="reference" />
+        <attr name="cometchatSearchErrorStateSubtitleTextColor" format="color" />
+        <attr name="cometchatSearchErrorStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatSearchErrorStateIcon" format="reference" />
+        <attr name="cometchatSearchErrorStateIconTint" format="color" />
+
+        <!-- See More Button -->
+        <attr name="cometchatSearchSeeMoreTextColor" format="color" />
+        <attr name="cometchatSearchSeeMoreTextAppearance" format="reference" />
+
+    </declare-styleable>
+</resources>

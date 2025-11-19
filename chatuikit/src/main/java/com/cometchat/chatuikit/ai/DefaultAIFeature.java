@@ -1,6 +1,6 @@
 package com.cometchat.chatuikit.ai;
 
-import com.cometchat.chatuikit.ai.aiconversationsummary.AIConversationSummaryExtension;
+import com.cometchat.chatuikit.shared.views.aiconversationsummary.AIConversationSummaryExtension;
 
 import java.util.ArrayList;
 import java.util.List;

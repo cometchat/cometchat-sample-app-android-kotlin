@@ -173,9 +173,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" />
 
+            <ImageView
+                android:id="@+id/message_header_menu_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:contentDescription="@string/cometchat_menu"
+                android:layout_marginStart="@dimen/cometchat_margin_3"/>
+
         </LinearLayout>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
 

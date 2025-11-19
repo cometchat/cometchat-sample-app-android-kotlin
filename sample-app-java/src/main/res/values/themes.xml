@@ -2,6 +2,13 @@
 
     <style name="JavaSampleApp.v5" parent="CometChatTheme.DayNight" />
 
+    <style name="CustomHeaderPopUpMenuStyle" parent="CometChatPopupMenuStyle">
+        <item name="cometchatPopupMenuItemTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatPopupMenuItemTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometchatPopupMenuStrokeColor">?attr/cometchatNeutralColor300</item>
+        <item name="cometchatPopupMenuItemStartIconTint">?attr/cometchatIconTintSecondary</item>
+    </style>
+
     <style name="ConfirmationDialogStyle" parent="CometChatConfirmDialogStyle" />
 
     <style name="DetailsAvatarStyle" parent="CometChatAvatarStyle">

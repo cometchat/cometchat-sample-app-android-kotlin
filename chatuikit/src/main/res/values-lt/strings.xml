@@ -219,4 +219,20 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_no_conversations_history_subtitle">Pradėkite pokalbį paspaudę „Naujas pokalbis“ mygtuką</string>
     <string name="cometchat_new_chat">Naujas pokalbis</string>
     <string name="cometchat_chat_history">Pokalbių istorija</string>
+    <string name="cometchat_messages">Žinutės</string>
+    <string name="cometchat_menu">Meniu</string>
+    <string name="cometchat_menu_search">Paieška</string>
+    <string name="cometchat_menu_conversation_summary">Pokalbio santrauka</string>
+    <string name="cometchat_see_more">Rodyti daugiau</string>
+    <string name="cometchat_no_results">Nėra rezultatų</string>
+    <string name="cometchat_no_matches_found">Nepavyko rasti atitikmenų. Bandykite naudoti kitą paieškos raktažodį.</string>
+    <string name="cometchat_start_your_search">Pradėkite paiešką</string>
+    <string name="cometchat_search_for_conversations_or_messages">Ieškokite pokalbių ar žinučių įrašydami raktažodį aukščiau.</string>
+    <string name="cometchat_unread" translatable="true">Neperskaityta</string>
+    <string name="cometchat_photos" translatable="true">Nuotraukos</string>
+    <string name="cometchat_videos" translatable="true">Vaizdo įrašai</string>
+    <string name="cometchat_audio" translatable="true">Garsas</string>
+    <string name="cometchat_documents" translatable="true">Dokumentai</string>
+    <string name="cometchat_links" translatable="true">Nuorodos</string>
+    <string name="cometchat_details" translatable="true">Detales</string>
 </resources>

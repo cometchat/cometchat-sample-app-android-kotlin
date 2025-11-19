@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ui.fragments.CallsFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_call_details"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/empty_state_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_empty_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/app_no_recordings_found"
+            android:textAlignment="center"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
+            android:textColor="?attr/cometchatTextColorPrimary" />
+
+    </LinearLayout>
+
+</FrameLayout>

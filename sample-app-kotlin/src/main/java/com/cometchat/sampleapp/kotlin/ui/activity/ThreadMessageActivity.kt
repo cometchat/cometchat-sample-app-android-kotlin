@@ -29,6 +29,7 @@ class ThreadMessageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityThreadMessageBinding
     private var user: User? = null
     private var group: Group? = null
+    private var goToMessage: BaseMessage? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +41,12 @@ class ThreadMessageActivity : AppCompatActivity() {
         windowInsetsListener()
 
         val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
+        val goToMessageJson = intent.getStringExtra(getString(R.string.app_go_to_message))
         val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
         try {
+            if (goToMessageJson != null) {
+                goToMessage = BaseMessage.processMessage(JSONObject(goToMessageJson))
+            }
             if (rawMessage != null) {
                 val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
                 viewModel.setParentMessage(parentMessage)
@@ -134,6 +139,7 @@ class ThreadMessageActivity : AppCompatActivity() {
             group = parentMessage.receiver as Group
         }
 
+        if (goToMessage != null) binding.messageList.gotoMessage(goToMessage!!.id)
         binding.tvSubtitle.text = if (user != null) user!!.name else if (group != null) group!!.name else ""
         binding.tvSubtitle.visibility = if (binding.tvSubtitle.text.toString().isEmpty()) View.GONE else View.VISIBLE
         binding.messageList.setParentMessage(parentMessage.id)

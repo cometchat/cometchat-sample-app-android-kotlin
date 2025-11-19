@@ -164,6 +164,16 @@
                     android:id="@+id/rv_message_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:id="@+id/new_messages_pagination_icon"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="8dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/cometchat_loading"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView

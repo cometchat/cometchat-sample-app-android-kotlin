@@ -212,6 +212,13 @@ public class CometChatUIKitHelper {
         }
     }
 
+    public static void onMessageReply(BaseMessage message, @MessageStatus int status) {
+        List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
+        for (CometChatMessageEvents event : events) {
+            event.ccReplyToMessage(message, status);
+        }
+    }
+
     public static void onUserBlocked(User user) {
         List<CometChatUserEvents> events = new ArrayList<>(CometChatUserEvents.userEvents.values());
         for (CometChatUserEvents event : events) {

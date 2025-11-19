@@ -214,4 +214,21 @@
     <string name="cometchat_chat_history">聊天記錄</string>
     <string name="cometchat_ask_anything">提問任何問題</string>
     <string name="cometchat_something_went_wrong_try_again">我們這邊出了點問題，請重試</string>
+    <string name="cometchat_messages">訊息</string>
+    <string name="cometchat_menu">菜單</string>
+    <string name="cometchat_menu_search">搜尋</string>
+    <string name="cometchat_menu_conversation_summary">對話摘要</string>
+    <string name="cometchat_see_more">查看更多</string>
+    <string name="cometchat_no_results">沒有結果</string>
+    <string name="cometchat_no_matches_found">我們無法找到任何匹配項。請嘗試使用不同的搜尋關鍵字。</string>
+    <string name="cometchat_start_your_search">開始搜尋</string>
+    <string name="cometchat_search_for_conversations_or_messages">通過在上方輸入關鍵字來搜尋對話或訊息。</string>
+    <string name="cometchat_unread" translatable="true">未讀</string>
+    <string name="cometchat_photos" translatable="true">照片</string>
+    <string name="cometchat_videos" translatable="true">影片</string>
+    <string name="cometchat_audio" translatable="true">音訊</string>
+    <string name="cometchat_documents" translatable="true">文件</string>
+    <string name="cometchat_links" translatable="true">連結</string>
+    <string name="cometchat_details" translatable="true">詳情</string>
+
 </resources>

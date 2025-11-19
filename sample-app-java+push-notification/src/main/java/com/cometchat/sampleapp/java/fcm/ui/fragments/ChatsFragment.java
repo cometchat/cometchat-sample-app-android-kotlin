@@ -33,6 +33,7 @@ import com.cometchat.sampleapp.java.fcm.databinding.FragmentChatsBinding;
 import com.cometchat.sampleapp.java.fcm.databinding.UserProfilePopupMenuLayoutBinding;
 import com.cometchat.sampleapp.java.fcm.fcm.FCMMessageDTO;
 import com.cometchat.sampleapp.java.fcm.ui.activity.MessagesActivity;
+import com.cometchat.sampleapp.java.fcm.ui.activity.SearchActivity;
 import com.cometchat.sampleapp.java.fcm.ui.activity.SplashActivity;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.utils.MyApplication;
@@ -92,6 +93,12 @@ public class ChatsFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        binding.cometchatConversations.setOnSearchClickListener(() -> {
+            Intent intent = new Intent(getContext(), SearchActivity.class);
+            startActivity(intent);
+        });
+
         // Set the overflow menu (Logout button) in the Conversations view
         handleDeepLinking();
         binding.cometchatConversations.setOverflowMenu(getLogoutView());
@@ -192,45 +199,167 @@ public class ChatsFragment extends Fragment {
 
     private void handleDeepLinking() {
         Bundle args = getArguments();
-        if (args != null) {
-            String notificationType = args.getString(AppConstants.FCMConstants.NOTIFICATION_TYPE);
-            String notificationPayload = args.getString(AppConstants.FCMConstants.NOTIFICATION_PAYLOAD);
-            if (AppConstants.FCMConstants.NOTIFICATION_TYPE_MESSAGE.equals(notificationType)) {
-                FCMMessageDTO fcmMessageDTO = new Gson().fromJson(notificationPayload, FCMMessageDTO.class);
-                boolean isUser = fcmMessageDTO.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER);
-                String uid = isUser ? fcmMessageDTO.getSender() : fcmMessageDTO.getReceiver();
-                if (isUser) {
-                    Repository.getUser(uid, new CometChat.CallbackListener<User>() {
+        if (args == null) return;
+
+        String notificationType = args.getString(AppConstants.FCMConstants.NOTIFICATION_TYPE);
+        String notificationPayload = args.getString(AppConstants.FCMConstants.NOTIFICATION_PAYLOAD);
+
+        if (AppConstants.FCMConstants.NOTIFICATION_TYPE_MESSAGE.equals(notificationType) && notificationPayload != null) {
+            FCMMessageDTO fcmMessage = parseFcmMessage(notificationPayload);
+            if (fcmMessage != null) {
+                handleFcmMessage(fcmMessage);
+            }
+        }
+    }
+
+    /**
+     * Parse FCM message JSON safely.
+     */
+    private FCMMessageDTO parseFcmMessage(String payload) {
+        try {
+            return new Gson().fromJson(payload, FCMMessageDTO.class);
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "Failed to parse FCMMessageDTO: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Handle routing based on FCM message type.
+     */
+    private void handleFcmMessage(FCMMessageDTO fcmMessage) {
+        boolean isUser = CometChatConstants.RECEIVER_TYPE_USER.equals(fcmMessage.getReceiverType());
+        String uid = isUser ? fcmMessage.getSender() : fcmMessage.getReceiver();
+        String messageId = fcmMessage.getTag();
+
+        if (uid == null) return;
+
+        if (isUser) {
+            handleUserMessage(uid, messageId);
+        } else {
+            handleGroupMessage(uid, messageId);
+        }
+    }
+
+    /**
+     * Fetch user info and navigate.
+     */
+    private void handleUserMessage(String uid, @Nullable String messageId) {
+        Repository.getUser(uid, new CometChat.CallbackListener<User>() {
+            @Override
+            public void onSuccess(User user) {
+                if (messageId != null) {
+                    fetchMessageAndNavigate(user, messageId);
+                } else {
+                    navigateToUserChat(user, null, null);
+                }
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                showToast(e.getMessage());
+                CometChatLogger.e(TAG, e.toString());
+            }
+        });
+    }
+
+    /**
+     * Fetch group info and navigate.
+     */
+    private void handleGroupMessage(String uid, String messageId) {
+        Repository.getGroup(uid, new CometChat.CallbackListener<Group>() {
+            @Override
+            public void onSuccess(Group group) {
+                if (messageId != null) {
+                    Repository.fetchMessageInformation(Long.parseLong(messageId), new CometChat.CallbackListener<BaseMessage>() {
                         @Override
-                        public void onSuccess(User user) {
-                            Intent intent = new Intent(requireContext(), MessagesActivity.class);
-                            intent.putExtra(getString(R.string.app_user), new Gson().toJson(user));
-                            startActivity(intent);
+                        public void onSuccess(BaseMessage baseMessage) {
+                            navigateToGroupChat(group, baseMessage);
                         }
 
                         @Override
                         public void onError(CometChatException e) {
-                            Toast.makeText(requireContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                             CometChatLogger.e(TAG, e.toString());
+                            navigateToGroupChat(group, null);
                         }
                     });
                 } else {
-                    Repository.getGroup(uid, new CometChat.CallbackListener<Group>() {
+                    navigateToGroupChat(group, null);
+                }
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                showToast(e.getMessage());
+                CometChatLogger.e(TAG, e.toString());
+            }
+        });
+    }
+
+
+    /**
+     * Fetch message and parent message if exists, then navigate.
+     */
+    private void fetchMessageAndNavigate(User user, String messageId) {
+        Repository.fetchMessageInformation(Long.parseLong(messageId), new CometChat.CallbackListener<BaseMessage>() {
+            @Override
+            public void onSuccess(BaseMessage baseMessage) {
+                if (baseMessage != null && baseMessage.getParentMessageId() != 0 && "@agentic".equals(user.getRole())) {
+                    Repository.fetchMessageInformation(baseMessage.getParentMessageId(), new CometChat.CallbackListener<BaseMessage>() {
                         @Override
-                        public void onSuccess(Group group) {
-                            Intent intent = new Intent(getContext(), MessagesActivity.class);
-                            intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
-                            startActivity(intent);
+                        public void onSuccess(BaseMessage parentMessage) {
+                            navigateToUserChat(user, parentMessage, baseMessage);
                         }
 
                         @Override
                         public void onError(CometChatException e) {
-                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                             CometChatLogger.e(TAG, e.toString());
+                            navigateToUserChat(user, null, baseMessage);
                         }
                     });
+                } else {
+                    navigateToUserChat(user, null, baseMessage);
                 }
             }
+
+            @Override
+            public void onError(CometChatException e) {
+                CometChatLogger.e(TAG, e.toString());
+                navigateToUserChat(user, null, null);
+            }
+        });
+    }
+
+    /**
+     * Navigation helpers
+     */
+    private void navigateToUserChat(User user, @Nullable BaseMessage parentMessage, BaseMessage goToMessage) {
+        Intent intent = new Intent(getContext(), MessagesActivity.class);
+        intent.putExtra(getString(R.string.app_user), user != null ? user.toJson().toString() : null);
+        if (goToMessage != null)
+            intent.putExtra(getString(R.string.app_go_to_message), goToMessage.getRawMessage().toString());
+        if (parentMessage != null) {
+            intent.putExtra(getString(R.string.app_base_message), parentMessage.getRawMessage().toString());
         }
+
+        startActivity(intent);
+    }
+
+    private void navigateToGroupChat(Group group, BaseMessage goToMessage) {
+        Intent intent = new Intent(requireContext(), MessagesActivity.class);
+        intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+
+        if (goToMessage != null) {
+            intent.putExtra(getString(R.string.app_go_to_message), goToMessage.getRawMessage().toString());
+        }
+
+        startActivity(intent);
+    }
+
+    /**
+     * Generic error handler.
+     */
+    private void showToast(@Nullable String message) {
+        Toast.makeText(getContext(), message != null ? message : "Unknown error", Toast.LENGTH_SHORT).show();
     }
 }

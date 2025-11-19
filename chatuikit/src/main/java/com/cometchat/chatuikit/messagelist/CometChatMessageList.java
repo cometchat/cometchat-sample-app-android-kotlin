@@ -1,5 +1,9 @@
 package com.cometchat.chatuikit.messagelist;
 
+import android.app.Activity;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -18,6 +22,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +43,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -59,6 +65,7 @@ import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.shared.constants.MessageStatus;
 import com.cometchat.chatuikit.shared.interfaces.ToolCallListener;
 import com.cometchat.chatuikit.shared.ai.CometChatAIStreamService;
 import com.cometchat.chatuikit.logger.CometChatLogger;
@@ -90,7 +97,10 @@ import com.cometchat.chatuikit.shared.resources.utils.MediaUtils;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatConfirmDialog;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderDecoration;
+import com.cometchat.chatuikit.shared.resources.utils.swipetoreply.SwipeActions;
+import com.cometchat.chatuikit.shared.resources.utils.swipetoreply.SwipeController;
 import com.cometchat.chatuikit.shared.views.aiconversationstarter.CometChatAIConversationStarterView;
+import com.cometchat.chatuikit.shared.views.aiconversationsummary.view.CometChatAIConversationSummaryView;
 import com.cometchat.chatuikit.shared.views.aismartreplies.CometChatAISmartRepliesView;
 import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar;
 import com.cometchat.chatuikit.shared.views.badge.CometChatBadge;
@@ -172,6 +182,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private CometChatSoundManager soundManager;
     // Message and Template Management
     private BaseMessage baseMessage;
+    private long gotoMessageId;
     private CometChatMessageBubble messageBubble;
     private CometChatMessageTemplate messageTemplate;
     private List<CometChatMessageOption> customOption = new ArrayList<>();
@@ -184,9 +195,13 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private boolean autoFetch = true;
     private boolean isAgentChat = false;
     private boolean hasMore;
+    private boolean hasMoreNewMessages;
+    private boolean hasMorePreviousMessages;
     private boolean isScrolling;
     private boolean isInProgress;
     private boolean scrollToBottomOnNewMessage;
+    private boolean swipeToReplyEnabled = true;
+    private ItemTouchHelper itemTouchHelper;
     // UI Components - Headers, Footers, and Indicators
     private LinearLayout headerView, footerView;
     private MaterialCardView newMessageLayout;
@@ -260,6 +275,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private LinearLayout customViewLayout, errorViewLayout, aiAssistantEmptyChatGreetingLayout;
     private LinearLayout parent;
     private ImageView paginationLoadingIcon;
+    private ImageView newMessagesPaginationIcon;
     // Styles
     private @StyleRes int incomingMessageBubbleStyle;
     private @StyleRes int outgoingMessageBubbleStyle;
@@ -327,6 +343,17 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             messageListViewModel.addReaction(baseMessage, emoji);
         }
     };
+
+    SwipeController controller = new SwipeController(getContext(), new SwipeActions() {
+        @Override
+        public void onSwipePerformed(int position) {
+            BaseMessage message = messageAdapter.getBaseMessageList().get(position);
+            if (message != null) {
+                CometChatUIKitHelper.onMessageReply(message, MessageStatus.IN_PROGRESS);
+            }
+        }
+    });
+
     /**
      * onReactionLongClick is an interface that provides methods to handle long click on reaction
      */
@@ -334,8 +361,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     /**
      * onAddMoreReactionsClick is an interface that provides methods to handle click on add more reactions
      */
-    private OnAddMoreReactionsClick onAddMoreReactionsClick = baseMessage -> openReactionListBottomSheet(getContext().getString(R.string.cometchat_all),
-                                                                                                         baseMessage);
+    private OnAddMoreReactionsClick onAddMoreReactionsClick = baseMessage -> openReactionListBottomSheet(getContext().getString(R.string.cometchat_all), baseMessage);
+
+    // AI Conversation Summary
+    private boolean enableConversationSummary = false;
+    private CometChatAIConversationSummaryView aiConversationSummaryView;
+    private @StyleRes int conversationSummaryStyle = 0;
+    private int unreadMessageThreshold = 30;
+
     private List<String> smartRepliesKeywords;
     private int smartRepliesDelayDuration;
     private CometChatAISmartRepliesView aiSmartRepliesView;
@@ -468,6 +501,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         setQuickReactions(Arrays.asList(Utils.getDefaultReactionsList()));
         initializeSmartRepliesView();
         initializeConversationStarterView();
+        initializeConversationSummaryView();
         processMentionsFormatter();
 
         // Set up RecyclerView for the chat list
@@ -511,6 +545,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
 
         // Initialize pagination loading icon
         paginationLoadingIcon = view.findViewById(R.id.paginating_icon);
+        newMessagesPaginationIcon = view.findViewById(R.id.new_messages_pagination_icon);
         parent = view.findViewById(R.id.parent);
 
         // Hide header date initially
@@ -543,11 +578,35 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         });
 
+        itemTouchHelper = new ItemTouchHelper(controller);
+        if (swipeToReplyEnabled) {
+            itemTouchHelper.attachToRecyclerView(rvChatListView);
+        }
+        controller.setAdapter(messageAdapter);
+
         newMessageLayout.setOnClickListener(v -> {
             newMessageCount = 0;
             if (isScrolling) rvChatListView.stopScroll();
-            scrollToBottom();
+            messageListViewModel.resetMessageRequest();
+            messageListViewModel.clear();
+            messageListViewModel.fetchMessages();
             newMessageLayout.setVisibility(GONE);
+        });
+
+        additionParameter.setOnMessagePreviewClick((messagePreview, position, message) -> {
+            if (messageListViewModel.getMessageList().contains(message)) {
+                int index = messageListViewModel.getMessageList().indexOf(message);
+                if (linearLayoutManager != null) {
+                    if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
+                        if (isScrolling) rvChatListView.stopScroll();
+                        int centerOffset = rvChatListView.getHeight() / 2;
+                        linearLayoutManager.scrollToPositionWithOffset(index, centerOffset);
+                        messageAdapter.notifyDataSetChanged();
+                        setHighlightMessageId(message.getId(), index);
+                    }
+                }
+            } else
+                messageListViewModel.goToMessage(message.getId());
         });
     }
 
@@ -564,6 +623,85 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             CometChatUIKitHelper.onComposeMessage(id, reply);
             detachedAIConversationStarterView();
         });
+    }
+
+    /**
+     *  Initializes the AI Smart Replies view and sets its layout parameters and click handler.
+     */
+    private void initializeConversationSummaryView() {
+        aiConversationSummaryView = new CometChatAIConversationSummaryView(getContext());
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(
+                Utils.convertDpToPx(getContext(), 10),
+                getResources().getDimensionPixelSize(R.dimen.cometchat_margin_2),
+                Utils.convertDpToPx(getContext(), 10),
+                Utils.convertDpToPx(getContext(), 10));
+        aiConversationSummaryView.setLayoutParams(layoutParams);
+
+        // Set close button click handler
+        aiConversationSummaryView.setOnCloseClick(view -> detachedAIConversationSummaryView());
+    }
+
+    public void generateConversationSummary() {
+        messageListViewModel.fetchConversationSummary();
+    }
+
+    public void handleConversationSummaryUIState(UIKitConstants.States states) {
+        switch (states) {
+            case LOADING:
+                aiConversationSummaryView.showLoadingView();
+                attachAIConversationSummaryView();
+                break;
+            case LOADED:
+                // Summary is set via separate observer
+                break;
+            case ERROR:
+                aiConversationSummaryView.showErrorView();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void attachAIConversationSummaryView() {
+        setFooterView(aiConversationSummaryView);
+    }
+
+    public void detachedAIConversationSummaryView() {
+        footerView.removeView(aiConversationSummaryView);
+    }
+
+    private void setConversationSummary(String summary) {
+        aiConversationSummaryView.setSummary(summary);
+    }
+
+    public boolean isEnableConversationSummary() {
+        return enableConversationSummary;
+    }
+
+    public void setEnableConversationSummary(boolean enableConversationSummary) {
+        this.enableConversationSummary = enableConversationSummary;
+        messageListViewModel.setEnableConversationSummary(enableConversationSummary);
+    }
+
+    public void setUnreadMessageThreshold(int unreadTresHold) {
+        this.unreadMessageThreshold = unreadTresHold;
+        messageListViewModel.setUnreadThreshold(unreadTresHold);
+    }
+
+    public int getUnreadMessageThreshold() {
+        return unreadMessageThreshold;
+    }
+
+    public int getAIConversationSummaryStyle() {
+        return conversationSummaryStyle;
+    }
+
+    public void setAIConversationSummaryStyle(@StyleRes int styleResId) {
+        this.conversationSummaryStyle = styleResId;
+        aiConversationSummaryView.setStyle(styleResId);
     }
 
     /**
@@ -593,7 +731,78 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getRemoveConversationStarter().observe(lifecycleOwner, this::removeAIView);
         messageListViewModel.getConversationStarterUIState().observe(lifecycleOwner, this::handleConversationStarterUIState);
         messageListViewModel.getSmartRepliesUIState().observe(lifecycleOwner, this::handleAISmartRepliesUIState);
+        messageListViewModel.messagesRangeChangedAtEnd().observe(lifecycleOwner, this::notifyRangeChangedAtEnd);
+        messageListViewModel.getMutableHasMoreNewMessages().observe(lifecycleOwner, this::hasMoreNewMessages);
+        messageListViewModel.getMutableHasMorePreviousMessages().observe(lifecycleOwner, this::hasMorePreviousMessages);
+        messageListViewModel.getScrollToMessageId().observe(lifecycleOwner, this::scrollToMessageId);
+        messageListViewModel.getMutableConversationSummary().observe(lifecycleOwner, this::setConversationSummary);
+        messageListViewModel.getRemoveConversationSummary().observe(lifecycleOwner, this::removeAIView);
+        messageListViewModel.getConversationSummaryUIState().observe(lifecycleOwner, this::handleConversationSummaryUIState);
     }
+
+    public void scrollToMessageId(long messageId) {
+        if (messageId == 0) return;
+        if (messageAdapter != null) {
+            int position = messageAdapter.findPositionById(messageId);
+            if (position >= 0) {
+                if (isScrolling) rvChatListView.stopScroll();
+                int centerOffset = rvChatListView.getHeight() / 2;
+                linearLayoutManager.scrollToPositionWithOffset(position, centerOffset);
+                messageAdapter.notifyDataSetChanged();
+                setHighlightMessageId(messageId, position);
+
+            }
+        }
+    }
+
+    /**
+     * Sets the highlight on a specific message by its ID and initiates a fade-out
+     * animation after a delay.
+     *
+     * @param messageId The ID of the message to be highlighted.
+     * @param position The position of the message in the adapter.
+     */
+    private void setHighlightMessageId(long messageId, int position) {
+        messageAdapter.setHighlightedMessage(messageId, position);
+        fadeOutMessageHighlight(position);
+    }
+
+    /**
+     * Initiates a fade-out animation for the highlighted message.
+     * The animation gradually reduces the highlight effect over a duration of 1 second.
+     */
+    private void fadeOutMessageHighlight(int position) {
+        if (messageAdapter != null) {
+            ValueAnimator fadeOut = ValueAnimator.ofFloat(1f, 0f);
+            fadeOut.setDuration(2000);
+            fadeOut.setInterpolator(new DecelerateInterpolator());
+            fadeOut.addUpdateListener(animation -> {
+                float alpha = (float) animation.getAnimatedValue();
+                if (messageAdapter != null)
+                    messageAdapter.updateHighlightAlpha(alpha, position);
+            });
+
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (messageAdapter != null) {
+                        messageAdapter.clearHighlight(position);
+                    }
+                }
+            });
+
+            fadeOut.start();
+        }
+    }
+
+    private void hasMorePreviousMessages(Boolean aBoolean) {
+        this.hasMorePreviousMessages = aBoolean;
+    }
+
+    private void hasMoreNewMessages(Boolean aBoolean) {
+        this.hasMoreNewMessages = aBoolean;
+    }
+
 
     private void messageDeleted(BaseMessage message) {
         if (baseMessage != null && message != null && baseMessage.getId() == message.getId()) {
@@ -665,6 +874,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         if (aBoolean) {
             detachedAISmartRepliesView();
             detachedAIConversationStarterView();
+            detachedAIConversationSummaryView();
         }
     }
 
@@ -689,15 +899,21 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * Handles the scrolling behavior of the RecyclerView.
      */
     private void handleScroll() {
-        if (hasMore && !isInProgress) {
+        if (hasMorePreviousMessages || hasMoreNewMessages && !isInProgress) {
             if (linearLayoutManager.findLastVisibleItemPosition() == (messageAdapter.getItemCount() - 1) || !rvChatListView.canScrollVertically(1)) {
                 messageListViewModel.markLastMessageAsRead(messageListViewModel.getLastMessage());
             }
-            if (isScrolling && linearLayoutManager.findFirstVisibleItemPosition() == 0 || !rvChatListView.canScrollVertically(-1)) {
+
+            if (hasMorePreviousMessages && isScrolling && (linearLayoutManager.findFirstVisibleItemPosition() == 0 || !rvChatListView.canScrollVertically(-1))) {
                 isInProgress = true;
                 isScrolling = false;
                 paginationLoadingIcon.setVisibility(VISIBLE);
                 messageListViewModel.fetchMessages();
+            } else if (hasMoreNewMessages && isScrolling && (linearLayoutManager.findLastVisibleItemPosition() == (messageAdapter.getItemCount() - 1) || !rvChatListView.canScrollVertically(1))) {
+                isInProgress = true;
+                isScrolling = false;
+                newMessagesPaginationIcon.setVisibility(VISIBLE);
+                messageListViewModel.fetchNextMessages();
             }
         }
 
@@ -771,6 +987,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             setAISmartRepliesStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAISmartRepliesStyle, 0));
             setAIConversationStarterStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAIConversationStarterStyle, 0));
             if (backgroundDrawable != null) setBackgroundDrawable(backgroundDrawable);
+            setAIConversationSummaryStyle(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListAIConversationSummaryStyle, 0));
         } finally {
             typedArray.recycle();
         }
@@ -797,6 +1014,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 additionParameter.setIncomingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle, 0));
                 additionParameter.setIncomingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle, 0));
                 additionParameter.setAIAssistantMessageBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatAIAssistantBubbleStyle, 0));
+                additionParameter.setIncomingReplyMessagePreviewStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometChatMessagePreviewStyle, 0));
                 setIncomingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle, 0));
             } else {
                 additionParameter.setOutgoingTextBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatTextBubbleStyle, 0));
@@ -808,6 +1026,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 additionParameter.setOutgoingPollBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatPollBubbleStyle, 0));
                 additionParameter.setOutgoingCollaborativeBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatCollaborativeBubbleStyle, 0));
                 additionParameter.setOutgoingMeetCallBubbleStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMeetCallBubbleStyle, 0));
+                additionParameter.setOutgoingReplyMessagePreviewStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometChatMessagePreviewStyle, 0));
                 setOutgoingMessageBubbleMentionsStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatMessageBubbleMentionsStyle, 0));
                 setModerationViewStyle(typedArray.getResourceId(R.styleable.CometChatMessageBubble_cometchatModerationViewStyle, 0));
             }
@@ -862,6 +1081,33 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void setEnableSmartReplies(boolean enableSmartReplies) {
         this.enableSmartReplies = enableSmartReplies;
         messageListViewModel.setEnableSmartReplies(enableSmartReplies);
+    }
+
+    /**
+     * Sets whether swipe to reply functionality is enabled or disabled.
+     * When disabled, users cannot swipe on messages to reply to them.
+     *
+     * @param swipeToReplyEnabled true to enable swipe to reply, false to disable
+     */
+    public void setSwipeToReplyEnabled(boolean swipeToReplyEnabled) {
+        this.swipeToReplyEnabled = swipeToReplyEnabled;
+
+        if (itemTouchHelper != null && rvChatListView != null) {
+            if (swipeToReplyEnabled) {
+                itemTouchHelper.attachToRecyclerView(rvChatListView);
+            } else {
+                itemTouchHelper.attachToRecyclerView(null);
+            }
+        }
+    }
+
+    /**
+     * Gets the current state of swipe to reply functionality.
+     *
+     * @return true if swipe to reply is enabled, false if disabled
+     */
+    public boolean isSwipeToReplyEnabled() {
+        return swipeToReplyEnabled;
     }
 
     public List<String> getSmartRepliesKeywords() {
@@ -1178,6 +1424,18 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
+     * Notifies the adapter of a range of new items that have been inserted at the end
+     * of the data set (for pagination when scrolling down).
+     *
+     * @param finalRange the number of new items added to the adapter at the end
+     */
+    public void notifyRangeChangedAtEnd(int finalRange) {
+        int insertPosition = messageAdapter.getItemCount() - finalRange;
+        messageAdapter.notifyItemRangeInserted(insertPosition, finalRange);
+        newMessagesPaginationIcon.setVisibility(GONE);
+    }
+
+    /**
      * Notifies the adapter that a specific item has been removed.
      *
      * @param integer the position of the item to be removed
@@ -1481,13 +1739,23 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
             bottomSheetDialog.dismiss();
         }
+        try {
+            AudioPlayer.getInstance().stop();
+            messageListViewModel.removeListener();
+            disposeObservers();
+            messageListViewModel = null;
+            lifecycleOwner = null;
+            messageAdapter = null;
+        } catch (Exception e) {
+            messageListViewModel = null;
+            lifecycleOwner = null;
+            messageAdapter = null;
+            CometChatLogger.e(TAG, e.getMessage());
+        }
         super.onDetachedFromWindow();
-        AudioPlayer.getInstance().stop();
-        dispose();
     }
 
-    private void dispose() {
-        messageListViewModel.removeListener();
+    private void disposeObservers() {
         if (lifecycleOwner != null) {
             messageListViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
             messageListViewModel.messagesRangeChanged().removeObservers(lifecycleOwner);
@@ -1510,10 +1778,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             messageListViewModel.getRemoveConversationStarter().removeObservers(lifecycleOwner);
             messageListViewModel.getConversationStarterUIState().removeObservers(lifecycleOwner);
             messageListViewModel.getSmartRepliesUIState().removeObservers(lifecycleOwner);
+            messageListViewModel.messagesRangeChangedAtEnd().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMoreNewMessages().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMorePreviousMessages().removeObservers(lifecycleOwner);
+            messageListViewModel.getScrollToMessageId().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableConversationSummary().removeObservers(lifecycleOwner);
+            messageListViewModel.getRemoveConversationSummary().removeObservers(lifecycleOwner);
+            messageListViewModel.getConversationSummaryUIState().removeObservers(lifecycleOwner);
         }
-        messageListViewModel = null;
-        lifecycleOwner = null;
-        messageAdapter = null;
     }
 
     /**
@@ -1579,6 +1851,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             customViewLayout.removeAllViews();
             customViewLayout.addView(customLoadingView);
         } else {
+            messageListLayout.setVisibility(View.GONE);
             setAIAssistantEmptyStateVisibility();
             CometChatShimmerAdapter adapter = new CometChatShimmerAdapter(2, R.layout.cometchat_shimmer_message_list);
             shimmerRecyclerviewMessageListList.setAdapter(adapter);
@@ -1651,6 +1924,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         } else {
             paginationLoadingIcon.setVisibility(GONE);
+            newMessagesPaginationIcon.setVisibility(GONE);
         }
     }
 
@@ -1887,6 +2161,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void scrollToBottom() {
         if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
             linearLayoutManager.scrollToPositionWithOffset(messageAdapter.getItemCount() - 1, -1000000000);
+            messageAdapter.notifyDataSetChanged();
             markLastMessageAsRead();
         }
     }
@@ -2219,6 +2494,13 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    public void gotoMessage(long gotoMessageId) {
+        if (gotoMessageId != 0) {
+            this.gotoMessageId = gotoMessageId;
+        }
+    }
+
+
     /**
      * Opens a bottom sheet for message options.
      *
@@ -2371,6 +2653,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             case UIKitConstants.MessageOption.EDIT:
                 messageListViewModel.onMessageEdit(baseMessage);
                 break;
+            case UIKitConstants.MessageOption.REPLY_TO_MESSAGE:
+                messageListViewModel.onMessageReply(baseMessage);
+                break;
         }
     }
 
@@ -2387,6 +2672,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * user.
      */
     public void showMessageInformation() {
+        Activity activity = Utils.getActivity(getContext());
         cometchatMessageInformation = new CometChatMessageInformation();
         cometchatMessageInformation.init(getContext(), baseMessage);
         cometchatMessageInformation.setStyle(messageInformationStyle);
@@ -2403,7 +2689,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             return threadHeader;
         });
         cometchatMessageInformation.setBottomSheetListener(() -> cometchatMessageInformation = null);
-        cometchatMessageInformation.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "CometChatMessageInformation");
+        try {
+            if (Utils.isActivityUsable(activity) && activity instanceof AppCompatActivity) {
+                cometchatMessageInformation.show(((AppCompatActivity) activity).getSupportFragmentManager(), "CometChatMessageInformation");
+            } else {
+                CometChatLogger.e(TAG, "Activity is not usable to show Message Information");
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "Error showing message information: " + e.getMessage());
+        }
     }
 
     /**
@@ -2595,7 +2889,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             messageListViewModel.setUser(user,
                                          new ArrayList<>(messageTypesToRetrieve.values()),
                                          new ArrayList<>(messageCategoriesToRetrieve.values()),
-                                         parentMessageId, isAgentChat);
+                                         parentMessageId, isAgentChat, gotoMessageId);
             if (isAgentChat) {
                 handleEmptyState();
                 setStickyDateVisibility(View.GONE);
@@ -2603,8 +2897,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                     messageListViewModel.fetchMessages();
                 }
             } else {
-                if (autoFetch)
+                if (autoFetch && gotoMessageId == 0) {
                     messageListViewModel.fetchMessagesWithUnreadCount();
+                } else {
+                    messageListViewModel.goToMessage(gotoMessageId);
+                }
             }
             aiConversationStarterView.setUid(user.getUid());
             aiSmartRepliesView.setUid(user.getUid());
@@ -2637,8 +2934,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             messageListViewModel.setGroup(group,
                                           new ArrayList<>(messageTypesToRetrieve.values()),
                                           new ArrayList<>(messageCategoriesToRetrieve.values()),
-                                          parentMessageId);
-            if (autoFetch) messageListViewModel.fetchMessagesWithUnreadCount();
+                                          parentMessageId, gotoMessageId);
+            if (autoFetch && gotoMessageId == 0) messageListViewModel.fetchMessagesWithUnreadCount();
+            else messageListViewModel.goToMessage(gotoMessageId);
             aiConversationStarterView.setUid(group.getGuid());
             aiSmartRepliesView.setUid(group.getGuid());
             processFormatters();

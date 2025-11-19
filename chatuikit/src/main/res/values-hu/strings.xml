@@ -220,4 +220,20 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_no_conversations_history_subtitle">Kezdje el a csevegést a \'Új csevegés\' gombra kattintva</string>
     <string name="cometchat_new_chat">Új csevegés</string>
     <string name="cometchat_chat_history">Chat előzményei</string>
+    <string name="cometchat_messages">Üzenetek</string>
+    <string name="cometchat_menu">Menü</string>
+    <string name="cometchat_menu_search">Keresés</string>
+    <string name="cometchat_menu_conversation_summary">Beszélgetés összefoglalója</string>
+    <string name="cometchat_see_more">Tovább</string>
+    <string name="cometchat_no_results">Nincsenek eredmények</string>
+    <string name="cometchat_no_matches_found">Nem találtunk egyezéseket. Kérjük, próbáljon meg más keresőszót.</string>
+    <string name="cometchat_start_your_search">Kezdje el a keresést</string>
+    <string name="cometchat_search_for_conversations_or_messages">Keresés beszélgetések vagy üzenetek között a fenti kulcsszó beírásával.</string>
+    <string name="cometchat_unread" translatable="true">Olvasatlan</string>
+    <string name="cometchat_photos" translatable="true">Fotók</string>
+    <string name="cometchat_videos" translatable="true">Videók</string>
+    <string name="cometchat_audio" translatable="true">Audió</string>
+    <string name="cometchat_documents" translatable="true">Dokumentumok</string>
+    <string name="cometchat_links" translatable="true">Hivatkozások</string>
+    <string name="cometchat_details" translatable="true">Részletek</string>
 </resources>

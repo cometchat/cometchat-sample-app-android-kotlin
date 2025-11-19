@@ -15,6 +15,7 @@ import androidx.annotation.StringDef;
 import androidx.annotation.StyleRes;
 
 import com.cometchat.chatuikit.databinding.CometchatSearchBoxBinding;
+import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 
@@ -33,6 +34,7 @@ public class CometChatSearchBox extends MaterialCardView {
     private @ColorInt int searchInputStartIconTint;
     private @ColorInt int searchInputEndIconTint;
     private OnSearch eventListener;
+    private OnClick onSearchClick;
 
     public CometChatSearchBox(@NonNull Context context) {
         this(context, null);
@@ -96,6 +98,22 @@ public class CometChatSearchBox extends MaterialCardView {
                 eventListener.onSearch(SearchState.Clear, "");
             }
         });
+
+        binding.searchBoxParent.setOnClickListener( view -> {
+            if (onSearchClick != null) {
+                onSearchClick.onClick();
+            }
+        });
+
+        binding.etSearch.setOnClickListener( view -> {
+            if (onSearchClick != null) {
+                onSearchClick.onClick();
+            }
+        });
+    }
+
+    public void setOnSearchClick(OnClick onSearchClick) {
+        this.onSearchClick = onSearchClick;
     }
 
     public void setSearchInputEndIconVisibility(int visibility) {

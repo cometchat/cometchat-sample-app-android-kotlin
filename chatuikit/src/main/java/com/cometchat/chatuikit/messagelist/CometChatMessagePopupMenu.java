@@ -328,7 +328,10 @@ class CometChatMessagePopupMenu {
         relativeParam.topMargin = Utils.convertDpToPx(context, 0);
         cardView.setLayoutParams(relativeParam);
         // Show the popup window at the calculated position
-        dimBackground((Activity) context);
+        Activity activity = Utils.getActivity(context);
+        if (Utils.isActivityUsable(activity)) {
+            dimBackground(activity);
+        }
 
         popupWindow.showAtLocation(anchorView,
                                    Gravity.TOP | Gravity.CENTER,
@@ -336,7 +339,11 @@ class CometChatMessagePopupMenu {
                                    (location[1] - 1000) > 550 ? (location[1] - 1000) : Math.max(Math.max(-(location[1] - 500), location[1] - 500),
                                                                                                 300));
 
-        popupWindow.setOnDismissListener(() -> removeDimBackground((Activity) context));
+        popupWindow.setOnDismissListener(() -> {
+            if (Utils.isActivityUsable(activity)) {
+                removeDimBackground(activity);
+            }
+        });
         popupView.setOnTouchListener((v, event) -> {
             dismiss();
             return true;

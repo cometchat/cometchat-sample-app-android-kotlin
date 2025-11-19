@@ -54,9 +54,8 @@
 
                     <LinearLayout
                         android:id="@+id/reply_bubble"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
                         android:orientation="vertical" />
 
                     <LinearLayout

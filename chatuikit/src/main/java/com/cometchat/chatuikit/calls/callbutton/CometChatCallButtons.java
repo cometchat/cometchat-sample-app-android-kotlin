@@ -25,6 +25,7 @@ import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CometChatCallActivity;
 import com.cometchat.chatuikit.calls.outgoingcall.OutgoingCallConfiguration;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.interfaces.Function3;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.button.CometChatButton;
@@ -347,19 +348,23 @@ public class CometChatCallButtons extends MaterialCardView {
      */
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            callButtonsViewModel.removeListener();
+            disposeObservers();
+            callButtonsViewModel = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
+    private void disposeObservers() {
         // Remove listeners to prevent memory leaks when the view is detached
-        callButtonsViewModel.removeListener();
         if (lifecycleOwner != null) {
             callButtonsViewModel.getCallInitiated().removeObservers(lifecycleOwner);
             callButtonsViewModel.getStartDirectCall().removeObservers(lifecycleOwner);
         }
-        callButtonsViewModel = null;
-        lifecycleOwner = null;
     }
 
     /**

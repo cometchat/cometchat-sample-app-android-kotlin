@@ -213,4 +213,20 @@
     <string name="cometchat_no_conversations_history_subtitle">Start een chat door op de knop \'Nieuwe chat\' te tikken</string>
     <string name="cometchat_new_chat">Nieuwe chat</string>
     <string name="cometchat_chat_history">Chatgeschiedenis</string>
+    <string name="cometchat_messages">Berichten</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Zoeken</string>
+    <string name="cometchat_menu_conversation_summary">Gespreks Samenvatting</string>
+    <string name="cometchat_see_more">Meer weergeven</string>
+    <string name="cometchat_no_results">Geen resultaten</string>
+    <string name="cometchat_no_matches_found">We konden geen resultaten vinden. Probeer een ander zoekwoord.</string>
+    <string name="cometchat_start_your_search">Begin je zoekopdracht</string>
+    <string name="cometchat_search_for_conversations_or_messages">Zoek naar gesprekken of berichten door boven een zoekwoord in te typen.</string>
+    <string name="cometchat_unread" translatable="true">Ongelezen</string>
+    <string name="cometchat_photos" translatable="true">Foto\'s</string>
+    <string name="cometchat_videos" translatable="true">Video\'s</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Documenten</string>
+    <string name="cometchat_links" translatable="true">Links</string>
+    <string name="cometchat_details" translatable="true">Details</string>
 </resources>

@@ -6,13 +6,14 @@ import android.view.View;
 import androidx.annotation.ColorInt;
 import androidx.annotation.StyleRes;
 
+import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
+import com.cometchat.chatuikit.shared.interfaces.OnItemClick;
 
 import java.util.List;
 
 public class AdditionParameter {
     private static final String TAG = AdditionParameter.class.getSimpleName();
-
 
     private List<CometChatTextFormatter> textFormatters;
     private int videoCallButtonVisibility = View.VISIBLE;
@@ -30,6 +31,7 @@ public class AdditionParameter {
     private int stickersButtonVisibility = View.VISIBLE;
 
     private int replyInThreadOptionVisibility = View.VISIBLE;
+    private int replyToMessageOptionVisibility = View.VISIBLE;
     private int translateMessageOptionVisibility = View.VISIBLE;
     private int copyMessageOptionVisibility = View.VISIBLE;
     private int editMessageOptionVisibility = View.VISIBLE;
@@ -40,6 +42,7 @@ public class AdditionParameter {
     private int groupActionMessageVisibility = View.VISIBLE;
     private int moderationViewVisibility = View.VISIBLE;
 
+    private OnItemClick<BaseMessage> onMessagePreviewClick;
 
     private @StyleRes int incomingDeleteBubbleStyle;
     private @StyleRes int outgoingDeleteBubbleStyle;
@@ -90,6 +93,8 @@ public class AdditionParameter {
     private Drawable activeStickerIcon;
     private @ColorInt int activeAuxiliaryIconTint;
     private @StyleRes int aiAssistantMessageBubbleStyle;
+    private @StyleRes int outgoingMessagePreviewStyle;
+    private @StyleRes int incomingMessagePreviewStyle;
 
     public @StyleRes int getIncomingTextBubbleStyle() {
         return incomingTextBubbleStyle;
@@ -561,5 +566,37 @@ public class AdditionParameter {
 
     public void setAIAssistantMessageBubbleStyle(int aiAssistantMessageBubbleStyle) {
         this.aiAssistantMessageBubbleStyle = aiAssistantMessageBubbleStyle;
+    }
+
+    public int getReplyToMessageOptionVisibility() {
+        return replyToMessageOptionVisibility;
+    }
+
+    public void setReplyToMessageOptionVisibility(int replyToMessageOptionVisibility) {
+        this.replyToMessageOptionVisibility = replyToMessageOptionVisibility;
+    }
+
+    public int getIncomingReplyMessagePreviewStyle() {
+        return incomingMessagePreviewStyle;
+    }
+
+    public void setIncomingReplyMessagePreviewStyle(int resourceId) {
+        this.incomingMessagePreviewStyle = resourceId;
+    }
+
+    public int getOutgoingReplyMessagePreviewStyle() {
+        return outgoingMessagePreviewStyle;
+    }
+
+    public void setOutgoingReplyMessagePreviewStyle(int resourceId) {
+        this.outgoingMessagePreviewStyle = resourceId;
+    }
+
+    public OnItemClick<BaseMessage> getOnMessagePreviewClick() {
+        return onMessagePreviewClick;
+    }
+
+    public void setOnMessagePreviewClick(OnItemClick<BaseMessage> onMessagePreviewClick) {
+        this.onMessagePreviewClick = onMessagePreviewClick;
     }
 }

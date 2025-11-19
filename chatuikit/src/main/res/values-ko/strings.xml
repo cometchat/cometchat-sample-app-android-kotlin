@@ -213,4 +213,20 @@
     <string name="cometchat_no_conversations_history_subtitle">\'새로운 채팅\' 버튼을 눌러 채팅을 시작하세요</string>
     <string name="cometchat_new_chat">새로운 채팅</string>
     <string name="cometchat_chat_history">" 채팅 기록"</string>
+    <string name="cometchat_messages">메시지</string>
+    <string name="cometchat_menu">메뉴</string>
+    <string name="cometchat_menu_search">검색</string>
+    <string name="cometchat_menu_conversation_summary">대화 요약</string>
+    <string name="cometchat_see_more">더 보기</string>
+    <string name="cometchat_no_results">결과 없음</string>
+    <string name="cometchat_no_matches_found">일치하는 항목을 찾을 수 없습니다. 다른 검색 키워드를 시도해 보세요.</string>
+    <string name="cometchat_start_your_search">검색 시작</string>
+    <string name="cometchat_search_for_conversations_or_messages">위에 키워드를 입력하여 대화나 메시지를 검색하세요.</string>
+    <string name="cometchat_unread" translatable="true">읽지 않음</string>
+    <string name="cometchat_photos" translatable="true">사진</string>
+    <string name="cometchat_videos" translatable="true">비디오</string>
+    <string name="cometchat_audio" translatable="true">오디오</string>
+    <string name="cometchat_documents" translatable="true">문서</string>
+    <string name="cometchat_links" translatable="true">링크</string>
+    <string name="cometchat_details" translatable="true">세부 사항</string>
 </resources>

@@ -9,6 +9,16 @@ public final class UIKitConstants {
     private UIKitConstants() {
     }
 
+    public static final class MessageHeaderMenuOptions {
+        public static final String SEARCH = "search";
+        public static final String CONVERSATION_SUMMARY = "conversation_summary";
+        public static final String DETAILS = "details";
+    }
+
+    public enum SearchMode {
+        MESSAGES, CONVERSATIONS, BOTH, NONE
+    }
+
     public enum MentionsType {
         USERS, USERS_AND_GROUP_MEMBERS
     }
@@ -46,7 +56,7 @@ public final class UIKitConstants {
     }
 
     public enum States {
-        LOADING, LOADED, ERROR, EMPTY, NON_EMPTY
+        LOADING, LOADED, ERROR, EMPTY, NON_EMPTY, INITIAL
     }
 
     public enum ContactsVisibilityMode {
@@ -72,6 +82,29 @@ public final class UIKitConstants {
     public enum CustomUIPosition {
         COMPOSER_TOP, COMPOSER_BOTTOM, MESSAGE_LIST_TOP, MESSAGE_LIST_BOTTOM
     }
+
+    public enum SearchFilter {
+        MESSAGES("messages"),
+        CONVERSATIONS("conversations"),
+        UNREAD("unread"),
+        GROUPS("groups"),
+        PHOTOS("photos"),
+        VIDEOS("videos"),
+        LINKS("links"),
+        DOCUMENTS("files"),
+        AUDIO("audio");
+
+        private final String value;
+
+        SearchFilter(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
 
     public static final class SharedPreferencesKeys {
         public static final String CALL = "initiated_call";
@@ -282,6 +315,7 @@ public final class UIKitConstants {
         public static final String MESSAGE_INFORMATION = "message_information";
         public static final String SHARE = "share";
         public static final String REPLY_IN_THREAD = "reply_in_thread";
+        public static final String REPLY_TO_MESSAGE = "reply_to_message";
     }
 
     public static final class files {

@@ -21,6 +21,7 @@ import com.cometchat.chat.models.ReactionCount;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatReactionListBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.reactionlist.adapter.ReactedUsersAdapter;
 import com.cometchat.chatuikit.reactionlist.adapter.ReactionsHeaderAdapter;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -964,13 +965,20 @@ public class CometChatReactionList extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            reactionListViewModel.removeListener();
+            disposeObservers();
+            reactionListViewModel = null;
+            binding = null;
+            lifecycleOwner = null;
+            reactedUsersAdapter = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        reactionListViewModel.removeListener();
-
+    private void disposeObservers() {
         if (lifecycleOwner != null) {
             reactionListViewModel.getLoadingStateLiveData().removeObservers(lifecycleOwner);
             reactionListViewModel.getBaseMessageLiveData().removeObservers(lifecycleOwner);
@@ -979,8 +987,5 @@ public class CometChatReactionList extends MaterialCardView {
             reactionListViewModel.getActiveTabIndexLiveData().removeObservers(lifecycleOwner);
             reactionListViewModel.getReactedUsersLiveData().removeObservers(lifecycleOwner);
         }
-        reactionListViewModel = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 }

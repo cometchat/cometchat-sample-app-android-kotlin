@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">950141434859-aaanfrsbgqd9noso8hkivsd8kcv1j5ac.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">950141434859</string>
+    <string name="google_api_key" translatable="false">AIzaSyA3FyreEn5kuKehB4c7huXA8lkbWWXxd0c</string>
+    <string name="google_app_id" translatable="false">1:950141434859:android:d84fd5db2b7e53a3ee77ae</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyA3FyreEn5kuKehB4c7huXA8lkbWWXxd0c</string>
+    <string name="google_storage_bucket" translatable="false">cometchatteammessanger.firebasestorage.app</string>
+    <string name="project_id" translatable="false">cometchatteammessanger</string>
+</resources>

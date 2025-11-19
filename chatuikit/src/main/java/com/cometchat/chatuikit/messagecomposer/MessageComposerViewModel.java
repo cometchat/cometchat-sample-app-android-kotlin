@@ -39,6 +39,8 @@ public class MessageComposerViewModel extends ViewModel {
     public String LISTENERS_TAG;
     public MutableLiveData<BaseMessage> sentMessage;
     public MutableLiveData<BaseMessage> processEdit;
+    public MutableLiveData<BaseMessage> processQuote;
+    public MutableLiveData<BaseMessage> successQuote;
     public MutableLiveData<CometChatException> exception;
     public MutableLiveData<BaseMessage> successEdit;
     public MutableLiveData<HashMap<String, String>> mutableHashMap;
@@ -61,7 +63,9 @@ public class MessageComposerViewModel extends ViewModel {
         sentMessage = new MutableLiveData<>();
         exception = new MutableLiveData<>();
         processEdit = new MutableLiveData<>();
+        processQuote = new MutableLiveData<>();
         successEdit = new MutableLiveData<>();
+        successQuote = new MutableLiveData<>();
         mutableHashMap = new MutableLiveData<>();
         closeBottomPanel = new MutableLiveData<>();
         closeTopPanel = new MutableLiveData<>();
@@ -88,12 +92,20 @@ public class MessageComposerViewModel extends ViewModel {
         return processEdit;
     }
 
+    public MutableLiveData<BaseMessage> processQuote() {
+        return processQuote;
+    }
+
     public MutableLiveData<CometChatException> getException() {
         return exception;
     }
 
     public MutableLiveData<BaseMessage> successEdit() {
         return successEdit;
+    }
+
+    public MutableLiveData<BaseMessage> successQuote() {
+        return successQuote;
     }
 
     public MutableLiveData<HashMap<String, String>> getMutableHashMap() {
@@ -173,6 +185,10 @@ public class MessageComposerViewModel extends ViewModel {
         setIdMap();
     }
 
+    public void onMessageReply(BaseMessage baseMessage) {
+        CometChatUIKitHelper.onMessageReply(baseMessage, MessageStatus.SUCCESS);
+    }
+
     public void addListeners() {
         LISTENERS_TAG = System.currentTimeMillis() + "_composer";
         CometChatMessageEvents.addListener(LISTENERS_TAG, new CometChatMessageEvents() {
@@ -180,6 +196,23 @@ public class MessageComposerViewModel extends ViewModel {
             public void ccMessageEdited(BaseMessage baseMessage, int status) {
                 if (status == MessageStatus.IN_PROGRESS && baseMessage != null && idMap.equals(Utils.getIdMap(baseMessage))) {
                     if (baseMessage instanceof TextMessage) processEdit.setValue(baseMessage);
+                }
+            }
+
+            /**
+             * Called when a reply to a message is sent/in progress.
+             *
+             * @param baseMessage The replied message object.
+             * @param status      The status of the reply message.
+             */
+            @Override
+            public void ccReplyToMessage(BaseMessage baseMessage, int status) {
+                if (status == MessageStatus.IN_PROGRESS && baseMessage != null && idMap.equals(Utils.getIdMap(baseMessage))) {
+                    processQuote.setValue(baseMessage);
+                } else {
+                    if (status == MessageStatus.SUCCESS && baseMessage != null && idMap.equals(Utils.getIdMap(baseMessage))) {
+                        successQuote.setValue(baseMessage);
+                    }
                 }
             }
         });
@@ -242,8 +275,7 @@ public class MessageComposerViewModel extends ViewModel {
         });
     }
 
-    public void sendMediaMessage(File file, String contentType) {
-        MediaMessage mediaMessage = getMediaMessage(file, contentType);
+    public void sendMediaMessage(MediaMessage mediaMessage) {
         CometChatUIKit.sendMediaMessage(mediaMessage, new CometChat.CallbackListener<MediaMessage>() {
             @Override
             public void onSuccess(MediaMessage mediaMessage) {

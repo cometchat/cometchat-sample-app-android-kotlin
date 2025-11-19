@@ -18,6 +18,7 @@ import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CallingExtension;
 import com.cometchat.chatuikit.databinding.CometchatOngoingCallScreenBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -36,6 +37,7 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     private CometchatOngoingCallScreenBinding binding;
     private OngoingCallViewModel viewModel;
     private LifecycleOwner lifecycleOwner;
+    private Activity activity;
     private UIKitConstants.CallWorkFlow callWorkFlow = UIKitConstants.CallWorkFlow.DEFAULT;
     private OnError onError;
     private String sessionId;
@@ -49,14 +51,18 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     private void init(Context context) {
         Utils.initMaterialCard(this);
         binding = CometchatOngoingCallScreenBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        activity = Utils.getActivity(getContext());
+        if (!Utils.isActivityUsable(activity)) return;
 
         initViewModel();
 
-        setCallSettingsBuilder(new CometChatCalls.CallSettingsBuilder((Activity) context));
+        setCallSettingsBuilder(new CometChatCalls.CallSettingsBuilder(activity));
         // Register the component as a LifecycleObserver
-        ((AppCompatActivity) context).getLifecycle().addObserver(this);
+        if (Utils.isActivityUsable(activity) && activity instanceof AppCompatActivity) {
+            ((AppCompatActivity) activity).getLifecycle().addObserver(this);
+        }
         // Request the necessary permissions
-        Utils.requestPermissions(context, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA}, 101);
+        Utils.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA}, 101);
     }
 
     private void initViewModel() {
@@ -66,8 +72,12 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
         viewModel.getEndCall().observe(lifecycleOwner, this::endCall);
         viewModel.getException().observe(lifecycleOwner, this::showError);
         viewModel.hideProgressBar().observe(lifecycleOwner, this::hideProgressBar);
-        viewModel.isJoined().observe(lifecycleOwner, aBoolean -> ((AppCompatActivity) getContext()).runOnUiThread(() -> {
-            if (((AppCompatActivity) getContext()).isInPictureInPictureMode()) {
+
+        Activity activity = Utils.getActivity(getContext());
+        if (!Utils.isActivityUsable(activity)) return;
+
+        viewModel.isJoined().observe(lifecycleOwner, aBoolean -> activity.runOnUiThread(() -> {
+            if (activity.isInPictureInPictureMode()) {
                 CometChatCalls.enterPIPMode();
             }
         }));
@@ -80,7 +90,8 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     }
 
     public void endCall(Boolean call) {
-        ((Activity) getContext()).finish();
+        if (Utils.isActivityUsable(activity))
+            activity.finish();
     }
 
     public void showError(CometChatException exception) {
@@ -90,7 +101,8 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     }
 
     public void hideProgressBar(Boolean hideProgressBar) {
-        Utils.setStatusBarColor((Activity) getContext(), getResources().getColor(R.color.cometchat_calling_background, null));
+        if (Utils.isActivityUsable(activity))
+            Utils.setStatusBarColor(activity, getResources().getColor(R.color.cometchat_calling_background, null));
         if (hideProgressBar) {
             binding.progressBar.setVisibility(GONE);
             binding.callView.setVisibility(VISIBLE);
@@ -142,24 +154,34 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
 
     @Override
     protected void onDetachedFromWindow() {
+        if (Utils.isActivityUsable(activity)) {
+            activity = null;
+        }
         super.onDetachedFromWindow();
         dispose();
+        try {
+            viewModel.removeListener();
+            dispose();
+            viewModel = null;
+            binding = null;
+            lifecycleOwner = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+        }
+        super.onDetachedFromWindow();
     }
 
     private void dispose() {
-        viewModel.removeListener();
         if (getContext() instanceof LifecycleOwner) {
             ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
         }
-        if (lifecycleOwner != null) {
+        if (viewModel != null && lifecycleOwner != null) {
             viewModel.getEndCall().removeObservers(lifecycleOwner);
             viewModel.getException().removeObservers(lifecycleOwner);
             viewModel.hideProgressBar().removeObservers(lifecycleOwner);
             viewModel.isJoined().removeObservers(lifecycleOwner);
         }
-        viewModel = null;
-        binding = null;
-        lifecycleOwner = null;
+
     }
 
     @Override
@@ -172,7 +194,7 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     @Override
     public void onStop(LifecycleOwner owner) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (((Activity) getContext()).isInPictureInPictureMode()) {
+            if (Utils.isActivityUsable(activity) && activity.isInPictureInPictureMode()) {
                 handlePiPExit();
             }
         }
@@ -187,7 +209,9 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
             CometChatCalls.endSession();
         }
         CallingExtension.setIsActiveMeeting(false);
-        ((Activity) getContext()).finish();
+        if (Utils.isActivityUsable(activity)) {
+            activity.finish();
+        }
     }
 
     /**

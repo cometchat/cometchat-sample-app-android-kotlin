@@ -53,12 +53,33 @@ public class CometChatMessageTemplate {
     private String type;
     private Function3<Context, BaseMessage, Group, List<CometChatMessageOption>> options;
 
+    private MessagesViewHolderListener replyView;
     private MessagesViewHolderListener contentView;
     private MessagesViewHolderListener bubbleView;
     private MessagesViewHolderListener headerView;
     private MessagesViewHolderListener bottomView;
     private MessagesViewHolderListener statusInfoView;
     private MessagesViewHolderListener footerView;
+
+    /**
+     * Sets the reply view for the CometChatMessageTemplate.
+     *
+     * @param messageTemplateCallBack The listener interface that defines callbacks for the reply view.
+     * @return The current CometChatMessageTemplate instance to enable method
+     * chaining. This method allows you to specify a custom view to be used
+     * as the reply section above the message bubble for this chat message
+     * template. The provided listener interface
+     * (`MessagesViewHolderListener`) defines callbacks that will be invoked
+     * when various interactions occur with the reply view, similar to the
+     * bubble and content views. By implementing the
+     * `MessagesViewHolderListener` interface and passing an instance to
+     * this method, you can customize the behavior and appearance of the
+     * reply view for your specific needs.
+     */
+    public CometChatMessageTemplate setReplyView(MessagesViewHolderListener messageTemplateCallBack) {
+        this.replyView = messageTemplateCallBack;
+        return this;
+    }
 
     /**
      * Sets the content view for the CometChatMessageTemplate.
@@ -256,6 +277,10 @@ public class CometChatMessageTemplate {
         return optionList;
     }
 
+    public MessagesViewHolderListener getReplyView() {
+        return replyView;
+    }
+
     public MessagesViewHolderListener getContentView() {
         return contentView;
     }
@@ -283,7 +308,7 @@ public class CometChatMessageTemplate {
     @NonNull
     public CometChatMessageTemplate clone() {
         CometChatMessageTemplate messageTemplate = new CometChatMessageTemplate();
-
+        messageTemplate.setReplyView(getReplyView());
         messageTemplate.setBubbleView(getBubbleView());
         messageTemplate.setContentView(getContentView());
         messageTemplate.setStatusInfoView(getStatusInfoView());

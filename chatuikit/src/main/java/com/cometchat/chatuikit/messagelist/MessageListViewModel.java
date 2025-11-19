@@ -7,6 +7,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -65,17 +66,21 @@ public class MessageListViewModel extends ViewModel {
     private final String LISTENERS_TAG;
     private final MutableLiveData<List<BaseMessage>> mutableMessageList;
     private final MutableLiveData<Integer> mutableMessagesRangeChanged;
+    private final MutableLiveData<Integer> mutableMessagesRangeChangedAtEnd;
     private final List<BaseMessage> messageArrayList;
     private final MutableLiveData<Integer> updateMessage;
     private final MutableLiveData<Integer> removeMessage;
     private final MutableLiveData<BaseMessage> addMessage;
     private final MutableLiveData<BaseMessage> readMessage;
+    private final MutableLiveData<Long> scrollToMessage = new MutableLiveData<>();
     @NonNull
     private final MutableLiveData<CometChatException> cometchatException;
     private final MutableLiveData<UIKitConstants.States> states;
     private final MutableLiveData<UIKitConstants.DeleteState> messageDeleteState;
     private final int limit = 30;
     private final MutableLiveData<Boolean> mutableHasMore;
+    private final MutableLiveData<Boolean> mutableHasMorePreviousMessages;
+    private final MutableLiveData<Boolean> mutableHasMoreNewMessages;
     private final MutableLiveData<Boolean> mutableIsInProgress;
     private final MutableLiveData<Void> notifyUpdate;
     private final Void unused = null;
@@ -103,6 +108,7 @@ public class MessageListViewModel extends ViewModel {
     private MessagesRequest.MessagesRequestBuilder messagesRequestBuilder = null;
     private MessagesRequest messagesRequest;
     private boolean hasMore = true;
+    private boolean hasMorePreviousMessages = true;
     private boolean disableReceipt;
     private Group group;
     private User user;
@@ -118,11 +124,21 @@ public class MessageListViewModel extends ViewModel {
     private Timer smartReplyDelayTimer;
     private boolean enableConversationStarter = false;
     private boolean enableSmartReplies = false;
+    private long gotoMessageId;
+    private BaseMessage gotoMessage;
+
+    // Add these LiveData properties
+    private final MutableLiveData<String> mutableConversationSummary;
+    private final MutableLiveData<Boolean> removeConversationSummary;
+    private final MutableLiveData<UIKitConstants.States> conversationSummaryUIState;
+    private boolean enableConversationSummary = true;
+    private int unreadThreshold = 30;
     private boolean isAgentChat;
 
     public MessageListViewModel() {
         mutableMessageList = new MutableLiveData<>();
         mutableMessagesRangeChanged = new MutableLiveData<>();
+        mutableMessagesRangeChangedAtEnd = new MutableLiveData<>();
         updateMessage = new MutableLiveData<>();
         onMessageDeleted = new MutableLiveData<>();
         removeMessage = new MutableLiveData<>();
@@ -158,6 +174,28 @@ public class MessageListViewModel extends ViewModel {
         conversationStarterUIState = new MutableLiveData<>();
         actionCategories.add(CometChatConstants.CATEGORY_ACTION);
         LISTENERS_TAG = System.currentTimeMillis() + "";
+        mutableHasMoreNewMessages = new MutableLiveData<>();
+        mutableHasMorePreviousMessages = new MutableLiveData<>();
+
+        mutableConversationSummary = new MutableLiveData<>();
+        removeConversationSummary = new MutableLiveData<>();
+        conversationSummaryUIState = new MutableLiveData<>();
+    }
+
+    public MutableLiveData<String> getMutableConversationSummary() {
+        return mutableConversationSummary;
+    }
+
+    public MutableLiveData<Boolean> getRemoveConversationSummary() {
+        return removeConversationSummary;
+    }
+
+    public MutableLiveData<UIKitConstants.States> getConversationSummaryUIState() {
+        return conversationSummaryUIState;
+    }
+
+    public void setEnableConversationSummary(boolean enable) {
+        this.enableConversationSummary = enable;
     }
 
     public MutableLiveData<BaseMessage> getProcessMessageData() {
@@ -190,6 +228,10 @@ public class MessageListViewModel extends ViewModel {
 
     public MutableLiveData<Integer> messagesRangeChanged() {
         return mutableMessagesRangeChanged;
+    }
+
+    public MutableLiveData<Integer> messagesRangeChangedAtEnd() {
+        return mutableMessagesRangeChangedAtEnd;
     }
 
     public MutableLiveData<Integer> updateMessage() {
@@ -232,6 +274,14 @@ public class MessageListViewModel extends ViewModel {
         return mutableHasMore;
     }
 
+    public MutableLiveData<Boolean> getMutableHasMoreNewMessages() {
+        return mutableHasMoreNewMessages;
+    }
+
+    public MutableLiveData<Boolean> getMutableHasMorePreviousMessages() {
+        return mutableHasMorePreviousMessages;
+    }
+
     public MutableLiveData<Void> notifyUpdate() {
         return notifyUpdate;
     }
@@ -264,7 +314,7 @@ public class MessageListViewModel extends ViewModel {
         this.messageTemplateHashMap = messageTemplateHashMap;
     }
 
-    public void setGroup(Group group, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId) {
+    public void setGroup(Group group, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId, long gotoMessageId) {
         if (group != null) {
             this.group = group;
             this.type = UIKitConstants.ReceiverType.GROUP;
@@ -272,6 +322,7 @@ public class MessageListViewModel extends ViewModel {
             this.messagesTypes = messagesTypes;
             this.messagesCategories = messagesCategories;
             this.parentMessageId = parentMessageId;
+            this.gotoMessageId = gotoMessageId;
             setIdMap();
         }
         initializeGroupRequestBuilder();
@@ -296,12 +347,13 @@ public class MessageListViewModel extends ViewModel {
                 .setLimit(limit)
                 .setCategories(this.messagesCategories)
                 .hideReplies(true);
+            if (gotoMessageId != 0) messagesRequestBuilder.setMessageId(gotoMessageId);
             if (parentMessageId > -1) messagesRequestBuilder.setParentMessageId(parentMessageId);
         }
         messagesRequest = messagesRequestBuilder.setGUID(id).build();
     }
 
-    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId, boolean isAgentChat) {
+    public void setUser(User user, List<String> messagesTypes, List<String> messagesCategories, long parentMessageId, boolean isAgentChat, long gotoMessageId) {
         if (user != null) {
             this.user = user;
             this.id = user.getUid();
@@ -310,6 +362,7 @@ public class MessageListViewModel extends ViewModel {
             this.messagesCategories = messagesCategories;
             this.parentMessageId = parentMessageId;
             this.isAgentChat = isAgentChat;
+            this.gotoMessageId = gotoMessageId;
             setIdMap();
         }
         if (!isAgentChat || parentMessageId != -1) {
@@ -322,7 +375,9 @@ public class MessageListViewModel extends ViewModel {
             messagesRequestBuilder = new MessagesRequest.MessagesRequestBuilder()
                 .setTypes(this.messagesTypes)
                 .setLimit(limit)
-                .setCategories(this.messagesCategories);
+                .setCategories(this.messagesCategories)
+                .hideReplies(true);
+            if (gotoMessageId != 0) messagesRequestBuilder.setMessageId(gotoMessageId);
             if (parentMessageId > -1) {
                 messagesRequestBuilder.setParentMessageId(parentMessageId);
                 if (isAgentChat) {
@@ -655,6 +710,31 @@ public class MessageListViewModel extends ViewModel {
         }
     }
 
+    public void fetchConversationSummary() {
+        if (enableConversationSummary && parentMessageId == -1) {
+            conversationSummaryUIState.postValue(UIKitConstants.States.LOADING);
+
+            // Call CometChat SDK method for conversation summary
+            CometChat.getConversationSummary(
+                    user != null ? user.getUid() : group != null ? group.getGuid() : "",
+                    user != null ? UIKitConstants.ReceiverType.USER : UIKitConstants.ReceiverType.GROUP,
+                    new CometChat.CallbackListener<String>() {
+                        @Override
+                        public void onSuccess(String summary) {
+                            mutableConversationSummary.setValue(summary);
+                            conversationSummaryUIState.setValue(UIKitConstants.States.LOADED);
+                        }
+
+                        @Override
+                        public void onError(CometChatException e) {
+                            CometChatLogger.e(TAG, e.toString());
+                            conversationSummaryUIState.setValue(UIKitConstants.States.ERROR);
+                            cometchatException.setValue(e);
+                        }
+                    });
+        }
+    }
+
     private void updateGroupScope(Group group, User user, String scopeChangedTo) {
         if (this.group != null) {
             if (group.getGuid().equalsIgnoreCase(this.group.getGuid())) {
@@ -738,6 +818,10 @@ public class MessageListViewModel extends ViewModel {
 
     public void onMessageEdit(BaseMessage baseMessage) {
         CometChatUIKitHelper.onMessageEdited(baseMessage, MessageStatus.IN_PROGRESS);
+    }
+
+    public void onMessageReply(BaseMessage baseMessage) {
+        CometChatUIKitHelper.onMessageReply(baseMessage, MessageStatus.IN_PROGRESS);
     }
 
     public void updateMessageFromMUID(BaseMessage baseMessage) {
@@ -829,14 +913,14 @@ public class MessageListViewModel extends ViewModel {
 
     public void fetchMessages(int unreadCount) {
         if (messagesRequestBuilder != null && messagesRequest != null) {
-            if (hasMore) {
+            if (hasMorePreviousMessages) {
                 if (messageArrayList.isEmpty()) states.setValue(UIKitConstants.States.LOADING);
                 messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
                     @Override
                     public void onSuccess(List<BaseMessage> messageList) {
                         new Thread(() -> {
-                            hasMore = !messageList.isEmpty();
-                            if (hasMore) {
+                            hasMorePreviousMessages = !messageList.isEmpty();
+                            if (hasMorePreviousMessages) {
                                 processMessageList(messageList);
                             }
                             if (messageArrayList.isEmpty()) {
@@ -858,12 +942,14 @@ public class MessageListViewModel extends ViewModel {
                                     if (messageList.isEmpty()) {
                                         fetchConversationStarter();
                                     } else {
+                                        if (unreadThreshold > 30)
+                                            fetchConversationSummary();
                                         if (messageList.get(messageList.size() - 1) instanceof TextMessage)
                                             fetchSmartRepliesWithDelay((TextMessage) messageList.get(messageList.size() - 1));
                                     }
 
                                 }
-                                mutableHasMore.setValue(hasMore);
+                                mutableHasMorePreviousMessages.setValue(hasMorePreviousMessages);
                                 mutableIsInProgress.setValue(false);
                                 states.setValue(UIKitConstants.States.LOADED);
                                 states.setValue(checkIsEmpty(messageArrayList));
@@ -1051,17 +1137,26 @@ public class MessageListViewModel extends ViewModel {
                 @Override
                 public void onSuccess(List<BaseMessage> baseMessages) {
                     if (!baseMessages.isEmpty()) {
-                        for (BaseMessage baseMessage : baseMessages) {
-                            addMessage(Utils.convertToUIKitMessage(baseMessage));
+                        if (gotoMessageId == 0) {
+                            for (BaseMessage baseMessage : baseMessages) {
+                                addMessage(Utils.convertToUIKitMessage(baseMessage));
+                            }
+                        } else {
+                            processMessageList(baseMessages);
+                            messageArrayList.addAll(baseMessages);
+                            mutableMessagesRangeChangedAtEnd.setValue(baseMessages.size());
                         }
                         fetchNextMessages();
                     } else {
                         CometChatUIKitHelper.onActiveChatChanged(getIdMap(), messageArrayList.get(messageArrayList.size() - 1), user, group);
                     }
+                    mutableHasMoreNewMessages.setValue(!baseMessages.isEmpty());
+                    mutableIsInProgress.setValue(false);
                 }
 
                 @Override
                 public void onError(CometChatException e) {
+                    mutableIsInProgress.setValue(false);
                 }
             });
         }
@@ -1131,6 +1226,7 @@ public class MessageListViewModel extends ViewModel {
                     if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(user.getUid())) {
                         Integer count = stringIntegerHashMap.get(user.getUid());
                         unreadCount = (count != null) ? count : 0;
+                        unreadThreshold = unreadCount;
                     }
                     fetchMessages(unreadCount);
                 }
@@ -1150,6 +1246,7 @@ public class MessageListViewModel extends ViewModel {
                     if (stringIntegerHashMap != null && stringIntegerHashMap.containsKey(group.getGuid())) {
                         Integer count = stringIntegerHashMap.get(group.getGuid());
                         unreadCount = (count != null) ? count : 0;
+                        unreadThreshold = unreadCount;
                     }
                     fetchMessages(unreadCount);
                 }
@@ -1362,6 +1459,90 @@ public class MessageListViewModel extends ViewModel {
         });
     }
 
+
+    public void goToMessage(long messageId) {
+        states.setValue(UIKitConstants.States.LOADING);
+        gotoMessageId = messageId;
+        CometChat.getMessageDetails(messageId, new CometChat.CallbackListener<BaseMessage>() {
+            @Override
+            public void onSuccess(BaseMessage message) {
+                fetchSurroundingMessages(message);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+
+            }
+        });
+    }
+
+    private void fetchSurroundingMessages(BaseMessage goToMessage) {
+        if (messagesRequest != null) {
+            messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
+                @Override
+                public void onSuccess(List<BaseMessage> older) {
+                    mutableHasMorePreviousMessages.setValue(!older.isEmpty());
+                    MessagesRequest fetchNextGoToMessagesRequest = messagesRequestBuilder.setMessageId(gotoMessageId).build();
+                    fetchNextGoToMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
+                        @Override
+                        public void onSuccess(List<BaseMessage> messageList) {
+                            mutableHasMoreNewMessages.setValue(!messageList.isEmpty());
+                            setMessageWindowAroundAnchor(older, goToMessage, messageList);
+                        }
+
+                        @Override
+                        public void onError(CometChatException exception) {
+                            cometchatException.setValue(exception);
+                            states.setValue(UIKitConstants.States.ERROR);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(CometChatException exception) {
+                    cometchatException.setValue(exception);
+                    states.setValue(UIKitConstants.States.ERROR);
+                }
+            });
+        }
+    }
+
+    private void setMessageWindowAroundAnchor(List<BaseMessage> older, BaseMessage gotoMessage, List<BaseMessage> newer) {
+        List<BaseMessage> snapshot = new ArrayList<>();
+        if (older != null) snapshot.addAll(older);
+        if (gotoMessage != null) snapshot.add(gotoMessage);
+        if (newer != null) snapshot.addAll(newer);
+
+        messageArrayList.clear();
+        messageArrayList.addAll(snapshot);
+        mutableMessageList.setValue(messageArrayList);
+        scrollToMessage.postValue(gotoMessage != null ? gotoMessage.getId() : 0);
+        handler.post( () -> {
+            states.setValue(checkIsEmpty(messageArrayList));
+        });
+
+        if (!messageArrayList.isEmpty()) {
+            BaseMessage oldestMessage = messageArrayList.get(0);
+            if (user != null) {
+                messagesRequest = messagesRequestBuilder
+                        .setMessageId(oldestMessage.getId())
+                        .setUID(user.getUid())
+                        .setLimit(limit)
+                        .build();
+            } else if (group != null) {
+                messagesRequest = messagesRequestBuilder
+                        .setMessageId(oldestMessage.getId())
+                        .setGUID(group.getGuid())
+                        .setLimit(limit)
+                        .build();
+            }
+        }
+    }
+
+    public LiveData<Long> getScrollToMessageId() {
+        return scrollToMessage;
+    }
+
     private void updateStreamIntoAIAssistantMessage(AIAssistantMessage aiAssistantMessage, long runId) {
         for (int i = messageArrayList.size() - 1; i >= 0; i--) {
             BaseMessage oldMessage = messageArrayList.get(i);
@@ -1407,5 +1588,23 @@ public class MessageListViewModel extends ViewModel {
         streamMessage.setSentAt(System.currentTimeMillis() / 1000);
         streamMessage.setReceiver(CometChatUIKit.getLoggedInUser());
         addMessage(streamMessage);
+    }
+
+    public void clear() {
+        messageArrayList.clear();
+        mutableMessageList.setValue(messageArrayList);
+
+    }
+
+    public void resetMessageRequest() {
+        if (messagesRequestBuilder != null) {
+            messagesRequestBuilder.setMessageId(-1);
+            messagesRequest = messagesRequestBuilder.build();
+            hasMorePreviousMessages = true;
+        }
+    }
+
+    public void setUnreadThreshold(int unreadTresHold) {
+        this.unreadThreshold = unreadTresHold;
     }
 }

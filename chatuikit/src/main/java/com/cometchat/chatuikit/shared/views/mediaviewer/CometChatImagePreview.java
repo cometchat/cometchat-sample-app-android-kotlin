@@ -25,6 +25,8 @@ import android.widget.OverScroller;
 
 import androidx.core.view.ViewCompat;
 
+import com.cometchat.chatuikit.shared.resources.utils.Utils;
+
 import java.lang.ref.WeakReference;
 
 public class CometChatImagePreview implements View.OnTouchListener, View.OnLayoutChangeListener {
@@ -108,6 +110,7 @@ public class CometChatImagePreview implements View.OnTouchListener, View.OnLayou
     private OnViewTranslateListener onViewTranslateListener;
     // on scale changed listener
     private OnScaleChangedListener onScaleChangedListener;
+    private Activity activity;
     private final ScaleGestureDetector.OnScaleGestureListener onScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
 
         @Override
@@ -198,7 +201,10 @@ public class CometChatImagePreview implements View.OnTouchListener, View.OnLayou
     public CometChatImagePreview(ImageView imageView, ViewGroup container) {
         this.imageViewRef = new WeakReference<>(imageView);
         this.containerRef = new WeakReference<>(container);
-        ((Activity) containerRef.get().getContext()).getWindow().getDecorView().setBackgroundColor(Color.BLACK);  // Replace with any color
+        activity = Utils.getActivity(containerRef.get().getContext());
+        if (Utils.isActivityUsable(activity)) {
+            activity.getWindow().getDecorView().setBackgroundColor(Color.BLACK);
+        }
         container.setOnTouchListener(this);
         container.addOnLayoutChangeListener(this);
 
@@ -709,10 +715,12 @@ public class CometChatImagePreview implements View.OnTouchListener, View.OnLayou
     public void changeBackgroundAlpha(float amount) {
         ViewGroup container = containerRef.get();
         if (container == null) return;
-        if (amount == 0.0) {
-            ((Activity) containerRef.get().getContext()).getWindow().getDecorView().setBackgroundColor(Color.BLACK);  // Replace with any color
-        } else {
-            ((Activity) containerRef.get().getContext()).getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);  // Replace with any color
+        if (Utils.isActivityUsable(activity)) {
+            if (amount == 0.0) {
+                activity.getWindow().getDecorView().setBackgroundColor(Color.BLACK);  // Replace with any color
+            } else {
+                activity.getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);  // Replace with any color
+            }
         }
     }
 

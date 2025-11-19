@@ -156,6 +156,34 @@ public abstract class DataSourceDecorator implements DataSource {
     }
 
     /**
+     * Returns the reply view container.
+     *
+     * @param context The context of the application.
+     * @return The reply view container.
+     */
+    @Override
+    public View getReplyViewContainer(Context context) {
+        return dataSource.getReplyViewContainer(context);
+    }
+
+    /**
+     * Binds the reply view container with the provided message and other parameters.
+     *
+     * @param context           The context of the application.
+     * @param createdView       The created reply view container.
+     * @param message           The base message object.
+     * @param alignment         The message bubble alignment.
+     * @param holder            The RecyclerView ViewHolder.
+     * @param messageList       The list of base messages.
+     * @param position          The position of the message in the list.
+     * @param additionParameter Additional parameters for binding.
+     */
+    @Override
+    public void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter) {
+        dataSource.bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+    }
+
+    /**
      * @param context
      * @param messageBubble
      * @param alignment

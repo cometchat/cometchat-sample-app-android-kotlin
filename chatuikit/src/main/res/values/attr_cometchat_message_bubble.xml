@@ -36,6 +36,7 @@
         <attr name="cometchatCollaborativeBubbleStyle" />
         <attr name="cometchatMeetCallBubbleStyle" />
         <attr name="cometchatModerationViewStyle"/>
+        <attr name="cometChatMessagePreviewStyle"/>
     </declare-styleable>
 
 </resources>

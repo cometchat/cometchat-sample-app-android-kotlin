@@ -212,4 +212,20 @@
     <string name="cometchat_no_conversations_history_subtitle">Mulakan perbualan dengan mengetik butang \'Sembang Baru\'</string>
     <string name="cometchat_new_chat">Sembang Baru</string>
     <string name="cometchat_chat_history">Sejarah Sembang</string>
+    <string name="cometchat_messages">Mesej</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Carian</string>
+    <string name="cometchat_menu_conversation_summary">Ringkasan Perbualan</string>
+    <string name="cometchat_see_more">Lihat Lagi</string>
+    <string name="cometchat_no_results">Tiada Hasil</string>
+    <string name="cometchat_no_matches_found">Kami tidak dapat mencari sebarang padanan. Sila cuba kata kunci carian yang berbeza.</string>
+    <string name="cometchat_start_your_search">Mulakan Carian Anda</string>
+    <string name="cometchat_search_for_conversations_or_messages">Cari perbualan atau mesej dengan menaipkan kata kunci di atas.</string>
+    <string name="cometchat_unread" translatable="true">Belum dibaca</string>
+    <string name="cometchat_photos" translatable="true">Foto</string>
+    <string name="cometchat_videos" translatable="true">Video</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Dokumen</string>
+    <string name="cometchat_links" translatable="true">Pautan</string>
+    <string name="cometchat_details" translatable="true">Butiran</string>
 </resources>

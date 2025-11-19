@@ -27,6 +27,7 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatUserListBinding;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
@@ -37,8 +38,6 @@ import com.cometchat.chatuikit.shared.interfaces.OnItemLongClick;
 import com.cometchat.chatuikit.shared.interfaces.OnLoad;
 import com.cometchat.chatuikit.shared.interfaces.OnSelection;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.ClickListener;
-import com.cometchat.chatuikit.shared.resources.utils.recycler_touch.RecyclerTouchListener;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderDecoration;
 import com.cometchat.chatuikit.shared.viewholders.UsersViewHolderListener;
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
@@ -1718,12 +1717,20 @@ public class CometChatUsers extends MaterialCardView {
 
     @Override
     protected void onDetachedFromWindow() {
+        try {
+            usersViewModel.removeListeners();
+            disposeObservers();
+            lifecycleOwner = null;
+            usersViewModel = null;
+            binding = null;
+            usersAdapter = null;
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "onDetachedFromWindow: ", e);
+        }
         super.onDetachedFromWindow();
-        dispose();
     }
 
-    private void dispose() {
-        usersViewModel.removeListeners();
+    private void disposeObservers() {
         if (lifecycleOwner != null) {
             usersViewModel.getMutableUsersList().removeObservers(lifecycleOwner);
             usersViewModel.getStates().removeObservers(lifecycleOwner);
@@ -1733,10 +1740,6 @@ public class CometChatUsers extends MaterialCardView {
             usersViewModel.removeUser().removeObservers(lifecycleOwner);
             usersViewModel.getCometChatException().removeObservers(lifecycleOwner);
         }
-        lifecycleOwner = null;
-        usersViewModel = null;
-        binding = null;
-        usersAdapter = null;
     }
 
     public int getLoadingView() {

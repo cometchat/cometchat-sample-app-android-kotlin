@@ -40,6 +40,7 @@
         <attr name="cometchatMessageListAISmartRepliesStyle" format="reference" />
         <attr name="cometchatMessageListAIConversationStarterStyle" format="reference" />
         <attr name="cometchatMessageListReactionListStyle" format="reference" />
+        <attr name="cometchatMessageListAIConversationSummaryStyle" format="reference" />
 
     </declare-styleable>
 </resources>

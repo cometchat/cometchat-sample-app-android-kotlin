@@ -1,5 +1,6 @@
 package com.cometchat.chatuikit.shared.views.reaction.emojikeyboard;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,6 +47,7 @@ public class CometChatEmojiKeyboard extends BottomSheetDialogFragment {
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
+
         super.onDismiss(dialog);
     }
 
@@ -80,14 +82,17 @@ public class CometChatEmojiKeyboard extends BottomSheetDialogFragment {
 
     public void show(Context context) {
         emojiKeyBoardView = new EmojiKeyBoardView(context);
-        setUpFragmentManger(context);
-        fm = ((AppCompatActivity) context).getSupportFragmentManager();
-        if (!isAdded()) {
-            if (!fm.isDestroyed()) {
-                show(fm, CometChatEmojiKeyboard.class.getSimpleName());
-            } else {
-                setUpFragmentManger(context);
-                show(fm, CometChatEmojiKeyboard.class.getSimpleName());
+        Activity activity = Utils.getActivity(context);
+        if (Utils.isActivityUsable(activity) && activity instanceof AppCompatActivity) {
+            setUpFragmentManger(context);
+            fm = ((AppCompatActivity) context).getSupportFragmentManager();
+            if (!isAdded()) {
+                if (!fm.isDestroyed()) {
+                    show(fm, CometChatEmojiKeyboard.class.getSimpleName());
+                } else {
+                    setUpFragmentManger(context);
+                    show(fm, CometChatEmojiKeyboard.class.getSimpleName());
+                }
             }
         }
     }

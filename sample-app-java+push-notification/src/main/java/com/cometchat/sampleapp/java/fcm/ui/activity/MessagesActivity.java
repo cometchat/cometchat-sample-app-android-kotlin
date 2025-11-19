@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,7 +19,9 @@ import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityMessagesBinding;
@@ -28,11 +31,19 @@ import com.cometchat.sampleapp.java.fcm.utils.MyApplication;
 import com.cometchat.sampleapp.java.fcm.viewmodels.MessagesViewModel;
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class MessagesActivity extends AppCompatActivity {
+    private static final String TAG = "MessagesActivity";
 
     private User user;
     private Group group;
     private BaseMessage baseMessage;
+    private BaseMessage goToMessage;
     private MessagesViewModel viewModel;
     private ActivityMessagesBinding binding;
 
@@ -41,6 +52,22 @@ public class MessagesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMessagesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        try {
+            String rawGoToMessage = getIntent().getStringExtra(getString(R.string.app_go_to_message));
+            String userJson = getIntent().getStringExtra(getString(R.string.app_user));
+
+            if (rawGoToMessage != null) {
+                goToMessage = BaseMessage.processMessage(new JSONObject(rawGoToMessage));
+            }
+
+            if (userJson != null) {
+                user = User.fromJson(new JSONObject(userJson).toString());
+            }
+        } catch (JSONException e) {
+            CometChatLogger.e(TAG, e.getMessage());
+        }
+
 
         adjustWindowSettings();
         applyWindowInsets();
@@ -63,7 +90,6 @@ public class MessagesActivity extends AppCompatActivity {
         viewModel.getUnblockButtonState().observe(this, this::setUnblockButtonState);
 
         addViews();
-        setOverFlowMenu();
 
         binding.unblockBtn.setOnClickListener(view -> viewModel.unblockUser());
 
@@ -78,7 +104,63 @@ public class MessagesActivity extends AppCompatActivity {
             intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString());
             context.startActivity(intent);
         });
+
+        if (!Utils.isAgentChat(user)) {
+            setUpMessageHeaderMenu();
+        }
     }
+
+    private void setUpMessageHeaderMenu() {
+        List<CometChatPopupMenu.MenuItem> options = getHeaderMenuOptions();
+        binding.messageHeader.setOptions(options);
+        binding.messageHeader.setPopupMenuStyle(R.style.CustomHeaderPopUpMenuStyle);
+    }
+
+    private List<CometChatPopupMenu.MenuItem> getHeaderMenuOptions() {
+        List<CometChatPopupMenu.MenuItem> options = new ArrayList<>();
+
+        options.add(new CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.SEARCH,
+                getString(com.cometchat.chatuikit.R.string.cometchat_menu_search),
+                AppCompatResources.getDrawable(this, com.cometchat.chatuikit.R.drawable.cometchat_ic_search),
+                null,
+                this::navigateToSearchActivity
+        ));
+
+        options.add(new CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.CONVERSATION_SUMMARY,
+                getString(com.cometchat.chatuikit.R.string.cometchat_menu_conversation_summary),
+                AppCompatResources.getDrawable(this, com.cometchat.chatuikit.R.drawable.cometchat_ic_menu_conversation_summary),
+                null,
+                this::generateConversationSummary
+        ));
+        options.add(new CometChatPopupMenu.MenuItem(
+                UIKitConstants.MessageHeaderMenuOptions.DETAILS,
+                getString(com.cometchat.chatuikit.R.string.cometchat_details),
+                AppCompatResources.getDrawable(this, R.drawable.ic_info),
+                null,
+                this::openDetailScreen
+        ));
+
+        return options;
+    }
+
+    private void generateConversationSummary() {
+        binding.messageList.generateConversationSummary();
+    }
+
+    private void navigateToSearchActivity() {
+        Intent intent = new Intent(this, SearchActivity.class);
+        intent.putExtra("isFromMessageScreen", true);
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user.toJson().toString());
+        } else {
+            intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+        }
+        startActivity(intent);
+        finish();
+    }
+
 
     /**
      * Sets the window settings for the activity.
@@ -211,6 +293,9 @@ public class MessagesActivity extends AppCompatActivity {
      */
     private void addViews() {
         // Set user or group data to the message header and composer
+        if (goToMessage != null) {
+            binding.messageList.gotoMessage(goToMessage.getId());
+        }
         if (user != null) {
             binding.messageHeader.setUser(user);
             binding.messageList.setUser(user);
@@ -246,7 +331,7 @@ public class MessagesActivity extends AppCompatActivity {
                 linearLayout.addView(overflowMenuLayoutBinding.getRoot());
             }
 
-            overflowMenuLayoutBinding.ivMenu.setOnClickListener(view1 -> openDetailScreen(group));
+            overflowMenuLayoutBinding.ivMenu.setOnClickListener(view1 -> openDetailScreen());
             return linearLayout;
         });
     }
@@ -254,7 +339,7 @@ public class MessagesActivity extends AppCompatActivity {
     /**
      * Opens the detail screen for the selected user or group.
      */
-    private void openDetailScreen(Group group) {
+    private void openDetailScreen() {
         Intent intent = null;
         if (user != null) {
             intent = new Intent(this, UserDetailsActivity.class);

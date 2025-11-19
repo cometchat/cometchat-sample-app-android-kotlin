@@ -74,6 +74,15 @@ public abstract class CometChatMessageEvents {
     public void ccLiveReaction(@DrawableRes int icon) {
     }
 
+    /**
+     * Called when a reply to a message is sent/in progress.
+     *
+     * @param baseMessage The replied message object.
+     * @param status      The status of the reply message.
+     */
+    public void ccReplyToMessage(BaseMessage baseMessage, @MessageStatus int status) {
+    }
+
     public void onTextMessageReceived(TextMessage textMessage) {
     }
 

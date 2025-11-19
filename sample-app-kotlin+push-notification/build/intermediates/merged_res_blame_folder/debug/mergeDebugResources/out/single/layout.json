@@ -1,0 +1,134 @@
+[
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/call_details_recordings_items.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/call_details_recordings_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/add_members_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/add_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_home.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/create_group_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/create_group_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/fragment_users.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/fragment_users.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_google_login.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_google_login.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/fragment_groups.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/fragment_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/overflow_menu_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/overflow_menu_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_search.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_search.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/custom_toast.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/custom_toast.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_login.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/sample_user_items.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/sample_user_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_user_details.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_user_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/group_members_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/group_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_thread_message.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_thread_message.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/join_password_group_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/join_password_group_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_group_details.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_group_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_new_chat.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_new_chat.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/banned_members_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/banned_members_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_app_credentials.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_app_credentials.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/transfer_ownership_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/transfer_ownership_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/fragment_call_details_tab.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/fragment_call_details_tab.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/fragment_calls.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/fragment_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/user_profile_popup_menu_layout.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/user_profile_popup_menu_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/fragment_chats.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/fragment_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_messages.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_messages.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/dialog_feedback.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/dialog_feedback.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/banned_member_row.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/banned_member_row.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/banned_member_custom_view.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/banned_member_custom_view.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/call_details_participants_items.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/call_details_participants_items.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_splash.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/activity_call_details.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/activity_call_details.xml"
+    },
+    {
+        "merged": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-mergeDebugResources-57:/layout/call_details_history_items.xml",
+        "source": "com.cometchat.sampleapp.kotlin.fcm.sample-app-kotlin+push-notification-main-60:/layout/call_details_history_items.xml"
+    }
+]

@@ -211,4 +211,20 @@
     <string name="cometchat_no_conversations_history_subtitle">Inicie um chat tocando no botão \'Nova conversa\'</string>
     <string name="cometchat_new_chat">Nova conversa</string>
     <string name="cometchat_chat_history">Histórico de chat</string>
+    <string name="cometchat_messages">Mensagens</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Pesquisa</string>
+    <string name="cometchat_menu_conversation_summary">Resumo da conversa</string>
+    <string name="cometchat_see_more">Ver mais</string>
+    <string name="cometchat_no_results">Nenhum resultado</string>
+    <string name="cometchat_no_matches_found">Não conseguimos encontrar nenhuma correspondência. Tente usar uma palavra-chave de pesquisa diferente.</string>
+    <string name="cometchat_start_your_search">Inicie sua pesquisa</string>
+    <string name="cometchat_search_for_conversations_or_messages">Pesquise conversas ou mensagens digitando uma palavra-chave acima.</string>
+    <string name="cometchat_unread" translatable="true">Não lido</string>
+    <string name="cometchat_photos" translatable="true">Fotos</string>
+    <string name="cometchat_videos" translatable="true">Vídeos</string>
+    <string name="cometchat_audio" translatable="true">Áudio</string>
+    <string name="cometchat_documents" translatable="true">Documentos</string>
+    <string name="cometchat_links" translatable="true">Links</string>
+    <string name="cometchat_details" translatable="true">Detalhes</string>
 </resources>
