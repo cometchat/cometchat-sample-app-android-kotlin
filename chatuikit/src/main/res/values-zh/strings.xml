@@ -230,5 +230,21 @@
     <string name="cometchat_documents" translatable="true">文档</string>
     <string name="cometchat_links" translatable="true">链接</string>
     <string name="cometchat_details" translatable="true">详情</string>
+    <string name="cometchat_report">举报</string>
+    <string name="cometchat_report_a_message">举报消息</string>
+    <string name="cometchat_report_message_title">举报消息</string>
+    <string name="cometchat_report_message_description">如果此聊天违反了我们的社区标准，请举报。我们不会告知被举报的账号。</string>
+    <string name="cometchat_report_reason_label">原因</string>
+    <string name="cometchat_report_optional_label">(可选)</string>
+    <string name="cometchat_report_remark_hint">为您的举报提供更多背景信息…</string>
+    <string name="cometchat_report_button_report">举报</string>
+    <string name="cometchat_report_success_message">消息已举报</string>
+    <string name="cometchat_report_error_message">举报失败</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">出现问题。请检查后重试。</string>
+    <string name="cometchat_unable_to_flag_message">无法标记消息</string>
+    <string name="cometchat_flag_message_success">消息已举报</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">垃圾邮件 / 内容不当</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">性内容</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">骚扰 / 欺凌</string>
 
 </resources>

@@ -34,7 +34,6 @@ import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.R;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.views.aiassistant.CometChatAIAssistantMessageBubble;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -670,7 +669,7 @@ public class MessageBubbleUtils {
     }
 
     public static void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter) {
-        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.message_preview_container_layout);
+        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
         FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
         if (messagePreview != null && message.getDeletedAt() == 0) {
             BaseMessage quoteMessage = message.getQuotedMessage();
@@ -708,11 +707,16 @@ public class MessageBubbleUtils {
                         messagePreview.setLayoutParams(messagePreviewParams);
                         flexboxLayout.setLayoutParams(flexboxParams);
                         parent.setLayoutParams(parentLayoutParams);
-
-                        messagePreview.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
-                        flexboxLayout.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
-                        parent.setMinimumWidth(Utils.convertDpToPx(parent.getContext(), 500));
                     }
+                } else {
+                    FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                    LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                    messagePreview.setLayoutParams(messagePreviewParams);
+                    flexboxLayout.setLayoutParams(flexboxParams);
+                    parent.setLayoutParams(parentLayoutParams);
                 }
                 messagePreview.setMessage(context, quoteMessage, messagePreview, additionParameter.getTextFormatters());
             } else {

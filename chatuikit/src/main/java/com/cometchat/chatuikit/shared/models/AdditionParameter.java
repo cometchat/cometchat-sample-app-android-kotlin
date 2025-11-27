@@ -41,6 +41,7 @@ public class AdditionParameter {
     private int messageInfoOptionVisibility = View.VISIBLE;
     private int groupActionMessageVisibility = View.VISIBLE;
     private int moderationViewVisibility = View.VISIBLE;
+    private int reportOptionVisibility = View.VISIBLE;
 
     private OnItemClick<BaseMessage> onMessagePreviewClick;
 
@@ -598,5 +599,13 @@ public class AdditionParameter {
 
     public void setOnMessagePreviewClick(OnItemClick<BaseMessage> onMessagePreviewClick) {
         this.onMessagePreviewClick = onMessagePreviewClick;
+    }
+
+    public int getReportOptionVisibility() {
+        return reportOptionVisibility;
+    }
+
+    public void setReportOptionVisibility(int reportOptionVisibility) {
+        this.reportOptionVisibility = reportOptionVisibility;
     }
 }

@@ -453,10 +453,8 @@ public class CometChatMessageComposer extends MaterialCardView {
      * @param baseMessage The BaseMessage containing the quoted message.
      */
     private void onMessageQuoteSuccess(BaseMessage baseMessage) {
-        if (baseMessage != null) {
-            quoteMessage = null;
-            animateVisibilityGone(binding.messagePreview);
-        }
+        quoteMessage = null;
+        animateVisibilityGone(binding.messagePreview);
     }
 
     private void updateComposerState(Boolean aBoolean) {
@@ -1285,6 +1283,7 @@ public class CometChatMessageComposer extends MaterialCardView {
             mediaMessage.setQuotedMessage(quoteMessage);
             mediaMessage.setQuotedMessageId(quoteMessage.getId());
             quoteMessage = null;
+            composerViewModel.onMessageReply(mediaMessage);
         }
         composerViewModel.sendMediaMessage(mediaMessage);
     }
@@ -1504,7 +1503,8 @@ public class CometChatMessageComposer extends MaterialCardView {
 
             binding.messageInput.post(() -> {
                 CometChatEditText composeBox = binding.messageInput.getComposeBox();
-                if (composeBox != null && !composeBox.hasFocus()) {
+                if (composeBox != null) {
+                    composeBox.clearFocus();
                     composeBox.requestFocus();
                 }
                 Utils.showKeyBoard(getContext(), binding.messageInput.getComposeBox());

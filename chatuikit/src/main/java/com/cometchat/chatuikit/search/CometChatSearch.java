@@ -679,6 +679,14 @@ public class CometChatSearch extends MaterialCardView {
         extractAttributesAndApplyDefaults(typedArray);
     }
 
+    /** Sets the style of the CometChatSearch
+     * @param styleResId The resource ID of the style to be applied
+     */
+    public void setStyle (@StyleRes int styleResId) {
+        TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(styleResId, R.styleable.CometChatSearch);
+        extractAttributesAndApplyDefaults(typedArray);
+    }
+
     /** Extracts attributes from the TypedArray and applies default values */
     private void extractAttributesAndApplyDefaults(TypedArray typedArray) {
         if (typedArray == null) return;

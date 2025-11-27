@@ -23,6 +23,7 @@ import com.cometchat.chat.models.AIAssistantMessage;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.CustomMessage;
+import com.cometchat.chat.models.FlagDetail;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chat.models.InteractionReceipt;
@@ -77,6 +78,7 @@ public class MessageListViewModel extends ViewModel {
     private final MutableLiveData<CometChatException> cometchatException;
     private final MutableLiveData<UIKitConstants.States> states;
     private final MutableLiveData<UIKitConstants.DeleteState> messageDeleteState;
+    private final MutableLiveData<UIKitConstants.FlagMessageState> messageFlagState;
     private final int limit = 30;
     private final MutableLiveData<Boolean> mutableHasMore;
     private final MutableLiveData<Boolean> mutableHasMorePreviousMessages;
@@ -180,6 +182,7 @@ public class MessageListViewModel extends ViewModel {
         mutableConversationSummary = new MutableLiveData<>();
         removeConversationSummary = new MutableLiveData<>();
         conversationSummaryUIState = new MutableLiveData<>();
+        messageFlagState = new MutableLiveData<>();
     }
 
     public MutableLiveData<String> getMutableConversationSummary() {
@@ -252,6 +255,10 @@ public class MessageListViewModel extends ViewModel {
 
     public MutableLiveData<UIKitConstants.DeleteState> getMessageDeleteState() {
         return messageDeleteState;
+    }
+
+    public MutableLiveData<UIKitConstants.FlagMessageState> getMessageFlagState() {
+        return messageFlagState;
     }
 
     public MutableLiveData<CometChatException> getCometChatException() {
@@ -1370,6 +1377,22 @@ public class MessageListViewModel extends ViewModel {
         });
     }
 
+    public void flagMessage(FlagDetail flagDetail, BaseMessage baseMessage) {
+        messageFlagState.setValue(UIKitConstants.FlagMessageState.INITIATED_FLAG);
+        CometChat.flagMessage(baseMessage.getId(), flagDetail, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                messageFlagState.setValue(UIKitConstants.FlagMessageState.SUCCESS_FLAG);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                cometchatException.setValue(e);
+                messageFlagState.setValue(UIKitConstants.FlagMessageState.FAILURE_FLAG);
+            }
+        });
+    }
+
     public void removeListener() {
         CometChatAIStreamService.detachListener(LISTENERS_TAG);
         CometChat.removeAIAssistantListener(LISTENERS_TAG);
@@ -1478,6 +1501,7 @@ public class MessageListViewModel extends ViewModel {
 
     private void fetchSurroundingMessages(BaseMessage goToMessage) {
         if (messagesRequest != null) {
+            messagesRequest = messagesRequestBuilder.setMessageId(gotoMessageId).build();
             messagesRequest.fetchPrevious(new CometChat.CallbackListener<List<BaseMessage>>() {
                 @Override
                 public void onSuccess(List<BaseMessage> older) {

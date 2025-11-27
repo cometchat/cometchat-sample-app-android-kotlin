@@ -4,6 +4,7 @@ import static com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKitHelper
 import static com.cometchat.chatuikit.shared.resources.utils.Utils.isCallingAvailable;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -13,6 +14,7 @@ import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.ConversationUpdateSettings;
 import com.cometchat.chat.models.CustomMessage;
+import com.cometchat.chat.models.FlagReason;
 import com.cometchat.chat.models.InteractiveMessage;
 import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.TextMessage;
@@ -35,6 +37,7 @@ import com.cometchat.chatuikit.shared.resources.localise.Language;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.reaction.emojikeyboard.EmojiKeyboardUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,7 +49,7 @@ import java.util.List;
 public final class CometChatUIKit {
     private static final String TAG = CometChatUIKit.class.getSimpleName();
 
-
+    private static List<FlagReason> flagReasons;
     private static UIKitSettings authenticationSettings;
     private static String successMessage;
 
@@ -88,7 +91,10 @@ public final class CometChatUIKit {
                 EmojiKeyboardUtils.loadAndSaveEmojis(context);
                 successMessage = s;
                 if (isCallingAvailable()) initiateCallingExtension(context);
-                if (CometChatUIKit.getLoggedInUser() != null) initiateChatExtensions();
+                if (CometChatUIKit.getLoggedInUser() != null) {
+                    initiateChatExtensions();
+                    fetchFlagReasons();
+                }
 
                 if (callbackListener != null) callbackListener.onSuccess(successMessage);
                 CometChat.setSource("uikit-v5", "android", "java");
@@ -99,6 +105,23 @@ public final class CometChatUIKit {
                 if (e != null) if (callbackListener != null) callbackListener.onError(e);
             }
         });
+    }
+
+    private static void fetchFlagReasons() {
+        CometChat.getFlagReasons(new CometChat.CallbackListener<List<FlagReason>>() {
+            @Override
+            public void onSuccess(List<FlagReason> reasons) {
+                flagReasons = reasons;
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+            }
+        });
+    }
+
+    public static List<FlagReason> getFlagReasons() {
+        return flagReasons != null ? flagReasons : new ArrayList<>();
     }
 
     /**
@@ -169,6 +192,7 @@ public final class CometChatUIKit {
                 @Override
                 public void onSuccess(User user) {
                     initiateChatExtensions();
+                    fetchFlagReasons();
                     if (callbackListener != null) {
                         callbackListener.onSuccess(user);
                     }
@@ -206,6 +230,7 @@ public final class CometChatUIKit {
                 @Override
                 public void onSuccess(User user) {
                     initiateChatExtensions();
+                    fetchFlagReasons();
                     if (callbackListener != null) callbackListener.onSuccess(user);
                 }
 

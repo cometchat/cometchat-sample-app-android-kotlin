@@ -250,7 +250,7 @@ public class CometChatPollBubble extends MaterialCardView {
                 pollAnswerAdapter.setMessage(baseMessage);
                 pollAnswerAdapter.setMyChosenOptionPosition(myVotedPosition - 1);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                CometChatLogger.e(TAG, e.toString());
             }
         }
     }

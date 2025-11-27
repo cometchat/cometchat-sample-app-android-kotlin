@@ -257,6 +257,10 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_error_conversations_title" translatable="true">¡Vaya!</string>
     <string name="cometchat_file_download_failed" translatable="true">La descarga del archivo falló.</string>
     <string name="cometchat_file_not_exist" translatable="true">El archivo no existe</string>
+    <string name="cometchat_flag_message_success">Mensaje reportado</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Acoso / Bullying</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Contenido sexual</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Contenido no deseado</string>
     <string name="cometchat_form_completion_message" translatable="true">Gracias por completar el formulario.</string>
     <string name="cometchat_generate_summary" translatable="true">Generar un resumen</string>
     <string name="cometchat_group" translatable="true">Grupo</string>
@@ -358,6 +362,16 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_reply" translatable="true">Responder</string>
     <string name="cometchat_reply_lowercase" translatable="true">responder</string>
     <string name="cometchat_reply_uppercase" translatable="true">Responder</string>
+    <string name="cometchat_report">Reportar</string>
+    <string name="cometchat_report_a_message">Reportar un mensaje</string>
+    <string name="cometchat_report_button_report">Reportar</string>
+    <string name="cometchat_report_error_message">No se pudo reportar el mensaje</string>
+    <string name="cometchat_report_message_description">Reporta este chat si va en contra de nuestros Estándares de la Comunidad. No notificaremos a la cuenta que reportaste.</string>
+    <string name="cometchat_report_message_title">Reportar un mensaje</string>
+    <string name="cometchat_report_optional_label">(Opcional)</string>
+    <string name="cometchat_report_reason_label">Razón</string>
+    <string name="cometchat_report_remark_hint">Proporciona más contexto para tu reporte…</string>
+    <string name="cometchat_report_success_message">Mensaje reportado</string>
     <string name="cometchat_retry" translatable="true">Reintentar</string>
     <string name="cometchat_save" translatable="true">Guardar</string>
     <string name="cometchat_scope_change" translatable="true">Cambiar rol</string>
@@ -371,6 +385,7 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_share" translatable="true">Compartir</string>
     <string name="cometchat_shared_sticker" translatable="true">Compartió un sticker</string>
     <string name="cometchat_something_went_wrong" translatable="true">Ha ocurrido un error.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Algo salió mal. Verifica e intenta nuevamente.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Ha ocurrido un error. Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_something_went_wrong_try_again">Algo salió mal de nuestro lado. Por favor, intenta de nuevo</string>
     <string name="cometchat_start_conv_hint" translatable="true">Toca para iniciar la conversación</string>
@@ -394,6 +409,7 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_translation_error" translatable="true">El idioma seleccionado para la traducción es el mismo que el idioma del mensaje original</string>
     <string name="cometchat_try_again" translatable="true">Inténtalo de nuevo</string>
     <string name="cometchat_typing" translatable="true">Escribiendo…</string>
+    <string name="cometchat_unable_to_flag_message">No se puede marcar el mensaje</string>
     <string name="cometchat_unanswered" translatable="true">no respondida</string>
     <string name="cometchat_unban" translatable="true">Desbanear</string>
     <string name="cometchat_unread" translatable="true">No leído</string>

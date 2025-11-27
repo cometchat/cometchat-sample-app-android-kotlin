@@ -27,6 +27,7 @@ import java.util.List;
 
 public class CometChatMessagePreview extends MaterialCardView {
     private int MIN_WIDTH = 0;
+    private int MAX_WIDTH = -1;
     private final CometchatMessagePreviewBinding binding;
     private OnClick onMessagePreviewClick;
     private OnClick onCloseClick;
@@ -90,13 +91,25 @@ public class CometChatMessagePreview extends MaterialCardView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int minWidthPx = (int) (MIN_WIDTH * getResources().getDisplayMetrics().density);
+        int maxWidthPx = MAX_WIDTH == -1 ? -1 : (int) (MAX_WIDTH * getResources().getDisplayMetrics().density);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if(MIN_WIDTH == 0){
+
+        if(MIN_WIDTH == -1 && MAX_WIDTH == -1) {
             return;
         }
 
         int measuredWidth = getMeasuredWidth();
-        int finalWidth = Math.max(measuredWidth, minWidthPx);
+        int finalWidth = measuredWidth;
+
+        // Apply minimum width constraint
+        if (MIN_WIDTH != -1) {
+            finalWidth = Math.max(finalWidth, minWidthPx);
+        }
+
+        // Apply maximum width constraint
+        if (MAX_WIDTH != -1) {
+            finalWidth = Math.min(finalWidth, maxWidthPx);
+        }
 
         if (finalWidth != measuredWidth) {
             int newWidthSpec = MeasureSpec.makeMeasureSpec(finalWidth, MeasureSpec.EXACTLY);
@@ -105,16 +118,18 @@ public class CometChatMessagePreview extends MaterialCardView {
     }
 
     public void setMessage(Context context, BaseMessage message, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> textFormatters) {
-        if (message instanceof TextMessage) {
-            String messageText = ((TextMessage) message).getText();
-            if (messageText != null && messageText.length() > 20) {
-                MIN_WIDTH = 250;
-            }else {
-                MIN_WIDTH = 0;
-            }
-        }
         Utils.setReplyMessagePreview(context, message, messagePreview, textFormatters);
+    }
+
+    @Override
+    public void setMinimumWidth(int minWidth) {
+        this.MIN_WIDTH = minWidth;
         measure(getMeasuredWidth(),getMeasuredHeight());
+    }
+
+    public void setMaxWidth(int maxWidth) {
+        this.MAX_WIDTH = maxWidth;
+        measure(getMeasuredWidth(), getMeasuredHeight());
     }
 
     public void setOnMessagePreviewClickListener(OnClick listener) {

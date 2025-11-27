@@ -230,4 +230,21 @@
     <string name="cometchat_documents" translatable="true">Documents</string>
     <string name="cometchat_links" translatable="true">Liens</string>
     <string name="cometchat_details" translatable="true">Détails</string>
+    <string name="cometchat_report">Signaler</string>
+    <string name="cometchat_report_a_message">Signaler un message</string>
+    <string name="cometchat_report_message_title">Signaler un message</string>
+    <string name="cometchat_report_message_description">Signalez cette conversation si elle enfreint nos Standards de la communauté. Nous n’informerons pas le compte concerné.</string>
+    <string name="cometchat_report_reason_label">Raison</string>
+    <string name="cometchat_report_optional_label">(Facultatif)</string>
+    <string name="cometchat_report_remark_hint">Fournissez plus de contexte pour votre signalement…</string>
+    <string name="cometchat_report_button_report">Signaler</string>
+    <string name="cometchat_report_success_message">Message signalé</string>
+    <string name="cometchat_report_error_message">Échec du signalement</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Une erreur s’est produite. Veuillez vérifier et réessayer.</string>
+    <string name="cometchat_unable_to_flag_message">Impossible de signaler le message</string>
+    <string name="cometchat_flag_message_success">Message signalé</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Contenu indésirable</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Contenu sexuel</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Harcèlement / Intimidation</string>
+
 </resources>

@@ -259,6 +259,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">Ой!</string>
     <string name="cometchat_file_download_failed" translatable="true">Не удалось скачать файл.</string>
     <string name="cometchat_file_not_exist" translatable="true">Файл не существует</string>
+    <string name="cometchat_flag_message_success">Сообщение отправлено в жалобу</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Домогательства / Запугивание</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Сексуальный контент</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Спам / Нежелательный контент</string>
     <string name="cometchat_form_completion_message" translatable="true">Спасибо за заполнение формы.</string>
     <string name="cometchat_generate_summary" translatable="true">Сгенерировать итог</string>
     <string name="cometchat_group" translatable="true">Группа</string>
@@ -360,6 +364,16 @@
     <string name="cometchat_reply" translatable="true">Ответить</string>
     <string name="cometchat_reply_lowercase" translatable="true">ответить</string>
     <string name="cometchat_reply_uppercase" translatable="true">Ответить</string>
+    <string name="cometchat_report">Пожаловаться</string>
+    <string name="cometchat_report_a_message">Пожаловаться на сообщение</string>
+    <string name="cometchat_report_button_report">Пожаловаться</string>
+    <string name="cometchat_report_error_message">Не удалось отправить жалобу</string>
+    <string name="cometchat_report_message_description">Пожалуйтесь на этот чат, если он нарушает наши стандарты сообщества. Мы не уведомим учетную запись, на которую вы пожаловались.</string>
+    <string name="cometchat_report_message_title">Пожаловаться на сообщение</string>
+    <string name="cometchat_report_optional_label">(Необязательно)</string>
+    <string name="cometchat_report_reason_label">Причина</string>
+    <string name="cometchat_report_remark_hint">Предоставьте дополнительный контекст для вашей жалобы…</string>
+    <string name="cometchat_report_success_message">Сообщение отправлено в жалобу</string>
     <string name="cometchat_retry" translatable="true">Повторить</string>
     <string name="cometchat_save" translatable="true">Сохранить</string>
     <string name="cometchat_scope_change" translatable="true">Изменить роль</string>
@@ -373,6 +387,7 @@
     <string name="cometchat_share" translatable="true">Поделиться</string>
     <string name="cometchat_shared_sticker" translatable="true">Отправил(а) стикер</string>
     <string name="cometchat_something_went_wrong" translatable="true">Что-то пошло не так.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Что-то пошло не так. Проверьте и попробуйте снова.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Что-то пошло не так. Пожалуйста, попробуйте снова.</string>
     <string name="cometchat_something_went_wrong_try_again">Что-то пошло не так с нашей стороны. Пожалуйста, попробуйте снова</string>
     <string name="cometchat_start_conv_hint" translatable="true">Нажмите, чтобы начать беседу</string>
@@ -396,6 +411,7 @@
     <string name="cometchat_translation_error" translatable="true">Выбранный язык перевода совпадает с языком оригинального сообщения</string>
     <string name="cometchat_try_again" translatable="true">Повторить попытку</string>
     <string name="cometchat_typing" translatable="true">Печатает…</string>
+    <string name="cometchat_unable_to_flag_message">Не удалось пометить сообщение</string>
     <string name="cometchat_unanswered" translatable="true">без ответа</string>
     <string name="cometchat_unban" translatable="true">Разблокировать</string>
     <string name="cometchat_unread" translatable="true">Не прочитано</string>

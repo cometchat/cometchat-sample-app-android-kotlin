@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Conversation;
@@ -32,7 +33,9 @@ import com.cometchat.chatuikit.extensions.sticker.keyboard.model.Sticker;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKitHelper;
+import com.cometchat.chatuikit.shared.constants.MessageStatus;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
+import com.cometchat.chatuikit.shared.events.CometChatMessageEvents;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
 import com.cometchat.chatuikit.shared.framework.DataSource;
 import com.cometchat.chatuikit.shared.framework.DataSourceDecorator;
@@ -57,14 +60,38 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
     private final String stickerTypeConstant = ExtensionConstants.ExtensionType.STICKER;
     private StickerKeyboardConfiguration configuration;
     private final boolean isKeyboardVisible = false;
+    private final String LISTENER_ID;
+    private BaseMessage quotedMessage;
 
     public StickerExtensionDecorator(DataSource dataSource) {
         super(dataSource);
+        LISTENER_ID = "sticker_keyboard_listener_" + System.currentTimeMillis();
     }
 
     public StickerExtensionDecorator(DataSource dataSource, StickerKeyboardConfiguration configuration) {
         super(dataSource);
         this.configuration = configuration;
+        LISTENER_ID = "sticker_keyboard_listener_" + System.currentTimeMillis();
+        addListeners();
+    }
+
+    private void addListeners() {
+        CometChatMessageEvents.addListener(LISTENER_ID, new CometChatMessageEvents() {
+            /**
+             * Called when a reply to a message is sent/in progress.
+             *
+             * @param baseMessage The replied message object.
+             * @param status      The status of the reply message.
+             */
+            @Override
+            public void ccReplyToMessage(BaseMessage baseMessage, int status) {
+                if (status == MessageStatus.ERROR || status == MessageStatus.SUCCESS) {
+                    quotedMessage = null;
+                } else {
+                    quotedMessage = baseMessage;
+                }
+            }
+        });
     }
 
     @Override
@@ -292,13 +319,32 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
                 id = group.getGuid();
                 receiverType = UIKitConstants.ReceiverType.GROUP;
             }
+            long quotedMessageId = Utils.getQuotedMessageId(quotedMessage, user, group);
             CustomMessage customMessage = new CustomMessage(id, receiverType, stickerTypeConstant, stickerData);
             customMessage.shouldUpdateConversation(true);
             if (idMap.containsKey(UIKitConstants.MapId.PARENT_MESSAGE_ID)) {
                 customMessage.setParentMessageId(Long.parseLong(idMap.get(UIKitConstants.MapId.PARENT_MESSAGE_ID)));
             }
             customMessage.setMetadata(jsonObject);
-            CometChatUIKit.sendCustomMessage(customMessage, null);
+            if (quotedMessageId > -1) {
+                if(quotedMessage.getParentMessageId() == customMessage.getParentMessageId()){
+                    customMessage.setQuotedMessageId(quotedMessageId);
+                    customMessage.setQuotedMessage(customMessage);
+                }
+            } else {
+                quotedMessage = null;
+            }
+            CometChatUIKit.sendCustomMessage(customMessage, new CometChat.CallbackListener<CustomMessage>() {
+                @Override
+                public void onSuccess(CustomMessage customMessage) {
+                    CometChatUIKitHelper.onMessageReply(customMessage, MessageStatus.SUCCESS);
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+
+                }
+            });
         });
 
         return cometchatStickerKeyboard;
@@ -306,65 +352,76 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
 
     public CometChatMessageTemplate getStickerTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(UIKitConstants.MessageCategory.CUSTOM)
-            .setType(stickerTypeConstant)
-            .setOptions((context, baseMessage, isLeftAlign) -> ChatConfigurator
-                .getDataSource()
-                .getCommonOptions(context, baseMessage, isLeftAlign, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    View view = View.inflate(context, R.layout.cometchat_sticker_bubble_layout_container, null);
-                    MessageBubbleUtils.setDeletedMessageBubble(context, view);
-                    return view;
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     @NonNull View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatStickerBubble stickerBubble = createdView.findViewById(R.id.cometchat_sticker_bubble);
-                    CometChatDeleteBubble deletedBubble = createdView.findViewById(R.id.cometchat_delete_text_bubble);
-
-                    if (message.getDeletedAt() == 0) {
-                        deletedBubble.setVisibility(View.GONE);
-                        stickerBubble.setVisibility(View.VISIBLE);
-                        stickerBubble.setMessage((CustomMessage) message);
-                    } else {
-                        stickerBubble.setVisibility(View.GONE);
-                        deletedBubble.setVisibility(View.VISIBLE);
-                        deletedBubble.setStyle(CometChatUIKit
-                                                   .getLoggedInUser()
-                                                   .getUid()
-                                                   .equals(message
-                                                               .getSender()
-                                                               .getUid()) ? additionParameter.getOutgoingDeleteBubbleStyle() : additionParameter.getIncomingDeleteBubbleStyle());
+                .setCategory(UIKitConstants.MessageCategory.CUSTOM)
+                .setType(stickerTypeConstant)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
                     }
-                }
-            })
-            .setBottomView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
-                }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                    }
+                })
+                .setOptions((context, baseMessage, isLeftAlign) -> ChatConfigurator
                         .getDataSource()
-                        .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                }
-            });
+                        .getCommonOptions(context, baseMessage, isLeftAlign, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        View view = View.inflate(context, R.layout.cometchat_sticker_bubble_layout_container, null);
+                        MessageBubbleUtils.setDeletedMessageBubble(context, view);
+                        return view;
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         @NonNull View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatStickerBubble stickerBubble = createdView.findViewById(R.id.cometchat_sticker_bubble);
+                        CometChatDeleteBubble deletedBubble = createdView.findViewById(R.id.cometchat_delete_text_bubble);
+
+                        if (message.getDeletedAt() == 0) {
+                            deletedBubble.setVisibility(View.GONE);
+                            stickerBubble.setVisibility(View.VISIBLE);
+                            stickerBubble.setMessage((CustomMessage) message);
+                        } else {
+                            stickerBubble.setVisibility(View.GONE);
+                            deletedBubble.setVisibility(View.VISIBLE);
+                            deletedBubble.setStyle(CometChatUIKit
+                                    .getLoggedInUser()
+                                    .getUid()
+                                    .equals(message
+                                            .getSender()
+                                            .getUid()) ? additionParameter.getOutgoingDeleteBubbleStyle() : additionParameter.getIncomingDeleteBubbleStyle());
+                        }
+                    }
+                })
+                .setBottomView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getBottomView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindBottomView(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                    }
+                });
     }
 
     @Override

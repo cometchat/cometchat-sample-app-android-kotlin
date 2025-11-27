@@ -1,0 +1,270 @@
+[
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_flag_us.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_flag_us.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_custom_toast.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/custom_toast.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_activity_login.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_calls.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_delete.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_toggle_widget_drawable.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/toggle_widget_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_users.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_users.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_cometchat_notification.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_cometchat_notification.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_notification_user_placeholder.png.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_notification_user_placeholder.png"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_chats.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_user_profile_popup_menu_layout.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/user_profile_popup_menu_layout.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_play_recording.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_play_recording.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_start_conversation.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_start_conversation.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_reply.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_reply.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_cometchat_logo.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_cometchat_logo.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_users.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_users.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_tab_layout_bg.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/tab_layout_bg.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_activity_ai_assistant_chat.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/activity_ai_assistant_chat.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_notification_group_placeholder.png.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_notification_group_placeholder.png"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_rounded_edittext.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/rounded_edittext.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_download_recording.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_download_recording.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_cometchat_logo.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_cometchat_logo.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_google_logo.png.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_google_logo.png"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ai_profile.png.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ai_profile.png"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_flag_india.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_flag_india.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_user_profile.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_user_profile.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_selector_radio_text_color.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/selector_radio_text_color.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_flag_eu.png.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_flag_eu.png"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_activity_app_credentials.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/activity_app_credentials.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_calls.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_calls.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_chats.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_chats.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_user.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_user.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_banned_members.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_banned_members.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_logout.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_logout.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_logout.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_logout.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_create_group.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_create_group.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_tab_background_state.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/tab_background_state.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_group.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_group.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_activity_aiassistant_users.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/activity_aiassistant_users.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_tab_layout_background_active.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/tab_layout_background_active.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_info.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_info.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_sample_user_items.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/sample_user_items.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_leave_group.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_leave_group.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_bottom_bar_groups.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_bottom_bar_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_curved_button_drawable.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/curved_button_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable-night_ic_bottom_bar_groups.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable-night/ic_bottom_bar_groups.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_select_radio_button_drawable.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/select_radio_button_drawable.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/drawable_ic_sample_user_selection.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/drawable/ic_sample_user_selection.xml"
+    },
+    {
+        "merged": "com.cometchat.ai.sampleapp.ai-sample-app-debug-41:/layout_activity_splash.xml.flat",
+        "source": "com.cometchat.ai.sampleapp.ai-sample-app-main-43:/layout/activity_splash.xml"
+    }
+]

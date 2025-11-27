@@ -236,4 +236,21 @@
     <string name="cometchat_documents" translatable="true">Документы</string>
     <string name="cometchat_links" translatable="true">Ссылки</string>
     <string name="cometchat_details" translatable="true">Детали</string>
+    <string name="cometchat_report">Пожаловаться</string>
+    <string name="cometchat_report_a_message">Пожаловаться на сообщение</string>
+    <string name="cometchat_report_message_title">Пожаловаться на сообщение</string>
+    <string name="cometchat_report_message_description">Пожалуйтесь на этот чат, если он нарушает наши стандарты сообщества. Мы не уведомим учетную запись, на которую вы пожаловались.</string>
+    <string name="cometchat_report_reason_label">Причина</string>
+    <string name="cometchat_report_optional_label">(Необязательно)</string>
+    <string name="cometchat_report_remark_hint">Предоставьте дополнительный контекст для вашей жалобы…</string>
+    <string name="cometchat_report_button_report">Пожаловаться</string>
+    <string name="cometchat_report_success_message">Сообщение отправлено в жалобу</string>
+    <string name="cometchat_report_error_message">Не удалось отправить жалобу</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Что-то пошло не так. Проверьте и попробуйте снова.</string>
+    <string name="cometchat_unable_to_flag_message">Не удалось пометить сообщение</string>
+    <string name="cometchat_flag_message_success">Сообщение отправлено в жалобу</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Спам / Нежелательный контент</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Сексуальный контент</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Домогательства / Запугивание</string>
+
 </resources>

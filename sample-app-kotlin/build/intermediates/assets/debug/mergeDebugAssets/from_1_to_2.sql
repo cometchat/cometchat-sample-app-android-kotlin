@@ -1,1 +1,0 @@
-ALTER TABLE CurrentUser ADD COLUMN jwt TEXT;

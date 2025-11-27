@@ -4,12 +4,11 @@
     android:orientation="vertical"
     android:id="@+id/message_preview_flexbox"
     android:layout_width="match_parent"
-    android:minWidth="@dimen/cometchat_200dp"
     app:flexWrap="wrap"
     android:layout_height="wrap_content">
 
     <com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview
-        android:id="@+id/message_preview_container_layout"
+        android:id="@+id/reply_message_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

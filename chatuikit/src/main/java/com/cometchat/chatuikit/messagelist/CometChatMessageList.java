@@ -58,6 +58,7 @@ import com.cometchat.chat.enums.ModerationStatus;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.Action;
 import com.cometchat.chat.models.BaseMessage;
+import com.cometchat.chat.models.FlagReason;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.MediaMessage;
 import com.cometchat.chat.models.ReactionCount;
@@ -65,6 +66,7 @@ import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.report.CometChatFlagMessageDialog;
 import com.cometchat.chatuikit.shared.constants.MessageStatus;
 import com.cometchat.chatuikit.shared.interfaces.ToolCallListener;
 import com.cometchat.chatuikit.shared.ai.CometChatAIStreamService;
@@ -127,6 +129,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CometChatMessageList is a custom view that extends {@link MaterialCardView}
@@ -162,6 +165,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private boolean enableConversationStarter = false;
     private boolean enableSmartReplies = false;
     private int replyInThreadOptionVisibility = VISIBLE;
+    private int replyOptionVisibility = VISIBLE;
     private int translateMessageOptionVisibility = VISIBLE;
     private int copyMessageOptionVisibility = VISIBLE;
     private int editMessageOptionVisibility = VISIBLE;
@@ -241,6 +245,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     // Dialogs and Alerts
     private CometChatMessageInformation cometchatMessageInformation;
     private CometChatConfirmDialog deleteAlertDialog;
+    private CometChatFlagMessageDialog flagMessageDialog;
     /**
      * Observer for monitoring the deletion state of a message.
      *
@@ -267,6 +272,28 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 }
                 baseMessage = null;
                 Toast.makeText(getContext(), getContext().getString(R.string.cometchat_message_delete_error), Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    Observer<UIKitConstants.FlagMessageState> flagMessageObserver = new Observer<UIKitConstants.FlagMessageState>() {
+        @Override
+        public void onChanged(UIKitConstants.FlagMessageState progressState) {
+            if (UIKitConstants.FlagMessageState.INITIATED_FLAG.equals(progressState)) {
+                if (flagMessageDialog != null) flagMessageDialog.hidePositiveButtonProgressBar(false);
+            } else if (UIKitConstants.FlagMessageState.SUCCESS_FLAG.equals(progressState)) {
+                Toast.makeText(getContext(), getContext().getString(R.string.cometchat_flag_message_success), Toast.LENGTH_SHORT).show();
+                if (flagMessageDialog != null) {
+                    flagMessageDialog.dismiss();
+                    flagMessageDialog = null;
+                }
+                baseMessage = null;
+            } else if (UIKitConstants.FlagMessageState.FAILURE_FLAG.equals(progressState)) {
+                if (flagMessageDialog != null) {
+                    flagMessageDialog.hidePositiveButtonProgressBar(true);
+                    flagMessageDialog.onFlagMessageError();
+                }
+                baseMessage = null;
             }
         }
     };
@@ -397,6 +424,8 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private AttributeSet attrs;
     private @StyleRes int defStyleAttr;
     private @StyleRes int style;
+    private @StyleRes int flagMessageStyle = -1;
+    private Map<String, Integer> flagReasonLocalization;
 
     /**
      * Constructs a new {@link CometChatMessageList} with the specified context.
@@ -550,6 +579,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
 
         // Hide header date initially
         setStickyDateVisibility(VISIBLE);
+
+        // Set report option visibility based on flag reasons
+        List<FlagReason> flagReasons = CometChatUIKit.getFlagReasons();
+        setReportOptionVisibility(flagReasons == null || flagReasons.isEmpty() ? GONE : VISIBLE);
 
         // Set up message list layout and header/footer views
         messageListLayout = view.findViewById(R.id.message_list_layout);
@@ -722,6 +755,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.notifyUpdate().observe(lifecycleOwner, this::notifyDataChanged);
         messageListViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
         messageListViewModel.getMessageDeleteState().observe(lifecycleOwner, messageDeleteObserver);
+        messageListViewModel.getMessageFlagState().observe(lifecycleOwner, flagMessageObserver);
         messageListViewModel.closeTopPanel().observe(lifecycleOwner, this::closeInternalTopPanel);
         messageListViewModel.closeBottomPanel().observe(lifecycleOwner, this::closeInternalBottomPanel);
         messageListViewModel.showTopPanel().observe(lifecycleOwner, this::showInternalTopPanel);
@@ -1135,6 +1169,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void setAISmartRepliesStyle(@StyleRes int styleResId) {
         this.smartRepliesStyle = styleResId;
         aiSmartRepliesView.setStyle(styleResId);
+    }
+
+    /**
+     * Apply style from style resource
+     * @param styleResId Style resource ID
+     */
+    public void setFlagMessageStyle(@StyleRes int styleResId) {
+        if (styleResId == -1) return;
+        this.flagMessageStyle = styleResId;
     }
 
     public int getAIConversationStarterStyle() {
@@ -2296,6 +2339,26 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
+     * Retrieves the visibility status of the "Reply to Message" option.
+     *
+     * @return An integer representing the visibility of the reply to message option.
+     * Possible values include {@code View.VISIBLE}, {@code View.INVISIBLE}, and {@code View.GONE}.
+     */
+    public int getReplyOptionVisibility() {
+        return replyOptionVisibility;
+    }
+
+    /**
+     * Sets the visibility of the "Reply to Message" option.
+     *
+     * @param visibility An integer representing the visibility status of the reply to message option.
+     */
+    public void setReplyOptionVisibility(int visibility) {
+        this.replyOptionVisibility = visibility;
+        additionParameter.setReplyToMessageOptionVisibility(visibility);
+    }
+
+    /**
      * Retrieves the visibility status of the "Translate Message" option.
      *
      * @return An integer representing the visibility of the translate message option.
@@ -2573,6 +2636,22 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         cometchatPopUpMenuMessage.show(messageBubble.getContentView(), this, baseMessage);
     }
 
+    /** Sets the visibility of the "Report" option.
+     *
+     * @param visibility An integer representing the visibility status of the report option.
+     */
+    public void setReportOptionVisibility(int visibility) {
+        additionParameter.setReportOptionVisibility(visibility);
+    }
+
+    /** Retrieves the visibility status of the "Report" option.
+     *
+     * @return An integer representing the visibility of the report option.
+     */
+    public int getReportOptionVisibility() {
+        return additionParameter.getReportOptionVisibility();
+    }
+
     /**
      * Retrieves a list of action items for the options available on a message.
      *
@@ -2656,6 +2735,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             case UIKitConstants.MessageOption.REPLY_TO_MESSAGE:
                 messageListViewModel.onMessageReply(baseMessage);
                 break;
+            case UIKitConstants.MessageOption.REPORT:
+                showFlagMessageDialog(baseMessage);
+                break;
         }
     }
 
@@ -2718,6 +2800,23 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         deleteAlertDialog.setConfirmDialogElevation(0);
         deleteAlertDialog.setCancelable(false);
         deleteAlertDialog.show();
+    }
+
+    private void showFlagMessageDialog(BaseMessage baseMessage) {
+        flagMessageDialog = new CometChatFlagMessageDialog(getContext(), baseMessage);
+        if (flagReasonLocalization != null) flagMessageDialog.setLocalizationIdMap(flagReasonLocalization);
+        flagMessageDialog.setFlagReasons(CometChatUIKit.getFlagReasons());
+        flagMessageDialog.setOnPositiveButtonClickListener((flagDetail) -> {
+            messageListViewModel.flagMessage(flagDetail, baseMessage);
+        });
+        if (flagMessageStyle != -1) flagMessageDialog.setFlagMessageStyle(flagMessageStyle);
+        flagMessageDialog.setOnCancelButtonClickListener(() -> flagMessageDialog.dismiss());
+        flagMessageDialog.setOnCloseButtonClickListener(() -> flagMessageDialog.dismiss());
+        flagMessageDialog.show();
+    }
+
+    public void setFlagReasonLocalization(Map<String, Integer> localizationIdMap) {
+        this.flagReasonLocalization = localizationIdMap;
     }
 
     /**

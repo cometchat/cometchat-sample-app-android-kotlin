@@ -229,4 +229,21 @@
     <string name="cometchat_documents" translatable="true">Belgeler</string>
     <string name="cometchat_links" translatable="true">Bağlantılar</string>
     <string name="cometchat_details" translatable="true">Detaylar</string>
+    <string name="cometchat_report">Bildir</string>
+    <string name="cometchat_report_a_message">Bir mesajı bildir</string>
+    <string name="cometchat_report_message_title">Mesajı bildir</string>
+    <string name="cometchat_report_message_description">Bu sohbet topluluk kurallarımıza aykırıysa bildirin. Bildirdiğiniz hesabı bilgilendirmeyeceğiz.</string>
+    <string name="cometchat_report_reason_label">Neden</string>
+    <string name="cometchat_report_optional_label">(İsteğe bağlı)</string>
+    <string name="cometchat_report_remark_hint">Bildiriminiz için ek bağlam sağlayın…</string>
+    <string name="cometchat_report_button_report">Bildir</string>
+    <string name="cometchat_report_success_message">Mesaj bildirildi</string>
+    <string name="cometchat_report_error_message">Mesaj bildirilemedi</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Bir şeyler yanlış gitti. Lütfen kontrol edip tekrar deneyin.</string>
+    <string name="cometchat_unable_to_flag_message">Mesaj işaretlenemiyor</string>
+    <string name="cometchat_flag_message_success">Mesaj bildirildi</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / İstenmeyen İçerik</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Cinsel İçerik</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Taciz / Zorbalık</string>
+
 </resources>

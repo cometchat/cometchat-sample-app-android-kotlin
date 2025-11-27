@@ -158,6 +158,7 @@
         <item name="cometchatAIConversationSummaryStyle">@style/CometChatAIConversationSummaryStyle</item>
         <item name="cometChatAIAssistantChatHistoryStyle">@style/CometChatAIAssistantChatHistoryStyle</item>
         <item name="cometchatSearchStyle">@style/CometChatSearchStyle</item>
+        <item name="cometChatFlagMessageStyle">@style/CometChatFlagMessageStyle</item>
     </style>
 
     <!-- ########################################## Start of Base Component Styles ########################################## -->
@@ -1037,6 +1038,24 @@
         <item name="cometChatAIAssistantChatHistoryItemTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometChatAIAssistantChatHistoryDeleteOptionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometChatAIAssistantChatHistoryDeleteOptionIcon">@drawable/cometchat_ic_delete</item>
+    </style>
+
+    <style name="CometChatFlagMessageStyle">
+        <item name="cometchatFlagMessageBorderRadius">@dimen/cometchat_radius_5</item>
+        <item name="cometchatFlagMessageTitleAppearance">?attr/cometchatTextAppearanceHeading2Bold</item>
+        <item name="cometchatFlagMessageSubtitleTextAppearance">?attr/cometchatTextAppearanceButtonRegular</item>
+        <item name="cometchatFlagMessageCloseIcon">@drawable/cometchat_ic_close</item>
+        <item name="cometchatFlagMessageStrokeWidth">1dp</item>
+
+        <item name="cometchatFlagMessageChipCornerRadius">@dimen/cometchat_radius_max</item>
+        <item name="cometchatFlagMessageChipStrokeWidth">1dp</item>
+        <item name="cometchatFlagMessageChipTextAppearance">?attr/cometchatTextAppearanceButtonRegular</item>
+
+        <item name="cometchatFlagMessageRemarkFieldTitleTextAppearance">?attr/cometchatTextAppearanceBodyMedium</item>
+        <item name="cometchatFlagMessageRemarkFieldTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+
+        <item name="cometchatFlagMessageButtonCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatFlagMessageButtonStrokeWidth">1dp</item>
     </style>
 
     <!-- ########################################## Typography ########################################## -->

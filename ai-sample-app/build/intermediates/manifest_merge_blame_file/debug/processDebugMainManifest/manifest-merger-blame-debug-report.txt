@@ -1,0 +1,314 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.cometchat.ai.sampleapp"
+4    android:versionCode="1"
+5    android:versionName="5.2.4" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:5:5-67
+11-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:5:22-64
+12    <uses-permission
+12-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:6:5-8:38
+13        android:name="android.permission.READ_EXTERNAL_STORAGE"
+13-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:7:9-64
+14        android:maxSdkVersion="32" />
+14-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:8:9-35
+15    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+15-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:9:5-76
+15-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:9:22-73
+16    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+16-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:10:5-75
+16-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:10:22-72
+17    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+17-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:11:5-77
+17-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:11:22-74
+18
+19    <uses-feature
+19-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:13:5-15:36
+20        android:name="android.hardware.sensor.proximity"
+20-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:14:9-57
+21        android:required="false" />
+21-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:15:9-33
+22    <uses-feature
+22-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:16:5-18:36
+23        android:name="android.hardware.telephony"
+23-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:17:9-50
+24        android:required="false" />
+24-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:18:9-33
+25
+26    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+26-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:5-79
+26-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:22-76
+27    <uses-permission android:name="android.permission.CAMERA" />
+27-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:5-65
+27-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:22-62
+28    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+28-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:5-71
+28-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:22-68
+29    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+29-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:5-80
+29-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:22-77
+30    <uses-permission
+30-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:13:5-15:38
+31        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+31-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:9-65
+32        android:maxSdkVersion="32" />
+32-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:9-35
+33    <uses-permission android:name="android.permission.VIBRATE" />
+33-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:5-66
+33-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:22-63
+34
+35    <queries>
+35-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:21:5-35:15
+36        <intent>
+36-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:9-26:18
+37            <action android:name="android.intent.action.GET_CONTENT" />
+37-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:23:13-72
+37-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:23:21-69
+38
+39            <data android:mimeType="image/* video/*" />
+39-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:13-56
+39-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:19-53
+40        </intent>
+41        <intent>
+41-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:27:9-31:18
+42            <action android:name="android.intent.action.PICK" />
+42-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:13-65
+42-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:21-62
+43
+44            <data android:mimeType="image/* video/*" />
+44-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:13-56
+44-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:19-53
+45        </intent>
+46        <intent>
+46-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:32:9-34:18
+47            <action android:name="android.intent.action.CHOOSER" />
+47-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:33:13-68
+47-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:33:21-65
+48        </intent>
+49    </queries>
+50
+51    <permission
+51-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+52        android:name="com.cometchat.ai.sampleapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+52-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+53        android:protectionLevel="signature" />
+53-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+54
+55    <uses-permission android:name="com.cometchat.ai.sampleapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+55-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+55-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+56
+57    <application
+57-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:20:5-53:19
+58        android:name="com.cometchat.ai.sampleapp.utils.MyApplication"
+58-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:21:9-70
+59        android:allowBackup="true"
+59-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:22:9-35
+60        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+60-->[androidx.core:core:1.15.0] /Users/cometchat/.gradle/caches/transforms-4/32fc0087bb18617c58bedca8a0c55efa/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+61        android:debuggable="true"
+62        android:extractNativeLibs="false"
+63        android:hardwareAccelerated="true"
+63-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:38:9-43
+64        android:icon="@mipmap/ic_launcher"
+64-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:23:9-43
+65        android:label="@string/app_name"
+65-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:24:9-41
+66        android:localeConfig="@xml/cometchat_locale_config"
+66-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:25:9-60
+67        android:requestLegacyExternalStorage="true"
+67-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:39:9-52
+68        android:roundIcon="@mipmap/ic_launcher_round"
+68-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:26:9-54
+69        android:supportsRtl="true"
+69-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:27:9-35
+70        android:testOnly="true"
+71        android:theme="@style/AIAssistantSampleApp.v5" >
+71-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:28:9-55
+72        <activity
+72-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:30:9-32:40
+73            android:name="com.cometchat.ai.sampleapp.ui.activity.AIAssistantUsersActivity"
+73-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:31:13-91
+74            android:exported="false" />
+74-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:32:13-37
+75        <activity
+75-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:33:9-35:40
+76            android:name="com.cometchat.ai.sampleapp.ui.activity.AppCredentialsActivity"
+76-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:34:13-89
+77            android:exported="false" />
+77-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:35:13-37
+78        <activity
+78-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:36:9-44:20
+79            android:name="com.cometchat.ai.sampleapp.ui.activity.SplashActivity"
+79-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:37:13-81
+80            android:exported="true" >
+80-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:38:13-36
+81            <intent-filter>
+81-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:39:13-43:29
+82                <action android:name="android.intent.action.MAIN" />
+82-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:40:17-69
+82-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:40:25-66
+83
+84                <category android:name="android.intent.category.LAUNCHER" />
+84-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:42:17-77
+84-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:42:27-74
+85            </intent-filter>
+86        </activity>
+87        <activity
+87-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:45:9-48:58
+88            android:name="com.cometchat.ai.sampleapp.ui.activity.LoginActivity"
+88-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:46:13-80
+89            android:exported="false"
+89-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:47:13-37
+90            android:windowSoftInputMode="adjustResize" />
+90-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:48:13-55
+91        <activity
+91-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:49:9-52:58
+92            android:name="com.cometchat.ai.sampleapp.ui.activity.AIAssistantChatActivity"
+92-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:50:13-90
+93            android:exported="false"
+93-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:51:13-37
+94            android:windowSoftInputMode="adjustResize" />
+94-->/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/src/main/AndroidManifest.xml:52:13-55
+95        <activity
+95-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:42:9-45:72
+96            android:name="com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity"
+96-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:43:13-105
+97            android:exported="false"
+97-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:44:13-37
+98            android:theme="@style/UiKit.Internal.Theme.Transparent2" />
+98-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:45:13-69
+99        <activity
+99-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:46:9-48:71
+100            android:name="com.cometchat.chatuikit.shared.permission.CometChatPermissionActivity"
+100-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:47:13-97
+101            android:theme="@style/UiKit.Internal.Theme.Transparent" />
+101-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:48:13-68
+102        <activity
+102-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:49:9-53:55
+103            android:name="com.cometchat.chatuikit.calls.CometChatCallActivity"
+103-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:50:13-79
+104            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+104-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:51:13-79
+105            android:screenOrientation="portrait"
+105-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:52:13-49
+106            android:supportsPictureInPicture="true" />
+106-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:53:13-52
+107        <activity
+107-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:54:9-56:40
+108            android:name="com.cometchat.chatuikit.extensions.collaborative.CometChatWebViewActivity"
+108-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:55:13-101
+109            android:exported="false" />
+109-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:56:13-37
+110        <activity
+110-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:57:9-63:55
+111            android:name="com.cometchat.chatuikit.calls.CometChatOngoingCallActivity"
+111-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:58:13-86
+112            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+112-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:59:13-79
+113            android:excludeFromRecents="true"
+113-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:60:13-46
+114            android:exported="false"
+114-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:61:13-37
+115            android:screenOrientation="portrait"
+115-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:62:13-49
+116            android:supportsPictureInPicture="true" />
+116-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:63:13-52
+117
+118        <meta-data
+118-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:65:9-67:48
+119            android:name="com.cometchat.chatuikit"
+119-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:66:13-51
+120            android:value="com.cometchat.ai.sampleapp" />
+120-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:67:13-45
+121
+122        <provider
+122-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:69:9-77:20
+123            android:name="androidx.core.content.FileProvider"
+123-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:70:13-62
+124            android:authorities="com.cometchat.ai.sampleapp.provider"
+124-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:71:13-60
+125            android:exported="false"
+125-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:72:13-37
+126            android:grantUriPermissions="true" >
+126-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:73:13-47
+127            <meta-data
+127-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:74:13-76:57
+128                android:name="android.support.FILE_PROVIDER_PATHS"
+128-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:75:17-67
+129                android:resource="@xml/provider_path" />
+129-->[:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:76:17-54
+130        </provider>
+131        <provider
+131-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+132            android:name="androidx.startup.InitializationProvider"
+132-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:25:13-67
+133            android:authorities="com.cometchat.ai.sampleapp.androidx-startup"
+133-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:26:13-68
+134            android:exported="false" >
+134-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:27:13-37
+135            <meta-data
+135-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+136                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+136-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:30:17-75
+137                android:value="androidx.startup" />
+137-->[androidx.emoji2:emoji2:1.3.0] /Users/cometchat/.gradle/caches/transforms-4/aa9067099b2084a5859afbd8caa8badb/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:31:17-49
+138            <meta-data
+138-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/cometchat/.gradle/caches/transforms-4/04d829034e14162f87378d966d338c0d/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+139                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+139-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/cometchat/.gradle/caches/transforms-4/04d829034e14162f87378d966d338c0d/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+140                android:value="androidx.startup" />
+140-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/cometchat/.gradle/caches/transforms-4/04d829034e14162f87378d966d338c0d/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+141            <meta-data
+141-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+142                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+142-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+143                android:value="androidx.startup" />
+143-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+144        </provider>
+145
+146        <receiver
+146-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+147            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+147-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+148            android:directBootAware="false"
+148-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+149            android:enabled="true"
+149-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+150            android:exported="true"
+150-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+151            android:permission="android.permission.DUMP" >
+151-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+152            <intent-filter>
+152-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+153                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+153-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+153-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+154            </intent-filter>
+155            <intent-filter>
+155-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+156                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+156-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+156-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+157            </intent-filter>
+158            <intent-filter>
+158-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+159                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+159-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+159-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+160            </intent-filter>
+161            <intent-filter>
+161-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+162                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+162-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+162-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/cometchat/.gradle/caches/transforms-4/9fce0e4bca4acf8d99988c1ffebcc6a9/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+163            </intent-filter>
+164        </receiver>
+165    </application>
+166
+167</manifest>

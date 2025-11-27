@@ -218,6 +218,30 @@ public class Utils {
         return idMap;
     }
 
+    public static long getQuotedMessageId(BaseMessage quotedMessage, User user, Group group) {
+        long quotedMessageId = -1;
+        if (user != null) {
+            if (quotedMessage.getReceiver() instanceof User) {
+                String[] ids = quotedMessage.getConversationId().split("_");
+                boolean isCorrectConversation = false;
+                for (String s : ids) {
+                    if (s.equals(user.getUid())) {
+                        isCorrectConversation = true;
+                        break;
+                    }
+                }
+                if (isCorrectConversation)
+                    quotedMessageId = quotedMessage.getId();
+            }
+        } else {
+            if (quotedMessage.getReceiver() instanceof Group) {
+                Group receiver = (Group) quotedMessage.getReceiver();
+                quotedMessageId = receiver.getGuid().equals(group.getGuid()) ? quotedMessage.getId() : -1;
+            }
+        }
+        return quotedMessageId;
+    }
+
     public static Typeface getTypefaceFromTextAppearance(Context context, int textAppearanceResId) {
         String fontFamily;
         int textStyle = Typeface.NORMAL;
@@ -476,36 +500,62 @@ public class Utils {
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_poll));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_poll);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             case ExtensionConstants.ExtensionType.STICKER:
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_sticker));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_sticker);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             case ExtensionConstants.ExtensionType.LOCATION:
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_location));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_location);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             case ExtensionConstants.ExtensionType.DOCUMENT:
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_message_document));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_collaborative_document);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             case ExtensionConstants.ExtensionType.WHITEBOARD:
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_collaborative_whiteboard));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_conversations_collabrative_document);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             case ExtensionConstants.ExtensionType.MEETING:
                 messagePreview.setMessagePreviewTitleText(sender);
                 messagePreview.setMessagePreviewSubtitleText(context.getString(R.string.cometchat_meeting));
                 messagePreview.setMessageIcon(R.drawable.cometchat_ic_message_preview_call);
+                messagePreview.setMessageIconVisibility(VISIBLE);
                 break;
             default:
+                if (baseMessage.getConversationText() != null && !baseMessage.getConversationText().isEmpty()) {
+                    messagePreview.setMessagePreviewTitleText(sender);
+                    messagePreview.setMessagePreviewSubtitleText(baseMessage.getConversationText());
+                    messagePreview.setMessageIconVisibility(GONE);
+                } else {
+                    if (baseMessage.getMetadata() != null && baseMessage.getMetadata().has("pushNotification")) {
+                        try {
+                            messagePreview.setMessagePreviewTitleText(sender);
+                            messagePreview.setMessagePreviewSubtitleText(baseMessage.getMetadata().getString("pushNotification"));
+                            messagePreview.setMessageIconVisibility(GONE);
+                        } catch (Exception ignored) {
+                            messagePreview.setMessagePreviewTitleText(sender);
+                            messagePreview.setMessagePreviewSubtitleText(baseMessage.getType());
+                            messagePreview.setMessageIconVisibility(GONE);
+                        }
+                    } else {
+                        messagePreview.setMessagePreviewTitleText(sender);
+                        messagePreview.setMessagePreviewSubtitleText(baseMessage.getType());
+                        messagePreview.setMessageIconVisibility(GONE);
+                    }
+                }
                 break;
         }
-        messagePreview.setMessageIconVisibility(VISIBLE);
     }
 
     public static void handleMediaMessagePreview(Context context, String sender, MediaMessage mediaMessage, CometChatMessagePreview messagePreview) {

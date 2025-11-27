@@ -404,11 +404,14 @@ public class Extensions {
         return result;
     }
 
-    public static void callWriteBoardExtension(String receiverId, String receiverType, ExtensionResponseListener extensionResponseListener) {
+    public static void callWriteBoardExtension(String receiverId, String receiverType, long quotedMessageId, ExtensionResponseListener extensionResponseListener) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("receiver", receiverId);
             jsonObject.put("receiverType", receiverType);
+            if (quotedMessageId > -1) {
+                jsonObject.put("quotedMessageId", quotedMessageId);
+            }
         } catch (Exception e) {
             CometChatLogger.e(TAG, e.toString());
         }
@@ -425,11 +428,14 @@ public class Extensions {
         });
     }
 
-    public static void callWhiteBoardExtension(String receiverId, String receiverType, ExtensionResponseListener extensionResponseListener) {
+    public static void callWhiteBoardExtension(String receiverId, String receiverType, long quotedMessageId, ExtensionResponseListener extensionResponseListener) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("receiver", receiverId);
             jsonObject.put("receiverType", receiverType);
+            if (quotedMessageId > -1) {
+                jsonObject.put("quotedMessageId", quotedMessageId);
+            }
         } catch (Exception e) {
             CometChatLogger.e(TAG, e.toString());
         }

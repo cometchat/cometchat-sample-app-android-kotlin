@@ -1,10 +1,10 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-85:12
-INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-85:12
-INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-85:12
-INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-85:12
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-80:12
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:1-86:12
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:2:1-80:12
 MERGED from [androidx.databinding:databinding-adapters:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/e1338861e7157f6383d82d0689352343/transformed/databinding-adapters-8.5.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.databinding:databinding-runtime:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/ac17a21c8448e224bf74f23003168a13/transformed/databinding-runtime-8.5.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.databinding:viewbinding:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/5375cd8ef2f922c78b6689231fe640ee/transformed/jetified-viewbinding-8.5.2/AndroidManifest.xml:2:1-7:12
@@ -20,7 +20,7 @@ MERGED from [com.facebook.react:react-android:0.77.2] /Users/cometchat/.gradle/c
 MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /Users/cometchat/.gradle/caches/transforms-4/2bc48d453b1a33d0328440c86a773918/transformed/jetified-appcompat-resources-1.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.appcompat:appcompat:1.7.0] /Users/cometchat/.gradle/caches/transforms-4/377ee9beef880fb0a5fe5bde3938e4f7/transformed/appcompat-1.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/cometchat/.gradle/caches/transforms-4/17b58928030bfa159ba62b10a5f3dc23/transformed/jetified-glide-4.16.0/AndroidManifest.xml:2:1-9:12
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:2:1-14:12
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:2:1-14:12
 MERGED from [androidx.lifecycle:lifecycle-extensions:2.0.0] /Users/cometchat/.gradle/caches/transforms-4/7f013cd0a948a4a3f2d69b7284da76fd/transformed/lifecycle-extensions-2.0.0/AndroidManifest.xml:17:1-25:12
 MERGED from [io.noties.markwon:recycler-table:4.6.2] /Users/cometchat/.gradle/caches/transforms-4/879be53cd61484d45e0c8f0187b95b68/transformed/jetified-recycler-table-4.6.2/AndroidManifest.xml:2:1-11:12
 MERGED from [io.noties.markwon:recycler:4.6.2] /Users/cometchat/.gradle/caches/transforms-4/f0dc915fd96f0088abeaa8c9c66e000b/transformed/jetified-recycler-4.6.2/AndroidManifest.xml:2:1-11:12
@@ -107,18 +107,18 @@ MERGED from [org.jitsi:webrtc:124.0.0] /Users/cometchat/.gradle/caches/transform
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
 ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:5:5-67
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:5-67
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:5-67
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:9:5-67
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:9:5-67
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:15:5-67
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:15:5-67
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:11:5-67
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:11:5-67
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:11:5-67
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:11:5-67
 	android:name
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:5:22-64
 uses-permission#android.permission.READ_EXTERNAL_STORAGE
 ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:6:5-8:38
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:5-18:38
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:5-18:38
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:16:5-18:38
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:16:5-18:38
 	android:maxSdkVersion
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:8:9-35
 	android:name
@@ -137,14 +137,14 @@ ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:11:22-74
 uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:14:5-79
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:5-79
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:5-79
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:8:5-79
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:8:5-79
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:10:5-79
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:10:5-79
 MERGED from [com.facebook.react:react-native-community_netinfo:11.1.0-cometchat-21164567] /Users/cometchat/.gradle/caches/transforms-4/b1484c1541b38302601b1f23cd12283e/transformed/jetified-react-native-community_netinfo-11.1.0-cometchat-21164567/AndroidManifest.xml:7:5-79
 MERGED from [com.facebook.react:react-native-community_netinfo:11.1.0-cometchat-21164567] /Users/cometchat/.gradle/caches/transforms-4/b1484c1541b38302601b1f23cd12283e/transformed/jetified-react-native-community_netinfo-11.1.0-cometchat-21164567/AndroidManifest.xml:7:5-79
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:12:5-79
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:12:5-79
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:12:5-79
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:12:5-79
 	android:name
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:14:22-76
 uses-permission#android.permission.READ_PHONE_STATE
@@ -153,8 +153,8 @@ ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:15:22-72
 uses-permission#android.permission.RECORD_AUDIO
 ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:16:5-71
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:5-71
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:5-71
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:11:5-71
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:11:5-71
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:18:5-71
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:18:5-71
 	android:name
@@ -194,10 +194,10 @@ ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-
 	android:name
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:26:9-50
 application
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:29:5-83:19
-INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:29:5-83:19
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:37:5-78:19
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:37:5-78:19
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:29:5-84:19
+INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:29:5-84:19
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:37:5-78:19
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:37:5-78:19
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:28:5-35:19
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:28:5-35:19
 MERGED from [com.google.android.material:material:1.12.0] /Users/cometchat/.gradle/caches/transforms-4/395d97c23a3bf4dba7f07b1f891c2bd9/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
@@ -227,7 +227,7 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/cometchat/.gradle/ca
 MERGED from [com.facebook.soloader:soloader:0.12.1] /Users/cometchat/.gradle/caches/transforms-4/454763bc5974d1a70674b0594874689b/transformed/jetified-soloader-0.12.1/AndroidManifest.xml:11:5-15:19
 MERGED from [com.facebook.soloader:soloader:0.12.1] /Users/cometchat/.gradle/caches/transforms-4/454763bc5974d1a70674b0594874689b/transformed/jetified-soloader-0.12.1/AndroidManifest.xml:11:5-15:19
 	android:requestLegacyExternalStorage
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:39:9-52
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:39:9-52
 	android:extractNativeLibs
 		INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml
 	android:exported
@@ -247,9 +247,9 @@ MERGED from [com.facebook.soloader:soloader:0.12.1] /Users/cometchat/.gradle/cac
 	android:label
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:33:9-41
 	android:hardwareAccelerated
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:38:9-43
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:38:9-43
 	tools:targetApi
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:41:9-28
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:41:9-28
 	android:allowBackup
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:31:9-35
 	android:theme
@@ -287,65 +287,67 @@ ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-
 	android:name
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:52:27-74
 activity#com.cometchat.sampleapp.java.ui.activity.ThreadMessageActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:55:9-57:40
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:55:9-58:76
 	android:exported
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:57:13-37
+	android:configChanges
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:58:13-74
 	android:name
 		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:56:13-62
 activity#com.cometchat.sampleapp.java.ui.activity.SearchActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:58:9-60:40
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:59:9-61:40
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:60:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:61:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:59:13-55
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:60:13-55
 activity#com.cometchat.sampleapp.java.ui.activity.LoginActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:61:9-64:58
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:62:9-65:58
 	android:windowSoftInputMode
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:64:13-55
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:65:13-55
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:63:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:64:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:62:13-54
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:63:13-54
 activity#com.cometchat.sampleapp.java.ui.activity.HomeActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:65:9-68:59
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:66:9-69:59
 	android:windowSoftInputMode
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:68:13-56
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:69:13-56
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:67:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:68:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:66:13-53
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:67:13-53
 activity#com.cometchat.sampleapp.java.ui.activity.MessagesActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:69:9-72:58
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:70:9-73:58
 	android:windowSoftInputMode
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:72:13-55
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:73:13-55
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:71:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:72:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:70:13-57
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:71:13-57
 activity#com.cometchat.sampleapp.java.ui.activity.GroupDetailsActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:73:9-75:40
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:74:9-76:40
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:75:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:76:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:74:13-61
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:75:13-61
 activity#com.cometchat.sampleapp.java.ui.activity.CallDetailsActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:76:9-78:40
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:77:9-79:40
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:78:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:79:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:77:13-60
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:78:13-60
 activity#com.cometchat.sampleapp.java.ui.activity.UserDetailsActivity
-ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:79:9-81:40
+ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:80:9-82:40
 	android:exported
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:81:13-37
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:82:13-37
 	android:name
-		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:80:13-60
+		ADDED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml:81:13-60
 uses-sdk
 INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml
 INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:6:5-44
-MERGED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:6:5-44
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:6:5-44
+MERGED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:6:5-44
 MERGED from [androidx.databinding:databinding-adapters:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/e1338861e7157f6383d82d0689352343/transformed/databinding-adapters-8.5.2/AndroidManifest.xml:5:5-44
 MERGED from [androidx.databinding:databinding-adapters:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/e1338861e7157f6383d82d0689352343/transformed/databinding-adapters-8.5.2/AndroidManifest.xml:5:5-44
 MERGED from [androidx.databinding:databinding-runtime:8.5.2] /Users/cometchat/.gradle/caches/transforms-4/ac17a21c8448e224bf74f23003168a13/transformed/databinding-runtime-8.5.2/AndroidManifest.xml:5:5-44
@@ -376,8 +378,8 @@ MERGED from [androidx.appcompat:appcompat:1.7.0] /Users/cometchat/.gradle/caches
 MERGED from [androidx.appcompat:appcompat:1.7.0] /Users/cometchat/.gradle/caches/transforms-4/377ee9beef880fb0a5fe5bde3938e4f7/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/cometchat/.gradle/caches/transforms-4/17b58928030bfa159ba62b10a5f3dc23/transformed/jetified-glide-4.16.0/AndroidManifest.xml:5:5-7:41
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/cometchat/.gradle/caches/transforms-4/17b58928030bfa159ba62b10a5f3dc23/transformed/jetified-glide-4.16.0/AndroidManifest.xml:5:5-7:41
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:7:5-9:41
-MERGED from [com.cometchat:chat-sdk-android:4.1.7] /Users/cometchat/.gradle/caches/transforms-4/c4ddc8e4153fa12aba8073ade121e9fa/transformed/jetified-chat-sdk-android-4.1.7/AndroidManifest.xml:7:5-9:41
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:7:5-9:41
+MERGED from [com.cometchat:chat-sdk-android:4.1.8] /Users/cometchat/.gradle/caches/transforms-4/8a4be4e9f37d8444ca7cc6a825d933d7/transformed/jetified-chat-sdk-android-4.1.8/AndroidManifest.xml:7:5-9:41
 MERGED from [androidx.lifecycle:lifecycle-extensions:2.0.0] /Users/cometchat/.gradle/caches/transforms-4/7f013cd0a948a4a3f2d69b7284da76fd/transformed/lifecycle-extensions-2.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.lifecycle:lifecycle-extensions:2.0.0] /Users/cometchat/.gradle/caches/transforms-4/7f013cd0a948a4a3f2d69b7284da76fd/transformed/lifecycle-extensions-2.0.0/AndroidManifest.xml:20:5-44
 MERGED from [io.noties.markwon:recycler-table:4.6.2] /Users/cometchat/.gradle/caches/transforms-4/879be53cd61484d45e0c8f0187b95b68/transformed/jetified-recycler-table-4.6.2/AndroidManifest.xml:7:5-9:41
@@ -533,117 +535,117 @@ MERGED from [org.jitsi:webrtc:124.0.0] /Users/cometchat/.gradle/caches/transform
 	android:minSdkVersion
 		INJECTED from /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/sample-app-java/src/main/AndroidManifest.xml
 uses-permission#android.permission.CAMERA
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:5-65
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:10:5-65
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:14:5-65
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:14:5-65
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:22-62
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:10:22-62
 uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:5-80
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:12:5-80
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:17:5-80
 MERGED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:17:5-80
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:22-77
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:12:22-77
 uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:13:5-15:38
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:13:5-15:38
 	android:maxSdkVersion
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:9-35
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:15:9-35
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:9-65
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:14:9-65
 uses-permission#android.permission.VIBRATE
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:5-66
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:19:5-66
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:22-63
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:19:22-63
 queries
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:21:5-35:15
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:21:5-35:15
 intent#action:name:android.intent.action.GET_CONTENT+data:mimeType:image/* video/*
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:9-26:18
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:22:9-26:18
 action#android.intent.action.GET_CONTENT
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:23:13-72
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:23:13-72
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:23:21-69
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:23:21-69
 data
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:13-56
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:25:13-56
 	android:mimeType
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:19-53
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:25:19-53
 intent#action:name:android.intent.action.PICK+data:mimeType:image/* video/*
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:27:9-31:18
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:27:9-31:18
 action#android.intent.action.PICK
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:13-65
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:28:13-65
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:21-62
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:28:21-62
 intent#action:name:android.intent.action.CHOOSER
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:32:9-34:18
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:32:9-34:18
 action#android.intent.action.CHOOSER
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:33:13-68
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:33:13-68
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:33:21-65
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:33:21-65
 activity#com.cometchat.chatuikit.shared.views.mediaviewer.CometChatImageViewerActivity
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:42:9-45:72
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:42:9-45:72
 	android:exported
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:44:13-37
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:44:13-37
 	android:theme
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:45:13-69
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:45:13-69
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:43:13-105
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:43:13-105
 activity#com.cometchat.chatuikit.shared.permission.CometChatPermissionActivity
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:46:9-48:71
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:46:9-48:71
 	android:theme
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:48:13-68
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:48:13-68
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:47:13-97
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:47:13-97
 activity#com.cometchat.chatuikit.calls.CometChatCallActivity
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:49:9-53:55
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:49:9-53:55
 	android:screenOrientation
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:52:13-49
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:52:13-49
 	android:supportsPictureInPicture
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:53:13-52
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:53:13-52
 	android:configChanges
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:51:13-79
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:51:13-79
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:50:13-79
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:50:13-79
 activity#com.cometchat.chatuikit.extensions.collaborative.CometChatWebViewActivity
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:54:9-56:40
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:54:9-56:40
 	android:exported
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:56:13-37
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:56:13-37
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:55:13-101
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:55:13-101
 activity#com.cometchat.chatuikit.calls.CometChatOngoingCallActivity
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:57:9-63:55
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:57:9-63:55
 	android:screenOrientation
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:62:13-49
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:62:13-49
 	android:excludeFromRecents
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:60:13-46
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:60:13-46
 	android:exported
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:61:13-37
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:61:13-37
 	android:supportsPictureInPicture
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:63:13-52
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:63:13-52
 	android:configChanges
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:59:13-79
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:59:13-79
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:58:13-86
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:58:13-86
 meta-data#com.cometchat.chatuikit
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:65:9-67:48
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:65:9-67:48
 	android:value
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:67:13-45
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:67:13-45
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:66:13-51
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:66:13-51
 provider#androidx.core.content.FileProvider
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:69:9-77:20
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:69:9-77:20
 	android:grantUriPermissions
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:73:13-47
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:73:13-47
 	android:authorities
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:71:13-60
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:71:13-60
 	android:exported
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:72:13-37
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:72:13-37
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:70:13-62
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:70:13-62
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:74:13-76:57
+ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:74:13-76:57
 	android:resource
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:76:17-54
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:76:17-54
 	android:name
-		ADDED from [:chatuikit] /Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/chatuikit/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:75:17-67
+		ADDED from [com.cometchat:chat-uikit-android:5.2.4] /Users/cometchat/.gradle/caches/transforms-4/a852c0172b915cebaba84ba9649899fe/transformed/jetified-chat-uikit-android-5.2.4/AndroidManifest.xml:75:17-67
 uses-permission#android.permission.BLUETOOTH
 ADDED from [com.cometchat:calls-sdk-android:4.3.1] /Users/cometchat/.gradle/caches/transforms-4/924b9ea7302c3448e0ac17fc6352efa6/transformed/jetified-calls-sdk-android-4.3.1/AndroidManifest.xml:11:5-68
 	android:name

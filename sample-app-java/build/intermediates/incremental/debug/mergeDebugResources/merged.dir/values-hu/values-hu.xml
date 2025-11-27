@@ -257,6 +257,10 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_error_conversations_title" translatable="true">Hoppá!</string>
     <string name="cometchat_file_download_failed" translatable="true">A fájl letöltése sikertelen.</string>
     <string name="cometchat_file_not_exist" translatable="true">A fájl nem létezik</string>
+    <string name="cometchat_flag_message_success">Üzenet jelentve</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Zaklatás / Zaklatás</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Szexuális tartalom</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Nem kívánt tartalom</string>
     <string name="cometchat_form_completion_message" translatable="true">Köszönjük, hogy kitöltötte az űrlapot.</string>
     <string name="cometchat_generate_summary" translatable="true">Összegzés létrehozása</string>
     <string name="cometchat_group" translatable="true">csoport</string>
@@ -358,6 +362,16 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_reply" translatable="true">Válasz</string>
     <string name="cometchat_reply_lowercase" translatable="true">válasz</string>
     <string name="cometchat_reply_uppercase" translatable="true">Válasz</string>
+    <string name="cometchat_report">Jelentés</string>
+    <string name="cometchat_report_a_message">Üzenet jelentése</string>
+    <string name="cometchat_report_button_report">Jelentés</string>
+    <string name="cometchat_report_error_message">A jelentés sikertelen</string>
+    <string name="cometchat_report_message_description">Jelentse ezt a csevegést, ha az sérti a közösségi irányelveinket. Nem értesítjük azt a fiókot, amelyet bejelentett.</string>
+    <string name="cometchat_report_message_title">Üzenet jelentése</string>
+    <string name="cometchat_report_optional_label">(Nem kötelező)</string>
+    <string name="cometchat_report_reason_label">Indok</string>
+    <string name="cometchat_report_remark_hint">Adjon meg további információt a jelentéséhez…</string>
+    <string name="cometchat_report_success_message">Üzenet jelentve</string>
     <string name="cometchat_retry" translatable="true">Újrapróbálkozás</string>
     <string name="cometchat_save" translatable="true">Mentés</string>
     <string name="cometchat_scope_change" translatable="true">Jogosultság módosítása</string>
@@ -371,6 +385,7 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_share" translatable="true">Megosztás</string>
     <string name="cometchat_shared_sticker" translatable="true">Egy matricát osztott meg</string>
     <string name="cometchat_something_went_wrong" translatable="true">Hiba történt.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Hiba történt. Kérjük, ellenőrizze és próbálja újra.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Hiba történt. Kérjük, próbálja újra.</string>
     <string name="cometchat_something_went_wrong_try_again">Valami hiba történt nálunk. Kérjük, próbálja újra</string>
     <string name="cometchat_start_conv_hint" translatable="true">Érintse meg a beszélgetés indításához</string>
@@ -394,6 +409,7 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_translation_error" translatable="true">A fordításhoz kiválasztott nyelv megegyezik az eredeti üzenet nyelvével</string>
     <string name="cometchat_try_again" translatable="true">Próbálja újra</string>
     <string name="cometchat_typing" translatable="true">Gépel…</string>
+    <string name="cometchat_unable_to_flag_message">Nem sikerült megjelölni az üzenetet</string>
     <string name="cometchat_unanswered" translatable="true">megválaszolatlan</string>
     <string name="cometchat_unban" translatable="true">Tiltás feloldása</string>
     <string name="cometchat_unread" translatable="true">Olvasatlan</string>

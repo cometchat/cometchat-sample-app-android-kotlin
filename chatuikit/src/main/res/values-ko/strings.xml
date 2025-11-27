@@ -229,4 +229,21 @@
     <string name="cometchat_documents" translatable="true">문서</string>
     <string name="cometchat_links" translatable="true">링크</string>
     <string name="cometchat_details" translatable="true">세부 사항</string>
+    <string name="cometchat_report">신고</string>
+    <string name="cometchat_report_a_message">메시지 신고</string>
+    <string name="cometchat_report_message_title">메시지 신고</string>
+    <string name="cometchat_report_message_description">이 채팅이 커뮤니티 규정을 위반한 경우 신고하세요. 신고 대상 계정에는 알리지 않습니다.</string>
+    <string name="cometchat_report_reason_label">사유</string>
+    <string name="cometchat_report_optional_label">(선택 사항)</string>
+    <string name="cometchat_report_remark_hint">신고에 대한 추가 설명을 입력하세요…</string>
+    <string name="cometchat_report_button_report">신고</string>
+    <string name="cometchat_report_success_message">메시지가 신고되었습니다</string>
+    <string name="cometchat_report_error_message">메시지 신고 실패</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">문제가 발생했습니다. 확인 후 다시 시도하세요.</string>
+    <string name="cometchat_unable_to_flag_message">메시지를 표시할 수 없습니다</string>
+    <string name="cometchat_flag_message_success">메시지가 신고되었습니다</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">스팸 / 원하지 않는 콘텐츠</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">성적 콘텐츠</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">괴롭힘 / 따돌림</string>
+
 </resources>

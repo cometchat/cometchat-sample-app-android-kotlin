@@ -259,6 +259,10 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_error_conversations_title" translatable="true">Oi!</string>
     <string name="cometchat_file_download_failed" translatable="true">Nepavyko atsisiųsti failo.</string>
     <string name="cometchat_file_not_exist" translatable="true">Failas neegzistuoja</string>
+    <string name="cometchat_flag_message_success">Žinutė pranešta</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Priekabiavimas / Terorizavimas</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexualus turinys</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Šlamštas / Nepageidaujamas turinys</string>
     <string name="cometchat_form_completion_message" translatable="true">Ačiū, kad užpildėte formą.</string>
     <string name="cometchat_generate_summary" translatable="true">Generuoti santrauką</string>
     <string name="cometchat_group" translatable="true">grupė</string>
@@ -360,6 +364,16 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_reply" translatable="true">Atsakyti</string>
     <string name="cometchat_reply_lowercase" translatable="true">atsakyti</string>
     <string name="cometchat_reply_uppercase" translatable="true">Atsakyti</string>
+    <string name="cometchat_report">Pranešti</string>
+    <string name="cometchat_report_a_message">Pranešti apie žinutę</string>
+    <string name="cometchat_report_button_report">Pranešti</string>
+    <string name="cometchat_report_error_message">Nepavyko pranešti žinutės</string>
+    <string name="cometchat_report_message_description">Praneškite apie šį pokalbį, jei jis pažeidžia mūsų bendruomenės standartus. Mes nepranešime paskyrai, kurią pranešėte.</string>
+    <string name="cometchat_report_message_title">Pranešti apie žinutę</string>
+    <string name="cometchat_report_optional_label">(Nebūtina)</string>
+    <string name="cometchat_report_reason_label">Priežastis</string>
+    <string name="cometchat_report_remark_hint">Pateikite papildomą informaciją apie savo pranešimą…</string>
+    <string name="cometchat_report_success_message">Žinutė pranešta</string>
     <string name="cometchat_retry" translatable="true">Bandyti iš naujo</string>
     <string name="cometchat_save" translatable="true">Išsaugoti</string>
     <string name="cometchat_scope_change" translatable="true">Keisti teises</string>
@@ -373,6 +387,7 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_share" translatable="true">Bendrinti</string>
     <string name="cometchat_shared_sticker" translatable="true">Pasidalino lipduku</string>
     <string name="cometchat_something_went_wrong" translatable="true">Įvyko klaida.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Įvyko klaida. Patikrinkite ir bandykite dar kartą.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Įvyko klaida. Bandykite dar kartą.</string>
     <string name="cometchat_something_went_wrong_try_again">Kažkas nepavyko iš mūsų pusės. Pabandykite dar kartą</string>
     <string name="cometchat_start_conv_hint" translatable="true">Bakstelėkite, kad pradėtumėte pokalbį</string>
@@ -396,6 +411,7 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_translation_error" translatable="true">Pasirinkta vertimo kalba sutampa su pranešimo originalo kalba</string>
     <string name="cometchat_try_again" translatable="true">Bandykite dar kartą</string>
     <string name="cometchat_typing" translatable="true">Rašo…</string>
+    <string name="cometchat_unable_to_flag_message">Nepavyko pažymėti žinutės</string>
     <string name="cometchat_unanswered" translatable="true">neatsakyta</string>
     <string name="cometchat_unban" translatable="true">Atblokuoti</string>
     <string name="cometchat_unread" translatable="true">Neperskaityta</string>

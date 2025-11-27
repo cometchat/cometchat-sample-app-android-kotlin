@@ -13,7 +13,7 @@ android {
         //noinspection OldTargetApi
         targetSdk 35
         versionCode 1
-        versionName "5.2.3"
+        versionName "5.2.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,7 +39,7 @@ dependencies {
 
     // CometChat Dependencies
     implementation project(':chatuikit')
-//     implementation libs.chat.uikit.android
+    // implementation libs.chat.uikit.android
     implementation libs.chat.sdk.android
     implementation libs.calls.sdk.android
 

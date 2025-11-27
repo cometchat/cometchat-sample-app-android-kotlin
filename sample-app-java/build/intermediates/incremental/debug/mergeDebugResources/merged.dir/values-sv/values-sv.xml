@@ -257,6 +257,10 @@ Vänligen försök igen.</string>
     <string name="cometchat_error_conversations_title" translatable="true">Hoppsan!</string>
     <string name="cometchat_file_download_failed" translatable="true">Nedladdning av fil misslyckades.</string>
     <string name="cometchat_file_not_exist" translatable="true">Filen finns inte</string>
+    <string name="cometchat_flag_message_success">Meddelandet rapporterat</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Häleri / Mobbningsbeteende</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexuellt innehåll</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Oönskat innehåll</string>
     <string name="cometchat_form_completion_message" translatable="true">Tack för att du fyllt i formuläret.</string>
     <string name="cometchat_generate_summary" translatable="true">Skapa en sammanfattning</string>
     <string name="cometchat_group" translatable="true">grupp</string>
@@ -358,6 +362,16 @@ Vänligen försök igen.</string>
     <string name="cometchat_reply" translatable="true">Svara</string>
     <string name="cometchat_reply_lowercase" translatable="true">svara</string>
     <string name="cometchat_reply_uppercase" translatable="true">Svara</string>
+    <string name="cometchat_report">Rapportera</string>
+    <string name="cometchat_report_a_message">Rapportera ett meddelande</string>
+    <string name="cometchat_report_button_report">Rapportera</string>
+    <string name="cometchat_report_error_message">Misslyckades att rapportera meddelandet</string>
+    <string name="cometchat_report_message_description">Rapportera denna chatt om den bryter mot våra gemenskapsriktlinjer. Vi meddelar inte kontot du rapporterar.</string>
+    <string name="cometchat_report_message_title">Rapportera ett meddelande</string>
+    <string name="cometchat_report_optional_label">(Valfritt)</string>
+    <string name="cometchat_report_reason_label">Orsak</string>
+    <string name="cometchat_report_remark_hint">Ge ytterligare information för din rapport…</string>
+    <string name="cometchat_report_success_message">Meddelandet rapporterat</string>
     <string name="cometchat_retry" translatable="true">Försök igen</string>
     <string name="cometchat_save" translatable="true">Spara</string>
     <string name="cometchat_scope_change" translatable="true">Ändra behörighet</string>
@@ -371,6 +385,7 @@ Vänligen försök igen.</string>
     <string name="cometchat_share" translatable="true">Dela</string>
     <string name="cometchat_shared_sticker" translatable="true">Delade en klistermärke</string>
     <string name="cometchat_something_went_wrong" translatable="true">Något gick fel.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Något gick fel. Kontrollera och försök igen.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Något gick fel. Försök igen.</string>
     <string name="cometchat_something_went_wrong_try_again">Något gick fel hos oss. Försök igen</string>
     <string name="cometchat_start_conv_hint" translatable="true">Tryck för att starta en konversation</string>
@@ -394,6 +409,7 @@ Vänligen försök igen.</string>
     <string name="cometchat_translation_error" translatable="true">Det valda språket för översättning är liknande meddelandets originalspråk</string>
     <string name="cometchat_try_again" translatable="true">Försök igen</string>
     <string name="cometchat_typing" translatable="true">Skriver…</string>
+    <string name="cometchat_unable_to_flag_message">Kan inte flagga meddelandet</string>
     <string name="cometchat_unanswered" translatable="true">obesvarad</string>
     <string name="cometchat_unban" translatable="true">Avblockera</string>
     <string name="cometchat_unread" translatable="true">Oläst</string>

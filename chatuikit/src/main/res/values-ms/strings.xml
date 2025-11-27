@@ -228,4 +228,21 @@
     <string name="cometchat_documents" translatable="true">Dokumen</string>
     <string name="cometchat_links" translatable="true">Pautan</string>
     <string name="cometchat_details" translatable="true">Butiran</string>
+    <string name="cometchat_report">Laporkan</string>
+    <string name="cometchat_report_a_message">Laporkan Mesej</string>
+    <string name="cometchat_report_message_title">Laporkan mesej</string>
+    <string name="cometchat_report_message_description">Laporkan sembang ini jika ia melanggar Standard Komuniti kami. Kami tidak akan memberitahu akaun yang anda laporkan.</string>
+    <string name="cometchat_report_reason_label">Sebab</string>
+    <string name="cometchat_report_optional_label">(Pilihan)</string>
+    <string name="cometchat_report_remark_hint">Berikan konteks tambahan untuk laporan anda…</string>
+    <string name="cometchat_report_button_report">Laporkan</string>
+    <string name="cometchat_report_success_message">Mesej telah dilaporkan</string>
+    <string name="cometchat_report_error_message">Gagal melaporkan mesej</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Ada masalah. Sila semak dan cuba lagi.</string>
+    <string name="cometchat_unable_to_flag_message">Tidak dapat menandakan mesej</string>
+    <string name="cometchat_flag_message_success">Mesej telah dilaporkan</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Kandungan yang Tidak Diingini</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Kandungan Seksual</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Gangguan / Membuli</string>
+
 </resources>

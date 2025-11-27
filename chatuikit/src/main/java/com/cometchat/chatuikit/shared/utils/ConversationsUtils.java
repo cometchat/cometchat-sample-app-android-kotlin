@@ -1,5 +1,7 @@
 package com.cometchat.chatuikit.shared.utils;
 
+import static android.view.View.GONE;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -331,18 +333,25 @@ public class ConversationsUtils {
                                                                      senderName));
                         }
                     default:
-                        if (lastMessage.getMetadata() != null && lastMessage.getMetadata().has("pushNotification")) {
-                            try {
-                                return new LastMessageData(MessageType.DEFAULT,
-                                                           Utils.getMessagePrefix(lastMessage, context),
-                                                           lastMessage.getMetadata().getString("pushNotification"));
-                            } catch (Exception ignored) {
-                                return new LastMessageData(MessageType.DELETED_MESSAGE,
-                                                           Utils.getMessagePrefix(lastMessage, context),
-                                                           context.getString(R.string.cometchat_this_message_deleted));
-                            }
+                        CustomMessage customMessage = (CustomMessage) lastMessage;
+                        if (customMessage.getConversationText() != null && !customMessage.getConversationText().isEmpty()) {
+                            return new LastMessageData(MessageType.DEFAULT,
+                                    Utils.getMessagePrefix(lastMessage, context),
+                                    customMessage.getConversationText());
                         } else {
-                            return new LastMessageData(MessageType.DEFAULT, Utils.getMessagePrefix(lastMessage, context), lastMessage.getType());
+                            if (lastMessage.getMetadata() != null && lastMessage.getMetadata().has("pushNotification")) {
+                                try {
+                                    return new LastMessageData(MessageType.DEFAULT,
+                                            Utils.getMessagePrefix(lastMessage, context),
+                                            lastMessage.getMetadata().getString("pushNotification"));
+                                } catch (Exception ignored) {
+                                    return new LastMessageData(MessageType.DELETED_MESSAGE,
+                                            Utils.getMessagePrefix(lastMessage, context),
+                                            context.getString(R.string.cometchat_this_message_deleted));
+                                }
+                            } else {
+                                return new LastMessageData(MessageType.DEFAULT, Utils.getMessagePrefix(lastMessage, context), lastMessage.getType());
+                            }
                         }
                 }
             } else {

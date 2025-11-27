@@ -231,4 +231,21 @@
     <string name="cometchat_documents" translatable="true">दस्तावेज</string>
     <string name="cometchat_links" translatable="true">लिंक</string>
     <string name="cometchat_details" translatable="true">विवरण</string>
+    <string name="cometchat_report">रिपोर्ट</string>
+    <string name="cometchat_report_a_message">संदेश रिपोर्ट करें</string>
+    <string name="cometchat_report_message_title">संदेश रिपोर्ट करें</string>
+    <string name="cometchat_report_message_description">यदि यह चैट हमारे सामुदायिक मानकों का उल्लंघन करती है, तो इसे रिपोर्ट करें। हम उस खाते को नहीं बताएंगे जिसकी आपने रिपोर्ट की है।</string>
+    <string name="cometchat_report_reason_label">कारण</string>
+    <string name="cometchat_report_optional_label">(वैकल्पिक)</string>
+    <string name="cometchat_report_remark_hint">अपनी रिपोर्ट के लिए अतिरिक्त संदर्भ प्रदान करें…</string>
+    <string name="cometchat_report_button_report">रिपोर्ट</string>
+    <string name="cometchat_report_success_message">संदेश रिपोर्ट किया गया</string>
+    <string name="cometchat_report_error_message">संदेश रिपोर्ट करने में विफल</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">कुछ गलत हो गया। कृपया जाँच करें और पुनः प्रयास करें।</string>
+    <string name="cometchat_unable_to_flag_message">संदेश को फ़्लैग नहीं कर सकते</string>
+    <string name="cometchat_flag_message_success">संदेश रिपोर्ट किया गया</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">स्पैम / अवांछित सामग्री</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">यौन सामग्री</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">उत्पीड़न / धमकाना</string>
+
 </resources>

@@ -1,9 +1,12 @@
 package com.cometchat.chatuikit.shared.framework;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.cometchat.chatuikit.shared.resources.utils.Utils.isNotParticipant;
 import android.content.Context;
 import android.text.SpannableString;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -41,6 +44,9 @@ import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.viewholders.MessagesViewHolderListener;
 import com.cometchat.chatuikit.shared.views.audiobubble.CometChatAudioBubble;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
+import com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview;
+import com.google.android.flexbox.FlexboxLayout;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,6 +99,9 @@ public class MessagesDataSource implements DataSource {
                 if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) {
                     cometchatOptions.add(_getDeleteOption(context));
                 }
+            }
+            if (additionParameter.getReportOptionVisibility() == View.VISIBLE && !isMyMessage(baseMessage)) {
+                cometchatOptions.add(_getReportOption(context));
             }
             if (baseMessage.getReceiverType().equalsIgnoreCase(UIKitConstants.ReceiverType.GROUP) && !baseMessage
                 .getSender()
@@ -174,6 +183,13 @@ public class MessagesDataSource implements DataSource {
                                           context.getString(R.string.cometchat_reply_to_message),
                                           R.drawable.cometchat_ic_reply_to_message,
                                           null);
+    }
+
+    private CometChatMessageOption _getReportOption(Context context) {
+        return new CometChatMessageOption(UIKitConstants.MessageOption.REPORT,
+                context.getString(R.string.cometchat_report),
+                R.drawable.cometchat_ic_info,
+                null);
     }
 
     @Override
@@ -537,43 +553,61 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultAudioTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_MESSAGE)
-            .setType(CometChatConstants.MESSAGE_TYPE_AUDIO)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getAudioMessageOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getAudioBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_MESSAGE)
+                .setType(CometChatConstants.MESSAGE_TYPE_AUDIO)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) createdView.getLayoutParams();
+                        LinearLayout parent = (LinearLayout) createdView.getParent();
+                        params.width = MATCH_PARENT;
+                        createdView.setLayoutParams(params);
+                        ViewGroup.LayoutParams parentParams = parent.getLayoutParams();
+                        parentParams.width = MATCH_PARENT;
+                        parent.setLayoutParams(parentParams);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindAudioBubbleContentView(context,
-                                                    createdView,
-                                                    (MediaMessage) message,
-                                                    CometChatUIKit
-                                                        .getLoggedInUser()
-                                                        .getUid()
-                                                        .equals(message
-                                                                    .getSender()
-                                                                    .getUid()) ? additionParameter.getOutgoingAudioBubbleStyle() : additionParameter.getIncomingAudioBubbleStyle(),
-                                                    alignment,
-                                                    holder,
-                                                    messageList,
-                                                    position,
-                                                    additionParameter);
-                }
-            });
+                        .getAudioMessageOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getAudioBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindAudioBubbleContentView(context,
+                                        createdView,
+                                        (MediaMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingAudioBubbleStyle() : additionParameter.getIncomingAudioBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -583,44 +617,66 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultVideoTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_MESSAGE)
-            .setType(CometChatConstants.MESSAGE_TYPE_VIDEO)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getVideoMessageOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getVideoBubbleContentView(context, messageBubble, alignment);
-                }
-
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                .setCategory(CometChatConstants.CATEGORY_MESSAGE)
+                .setType(CometChatConstants.MESSAGE_TYPE_VIDEO)
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindVideoBubbleContentView(context,
-                                                    createdView,
-                                                    null,
-                                                    (MediaMessage) message,
-                                                    CometChatUIKit
-                                                        .getLoggedInUser()
-                                                        .getUid()
-                                                        .equals(message
-                                                                    .getSender()
-                                                                    .getUid()) ? additionParameter.getOutgoingVideoBubbleStyle() : additionParameter.getIncomingVideoBubbleStyle(),
-                                                    alignment,
-                                                    holder,
-                                                    messageList,
-                                                    position,
-                                                    additionParameter);
-                }
-            });
+                        .getVideoMessageOptions(context, baseMessage, group, additionParameter))
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
+
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getVideoBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindVideoBubbleContentView(context,
+                                        createdView,
+                                        null,
+                                        (MediaMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingVideoBubbleStyle() : additionParameter.getIncomingVideoBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -630,44 +686,66 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultImageTemplate(@NonNull AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_MESSAGE)
-            .setType(CometChatConstants.MESSAGE_TYPE_IMAGE)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getImageMessageOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getImageBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_MESSAGE)
+                .setType(CometChatConstants.MESSAGE_TYPE_IMAGE)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindImageBubbleContentView(context,
-                                                    createdView,
-                                                    null,
-                                                    (MediaMessage) message,
-                                                    CometChatUIKit
-                                                        .getLoggedInUser()
-                                                        .getUid()
-                                                        .equals(message
-                                                                    .getSender()
-                                                                    .getUid()) ? additionParameter.getOutgoingImageBubbleStyle() : additionParameter.getIncomingImageBubbleStyle(),
-                                                    alignment,
-                                                    holder,
-                                                    messageList,
-                                                    position,
-                                                    additionParameter);
-                }
-            });
+                        .getImageMessageOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getImageBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindImageBubbleContentView(context,
+                                        createdView,
+                                        null,
+                                        (MediaMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingImageBubbleStyle() : additionParameter.getIncomingImageBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -705,43 +783,65 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultFileTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_MESSAGE)
-            .setType(CometChatConstants.MESSAGE_TYPE_FILE)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getFileMessageOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getFileBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_MESSAGE)
+                .setType(CometChatConstants.MESSAGE_TYPE_FILE)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindFileBubbleContentView(context,
-                                                   createdView,
-                                                   (MediaMessage) message,
-                                                   CometChatUIKit
-                                                       .getLoggedInUser()
-                                                       .getUid()
-                                                       .equals(message
-                                                                   .getSender()
-                                                                   .getUid()) ? additionParameter.getOutgoingFileBubbleStyle() : additionParameter.getIncomingFileBubbleStyle(),
-                                                   alignment,
-                                                   holder,
-                                                   messageList,
-                                                   position,
-                                                   additionParameter);
-                }
-            });
+                        .getFileMessageOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getFileBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindFileBubbleContentView(context,
+                                        createdView,
+                                        (MediaMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingFileBubbleStyle() : additionParameter.getIncomingFileBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -765,6 +865,42 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        BaseMessage quoteMessage = message.getQuotedMessage();
+                        if (quoteMessage instanceof TextMessage) {
+                            String messageText = ((TextMessage) quoteMessage).getText();
+                            if (messageText != null && messageText.length() > 20) {
+                                FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                                LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                                LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                                messagePreview.setLayoutParams(messagePreviewParams);
+                                flexboxLayout.setLayoutParams(flexboxParams);
+                                parent.setLayoutParams(parentLayoutParams);
+                                messagePreview.setMinimumWidth(240);
+                            } else {
+                                FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                                LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                                LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                                parent.setLayoutParams(parentLayoutParams);
+                                flexboxLayout.setLayoutParams(flexboxParams);
+                                messagePreview.setLayoutParams(messagePreviewParams);
+                            }
+                        } else {
+                            FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                            LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                            LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                            parent.setLayoutParams(parentLayoutParams);
+                            flexboxLayout.setLayoutParams(flexboxParams);
+                            messagePreview.setLayoutParams(messagePreviewParams);
+
+                        }
                     }
                 })
             .setContentView(new MessagesViewHolderListener() {
@@ -808,87 +944,109 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultFormTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
-            .setType(UIKitConstants.MessageType.FORM)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getCommonOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getFormBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
+                .setType(UIKitConstants.MessageType.FORM)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    /*
-                     * FormBubbleStyle formBubbleStyle = new
-                     * FormBubbleStyle().setTitleAppearance(theme.getTypography().getHeading()).
-                     * setTitleColor(theme.getPalette().getAccent(context)).setSeparatorColor(theme.
-                     * getPalette().getAccent100(context))
-                     * .setLabelAppearance(theme.getTypography().getSubtitle1()).setLabelColor(theme
-                     * .getPalette().getAccent(context))
-                     * .setInputTextAppearance(theme.getTypography().getSubtitle1()).
-                     * setInputTextColor(theme.getPalette().getAccent(context)).setInputHintColor(
-                     * theme.getPalette().getAccent500(context)).setErrorColor(theme.getPalette().
-                     * getError(context)).setInputStrokeColor(theme.getPalette().getAccent600(
-                     * context)).setActiveInputStrokeColor(theme.getPalette().getAccent(context))
-                     * .setDefaultCheckboxButtonTint(theme.getPalette().getAccent500(context)).
-                     * setSelectedCheckboxButtonTint(theme.getPalette().getPrimary(context)).
-                     * setErrorCheckboxButtonTint(theme.getPalette().getError(context)).
-                     * setCheckboxTextColor(theme.getPalette().getAccent(context)).
-                     * setCheckboxTextAppearance(theme.getTypography().getSubtitle1())
-                     * .setButtonBackgroundColor(theme.getPalette().getPrimary(context)).
-                     * setButtonTextColor(theme.getPalette().getAccent900(context)).
-                     * setButtonTextAppearance(theme.getTypography().getSubtitle1()).
-                     * setProgressBarTintColor(theme.getPalette().getAccent900(context)).
-                     * setRadioButtonTint(theme.getPalette().getAccent500(context)).
-                     * setRadioButtonTextColor(theme.getPalette().getAccent(context)).
-                     * setRadioButtonTextAppearance(theme.getTypography().getSubtitle1()).
-                     * setSelectedRadioButtonTint(theme.getPalette().getPrimary(context))
-                     * .setSpinnerTextColor(theme.getPalette().getAccent(context)).
-                     * setSpinnerTextAppearance(theme.getTypography().getSubtitle1()).
-                     * setSpinnerBackgroundColor(theme.getPalette().getAccent500(context))
-                     * .setBackgroundColor(theme.getPalette().getBackground(context)).setBackground(
-                     * theme.getPalette().getGradientBackground()) .setSingleSelectStyle(new
-                     * SingleSelectStyle().setOptionTextAppearance(theme.getTypography().
-                     * getSubtitle1()).setOptionTextColor(theme.getPalette().getAccent500(context)).
-                     * setSelectedOptionTextAppearance(theme.getTypography().getSubtitle1()).
-                     * setSelectedOptionTextColor(theme.getPalette().getAccent(context)).
-                     * setButtonStrokeColor(theme.getPalette().getAccent600(context)).setTitleColor(
-                     * theme.getPalette().getAccent(context)).setTitleAppearance(theme.getTypography
-                     * ().getSubtitle1())) .setQuickViewStyle(new
-                     * QuickViewStyle().setCornerRadius(16).setBackgroundColor(theme.getPalette().
-                     * getBackground(context)).setLeadingBarTint(theme.getPalette().getPrimary(
-                     * context)).setTitleColor(theme.getPalette().getPrimary(context)).
-                     * setTitleAppearance(theme.getTypography().getText1()).setSubtitleColor(theme.
-                     * getPalette().getAccent500(context)).setSubtitleAppearance(theme.getTypography
-                     * ().getSubtitle1()));
-                     */
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindFormBubbleContentView(context,
-                                                   createdView,
-                                                   (FormMessage) message,
-                                                   CometChatUIKit
-                                                       .getLoggedInUser()
-                                                       .getUid()
-                                                       .equals(message
-                                                                   .getSender()
-                                                                   .getUid()) ? additionParameter.getOutgoingFormBubbleStyle() : additionParameter.getIncomingFormBubbleStyle(),
-                                                   alignment,
-                                                   holder,
-                                                   messageList,
-                                                   position,
-                                                   additionParameter);
-                }
-            });
+                        .getCommonOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getFormBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        /*
+                         * FormBubbleStyle formBubbleStyle = new
+                         * FormBubbleStyle().setTitleAppearance(theme.getTypography().getHeading()).
+                         * setTitleColor(theme.getPalette().getAccent(context)).setSeparatorColor(theme.
+                         * getPalette().getAccent100(context))
+                         * .setLabelAppearance(theme.getTypography().getSubtitle1()).setLabelColor(theme
+                         * .getPalette().getAccent(context))
+                         * .setInputTextAppearance(theme.getTypography().getSubtitle1()).
+                         * setInputTextColor(theme.getPalette().getAccent(context)).setInputHintColor(
+                         * theme.getPalette().getAccent500(context)).setErrorColor(theme.getPalette().
+                         * getError(context)).setInputStrokeColor(theme.getPalette().getAccent600(
+                         * context)).setActiveInputStrokeColor(theme.getPalette().getAccent(context))
+                         * .setDefaultCheckboxButtonTint(theme.getPalette().getAccent500(context)).
+                         * setSelectedCheckboxButtonTint(theme.getPalette().getPrimary(context)).
+                         * setErrorCheckboxButtonTint(theme.getPalette().getError(context)).
+                         * setCheckboxTextColor(theme.getPalette().getAccent(context)).
+                         * setCheckboxTextAppearance(theme.getTypography().getSubtitle1())
+                         * .setButtonBackgroundColor(theme.getPalette().getPrimary(context)).
+                         * setButtonTextColor(theme.getPalette().getAccent900(context)).
+                         * setButtonTextAppearance(theme.getTypography().getSubtitle1()).
+                         * setProgressBarTintColor(theme.getPalette().getAccent900(context)).
+                         * setRadioButtonTint(theme.getPalette().getAccent500(context)).
+                         * setRadioButtonTextColor(theme.getPalette().getAccent(context)).
+                         * setRadioButtonTextAppearance(theme.getTypography().getSubtitle1()).
+                         * setSelectedRadioButtonTint(theme.getPalette().getPrimary(context))
+                         * .setSpinnerTextColor(theme.getPalette().getAccent(context)).
+                         * setSpinnerTextAppearance(theme.getTypography().getSubtitle1()).
+                         * setSpinnerBackgroundColor(theme.getPalette().getAccent500(context))
+                         * .setBackgroundColor(theme.getPalette().getBackground(context)).setBackground(
+                         * theme.getPalette().getGradientBackground()) .setSingleSelectStyle(new
+                         * SingleSelectStyle().setOptionTextAppearance(theme.getTypography().
+                         * getSubtitle1()).setOptionTextColor(theme.getPalette().getAccent500(context)).
+                         * setSelectedOptionTextAppearance(theme.getTypography().getSubtitle1()).
+                         * setSelectedOptionTextColor(theme.getPalette().getAccent(context)).
+                         * setButtonStrokeColor(theme.getPalette().getAccent600(context)).setTitleColor(
+                         * theme.getPalette().getAccent(context)).setTitleAppearance(theme.getTypography
+                         * ().getSubtitle1())) .setQuickViewStyle(new
+                         * QuickViewStyle().setCornerRadius(16).setBackgroundColor(theme.getPalette().
+                         * getBackground(context)).setLeadingBarTint(theme.getPalette().getPrimary(
+                         * context)).setTitleColor(theme.getPalette().getPrimary(context)).
+                         * setTitleAppearance(theme.getTypography().getText1()).setSubtitleColor(theme.
+                         * getPalette().getAccent500(context)).setSubtitleAppearance(theme.getTypography
+                         * ().getSubtitle1()));
+                         */
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindFormBubbleContentView(context,
+                                        createdView,
+                                        (FormMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingFormBubbleStyle() : additionParameter.getIncomingFormBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -898,43 +1056,65 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultSchedulerTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
-            .setType(UIKitConstants.MessageType.SCHEDULER)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getCommonOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getSchedulerBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
+                .setType(UIKitConstants.MessageType.SCHEDULER)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindSchedulerBubbleContentView(context,
-                                                        createdView,
-                                                        (SchedulerMessage) message,
-                                                        CometChatUIKit
-                                                            .getLoggedInUser()
-                                                            .getUid()
-                                                            .equals(message
-                                                                        .getSender()
-                                                                        .getUid()) ? additionParameter.getOutgoingSchedulerBubbleStyle() : additionParameter.getIncomingSchedulerBubbleStyle(),
-                                                        alignment,
-                                                        holder,
-                                                        messageList,
-                                                        position,
-                                                        additionParameter);
-                }
-            });
+                        .getCommonOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getSchedulerBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindSchedulerBubbleContentView(context,
+                                        createdView,
+                                        (SchedulerMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingSchedulerBubbleStyle() : additionParameter.getIncomingSchedulerBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -944,43 +1124,65 @@ public class MessagesDataSource implements DataSource {
 
     private CometChatMessageTemplate _getDefaultCardTemplate(AdditionParameter additionParameter) {
         return new CometChatMessageTemplate()
-            .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
-            .setType(UIKitConstants.MessageType.CARD)
-            .setOptions((context, baseMessage, group) -> ChatConfigurator
-                .getDataSource()
-                .getCommonOptions(context, baseMessage, group, additionParameter))
-            .setContentView(new MessagesViewHolderListener() {
-                @Override
-                public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
-                    return CometChatUIKit.getDataSource().getCardBubbleContentView(context, messageBubble, alignment);
-                }
+                .setCategory(CometChatConstants.CATEGORY_INTERACTIVE)
+                .setType(UIKitConstants.MessageType.CARD)
+                .setReplyView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getReplyViewContainer(context);
+                    }
 
-                @Override
-                public void bindView(Context context,
-                                     View createdView,
-                                     BaseMessage message,
-                                     UIKitConstants.MessageBubbleAlignment alignment,
-                                     RecyclerView.ViewHolder holder,
-                                     List<BaseMessage> messageList,
-                                     int position) {
-                    CometChatUIKit
+                    @Override
+                    public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
+                        CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
+                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
+                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
+                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
+                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        messagePreview.setLayoutParams(messagePreviewParams);
+                        flexboxLayout.setLayoutParams(flexboxParams);
+                        parent.setLayoutParams(parentLayoutParams);
+                        messagePreview.setMinimumWidth(240);
+                    }
+                })
+                .setOptions((context, baseMessage, group) -> ChatConfigurator
                         .getDataSource()
-                        .bindCardBubbleContentView(context,
-                                                   createdView,
-                                                   (CardMessage) message,
-                                                   CometChatUIKit
-                                                       .getLoggedInUser()
-                                                       .getUid()
-                                                       .equals(message
-                                                                   .getSender()
-                                                                   .getUid()) ? additionParameter.getOutgoingCardBubbleStyle() : additionParameter.getIncomingCardBubbleStyle(),
-                                                   alignment,
-                                                   holder,
-                                                   messageList,
-                                                   position,
-                                                   additionParameter);
-                }
-            });
+                        .getCommonOptions(context, baseMessage, group, additionParameter))
+                .setContentView(new MessagesViewHolderListener() {
+                    @Override
+                    public View createView(Context context, CometChatMessageBubble messageBubble, UIKitConstants.MessageBubbleAlignment alignment) {
+                        return CometChatUIKit.getDataSource().getCardBubbleContentView(context, messageBubble, alignment);
+                    }
+
+                    @Override
+                    public void bindView(Context context,
+                                         View createdView,
+                                         BaseMessage message,
+                                         UIKitConstants.MessageBubbleAlignment alignment,
+                                         RecyclerView.ViewHolder holder,
+                                         List<BaseMessage> messageList,
+                                         int position) {
+                        CometChatUIKit
+                                .getDataSource()
+                                .bindCardBubbleContentView(context,
+                                        createdView,
+                                        (CardMessage) message,
+                                        CometChatUIKit
+                                                .getLoggedInUser()
+                                                .getUid()
+                                                .equals(message
+                                                        .getSender()
+                                                        .getUid()) ? additionParameter.getOutgoingCardBubbleStyle() : additionParameter.getIncomingCardBubbleStyle(),
+                                        alignment,
+                                        holder,
+                                        messageList,
+                                        position,
+                                        additionParameter);
+                    }
+                });
     }
 
     @Override
@@ -1203,6 +1405,7 @@ public class MessagesDataSource implements DataSource {
                 if (baseMessage instanceof TextMessage || baseMessage instanceof MediaMessage) {
                     if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getShareOption(context));
                 }
+                if (additionParameter.getReportOptionVisibility() == View.VISIBLE) messageOptions.add(_getReportOption(context));
                 if (_isCommon(baseMessage, group)) {
                     if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getDeleteOption(context));
                 }

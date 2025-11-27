@@ -261,6 +261,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">عفوًا!</string>
     <string name="cometchat_file_download_failed" translatable="true">فشل تحميل الملف.</string>
     <string name="cometchat_file_not_exist" translatable="true">الملف غير موجود</string>
+    <string name="cometchat_flag_message_success">تم الإبلاغ عن الرسالة</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">تحرش / تنمر</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">محتوى جنسي</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">بريد مزعج / محتوى غير مرغوب فيه</string>
     <string name="cometchat_form_completion_message" translatable="true">شكرًا لتعبئتك النموذج.</string>
     <string name="cometchat_generate_summary" translatable="true">إنشاء ملخص</string>
     <string name="cometchat_group" translatable="true">مجموعة</string>
@@ -362,6 +366,16 @@
     <string name="cometchat_reply" translatable="true">رد</string>
     <string name="cometchat_reply_lowercase" translatable="true">رد</string>
     <string name="cometchat_reply_uppercase" translatable="true">رد</string>
+    <string name="cometchat_report">إبلاغ</string>
+    <string name="cometchat_report_a_message">الإبلاغ عن رسالة</string>
+    <string name="cometchat_report_button_report">إبلاغ</string>
+    <string name="cometchat_report_error_message">فشل الإبلاغ عن الرسالة</string>
+    <string name="cometchat_report_message_description">أبلغ عن هذه الدردشة إذا كانت تخالف معايير المجتمع لدينا. لن نخبر الحساب الذي أبلغت عنه.</string>
+    <string name="cometchat_report_message_title">الإبلاغ عن رسالة</string>
+    <string name="cometchat_report_optional_label">(اختياري)</string>
+    <string name="cometchat_report_reason_label">السبب</string>
+    <string name="cometchat_report_remark_hint">قدّم سياقًا إضافيًا لبلاغك…</string>
+    <string name="cometchat_report_success_message">تم الإبلاغ عن الرسالة</string>
     <string name="cometchat_retry" translatable="true">إعادة المحاولة</string>
     <string name="cometchat_save" translatable="true">حفظ</string>
     <string name="cometchat_scope_change" translatable="true">تغيير الصلاحيات</string>
@@ -375,6 +389,7 @@
     <string name="cometchat_share" translatable="true">مشاركة</string>
     <string name="cometchat_shared_sticker" translatable="true">شارك ملصقاً</string>
     <string name="cometchat_something_went_wrong" translatable="true">حدث خطأ ما.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">حدث خطأ ما. يرجى التحقق والمحاولة مرة أخرى.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
     <string name="cometchat_something_went_wrong_try_again">حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى</string>
     <string name="cometchat_start_conv_hint" translatable="true">اضغط لبدء المحادثة</string>
@@ -398,6 +413,7 @@
     <string name="cometchat_translation_error" translatable="true">اللغة المحددة للترجمة مشابهة للغة الرسالة الأصلية</string>
     <string name="cometchat_try_again" translatable="true">حاول مرة أخرى</string>
     <string name="cometchat_typing" translatable="true">يكتب…</string>
+    <string name="cometchat_unable_to_flag_message">غير قادر على تعليم الرسالة</string>
     <string name="cometchat_unanswered" translatable="true">غير مجابة</string>
     <string name="cometchat_unban" translatable="true">رفع الحظر</string>
     <string name="cometchat_unread" translatable="true">غير مقروء</string>

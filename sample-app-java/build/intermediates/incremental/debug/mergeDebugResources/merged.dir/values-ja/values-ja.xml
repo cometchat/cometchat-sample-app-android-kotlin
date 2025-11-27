@@ -123,6 +123,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">おっと！</string>
     <string name="cometchat_file_download_failed" translatable="true">ファイルのダウンロードに失敗しました。</string>
     <string name="cometchat_file_not_exist" translatable="true">ファイルが存在しません</string>
+    <string name="cometchat_flag_message_success">メッセージが報告されました</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">嫌がらせ / いじめ</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">性的コンテンツ</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">スパム / 不正なコンテンツ</string>
     <string name="cometchat_form_completion_message" translatable="true">フォームへのご記入ありがとうございました。</string>
     <string name="cometchat_generate_summary" translatable="true">概要を生成</string>
     <string name="cometchat_group" translatable="true">グループ</string>
@@ -222,6 +226,16 @@
     <string name="cometchat_reply" translatable="true">返信</string>
     <string name="cometchat_reply_lowercase" translatable="true">返信</string>
     <string name="cometchat_reply_uppercase" translatable="true">返信</string>
+    <string name="cometchat_report">報告</string>
+    <string name="cometchat_report_a_message">メッセージを報告</string>
+    <string name="cometchat_report_button_report">報告</string>
+    <string name="cometchat_report_error_message">メッセージの報告に失敗しました</string>
+    <string name="cometchat_report_message_description">このチャットがコミュニティ基準に違反している場合、報告してください。報告された相手には通知されません。</string>
+    <string name="cometchat_report_message_title">メッセージを報告</string>
+    <string name="cometchat_report_optional_label">(任意)</string>
+    <string name="cometchat_report_reason_label">理由</string>
+    <string name="cometchat_report_remark_hint">報告内容の追加情報を入力してください…</string>
+    <string name="cometchat_report_success_message">メッセージが報告されました</string>
     <string name="cometchat_retry" translatable="true">再試行</string>
     <string name="cometchat_save" translatable="true">保存</string>
     <string name="cometchat_scope_change" translatable="true">役割変更</string>
@@ -236,6 +250,7 @@
     <string name="cometchat_shared_image_transition" translatable="false">共有画像のトランジション_%1$d</string>
     <string name="cometchat_shared_sticker" translatable="true">共有ステッカー</string>
     <string name="cometchat_something_went_wrong" translatable="true">問題が発生しました。</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">問題が発生しました。確認して再試行してください。</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">問題が発生しました。もう一度お試しください。</string>
     <string name="cometchat_something_went_wrong_try_again">当社側で問題が発生しました。もう一度試してください</string>
     <string name="cometchat_start_conv_hint" translatable="true">タップして会話を開始</string>
@@ -259,6 +274,7 @@
     <string name="cometchat_translation_error" translatable="true">選択した翻訳言語は、元のメッセージの言語と似ています</string>
     <string name="cometchat_try_again" translatable="true">再試行</string>
     <string name="cometchat_typing" translatable="true">入力中…</string>
+    <string name="cometchat_unable_to_flag_message">メッセージをフラグできません</string>
     <string name="cometchat_unanswered" translatable="true">未応答</string>
     <string name="cometchat_unban" translatable="true">禁止を解除</string>
     <string name="cometchat_unread" translatable="true">未読</string>

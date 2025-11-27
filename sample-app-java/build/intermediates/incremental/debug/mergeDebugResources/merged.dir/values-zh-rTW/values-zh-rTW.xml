@@ -255,6 +255,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">糟糕！</string>
     <string name="cometchat_file_download_failed" translatable="true">檔案下載失敗。</string>
     <string name="cometchat_file_not_exist" translatable="true">檔案不存在</string>
+    <string name="cometchat_flag_message_success">訊息已被檢舉</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">騷擾 / 欺凌</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">性內容</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">垃圾郵件 / 不當內容</string>
     <string name="cometchat_form_completion_message" translatable="true">感謝您填寫此表單。</string>
     <string name="cometchat_generate_summary" translatable="true">產生摘要</string>
     <string name="cometchat_group" translatable="true">群組</string>
@@ -354,6 +358,16 @@
     <string name="cometchat_reply" translatable="true">回覆</string>
     <string name="cometchat_reply_lowercase" translatable="true">回覆</string>
     <string name="cometchat_reply_uppercase" translatable="true">回覆</string>
+    <string name="cometchat_report">檢舉</string>
+    <string name="cometchat_report_a_message">檢舉訊息</string>
+    <string name="cometchat_report_button_report">檢舉</string>
+    <string name="cometchat_report_error_message">檢舉失敗</string>
+    <string name="cometchat_report_message_description">若此聊天內容違反我們的社群標準，請進行檢舉。我們不會告知被檢舉的帳號。</string>
+    <string name="cometchat_report_message_title">檢舉訊息</string>
+    <string name="cometchat_report_optional_label">(選填)</string>
+    <string name="cometchat_report_reason_label">原因</string>
+    <string name="cometchat_report_remark_hint">請提供更多與檢舉相關的背景資訊…</string>
+    <string name="cometchat_report_success_message">訊息已被檢舉</string>
     <string name="cometchat_retry" translatable="true">重試</string>
     <string name="cometchat_save" translatable="true">儲存</string>
     <string name="cometchat_scope_change" translatable="true">更改權限</string>
@@ -367,6 +381,7 @@
     <string name="cometchat_share" translatable="true">分享</string>
     <string name="cometchat_shared_sticker" translatable="true">分享了貼圖</string>
     <string name="cometchat_something_went_wrong" translatable="true">發生了一些問題。</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">發生錯誤。請檢查後再試一次。</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">發生了一些問題。請重試。</string>
     <string name="cometchat_something_went_wrong_try_again">我們這邊出了點問題，請重試</string>
     <string name="cometchat_start_conv_hint" translatable="true">輕觸以開始對話</string>
@@ -390,6 +405,7 @@
     <string name="cometchat_translation_error" translatable="true">選擇的翻譯語言與原始訊息的語言相同</string>
     <string name="cometchat_try_again" translatable="true">重試</string>
     <string name="cometchat_typing" translatable="true">正在輸入…</string>
+    <string name="cometchat_unable_to_flag_message">無法標記訊息</string>
     <string name="cometchat_unanswered" translatable="true">未接聽</string>
     <string name="cometchat_unban" translatable="true">解除禁言</string>
     <string name="cometchat_unread" translatable="true">未讀</string>

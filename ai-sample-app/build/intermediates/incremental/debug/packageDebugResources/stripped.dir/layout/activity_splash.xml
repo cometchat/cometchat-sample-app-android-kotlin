@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ui.activity.SplashActivity">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_ai_logo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ai_profile"
+        app:layout_constraintBottom_toTopOf="@id/img_cometchat_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_cometchat_logo"
+        android:layout_width="105.7247dp"
+        android:layout_height="15.3168dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/ic_cometchat_logo"
+        app:layout_constraintBottom_toTopOf="@id/tv_ai_agents"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_ai_logo" />
+
+    <TextView
+        android:id="@+id/tv_ai_agents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="AI Agents"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="?attr/cometchatTextColorHighlight"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_cometchat_logo" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

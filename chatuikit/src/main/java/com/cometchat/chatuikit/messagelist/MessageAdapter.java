@@ -6729,11 +6729,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 } else {
                     // Initialize content, header, bottom, status info, footer, thread, and leading
                     // views
-                    if (template.getReplyView() != null) {
-                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
-                    }
                     if (template.getContentView() != null) {
                         contentView = template.getContentView().createView(context, cometchatMessageBubble, alignment);
+                    }
+                    if (template.getReplyView() != null) {
+                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
                     }
                     if (template.getHeaderView() != null) {
                         headerView = template.getHeaderView().createView(context, cometchatMessageBubble, alignment);
@@ -6804,19 +6804,19 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         parent.setBackgroundColor(Color.TRANSPARENT);
                     }
 
-                    if (template.getReplyView() != null) {
-                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
-                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
-                    } else {
-                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
-                    }
-
                     // Bind content view if available
                     if (template.getContentView() != null) {
                         cometchatMessageBubble.setContentViewVisibility(View.VISIBLE);
                         template.getContentView().bindView(context, contentView, baseMessage, alignment, this, baseMessageList, position);
                     } else {
                         cometchatMessageBubble.setContentViewVisibility(View.GONE);
+                    }
+
+                    if (template.getReplyView() != null) {
+                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
+                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
+                    } else {
+                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
                     }
 
                     // Bind header view if available
@@ -6942,11 +6942,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 } else {
                     // Initialize content, header, bottom, status info, footer, thread, and leading
                     // views
-                    if (template.getReplyView() != null) {
-                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
-                    }
                     if (template.getContentView() != null) {
                         contentView = template.getContentView().createView(context, cometchatMessageBubble, alignment);
+                    }
+                    if (template.getReplyView() != null) {
+                        replyView = template.getReplyView().createView(context, cometchatMessageBubble, alignment);
                     }
                     if (template.getHeaderView() != null) {
                         headerView = template.getHeaderView().createView(context, cometchatMessageBubble, alignment);
@@ -7016,13 +7016,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     boolean isIncoming = !baseMessage.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
                     applyBubbleStyle(baseMessage, isIncoming, alignment, cometchatMessageBubble, showReadReceipt, hideName, headerView, statusInfoView, threadView, leadingView, bottomView);
 
-                    if (template.getReplyView() != null) {
-                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
-                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
-                    } else {
-                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
-                    }
-
                     if (baseMessage.getId() == highlightedMessageId) {
                         parent.setBackgroundColor(getHighlightColor());
                     } else {
@@ -7035,6 +7028,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         template.getContentView().bindView(context, contentView, baseMessage, alignment, this, baseMessageList, position);
                     } else {
                         cometchatMessageBubble.setContentViewVisibility(View.GONE);
+                    }
+
+                    if (template.getReplyView() != null) {
+                        cometchatMessageBubble.setReplyViewVisibility(View.VISIBLE);
+                        template.getReplyView().bindView(context, replyView, baseMessage, alignment, this, baseMessageList, position);
+                    } else {
+                        cometchatMessageBubble.setReplyViewVisibility(View.GONE);
                     }
 
                     // Bind header view if available

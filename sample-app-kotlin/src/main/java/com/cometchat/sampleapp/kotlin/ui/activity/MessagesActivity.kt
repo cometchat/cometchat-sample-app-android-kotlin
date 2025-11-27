@@ -210,7 +210,9 @@ class MessagesActivity : AppCompatActivity() {
             val bottomInset = max(ime.bottom.toDouble(), nav.bottom.toDouble()).toInt()
 
             if (isImeVisible && binding.messageComposer.messageInput.composeBox.isFocused) {
-                binding.messageList.scrollToBottom()
+                if (binding.messageList.atBottom()) {
+                    binding.messageList.scrollToBottom()
+                }
             }
 
             v.setPadding(

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatFlagMessage">
+        <attr name="cometChatFlagMessageStyle" format="reference"/>
+        <!-- Dialog Styling -->
+        <attr name="cometchatFlagMessageBackgroundColor" format="color"/>
+        <attr name="cometchatFlagMessageBorderRadius" format="dimension"/>
+        <attr name="cometchatFlagMessageTitleColor" format="color"/>
+        <attr name="cometchatFlagMessageSubtitleColor" format="color"/>
+        <attr name="cometchatFlagMessageTitleAppearance" format="reference"/>
+        <attr name="cometchatFlagMessageSubtitleTextAppearance" format="reference"/>
+        <attr name="cometchatFlagMessageCloseIconColor" format="color"/>
+        <attr name="cometchatFlagMessageCloseIcon" format="reference"/>
+        <attr name="cometchatFlagMessageStrokeColor" format="color"/>
+        <attr name="cometchatFlagMessageStrokeWidth" format="dimension"/>
+
+        <!-- Chip Styling -->
+        <attr name="cometchatFlagMessageChipCornerRadius" format="dimension"/>
+        <attr name="cometchatFlagMessageChipStrokeWidth" format="dimension"/>
+        <attr name="cometchatFlagMessageChipTextAppearance" format="reference"/>
+
+        <!-- Chip Active/Inactive State -->
+        <attr name="cometchatFlagMessageChipActiveBackgroundColor" format="color"/>
+        <attr name="cometchatFlagMessageChipInactiveBackgroundColor" format="color"/>
+        <attr name="cometchatFlagMessageChipActiveTextColor" format="color"/>
+        <attr name="cometchatFlagMessageChipInactiveTextColor" format="color"/>
+        <attr name="cometchatFlagMessageChipActiveBorderColor" format="color"/>
+        <attr name="cometchatFlagMessageChipInactiveBorderColor" format="color"/>
+
+        <!-- Remark Text Field -->
+        <attr name="cometchatFlagMessageRemarkFieldTitleTextColor" format="color"/>
+        <attr name="cometchatFlagMessageRemarkFieldTitleTextAppearance" format="color"/>
+        <attr name="cometchatFlagMessageRemarkFieldHintTextColor" format="color"/>
+        <attr name="cometchatFlagMessageRemarkFieldTextColor" format="color"/>
+        <attr name="cometchatFlagMessageRemarkFieldTextAppearance" format="reference"/>
+        <attr name="cometchatFlagMessageRemarkFieldBackgroundColor" format="color"/>
+
+        <!-- Button Styling -->
+        <attr name="cometchatFlagMessageButtonCornerRadius" format="dimension"/>
+        <attr name="cometchatFlagMessageButtonStrokeColor" format="color"/>
+        <attr name="cometchatFlagMessageButtonStrokeWidth" format="dimension"/>
+
+        <attr name="cometchatFlagMessageReportButtonDisabledTextColor" format="color"/>
+        <attr name="cometchatFlagMessageReportButtonEnabledTextColor" format="color"/>
+        <attr name="cometchatFlagMessageReportButtonEnabledBackgroundColor" format="color"/>
+        <attr name="cometchatFlagMessageReportButtonDisabledBackgroundColor" format="color"/>
+
+        <attr name="cometchatFlagMessageCancelButtonDisabledTextColor" format="color"/>
+        <attr name="cometchatFlagMessageCancelButtonEnabledTextColor" format="color"/>
+        <attr name="cometchatFlagMessageCancelButtonEnabledBackgroundColor" format="color"/>
+        <attr name="cometchatFlagMessageCancelButtonDisabledBackgroundColor" format="color"/>
+
+        <attr name="cometchatFlagMessageErrorTextColor" format="color"/>
+
+        <attr name="cometchatFlagMessageProgressIndicatorColor" format="color"/>
+    </declare-styleable>
+
+</resources>

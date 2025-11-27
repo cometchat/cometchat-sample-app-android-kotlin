@@ -229,4 +229,21 @@
     <string name="cometchat_documents" translatable="true">ドキュメント</string>
     <string name="cometchat_links" translatable="true">リンク</string>
     <string name="cometchat_details" translatable="true">詳細</string>
+    <string name="cometchat_report">報告</string>
+    <string name="cometchat_report_a_message">メッセージを報告</string>
+    <string name="cometchat_report_message_title">メッセージを報告</string>
+    <string name="cometchat_report_message_description">このチャットがコミュニティ基準に違反している場合、報告してください。報告された相手には通知されません。</string>
+    <string name="cometchat_report_reason_label">理由</string>
+    <string name="cometchat_report_optional_label">(任意)</string>
+    <string name="cometchat_report_remark_hint">報告内容の追加情報を入力してください…</string>
+    <string name="cometchat_report_button_report">報告</string>
+    <string name="cometchat_report_success_message">メッセージが報告されました</string>
+    <string name="cometchat_report_error_message">メッセージの報告に失敗しました</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">問題が発生しました。確認して再試行してください。</string>
+    <string name="cometchat_unable_to_flag_message">メッセージをフラグできません</string>
+    <string name="cometchat_flag_message_success">メッセージが報告されました</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">スパム / 不正なコンテンツ</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">性的コンテンツ</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">嫌がらせ / いじめ</string>
+
 </resources>

@@ -75,6 +75,10 @@ public final class UIKitConstants {
         INITIATED_DELETE, SUCCESS_DELETE, FAILURE_DELETE
     }
 
+    public enum FlagMessageState {
+        INITIATED_FLAG, SUCCESS_FLAG, FAILURE_FLAG
+    }
+
     public enum DialogState {
         INITIATED, SUCCESS, FAILURE
     }
@@ -316,6 +320,7 @@ public final class UIKitConstants {
         public static final String SHARE = "share";
         public static final String REPLY_IN_THREAD = "reply_in_thread";
         public static final String REPLY_TO_MESSAGE = "reply_to_message";
+        public static final String REPORT = "report";
     }
 
     public static final class files {

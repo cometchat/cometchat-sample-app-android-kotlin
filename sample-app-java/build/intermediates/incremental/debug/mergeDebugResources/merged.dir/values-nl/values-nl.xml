@@ -123,6 +123,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">Oeps!</string>
     <string name="cometchat_file_download_failed" translatable="true">Bestand downloaden mislukt.</string>
     <string name="cometchat_file_not_exist" translatable="true">Bestand bestaat niet</string>
+    <string name="cometchat_flag_message_success">Bericht gemeld</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Hinderen / Pesten</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Seksuele inhoud</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Ongewenste inhoud</string>
     <string name="cometchat_form_completion_message" translatable="true">Bedankt voor het invullen van het formulier.</string>
     <string name="cometchat_generate_summary" translatable="true">Genereer een samenvatting</string>
     <string name="cometchat_group" translatable="true">groep</string>
@@ -222,6 +226,16 @@
     <string name="cometchat_reply" translatable="true">Antwoord</string>
     <string name="cometchat_reply_lowercase" translatable="true">antwoord</string>
     <string name="cometchat_reply_uppercase" translatable="true">Antwoord</string>
+    <string name="cometchat_report">Melden</string>
+    <string name="cometchat_report_a_message">Bericht melden</string>
+    <string name="cometchat_report_button_report">Melden</string>
+    <string name="cometchat_report_error_message">Melden mislukt</string>
+    <string name="cometchat_report_message_description">Meld deze chat als deze in strijd is met onze Communityrichtlijnen. We informeren het account dat je hebt gemeld niet.</string>
+    <string name="cometchat_report_message_title">Bericht melden</string>
+    <string name="cometchat_report_optional_label">(Optioneel)</string>
+    <string name="cometchat_report_reason_label">Reden</string>
+    <string name="cometchat_report_remark_hint">Geef extra context voor je melding…</string>
+    <string name="cometchat_report_success_message">Bericht gemeld</string>
     <string name="cometchat_retry" translatable="true">Opnieuw proberen</string>
     <string name="cometchat_save" translatable="true">Opslaan</string>
     <string name="cometchat_scope_change" translatable="true">Wijzig rol</string>
@@ -236,6 +250,7 @@
     <string name="cometchat_shared_image_transition" translatable="false">gedeelde_afbeelding_overgang_%1$d</string>
     <string name="cometchat_shared_sticker" translatable="true">Sticker gedeeld</string>
     <string name="cometchat_something_went_wrong" translatable="true">Er is iets mis gegaan.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Er ging iets mis. Controleer het en probeer opnieuw.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Er is iets mis gegaan. Probeer het opnieuw.</string>
     <string name="cometchat_something_went_wrong_try_again">Er ging iets mis aan onze kant. Probeer het opnieuw</string>
     <string name="cometchat_start_conv_hint" translatable="true">Tik om een gesprek te starten</string>
@@ -259,6 +274,7 @@
     <string name="cometchat_translation_error" translatable="true">De geselecteerde taal voor vertaling lijkt op de taal van het oorspronkelijke bericht</string>
     <string name="cometchat_try_again" translatable="true">Probeer het opnieuw</string>
     <string name="cometchat_typing" translatable="true">Typen…</string>
+    <string name="cometchat_unable_to_flag_message">Kan bericht niet markeren</string>
     <string name="cometchat_unanswered" translatable="true">Onbeantwoord</string>
     <string name="cometchat_unban" translatable="true">Unban</string>
     <string name="cometchat_unread" translatable="true">Ongelezen</string>

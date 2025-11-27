@@ -256,6 +256,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">Oops!</string>
     <string name="cometchat_file_download_failed" translatable="true">Muatan fail gagal.</string>
     <string name="cometchat_file_not_exist" translatable="true">Fail tidak wujud</string>
+    <string name="cometchat_flag_message_success">Mesej telah dilaporkan</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Gangguan / Membuli</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Kandungan Seksual</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Kandungan yang Tidak Diingini</string>
     <string name="cometchat_form_completion_message" translatable="true">Terima kasih kerana mengisi borang.</string>
     <string name="cometchat_generate_summary" translatable="true">Hasilkan ringkasan</string>
     <string name="cometchat_group" translatable="true">kumpulan</string>
@@ -355,6 +359,16 @@
     <string name="cometchat_reply" translatable="true">Balas</string>
     <string name="cometchat_reply_lowercase" translatable="true">balas</string>
     <string name="cometchat_reply_uppercase" translatable="true">BALAS</string>
+    <string name="cometchat_report">Laporkan</string>
+    <string name="cometchat_report_a_message">Laporkan Mesej</string>
+    <string name="cometchat_report_button_report">Laporkan</string>
+    <string name="cometchat_report_error_message">Gagal melaporkan mesej</string>
+    <string name="cometchat_report_message_description">Laporkan sembang ini jika ia melanggar Standard Komuniti kami. Kami tidak akan memberitahu akaun yang anda laporkan.</string>
+    <string name="cometchat_report_message_title">Laporkan mesej</string>
+    <string name="cometchat_report_optional_label">(Pilihan)</string>
+    <string name="cometchat_report_reason_label">Sebab</string>
+    <string name="cometchat_report_remark_hint">Berikan konteks tambahan untuk laporan anda…</string>
+    <string name="cometchat_report_success_message">Mesej telah dilaporkan</string>
     <string name="cometchat_retry" translatable="true">Cuba lagi</string>
     <string name="cometchat_save" translatable="true">Simpan</string>
     <string name="cometchat_scope_change" translatable="true">Tukar Skop</string>
@@ -369,6 +383,7 @@
     <string name="cometchat_shared_image_transition" translatable="false">peralihan_gambar_berkongsi_%1$d</string>
     <string name="cometchat_shared_sticker" translatable="true">Pelekat Dikongsi</string>
     <string name="cometchat_something_went_wrong" translatable="true">Ada sesuatu yang tidak kena.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Ada masalah. Sila semak dan cuba lagi.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Ada sesuatu yang tidak kena. Sila cuba lagi.</string>
     <string name="cometchat_something_went_wrong_try_again">Sesuatu yang salah berlaku di pihak kami. Sila cuba lagi</string>
     <string name="cometchat_start_conv_hint" translatable="true">Ketuk untuk memulakan perbualan</string>
@@ -392,6 +407,7 @@
     <string name="cometchat_translation_error" translatable="true">Bahasa yang dipilih untuk terjemahan adalah serupa dengan bahasa mesej asal</string>
     <string name="cometchat_try_again" translatable="true">Cuba lagi</string>
     <string name="cometchat_typing" translatable="true">Sedang menaip…</string>
+    <string name="cometchat_unable_to_flag_message">Tidak dapat menandakan mesej</string>
     <string name="cometchat_unanswered" translatable="true">belum dijawab</string>
     <string name="cometchat_unban" translatable="true">Buka Sekatan</string>
     <string name="cometchat_unread" translatable="true">Belum dibaca</string>

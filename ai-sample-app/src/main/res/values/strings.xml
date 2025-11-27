@@ -151,4 +151,6 @@
     <string name="scan_qr_code" translatable="false">Scan QR Code</string>
     <string name="app_reset_to_default" translatable="false">Reset to Default</string>
     <string name="app_ai_agents" translatable="true">Agents</string>
+    <string name="app_go_to_message" translatable="false">go to message</string>
+    <string name="cometchat_search_in">Search in</string>
 </resources>

@@ -4491,6 +4491,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">Oops!</string>
     <string name="cometchat_file_download_failed" translatable="true">File download failed.</string>
     <string name="cometchat_file_not_exist" translatable="true">File doesn\'t exists</string>
+    <string name="cometchat_flag_message_success" translatable="true">Message reported</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Harassment / Bullying</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexual Content</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Unwanted Content</string>
     <string name="cometchat_form_completion_message" translatable="true">Thank you for filling out the form.</string>
     <string name="cometchat_generate_summary" translatable="true">Generate a summary</string>
     <string name="cometchat_group" translatable="true">group</string>
@@ -4592,6 +4596,16 @@
     <string name="cometchat_reply_lowercase" translatable="true">reply</string>
     <string name="cometchat_reply_to_message" translatable="true">Reply</string>
     <string name="cometchat_reply_uppercase" translatable="true">Reply In Thread</string>
+    <string name="cometchat_report">Report</string>
+    <string name="cometchat_report_a_message" translatable="true">Report A Message</string>
+    <string name="cometchat_report_button_report" translatable="true">Report</string>
+    <string name="cometchat_report_error_message" translatable="true">Failed to report message</string>
+    <string name="cometchat_report_message_description" translatable="true">Report this chat if it goes against our Community Standards. We won\'t tell the account you reported them.</string>
+    <string name="cometchat_report_message_title" translatable="true">Report a message</string>
+    <string name="cometchat_report_optional_label" translatable="true">(Optional)</string>
+    <string name="cometchat_report_reason_label" translatable="true">Reason</string>
+    <string name="cometchat_report_remark_hint" translatable="true">Provide additional context for your report…</string>
+    <string name="cometchat_report_success_message" translatable="true">Message reported</string>
     <string name="cometchat_retry" translatable="true">Retry</string>
     <string name="cometchat_save" translatable="true">Save</string>
     <string name="cometchat_scope_change" translatable="true">Change Scope</string>
@@ -4607,6 +4621,7 @@
     <string name="cometchat_shared_image_transition" translatable="false">shared_image_transition_%1$d</string>
     <string name="cometchat_shared_sticker" translatable="true">Shared a Sticker</string>
     <string name="cometchat_something_went_wrong" translatable="true">Something went wrong.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again" translatable="true">Something went wrong. Please check and try again.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Something went wrong. Please try again.</string>
     <string name="cometchat_something_went_wrong_try_again" translatable="true">Something went wrong on our end. Please try again. </string>
     <string name="cometchat_start_conv_hint" translatable="true">Tap to start conversation</string>
@@ -4631,6 +4646,7 @@
     <string name="cometchat_translation_error" translatable="true">Selected language for translation is similar to the language of original message</string>
     <string name="cometchat_try_again" translatable="true">Try again</string>
     <string name="cometchat_typing" translatable="true">Typing…</string>
+    <string name="cometchat_unable_to_flag_message" translatable="true">Unable to flag message</string>
     <string name="cometchat_unanswered" translatable="true">unanswered</string>
     <string name="cometchat_unban" translatable="true">Unban</string>
     <string name="cometchat_unread" translatable="true">Unread</string>
@@ -8427,6 +8443,23 @@
         <item name="cometchatEmojiKeyboardCornerRadius">@dimen/cometchat_radius_4</item>
         <item name="cometchatEmojiKeyboardStrokeWidth">@dimen/cometchat_1dp</item>
     </style>
+    <style name="CometChatFlagMessageStyle">
+        <item name="cometchatFlagMessageBorderRadius">@dimen/cometchat_radius_5</item>
+        <item name="cometchatFlagMessageTitleAppearance">?attr/cometchatTextAppearanceHeading2Bold</item>
+        <item name="cometchatFlagMessageSubtitleTextAppearance">?attr/cometchatTextAppearanceButtonRegular</item>
+        <item name="cometchatFlagMessageCloseIcon">@drawable/cometchat_ic_close</item>
+        <item name="cometchatFlagMessageStrokeWidth">1dp</item>
+
+        <item name="cometchatFlagMessageChipCornerRadius">@dimen/cometchat_radius_max</item>
+        <item name="cometchatFlagMessageChipStrokeWidth">1dp</item>
+        <item name="cometchatFlagMessageChipTextAppearance">?attr/cometchatTextAppearanceButtonRegular</item>
+
+        <item name="cometchatFlagMessageRemarkFieldTitleTextAppearance">?attr/cometchatTextAppearanceBodyMedium</item>
+        <item name="cometchatFlagMessageRemarkFieldTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+
+        <item name="cometchatFlagMessageButtonCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatFlagMessageButtonStrokeWidth">1dp</item>
+    </style>
     <style name="CometChatGroupMembersStyle">
         <item name="cometchatGroupMembersBackIcon">@drawable/cometchat_ic_back</item>
         <item name="cometchatGroupMembersTitleTextAppearance">?attr/cometchatTextAppearanceHeading2Bold</item>
@@ -9270,6 +9303,7 @@
         <item name="cometchatAIConversationSummaryStyle">@style/CometChatAIConversationSummaryStyle</item>
         <item name="cometChatAIAssistantChatHistoryStyle">@style/CometChatAIAssistantChatHistoryStyle</item>
         <item name="cometchatSearchStyle">@style/CometChatSearchStyle</item>
+        <item name="cometChatFlagMessageStyle">@style/CometChatFlagMessageStyle</item>
     </style>
     <style name="CometChatThreadHeaderStyle">
         <item name="cometchatThreadHeaderIncomingMessageBubbleStyle">?attr/cometchatIncomingMessageBubbleStyle</item>
@@ -15076,6 +15110,60 @@
         <attr format="reference" name="cometchatFileBubbleDateStyle"/>
         <attr format="reference" name="cometchatFileBubbleMessageReceiptStyle"/>
         <attr format="reference" name="cometchatFileBubbleAvatarStyle"/>
+    </declare-styleable>
+    <declare-styleable name="CometChatFlagMessage">
+        <attr format="reference" name="cometChatFlagMessageStyle"/>
+        
+        <attr format="color" name="cometchatFlagMessageBackgroundColor"/>
+        <attr format="dimension" name="cometchatFlagMessageBorderRadius"/>
+        <attr format="color" name="cometchatFlagMessageTitleColor"/>
+        <attr format="color" name="cometchatFlagMessageSubtitleColor"/>
+        <attr format="reference" name="cometchatFlagMessageTitleAppearance"/>
+        <attr format="reference" name="cometchatFlagMessageSubtitleTextAppearance"/>
+        <attr format="color" name="cometchatFlagMessageCloseIconColor"/>
+        <attr format="reference" name="cometchatFlagMessageCloseIcon"/>
+        <attr format="color" name="cometchatFlagMessageStrokeColor"/>
+        <attr format="dimension" name="cometchatFlagMessageStrokeWidth"/>
+
+        
+        <attr format="dimension" name="cometchatFlagMessageChipCornerRadius"/>
+        <attr format="dimension" name="cometchatFlagMessageChipStrokeWidth"/>
+        <attr format="reference" name="cometchatFlagMessageChipTextAppearance"/>
+
+        
+        <attr format="color" name="cometchatFlagMessageChipActiveBackgroundColor"/>
+        <attr format="color" name="cometchatFlagMessageChipInactiveBackgroundColor"/>
+        <attr format="color" name="cometchatFlagMessageChipActiveTextColor"/>
+        <attr format="color" name="cometchatFlagMessageChipInactiveTextColor"/>
+        <attr format="color" name="cometchatFlagMessageChipActiveBorderColor"/>
+        <attr format="color" name="cometchatFlagMessageChipInactiveBorderColor"/>
+
+        
+        <attr format="color" name="cometchatFlagMessageRemarkFieldTitleTextColor"/>
+        <attr format="color" name="cometchatFlagMessageRemarkFieldTitleTextAppearance"/>
+        <attr format="color" name="cometchatFlagMessageRemarkFieldHintTextColor"/>
+        <attr format="color" name="cometchatFlagMessageRemarkFieldTextColor"/>
+        <attr format="reference" name="cometchatFlagMessageRemarkFieldTextAppearance"/>
+        <attr format="color" name="cometchatFlagMessageRemarkFieldBackgroundColor"/>
+
+        
+        <attr format="dimension" name="cometchatFlagMessageButtonCornerRadius"/>
+        <attr format="color" name="cometchatFlagMessageButtonStrokeColor"/>
+        <attr format="dimension" name="cometchatFlagMessageButtonStrokeWidth"/>
+
+        <attr format="color" name="cometchatFlagMessageReportButtonDisabledTextColor"/>
+        <attr format="color" name="cometchatFlagMessageReportButtonEnabledTextColor"/>
+        <attr format="color" name="cometchatFlagMessageReportButtonEnabledBackgroundColor"/>
+        <attr format="color" name="cometchatFlagMessageReportButtonDisabledBackgroundColor"/>
+
+        <attr format="color" name="cometchatFlagMessageCancelButtonDisabledTextColor"/>
+        <attr format="color" name="cometchatFlagMessageCancelButtonEnabledTextColor"/>
+        <attr format="color" name="cometchatFlagMessageCancelButtonEnabledBackgroundColor"/>
+        <attr format="color" name="cometchatFlagMessageCancelButtonDisabledBackgroundColor"/>
+
+        <attr format="color" name="cometchatFlagMessageErrorTextColor"/>
+
+        <attr format="color" name="cometchatFlagMessageProgressIndicatorColor"/>
     </declare-styleable>
     <declare-styleable name="CometChatFormBubble">
         <attr format="reference" name="cometchatFormBubbleBackgroundDrawable"/>

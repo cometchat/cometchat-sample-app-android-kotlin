@@ -123,6 +123,10 @@
     <string name="cometchat_error_conversations_title" translatable="true">앗!</string>
     <string name="cometchat_file_download_failed" translatable="true">파일 다운로드 실패.</string>
     <string name="cometchat_file_not_exist" translatable="true">파일이 존재하지 않습니다</string>
+    <string name="cometchat_flag_message_success">메시지가 신고되었습니다</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">괴롭힘 / 따돌림</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">성적 콘텐츠</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">스팸 / 원하지 않는 콘텐츠</string>
     <string name="cometchat_form_completion_message" translatable="true">양식을 작성해 주셔서 감사합니다.</string>
     <string name="cometchat_generate_summary" translatable="true">요약 생성</string>
     <string name="cometchat_group" translatable="true">그룹</string>
@@ -222,6 +226,16 @@
     <string name="cometchat_reply" translatable="true">답장</string>
     <string name="cometchat_reply_lowercase" translatable="true">답장</string>
     <string name="cometchat_reply_uppercase" translatable="true">답장</string>
+    <string name="cometchat_report">신고</string>
+    <string name="cometchat_report_a_message">메시지 신고</string>
+    <string name="cometchat_report_button_report">신고</string>
+    <string name="cometchat_report_error_message">메시지 신고 실패</string>
+    <string name="cometchat_report_message_description">이 채팅이 커뮤니티 규정을 위반한 경우 신고하세요. 신고 대상 계정에는 알리지 않습니다.</string>
+    <string name="cometchat_report_message_title">메시지 신고</string>
+    <string name="cometchat_report_optional_label">(선택 사항)</string>
+    <string name="cometchat_report_reason_label">사유</string>
+    <string name="cometchat_report_remark_hint">신고에 대한 추가 설명을 입력하세요…</string>
+    <string name="cometchat_report_success_message">메시지가 신고되었습니다</string>
     <string name="cometchat_retry" translatable="true">다시 시도</string>
     <string name="cometchat_save" translatable="true">저장</string>
     <string name="cometchat_scope_change" translatable="true">역할 변경</string>
@@ -236,6 +250,7 @@
     <string name="cometchat_shared_image_transition" translatable="false">공유_이미지_전환_%1$d</string>
     <string name="cometchat_shared_sticker" translatable="true">스티커 공유됨</string>
     <string name="cometchat_something_went_wrong" translatable="true">뭔가 잘못되었습니다.</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">문제가 발생했습니다. 확인 후 다시 시도하세요.</string>
     <string name="cometchat_something_went_wrong_please_try_again" translatable="true">뭔가 잘못되었습니다. 다시 시도하십시오.</string>
     <string name="cometchat_something_went_wrong_try_again">우리 측에서 문제가 발생했습니다. 다시 시도해주세요</string>
     <string name="cometchat_start_conv_hint" translatable="true">대화를 시작하려면 탭하세요</string>
@@ -259,6 +274,7 @@
     <string name="cometchat_translation_error" translatable="true">선택한 번역 언어가 원본 메시지의 언어와 비슷합니다</string>
     <string name="cometchat_try_again" translatable="true">다시 시도</string>
     <string name="cometchat_typing" translatable="true">입력 중…</string>
+    <string name="cometchat_unable_to_flag_message">메시지를 표시할 수 없습니다</string>
     <string name="cometchat_unanswered" translatable="true">응답 없음</string>
     <string name="cometchat_unban" translatable="true">차단 해제</string>
     <string name="cometchat_unread" translatable="true">읽지 않음</string>

@@ -234,4 +234,21 @@ Vänligen försök igen.</string>
     <string name="cometchat_documents" translatable="true">Dokument</string>
     <string name="cometchat_links" translatable="true">Länkar</string>
     <string name="cometchat_details" translatable="true">Detaljer</string>
+    <string name="cometchat_report">Rapportera</string>
+    <string name="cometchat_report_a_message">Rapportera ett meddelande</string>
+    <string name="cometchat_report_message_title">Rapportera ett meddelande</string>
+    <string name="cometchat_report_message_description">Rapportera denna chatt om den bryter mot våra gemenskapsriktlinjer. Vi meddelar inte kontot du rapporterar.</string>
+    <string name="cometchat_report_reason_label">Orsak</string>
+    <string name="cometchat_report_optional_label">(Valfritt)</string>
+    <string name="cometchat_report_remark_hint">Ge ytterligare information för din rapport…</string>
+    <string name="cometchat_report_button_report">Rapportera</string>
+    <string name="cometchat_report_success_message">Meddelandet rapporterat</string>
+    <string name="cometchat_report_error_message">Misslyckades att rapportera meddelandet</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Något gick fel. Kontrollera och försök igen.</string>
+    <string name="cometchat_unable_to_flag_message">Kan inte flagga meddelandet</string>
+    <string name="cometchat_flag_message_success">Meddelandet rapporterat</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Oönskat innehåll</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexuellt innehåll</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Häleri / Mobbningsbeteende</string>
+
 </resources>

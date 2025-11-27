@@ -235,4 +235,21 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_documents" translatable="true">Dokumentai</string>
     <string name="cometchat_links" translatable="true">Nuorodos</string>
     <string name="cometchat_details" translatable="true">Detales</string>
+    <string name="cometchat_report">Pranešti</string>
+    <string name="cometchat_report_a_message">Pranešti apie žinutę</string>
+    <string name="cometchat_report_message_title">Pranešti apie žinutę</string>
+    <string name="cometchat_report_message_description">Praneškite apie šį pokalbį, jei jis pažeidžia mūsų bendruomenės standartus. Mes nepranešime paskyrai, kurią pranešėte.</string>
+    <string name="cometchat_report_reason_label">Priežastis</string>
+    <string name="cometchat_report_optional_label">(Nebūtina)</string>
+    <string name="cometchat_report_remark_hint">Pateikite papildomą informaciją apie savo pranešimą…</string>
+    <string name="cometchat_report_button_report">Pranešti</string>
+    <string name="cometchat_report_success_message">Žinutė pranešta</string>
+    <string name="cometchat_report_error_message">Nepavyko pranešti žinutės</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Įvyko klaida. Patikrinkite ir bandykite dar kartą.</string>
+    <string name="cometchat_unable_to_flag_message">Nepavyko pažymėti žinutės</string>
+    <string name="cometchat_flag_message_success">Žinutė pranešta</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Šlamštas / Nepageidaujamas turinys</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexualus turinys</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Priekabiavimas / Terorizavimas</string>
+
 </resources>
