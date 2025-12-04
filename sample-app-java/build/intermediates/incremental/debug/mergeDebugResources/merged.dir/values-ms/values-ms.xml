@@ -336,6 +336,8 @@
     <string name="cometchat_no_results">Tiada Hasil</string>
     <string name="cometchat_no_stickers_available" translatable="true">Tiada Stiker Tersedia</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Tiada slot masa yang tersedia untuk tarikh ini. Sila cuba tarikh lain.</string>
+    <string name="cometchat_notify_all" translatable="true">semua</string>
+    <string name="cometchat_notify_everyone_in_this_group">Beritahu semua orang dalam kumpulan ini</string>
     <string name="cometchat_offline" translatable="true">Luar talian</string>
     <string name="cometchat_online" translatable="true">Dalam talian</string>
     <string name="cometchat_open_document" translatable="true">Buka Dokumen</string>

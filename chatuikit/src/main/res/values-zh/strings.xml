@@ -246,5 +246,7 @@
     <string name="cometchat_flag_reason_spam" translatable="true">垃圾邮件 / 内容不当</string>
     <string name="cometchat_flag_reason_sexual" translatable="true">性内容</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">骚扰 / 欺凌</string>
+    <string name="cometchat_notify_everyone_in_this_group">通知该群组中的每个人</string>
+    <string name="cometchat_notify_all" translatable="true">所有</string>
 
 </resources>

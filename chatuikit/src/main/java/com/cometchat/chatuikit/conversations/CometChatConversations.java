@@ -86,6 +86,8 @@ public class CometChatConversations extends MaterialCardView {
     private int searchInputStrokeColor;
     private int searchInputCornerRadius;
     private int searchBoxVisibility = VISIBLE;
+    private String mentionAllLabelId;
+    private String mentionAllLabel;
 
     /**
      * Observer for updating a specific conversation in the list. Notifies the
@@ -400,6 +402,7 @@ public class CometChatConversations extends MaterialCardView {
         for (CometChatTextFormatter textFormatter : CometChatUIKit.getDataSource().getTextFormatters(getContext(), additionParameter)) {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
+                cometchatMentionsFormatter.setMentionAllLabel(mentionAllLabelId, mentionAllLabel);
                 break;
             }
         }
@@ -896,7 +899,7 @@ public class CometChatConversations extends MaterialCardView {
     public void setSearchBoxVisibility(int visibility) {
         this.searchBoxVisibility = visibility;
         binding.searchBox.setVisibility(visibility);
-
+        binding.searchBoxLayout.setVisibility(GONE);
     }
 
     /**
@@ -2647,6 +2650,24 @@ public class CometChatConversations extends MaterialCardView {
     public void setErrorStateVisibility(int visibility) {
         this.errorStateVisibility = visibility;
         binding.errorStateView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Sets a custom label for the "mention all" feature for a specific ID.
+     *
+     * @param id The unique identifier (such as a group or user ID) for which the mention all label should be set.
+     * @param mentionAllLabel The custom label to display when mentioning all members.
+     *
+     * If either parameter is null or empty, or if the mentions formatter is not initialized, this method does nothing.
+     */
+    public void setMentionAllLabelId(String id, String mentionAllLabel) {
+        if (id != null && !id.isEmpty() && mentionAllLabel != null && !mentionAllLabel.isEmpty()) {
+            if (cometchatMentionsFormatter != null) {
+                cometchatMentionsFormatter.setMentionAllLabel(id, mentionAllLabel);
+            }
+            this.mentionAllLabelId = id;
+            this.mentionAllLabel = mentionAllLabel;
+        }
     }
 
     @Override

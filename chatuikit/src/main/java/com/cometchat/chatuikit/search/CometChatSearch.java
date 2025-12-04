@@ -178,6 +178,7 @@ public class CometChatSearch extends MaterialCardView {
     private @StyleRes int messageTimestampTextAppearance;
     private @ColorInt int messageLinkTextColor;
     private @StyleRes int messageLinkTextAppearance;
+    private Drawable messageThreadIcon;
 
     // Date Separator Styling
     private @StyleRes int dateSeparatorTextAppearance;
@@ -266,6 +267,9 @@ public class CometChatSearch extends MaterialCardView {
     private OnLoad<BaseMessage> onLoadMessages;
     private OnLoad<Conversation> onLoadConversations;
     private OnEmpty onEmpty;
+    private String mentionAllLabelId;
+
+    private String mentionAllLabel;
 
     /** Constructor for CometChatSearch */
     public CometChatSearch(Context context) {
@@ -738,6 +742,7 @@ public class CometChatSearch extends MaterialCardView {
             messageTimestampTextAppearance = typedArray.getResourceId(R.styleable.CometChatSearch_cometchatSearchMessageTimestampTextAppearance, 0);
             messageLinkTextColor = typedArray.getColor(R.styleable.CometChatSearch_cometchatSearchMessageLinkTextColor,  CometChatTheme.getInfoColor(getContext()));
             messageLinkTextAppearance = typedArray.getResourceId(R.styleable.CometChatSearch_cometchatSearchMessageLinkTextAppearance, 0);
+            messageThreadIcon = typedArray.getDrawable(R.styleable.CometChatSearch_cometChatSearchMessageThreadIcon);
 
             avatarStyle = typedArray.getResourceId(R.styleable.CometChatSearch_cometchatSearchAvatarStyle, 0);
             badgeStyle = typedArray.getResourceId(R.styleable.CometChatSearch_cometchatSearchBadgeStyle, 0);
@@ -829,6 +834,7 @@ public class CometChatSearch extends MaterialCardView {
         setMessageTimestampTextAppearance(messageTimestampTextAppearance);
         setMessageLinkTextAppearance(messageLinkTextAppearance);
         setMessageLinkTextColor(messageLinkTextColor);
+        setMessageThreadIcon(messageThreadIcon);
 
         setAvatarStyle(avatarStyle);
         setBadgeStyle(badgeStyle);
@@ -860,6 +866,11 @@ public class CometChatSearch extends MaterialCardView {
         setDateSeparatorTextColor(dateSeparatorTextColor);
         setDateSeparatorTextAppearance(dateSeparatorTextAppearance);
         setDateSeparatorBackgroundColor(dateSeparatorBackgroundColor);
+    }
+
+    private void setMessageThreadIcon(Drawable threadIcon) {
+        this.messageThreadIcon = threadIcon;
+        cometChatSearchMessageAdapter.setMessageThreadIcon(threadIcon);
     }
 
     /**
@@ -1072,6 +1083,7 @@ public class CometChatSearch extends MaterialCardView {
         for (CometChatTextFormatter textFormatter : CometChatUIKit.getDataSource().getTextFormatters(getContext(), new AdditionParameter())) {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
+                cometchatMentionsFormatter.setMentionAllLabel(mentionAllLabelId, mentionAllLabel);
                 break;
             }
         }
@@ -2797,5 +2809,23 @@ public class CometChatSearch extends MaterialCardView {
 
     public void setHintText(String string) {
         binding.searchInput.setHint(string);
+    }
+
+    /**
+     * Sets a custom label for the "mention all" feature for a specific ID.
+     *
+     * @param id The unique identifier (such as a group or user ID) for which the mention all label should be set.
+     * @param mentionAllLabel The custom label to display when mentioning all members.
+     *
+     * If either parameter is null or empty, or if the mentions formatter is not initialized, this method does nothing.
+     */
+    public void setMentionAllLabelId(String id, String mentionAllLabel) {
+        if (id != null && !id.isEmpty() && mentionAllLabel != null && !mentionAllLabel.isEmpty()) {
+            if (cometchatMentionsFormatter != null) {
+                cometchatMentionsFormatter.setMentionAllLabel(id, mentionAllLabel);
+            }
+            this.mentionAllLabelId = id;
+            this.mentionAllLabel = mentionAllLabel;
+        }
     }
 }

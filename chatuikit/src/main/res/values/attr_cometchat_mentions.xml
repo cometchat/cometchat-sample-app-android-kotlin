@@ -9,6 +9,7 @@
         <attr name="cometchatSelfMentionTextColor" format="color" />
         <attr name="cometchatSelfMentionBackgroundColor" format="color" />
         <attr name="cometchatMentionsStyle" format="reference" />
+        <attr name="cometchatMentionAllStyle" format="reference" />
     </declare-styleable>
 
 </resources>

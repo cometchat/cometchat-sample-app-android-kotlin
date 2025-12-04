@@ -335,6 +335,8 @@
     <string name="cometchat_no_results">沒有結果</string>
     <string name="cometchat_no_stickers_available" translatable="true">沒有可用的貼圖</string>
     <string name="cometchat_no_time_slots_available" translatable="true">此日期沒有可用時段。請嘗試其他日期。</string>
+    <string name="cometchat_notify_all" translatable="true">所有</string>
+    <string name="cometchat_notify_everyone_in_this_group">通知該群組中的每個人</string>
     <string name="cometchat_offline" translatable="true">離線</string>
     <string name="cometchat_online" translatable="true">線上</string>
     <string name="cometchat_open_document">開啟檔案</string>

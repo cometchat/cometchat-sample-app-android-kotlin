@@ -44,12 +44,14 @@ class ThreadMessageActivity : AppCompatActivity() {
         val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
         val goToMessageJson = intent.getStringExtra(getString(R.string.app_go_to_message))
         val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
+        val replyCount = intent.getIntExtra(AppConstants.JSONConstants.REPLY_COUNT, 0)
         try {
             if (goToMessageJson != null) {
                 goToMessage = BaseMessage.processMessage(JSONObject(goToMessageJson))
             }
             if (rawMessage != null) {
                 val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
+                parentMessage.replyCount = replyCount
                 viewModel.setParentMessage(parentMessage)
             }
         } catch (e: JSONException) {

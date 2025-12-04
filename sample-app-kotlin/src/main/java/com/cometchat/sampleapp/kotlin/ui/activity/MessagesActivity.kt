@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
@@ -46,6 +47,58 @@ class MessagesActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMessagesBinding
     private var goToMessage: BaseMessage? = null
 
+    private val searchActivityLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val data = result.data!!
+            val shouldNavigateToDifferentChat = data.getBooleanExtra("navigateToDifferentChat", false)
+
+            if (shouldNavigateToDifferentChat) {
+                handleDifferentChatNavigation(data)
+            } else {
+                handleSameChatNavigation(data)
+            }
+        }
+    }
+
+    private fun handleDifferentChatNavigation(data: Intent) {
+        val selectedUserJson = data.getStringExtra(getString(R.string.app_user))
+        val selectedGroupJson = data.getStringExtra(getString(R.string.app_group))
+        val goToMessageJson = data.getStringExtra(getString(R.string.app_go_to_message))
+        val parentMessageJson = data.getStringExtra(getString(R.string.app_base_message))
+
+        if (parentMessageJson != null) {
+            val intent = Intent(this, ThreadMessageActivity::class.java).apply {
+                putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessageJson)
+                selectedUserJson?.let { putExtra(getString(R.string.app_user), it) }
+                selectedGroupJson?.let { putExtra(getString(R.string.app_group), it) }
+            }
+            startActivity(intent)
+            finish()
+        } else {
+            val intent = Intent(this, MessagesActivity::class.java).apply {
+                selectedUserJson?.let { putExtra(getString(R.string.app_user), it) }
+                selectedGroupJson?.let { putExtra(getString(R.string.app_group), it) }
+                goToMessageJson?.let { putExtra(getString(R.string.app_go_to_message), it) }
+            }
+            startActivity(intent)
+            finish()
+        }
+    }
+
+    private fun handleSameChatNavigation(data: Intent) {
+        val goToMessageJson = data.getStringExtra(getString(R.string.app_go_to_message))
+        goToMessageJson?.let {
+            try {
+                this.goToMessage = BaseMessage.processMessage(JSONObject(it))
+                addViews()
+            } catch (e: JSONException) {
+                CometChatLogger.e(TAG, "Error processing goto message: ${e.message}")
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMessagesBinding.inflate(layoutInflater)
@@ -54,14 +107,18 @@ class MessagesActivity : AppCompatActivity() {
         setUpTheme()
         adjustWindowSettings()
         applyWindowInsets()
+        extractIntentData(intent)
+        initViewModel()
+        addViews()
+        initClickListeners()
+        if (!Utils.isAgentChat(user))
+            setUpMessageHeaderMenu()
+        MyApplication.currentOpenChatId = if (group != null) group!!.guid else user?.uid
+    }
 
-        // Create an instance of the MessagesViewModel
-        viewModel = ViewModelProvider.NewInstanceFactory().create(MessagesViewModel::class.java)
-
-        // Deserialize group data from the Intent
+    private fun extractIntentData(intent: Intent) {
         group = Gson().fromJson(intent.getStringExtra(getString(R.string.app_group)), Group::class.java)
         try {
-            val rawParentMessage = intent.getStringExtra(getString(R.string.app_base_message))
             val rawGoToMessage = intent.getStringExtra(getString(R.string.app_go_to_message))
             val userJson = intent.getStringExtra(getString(R.string.app_user))
             if (rawGoToMessage != null)
@@ -71,9 +128,10 @@ class MessagesActivity : AppCompatActivity() {
         } catch (e: JSONException) {
             CometChatLogger.e(TAG, e.message)
         }
+    }
 
-        MyApplication.currentOpenChatId = if (group != null) group!!.guid else user?.uid
-
+    private fun initViewModel() {
+        viewModel = ViewModelProvider.NewInstanceFactory().create(MessagesViewModel::class.java)
         // Set the user and group in the ViewModel
         viewModel.setUser(user)
         viewModel.setGroup(group)
@@ -81,44 +139,36 @@ class MessagesActivity : AppCompatActivity() {
         // Add listeners for ViewModel updates
         viewModel.addListener()
 
-        viewModel.updatedGroup.observe(this) { group: Group ->
-            this.updateGroupJoinedStatus(group)
-        }
-
+        viewModel.updatedGroup.observe(this) { group: Group -> this.updateGroupJoinedStatus(group) }
         viewModel.baseMessage.observe(this) { baseMessage: BaseMessage? ->
             if (baseMessage != null) {
                 this.setBaseMessage(baseMessage)
             }
         }
-
         viewModel.updateUser.observe(this) { user: User ->
             this.user = user
             this.updateUserBlockStatus(user)
         }
-
         viewModel.openUserChat().observe(this) { user: User? -> this.openUserChat(user) }
         viewModel.isExitActivity.observe(this) { exit: Boolean -> this.exitActivity(exit) }
         viewModel.unblockButtonState.observe(this) { dialogState: DialogState -> this.setUnblockButtonState(dialogState) }
+    }
 
-        // Initialize UI components
-        addViews()
-        // Set click listener for the unblock button
+    private fun initClickListeners() {
         binding.unblockBtn.setOnClickListener { view: View? -> viewModel.unblockUser() }
-
         binding.messageList.mentionsFormatter.setOnMentionClick { context: Context, user: User? ->
             val intent = Intent(context, MessagesActivity::class.java)
             intent.putExtra(context.getString(R.string.app_user), Gson().toJson(user))
             context.startActivity(intent)
         }
-
         binding.messageList.setOnThreadRepliesClick { context: Context, baseMessage: BaseMessage, cometchatMessageTemplate: CometChatMessageTemplate? ->
             val intent = Intent(context, ThreadMessageActivity::class.java)
+            intent.putExtra(context.getString(R.string.app_user), user?.toJson().toString())
+            intent.putExtra("isBlockedByMe", user?.isBlockedByMe)
+            intent.putExtra(AppConstants.JSONConstants.REPLY_COUNT, baseMessage.replyCount)
             intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString())
             context.startActivity(intent)
         }
-
-        if (!Utils.isAgentChat(user))
-            setUpMessageHeaderMenu()
     }
 
     private fun setUpMessageHeaderMenu() {
@@ -168,13 +218,11 @@ class MessagesActivity : AppCompatActivity() {
 
     private fun navigateToSearchActivity() {
         val intent = Intent(this, SearchActivity::class.java)
-        intent.putExtra("isFromMessageScreen", true)
         if (user != null)
             intent.putExtra(getString(R.string.app_user), user?.toJson().toString())
         else
             intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
-        startActivity(intent)
-        finish()
+        searchActivityLauncher.launch(intent)
     }
 
     private fun setUpTheme() {

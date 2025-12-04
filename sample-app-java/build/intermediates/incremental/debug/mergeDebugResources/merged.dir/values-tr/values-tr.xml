@@ -203,6 +203,8 @@
     <string name="cometchat_no_results">Sonuç Yok</string>
     <string name="cometchat_no_stickers_available" translatable="true">Hiç Çıkartma Yok</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Bu tarih için zaman dilimi mevcut değil. Lütfen başka bir tarih deneyin.</string>
+    <string name="cometchat_notify_all" translatable="true">hepsi</string>
+    <string name="cometchat_notify_everyone_in_this_group">Bu gruptaki herkesi bilgilendir</string>
     <string name="cometchat_offline" translatable="true">Çevrimdışı</string>
     <string name="cometchat_online" translatable="true">Çevrimiçi</string>
     <string name="cometchat_open_document" translatable="true">Belgeyi Aç</string>

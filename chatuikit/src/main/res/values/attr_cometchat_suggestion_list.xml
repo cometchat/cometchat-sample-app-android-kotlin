@@ -9,5 +9,7 @@
         <attr name="cometchatSuggestionListItemAvatarStyle" format="reference" />
         <attr name="cometchatSuggestionListItemTextAppearance" format="reference" />
         <attr name="cometchatSuggestionListItemTextColor" format="color" />
+        <attr name="cometchatSuggestionListItemInfoTextAppearance" format="reference" />
+        <attr name="cometchatSuggestionListItemInfoTextColor" format="color" />
     </declare-styleable>
 </resources>

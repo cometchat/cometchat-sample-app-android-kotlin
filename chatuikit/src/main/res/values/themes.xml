@@ -768,6 +768,7 @@
         <item name="cometchatSuggestionListStrokeWidth">@dimen/cometchat_1dp</item>
         <item name="cometchatSuggestionListItemAvatarStyle">?attr/cometchatAvatarStyle</item>
         <item name="cometchatSuggestionListItemTextAppearance">?attr/cometchatTextAppearanceHeading4Medium</item>
+        <item name="cometchatSuggestionListItemInfoTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
 
     <style name="CometChatMediaRecorderStyle">
@@ -984,6 +985,7 @@
         <item name="cometchatSearchMessageTimestampTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
         <item name="cometchatSearchMessageSeparatorColor">@android:color/transparent</item>
         <item name="cometchatSearchMessageLinkTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometChatSearchMessageThreadIcon">@drawable/cometchat_ic_thread</item>
 
         <!-- Avatar Styling -->
         <item name="cometchatSearchAvatarStyle">?attr/cometchatAvatarStyle</item>

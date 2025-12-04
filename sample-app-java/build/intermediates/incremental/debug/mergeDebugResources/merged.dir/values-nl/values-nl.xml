@@ -203,6 +203,8 @@
     <string name="cometchat_no_results">Geen resultaten</string>
     <string name="cometchat_no_stickers_available" translatable="true">Geen stickers beschikbaar</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Geen tijdslot beschikbaar voor deze datum. Probeer een andere datum.</string>
+    <string name="cometchat_notify_all" translatable="true">iedereen</string>
+    <string name="cometchat_notify_everyone_in_this_group">Iedereen in deze groep op de hoogte stellen</string>
     <string name="cometchat_offline" translatable="true">Offline</string>
     <string name="cometchat_online" translatable="true">Online</string>
     <string name="cometchat_open_document" translatable="true">Document openen</string>

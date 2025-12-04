@@ -1,4 +1,4 @@
-#Thu Nov 27 14:32:50 IST 2025
+#Thu Dec 04 18:42:27 IST 2025
 base.0=/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/build/intermediates/dex/debug/mergeLibDexDebug/1/classes.dex
 base.10=/Users/cometchat/Documents/Cometchat/UIKit public release /cometchat-uikit-android/ai-sample-app/build/intermediates/dex/debug/mergeLibDexDebug/4/classes.dex

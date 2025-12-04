@@ -203,6 +203,8 @@
     <string name="cometchat_no_results">결과 없음</string>
     <string name="cometchat_no_stickers_available" translatable="true">사용 가능한 스티커가 없습니다</string>
     <string name="cometchat_no_time_slots_available" translatable="true">이 날짜에는 사용할 수 있는 시간대가 없습니다. 다른 날짜를 시도하십시오.</string>
+    <string name="cometchat_notify_all" translatable="true">모든</string>
+    <string name="cometchat_notify_everyone_in_this_group">이 그룹의 모든 사람에게 알림</string>
     <string name="cometchat_offline" translatable="true">오프라인</string>
     <string name="cometchat_online" translatable="true">온라인</string>
     <string name="cometchat_open_document" translatable="true">문서 열기</string>

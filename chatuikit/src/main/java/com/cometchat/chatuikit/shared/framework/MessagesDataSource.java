@@ -100,7 +100,7 @@ public class MessagesDataSource implements DataSource {
                     cometchatOptions.add(_getDeleteOption(context));
                 }
             }
-            if (additionParameter.getReportOptionVisibility() == View.VISIBLE && !isMyMessage(baseMessage)) {
+            if (additionParameter.getFlagOptionVisibility() == View.VISIBLE && !isMyMessage(baseMessage)) {
                 cometchatOptions.add(_getReportOption(context));
             }
             if (baseMessage.getReceiverType().equalsIgnoreCase(UIKitConstants.ReceiverType.GROUP) && !baseMessage
@@ -564,13 +564,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) createdView.getLayoutParams();
-                        LinearLayout parent = (LinearLayout) createdView.getParent();
-                        params.width = MATCH_PARENT;
-                        createdView.setLayoutParams(params);
-                        ViewGroup.LayoutParams parentParams = parent.getLayoutParams();
-                        parentParams.width = MATCH_PARENT;
-                        parent.setLayoutParams(parentParams);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -631,17 +624,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setContentView(new MessagesViewHolderListener() {
@@ -697,17 +679,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -794,17 +765,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -865,42 +825,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        BaseMessage quoteMessage = message.getQuotedMessage();
-                        if (quoteMessage instanceof TextMessage) {
-                            String messageText = ((TextMessage) quoteMessage).getText();
-                            if (messageText != null && messageText.length() > 20) {
-                                FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                                LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                                LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                                messagePreview.setLayoutParams(messagePreviewParams);
-                                flexboxLayout.setLayoutParams(flexboxParams);
-                                parent.setLayoutParams(parentLayoutParams);
-                                messagePreview.setMinimumWidth(240);
-                            } else {
-                                FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                                LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                                LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                                parent.setLayoutParams(parentLayoutParams);
-                                flexboxLayout.setLayoutParams(flexboxParams);
-                                messagePreview.setLayoutParams(messagePreviewParams);
-                            }
-                        } else {
-                            FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                            LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                            LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                            LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                            parent.setLayoutParams(parentLayoutParams);
-                            flexboxLayout.setLayoutParams(flexboxParams);
-                            messagePreview.setLayoutParams(messagePreviewParams);
-
-                        }
                     }
                 })
             .setContentView(new MessagesViewHolderListener() {
@@ -955,17 +879,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -1067,17 +980,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -1135,17 +1037,6 @@ public class MessagesDataSource implements DataSource {
                     @Override
                     public void bindView(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position) {
                         CometChatUIKit.getDataSource().bindReplyViewContainer(context, createdView, message, alignment, holder, messageList, position, additionParameter);
-                        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
-                        CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                        messagePreview.setMinimumWidth(240);
                     }
                 })
                 .setOptions((context, baseMessage, group) -> ChatConfigurator
@@ -1405,7 +1296,8 @@ public class MessagesDataSource implements DataSource {
                 if (baseMessage instanceof TextMessage || baseMessage instanceof MediaMessage) {
                     if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getShareOption(context));
                 }
-                if (additionParameter.getReportOptionVisibility() == View.VISIBLE) messageOptions.add(_getReportOption(context));
+                if (additionParameter.getFlagOptionVisibility() == View.VISIBLE && !isMyMessage(baseMessage) && UIKitConstants.MessageCategory.MESSAGE.equals(baseMessage.getCategory()))
+                    messageOptions.add(_getReportOption(context));
                 if (_isCommon(baseMessage, group)) {
                     if (additionParameter.getDeleteMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getDeleteOption(context));
                 }
@@ -1414,9 +1306,6 @@ public class MessagesDataSource implements DataSource {
                         .getUid()
                         .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
                     if (additionParameter.getMessagePrivatelyOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessagePrivatelyOption(context));
-                }
-                if (_isCommon(baseMessage, group)) {
-                    if (additionParameter.getReplyToMessageOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyToMessageOption(context));
                 }
             }
         }

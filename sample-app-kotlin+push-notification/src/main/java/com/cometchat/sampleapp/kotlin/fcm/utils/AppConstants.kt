@@ -24,6 +24,7 @@ class AppConstants {
         const val NAME: String = "name"
         const val AVATAR: String = "avatar"
         const val RAW_JSON: String = "raw_json"
+        const val REPLY_COUNT: String = "reply_count"
     }
 
     object FCMConstants {

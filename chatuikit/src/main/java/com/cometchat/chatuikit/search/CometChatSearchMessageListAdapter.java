@@ -1,7 +1,9 @@
 package com.cometchat.chatuikit.search;
 
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -93,6 +95,7 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
     private @StyleRes int messageTimestampTextAppearance;
     private @ColorInt int messageLinkTextColor;
     private @StyleRes int messageLinkTextAppearance;
+    private Drawable messageThreadIcon;
 
     public CometChatSearchMessageListAdapter(Context context) {
         this.context = context;
@@ -337,6 +340,10 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
         this.textFormatters = textFormatters;
     }
 
+    public void setMessageThreadIcon(Drawable threadIcon) {
+        this.messageThreadIcon = threadIcon;
+    }
+
     private class SearchImageViewHolder extends RecyclerView.ViewHolder {
         private View customView;
         private final CometchatSearchMessageItemImageBinding binding;
@@ -359,6 +366,12 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
             } else {
                 if (messageItemBackgroundColor != 0) {
                     binding.parentLayout.setBackgroundColor(messageItemBackgroundColor);
+                }
+                if (mediaMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
                 }
                 String title = getConversationTitle(mediaMessage);
                 setTextAndStyle(binding.tvMessageTitle, title, messageTitleTextColor, messageTitleTextAppearance);
@@ -393,6 +406,12 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
             } else {
                 if (messageItemBackgroundColor != 0) {
                     binding.parentLayout.setBackgroundColor(messageItemBackgroundColor);
+                }
+                if (mediaMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
                 }
                 String title = getConversationTitle(mediaMessage);
                 setTextAndStyle(binding.tvMessageTitle, title, messageTitleTextColor, messageTitleTextAppearance);
@@ -457,6 +476,13 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
                     binding.messageIvLinkThumbnail.setImageResource(R.drawable.cometchat_image_placeholder);
                 }
 
+                if (textMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
+                }
+
                 // Bind tail view
                 bindTailView(binding.date, textMessage, messageTimestampTextColor, messageTimestampTextAppearance);
             }
@@ -518,6 +544,13 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
                         setFileIcon(R.drawable.cometchat_unknown_file_icon);
                     }
                 }
+
+                if (mediaMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
+                }
                 // Set tail view
                 bindTailView(binding.date, mediaMessage, messageTimestampTextColor, messageTimestampTextAppearance);
             }
@@ -553,6 +586,12 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
                 setTextAndStyle(binding.tvMessageTitle, title, messageTitleTextColor, messageTitleTextAppearance);
                 String fileName = audioMessage.getAttachment().getFileName() != null ? audioMessage.getAttachment().getFileName() : context.getString(R.string.cometchat_message_audio);
                 setTextAndStyle(binding.tvSubtitleView, fileName, messageSubtitleTextColor, messageSubtitleTextAppearance);
+                if (audioMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
+                }
                 // Bind tail view
                 bindTailView(binding.date, audioMessage, messageTimestampTextColor, messageTimestampTextAppearance);
             }
@@ -561,24 +600,33 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
 
     private class SearchTextViewHolder extends RecyclerView.ViewHolder {
         private final CometchatSearchMessageItemTextBinding binding;
+        private View customView;
 
         public SearchTextViewHolder(View view) {
             super(view);
             binding = CometchatSearchMessageItemTextBinding.bind(view);
 
             if (textItemViewHolder != null) {
-                textItemViewHolder.createView(context, view);
+                customView = textItemViewHolder.createView(context, view);
+                binding.parentLayout.removeAllViews();
+                binding.parentLayout.addView(customView);
             }
         }
 
         public void bindView(TextMessage textMessage, int position) {
             if (textItemViewHolder != null) {
-                textItemViewHolder.bindView(context, itemView, textMessage, this, messagesList, position);
+                textItemViewHolder.bindView(context, customView, textMessage, this, messagesList, position);
             } else {
                 if (messageItemBackgroundColor != 0) {
-                    itemView.setBackgroundColor(messageItemBackgroundColor);
+                    binding.parentLayout.setBackgroundColor(messageItemBackgroundColor);
                 }
                 String title = getConversationTitle(textMessage);
+                if (textMessage.getParentMessageId() > 0) {
+                    binding.icThreadMessage.setImageDrawable(messageThreadIcon);
+                    binding.icThreadMessage.setVisibility(VISIBLE);
+                } else {
+                    binding.icThreadMessage.setVisibility(GONE);
+                }
                 // Title
                 setTextAndStyle(binding.tvMessageTitle, title, messageTitleTextColor, messageTitleTextAppearance);
 
@@ -639,11 +687,11 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
                     txtMessageDate.setDateTextColor(dateSeparatorTextColor);
                     if (dateSeparatorTextAppearance != 0) txtMessageDate.setDateTextAppearance(dateSeparatorTextAppearance);
                 } else {
-                    parent.setVisibility(View.GONE);
+                    parent.setVisibility(GONE);
                     parent.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                 }
             } else {
-                parent.setVisibility(View.GONE);
+                parent.setVisibility(GONE);
                 parent.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
             }
         }

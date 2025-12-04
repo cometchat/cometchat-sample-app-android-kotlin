@@ -23,7 +23,6 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
-import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar;
 import com.cometchat.sampleapp.java.fcm.BuildConfig;
 import com.cometchat.sampleapp.java.fcm.R;
@@ -35,6 +34,7 @@ import com.cometchat.sampleapp.java.fcm.fcm.FCMMessageDTO;
 import com.cometchat.sampleapp.java.fcm.ui.activity.MessagesActivity;
 import com.cometchat.sampleapp.java.fcm.ui.activity.SearchActivity;
 import com.cometchat.sampleapp.java.fcm.ui.activity.SplashActivity;
+import com.cometchat.sampleapp.java.fcm.ui.activity.ThreadMessageActivity;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.utils.MyApplication;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,14 +83,10 @@ public class ChatsFragment extends Fragment {
         binding.cometchatConversations.setOnItemClick((view1, position, conversation) -> {
             if (conversation.getConversationType().equals(CometChatConstants.CONVERSATION_TYPE_GROUP)) {
                 Group group = (Group) conversation.getConversationWith();
-                Intent intent = new Intent(getContext(), MessagesActivity.class);
-                intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
-                startActivity(intent);
+                navigateToMessages(group, null);
             } else {
                 User user = (User) conversation.getConversationWith();
-                Intent intent = new Intent(getContext(), MessagesActivity.class);
-                intent.putExtra(getString(R.string.app_user), new Gson().toJson(user));
-                startActivity(intent);
+                navigateToMessages(null, user);
             }
         });
 
@@ -102,6 +98,14 @@ public class ChatsFragment extends Fragment {
         // Set the overflow menu (Logout button) in the Conversations view
         handleDeepLinking();
         binding.cometchatConversations.setOverflowMenu(getLogoutView());
+    }
+
+    private void navigateToMessages(Group group, User user) {
+        Intent intent = new Intent(getContext(), MessagesActivity.class);
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user.toJson().toString());
+        } else intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+        startActivity(intent);
     }
 
     @Override
@@ -152,9 +156,7 @@ public class ChatsFragment extends Fragment {
             listener.onItemClick();
         });
 
-        popupMenuBinding.tvUserName.setOnClickListener(view -> {
-            popupWindow.dismiss();
-        });
+        popupMenuBinding.tvUserName.setOnClickListener(view -> popupWindow.dismiss());
 
         popupMenuBinding.tvLogout.setOnClickListener(view -> {
             Repository.unregisterFCMToken(new CometChat.CallbackListener<String>() {
@@ -249,7 +251,7 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onSuccess(User user) {
                 if (messageId != null) {
-                    fetchMessageAndNavigate(user, messageId);
+                    fetchMessageAndNavigate(user, null, messageId);
                 } else {
                     navigateToUserChat(user, null, null);
                 }
@@ -271,20 +273,9 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onSuccess(Group group) {
                 if (messageId != null) {
-                    Repository.fetchMessageInformation(Long.parseLong(messageId), new CometChat.CallbackListener<BaseMessage>() {
-                        @Override
-                        public void onSuccess(BaseMessage baseMessage) {
-                            navigateToGroupChat(group, baseMessage);
-                        }
-
-                        @Override
-                        public void onError(CometChatException e) {
-                            CometChatLogger.e(TAG, e.toString());
-                            navigateToGroupChat(group, null);
-                        }
-                    });
+                    fetchMessageAndNavigate(null, group, messageId);
                 } else {
-                    navigateToGroupChat(group, null);
+                    navigateToGroupChat(group, null, null);
                 }
             }
 
@@ -300,15 +291,19 @@ public class ChatsFragment extends Fragment {
     /**
      * Fetch message and parent message if exists, then navigate.
      */
-    private void fetchMessageAndNavigate(User user, String messageId) {
+    private void fetchMessageAndNavigate(User user, Group group, String messageId) {
         Repository.fetchMessageInformation(Long.parseLong(messageId), new CometChat.CallbackListener<BaseMessage>() {
             @Override
             public void onSuccess(BaseMessage baseMessage) {
-                if (baseMessage != null && baseMessage.getParentMessageId() != 0 && "@agentic".equals(user.getRole())) {
+                if (baseMessage != null && baseMessage.getParentMessageId() != 0L) {
                     Repository.fetchMessageInformation(baseMessage.getParentMessageId(), new CometChat.CallbackListener<BaseMessage>() {
                         @Override
                         public void onSuccess(BaseMessage parentMessage) {
-                            navigateToUserChat(user, parentMessage, baseMessage);
+                            if (user != null) {
+                                navigateToUserChat(user, parentMessage, baseMessage);
+                            } else if (group != null) {
+                                navigateToGroupChat(group, parentMessage, baseMessage);
+                            }
                         }
 
                         @Override
@@ -318,7 +313,11 @@ public class ChatsFragment extends Fragment {
                         }
                     });
                 } else {
-                    navigateToUserChat(user, null, baseMessage);
+                    if (user != null) {
+                        navigateToUserChat(user, null, baseMessage);
+                    } else if (group != null) {
+                        navigateToGroupChat(group, null, baseMessage);
+                    }
                 }
             }
 
@@ -333,22 +332,42 @@ public class ChatsFragment extends Fragment {
     /**
      * Navigation helpers
      */
-    private void navigateToUserChat(User user, @Nullable BaseMessage parentMessage, BaseMessage goToMessage) {
-        Intent intent = new Intent(getContext(), MessagesActivity.class);
-        intent.putExtra(getString(R.string.app_user), user != null ? user.toJson().toString() : null);
-        if (goToMessage != null)
-            intent.putExtra(getString(R.string.app_go_to_message), goToMessage.getRawMessage().toString());
+    private void navigateToUserChat(User user, @Nullable BaseMessage parentMessage, @Nullable BaseMessage goToMessage) {
+
+        Intent intent;
         if (parentMessage != null) {
-            intent.putExtra(getString(R.string.app_base_message), parentMessage.getRawMessage().toString());
+            intent = new Intent(requireContext(), ThreadMessageActivity.class);
+            intent.putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.getReplyCount());
+        } else {
+            intent = new Intent(requireContext(), MessagesActivity.class);
+        }
+
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user.toJson().toString());
+        }
+        if (goToMessage != null) {
+            intent.putExtra(getString(R.string.app_go_to_message), goToMessage.getRawMessage().toString());
+        }
+        if (parentMessage != null) {
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.getRawMessage().toString());
         }
 
         startActivity(intent);
     }
 
-    private void navigateToGroupChat(Group group, BaseMessage goToMessage) {
-        Intent intent = new Intent(requireContext(), MessagesActivity.class);
-        intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+    private void navigateToGroupChat(Group group, @Nullable BaseMessage parentMessage, @Nullable BaseMessage goToMessage) {
+        Intent intent;
+        if (parentMessage != null) {
+            intent = new Intent(requireContext(), ThreadMessageActivity.class);
+            intent.putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.getReplyCount());
+        } else {
+            intent = new Intent(requireContext(), MessagesActivity.class);
+        }
 
+        intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+        if (parentMessage != null) {
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.getRawMessage().toString());
+        }
         if (goToMessage != null) {
             intent.putExtra(getString(R.string.app_go_to_message), goToMessage.getRawMessage().toString());
         }

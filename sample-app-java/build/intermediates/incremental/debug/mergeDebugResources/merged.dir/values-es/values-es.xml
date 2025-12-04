@@ -338,6 +338,8 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_no_results">Sin resultados</string>
     <string name="cometchat_no_stickers_available" translatable="true">No hay stickers disponibles</string>
     <string name="cometchat_no_time_slots_available" translatable="true">No hay intervalos de tiempo disponibles para esta fecha. Prueba otra fecha.</string>
+    <string name="cometchat_notify_all" translatable="true">todos</string>
+    <string name="cometchat_notify_everyone_in_this_group">Notificar a todos en este grupo</string>
     <string name="cometchat_offline" translatable="true">Desconectado</string>
     <string name="cometchat_online" translatable="true">En línea</string>
     <string name="cometchat_open_document">Abrir documento</string>

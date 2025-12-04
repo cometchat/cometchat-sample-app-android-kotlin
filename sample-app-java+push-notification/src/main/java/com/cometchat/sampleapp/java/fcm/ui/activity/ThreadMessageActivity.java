@@ -1,5 +1,6 @@
 package com.cometchat.sampleapp.java.fcm.ui.activity;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chat.models.Group;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -26,6 +28,7 @@ import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityThreadMessageBinding;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.cometchat.sampleapp.java.fcm.viewmodels.ThreadMessageViewModel;
+import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +37,7 @@ public class ThreadMessageActivity extends AppCompatActivity {
     private User user;
     private Group group;
     private BaseMessage goToMessage;
+    private boolean isBlockedByMe = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,27 +51,39 @@ public class ThreadMessageActivity extends AppCompatActivity {
         applyWindowInsets();
 
         ThreadMessageViewModel viewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel.class);
-        String rawMessage = getIntent().getStringExtra(AppConstants.JSONConstants.RAW_JSON);
         String goToMessageJson = getIntent().getStringExtra(getString(R.string.app_go_to_message));
+        String rawMessage = getIntent().getStringExtra(AppConstants.JSONConstants.RAW_JSON);
+        int replyCount = getIntent().getIntExtra(AppConstants.JSONConstants.REPLY_COUNT, 0);
+        String userJson = getIntent().getStringExtra(getString(R.string.app_user));
 
         try {
+            isBlockedByMe = getIntent().getBooleanExtra("isBlockedByMe", false);
             if (goToMessageJson != null) {
                 goToMessage = BaseMessage.processMessage(new JSONObject(goToMessageJson));
             }
-            BaseMessage parentMessage = BaseMessage.processMessage(new JSONObject(rawMessage));
-            viewModel.setParentMessage(parentMessage);
+            if (rawMessage != null) {
+                BaseMessage parentMessage = BaseMessage.processMessage(new JSONObject(rawMessage));
+                parentMessage.setReplyCount(replyCount);
+                viewModel.setParentMessage(parentMessage);
+            }
+            if (userJson != null) {
+                user = User.fromJson(userJson);
+            }
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            CometChatLogger.e(ThreadMessageActivity.class.getSimpleName(), e.getMessage());
         }
 
         viewModel.addUserListener();
         viewModel.getParentMessage().observe(this, this::setParentMessage);
-        viewModel.getUserBlockStatus().observe(this, this::updateUserBlockStatus);
+        viewModel.getUserBlockStatus().observe(this, this::setUserBlockedStatus);
         viewModel.getUnblockButtonState().observe(this, this::setUnblockButtonState);
-        viewModel.setUser(user);
+
+        if (user != null) {
+            viewModel.setUser(user);
+        }
 
         binding.unblockBtn.setOnClickListener(view -> viewModel.unblockUser());
-
+        initClickListeners();
         setupUI();
     }
 
@@ -144,8 +160,29 @@ public class ThreadMessageActivity extends AppCompatActivity {
         }
     }
 
-    private void updateUserBlockStatus(User user) {
-        if (user.isBlockedByMe()) {
+    private void setUserBlockedStatus(User user) {
+        if (this.user != null && this.user.getUid().equals(user.getUid())) {
+            isBlockedByMe = user.isBlockedByMe();
+            updateUserBlockStatus();
+        }
+    }
+
+    private void initClickListeners() {
+        binding.messageList.getMentionsFormatter().setOnMentionClick((context, user) -> {
+            Intent intent = new Intent(context, MessagesActivity.class);
+            intent.putExtra(context.getString(R.string.app_user), new Gson().toJson(user));
+            context.startActivity(intent);
+        });
+
+        binding.threadHeader.getCometchatMentionsFormatter().setOnMentionClick((context, user) -> {
+            Intent intent = new Intent(context, MessagesActivity.class);
+            intent.putExtra(context.getString(R.string.app_user), new Gson().toJson(user));
+            context.startActivity(intent);
+        });
+    }
+
+    private void updateUserBlockStatus() {
+        if (isBlockedByMe) {
             binding.messageComposer.setVisibility(View.GONE);
             binding.unblockLayout.setVisibility(View.VISIBLE);
         } else {
@@ -180,6 +217,6 @@ public class ThreadMessageActivity extends AppCompatActivity {
         int requiredHeight = (int) (screenHeight * 0.35);
         binding.threadHeader.setMaxHeight(requiredHeight);
 
-        if (user != null) updateUserBlockStatus(user);
+        updateUserBlockStatus();
     }
 }

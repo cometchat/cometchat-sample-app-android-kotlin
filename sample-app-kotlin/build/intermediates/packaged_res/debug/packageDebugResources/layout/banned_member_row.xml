@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/cometchat_padding_4"
+    android:paddingTop="@dimen/cometchat_padding_3"
+    android:paddingEnd="@dimen/cometchat_padding_4"
+    android:paddingBottom="@dimen/cometchat_padding_3">
+
+    <LinearLayout
+        android:id="@+id/member_leading_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+
+            android:layout_width="@dimen/cometchat_40dp"
+            android:layout_height="@dimen/cometchat_40dp">
+
+            <com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
+                android:id="@+id/member_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/cometchat_margin_3"
+        android:layout_toEndOf="@id/member_leading_view"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/member_item_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_member_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
+                android:textColor="?attr/cometchatTextColorPrimary"
+                tools:text="@tools:sample/full_names" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_unban_member"
+            android:layout_width="@dimen/cometchat_24dp"
+            android:layout_height="@dimen/cometchat_24dp"
+            android:layout_marginStart="@dimen/cometchat_margin_4"
+            android:importantForAccessibility="no"
+            android:src="@drawable/cometchat_ic_close"
+            app:tint="?attr/cometchatIconTintSecondary" />
+
+    </LinearLayout>
+
+</RelativeLayout>

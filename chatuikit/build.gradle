@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         minSdk 24
-        versionCode 32
-        versionName "5.2.4"
+        versionCode 33
+        versionName "5.2.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 

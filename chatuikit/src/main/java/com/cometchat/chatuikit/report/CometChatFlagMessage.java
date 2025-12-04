@@ -1235,6 +1235,12 @@ public class CometChatFlagMessage extends MaterialCardView {
         binding.tvErrorMessage.setVisibility(VISIBLE);
     }
 
+    public void setFlagRemarkInputFieldVisibility(int flagRemarkInputFieldVisibility) {
+        binding.tvReasonLabel.setVisibility(flagRemarkInputFieldVisibility);
+        binding.tvReasonOptional.setVisibility(flagRemarkInputFieldVisibility);
+        binding.tilLayout.setVisibility(flagRemarkInputFieldVisibility);
+    }
+
     /**
      * Interface for handling report button click events.
      * Provides callback when user clicks the report button with selected flag details.

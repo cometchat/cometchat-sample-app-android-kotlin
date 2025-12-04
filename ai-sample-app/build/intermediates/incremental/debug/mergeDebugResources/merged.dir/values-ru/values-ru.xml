@@ -339,6 +339,8 @@
     <string name="cometchat_no_results">Нет результатов</string>
     <string name="cometchat_no_stickers_available" translatable="true">Нет доступных стикеров</string>
     <string name="cometchat_no_time_slots_available" translatable="true">На эту дату нет доступных временных интервалов. Попробуйте другую дату.</string>
+    <string name="cometchat_notify_all" translatable="true">все</string>
+    <string name="cometchat_notify_everyone_in_this_group">Уведомить всех в этой группе</string>
     <string name="cometchat_offline" translatable="true">Не в сети</string>
     <string name="cometchat_online" translatable="true">В сети</string>
     <string name="cometchat_open_document">Открыть документ</string>

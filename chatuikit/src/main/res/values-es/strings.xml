@@ -250,5 +250,7 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_flag_reason_spam" translatable="true">Spam / Contenido no deseado</string>
     <string name="cometchat_flag_reason_sexual" translatable="true">Contenido sexual</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">Acoso / Bullying</string>
+    <string name="cometchat_notify_everyone_in_this_group">Notificar a todos en este grupo</string>
+    <string name="cometchat_notify_all" translatable="true">todos</string>
 
 </resources>

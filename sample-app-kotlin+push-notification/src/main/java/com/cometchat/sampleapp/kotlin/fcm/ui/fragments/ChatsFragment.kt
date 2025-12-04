@@ -11,7 +11,6 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
@@ -22,7 +21,6 @@ import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.logger.CometChatLogger
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.interfaces.OnItemClick
-import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
 import com.cometchat.sampleapp.kotlin.fcm.BuildConfig
 import com.cometchat.sampleapp.kotlin.fcm.R
@@ -34,6 +32,7 @@ import com.cometchat.sampleapp.kotlin.fcm.fcm.FCMMessageDTO
 import com.cometchat.sampleapp.kotlin.fcm.ui.activity.MessagesActivity
 import com.cometchat.sampleapp.kotlin.fcm.ui.activity.SearchActivity
 import com.cometchat.sampleapp.kotlin.fcm.ui.activity.SplashActivity
+import com.cometchat.sampleapp.kotlin.fcm.ui.activity.ThreadMessageActivity
 import com.cometchat.sampleapp.kotlin.fcm.utils.AppConstants
 import com.cometchat.sampleapp.kotlin.fcm.utils.MyApplication
 import com.google.gson.Gson
@@ -44,7 +43,7 @@ import com.google.gson.Gson
  */
 class ChatsFragment : Fragment() {
 
-    private val TAG: String = ChatsFragment::class.java.simpleName
+    private val tag: String = ChatsFragment::class.java.simpleName
     private lateinit var binding: FragmentChatsBinding
     private var listener: OnItemClickListener? = null
 
@@ -73,14 +72,10 @@ class ChatsFragment : Fragment() {
         binding.cometchatConversations.onItemClick = OnItemClick { view, position, conversation ->
             if (conversation.conversationType == CometChatConstants.CONVERSATION_TYPE_GROUP) {
                 val group = conversation.conversationWith as Group
-                val intent = Intent(context, MessagesActivity::class.java)
-                intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
-                startActivity(intent)
+                navigateToMessages(group)
             } else {
                 val user = conversation.conversationWith as User
-                val intent = Intent(context, MessagesActivity::class.java)
-                intent.putExtra(getString(R.string.app_user), Gson().toJson(user))
-                startActivity(intent)
+                navigateToMessages(null, user)
             }
         }
 
@@ -92,6 +87,16 @@ class ChatsFragment : Fragment() {
         // Set the overflow menu (Logout button) in the Conversations view
         binding.cometchatConversations.setOverflowMenu(logoutView)
         handleDeepLinking()
+    }
+
+    private fun navigateToMessages(group: Group? = null, user: User? = null) {
+        val intent = Intent(context, MessagesActivity::class.java)
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user.toJson().toString())
+        } else {
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+        }
+        startActivity(intent)
     }
 
     private val logoutView: View?
@@ -223,7 +228,7 @@ class ChatsFragment : Fragment() {
         Repository.getUser(uid, object : CometChat.CallbackListener<User>() {
             override fun onSuccess(user: User) {
                 if (messageId != null) {
-                    fetchMessageAndNavigate(user, messageId)
+                    fetchMessageAndNavigate(user, null, messageId)
                 } else {
                     navigateToUserChat(user, null, null)
                 }
@@ -243,18 +248,9 @@ class ChatsFragment : Fragment() {
         Repository.getGroup(uid, object : CometChat.CallbackListener<Group>() {
             override fun onSuccess(group: Group) {
                 if (messageId != null) {
-                    Repository.fetchMessageInformation(messageId.toLong(), object : CometChat.CallbackListener<BaseMessage>() {
-                        override fun onSuccess(baseMessage: BaseMessage?) {
-                            navigateToGroupChat(group, baseMessage)
-                        }
-
-                        override fun onError(e: CometChatException) {
-                            CometChatLogger.e(tag, e.toString())
-                            navigateToGroupChat(group)
-                        }
-                    })
+                    fetchMessageAndNavigate(null, group, messageId)
                 } else {
-                    navigateToGroupChat(group)
+                    navigateToGroupChat(group, null, null)
                 }
             }
 
@@ -267,13 +263,16 @@ class ChatsFragment : Fragment() {
     /**
      * Fetch message details, and if available, navigate with parent message info.
      */
-    private fun fetchMessageAndNavigate(user: User, messageId: String) {
+    private fun fetchMessageAndNavigate(user: User?, group: Group?, messageId: String) {
         Repository.fetchMessageInformation(messageId.toLong(), object : CometChat.CallbackListener<BaseMessage>() {
             override fun onSuccess(baseMessage: BaseMessage?) {
-                if (baseMessage != null && baseMessage.parentMessageId != 0L && user.role == "@agentic") {
+                if (baseMessage != null && baseMessage.parentMessageId != 0L) {
                     Repository.fetchMessageInformation(baseMessage.parentMessageId, object : CometChat.CallbackListener<BaseMessage>() {
                         override fun onSuccess(parentMessage: BaseMessage?) {
-                            navigateToUserChat(user, parentMessage, baseMessage)
+                            if (user != null)
+                                navigateToUserChat(user, parentMessage, baseMessage)
+                            else if (group != null)
+                                navigateToGroupChat(group, parentMessage, baseMessage)
                         }
 
                         override fun onError(e: CometChatException) {
@@ -282,7 +281,10 @@ class ChatsFragment : Fragment() {
                         }
                     })
                 } else {
-                    navigateToUserChat(user, null, baseMessage)
+                    if (user != null)
+                        navigateToUserChat(user, null, baseMessage)
+                    else if (group != null)
+                        navigateToGroupChat(group, null, baseMessage)
                 }
             }
 
@@ -301,21 +303,36 @@ class ChatsFragment : Fragment() {
         parentMessage: BaseMessage?,
         goToMessage: BaseMessage?
     ) {
-        val intent = Intent(requireContext(), MessagesActivity::class.java).apply {
-            putExtra(getString(R.string.app_user), user?.toJson()?.toString())
-            if (goToMessage != null) {
-                putExtra(getString(R.string.app_go_to_message), goToMessage.rawMessage.toString())
+        val intent = if (parentMessage != null) {
+            Intent(requireContext(), ThreadMessageActivity::class.java).apply {
+                putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.replyCount)
             }
-            if (parentMessage != null) {
-                putExtra(getString(R.string.app_base_message), parentMessage.rawMessage.toString())
-            }
+        } else {
+            Intent(requireContext(), MessagesActivity::class.java)
+        }
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user.toJson().toString())
+        }
+        if (goToMessage != null) {
+            intent.putExtra(getString(R.string.app_go_to_message), goToMessage.rawMessage.toString())
+        }
+        if (parentMessage != null) {
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.rawMessage.toString())
         }
         startActivity(intent)
     }
 
-    private fun navigateToGroupChat(group: Group, goToMessage: BaseMessage? = null) {
-        val intent = Intent(requireContext(), MessagesActivity::class.java).apply {
-            putExtra(getString(R.string.app_group), Gson().toJson(group))
+    private fun navigateToGroupChat(group: Group, parentMessage: BaseMessage?, goToMessage: BaseMessage? = null) {
+        val intent = if (parentMessage != null) {
+            Intent(requireContext(), ThreadMessageActivity::class.java).apply {
+                putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.replyCount)
+            }
+        } else {
+            Intent(requireContext(), MessagesActivity::class.java)
+        }
+        intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+        if (parentMessage != null) {
+            intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.rawMessage.toString())
         }
         if (goToMessage != null) {
             intent.putExtra(getString(R.string.app_go_to_message), goToMessage.rawMessage.toString())

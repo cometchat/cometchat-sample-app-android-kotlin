@@ -28,10 +28,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.calls.core.CometChatCalls;
 import com.cometchat.chat.core.Call;
+import com.cometchat.chat.core.CometChat;
 import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.calls.CallingExtension;
 import com.cometchat.chatuikit.databinding.CometchatOutgoingCallLayoutBinding;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -764,7 +766,13 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
 
     private void handlePiPExit() {
         viewModel.removeListeners();
-        viewModel.rejectCall(call);
+        if (call != null) {
+            viewModel.rejectCall(call);
+            call = null;
+        }
+        CometChat.clearActiveCall();
+        CallingExtension.setActiveCall(null);
+        CallingExtension.setIsActiveMeeting(false);
         activity.finish();
     }
 

@@ -175,8 +175,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private int messageInfoOptionVisibility = VISIBLE;
     private int groupActionMessageVisibility = VISIBLE;
     private int messageReactionOptionVisibility = VISIBLE;
+    private int flagRemarkInputFieldVisibility = VISIBLE;
     private int avatarVisibility = VISIBLE;
     private int receiptsVisibility = VISIBLE;
+    private int moderationViewVisibility = VISIBLE;
     // User and Group
     private User user;
     private Group group;
@@ -240,6 +242,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     // Reactions and Mentions
     private CometChatEmojiKeyboard emojiKeyboard;
     private CometChatMentionsFormatter cometchatMentionsFormatter;
+    private boolean disableMentionAll;
     private List<String> quickReactions;
     private @DrawableRes int addReactionIcon;
     // Dialogs and Alerts
@@ -426,6 +429,8 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private @StyleRes int style;
     private @StyleRes int flagMessageStyle = -1;
     private Map<String, Integer> flagReasonLocalization;
+    private String mentionAllLabelId;
+    private String mentionAllLabel;
 
     /**
      * Constructs a new {@link CometChatMessageList} with the specified context.
@@ -582,7 +587,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
 
         // Set report option visibility based on flag reasons
         List<FlagReason> flagReasons = CometChatUIKit.getFlagReasons();
-        setReportOptionVisibility(flagReasons == null || flagReasons.isEmpty() ? GONE : VISIBLE);
+        setFlagOptionVisibility(flagReasons == null || flagReasons.isEmpty() ? GONE : VISIBLE);
 
         // Set up message list layout and header/footer views
         messageListLayout = view.findViewById(R.id.message_list_layout);
@@ -610,12 +615,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 handleScroll();
             }
         });
-
-        itemTouchHelper = new ItemTouchHelper(controller);
-        if (swipeToReplyEnabled) {
-            itemTouchHelper.attachToRecyclerView(rvChatListView);
-        }
-        controller.setAdapter(messageAdapter);
 
         newMessageLayout.setOnClickListener(v -> {
             newMessageCount = 0;
@@ -1303,6 +1302,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         for (CometChatTextFormatter textFormatter : formatters) {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
+                cometchatMentionsFormatter.setMentionAllLabel(mentionAllLabelId, mentionAllLabel);
                 break;
             }
         }
@@ -2640,16 +2640,16 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      *
      * @param visibility An integer representing the visibility status of the report option.
      */
-    public void setReportOptionVisibility(int visibility) {
-        additionParameter.setReportOptionVisibility(visibility);
+    public void setFlagOptionVisibility(int visibility) {
+        additionParameter.setFlagOptionVisibility(visibility);
     }
 
     /** Retrieves the visibility status of the "Report" option.
      *
      * @return An integer representing the visibility of the report option.
      */
-    public int getReportOptionVisibility() {
-        return additionParameter.getReportOptionVisibility();
+    public int getFlagOptionVisibility() {
+        return additionParameter.getFlagOptionVisibility();
     }
 
     /**
@@ -2806,6 +2806,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         flagMessageDialog = new CometChatFlagMessageDialog(getContext(), baseMessage);
         if (flagReasonLocalization != null) flagMessageDialog.setLocalizationIdMap(flagReasonLocalization);
         flagMessageDialog.setFlagReasons(CometChatUIKit.getFlagReasons());
+        flagMessageDialog.setFlagRemarkInputFieldVisibility(flagRemarkInputFieldVisibility);
         flagMessageDialog.setOnPositiveButtonClickListener((flagDetail) -> {
             messageListViewModel.flagMessage(flagDetail, baseMessage);
         });
@@ -2815,8 +2816,33 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         flagMessageDialog.show();
     }
 
+    /**
+     * Sets the localization ID map for flag reasons.
+     *
+     * @param localizationIdMap A map containing localization IDs for flag reasons.
+     */
     public void setFlagReasonLocalization(Map<String, Integer> localizationIdMap) {
         this.flagReasonLocalization = localizationIdMap;
+    }
+
+    /**
+     * Retrieves the visibility status of the flag remark input field in the flag message dialog.
+     *
+     * @return An integer representing the visibility of the flag remark input field.
+     * Possible values include {@code View.VISIBLE}, {@code View.INVISIBLE}, and {@code View.GONE}.
+     */
+    public int getFlagRemarkInputFieldVisibility() {
+        return flagRemarkInputFieldVisibility;
+    }
+
+    /**
+     * Sets the visibility of the flag remark input field in the flag message dialog.
+     *
+     * @param visibility An integer representing the visibility status of the flag remark input field.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE}, or {@code View.GONE}.
+     */
+    public void setFlagRemarkInputFieldVisibility(int visibility) {
+        this.flagRemarkInputFieldVisibility = visibility;
     }
 
     /**
@@ -2990,10 +3016,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                                          new ArrayList<>(messageCategoriesToRetrieve.values()),
                                          parentMessageId, isAgentChat, gotoMessageId);
             if (isAgentChat) {
-                handleEmptyState();
                 setStickyDateVisibility(View.GONE);
                 if (parentMessageId != -1) {
-                    messageListViewModel.fetchMessages();
+                    if (gotoMessageId > 0) {
+                        messageListViewModel.goToMessage(gotoMessageId);
+                    } else {
+                        messageListViewModel.fetchMessages();
+                    }
+                } else {
+                    handleEmptyState();
                 }
             } else {
                 if (autoFetch && gotoMessageId == 0) {
@@ -3005,6 +3036,17 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             aiConversationStarterView.setUid(user.getUid());
             aiSmartRepliesView.setUid(user.getUid());
             processFormatters();
+            initializeItemTouchHelper();
+        }
+    }
+
+    private void initializeItemTouchHelper() {
+        if (!isAgentChat) {
+            itemTouchHelper = new ItemTouchHelper(controller);
+            if (swipeToReplyEnabled) {
+                itemTouchHelper.attachToRecyclerView(rvChatListView);
+            }
+            controller.setAdapter(messageAdapter);
         }
     }
 
@@ -3039,6 +3081,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             aiConversationStarterView.setUid(group.getGuid());
             aiSmartRepliesView.setUid(group.getGuid());
             processFormatters();
+            initializeItemTouchHelper();
         }
     }
 
@@ -3847,8 +3890,39 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         this.messageReactionOptionVisibility = messageReactionOptionVisibility;
     }
 
+    /**
+     * Gets the visibility of the moderation view.
+     * @return the visibility of the moderation view.
+     */
+    public int getModerationViewVisibility() {
+        return moderationViewVisibility;
+    }
+
+    /**
+     * Sets the visibility of the moderation view.
+     * @param visibility the visibility to set for the moderation view.
+     */
     public void setModerationViewVisibility(int visibility) {
+        this.moderationViewVisibility = visibility;
         messageAdapter.setModerationViewVisibility(visibility != View.VISIBLE);
+    }
+
+    /**
+     * Sets a custom label for the "mention all" feature for a specific ID.
+     *
+     * @param id The unique identifier (such as a group or user ID) for which the mention all label should be set.
+     * @param mentionAllLabel The custom label to display when mentioning all members.
+     *
+     * If either parameter is null or empty, or if the mentions formatter is not initialized, this method does nothing.
+     */
+    public void setMentionAllLabelId(String id, String mentionAllLabel) {
+        if (id != null && !id.isEmpty() && mentionAllLabel != null && !mentionAllLabel.isEmpty()) {
+            if (cometchatMentionsFormatter != null) {
+                cometchatMentionsFormatter.setMentionAllLabel(id, mentionAllLabel);
+            }
+            this.mentionAllLabelId = id;
+            this.mentionAllLabel = mentionAllLabel;
+        }
     }
 
     /**

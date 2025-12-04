@@ -48,7 +48,8 @@ public class CometChatSuggestionList extends MaterialCardView {
     private @StyleRes int suggestionListItemAvatarStyle;
     private @StyleRes int suggestionListItemTextAppearance;
     private @ColorInt int suggestionListItemTextColor;
-
+    private @ColorInt int suggestionListItemInfoTextColor;
+    private @StyleRes int suggestionListItemInfoTextAppearance;
     private @Dimension int maxHeightLimit;
 
     private SuggestionListAdapter suggestionListAdapter;
@@ -187,6 +188,10 @@ public class CometChatSuggestionList extends MaterialCardView {
                                                                         0);
             suggestionListItemTextColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemTextColor,
                                                               CometChatTheme.getTextColorPrimary(getContext()));
+            suggestionListItemInfoTextColor = typedArray.getColor(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemInfoTextColor,
+                                                                    CometChatTheme.getTextColorSecondary(getContext()));
+            suggestionListItemInfoTextAppearance = typedArray.getResourceId(R.styleable.CometChatSuggestionList_cometchatSuggestionListItemInfoTextAppearance,
+                                                                            0);
             updateUI();
         } finally {
             typedArray.recycle();
@@ -205,6 +210,8 @@ public class CometChatSuggestionList extends MaterialCardView {
         setSuggestionListItemAvatarStyle(suggestionListItemAvatarStyle);
         setSuggestionListItemTextAppearance(suggestionListItemTextAppearance);
         setSuggestionListItemTextColor(suggestionListItemTextColor);
+        setSuggestionListItemInfoTextColor(suggestionListItemInfoTextColor);
+        setSuggestionListItemInfoTextAppearance(suggestionListItemInfoTextAppearance);
     }
 
     /**
@@ -350,6 +357,25 @@ public class CometChatSuggestionList extends MaterialCardView {
     public void setSuggestionListItemTextColor(@ColorInt int suggestionListItemTextColor) {
         this.suggestionListItemTextColor = suggestionListItemTextColor;
         suggestionListAdapter.setSuggestionListItemTextColor(suggestionListItemTextColor);
+    }
+
+    /**
+     * Sets the color resource ID for the suggestion list item info text.
+     * @param suggestionListItemInfoTextColor the color resource ID to apply to the suggestion list item info text
+     */
+    public void setSuggestionListItemInfoTextColor(@ColorInt int suggestionListItemInfoTextColor) {
+        this.suggestionListItemInfoTextColor = suggestionListItemInfoTextColor;
+        suggestionListAdapter.setSuggestionListItemInfoTextColor(suggestionListItemInfoTextColor);
+    }
+
+    /**
+     * Sets the style resource ID for the suggestion list item info text appearance.
+     *
+     * @param suggestionListItemInfoTextAppearance the style resource ID to apply to the suggestion list item info text appearance
+     */
+    public void setSuggestionListItemInfoTextAppearance(@StyleRes int suggestionListItemInfoTextAppearance) {
+        this.suggestionListItemInfoTextAppearance = suggestionListItemInfoTextAppearance;
+        suggestionListAdapter.setSuggestionListItemInfoTextAppearance(suggestionListItemInfoTextAppearance);
     }
 
     /**

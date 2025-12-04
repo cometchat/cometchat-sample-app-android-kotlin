@@ -11,7 +11,7 @@
 
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent">
 
@@ -54,31 +54,23 @@
 
                     <LinearLayout
                         android:id="@+id/reply_bubble"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <LinearLayout
+                        android:id="@+id/content_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
 
                     <LinearLayout
+                        android:id="@+id/status_info_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/content_view"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical" />
-
-                        <LinearLayout
-                            android:id="@+id/status_info_view"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|right"
-                            android:layout_marginTop="@dimen/cometchat_margin_1"
-                            android:orientation="vertical" />
-
-                    </LinearLayout>
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginTop="@dimen/cometchat_margin_1"
+                        android:orientation="vertical" />
 
                     <LinearLayout
                         android:id="@+id/bottom_view"

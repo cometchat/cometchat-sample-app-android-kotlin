@@ -147,6 +147,13 @@ public final class UIKitConstants {
         public static final String PATH = "path";
     }
 
+    public static final class JSONKeys {
+        public static final String METADATA = "metadata";
+        public static final String CUSTOM_DATA = "customData";
+
+        public static final String INFO_TEXT = "infoText";
+    }
+
     public static final class MimeType {
 
         public static final String VIDEO = "video";

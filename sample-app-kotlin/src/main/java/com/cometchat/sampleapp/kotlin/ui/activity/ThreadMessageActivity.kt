@@ -1,5 +1,7 @@
 package com.cometchat.sampleapp.kotlin.ui.activity
 
+import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +16,7 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
+import com.cometchat.chatuikit.logger.CometChatLogger
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
@@ -22,6 +25,7 @@ import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityThreadMessageBinding
 import com.cometchat.sampleapp.kotlin.viewmodels.ThreadMessageViewModel
 import com.cometchat.sampleapp.kotlin.utils.AppConstants
+import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -30,6 +34,7 @@ class ThreadMessageActivity : AppCompatActivity() {
     private var user: User? = null
     private var group: Group? = null
     private var goToMessage: BaseMessage? = null
+    private var isBlockedByMe: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,28 +48,56 @@ class ThreadMessageActivity : AppCompatActivity() {
         val viewModel: ThreadMessageViewModel = ViewModelProvider.NewInstanceFactory().create(ThreadMessageViewModel::class.java)
         val goToMessageJson = intent.getStringExtra(getString(R.string.app_go_to_message))
         val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
+        val replyCount = intent.getIntExtra(AppConstants.JSONConstants.REPLY_COUNT, 0)
+        val userJson = intent.getStringExtra(getString(R.string.app_user))
         try {
+            isBlockedByMe = intent.getBooleanExtra("isBlockedByMe", false)
             if (goToMessageJson != null) {
                 goToMessage = BaseMessage.processMessage(JSONObject(goToMessageJson))
             }
             if (rawMessage != null) {
                 val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
+                parentMessage.replyCount = replyCount
                 viewModel.setParentMessage(parentMessage)
             }
+            if (userJson != null) {
+                user = User.fromJson(userJson)
+            }
         } catch (e: JSONException) {
-            throw RuntimeException(e)
+            CometChatLogger.e("ThreadMessageActivity", "onCreate: $e")
         }
         viewModel.addUserListener()
         viewModel.parentMessage.observe(this, this::setParentMessage)
-        viewModel.userBlockStatus.observe(this, this::updateUserBlockStatus)
+        viewModel.userBlockStatus.observe(this, this::setUserBlockedStatus)
         viewModel.unblockButtonState.observe(this, this::setUnblockButtonState)
 
         if (user != null)
             viewModel.setUser(user!!)
 
         binding.unblockBtn.setOnClickListener { _ -> viewModel.unblockUser() }
-
+        initClickListeners()
         setupUI()
+    }
+
+    private fun setUserBlockedStatus(user: User) {
+        if (this.user != null && this.user!!.uid == user.uid) {
+            isBlockedByMe = user.isBlockedByMe
+            updateUserBlockStatus()
+        }
+    }
+
+    private fun initClickListeners() {
+        binding.messageList.mentionsFormatter.setOnMentionClick { context: Context, user: User? ->
+            val intent = Intent(context, MessagesActivity::class.java)
+            intent.putExtra(context.getString(R.string.app_user), Gson().toJson(user))
+            context.startActivity(intent)
+        }
+
+        binding.threadHeader.cometchatMentionsFormatter.setOnMentionClick { context: Context, user: User? ->
+            val intent = Intent(context, MessagesActivity::class.java)
+            intent.putExtra(context.getString(R.string.app_user), Gson().toJson(user))
+            context.startActivity(intent)
+        }
     }
 
     private fun setUpTheme() {
@@ -123,9 +156,7 @@ class ThreadMessageActivity : AppCompatActivity() {
         val requiredHeight = (screenHeight * 0.35).toInt()
         binding.threadHeader.maxHeight = requiredHeight
 
-        if (user != null) {
-            updateUserBlockStatus(user!!)
-        }
+        updateUserBlockStatus()
     }
 
     private fun setParentMessage(parentMessage: BaseMessage) {
@@ -157,8 +188,8 @@ class ThreadMessageActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserBlockStatus(user: User) {
-        if (user.isBlockedByMe) {
+    private fun updateUserBlockStatus() {
+        if (isBlockedByMe) {
             binding.messageComposer.visibility = View.GONE
             binding.unblockLayout.visibility = View.VISIBLE
         } else {

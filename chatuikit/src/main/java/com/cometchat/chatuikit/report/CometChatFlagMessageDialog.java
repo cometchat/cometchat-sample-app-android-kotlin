@@ -116,4 +116,8 @@ public class CometChatFlagMessageDialog extends Dialog {
     public void setLocalizationIdMap(Map<String, Integer> localizationIdMap) {
         flagMessageView.setLocalizationIdMap(localizationIdMap);
     }
+
+    public void setFlagRemarkInputFieldVisibility(int flagRemarkInputFieldVisibility) {
+        flagMessageView.setFlagRemarkInputFieldVisibility(flagRemarkInputFieldVisibility);
+    }
 }

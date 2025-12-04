@@ -670,7 +670,6 @@ public class MessageBubbleUtils {
 
     public static void bindReplyViewContainer(Context context, View createdView, BaseMessage message, UIKitConstants.MessageBubbleAlignment alignment, RecyclerView.ViewHolder holder, List<BaseMessage> messageList, int position, AdditionParameter additionParameter) {
         CometChatMessagePreview messagePreview = createdView.findViewById(R.id.reply_message_preview);
-        FlexboxLayout flexboxLayout = createdView.findViewById(R.id.message_preview_flexbox);
         if (messagePreview != null && message.getDeletedAt() == 0) {
             BaseMessage quoteMessage = message.getQuotedMessage();
             if (quoteMessage != null) {
@@ -687,38 +686,7 @@ public class MessageBubbleUtils {
                         additionParameter.getOnMessagePreviewClick().click(createdView, position, quoteMessage);
                     }
                 });
-                if (quoteMessage instanceof TextMessage) {
-                    String messageText = ((TextMessage) quoteMessage).getText();
-                    if (messageText != null && messageText.length() > 20) {
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                    } else {
-                        FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                        LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        messagePreview.setLayoutParams(messagePreviewParams);
-                        flexboxLayout.setLayoutParams(flexboxParams);
-                        parent.setLayoutParams(parentLayoutParams);
-                    }
-                } else {
-                    FlexboxLayout.LayoutParams messagePreviewParams = new FlexboxLayout.LayoutParams(MATCH_PARENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
-                    LinearLayout.LayoutParams flexboxParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    LinearLayout parent = (LinearLayout) flexboxLayout.getParent();
-                    LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                    messagePreview.setLayoutParams(messagePreviewParams);
-                    flexboxLayout.setLayoutParams(flexboxParams);
-                    parent.setLayoutParams(parentLayoutParams);
-                }
-                messagePreview.setMessage(context, quoteMessage, messagePreview, additionParameter.getTextFormatters());
+                messagePreview.setMessage(context, quoteMessage, messagePreview, additionParameter.getTextFormatters(), UIKitConstants.FormattingType.MESSAGE_BUBBLE, alignment);
             } else {
                 messagePreview.setVisibility(View.GONE);
             }
@@ -727,4 +695,56 @@ public class MessageBubbleUtils {
                 messagePreview.setVisibility(View.GONE);
         }
     }
+
+    /*public static void adjustContentWidth(
+            LinearLayout replyBubble,
+            LinearLayout contentView,
+            CometChatMessagePreview messagePreview
+    ) {
+        // Wait for views to be laid out
+        contentView.post(() -> {
+            // Measure reply bubble's desired width
+            int replyWidth = measureViewDesiredWidth(replyBubble);
+
+            // Measure content's desired width
+            int contentWidth = measureViewDesiredWidth(contentView);
+
+            // Get the maximum width
+            int maxWidth = Math.max(replyWidth, contentWidth);
+
+            // Set both to the same width
+            setViewWidth(replyBubble, maxWidth);
+            setViewWidth(contentView, maxWidth);
+
+            // Also set message preview width if it exists
+            if (messagePreview != null) {
+                ViewGroup.LayoutParams params = messagePreview.getLayoutParams();
+                if (params != null) {
+                    params.width = maxWidth;
+                    messagePreview.setLayoutParams(params);
+                }
+            }
+        });
+    }
+
+    private static int measureViewDesiredWidth(View view) {
+        if (view.getVisibility() == View.GONE || view.getVisibility() == View.INVISIBLE) {
+            return 0;
+        }
+
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        );
+
+        return view.getMeasuredWidth();
+    }
+
+    private static void setViewWidth(View view, int width) {
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        if (params != null) {
+            params.width = width;
+            view.setLayoutParams(params);
+        }
+    }*/
 }

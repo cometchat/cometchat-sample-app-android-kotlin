@@ -1506,7 +1506,7 @@ public class MessageListViewModel extends ViewModel {
                 @Override
                 public void onSuccess(List<BaseMessage> older) {
                     mutableHasMorePreviousMessages.setValue(!older.isEmpty());
-                    MessagesRequest fetchNextGoToMessagesRequest = messagesRequestBuilder.setMessageId(gotoMessageId).build();
+                    MessagesRequest fetchNextGoToMessagesRequest = messagesRequestBuilder.withParent(false).setMessageId(gotoMessageId).build();
                     fetchNextGoToMessagesRequest.fetchNext(new CometChat.CallbackListener<List<BaseMessage>>() {
                         @Override
                         public void onSuccess(List<BaseMessage> messageList) {

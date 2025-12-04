@@ -5,7 +5,6 @@ import static com.cometchat.chatuikit.shared.resources.utils.AnimationUtils.anim
 import static com.cometchat.chatuikit.shared.resources.utils.AnimationUtils.animateVisibilityVisible;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,7 +35,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
@@ -64,6 +62,7 @@ import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.constants.UIKitUtilityConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
+import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
 import com.cometchat.chatuikit.shared.interfaces.Function1;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
@@ -205,6 +204,7 @@ public class CometChatMessageComposer extends MaterialCardView {
     private String text, id, type;
     private List<CometChatTextFormatter> cometchatTextFormatters;
     private boolean disableMentions;
+    private boolean disableMentionAll;
     private HashMap<Character, CometChatTextFormatter> cometchatTextFormatterHashMap;
     private CometChatTextFormatter tempTextFormatter;
     private CometChatMentionsFormatter cometchatMentionsFormatter;
@@ -292,6 +292,9 @@ public class CometChatMessageComposer extends MaterialCardView {
     private Drawable messagePreviewCloseIcon;
     private @ColorInt int messagePreviewCloseIconTint;
     private int messagePreviewStyle;
+    private String mentionAllLabelId;
+
+    private String mentionAllLabel;
 
     /**
      * The constructor for the CometChatMessageComposer class.
@@ -475,7 +478,7 @@ public class CometChatMessageComposer extends MaterialCardView {
         cometchatTextFormatterHashMap = new HashMap<>();
         selectedSuggestionItemHashMap = new HashMap<>();
         this.cometchatTextFormatters = new ArrayList<>();
-        getDefaultMentionsFormatter();
+        processMentionsFormatter();
         setTextFormatters(null);
     }
 
@@ -787,8 +790,9 @@ public class CometChatMessageComposer extends MaterialCardView {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editMessage != null && editable.toString().trim().equals(editMessage.getText().trim())) {
-                    inactiveSendButton();
+                if (!isAgentChat) {
+                    updateSendButtonState(editable);
+                    handleTypingIndicator();
                 } else {
                     if (!isAIAssistantGenerating) {
                         if (!editable.toString().isEmpty()) {
@@ -798,10 +802,59 @@ public class CometChatMessageComposer extends MaterialCardView {
                         }
                     }
                 }
+            }
+
+            private void updateSendButtonState(Editable editable) {
+                String currentText = editable.toString().trim();
+                if (editable.toString().isEmpty()) {
+                    inactiveSendButton();
+                    return;
+                }
+
+                if (editMessage != null) {
+                    handleEditMessageState(currentText);
+                } else {
+                    handleNewMessageState(currentText);
+                }
+            }
+
+            private void handleEditMessageState(String currentText) {
+                String formattedText = String.valueOf(FormatterUtils.getFormattedText(
+                        getContext(),
+                        editMessage,
+                        UIKitConstants.FormattingType.MESSAGE_COMPOSER,
+                        null,
+                        editMessage.getText(),
+                        cometchatTextFormatters
+                )).trim();
+
+                if (currentText.equals(formattedText)) {
+                    inactiveSendButton();
+                } else {
+                    activeSendButton();
+                }
+            }
+
+            private void handleNewMessageState(String currentText) {
+                // For agent chat during AI generation, apply special logic
+                // Otherwise, activate button only if text is not empty
+                boolean shouldActivate = !currentText.isEmpty();
+
+                if (shouldActivate) {
+                    activeSendButton();
+                } else {
+                    inactiveSendButton();
+                }
+            }
+
+            private void handleTypingIndicator() {
                 if (typingTimer == null) {
                     typingTimer = new Timer();
                 }
-                if (!disableTypingEvents) endTypingTimer();
+
+                if (!disableTypingEvents) {
+                    endTypingTimer();
+                }
             }
 
             @Override
@@ -918,10 +971,14 @@ public class CometChatMessageComposer extends MaterialCardView {
      * `cometchatMentionsFormatter` variable to that instance and adds it to the
      * `cometchatTextFormatters` list.
      */
-    private void getDefaultMentionsFormatter() {
-        for (CometChatTextFormatter textFormatter : CometChatUIKit.getDataSource().getTextFormatters(getContext(), additionParameter)) {
+    private void processMentionsFormatter() {
+        List<CometChatTextFormatter> formatters = CometChatUIKit.getDataSource().getTextFormatters(getContext(),
+                additionParameter);
+        for (CometChatTextFormatter textFormatter : formatters) {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
+                cometchatMentionsFormatter.setDisableMentionAll(disableMentionAll);
+                cometchatMentionsFormatter.setMentionAllLabel(mentionAllLabelId, mentionAllLabel);
                 break;
             }
         }
@@ -1491,7 +1548,7 @@ public class CometChatMessageComposer extends MaterialCardView {
     private void showQuoteMessagePreview(BaseMessage baseMessage) {
         this.quoteMessage = baseMessage;
         if (baseMessage != null) {
-            binding.messagePreview.setMessage(getContext(), baseMessage, binding.messagePreview, cometchatTextFormatters);
+            binding.messagePreview.setMessage(getContext(), baseMessage, binding.messagePreview, cometchatTextFormatters, UIKitConstants.FormattingType.MESSAGE_COMPOSER, null);
             binding.messagePreview.getSubtitleView().setMaxLines(1);
             // Set up close listener
             binding.messagePreview.setOnCloseClickListener(() -> {
@@ -1504,10 +1561,8 @@ public class CometChatMessageComposer extends MaterialCardView {
             binding.messageInput.post(() -> {
                 CometChatEditText composeBox = binding.messageInput.getComposeBox();
                 if (composeBox != null) {
-                    composeBox.clearFocus();
-                    composeBox.requestFocus();
+                    Utils.showKeyBoard(getContext(), composeBox);
                 }
-                Utils.showKeyBoard(getContext(), binding.messageInput.getComposeBox());
             });
         }
     }
@@ -3710,6 +3765,7 @@ public class CometChatMessageComposer extends MaterialCardView {
                 }
                 sendButtonLayoutBinding.sendButtonCard.setCardBackgroundColor(CometChatTheme.getBackgroundColor4(getContext()));
                 sendButtonLayoutBinding.sendButtonCard.setVisibility(VISIBLE);
+                sendButtonLayoutBinding.sendButton.setClickable(false);
             }
         }
     }
@@ -3970,5 +4026,39 @@ public class CometChatMessageComposer extends MaterialCardView {
     @Override
     public @Dimension int getStrokeWidth() {
         return strokeWidth;
+    }
+
+    /**
+     * Enables or disables the "mention all" feature in the message composer.
+     *
+     * <p>
+     * When disabled, users will not be able to mention all members at once.
+     * This method also updates the state in the mentions formatter if it is initialized.
+     *
+     * @param disableMentionAll {@code true} to disable the "mention all" feature, {@code false} to enable it.
+     */
+    public void setDisableMentionAll(boolean disableMentionAll) {
+        this.disableMentionAll = disableMentionAll;
+        if (cometchatMentionsFormatter != null) {
+            cometchatMentionsFormatter.setDisableMentionAll(disableMentionAll);
+        }
+    }
+
+    /**
+     * Sets a custom label for the "mention all" feature for a specific ID.
+     *
+     * @param id The unique identifier (such as a group or user ID) for which the mention all label should be set.
+     * @param label The custom label to display when mentioning all members.
+     *
+     * If either parameter is null or empty, or if the mentions formatter is not initialized, this method does nothing.
+     */
+    public void setMentionAllLabelId(String id, String label) {
+        if (id != null && !id.isEmpty() && label != null && !label.isEmpty()) {
+            if (cometchatMentionsFormatter != null) {
+                cometchatMentionsFormatter.setMentionAllLabel(id, label);
+            }
+            mentionAllLabelId = id;
+            mentionAllLabel = label;
+        }
     }
 }

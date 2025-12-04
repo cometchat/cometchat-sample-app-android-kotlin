@@ -14,10 +14,10 @@ import androidx.annotation.StyleRes;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import com.cometchat.chat.models.BaseMessage;
-import com.cometchat.chat.models.TextMessage;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessagePreviewBinding;
+import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -117,8 +117,8 @@ public class CometChatMessagePreview extends MaterialCardView {
         }
     }
 
-    public void setMessage(Context context, BaseMessage message, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> textFormatters) {
-        Utils.setReplyMessagePreview(context, message, messagePreview, textFormatters);
+    public void setMessage(Context context, BaseMessage message, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> textFormatters, UIKitConstants.FormattingType formattingType, UIKitConstants.MessageBubbleAlignment alignment) {
+        Utils.setReplyMessagePreview(context, message, messagePreview, textFormatters, formattingType, alignment);
     }
 
     @Override

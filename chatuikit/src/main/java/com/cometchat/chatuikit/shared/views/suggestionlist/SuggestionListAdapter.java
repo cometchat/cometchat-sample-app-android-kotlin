@@ -1,6 +1,8 @@
 package com.cometchat.chatuikit.shared.views.suggestionlist;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatSuggestionListItemsBinding;
+import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 
 import java.util.List;
 
@@ -29,6 +32,8 @@ public class SuggestionListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private @StyleRes int suggestionListItemAvatarStyle;
     private @StyleRes int suggestionListItemTextAppearance;
     private @ColorInt int suggestionListItemTextColor;
+    private @ColorInt int suggestionListItemInfoTextColor;
+    private @StyleRes int suggestionListItemInfoTextAppearance;
     private boolean showAvatar = true;
 
     /**
@@ -152,6 +157,41 @@ public class SuggestionListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     /**
+     * Sets the color resource ID for the suggestion list item info text.
+     * @param suggestionListItemInfoTextColor the color resource ID to apply to the suggestion list item info text
+     */
+    public void setSuggestionListItemInfoTextColor(int suggestionListItemInfoTextColor) {
+        this.suggestionListItemInfoTextColor = suggestionListItemInfoTextColor;
+    }
+
+    /**
+     * Retrieves the color resource ID for the suggestion list item info text.
+     *
+     * @return the color resource ID for the suggestion list item info text
+     */
+    public int getSuggestionListItemInfoTextColor() {
+        return suggestionListItemInfoTextColor;
+    }
+
+    /**
+     * Sets the style resource ID for the suggestion list item info text appearance.
+     *
+     * @param suggestionListItemInfoTextAppearance the style resource ID to apply to the suggestion list item info text appearance
+     */
+    public void setSuggestionListItemInfoTextAppearance(int suggestionListItemInfoTextAppearance) {
+        this.suggestionListItemInfoTextAppearance = suggestionListItemInfoTextAppearance;
+    }
+
+    /**
+     * Retrieves the style resource ID for the suggestion list item info text appearance.
+     *
+     * @return the style resource ID for the suggestion list item info text appearance
+     */
+    public int getSuggestionListItemInfoTextAppearance() {
+        return suggestionListItemInfoTextAppearance;
+    }
+
+    /**
      * Checks whether the avatar should be displayed.
      *
      * @return true if the avatar should be shown; false otherwise
@@ -168,6 +208,8 @@ public class SuggestionListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void showAvatar(boolean showAvatar) {
         this.showAvatar = showAvatar;
     }
+
+
 
     /**
      * ViewHolder class for managing individual suggestion item views.
@@ -201,16 +243,53 @@ public class SuggestionListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          */
         public void bindView(SuggestionItem suggestionItem, int position) {
             if (showAvatar) {
-                binding.suggestionItemAvatar.setAvatar(suggestionItem.getName(), suggestionItem.getLeadingIconUrl());
+                String iconUrl = suggestionItem.getLeadingIconUrl();
+                String nameText = suggestionItem.getName();
+
+                // Check if URL is valid
+                if (isValidUrl(iconUrl)) {
+                    // If URL is valid, use name as first argument and URL as second
+                    binding.suggestionItemAvatar.setAvatar(nameText, iconUrl);
+                } else if (!TextUtils.isEmpty(iconUrl)) {
+                    // If URL is not valid but not empty/null, use URL as first argument instead of name
+                    binding.suggestionItemAvatar.setAvatar(iconUrl, (String) null);
+                } else {
+                    // If URL is null or empty, keep the original flow (use name and URL)
+                    binding.suggestionItemAvatar.setAvatar(nameText, iconUrl);
+                }
+
                 binding.suggestionItemAvatar.setStyle(suggestionListItemAvatarStyle);
                 binding.suggestionItemAvatar.setVisibility(View.VISIBLE);
             } else {
                 binding.suggestionItemAvatar.setVisibility(View.GONE);
             }
+
             binding.tvSuggestionItemName.setText(suggestionItem.getName());
             binding.tvSuggestionItemName.setTextColor(suggestionListItemTextColor);
             binding.tvSuggestionItemName.setTextAppearance(suggestionListItemTextAppearance);
+            binding.tvMetaInfo.setTextColor(suggestionListItemInfoTextColor);
+            binding.tvMetaInfo.setTextAppearance(suggestionListItemInfoTextAppearance);
+
+            if (suggestionItem.getData() != null) {
+                if (suggestionItem.getData().has(UIKitConstants.JSONKeys.INFO_TEXT)) {
+                    binding.tvMetaInfo.setVisibility(View.VISIBLE);
+                    binding.tvMetaInfo.setText(suggestionItem.getData().optString(UIKitConstants.JSONKeys.INFO_TEXT));
+                } else {
+                    binding.tvMetaInfo.setVisibility(View.GONE);
+                }
+            } else binding.tvMetaInfo.setVisibility(View.GONE);
+
             itemView.setTag(R.string.cometchat_tag_item, suggestionItem);
+        }
+
+        /**
+         * Validates if the provided URL string is a valid URL.
+         *
+         * @param url the URL string to validate
+         * @return true if the URL is valid; false otherwise
+         */
+        private boolean isValidUrl(String url) {
+            return !TextUtils.isEmpty(url) && Patterns.WEB_URL.matcher(url).matches();
         }
     }
 }

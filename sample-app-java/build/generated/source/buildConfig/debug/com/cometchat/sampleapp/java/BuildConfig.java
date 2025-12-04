@@ -8,5 +8,5 @@ public final class BuildConfig {
   public static final String APPLICATION_ID = "com.cometchat.sampleapp.java";
   public static final String BUILD_TYPE = "debug";
   public static final int VERSION_CODE = 1;
-  public static final String VERSION_NAME = "5.2.4";
+  public static final String VERSION_NAME = "5.1.1";
 }

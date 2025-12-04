@@ -27,13 +27,15 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private var user: User? = null
     private var group: Group? = null
-    private var isFromMessages: Boolean = false
+    private val isFromMessagesScreen: Boolean by lazy {
+        user != null || group != null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        isFromMessages = intent.getBooleanExtra("isFromMessageScreen", false)
+
         val userJson = intent.getStringExtra(getString(R.string.app_user))
         val groupJson = intent.getStringExtra(getString(R.string.app_group))
         try {
@@ -53,7 +55,7 @@ class SearchActivity : AppCompatActivity() {
             insets
         }
 
-        binding.cometchatSearch.setOnBackPressListener { finish() }
+        binding.cometchatSearch.setOnBackPressListener { handleBackPressed() }
         binding.cometchatSearch.setOnMessageClicked { view, position, baseMessage ->
             handleMessageClick(baseMessage)
         }
@@ -68,7 +70,7 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        if (isFromMessages) {
+        if (user != null || group != null) {
             val searchFilters = listOf(
                 UIKitConstants.SearchFilter.PHOTOS,
                 UIKitConstants.SearchFilter.VIDEOS,
@@ -142,22 +144,99 @@ class SearchActivity : AppCompatActivity() {
             })
     }
 
+    private fun handleBackPressed() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     private fun navigateToActivity(
         user: User? = null,
         group: Group? = null,
         baseMessage: BaseMessage? = null,
         parentMessage: BaseMessage? = null
     ) {
-        val intent: Intent = if (parentMessage != null) {
-            Intent(this@SearchActivity, ThreadMessageActivity::class.java)
+        if (isFromMessagesScreen) {
+            handleMessagesScreenNavigation(user, group, baseMessage, parentMessage)
         } else {
-            Intent(this@SearchActivity, MessagesActivity::class.java)
+            handleConversationsScreenNavigation(user, group, baseMessage, parentMessage)
         }
-        if (parentMessage != null) intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.rawMessage.toString())
-        if (user != null) intent.putExtra(getString(R.string.app_user), user.toJson().toString())
-        if (group != null) intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
-        if (baseMessage != null) intent.putExtra(getString(R.string.app_go_to_message), baseMessage.rawMessage.toString())
+    }
+
+    private fun handleMessagesScreenNavigation(
+        targetUser: User?,
+        targetGroup: Group?,
+        baseMessage: BaseMessage?,
+        parentMessage: BaseMessage?
+    ) {
+        val isSameChat = checkIfSameChat(targetUser, targetGroup)
+
+        if (isSameChat && parentMessage == null) {
+            val resultIntent = Intent().apply {
+                putExtra("navigateToDifferentChat", false)
+                baseMessage?.let {
+                    putExtra(getString(R.string.app_go_to_message), it.rawMessage.toString())
+                }
+            }
+            setResult(RESULT_OK, resultIntent)
+        } else {
+            if (parentMessage != null) {
+                handleConversationsScreenNavigation(targetUser, targetGroup, baseMessage, parentMessage)
+            } else {
+                val resultIntent = Intent().apply {
+                    putExtra("navigateToDifferentChat", true)
+                    targetUser?.let {
+                        putExtra(getString(R.string.app_user), it.toJson().toString())
+                    }
+                    targetGroup?.let {
+                        putExtra(getString(R.string.app_group), Gson().toJson(it))
+                    }
+                    baseMessage?.let {
+                        putExtra(getString(R.string.app_go_to_message), baseMessage.rawMessage.toString())
+                    }
+                    parentMessage?.let {
+                        putExtra(getString(R.string.app_base_message), parentMessage.rawMessage.toString())
+                    }
+                }
+                setResult(RESULT_OK, resultIntent)
+            }
+        }
+        finish()
+    }
+
+    private fun handleConversationsScreenNavigation(
+        targetUser: User?,
+        targetGroup: Group?,
+        baseMessage: BaseMessage?,
+        parentMessage: BaseMessage?
+    ) {
+        val intent = if (parentMessage != null) {
+            Intent(this, ThreadMessageActivity::class.java).apply {
+                putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.rawMessage.toString())
+                putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.replyCount)
+            }
+        } else {
+            Intent(this, MessagesActivity::class.java)
+        }
+
+        targetUser?.let {
+            intent.putExtra(getString(R.string.app_user), it.toJson().toString())
+        }
+        targetGroup?.let {
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(it))
+        }
+        baseMessage?.let {
+            intent.putExtra(getString(R.string.app_go_to_message), it.rawMessage.toString())
+        }
+
         startActivity(intent)
         finish()
+    }
+
+    private fun checkIfSameChat(targetUser: User?, targetGroup: Group?): Boolean {
+        return when {
+            targetUser != null && user != null -> targetUser.uid == user!!.uid
+            targetGroup != null && group != null -> targetGroup.guid == group!!.guid
+            else -> false
+        }
     }
 }

@@ -28,6 +28,7 @@ public class AppConstants {
         public static final String NAME = "name";
         public static final String AVATAR = "avatar";
         public static final String RAW_JSON = "rawJson";
+        public static final String REPLY_COUNT = "reply_count";
     }
 
     /**

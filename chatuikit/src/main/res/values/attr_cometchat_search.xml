@@ -59,6 +59,7 @@
         <attr name="cometchatSearchMessageSeparatorColor" format="color" />
         <attr name="cometchatSearchMessageLinkTextColor" format="color" />
         <attr name="cometchatSearchMessageLinkTextAppearance" format="reference" />
+        <attr name="cometChatSearchMessageThreadIcon" format="reference" />
 
         <!-- Date Separator-->
         <attr name="cometchatSearchDateSeparatorTextColor" format="color" />

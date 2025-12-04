@@ -4572,6 +4572,8 @@
     <string name="cometchat_no_results">No Results</string>
     <string name="cometchat_no_stickers_available" translatable="true">No Stickers Available</string>
     <string name="cometchat_no_time_slots_available" translatable="true">No time slot available for this date. Please try another date.</string>
+    <string name="cometchat_notify_all" translatable="true">all</string>
+    <string name="cometchat_notify_everyone_in_this_group">Notify everyone in this group</string>
     <string name="cometchat_offline" translatable="true">Offline</string>
     <string name="cometchat_online" translatable="true">Online</string>
     <string name="cometchat_open_document" translatable="true">Open Document</string>
@@ -8974,6 +8976,7 @@
         <item name="cometchatSearchMessageTimestampTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
         <item name="cometchatSearchMessageSeparatorColor">@android:color/transparent</item>
         <item name="cometchatSearchMessageLinkTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometChatSearchMessageThreadIcon">@drawable/cometchat_ic_thread</item>
 
         
         <item name="cometchatSearchAvatarStyle">?attr/cometchatAvatarStyle</item>
@@ -9030,6 +9033,7 @@
         <item name="cometchatSuggestionListStrokeWidth">@dimen/cometchat_1dp</item>
         <item name="cometchatSuggestionListItemAvatarStyle">?attr/cometchatAvatarStyle</item>
         <item name="cometchatSuggestionListItemTextAppearance">?attr/cometchatTextAppearanceHeading4Medium</item>
+        <item name="cometchatSuggestionListItemInfoTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
     <style name="CometChatTextAppearanceBody">
         <item name="android:textSize">14sp</item>
@@ -15500,6 +15504,7 @@
         <attr format="color" name="cometchatSelfMentionTextColor"/>
         <attr format="color" name="cometchatSelfMentionBackgroundColor"/>
         <attr format="reference" name="cometchatMentionsStyle"/>
+        <attr format="reference" name="cometchatMentionAllStyle"/>
     </declare-styleable>
     <declare-styleable name="CometChatMessageBubble">
         <attr format="reference" name="cometchatMessageBubbleBackgroundDrawable"/>
@@ -15983,6 +15988,7 @@
         <attr format="color" name="cometchatSearchMessageSeparatorColor"/>
         <attr format="color" name="cometchatSearchMessageLinkTextColor"/>
         <attr format="reference" name="cometchatSearchMessageLinkTextAppearance"/>
+        <attr format="reference" name="cometChatSearchMessageThreadIcon"/>
 
         
         <attr format="color" name="cometchatSearchDateSeparatorTextColor"/>
@@ -16106,6 +16112,8 @@
         <attr format="reference" name="cometchatSuggestionListItemAvatarStyle"/>
         <attr format="reference" name="cometchatSuggestionListItemTextAppearance"/>
         <attr format="color" name="cometchatSuggestionListItemTextColor"/>
+        <attr format="reference" name="cometchatSuggestionListItemInfoTextAppearance"/>
+        <attr format="color" name="cometchatSuggestionListItemInfoTextColor"/>
     </declare-styleable>
     <declare-styleable name="CometChatTextBubble">
 

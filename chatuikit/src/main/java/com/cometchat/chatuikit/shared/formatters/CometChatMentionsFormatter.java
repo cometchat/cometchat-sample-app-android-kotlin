@@ -20,15 +20,20 @@ import com.cometchat.chat.models.GroupMember;
 import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.style.PromptTextStyle;
 import com.cometchat.chatuikit.shared.interfaces.Function1;
+import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.spans.NonEditableSpan;
 import com.cometchat.chatuikit.shared.spans.OnTagClick;
 import com.cometchat.chatuikit.shared.spans.TagSpan;
 import com.cometchat.chatuikit.shared.views.suggestionlist.SuggestionItem;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,7 +61,13 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
     private PromptTextStyle selfTagStyle, tagStyle, outgoingBubbleTagStyle, outgoingBubbleSelfTagStyle, incomingBubbleSelfTagStyle, incomingBubbleTagStyle, conversationSelfTagStyle, conversationTagStyle;
     private @StyleRes int messageComposerMentionTextStyle, incomingBubbleMentionTextStyle, outgoingBubbleMentionTextStyle, conversationsMentionTextStyle;
     private OnTagClick<User> onTagClick;
+    private OnClick mentionAllClick;
     private Pattern pattern;
+    private Pattern mentionAllPattern;
+    private boolean disableMentionAll = false;
+    private String mentionAllId;
+    private String mentionAllLabelText;
+    private String mentionAllInfoText;
 
     public CometChatMentionsFormatter(Context context) {
         super('@');
@@ -65,11 +76,19 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
     }
 
     private void init(Context context, @NonNull String regexPattern) {
-        this.pattern = Pattern.compile(regexPattern);
+        mentionAllId = "all";
+        mentionAllLabelText = context.getResources().getString(R.string.cometchat_notify_all);
+        mentionAllInfoText = context.getResources().getString(R.string.cometchat_notify_everyone_in_this_group);
         setOutgoingBubbleMentionTextStyle(context, R.style.CometChatOutgoingBubbleMentionsStyle);
         setIncomingBubbleMentionTextStyle(context, R.style.CometChatIncomingBubbleMentionsStyle);
         setMessageComposerMentionTextStyle(context, R.style.CometChatMessageComposerMentionsStyle);
         setConversationsMentionTextStyle(context, R.style.CometChatConversationsMentionsStyle);
+        this.pattern = Pattern.compile(regexPattern);
+        this.mentionAllPattern = Pattern.compile(generateMentionAllRegexPattern(mentionAllId));
+    }
+
+    private String generateMentionAllRegexPattern(String mentionAllId) {
+        return "<" + getTrackingCharacter() + "all" + ":" + mentionAllId + ">";
     }
 
     public void setOutgoingBubbleMentionTextStyle(Context context, @StyleRes int style) {
@@ -109,20 +128,12 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
     private PromptTextStyle getPromptTextStyle(Context context, @StyleRes int style) {
         PromptTextStyle promptTextStyle = new PromptTextStyle();
         if (context != null && style != 0) {
-            TypedArray typedArray = context
-                .getTheme()
-                .obtainStyledAttributes(null, R.styleable.CometChatMentionStyle, R.attr.cometchatMentionsStyle, style);
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(null, R.styleable.CometChatMentionStyle, R.attr.cometchatMentionsStyle, style);
             try {
-                promptTextStyle.setTextAppearance(Utils.getTypefaceFromTextAppearance(context,
-                                                                                      typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatMentionTextAppearance,
-                                                                                                               0)));
-                promptTextStyle.setTextSize(Utils.getTextSize(context,
-                                                              typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatMentionTextAppearance,
-                                                                                       0)));
-                promptTextStyle.setColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionTextColor,
-                                                             CometChatTheme.getPrimaryColor(context)));
-                promptTextStyle.setBackgroundColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionBackgroundColor,
-                                                                       CometChatTheme.getPrimaryColor(context)));
+                promptTextStyle.setTextAppearance(Utils.getTypefaceFromTextAppearance(context, typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatMentionTextAppearance, 0)));
+                promptTextStyle.setTextSize(Utils.getTextSize(context, typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatMentionTextAppearance, 0)));
+                promptTextStyle.setColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionTextColor, CometChatTheme.getPrimaryColor(context)));
+                promptTextStyle.setBackgroundColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatMentionBackgroundColor, CometChatTheme.getPrimaryColor(context)));
             } finally {
                 typedArray.recycle();
             }
@@ -137,17 +148,11 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
     private PromptTextStyle getSelfPromptTextStyle(Context context, @StyleRes int style) {
         PromptTextStyle promptTextStyle = new PromptTextStyle();
         if (context != null && style != 0) {
-            TypedArray typedArray = context
-                .getTheme()
-                .obtainStyledAttributes(null, R.styleable.CometChatMentionStyle, R.attr.cometchatMentionsStyle, style);
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(null, R.styleable.CometChatMentionStyle, R.attr.cometchatMentionsStyle, style);
             try {
-                promptTextStyle.setTextAppearance(Utils.getTypefaceFromTextAppearance(context,
-                                                                                      typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatSelfMentionTextAppearance,
-                                                                                                               0)));
+                promptTextStyle.setTextAppearance(Utils.getTypefaceFromTextAppearance(context, typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatSelfMentionTextAppearance, 0)));
                 promptTextStyle.setColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatSelfMentionTextColor, 0));
-                promptTextStyle.setTextSize(Utils.getTextSize(context,
-                                                              typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatSelfMentionTextAppearance,
-                                                                                       0)));
+                promptTextStyle.setTextSize(Utils.getTextSize(context, typedArray.getResourceId(R.styleable.CometChatMentionStyle_cometchatSelfMentionTextAppearance, 0)));
                 promptTextStyle.setBackgroundColor(typedArray.getColor(R.styleable.CometChatMentionStyle_cometchatSelfMentionBackgroundColor, 0));
             } finally {
                 typedArray.recycle();
@@ -224,6 +229,10 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
         this.onTagClick = onTagClick;
     }
 
+    public void setOnMentionAllClick(OnClick click) {
+        this.mentionAllClick = click;
+    }
+
     public @StyleRes int getMessageComposerMentionTextStyle() {
         return messageComposerMentionTextStyle;
     }
@@ -238,6 +247,18 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
 
     public @StyleRes int getConversationsMentionTextStyle() {
         return conversationsMentionTextStyle;
+    }
+
+    public void setDisableMentionAll(boolean disableMentionAll) {
+        this.disableMentionAll = disableMentionAll;
+    }
+
+    public void setMentionAllLabel(String labelId, String mentionAllLabelText) {
+        if (labelId != null && !labelId.isEmpty() && mentionAllLabelText != null && !mentionAllLabelText.isEmpty()) {
+            this.mentionAllLabelText = mentionAllLabelText;
+            this.mentionAllId = labelId;
+            this.mentionAllPattern = Pattern.compile(generateMentionAllRegexPattern(mentionAllId));
+        }
     }
 
     @Override
@@ -262,8 +283,10 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
                 searchUser(queryString);
                 break;
             case USERS_AND_GROUP_MEMBERS:
-                if (getGroup() != null) searchGroupMember(queryString);
-                else searchUser(queryString);
+                if (getGroup() != null)
+                    searchGroupMember(queryString);
+                else
+                    searchUser(queryString);
                 break;
             default:
                 break;
@@ -297,13 +320,13 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
                 List<SuggestionItem> suggestionItems = new ArrayList<>();
                 for (User user : users) {
                     suggestionItems.add(new SuggestionItem(user.getUid(),
-                                                           user.getName(),
-                                                           user.getAvatar(),
-                                                           user.getStatus(),
-                                                           getTrackingCharacter() + user.getName(),
-                                                           "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
-                                                           user.toJson(),
-                                                           tagStyle));
+                            user.getName(),
+                            user.getAvatar(),
+                            user.getStatus(),
+                            getTrackingCharacter() + user.getName(),
+                            "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
+                            user.toJson(),
+                            tagStyle));
                 }
                 suggestionItemList.addAll(suggestionItems);
                 setSuggestionItemList(suggestionItemList);
@@ -326,17 +349,45 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
                 List<SuggestionItem> suggestionItems = new ArrayList<>();
                 for (GroupMember user : groupMembers) {
                     suggestionItems.add(new SuggestionItem(user.getUid(),
-                                                           user.getName(),
-                                                           user.getAvatar(),
-                                                           user.getStatus(),
-                                                           getTrackingCharacter() + user.getName(),
-                                                           "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
-                                                           user.toJson(),
-                                                           user
-                                                               .getUid()
-                                                               .equals(CometChatUIKit
-                                                                           .getLoggedInUser()
-                                                                           .getUid()) && selfTagStyle != null ? selfTagStyle : tagStyle));
+                            user.getName(),
+                            user.getAvatar(),
+                            user.getStatus(),
+                            getTrackingCharacter() + user.getName(),
+                            "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
+                            user.toJson(),
+                            user
+                                    .getUid()
+                                    .equals(CometChatUIKit
+                                            .getLoggedInUser()
+                                            .getUid())
+                                    && selfTagStyle != null ? selfTagStyle : tagStyle));
+                }
+
+                if (!disableMentionAll && getGroup() != null) {
+                    JSONObject metaData = new JSONObject();
+                    try {
+                        metaData.put(UIKitConstants.JSONKeys.INFO_TEXT, mentionAllInfoText);
+                    } catch (JSONException e) {
+                        CometChatLogger.e(TAG, e.getMessage());
+                    }
+                    boolean containsMentionAll = false;
+                    for (SuggestionItem item : suggestionItemList) {
+                        if (item.getId().equals(mentionAllId)) {
+                            containsMentionAll = true;
+                            break;
+                        }
+                    }
+                    if (!containsMentionAll && mentionAllId.toLowerCase().contains(groupMembersRequest.getSearchKeyword().toLowerCase())) {
+                        suggestionItems.add(0, new SuggestionItem(mentionAllId,
+                                getTrackingCharacter() + mentionAllLabelText,
+                                getGroup().getIcon() != null && !getGroup().getIcon().isEmpty() ? getGroup().getIcon()
+                                        : !getGroup().getName().isEmpty() ? getGroup().getName() : "",
+                                null,
+                                getTrackingCharacter() + mentionAllLabelText,
+                                "<" + getTrackingCharacter() + "all:" + mentionAllId + ">",
+                                metaData,
+                                selfTagStyle));
+                    }
                 }
 
                 suggestionItemList.addAll(suggestionItems);
@@ -378,15 +429,17 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
 
     @Override
     public void onScrollToBottom() {
-        if (groupMembersRequestBuilder != null) fetchGroupMembers();
-        else if (usersRequestBuilder != null) fetchUsers();
+        if (groupMembersRequestBuilder != null)
+            fetchGroupMembers();
+        else if (usersRequestBuilder != null)
+            fetchUsers();
     }
 
     @Nullable
     @Override
     public SpannableStringBuilder prepareLeftMessageBubbleSpan(@NonNull Context context,
-                                                               @NonNull BaseMessage baseMessage,
-                                                               SpannableStringBuilder spannable) {
+            @NonNull BaseMessage baseMessage,
+            SpannableStringBuilder spannable) {
         if (context.getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
             return getBubbleSpan(baseMessage, UIKitConstants.MessageBubbleAlignment.RIGHT, spannable);
         }
@@ -396,8 +449,8 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
     @Nullable
     @Override
     public SpannableStringBuilder prepareRightMessageBubbleSpan(@NonNull Context context,
-                                                                @NonNull BaseMessage baseMessage,
-                                                                SpannableStringBuilder spannable) {
+            @NonNull BaseMessage baseMessage,
+            SpannableStringBuilder spannable) {
         if (context.getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
             return getBubbleSpan(baseMessage, UIKitConstants.MessageBubbleAlignment.LEFT, spannable);
         }
@@ -406,27 +459,31 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
 
     @Nullable
     @Override
-    public SpannableStringBuilder prepareComposerSpan(@NonNull Context context, @NonNull BaseMessage baseMessage, SpannableStringBuilder spannable) {
+    public SpannableStringBuilder prepareComposerSpan(@NonNull Context context, @NonNull BaseMessage baseMessage,
+            SpannableStringBuilder spannable) {
         return getComposerSpan(baseMessage, spannable);
     }
 
     @Nullable
     @Override
     public SpannableStringBuilder prepareConversationSpan(@NonNull Context context,
-                                                          @NonNull BaseMessage baseMessage,
-                                                          SpannableStringBuilder spannable) {
+            @NonNull BaseMessage baseMessage,
+            SpannableStringBuilder spannable) {
         return getConversationSpan(baseMessage, spannable);
     }
 
     @Override
-    public void observeSelectionList(@Nonnull Context context, @NonNull List<SuggestionItem> selectedSuggestionItemList) {
+    public void observeSelectionList(@Nonnull Context context,
+            @NonNull List<SuggestionItem> selectedSuggestionItemList) {
         setDisableSuggestions(getSelectedList().size() >= mentionLimit);
         setInfoVisibility(getSelectedList().size() >= mentionLimit);
         setInfoText(getSelectedList().size() >= mentionLimit ? context
-            .getResources()
-            .getString(R.string.cometchat_you_can_mention_up_to) + " " + mentionLimit + " " + context
-            .getResources()
-            .getString(R.string.cometchat_time_at_a_time) : "");
+                .getResources()
+                .getString(R.string.cometchat_you_can_mention_up_to) + " " + mentionLimit + " "
+                + context
+                        .getResources()
+                        .getString(R.string.cometchat_time_at_a_time)
+                : "");
     }
 
     @Override
@@ -453,167 +510,301 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
         if (mentionsVisibility == UIKitConstants.MentionsVisibility.BOTH && flag) {
             return false;
         } else {
-            if (mentionsVisibility == UIKitConstants.MentionsVisibility.USERS_CONVERSATION_ONLY && this.getUser() != null && flag) {
+            if (mentionsVisibility == UIKitConstants.MentionsVisibility.USERS_CONVERSATION_ONLY
+                    && this.getUser() != null && flag) {
                 return false;
-            } else return mentionsVisibility != UIKitConstants.MentionsVisibility.GROUP_CONVERSATION_ONLY || this.getGroup() == null || !flag;
+            } else
+                return mentionsVisibility != UIKitConstants.MentionsVisibility.GROUP_CONVERSATION_ONLY
+                        || this.getGroup() == null || !flag;
         }
     }
 
-    private SpannableStringBuilder getConversationSpan(BaseMessage baseMessage, SpannableStringBuilder spannableStringBuilder) {
+    private SpannableStringBuilder getConversationSpan(BaseMessage baseMessage,
+            SpannableStringBuilder spannableStringBuilder) {
 
         if (spannableStringBuilder != null && baseMessage != null) {
-            Matcher matcher = pattern.matcher(spannableStringBuilder.toString());
+            String originalText = spannableStringBuilder.toString();
+            Map<Integer, TagSpan> userSpanMap = new LinkedHashMap<>();
 
-            Map<Integer, TagSpan> userSpanMap = new LinkedHashMap<>(); // Used to store UserSpans and their starting
-            // indices
-            int offset = 0;
+            // Collect all mention all matches first
+            if (!disableMentionAll) {
+                Matcher mentionAllMatcher = mentionAllPattern.matcher(originalText);
+                while (mentionAllMatcher.find()) {
+                    String mentionText = getTrackingCharacter() + mentionAllId;
 
-            while (matcher.find()) {
-                String userId = matcher.group(1);
-                for (User user : baseMessage.getMentionedUsers()) {
-                    if (user.getUid().equals(userId)) {
-                        int startIdx = matcher.start() - offset;
-                        String mentionText = getTrackingCharacter() + user.getName();
-                        offset += matcher.group().length() - mentionText.length();
+                    SuggestionItem suggestionItem = new SuggestionItem(mentionAllId,
+                            mentionAllId,
+                            null,
+                            null,
+                            getTrackingCharacter() + mentionAllLabelText,
+                            "<" + getTrackingCharacter() + "all:" + mentionAllId + ">",
+                            new JSONObject(),
+                            conversationSelfTagStyle);
 
-                        SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
-                                                                           user.getName(),
-                                                                           user.getAvatar(),
-                                                                           user.getStatus(),
-                                                                           getTrackingCharacter() + user.getName(),
-                                                                           "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
-                                                                           user.toJson(),
-                                                                           user
-                                                                               .getUid()
-                                                                               .equals(CometChatUIKit
-                                                                                           .getLoggedInUser()
-                                                                                           .getUid()) ? conversationSelfTagStyle : conversationTagStyle);
+                    TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
+                        invokeMentionAllClick();
+                    });
+                    userSpanMap.put(mentionAllMatcher.start(), userSpan);
+                }
+            }
 
-                        spannableStringBuilder.replace(startIdx, startIdx + matcher.group().length(), mentionText);
+            // Collect all user mention matches
+            if (baseMessage.getMentionedUsers() != null) {
+                Matcher matcher = pattern.matcher(originalText);
+                while (matcher.find()) {
+                    String userId = matcher.group(1);
+                    for (User user : baseMessage.getMentionedUsers()) {
+                        if (user.getUid().equals(userId)) {
+                            String mentionText = getTrackingCharacter() + user.getName();
 
-                        TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
-                            if (onTagClick != null) onTagClick.onClick(context1, user1);
-                        });
-                        userSpanMap.put(startIdx, userSpan);
-                        break;
+                            SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
+                                    user.getName(),
+                                    user.getAvatar(),
+                                    user.getStatus(),
+                                    getTrackingCharacter() + user.getName(),
+                                    "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
+                                    user.toJson(),
+                                    user.getUid().equals(CometChatUIKit.getLoggedInUser().getUid())
+                                            ? conversationSelfTagStyle
+                                            : conversationTagStyle);
+
+                            TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
+                                if (onTagClick != null)
+                                    onTagClick.onClick(context1, user1);
+                            });
+                            userSpanMap.put(matcher.start(), userSpan);
+                            break;
+                        }
                     }
                 }
             }
 
-            for (Map.Entry<Integer, TagSpan> entry : userSpanMap.entrySet()) {
-                Integer startIdx = entry.getKey();
+            // Apply replacements in reverse order to maintain correct indices
+            List<Map.Entry<Integer, TagSpan>> sortedEntries = new ArrayList<>(userSpanMap.entrySet());
+            sortedEntries.sort((a, b) -> b.getKey().compareTo(a.getKey()));
+
+            for (Map.Entry<Integer, TagSpan> entry : sortedEntries) {
+                int originalStart = entry.getKey();
                 TagSpan userSpan = entry.getValue();
-                spannableStringBuilder.setSpan(userSpan, startIdx, startIdx + userSpan.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                // Find the original match to get the end position
+                String textToReplace = findOriginalMatch(originalText, originalStart);
+                if (textToReplace != null && originalStart >= 0
+                        && originalStart + textToReplace.length() <= spannableStringBuilder.length()) {
+                    spannableStringBuilder.replace(originalStart, originalStart + textToReplace.length(),
+                            userSpan.getText());
+                    spannableStringBuilder.setSpan(userSpan, originalStart, originalStart + userSpan.getText().length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
         return spannableStringBuilder;
     }
 
-    private SpannableStringBuilder getComposerSpan(BaseMessage baseMessage, SpannableStringBuilder spannableStringBuilder) {
+    private SpannableStringBuilder getComposerSpan(BaseMessage baseMessage,
+            SpannableStringBuilder spannableStringBuilder) {
         if (spannableStringBuilder != null && baseMessage != null) {
-            Matcher matcher = pattern.matcher(spannableStringBuilder.toString());
+            String originalText = spannableStringBuilder.toString();
+            Map<Integer, NonEditableSpan> userSpanMap = new LinkedHashMap<>();
 
-            Map<Integer, NonEditableSpan> userSpanMap = new LinkedHashMap<>(); // Used to store UserSpans and their
-            // starting indices
-            int offset = 0;
+            // Collect all mention all matches first
+            if (!disableMentionAll && getGroup() != null) {
+                Matcher mentionAllMatcher = mentionAllPattern.matcher(originalText);
+                while (mentionAllMatcher.find()) {
+                    String mentionText = getTrackingCharacter() + mentionAllId;
 
-            while (matcher.find()) {
-                String userId = matcher.group(1);
-                for (User user : baseMessage.getMentionedUsers()) {
-                    if (user.getUid().equals(userId)) {
-                        int startIdx = matcher.start() - offset;
-                        String mentionText = getTrackingCharacter() + user.getName();
-                        offset += matcher.group().length() - mentionText.length();
+                    SuggestionItem suggestionItem = new SuggestionItem(mentionAllId,
+                            mentionAllId,
+                            null,
+                            null,
+                            getTrackingCharacter() + mentionAllLabelText,
+                            "<" + getTrackingCharacter() + "all:" + mentionAllId + ">",
+                            new JSONObject(),
+                            selfTagStyle);
 
-                        SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
-                                                                           user.getName(),
-                                                                           user.getAvatar(),
-                                                                           user.getStatus(),
-                                                                           getTrackingCharacter() + user.getName(),
-                                                                           "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
-                                                                           user.toJson(),
-                                                                           user
-                                                                               .getUid()
-                                                                               .equals(CometChatUIKit
-                                                                                           .getLoggedInUser()
-                                                                                           .getUid()) && selfTagStyle != null ? selfTagStyle : tagStyle);
+                    NonEditableSpan span = new NonEditableSpan(getId(), mentionText, suggestionItem);
+                    userSpanMap.put(mentionAllMatcher.start(), span);
+                }
+            }
 
-                        spannableStringBuilder.replace(startIdx, startIdx + matcher.group().length(), mentionText);
-                        NonEditableSpan span = new NonEditableSpan(getId(), mentionText, suggestionItem);
-                        userSpanMap.put(startIdx, span);
-                        break;
+            // Collect all user mention matches
+            if (baseMessage.getMentionedUsers() != null) {
+                Matcher matcher = pattern.matcher(originalText);
+                while (matcher.find()) {
+                    String userId = matcher.group(1);
+                    for (User user : baseMessage.getMentionedUsers()) {
+                        if (user != null && user.getUid() != null && user.getUid().equals(userId)) {
+                            String mentionText = getTrackingCharacter() + user.getName();
+
+                            SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
+                                    user.getName(),
+                                    user.getAvatar(),
+                                    user.getStatus(),
+                                    getTrackingCharacter() + user.getName(),
+                                    "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
+                                    user.toJson(),
+                                    user.getUid().equals(CometChatUIKit.getLoggedInUser().getUid())
+                                            && selfTagStyle != null ? selfTagStyle : tagStyle);
+
+                            NonEditableSpan span = new NonEditableSpan(getId(), mentionText, suggestionItem);
+                            userSpanMap.put(matcher.start(), span);
+                            break;
+                        }
                     }
                 }
             }
 
-            for (Map.Entry<Integer, NonEditableSpan> entry : userSpanMap.entrySet()) {
-                Integer startIdx = entry.getKey();
+            // Apply replacements in reverse order to maintain correct indices
+            List<Map.Entry<Integer, NonEditableSpan>> sortedEntries = new ArrayList<>(userSpanMap.entrySet());
+            sortedEntries.sort((a, b) -> b.getKey().compareTo(a.getKey()));
+
+            for (Map.Entry<Integer, NonEditableSpan> entry : sortedEntries) {
+                int originalStart = entry.getKey();
                 NonEditableSpan userSpan = entry.getValue();
-                spannableStringBuilder.setSpan(userSpan, startIdx, startIdx + userSpan.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                // Find the original match to get the end position
+                String textToReplace = findOriginalMatch(originalText, originalStart);
+                if (textToReplace != null && originalStart >= 0
+                        && originalStart + textToReplace.length() <= spannableStringBuilder.length()) {
+                    spannableStringBuilder.replace(originalStart, originalStart + textToReplace.length(),
+                            userSpan.getText());
+                    spannableStringBuilder.setSpan(userSpan, originalStart, originalStart + userSpan.getText().length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
         return spannableStringBuilder;
     }
 
     private SpannableStringBuilder getBubbleSpan(BaseMessage baseMessage,
-                                                 UIKitConstants.MessageBubbleAlignment alignment,
-                                                 SpannableStringBuilder spannableStringBuilder) {
+            UIKitConstants.MessageBubbleAlignment alignment,
+            SpannableStringBuilder spannableStringBuilder) {
 
         if (spannableStringBuilder != null && baseMessage != null) {
-            Matcher matcher = pattern.matcher(spannableStringBuilder.toString());
+            String originalText = spannableStringBuilder.toString();
+            Map<Integer, TagSpan> userSpanMap = new LinkedHashMap<>();
 
-            Map<Integer, TagSpan> userSpanMap = new LinkedHashMap<>(); // Used to store UserSpans and their starting
-            // indices
-            int offset = 0;
+            // Collect all mention all matches first
+            if (!disableMentionAll) {
+                Matcher mentionAllMatcher = mentionAllPattern.matcher(originalText);
+                while (mentionAllMatcher.find()) {
+                    String mentionText = getTrackingCharacter() + mentionAllId;
 
-            while (matcher.find()) {
-                String userId = matcher.group(1);
-                for (User user : baseMessage.getMentionedUsers()) {
-                    if (user.getUid().equals(userId)) {
-                        int startIdx = matcher.start() - offset;
-                        String mentionText = getTrackingCharacter() + user.getName();
-                        offset += matcher.group().length() - mentionText.length();
+                    SuggestionItem suggestionItem = new SuggestionItem(mentionAllId,
+                            mentionAllId,
+                            null,
+                            null,
+                            getTrackingCharacter() + mentionAllLabelText,
+                            "<" + getTrackingCharacter() + "all:" + mentionAllId + ">",
+                            new JSONObject(),
+                            getMentionAllStyleForAppropriateBubble(alignment));
 
-                        SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
-                                                                           user.getName(),
-                                                                           user.getAvatar(),
-                                                                           user.getStatus(),
-                                                                           getTrackingCharacter() + user.getName(),
-                                                                           "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
-                                                                           user.toJson(),
-                                                                           getMentionStyleForAppropriateBubble(user, alignment));
+                    TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
+                        invokeMentionAllClick();
+                    });
+                    userSpanMap.put(mentionAllMatcher.start(), userSpan);
+                }
+            }
 
-                        spannableStringBuilder.replace(startIdx, startIdx + matcher.group().length(), mentionText);
+            // Collect all user mention matches
+            if (baseMessage.getMentionedUsers() != null) {
+                Matcher matcher = pattern.matcher(originalText);
+                while (matcher.find()) {
+                    String userId = matcher.group(1);
+                    for (User user : baseMessage.getMentionedUsers()) {
+                        if (user.getUid() != null && user.getUid().equals(userId)) {
+                            String mentionText = getTrackingCharacter() + user.getName();
 
-                        TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
-                            if (onTagClick != null) onTagClick.onClick(context1, user1);
-                        });
+                            SuggestionItem suggestionItem = new SuggestionItem(user.getUid(),
+                                    user.getName(),
+                                    user.getAvatar(),
+                                    user.getStatus(),
+                                    getTrackingCharacter() + user.getName(),
+                                    "<" + getTrackingCharacter() + "uid:" + user.getUid() + ">",
+                                    user.toJson(),
+                                    getMentionStyleForAppropriateBubble(user, alignment));
 
-                        userSpanMap.put(startIdx, userSpan);
-
-                        break;
+                            TagSpan userSpan = new TagSpan(getId(), mentionText, suggestionItem, (context1, user1) -> {
+                                if (onTagClick != null)
+                                    onTagClick.onClick(context1, user1);
+                            });
+                            userSpanMap.put(matcher.start(), userSpan);
+                            break;
+                        }
                     }
                 }
             }
 
-            for (Map.Entry<Integer, TagSpan> entry : userSpanMap.entrySet()) {
-                Integer startIdx = entry.getKey();
+            // Apply replacements in reverse order to maintain correct indices
+            List<Map.Entry<Integer, TagSpan>> sortedEntries = new ArrayList<>(userSpanMap.entrySet());
+            sortedEntries.sort((a, b) -> b.getKey().compareTo(a.getKey()));
+
+            for (Map.Entry<Integer, TagSpan> entry : sortedEntries) {
+                int originalStart = entry.getKey();
                 TagSpan userSpan = entry.getValue();
-                spannableStringBuilder.setSpan(userSpan, startIdx, startIdx + userSpan.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                // Find the original match to get the end position
+                String textToReplace = findOriginalMatch(originalText, originalStart);
+                if (textToReplace != null && originalStart >= 0
+                        && originalStart + textToReplace.length() <= spannableStringBuilder.length()) {
+                    spannableStringBuilder.replace(originalStart, originalStart + textToReplace.length(),
+                            userSpan.getText());
+                    spannableStringBuilder.setSpan(userSpan, originalStart, originalStart + userSpan.getText().length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
         return spannableStringBuilder;
     }
 
-    private PromptTextStyle getMentionStyleForAppropriateBubble(User user, UIKitConstants.MessageBubbleAlignment alignment) {
+    private void invokeMentionAllClick() {
+        if (mentionAllClick != null) {
+            mentionAllClick.onClick();
+        }
+    }
+
+    private String findOriginalMatch(String originalText, int startIndex) {
+        // Check for mention all pattern first
+        Matcher mentionAllMatcher = mentionAllPattern.matcher(originalText);
+        while (mentionAllMatcher.find()) {
+            if (mentionAllMatcher.start() == startIndex) {
+                return mentionAllMatcher.group();
+            }
+        }
+
+        // Check for user mention pattern
+        Matcher matcher = pattern.matcher(originalText);
+        while (matcher.find()) {
+            if (matcher.start() == startIndex) {
+                return matcher.group();
+            }
+        }
+
+        return null;
+    }
+
+    private PromptTextStyle getMentionStyleForAppropriateBubble(User user,
+            UIKitConstants.MessageBubbleAlignment alignment) {
         if (UIKitConstants.MessageBubbleAlignment.LEFT.equals(alignment)) {
-            if (CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
-                return outgoingBubbleSelfTagStyle;
-            else return outgoingBubbleTagStyle;
-        } else {
-            if (CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
+            if (CometChatUIKit.getLoggedInUser() != null
+                    && CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
                 return incomingBubbleSelfTagStyle;
-            else return incomingBubbleTagStyle;
+            else
+                return incomingBubbleTagStyle;
+        } else {
+            if (CometChatUIKit.getLoggedInUser() != null
+                    && CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
+                return outgoingBubbleSelfTagStyle;
+            else
+                return outgoingBubbleTagStyle;
+        }
+    }
+
+    private PromptTextStyle getMentionAllStyleForAppropriateBubble(UIKitConstants.MessageBubbleAlignment alignment) {
+        if (UIKitConstants.MessageBubbleAlignment.LEFT.equals(alignment)) {
+            return outgoingBubbleSelfTagStyle;
+        } else {
+            return incomingBubbleSelfTagStyle;
         }
     }
 

@@ -335,6 +335,8 @@
     <string name="cometchat_no_results">कोई परिणाम नहीं</string>
     <string name="cometchat_no_stickers_available" translatable="true">कोई स्टीकर उपलब्ध नहीं</string>
     <string name="cometchat_no_time_slots_available" translatable="true">इस तारीख के लिए कोई समय उपलब्ध नहीं है। कृपया कोई और तारीख़ आज़माएँ।</string>
+    <string name="cometchat_notify_all" translatable="true">सभी</string>
+    <string name="cometchat_notify_everyone_in_this_group">इस समूह में सभी को सूचित करें</string>
     <string name="cometchat_offline" translatable="true">ऑफ़लाइन</string>
     <string name="cometchat_online" translatable="true">ऑनलाइन</string>
     <string name="cometchat_open_document">दस्तावेज़ खोलें</string>

@@ -287,6 +287,8 @@
     <string name="cometchat_no_results">没有结果</string>
     <string name="cometchat_no_stickers_available" translatable="true">没有可用的贴纸</string>
     <string name="cometchat_no_time_slots_available" translatable="true">此日期没有可用时间段。请尝试其他日期。</string>
+    <string name="cometchat_notify_all" translatable="true">所有</string>
+    <string name="cometchat_notify_everyone_in_this_group">通知该群组中的每个人</string>
     <string name="cometchat_offline" translatable="true">离线</string>
     <string name="cometchat_online" translatable="true">在线</string>
     <string name="cometchat_open_document">打开文档</string>

@@ -40,6 +40,9 @@
             android:name=".ui.activity.SearchActivity"
             android:exported="false" />
         <activity
+            android:name=".ai.AIAssistantUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.NewChatActivity"
             android:exported="false" />
         <activity
@@ -58,6 +61,7 @@
             android:name=".ui.activity.ThreadMessageActivity"
             android:exported="false"
             android:configChanges="screenSize|orientation|keyboardHidden"/>
+
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="false"
@@ -72,6 +76,13 @@
             android:windowSoftInputMode="adjustResize"
             android:configChanges="screenSize|orientation|keyboardHidden"
             />
+        <activity
+            android:name=".ai.AIAssistantChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            />
+
         <activity
             android:name=".ui.activity.GroupDetailsActivity"
             android:exported="false" />

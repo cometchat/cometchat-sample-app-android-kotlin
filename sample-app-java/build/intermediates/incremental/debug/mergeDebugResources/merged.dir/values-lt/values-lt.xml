@@ -340,6 +340,8 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_no_results">Nėra rezultatų</string>
     <string name="cometchat_no_stickers_available" translatable="true">Nėra lipdukų</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Šiai datai laisvo laiko nėra. Pabandykite kitą datą.</string>
+    <string name="cometchat_notify_all" translatable="true">visi</string>
+    <string name="cometchat_notify_everyone_in_this_group">Pranešti visiems šioje grupėje</string>
     <string name="cometchat_offline" translatable="true">Atsijungęs</string>
     <string name="cometchat_online" translatable="true">Prisijungęs</string>
     <string name="cometchat_open_document">Atidaryti dokumentą</string>

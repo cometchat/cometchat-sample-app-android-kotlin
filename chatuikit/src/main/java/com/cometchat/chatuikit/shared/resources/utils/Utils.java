@@ -63,14 +63,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.FileProvider;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chat.core.Call;
@@ -220,23 +216,25 @@ public class Utils {
 
     public static long getQuotedMessageId(BaseMessage quotedMessage, User user, Group group) {
         long quotedMessageId = -1;
-        if (user != null) {
-            if (quotedMessage.getReceiver() instanceof User) {
-                String[] ids = quotedMessage.getConversationId().split("_");
-                boolean isCorrectConversation = false;
-                for (String s : ids) {
-                    if (s.equals(user.getUid())) {
-                        isCorrectConversation = true;
-                        break;
+        if (quotedMessage != null) {
+            if (user != null) {
+                if (quotedMessage.getReceiver() instanceof User) {
+                    String[] ids = quotedMessage.getConversationId().split("_");
+                    boolean isCorrectConversation = false;
+                    for (String s : ids) {
+                        if (s.equals(user.getUid())) {
+                            isCorrectConversation = true;
+                            break;
+                        }
                     }
+                    if (isCorrectConversation)
+                        quotedMessageId = quotedMessage.getId();
                 }
-                if (isCorrectConversation)
-                    quotedMessageId = quotedMessage.getId();
-            }
-        } else {
-            if (quotedMessage.getReceiver() instanceof Group) {
-                Group receiver = (Group) quotedMessage.getReceiver();
-                quotedMessageId = receiver.getGuid().equals(group.getGuid()) ? quotedMessage.getId() : -1;
+            } else {
+                if (quotedMessage.getReceiver() instanceof Group) {
+                    Group receiver = (Group) quotedMessage.getReceiver();
+                    quotedMessageId = receiver.getGuid().equals(group.getGuid()) ? quotedMessage.getId() : -1;
+                }
             }
         }
         return quotedMessageId;
@@ -460,11 +458,11 @@ public class Utils {
         return user != null && UIKitConstants.AIConstants.AGENTIC_USER.equalsIgnoreCase(user.getRole());
     }
 
-    public static void setReplyMessagePreview(Context context, BaseMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters) {
+    public static void setReplyMessagePreview(Context context, BaseMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters, UIKitConstants.FormattingType formattingType, UIKitConstants.MessageBubbleAlignment alignment) {
         try {
             String sender = !Objects.equals(baseMessage.getSender().getUid(), CometChatUIKit.getLoggedInUser().getUid()) ? baseMessage.getSender().getName() : context.getString(R.string.cometchat_you);
             if (baseMessage instanceof TextMessage) {
-                handleTextMessagePreview(context, sender, (TextMessage) baseMessage, messagePreview, cometchatTextFormatters);
+                handleTextMessagePreview(context, sender, (TextMessage) baseMessage, messagePreview, cometchatTextFormatters, formattingType, alignment);
             } else if (baseMessage instanceof MediaMessage) {
                 handleMediaMessagePreview(context, sender, (MediaMessage) baseMessage, messagePreview);
             } else if (baseMessage instanceof CustomMessage) {
@@ -475,13 +473,13 @@ public class Utils {
         }
     }
 
-    private static void handleTextMessagePreview(Context context, String sender, TextMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters) {
+    private static void handleTextMessagePreview(Context context, String sender, TextMessage baseMessage, CometChatMessagePreview messagePreview, List<CometChatTextFormatter> cometchatTextFormatters, UIKitConstants.FormattingType formattingType, UIKitConstants.MessageBubbleAlignment alignment) {
         SpannableStringBuilder spannableStringBuilder;
         if (baseMessage.getDeletedAt() == 0) {
             spannableStringBuilder = new SpannableStringBuilder(baseMessage.getText());
             for (CometChatTextFormatter textFormatter : cometchatTextFormatters) {
                 if (textFormatter != null)
-                    spannableStringBuilder = textFormatter.prepareMessageString(messagePreview.getContext(), baseMessage, spannableStringBuilder, null, UIKitConstants.FormattingType.MESSAGE_COMPOSER);
+                    spannableStringBuilder = textFormatter.prepareMessageString(messagePreview.getContext(), baseMessage, spannableStringBuilder, alignment, formattingType);
             }
         } else if (baseMessage.getDeletedAt() > 0) {
             spannableStringBuilder = new SpannableStringBuilder(context.getString(R.string.cometchat_this_message_deleted));
@@ -1331,8 +1329,14 @@ public class Utils {
     }
 
     public static void showKeyBoard(Context context, View mainLayout) {
+        if (context == null || mainLayout == null) return;
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInputFromWindow(mainLayout.getWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+        if (imm != null) {
+            if (!imm.isActive(mainLayout)) {
+                mainLayout.requestFocus();
+                imm.showSoftInput(mainLayout, InputMethodManager.SHOW_IMPLICIT);
+            }
+        }
     }
 
     public static JSONObject placeErrorObjectInMetaData(CometChatException exception) {

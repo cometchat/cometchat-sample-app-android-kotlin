@@ -337,6 +337,8 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_no_results">Nincsenek eredmények</string>
     <string name="cometchat_no_stickers_available" translatable="true">Nincsenek elérhető matricák</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Ehhez a dátumhoz nincs szabad időpont. Kérjük, próbáljon meg másik dátumot.</string>
+    <string name="cometchat_notify_all" translatable="true">mindenkit</string>
+    <string name="cometchat_notify_everyone_in_this_group">Mindenkit értesíteni ebben a csoportban</string>
     <string name="cometchat_offline" translatable="true">Offline</string>
     <string name="cometchat_online" translatable="true">Elérhető</string>
     <string name="cometchat_open_document">Dokumentum megnyitása</string>

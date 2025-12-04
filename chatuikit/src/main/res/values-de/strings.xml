@@ -246,5 +246,7 @@
     <string name="cometchat_flag_reason_spam" translatable="true">Spam / Unerwünschte Inhalte</string>
     <string name="cometchat_flag_reason_sexual" translatable="true">Sexuelle Inhalte</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">Belästigung / Mobbing</string>
+    <string name="cometchat_notify_everyone_in_this_group">Alle in dieser Gruppe benachrichtigen</string>
+    <string name="cometchat_notify_all" translatable="true">alle</string>
 
 </resources>

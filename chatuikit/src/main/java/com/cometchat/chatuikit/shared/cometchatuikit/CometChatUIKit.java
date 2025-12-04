@@ -304,6 +304,7 @@ public final class CometChatUIKit {
             .getMuid()
             .isEmpty() ? System.currentTimeMillis() + "" : customMessage.getMuid());
         customMessage.setSentAt(customMessage.getSentAt() == 0 ? System.currentTimeMillis() / 1000 : customMessage.getSentAt());
+        customMessage.shouldSendNotification(true);
 
         onMessageSent(customMessage, MessageStatus.IN_PROGRESS);
         CometChat.sendCustomMessage(customMessage, new CometChat.CallbackListener<CustomMessage>() {

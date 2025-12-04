@@ -43,6 +43,7 @@
                         android:id="@+id/tv_message_layout_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:maxLines="2"
                         tools:text="Ashfaq" />
                 </LinearLayout>
 
@@ -76,8 +77,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ellipsize="end"
-                    android:maxLines="3"
-                    android:minWidth="@dimen/cometchat_100dp"
+                    android:maxLines="1"
                     tools:text="Perfect! I've been waiting to go" />
             </LinearLayout>
 

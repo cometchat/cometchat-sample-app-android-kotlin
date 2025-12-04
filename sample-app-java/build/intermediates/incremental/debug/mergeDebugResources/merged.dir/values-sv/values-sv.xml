@@ -338,6 +338,8 @@ Vänligen försök igen.</string>
     <string name="cometchat_no_results">Inga resultat</string>
     <string name="cometchat_no_stickers_available" translatable="true">Inga klistermärken tillgängliga</string>
     <string name="cometchat_no_time_slots_available" translatable="true">Ingen tid tillgänglig för detta datum. Försök ett annat datum.</string>
+    <string name="cometchat_notify_all" translatable="true">alla</string>
+    <string name="cometchat_notify_everyone_in_this_group">Meddela alla i denna grupp</string>
     <string name="cometchat_offline" translatable="true">Offline</string>
     <string name="cometchat_online" translatable="true">Online</string>
     <string name="cometchat_open_document">Öppna dokument</string>

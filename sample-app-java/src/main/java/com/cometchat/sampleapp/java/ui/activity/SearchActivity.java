@@ -1,5 +1,6 @@
 package com.cometchat.sampleapp.java.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,7 +38,6 @@ public class SearchActivity extends AppCompatActivity {
         binding = ActivitySearchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        boolean isFromMessages = getIntent().getBooleanExtra("isFromMessageScreen", false);
         String userJson = getIntent().getStringExtra(getString(R.string.app_user));
         String groupJson = getIntent().getStringExtra(getString(R.string.app_group));
 
@@ -58,11 +58,9 @@ public class SearchActivity extends AppCompatActivity {
             return insets;
         });
 
-        binding.cometchatSearch.setOnBackPressListener(this::finish);
+        binding.cometchatSearch.setOnBackPressListener(this::handleBackPressed);
 
-        binding.cometchatSearch.setOnMessageClicked((view, position, baseMessage) -> {
-            handleMessageClick(baseMessage);
-        });
+        binding.cometchatSearch.setOnMessageClicked((view, position, baseMessage) -> handleMessageClick(baseMessage));
 
         binding.cometchatSearch.setOnConversationClicked((view, position, conversation) -> {
             if (conversation.getConversationType().equals(CometChatConstants.CONVERSATION_TYPE_GROUP)) {
@@ -74,24 +72,31 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        if (isFromMessages) {
+        if (user != null || group != null) {
             List<UIKitConstants.SearchFilter> searchFilters = Arrays.asList(
-                UIKitConstants.SearchFilter.PHOTOS,
-                UIKitConstants.SearchFilter.VIDEOS,
-                UIKitConstants.SearchFilter.DOCUMENTS,
-                UIKitConstants.SearchFilter.LINKS,
-                UIKitConstants.SearchFilter.AUDIO
+                    UIKitConstants.SearchFilter.PHOTOS,
+                    UIKitConstants.SearchFilter.VIDEOS,
+                    UIKitConstants.SearchFilter.DOCUMENTS,
+                    UIKitConstants.SearchFilter.LINKS,
+                    UIKitConstants.SearchFilter.AUDIO
             );
             binding.cometchatSearch.setSearchFilters(searchFilters);
 
             if (user != null) {
                 binding.cometchatSearch.setUid(user.getUid());
+                binding.cometchatSearch.setHintText(getString(com.cometchat.chatuikit.R.string.cometchat_search_in) + " " + user.getName());
             }
 
             if (group != null) {
                 binding.cometchatSearch.setGuid(group.getGuid());
+                binding.cometchatSearch.setHintText(getString(com.cometchat.chatuikit.R.string.cometchat_search_in) + " " + group.getName());
             }
         }
+    }
+
+    private void handleBackPressed() {
+        setResult(Activity.RESULT_CANCELED);
+        finish();
     }
 
     private void handleMessageClick(BaseMessage goToMessage) {
@@ -106,11 +111,7 @@ public class SearchActivity extends AppCompatActivity {
             Repository.getUser(uid, new CometChat.CallbackListener<User>() {
                 @Override
                 public void onSuccess(User user) {
-                    getParentMessage(goToMessage.getParentMessageId(), parentMessage -> {
-                        navigateToActivity(user, null, goToMessage, parentMessage);
-                    }, () -> {
-                        navigateToActivity(user, null, goToMessage, null);
-                    });
+                    getParentMessage(goToMessage.getParentMessageId(), parentMessage -> navigateToActivity(user, null, goToMessage, parentMessage), () -> navigateToActivity(user, null, goToMessage, null));
                 }
 
                 @Override
@@ -122,11 +123,7 @@ public class SearchActivity extends AppCompatActivity {
             Repository.getGroup(goToMessage.getReceiverUid(), new CometChat.CallbackListener<Group>() {
                 @Override
                 public void onSuccess(Group group) {
-                    getParentMessage(goToMessage.getParentMessageId(), parentMessage -> {
-                        navigateToActivity(null, group, goToMessage, parentMessage);
-                    }, () -> {
-                        navigateToActivity(null, group, goToMessage, null);
-                    });
+                    getParentMessage(goToMessage.getParentMessageId(), parentMessage -> navigateToActivity(null, group, goToMessage, parentMessage), () -> navigateToActivity(null, group, goToMessage, null));
                 }
 
                 @Override
@@ -158,21 +155,63 @@ public class SearchActivity extends AppCompatActivity {
         );
     }
 
+    private void navigateToActivity(User targetUser, Group targetGroup, BaseMessage baseMessage, BaseMessage parentMessage) {
+        if (isFromMessagesScreen()) {
+            handleMessagesScreenNavigation(targetUser, targetGroup, baseMessage, parentMessage);
+        } else {
+            handleConversationsScreenNavigation(targetUser, targetGroup, baseMessage, parentMessage);
+        }
+    }
 
-    private void navigateToActivity(User user, Group group, BaseMessage baseMessage, BaseMessage parentMessage) {
+    private void handleMessagesScreenNavigation(User targetUser, Group targetGroup, BaseMessage baseMessage, BaseMessage parentMessage) {
+        boolean isSameChat = checkIfSameChat(targetUser, targetGroup);
+
+        if (isSameChat && parentMessage == null) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("navigateToDifferentChat", false);
+            if (baseMessage != null) {
+                resultIntent.putExtra(getString(R.string.app_go_to_message), baseMessage.getRawMessage().toString());
+            }
+            setResult(Activity.RESULT_OK, resultIntent);
+        } else {
+            if (parentMessage != null) {
+                handleConversationsScreenNavigation(targetUser, targetGroup, baseMessage, parentMessage);
+            } else {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("navigateToDifferentChat", true);
+                if (targetUser != null) {
+                    resultIntent.putExtra(getString(R.string.app_user), targetUser.toJson().toString());
+                }
+                if (targetGroup != null) {
+                    resultIntent.putExtra(getString(R.string.app_group), new Gson().toJson(targetGroup));
+                }
+                if (baseMessage != null) {
+                    resultIntent.putExtra(getString(R.string.app_go_to_message), baseMessage.getRawMessage().toString());
+                }
+                if (parentMessage != null) {
+                    resultIntent.putExtra(getString(R.string.app_base_message), parentMessage.getRawMessage().toString());
+                }
+                setResult(Activity.RESULT_OK, resultIntent);
+            }
+        }
+        finish();
+    }
+
+    private void handleConversationsScreenNavigation(User targetUser, Group targetGroup, BaseMessage baseMessage, BaseMessage parentMessage) {
         Intent intent;
         if (parentMessage != null) {
             intent = new Intent(SearchActivity.this, ThreadMessageActivity.class);
             intent.putExtra(AppConstants.JSONConstants.RAW_JSON, parentMessage.getRawMessage().toString());
+            intent.putExtra(AppConstants.JSONConstants.REPLY_COUNT, parentMessage.getReplyCount());
         } else {
             intent = new Intent(SearchActivity.this, MessagesActivity.class);
         }
 
-        if (user != null) {
-            intent.putExtra(getString(R.string.app_user), user.toJson().toString());
+        if (targetUser != null) {
+            intent.putExtra(getString(R.string.app_user), targetUser.toJson().toString());
         }
-        if (group != null) {
-            intent.putExtra(getString(R.string.app_group), new Gson().toJson(group));
+        if (targetGroup != null) {
+            intent.putExtra(getString(R.string.app_group), new Gson().toJson(targetGroup));
         }
         if (baseMessage != null) {
             intent.putExtra(getString(R.string.app_go_to_message), baseMessage.getRawMessage().toString());
@@ -182,6 +221,18 @@ public class SearchActivity extends AppCompatActivity {
         finish();
     }
 
+    private boolean checkIfSameChat(User targetUser, Group targetGroup) {
+        if (targetUser != null && this.user != null) {
+            return targetUser.getUid().equals(this.user.getUid());
+        } else if (targetGroup != null && this.group != null) {
+            return targetGroup.getGuid().equals(this.group.getGuid());
+        }
+        return false;
+    }
+
+    private boolean isFromMessagesScreen() {
+        return user != null || group != null;
+    }
 
     public interface OnSuccess<T> {
         void onSuccess(T result);
