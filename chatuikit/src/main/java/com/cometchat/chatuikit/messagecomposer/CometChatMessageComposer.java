@@ -467,7 +467,14 @@ public class CometChatMessageComposer extends MaterialCardView {
         } else {
             if (binding.messageInput.getText().isEmpty())
                 inactiveSendButton();
-            else activeSendButton();
+            else {
+                if (editMessage != null) {
+                    handleEditMessageState(binding.messageInput.getText());
+                }
+                else {
+                    activeSendButton();
+                }
+            }
         }
     }
 
@@ -804,59 +811,6 @@ public class CometChatMessageComposer extends MaterialCardView {
                 }
             }
 
-            private void updateSendButtonState(Editable editable) {
-                String currentText = editable.toString().trim();
-                if (editable.toString().isEmpty()) {
-                    inactiveSendButton();
-                    return;
-                }
-
-                if (editMessage != null) {
-                    handleEditMessageState(currentText);
-                } else {
-                    handleNewMessageState(currentText);
-                }
-            }
-
-            private void handleEditMessageState(String currentText) {
-                String formattedText = String.valueOf(FormatterUtils.getFormattedText(
-                        getContext(),
-                        editMessage,
-                        UIKitConstants.FormattingType.MESSAGE_COMPOSER,
-                        null,
-                        editMessage.getText(),
-                        cometchatTextFormatters
-                )).trim();
-
-                if (currentText.equals(formattedText)) {
-                    inactiveSendButton();
-                } else {
-                    activeSendButton();
-                }
-            }
-
-            private void handleNewMessageState(String currentText) {
-                // For agent chat during AI generation, apply special logic
-                // Otherwise, activate button only if text is not empty
-                boolean shouldActivate = !currentText.isEmpty();
-
-                if (shouldActivate) {
-                    activeSendButton();
-                } else {
-                    inactiveSendButton();
-                }
-            }
-
-            private void handleTypingIndicator() {
-                if (typingTimer == null) {
-                    typingTimer = new Timer();
-                }
-
-                if (!disableTypingEvents) {
-                    endTypingTimer();
-                }
-            }
-
             @Override
             public void onSelectionChanged(int selStart, int selEnd) {
                 String charSequence = binding.messageInput.getEditableText().toString();
@@ -924,6 +878,59 @@ public class CometChatMessageComposer extends MaterialCardView {
             public void onSpanDeleted(NonEditableSpan span) {
             }
         });
+    }
+
+    private void updateSendButtonState(Editable editable) {
+        String currentText = editable.toString().trim();
+        if (editable.toString().isEmpty()) {
+            inactiveSendButton();
+            return;
+        }
+
+        if (editMessage != null) {
+            handleEditMessageState(currentText);
+        } else {
+            handleNewMessageState(currentText);
+        }
+    }
+
+    private void handleEditMessageState(String currentText) {
+        String formattedText = String.valueOf(FormatterUtils.getFormattedText(
+                getContext(),
+                editMessage,
+                UIKitConstants.FormattingType.MESSAGE_COMPOSER,
+                null,
+                editMessage.getText(),
+                cometchatTextFormatters
+        )).trim();
+
+        if (currentText.equals(formattedText)) {
+            inactiveSendButton();
+        } else {
+            activeSendButton();
+        }
+    }
+
+    private void handleNewMessageState(String currentText) {
+        // For agent chat during AI generation, apply special logic
+        // Otherwise, activate button only if text is not empty
+        boolean shouldActivate = !currentText.isEmpty();
+
+        if (shouldActivate) {
+            activeSendButton();
+        } else {
+            inactiveSendButton();
+        }
+    }
+
+    private void handleTypingIndicator() {
+        if (typingTimer == null) {
+            typingTimer = new Timer();
+        }
+
+        if (!disableTypingEvents) {
+            endTypingTimer();
+        }
     }
 
     /**

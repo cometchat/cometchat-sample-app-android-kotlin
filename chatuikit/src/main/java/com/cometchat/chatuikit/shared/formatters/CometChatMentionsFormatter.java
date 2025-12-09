@@ -788,15 +788,15 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
         if (UIKitConstants.MessageBubbleAlignment.LEFT.equals(alignment)) {
             if (CometChatUIKit.getLoggedInUser() != null
                     && CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
-                return incomingBubbleSelfTagStyle;
-            else
-                return incomingBubbleTagStyle;
-        } else {
-            if (CometChatUIKit.getLoggedInUser() != null
-                    && CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
                 return outgoingBubbleSelfTagStyle;
             else
                 return outgoingBubbleTagStyle;
+        } else {
+            if (CometChatUIKit.getLoggedInUser() != null
+                    && CometChatUIKit.getLoggedInUser().getUid().equals(user.getUid()))
+                return incomingBubbleSelfTagStyle;
+            else
+                return incomingBubbleTagStyle;
         }
     }
 

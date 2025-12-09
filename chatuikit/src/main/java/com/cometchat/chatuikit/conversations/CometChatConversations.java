@@ -899,7 +899,7 @@ public class CometChatConversations extends MaterialCardView {
     public void setSearchBoxVisibility(int visibility) {
         this.searchBoxVisibility = visibility;
         binding.searchBox.setVisibility(visibility);
-        binding.searchBoxLayout.setVisibility(GONE);
+        binding.searchBoxLayout.setVisibility(visibility);
     }
 
     /**

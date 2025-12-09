@@ -50,6 +50,7 @@ class ThreadMessageActivity : AppCompatActivity() {
         val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
         val replyCount = intent.getIntExtra(AppConstants.JSONConstants.REPLY_COUNT, 0)
         val userJson = intent.getStringExtra(getString(R.string.app_user))
+        val groupJson = intent.getStringExtra(getString(R.string.app_group))
         try {
             isBlockedByMe = intent.getBooleanExtra("isBlockedByMe", false)
             if (goToMessageJson != null) {
@@ -62,6 +63,9 @@ class ThreadMessageActivity : AppCompatActivity() {
             }
             if (userJson != null) {
                 user = User.fromJson(userJson)
+            }
+            if (groupJson != null) {
+                group = Group.fromJson(groupJson)
             }
         } catch (e: JSONException) {
             CometChatLogger.e("ThreadMessageActivity", "onCreate: $e")

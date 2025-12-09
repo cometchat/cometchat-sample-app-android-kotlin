@@ -163,6 +163,12 @@ class MessagesActivity : AppCompatActivity() {
         }
         binding.messageList.setOnThreadRepliesClick { context: Context, baseMessage: BaseMessage, cometchatMessageTemplate: CometChatMessageTemplate? ->
             val intent = Intent(context, ThreadMessageActivity::class.java)
+            if (user != null) {
+                intent.putExtra(context.getString(R.string.app_user), user?.toJson().toString())
+            } else if (group != null) {
+                intent.putExtra(context.getString(R.string.app_group), Gson().toJson(group))
+            }
+            intent.putExtra("isBlockedByMe", user?.isBlockedByMe)
             intent.putExtra(AppConstants.JSONConstants.REPLY_COUNT, baseMessage.replyCount)
             intent.putExtra(AppConstants.JSONConstants.RAW_JSON, baseMessage.getRawMessage().toString())
             context.startActivity(intent)
