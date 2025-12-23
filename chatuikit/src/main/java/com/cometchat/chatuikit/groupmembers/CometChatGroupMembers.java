@@ -72,6 +72,8 @@ import java.util.List;
  * options for different UI states and group member interactions.
  */
 public class CometChatGroupMembers extends MaterialCardView {
+    private boolean isDetachedFromWindow;
+
     private static final String TAG = CometChatGroupMembers.class.getSimpleName();
     // Data structures and function callbacks
     private final HashMap<GroupMember, Boolean> hashMap = new HashMap<>();
@@ -332,6 +334,10 @@ public class CometChatGroupMembers extends MaterialCardView {
         groupMembersViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupMembersViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         groupMembersViewModel.getMutableGroupMembersList().observe(lifecycleOwner, this::setGroupMemberList);
         groupMembersViewModel.getStates().observe(lifecycleOwner, this::setStateChangeObserver);
         groupMembersViewModel.insertAtTop().observe(lifecycleOwner, this::notifyInsertedAt);
@@ -881,47 +887,6 @@ public class CometChatGroupMembers extends MaterialCardView {
 
     public void setTitleText(String title) {
         binding.tvTitle.setText(title);
-    }
-
-    /**
-     * Called when the view is detached from a window.
-     *
-     * <p>
-     * This method is invoked when the view is detached from a window, allowing the
-     * {@link GroupMembersViewModel} to remove any previously added listeners. This
-     * helps prevent memory leaks by ensuring that the view model does not continue
-     * to listen for changes after the view is no longer visible.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            if (deleteAlertDialog != null && deleteAlertDialog.isShowing()) {
-                deleteAlertDialog.dismiss();
-                deleteAlertDialog = null;
-            }
-            groupMembersViewModel.removeListeners();
-            disposeObservers();
-            groupMembersViewModel = null;
-            groupMembersAdapter = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, e.toString());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (groupMembersViewModel != null && lifecycleOwner != null) {
-            groupMembersViewModel.getMutableGroupMembersList().removeObservers(lifecycleOwner);
-            groupMembersViewModel.getStates().removeObservers(lifecycleOwner);
-            groupMembersViewModel.insertAtTop().removeObservers(lifecycleOwner);
-            groupMembersViewModel.moveToTop().removeObservers(lifecycleOwner);
-            groupMembersViewModel.updateGroupMember().removeObservers(lifecycleOwner);
-            groupMembersViewModel.removeGroupMember().removeObservers(lifecycleOwner);
-            groupMembersViewModel.getDialogState().removeObservers(lifecycleOwner);
-            groupMembersViewModel.getCometChatException().removeObservers(lifecycleOwner);
-        }
     }
 
     public int getUserStatusVisibility() {
@@ -2077,18 +2042,6 @@ public class CometChatGroupMembers extends MaterialCardView {
      */
     public int getSearchInputStartIconTint() {
         return searchInputStartIconTint;
-    }    /**
-     * Called when the view is attached to a window.
-     *
-     * <p>
-     * This method is invoked when the view is attached to a window, allowing the
-     * {@link GroupMembersViewModel} to add necessary listeners. This is useful for
-     * setting up data binding and responding to live data changes.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        groupMembersViewModel.addListeners();
     }
 
     /**
@@ -2627,5 +2580,55 @@ public class CometChatGroupMembers extends MaterialCardView {
         return strokeWidth;
     }
 
+    /**
+     * Called when the view is attached to a window.
+     *
+     * <p>
+     * This method is invoked when the view is attached to a window, allowing the
+     * {@link GroupMembersViewModel} to add necessary listeners. This is useful for
+     * setting up data binding and responding to live data changes.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        groupMembersViewModel.addListeners();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+    }
 
+    /**
+     * Called when the view is detached from a window.
+     *
+     * <p>
+     * This method is invoked when the view is detached from a window, allowing the
+     * {@link GroupMembersViewModel} to remove any previously added listeners. This
+     * helps prevent memory leaks by ensuring that the view model does not continue
+     * to listen for changes after the view is no longer visible.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        if (deleteAlertDialog != null && deleteAlertDialog.isShowing()) {
+            deleteAlertDialog.dismiss();
+            deleteAlertDialog = null;
+        }
+        groupMembersViewModel.removeListeners();
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (groupMembersViewModel != null && lifecycleOwner != null) {
+            groupMembersViewModel.getMutableGroupMembersList().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getStates().removeObservers(lifecycleOwner);
+            groupMembersViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            groupMembersViewModel.moveToTop().removeObservers(lifecycleOwner);
+            groupMembersViewModel.updateGroupMember().removeObservers(lifecycleOwner);
+            groupMembersViewModel.removeGroupMember().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getDialogState().removeObservers(lifecycleOwner);
+            groupMembersViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+    }
 }

@@ -55,6 +55,7 @@ import com.google.android.material.card.MaterialCardView;
  * call-related properties and styles.
  */
 public class CometChatOutgoingCall extends MaterialCardView implements DefaultLifecycleObserver {
+    private boolean isDetachedFromWindow;
     private static final String TAG = CometChatOutgoingCall.class.getSimpleName();
     private CometchatOutgoingCallLayoutBinding binding;
     private OutgoingViewModel viewModel;
@@ -146,10 +147,7 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OutgoingViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(context);
         if (lifecycleOwner == null) return;
-        viewModel.getAcceptedCall().observe(lifecycleOwner, this::acceptedCall);
-        viewModel.getRejectCall().observe(lifecycleOwner, this::rejectedCall);
-        viewModel.getException().observe(lifecycleOwner, this::triggerError);
-        viewModel.getDisableEndCallButton().observe(lifecycleOwner, this::setDisableEndCallButton);
+        attachObservers();
 
         binding.endCall.getButton().setOnClickListener(view -> {
             binding.endCall.getButton().setEnabled(false);
@@ -158,6 +156,13 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
             } else onEndCallClick.onClick();
         });
         applyStyleAttributes(attrs, defStyleAttr);
+    }
+
+    public void attachObservers() {
+        viewModel.getAcceptedCall().observe(lifecycleOwner, this::acceptedCall);
+        viewModel.getRejectCall().observe(lifecycleOwner, this::rejectedCall);
+        viewModel.getException().observe(lifecycleOwner, this::triggerError);
+        viewModel.getDisableEndCallButton().observe(lifecycleOwner, this::setDisableEndCallButton);
     }
 
 
@@ -647,47 +652,6 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     }
 
     /**
-     * Called when the view is detached from the window. Removes listeners from the
-     * ViewModel and pauses sound playback.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            if (activity != null) {
-                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                if (activity instanceof AppCompatActivity) ((AppCompatActivity) activity).getLifecycle().removeObserver(this);
-            }
-            viewModel.removeListeners();
-            soundManager.pauseSilently();
-            stopProximitySensor();
-            if (wakeLock != null && wakeLock.isHeld()) {
-                wakeLock.release();
-                wakeLock = null;
-            }
-            disposeObservers();
-            activity = null;
-            viewModel = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (getContext() instanceof AppCompatActivity) {
-            ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
-        }
-        if (lifecycleOwner != null) {
-            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
-            viewModel.getRejectCall().removeObservers(lifecycleOwner);
-            viewModel.getException().removeObservers(lifecycleOwner);
-            viewModel.getDisableEndCallButton().removeObservers(lifecycleOwner);
-        }
-    }
-
-    /**
      * Plays the outgoing call sound if sound notifications are not disabled. It
      * uses the custom sound resource if provided; otherwise, it defaults to the
      * standard outgoing call sound.
@@ -811,10 +775,49 @@ public class CometChatOutgoingCall extends MaterialCardView implements DefaultLi
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
         viewModel.addListeners();
         if (user != null) {
             playSound();
         }
         startProximitySensor();
+    }
+
+    /**
+     * Called when the view is detached from the window. Removes listeners from the
+     * ViewModel and pauses sound playback.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        if (activity != null) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            if (activity instanceof AppCompatActivity)
+                ((AppCompatActivity) activity).getLifecycle().removeObserver(this);
+        }
+        viewModel.removeListeners();
+        soundManager.pauseSilently();
+        stopProximitySensor();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (getContext() instanceof AppCompatActivity) {
+            ((AppCompatActivity) getContext()).getLifecycle().removeObserver(this);
+        }
+        if (lifecycleOwner != null) {
+            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
+            viewModel.getRejectCall().removeObservers(lifecycleOwner);
+            viewModel.getException().removeObservers(lifecycleOwner);
+            viewModel.getDisableEndCallButton().removeObservers(lifecycleOwner);
+        }
     }
 }

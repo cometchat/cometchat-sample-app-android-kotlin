@@ -71,6 +71,8 @@ import java.util.List;
 public class CometChatSearch extends MaterialCardView {
     private static final String TAG = CometChatSearch.class.getSimpleName();
 
+    private boolean isDetachedFromWindow;
+
     private static final UIKitConstants.SearchFilter[] MESSAGE_FILTERS = {
             UIKitConstants.SearchFilter.AUDIO,
             UIKitConstants.SearchFilter.DOCUMENTS,
@@ -427,7 +429,10 @@ public class CometChatSearch extends MaterialCardView {
         cometChatSearchViewModel = new ViewModelProvider.NewInstanceFactory().create(CometChatSearchViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
 
+    public void attachObservers() {
         cometChatSearchViewModel.getMutableLiveDataIsSearching().observe(lifecycleOwner, this::searchInProgress);
         cometChatSearchViewModel.getCometChatException().observe(lifecycleOwner, this::throwError);
         cometChatSearchViewModel.getMutableMessagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
@@ -2780,33 +2785,6 @@ public class CometChatSearch extends MaterialCardView {
         return messageTimestampDateStyle;
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            disposeObservers();
-            cometChatSearchViewModel = null;
-            cometChatSearchConversationsAdapter = null;
-            cometChatSearchMessageAdapter = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (cometChatSearchViewModel != null) {
-            cometChatSearchViewModel.getMutableLiveDataIsSearching().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getCometChatException().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableMessagesRangeChanged().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableConversationsRangeChanged().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableHasMorePreviousMessages().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableHasMorePreviousConversations().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
-            cometChatSearchViewModel.getStates().removeObservers(lifecycleOwner);
-        }
-    }
-
     public void setHintText(String string) {
         binding.searchInput.setHint(string);
     }
@@ -2826,6 +2804,36 @@ public class CometChatSearch extends MaterialCardView {
             }
             this.mentionAllLabelId = id;
             this.mentionAllLabel = mentionAllLabel;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (cometChatSearchViewModel != null) {
+            cometChatSearchViewModel.getMutableLiveDataIsSearching().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getCometChatException().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableMessagesRangeChanged().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableConversationsRangeChanged().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableHasMorePreviousMessages().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableHasMorePreviousConversations().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
+            cometChatSearchViewModel.getStates().removeObservers(lifecycleOwner);
         }
     }
 }

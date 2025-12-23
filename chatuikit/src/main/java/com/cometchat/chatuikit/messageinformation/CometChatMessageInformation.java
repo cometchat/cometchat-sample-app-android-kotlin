@@ -25,7 +25,6 @@ import com.cometchat.chat.models.MessageReceipt;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatMessageInformationBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate;
@@ -63,6 +62,8 @@ import java.util.List;
  */
 public class CometChatMessageInformation extends BottomSheetDialogFragment {
     private static final String TAG = CometChatMessageInformation.class.getSimpleName();
+
+    private boolean isDetachedFromWindow;
 
     private Context context;
     private CometchatMessageInformationBinding binding;
@@ -171,13 +172,17 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
         messageInformationViewModel.addListener();
+        attachObservers();
+        messageInformationViewModel.setMessage(message);
+    }
+
+    public void attachObservers() {
         messageInformationViewModel.getLiveListData().observe(lifecycleOwner, this::setList);
         messageInformationViewModel.updateReceipt().observe(lifecycleOwner, this::notifyUpdateReceipt);
         messageInformationViewModel.addReceipt().observe(lifecycleOwner, this::notifyAddReceipt);
         messageInformationViewModel.exceptionMutableLiveData().observe(lifecycleOwner, this::showError);
         messageInformationViewModel.clearList().observe(lifecycleOwner, this::clear);
         messageInformationViewModel.getState().observe(lifecycleOwner, this::stateChangeObserver);
-        messageInformationViewModel.setMessage(message);
     }
 
     /**
@@ -436,21 +441,25 @@ public class CometChatMessageInformation extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onDestroyView() {
-        try {
-            binding = null;
-            if (messageInformationViewModel != null) {
-                messageInformationViewModel.removeListener();
-            }
-            disposeObservers();
-            messageInformationViewModel = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDestroyView: " + e.getMessage());
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (messageInformationViewModel != null) {
+            messageInformationViewModel.removeListener();
+        }
+        disposeObservers();
+        isDetachedFromWindow = false;
         super.onDestroyView();
     }
 
-    private void disposeObservers() {
+    public void disposeObservers() {
         if (lifecycleOwner != null) {
             messageInformationViewModel.getLiveListData().removeObservers(lifecycleOwner);
             messageInformationViewModel.updateReceipt().removeObservers(lifecycleOwner);

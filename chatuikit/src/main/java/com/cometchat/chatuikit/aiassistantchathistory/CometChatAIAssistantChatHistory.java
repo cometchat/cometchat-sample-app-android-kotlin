@@ -67,6 +67,7 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
     private boolean isScrolling;
     private boolean isInProgress;
     private boolean hasMore;
+    private boolean isDetachedFromWindow;
 
     private StickyHeaderDecoration stickyHeaderDecoration;
 
@@ -782,7 +783,10 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(CometChatAIAssistantChatHistoryViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
 
+    private void attachObservers() {
         viewModel.getMessagesLiveData().observe(lifecycleOwner, this::onMessagesReceived);
         viewModel.getStateLiveData().observe(lifecycleOwner, stateChangeObserver);
         viewModel.getDeleteStateMutableLiveData().observe(lifecycleOwner, deleteStateObserver);
@@ -790,7 +794,6 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
         viewModel.getMutableMessagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
         viewModel.getMutableHasMore().observe(lifecycleOwner, this::hasMore);
         viewModel.getMutableIsInProgress().observe(lifecycleOwner, this::isInProgress);
-
     }
 
     private void hasMore(Boolean aBoolean) {
@@ -965,12 +968,6 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
         }
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        viewModel.addListener();
-    }
-
     /**
      * Set click listener for close button
      *
@@ -1009,20 +1006,34 @@ public class CometChatAIAssistantChatHistory extends MaterialCardView {
         adapter.setOnItemLongClickListener(listener);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        viewModel.addListener();
+    }
+
     /**
      * Called when the view is detached from a window. Removes observers.
      */
     @Override
     protected void onDetachedFromWindow() {
+        isDetachedFromWindow = true;
+        removeListeners();
         disposeObservers();
-        viewModel = null;
-        adapter = null;
-        binding = null;
-        lifecycleOwner = null;
         super.onDetachedFromWindow();
     }
 
-    private void disposeObservers() {
+    private void removeListeners() {
+        if (viewModel != null) {
+            viewModel.removeListener();
+        }
+    }
+
+    public void disposeObservers() {
         try {
             if (lifecycleOwner != null && viewModel != null) {
                 viewModel.getMessagesLiveData().removeObservers(lifecycleOwner);

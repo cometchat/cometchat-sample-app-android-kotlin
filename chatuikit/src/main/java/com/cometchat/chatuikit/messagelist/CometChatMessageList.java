@@ -157,6 +157,8 @@ import java.util.Map;
  */
 public class CometChatMessageList extends MaterialCardView implements MessageAdapter.OnMessageLongClick {
     private static final String TAG = CometChatMessageList.class.getSimpleName();
+    private boolean isDetachedFromWindow;
+
     private LifecycleOwner lifecycleOwner;
     private final HashMap<String, Integer> messageViewTypes = new HashMap<>();
     private final HashMap<String, String> messageTypesToRetrieve = new HashMap<>();
@@ -742,6 +744,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void observeMessageListChanges() {
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         messageListViewModel.getMutableMessageList().observe(lifecycleOwner, this::setList);
         messageListViewModel.messagesRangeChanged().observe(lifecycleOwner, this::notifyRangeChanged);
         messageListViewModel.updateMessage().observe(lifecycleOwner, this::updateMessage);
@@ -1263,17 +1269,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
-     * Called when the view is attached to the window. This method adds a listener
-     * to the message list ViewModel and processes any formatters needed for the UI.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        messageListViewModel.addListener();
-        processFormatters();
-    }
-
-    /**
      * Sets the background drawable for the card.
      *
      * @param drawable The drawable to be used as the background.
@@ -1770,65 +1765,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void setDateFormat(SimpleDateFormat dateFormat) {
         messageAdapter.setDateFormat(dateFormat);
-    }
-
-    /**
-     * Called when the view is detached from the window. This method dismisses the
-     * bottom sheet dialog if it is currently showing and removes the listener from
-     * the message list ViewModel.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
-            bottomSheetDialog.dismiss();
-        }
-        try {
-            AudioPlayer.getInstance().stop();
-            messageListViewModel.removeListener();
-            disposeObservers();
-            messageListViewModel = null;
-            lifecycleOwner = null;
-            messageAdapter = null;
-        } catch (Exception e) {
-            messageListViewModel = null;
-            lifecycleOwner = null;
-            messageAdapter = null;
-            CometChatLogger.e(TAG, e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (lifecycleOwner != null) {
-            messageListViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
-            messageListViewModel.messagesRangeChanged().removeObservers(lifecycleOwner);
-            messageListViewModel.updateMessage().removeObservers(lifecycleOwner);
-            messageListViewModel.getOnMessageDeleted().removeObservers(lifecycleOwner);
-            messageListViewModel.addMessage().removeObservers(lifecycleOwner);
-            messageListViewModel.getCometChatException().removeObservers(lifecycleOwner);
-            messageListViewModel.removeMessage().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableHasMore().removeObservers(lifecycleOwner);
-            messageListViewModel.notifyUpdate().removeObservers(lifecycleOwner);
-            messageListViewModel.getStates().removeObservers(lifecycleOwner);
-            messageListViewModel.getMessageDeleteState().removeObservers(lifecycleOwner);
-            messageListViewModel.closeTopPanel().removeObservers(lifecycleOwner);
-            messageListViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
-            messageListViewModel.showTopPanel().removeObservers(lifecycleOwner);
-            messageListViewModel.showBottomPanel().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableSmartReplies().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableConversationStarterReplies().removeObservers(lifecycleOwner);
-            messageListViewModel.getRemoveConversationStarter().removeObservers(lifecycleOwner);
-            messageListViewModel.getConversationStarterUIState().removeObservers(lifecycleOwner);
-            messageListViewModel.getSmartRepliesUIState().removeObservers(lifecycleOwner);
-            messageListViewModel.messagesRangeChangedAtEnd().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableHasMoreNewMessages().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableHasMorePreviousMessages().removeObservers(lifecycleOwner);
-            messageListViewModel.getScrollToMessageId().removeObservers(lifecycleOwner);
-            messageListViewModel.getMutableConversationSummary().removeObservers(lifecycleOwner);
-            messageListViewModel.getRemoveConversationSummary().removeObservers(lifecycleOwner);
-            messageListViewModel.getConversationSummaryUIState().removeObservers(lifecycleOwner);
-        }
     }
 
     /**
@@ -3922,6 +3858,71 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
             this.mentionAllLabelId = id;
             this.mentionAllLabel = mentionAllLabel;
+        }
+    }
+
+    /**
+     * Called when the view is attached to the window. This method adds a listener
+     * to the message list ViewModel and processes any formatters needed for the UI.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        messageListViewModel.addListener();
+        processFormatters();
+    }
+
+    /**
+     * Called when the view is detached from the window. This method dismisses the
+     * bottom sheet dialog if it is currently showing and removes the listener from
+     * the message list ViewModel.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
+        AudioPlayer.getInstance().stop();
+        messageListViewModel.removeListener();
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null) {
+            messageListViewModel.getMutableMessageList().removeObservers(lifecycleOwner);
+            messageListViewModel.messagesRangeChanged().removeObservers(lifecycleOwner);
+            messageListViewModel.updateMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getOnMessageDeleted().removeObservers(lifecycleOwner);
+            messageListViewModel.addMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getCometChatException().removeObservers(lifecycleOwner);
+            messageListViewModel.removeMessage().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableIsInProgress().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMore().removeObservers(lifecycleOwner);
+            messageListViewModel.notifyUpdate().removeObservers(lifecycleOwner);
+            messageListViewModel.getStates().removeObservers(lifecycleOwner);
+            messageListViewModel.getMessageDeleteState().removeObservers(lifecycleOwner);
+            messageListViewModel.closeTopPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.showTopPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.showBottomPanel().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableSmartReplies().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableConversationStarterReplies().removeObservers(lifecycleOwner);
+            messageListViewModel.getRemoveConversationStarter().removeObservers(lifecycleOwner);
+            messageListViewModel.getConversationStarterUIState().removeObservers(lifecycleOwner);
+            messageListViewModel.getSmartRepliesUIState().removeObservers(lifecycleOwner);
+            messageListViewModel.messagesRangeChangedAtEnd().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMoreNewMessages().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableHasMorePreviousMessages().removeObservers(lifecycleOwner);
+            messageListViewModel.getScrollToMessageId().removeObservers(lifecycleOwner);
+            messageListViewModel.getMutableConversationSummary().removeObservers(lifecycleOwner);
+            messageListViewModel.getRemoveConversationSummary().removeObservers(lifecycleOwner);
+            messageListViewModel.getConversationSummaryUIState().removeObservers(lifecycleOwner);
         }
     }
 

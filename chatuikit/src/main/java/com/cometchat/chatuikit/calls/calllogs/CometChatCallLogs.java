@@ -65,6 +65,8 @@ public class CometChatCallLogs extends MaterialCardView {
 
     private CometchatCallLogsBinding binding;
 
+    private boolean isDetachedFromWindow;
+
     // Background, Stroke, and Corner Radius
     private @ColorInt int backgroundColor;
     private @Dimension int strokeWidth;
@@ -373,6 +375,10 @@ public class CometChatCallLogs extends MaterialCardView {
         callLogsViewModel = new ViewModelProvider.NewInstanceFactory().create(CallLogsViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         callLogsViewModel.getMutableCallsList().observe(lifecycleOwner, listObserver);
         callLogsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
         callLogsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
@@ -587,34 +593,6 @@ public class CometChatCallLogs extends MaterialCardView {
         callLogsAdapter.setDateTimeFormatter(dateTimeFormatter);
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            callLogsViewModel.getCallsArrayList().clear();
-            dispose();
-            callLogsViewModel = null;
-            callLogsAdapter = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "Error while detaching from window: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void dispose() {
-        if (lifecycleOwner != null && callLogsViewModel != null) {
-            callLogsViewModel.getMutableCallsList().removeObservers(lifecycleOwner);
-            callLogsViewModel.getStates().removeObservers(lifecycleOwner);
-            callLogsViewModel.insertAtTop().removeObservers(lifecycleOwner);
-            callLogsViewModel.moveToTop().removeObservers(lifecycleOwner);
-            callLogsViewModel.updateCall().removeObservers(lifecycleOwner);
-            callLogsViewModel.removeCall().removeObservers(lifecycleOwner);
-            callLogsViewModel.getInitiatedCall().removeObservers(lifecycleOwner);
-            callLogsViewModel.getCometChatException().removeObservers(lifecycleOwner);
-        }
-    }
-
     /**
      * Triggers a refresh of the call logs by invoking the ViewModel's `forceToRefresh` method.
      * This ensures the call logs are updated with the latest data from the server.
@@ -738,10 +716,6 @@ public class CometChatCallLogs extends MaterialCardView {
      */
     public @ColorInt int getTitleTextColor() {
         return titleTextColor;
-    }    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        callLogsViewModel.fetchCalls();
     }
 
     /**
@@ -1715,15 +1689,39 @@ public class CometChatCallLogs extends MaterialCardView {
         this.options = options;
     }
 
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        callLogsViewModel.fetchCalls();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        isDetachedFromWindow = true;
+        callLogsViewModel.getCallsArrayList().clear();
+        disposeObservers();
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null && callLogsViewModel != null) {
+            callLogsViewModel.getMutableCallsList().removeObservers(lifecycleOwner);
+            callLogsViewModel.getStates().removeObservers(lifecycleOwner);
+            callLogsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            callLogsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            callLogsViewModel.updateCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.removeCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.getInitiatedCall().removeObservers(lifecycleOwner);
+            callLogsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+    }
+
     public interface OnCallIconClick {
         void onCallIconClick(View view, CallLogsAdapter.CallLogsViewHolder holder, int position, CallLog callLog);
     }
-
-
-
-
-
-
-
-
 }

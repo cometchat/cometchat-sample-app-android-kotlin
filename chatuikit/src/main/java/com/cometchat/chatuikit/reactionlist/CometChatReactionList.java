@@ -21,7 +21,6 @@ import com.cometchat.chat.models.ReactionCount;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatReactionListBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.reactionlist.adapter.ReactedUsersAdapter;
 import com.cometchat.chatuikit.reactionlist.adapter.ReactionsHeaderAdapter;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
@@ -51,6 +50,8 @@ import java.util.List;
  * Sept 2024 Modified on: 12 Oct 2024
  */
 public class CometChatReactionList extends MaterialCardView {
+    private boolean isDetachedFromWindow;
+
     private static final String TAG = CometChatReactionList.class.getSimpleName();
 
     private CometchatReactionListBinding binding;
@@ -197,7 +198,10 @@ public class CometChatReactionList extends MaterialCardView {
 
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
 
+    public void attachObservers() {
         reactionListViewModel.getLoadingStateLiveData().observe(lifecycleOwner, this::stateChangeObserver);
         reactionListViewModel.getBaseMessageLiveData().observe(lifecycleOwner, this::setBaseMessage);
         reactionListViewModel.getReactionHeaderLiveData().observe(lifecycleOwner, this::setReactionHeaderList);
@@ -465,21 +469,6 @@ public class CometChatReactionList extends MaterialCardView {
      */
     public void setLoadingView(View loadingView) {
         this.loadingView = loadingView;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (reactedUsersAdapter != null) {
-            reactedUsersAdapter.setBaseMessage(baseMessage);
-        }
-        if (reactionListViewModel != null) {
-            reactionListViewModel.addListener();
-            String newBaseMessageString = new Gson().toJson(baseMessage);
-            BaseMessage newBaseMessage = new Gson().fromJson(newBaseMessageString, BaseMessage.class);
-            reactionListViewModel.setBaseMessageLiveData(newBaseMessage);
-            reactionListViewModel.setReactionHeaderLiveData(baseMessage.getReactions());
-        }
     }
 
     /**
@@ -964,21 +953,33 @@ public class CometChatReactionList extends MaterialCardView {
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        try {
-            reactionListViewModel.removeListener();
-            disposeObservers();
-            reactionListViewModel = null;
-            binding = null;
-            lifecycleOwner = null;
-            reactedUsersAdapter = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
         }
+        if (reactedUsersAdapter != null) {
+            reactedUsersAdapter.setBaseMessage(baseMessage);
+        }
+        if (reactionListViewModel != null) {
+            reactionListViewModel.addListener();
+            String newBaseMessageString = new Gson().toJson(baseMessage);
+            BaseMessage newBaseMessage = new Gson().fromJson(newBaseMessageString, BaseMessage.class);
+            reactionListViewModel.setBaseMessageLiveData(newBaseMessage);
+            reactionListViewModel.setReactionHeaderLiveData(baseMessage.getReactions());
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        reactionListViewModel.removeListener();
+        disposeObservers();
+        isDetachedFromWindow = true;
         super.onDetachedFromWindow();
     }
 
-    private void disposeObservers() {
+    public void disposeObservers() {
         if (lifecycleOwner != null) {
             reactionListViewModel.getLoadingStateLiveData().removeObservers(lifecycleOwner);
             reactionListViewModel.getBaseMessageLiveData().removeObservers(lifecycleOwner);

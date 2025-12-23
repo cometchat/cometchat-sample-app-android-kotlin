@@ -29,7 +29,6 @@ import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CometChatOngoingCallActivity;
 import com.cometchat.chatuikit.databinding.CometchatIncomingCallComponentBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.resources.soundmanager.CometChatSoundManager;
@@ -38,6 +37,7 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 
 public class CometChatIncomingCall extends MaterialCardView {
+    private boolean isDetachedFromWindow;
     private Call call;
     private CometChatCalls.CallSettingsBuilder callSettingsBuilder;
     private CometChatSoundManager soundManager;
@@ -114,6 +114,10 @@ public class CometChatIncomingCall extends MaterialCardView {
         viewModel = new ViewModelProvider.NewInstanceFactory().create(IncomingCallViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         viewModel.getAcceptedCall().observe(lifecycleOwner, this::acceptedCall);
         viewModel.getRejectCall().observe(lifecycleOwner, this::rejectedCall);
         viewModel.getException().observe(lifecycleOwner, this::throwError);
@@ -545,29 +549,6 @@ public class CometChatIncomingCall extends MaterialCardView {
         binding.declineButton.setBackgroundColor(rejectCallButtonBackgroundColor);
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            viewModel.removeListeners();
-            pauseSound();
-            dispose();
-            viewModel = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(CometChatIncomingCall.class.getSimpleName(), "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void dispose() {
-        if (lifecycleOwner != null && viewModel != null) {
-            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
-            viewModel.getRejectCall().removeObservers(lifecycleOwner);
-            viewModel.getException().removeObservers(lifecycleOwner);
-        }
-    }
-
     /**
      * Sets the stroke width for this component.
      *
@@ -824,16 +805,12 @@ public class CometChatIncomingCall extends MaterialCardView {
         this.binding = binding;
     }
 
-
-
-
     /**
      * Plays the incoming call sound if sound is not disabled.
      */
     public void playSound() {
         if (!disableSoundForCalls) soundManager.play(Sound.incomingCall, customSoundForCalls);
     }
-
 
     /**
      * Retrieves the stroke width for the call card border.
@@ -845,15 +822,38 @@ public class CometChatIncomingCall extends MaterialCardView {
         return strokeWidth;
     }
 
-
     /**
      * Adds listeners when the view is attached to the window.
      */
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
         viewModel.addListeners();
         if (call != null) playSound();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        isDetachedFromWindow = true;
+        removeListeners();
+        pauseSound();
+        disposeObservers();
+        super.onDetachedFromWindow();
+    }
+
+    private void removeListeners() {
+        viewModel.removeListeners();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null && viewModel != null) {
+            viewModel.getAcceptedCall().removeObservers(lifecycleOwner);
+            viewModel.getRejectCall().removeObservers(lifecycleOwner);
+            viewModel.getException().removeObservers(lifecycleOwner);
+        }
+    }
 }

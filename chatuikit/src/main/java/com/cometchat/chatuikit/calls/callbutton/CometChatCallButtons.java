@@ -50,6 +50,8 @@ public class CometChatCallButtons extends MaterialCardView {
     private CometChatButton voiceCall, videoCall;
     private Drawable voiceCallIcon, videoCallIcon;
 
+    private boolean isDetachedFromWindow;
+
     // Colors and styles for the call buttons
     private @ColorInt int voiceCallIconTint, videoCallIconTint;
     private @ColorInt int voiceCallTextColor, videoCallTextColor;
@@ -156,8 +158,7 @@ public class CometChatCallButtons extends MaterialCardView {
         // Observe call status updates from ViewModel
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner != null) {
-            callButtonsViewModel.getCallInitiated().observe(lifecycleOwner, this::callInitiated);
-            callButtonsViewModel.getStartDirectCall().observe(lifecycleOwner, this::startDirectCall);
+            attachObservers();
         }
 
         // Set click listeners for voice and video call buttons
@@ -188,6 +189,11 @@ public class CometChatCallButtons extends MaterialCardView {
 
         // Add the inflated view to this layout
         addView(view);
+    }
+
+    private void attachObservers() {
+        callButtonsViewModel.getCallInitiated().observe(lifecycleOwner, this::callInitiated);
+        callButtonsViewModel.getStartDirectCall().observe(lifecycleOwner, this::startDirectCall);
     }
 
     /**
@@ -327,43 +333,6 @@ public class CometChatCallButtons extends MaterialCardView {
     public void setOutgoingCallConfiguration(OutgoingCallConfiguration outgoingCallConfiguration) {
         if (outgoingCallConfiguration != null) {
             this.outgoingCallConfiguration = outgoingCallConfiguration;
-        }
-    }
-
-    /**
-     * Called when the view is attached to a window. Checks if there is an active
-     * call and disables the buttons if a call is active, or enables the buttons if
-     * there is no active call. It also adds the necessary listeners.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        // Add listeners to observe call status changes
-        callButtonsViewModel.addListener();
-    }
-
-    /**
-     * Called when the view is detached from a window. Removes listeners to avoid
-     * memory leaks and stops observing call status changes.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            callButtonsViewModel.removeListener();
-            disposeObservers();
-            callButtonsViewModel = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        // Remove listeners to prevent memory leaks when the view is detached
-        if (lifecycleOwner != null) {
-            callButtonsViewModel.getCallInitiated().removeObservers(lifecycleOwner);
-            callButtonsViewModel.getStartDirectCall().removeObservers(lifecycleOwner);
         }
     }
 
@@ -956,6 +925,49 @@ public class CometChatCallButtons extends MaterialCardView {
     }
 
     /**
+     * Called when the view is attached to a window. Checks if there is an active
+     * call and disables the buttons if a call is active, or enables the buttons if
+     * there is no active call. It also adds the necessary listeners.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        addListener();
+    }
+
+    private void addListener() {
+        callButtonsViewModel.removeListener();
+    }
+
+    /**
+     * Called when the view is detached from a window. Removes listeners to avoid
+     * memory leaks and stops observing call status changes.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        isDetachedFromWindow = true;
+        removeListeners();
+        disposeObservers();
+        super.onDetachedFromWindow();
+    }
+
+    private void removeListeners() {
+        if (callButtonsViewModel != null)
+            callButtonsViewModel.removeListener();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null) {
+            callButtonsViewModel.getCallInitiated().removeObservers(lifecycleOwner);
+            callButtonsViewModel.getStartDirectCall().removeObservers(lifecycleOwner);
+        }
+    }
+
+    /**
      * Interface for handling click events on call buttons.
      */
     public interface OnClick {
@@ -967,5 +979,4 @@ public class CometChatCallButtons extends MaterialCardView {
          */
         void onClick(User user, Group group);
     }
-
 }

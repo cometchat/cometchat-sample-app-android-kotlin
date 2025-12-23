@@ -19,6 +19,7 @@ import java.util.List;
 
 public class CometChatAIAssistantChatHistoryViewModel extends ViewModel {
     private static final String TAG = "CometChatAIAssistChatHistVM";
+    private String LISTENERS_TAG;
     private User user;
     private Group group;
     private MessagesRequest messagesRequest;
@@ -78,7 +79,8 @@ public class CometChatAIAssistantChatHistoryViewModel extends ViewModel {
     }
 
     public void addListener() {
-        CometChatMessageEvents.addListener(TAG+System.currentTimeMillis(), new CometChatMessageEvents() {
+        LISTENERS_TAG = System.currentTimeMillis() + "";
+        CometChatMessageEvents.addListener(LISTENERS_TAG, new CometChatMessageEvents() {
             @Override
             public void ccMessageDeleted(BaseMessage baseMessage) {
                 remove(baseMessage);
@@ -168,5 +170,9 @@ public class CometChatAIAssistantChatHistoryViewModel extends ViewModel {
                 }
             });
         }
+    }
+
+    public void removeListener() {
+        CometChatMessageEvents.removeListener(LISTENERS_TAG);
     }
 }

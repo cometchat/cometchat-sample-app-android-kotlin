@@ -31,7 +31,6 @@ import com.cometchat.chat.models.TypingIndicator;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatConversationsListViewBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
@@ -62,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CometChatConversations extends MaterialCardView {
+    private boolean isDetachedFromWindow;
     private static final String TAG = CometChatConversations.class.getSimpleName();
     private final HashMap<Conversation, Boolean> hashMap = new HashMap<>();
     private final List<CometChatTextFormatter> textFormatters = new ArrayList<>();
@@ -419,7 +419,10 @@ public class CometChatConversations extends MaterialCardView {
         conversationsViewModel = new ViewModelProvider.NewInstanceFactory().create(ConversationsViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
 
+    public void attachObservers() {
         conversationsViewModel.getMutableConversationList().observe(lifecycleOwner, listObserver);
         conversationsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
         conversationsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
@@ -1870,36 +1873,6 @@ public class CometChatConversations extends MaterialCardView {
         conversationsAdapter.setTextFormatters(textFormatters);
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            conversationsViewModel.removeListener();
-            disposeObservers();
-            lifecycleOwner = null;
-            conversationsViewModel = null;
-            conversationsAdapter = null;
-            binding = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: ", e);
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (lifecycleOwner != null) {
-            conversationsViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
-            conversationsViewModel.getStates().removeObservers(lifecycleOwner);
-            conversationsViewModel.insertAtTop().removeObservers(lifecycleOwner);
-            conversationsViewModel.moveToTop().removeObservers(lifecycleOwner);
-            conversationsViewModel.getTyping().removeObservers(lifecycleOwner);
-            conversationsViewModel.updateConversation().removeObservers(lifecycleOwner);
-            conversationsViewModel.playSound().removeObservers(lifecycleOwner);
-            conversationsViewModel.remove().removeObservers(lifecycleOwner);
-            conversationsViewModel.progressState().removeObservers(lifecycleOwner);
-            conversationsViewModel.getCometChatException().removeObservers(lifecycleOwner);
-        }
-    }
-
     public @LayoutRes int getEmptyView() {
         return emptyView;
     }
@@ -2673,10 +2646,35 @@ public class CometChatConversations extends MaterialCardView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
         processFormatters();
         conversationsViewModel.addListener();
         conversationsViewModel.fetchConversation();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        isDetachedFromWindow = true;
+        conversationsViewModel.removeListener();
+        disposeObservers();
+        super.onDetachedFromWindow();
+    }
 
+    public void disposeObservers() {
+        if (lifecycleOwner != null) {
+            conversationsViewModel.getMutableConversationList().removeObservers(lifecycleOwner);
+            conversationsViewModel.getStates().removeObservers(lifecycleOwner);
+            conversationsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            conversationsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            conversationsViewModel.getTyping().removeObservers(lifecycleOwner);
+            conversationsViewModel.updateConversation().removeObservers(lifecycleOwner);
+            conversationsViewModel.playSound().removeObservers(lifecycleOwner);
+            conversationsViewModel.remove().removeObservers(lifecycleOwner);
+            conversationsViewModel.progressState().removeObservers(lifecycleOwner);
+            conversationsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
+    }
 }

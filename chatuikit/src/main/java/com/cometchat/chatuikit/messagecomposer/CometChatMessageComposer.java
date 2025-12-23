@@ -121,6 +121,8 @@ import kotlin.jvm.functions.Function4;
  * </pre>
  */
 public class CometChatMessageComposer extends MaterialCardView {
+    private boolean isDetachedFromWindow;
+
     private static final String TAG = CometChatMessageComposer.class.getSimpleName();
     private LifecycleOwner lifecycleOwner;
 
@@ -436,6 +438,10 @@ public class CometChatMessageComposer extends MaterialCardView {
         composerViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageComposerViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         composerViewModel.sentMessage().observe(lifecycleOwner, this::messageSentSuccess);
         composerViewModel.getException().observe(lifecycleOwner, this::messageSendException);
         composerViewModel.processEdit().observe(lifecycleOwner, this::showEditMessagePreview);
@@ -1653,56 +1659,6 @@ public class CometChatMessageComposer extends MaterialCardView {
         if (message != null) {
             editMessage = null;
             animateVisibilityGone(binding.editPreviewLayout.editMessageLayout);
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
-                bottomSheetDialog.dismiss();
-            }
-            composerViewModel.removeListeners();
-            disposeObservers();
-            destroyTimers();
-            composerViewModel = null;
-            lifecycleOwner = null;
-            binding = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void destroyTimers() {
-        if (typingTimer != null) {
-            typingTimer.cancel();
-            typingTimer = null;
-        }
-        if (queryTimer != null) {
-            queryTimer.cancel();
-            queryTimer = null;
-        }
-        if (operationTimer != null) {
-            operationTimer.cancel();
-            operationTimer = null;
-        }
-    }
-
-    private void disposeObservers() {
-        if (composerViewModel != null && lifecycleOwner != null) {
-            composerViewModel.sentMessage().removeObservers(lifecycleOwner);
-            composerViewModel.getException().removeObservers(lifecycleOwner);
-            composerViewModel.processEdit().removeObservers(lifecycleOwner);
-            composerViewModel.successEdit().removeObservers(lifecycleOwner);
-            composerViewModel.closeTopPanel().removeObservers(lifecycleOwner);
-            composerViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
-            composerViewModel.showTopPanel().removeObservers(lifecycleOwner);
-            composerViewModel.showBottomPanel().removeObservers(lifecycleOwner);
-            composerViewModel.getComposeText().removeObservers(lifecycleOwner);
-            composerViewModel.getIsAIAssistantGenerating().removeObservers(lifecycleOwner);
-            composerViewModel.successQuote().removeObservers(lifecycleOwner);
-            composerViewModel.processQuote().removeObservers(lifecycleOwner);
         }
     }
 
@@ -4025,12 +3981,6 @@ public class CometChatMessageComposer extends MaterialCardView {
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        composerViewModel.addListeners();
-    }
-
-    @Override
     public @Dimension int getStrokeWidth() {
         return strokeWidth;
     }
@@ -4066,6 +4016,60 @@ public class CometChatMessageComposer extends MaterialCardView {
             }
             mentionAllLabelId = id;
             mentionAllLabel = label;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        composerViewModel.addListeners();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
+        composerViewModel.removeListeners();
+        disposeObservers();
+        destroyTimers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    private void destroyTimers() {
+        if (typingTimer != null) {
+            typingTimer.cancel();
+            typingTimer = null;
+        }
+        if (queryTimer != null) {
+            queryTimer.cancel();
+            queryTimer = null;
+        }
+        if (operationTimer != null) {
+            operationTimer.cancel();
+            operationTimer = null;
+        }
+    }
+
+    public void disposeObservers() {
+        if (composerViewModel != null && lifecycleOwner != null) {
+            composerViewModel.sentMessage().removeObservers(lifecycleOwner);
+            composerViewModel.getException().removeObservers(lifecycleOwner);
+            composerViewModel.processEdit().removeObservers(lifecycleOwner);
+            composerViewModel.successEdit().removeObservers(lifecycleOwner);
+            composerViewModel.closeTopPanel().removeObservers(lifecycleOwner);
+            composerViewModel.closeBottomPanel().removeObservers(lifecycleOwner);
+            composerViewModel.showTopPanel().removeObservers(lifecycleOwner);
+            composerViewModel.showBottomPanel().removeObservers(lifecycleOwner);
+            composerViewModel.getComposeText().removeObservers(lifecycleOwner);
+            composerViewModel.getIsAIAssistantGenerating().removeObservers(lifecycleOwner);
+            composerViewModel.successQuote().removeObservers(lifecycleOwner);
+            composerViewModel.processQuote().removeObservers(lifecycleOwner);
         }
     }
 }

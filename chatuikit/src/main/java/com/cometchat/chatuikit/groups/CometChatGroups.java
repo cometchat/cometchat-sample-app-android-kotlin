@@ -58,6 +58,8 @@ import java.util.List;
  * chats. Created on: 22 October 2024
  */
 public class CometChatGroups extends MaterialCardView {
+    private boolean isDetachedFromWindow;
+
     private static final String TAG = CometChatGroups.class.getSimpleName();
     private final HashMap<Group, Boolean> hashMap = new HashMap<>();
     private CometchatGroupListBinding binding;
@@ -327,6 +329,10 @@ public class CometChatGroups extends MaterialCardView {
         groupsViewModel = new ViewModelProvider.NewInstanceFactory().create(GroupsViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         groupsViewModel.getMutableGroupsList().observe(lifecycleOwner, listObserver);
         groupsViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
         groupsViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
@@ -1619,36 +1625,6 @@ public class CometChatGroups extends MaterialCardView {
     }
 
     /**
-     * Called when the view is detached from a window. Removes listeners.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            groupsViewModel.removeListeners();
-            disposeObservers();
-            groupsViewModel = null;
-            groupsAdapter = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, e.toString());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (groupsViewModel != null && lifecycleOwner != null) {
-            groupsViewModel.getMutableGroupsList().removeObservers(lifecycleOwner);
-            groupsViewModel.getStates().removeObservers(lifecycleOwner);
-            groupsViewModel.insertAtTop().removeObservers(lifecycleOwner);
-            groupsViewModel.moveToTop().removeObservers(lifecycleOwner);
-            groupsViewModel.updateGroup().removeObservers(lifecycleOwner);
-            groupsViewModel.removeGroup().removeObservers(lifecycleOwner);
-            groupsViewModel.getCometChatException().removeObservers(lifecycleOwner);
-        }
-    }
-
-    /**
      * Sets the options for displaying CometChat options in the getContext() menu
      * for a group.
      *
@@ -2408,15 +2384,6 @@ public class CometChatGroups extends MaterialCardView {
     public void setGroupTypeVisibility(int groupTypeVisibility) {
         this.groupTypeVisibility = groupTypeVisibility;
         groupsAdapter.hideGroupType(groupTypeVisibility != VISIBLE);
-    }    /**
-     * Called when the view is attached to a window. Adds listeners and fetches
-     * groups.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        groupsViewModel.addListeners();
-        groupsViewModel.fetchGroup();
     }
 
     /**
@@ -2577,5 +2544,43 @@ public class CometChatGroups extends MaterialCardView {
     public void setAdapter(GroupsAdapter adapter) {
         this.groupsAdapter = adapter;
         binding.recyclerViewList.setAdapter(adapter);
+    }
+
+    /**
+     * Called when the view is attached to a window. Adds listeners and fetches
+     * groups.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        groupsViewModel.addListeners();
+        groupsViewModel.fetchGroup();
+    }
+
+    /**
+     * Called when the view is detached from a window. Removes listeners.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        groupsViewModel.removeListeners();
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (groupsViewModel != null && lifecycleOwner != null) {
+            groupsViewModel.getMutableGroupsList().removeObservers(lifecycleOwner);
+            groupsViewModel.getStates().removeObservers(lifecycleOwner);
+            groupsViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            groupsViewModel.moveToTop().removeObservers(lifecycleOwner);
+            groupsViewModel.updateGroup().removeObservers(lifecycleOwner);
+            groupsViewModel.removeGroup().removeObservers(lifecycleOwner);
+            groupsViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
     }
 }

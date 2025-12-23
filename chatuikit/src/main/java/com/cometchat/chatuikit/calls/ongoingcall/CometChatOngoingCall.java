@@ -18,7 +18,6 @@ import com.cometchat.chat.exceptions.CometChatException;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.calls.CallingExtension;
 import com.cometchat.chatuikit.databinding.CometchatOngoingCallScreenBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.OnError;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
@@ -33,6 +32,7 @@ import com.google.android.material.card.MaterialCardView;
  * style for the ongoing call view.
  */
 public class CometChatOngoingCall extends MaterialCardView implements DefaultLifecycleObserver {
+    private boolean isDetachedFromWindow;
     private static final String TAG = CometChatOngoingCall.class.getSimpleName();
     private CometchatOngoingCallScreenBinding binding;
     private OngoingCallViewModel viewModel;
@@ -69,9 +69,7 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
         viewModel = new ViewModelProvider.NewInstanceFactory().create(OngoingCallViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
-        viewModel.getEndCall().observe(lifecycleOwner, this::endCall);
-        viewModel.getException().observe(lifecycleOwner, this::showError);
-        viewModel.hideProgressBar().observe(lifecycleOwner, this::hideProgressBar);
+        attachObservers();
 
         Activity activity = Utils.getActivity(getContext());
         if (!Utils.isActivityUsable(activity)) return;
@@ -81,6 +79,12 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
                 CometChatCalls.enterPIPMode();
             }
         }));
+    }
+
+    public void attachObservers() {
+        viewModel.getEndCall().observe(lifecycleOwner, this::endCall);
+        viewModel.getException().observe(lifecycleOwner, this::showError);
+        viewModel.hideProgressBar().observe(lifecycleOwner, this::hideProgressBar);
     }
 
     public void setCallSettingsBuilder(CometChatCalls.CallSettingsBuilder callSettingsBuilder) {
@@ -149,29 +153,28 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
         viewModel.addListener();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        if (Utils.isActivityUsable(activity)) {
-            activity = null;
-        }
-        super.onDetachedFromWindow();
-        dispose();
-        try {
-            viewModel.removeListener();
-            dispose();
-            viewModel = null;
-            binding = null;
-            lifecycleOwner = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
+        disposeObservers();
+        removeListeners();
+        isDetachedFromWindow = true;
         super.onDetachedFromWindow();
     }
 
-    private void dispose() {
+    private void removeListeners() {
+        if (viewModel != null) {
+            viewModel.removeListener();
+        }
+    }
+
+    public void disposeObservers() {
         if (getContext() instanceof LifecycleOwner) {
             ((LifecycleOwner) getContext()).getLifecycle().removeObserver(this);
         }
@@ -181,7 +184,6 @@ public class CometChatOngoingCall extends MaterialCardView implements DefaultLif
             viewModel.hideProgressBar().removeObservers(lifecycleOwner);
             viewModel.isJoined().removeObservers(lifecycleOwner);
         }
-
     }
 
     @Override

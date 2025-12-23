@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         minSdk 24
-        versionCode 33
-        versionName "5.2.6"
+        versionCode 34
+        versionName "5.2.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
@@ -100,6 +100,16 @@ publishing {
         maven {
             url = "$projectDir/distribution"
         }
+        maven {
+            name = "cloudsmith"
+            url = "https://api-g.cloudsmith.io/maven/cometchat/cometchat"
+            credentials {
+                Properties properties = new Properties()
+                properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                username = properties.getProperty("cloudsmith.username")
+                password = properties.getProperty("cloudsmith.apikey")
+            }
+        }
     }
 
     publications {
@@ -176,7 +186,7 @@ dependencies {
     implementation libs.recycler
     implementation libs.recycler.table
 
-    implementation (libs.syntax.highlight) {
+    implementation(libs.syntax.highlight) {
         exclude group: "org.jetbrains", module: "annotations-java5"
     }
 

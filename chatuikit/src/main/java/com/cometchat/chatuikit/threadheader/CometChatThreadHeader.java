@@ -20,7 +20,6 @@ import com.cometchat.chat.models.BaseMessage;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatThreadHeaderBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.messagelist.MessageAdapter;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
@@ -97,6 +96,8 @@ import java.util.List;
  */
 public class CometChatThreadHeader extends MaterialCardView {
     private static final String TAG = CometChatThreadHeader.class.getSimpleName();
+
+    private boolean isDetachedFromWindow;
 
     private LifecycleOwner lifecycleOwner;
 
@@ -263,12 +264,16 @@ public class CometChatThreadHeader extends MaterialCardView {
         threadHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(ThreadHeaderViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner != null) {
-            threadHeaderViewModel.getParentMessageListLiveData().observe(lifecycleOwner, this::updateMessage);
-            threadHeaderViewModel.getReplyCount().observe(lifecycleOwner, this::updateReplyCount);
+            attachObservers();
         }
 
         // Apply additional style attributes to the view
         applyStyleAttributes(attrs, defStyleAttr, 0);
+    }
+
+    public void attachObservers() {
+        threadHeaderViewModel.getParentMessageListLiveData().observe(lifecycleOwner, this::updateMessage);
+        threadHeaderViewModel.getReplyCount().observe(lifecycleOwner, this::updateReplyCount);
     }
 
     /**
@@ -433,22 +438,6 @@ public class CometChatThreadHeader extends MaterialCardView {
     }
 
     /**
-     * Called when the view is attached to a window.
-     *
-     * <p>
-     * This method is invoked when the view is being attached to a window. It calls
-     * the superclass implementation and then adds a listener to the
-     * {@link ThreadHeaderViewModel}. This listener is responsible for receiving
-     * updates and changes related to the parent message and its replies while the
-     * view is active.
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        threadHeaderViewModel.addListener();
-    }
-
-    /**
      * Updates the reply count displayed in the thread header.
      *
      * <p>
@@ -566,37 +555,6 @@ public class CometChatThreadHeader extends MaterialCardView {
      */
     private void updateMessage(List<BaseMessage> message) {
         adapter.setBaseMessageList(message);
-    }
-
-    /**
-     * Called when the view is detached from a window.
-     *
-     * <p>
-     * This method is invoked when the view is being detached from a window. It
-     * calls the superclass implementation and then removes the listener from the
-     * {@link ThreadHeaderViewModel}. This is done to prevent memory leaks and
-     * ensure that the view model no longer sends updates to a view that is no
-     * longer displayed.
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        try {
-            threadHeaderViewModel.removeListener();
-            disposeObservers();
-            lifecycleOwner = null;
-            threadHeaderViewModel = null;
-            adapter = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-    }
-
-    private void disposeObservers() {
-        if (lifecycleOwner != null) {
-            threadHeaderViewModel.getParentMessageListLiveData().removeObservers(lifecycleOwner);
-            threadHeaderViewModel.getReplyCount().removeObservers(lifecycleOwner);
-        }
     }
 
     /**
@@ -960,4 +918,48 @@ public class CometChatThreadHeader extends MaterialCardView {
         binding.repliesLayout.setVisibility(visibility);
     }
 
+    /**
+     * Called when the view is attached to a window.
+     *
+     * <p>
+     * This method is invoked when the view is being attached to a window. It calls
+     * the superclass implementation and then adds a listener to the
+     * {@link ThreadHeaderViewModel}. This listener is responsible for receiving
+     * updates and changes related to the parent message and its replies while the
+     * view is active.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        threadHeaderViewModel.addListener();
+    }
+
+    /**
+     * Called when the view is detached from a window.
+     *
+     * <p>
+     * This method is invoked when the view is being detached from a window. It
+     * calls the superclass implementation and then removes the listener from the
+     * {@link ThreadHeaderViewModel}. This is done to prevent memory leaks and
+     * ensure that the view model no longer sends updates to a view that is no
+     * longer displayed.
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        threadHeaderViewModel.removeListener();
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null) {
+            threadHeaderViewModel.getParentMessageListLiveData().removeObservers(lifecycleOwner);
+            threadHeaderViewModel.getReplyCount().removeObservers(lifecycleOwner);
+        }
+    }
 }

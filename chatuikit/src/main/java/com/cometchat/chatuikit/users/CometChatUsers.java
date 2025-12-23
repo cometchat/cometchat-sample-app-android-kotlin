@@ -27,7 +27,6 @@ import com.cometchat.chat.models.User;
 import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.databinding.CometchatUserListBinding;
-import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.interfaces.Function2;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
@@ -61,6 +60,7 @@ import java.util.List;
 public class CometChatUsers extends MaterialCardView {
     private static final String TAG = CometChatUsers.class.getSimpleName();
 
+    private boolean isDetachedFromWindow;
     private LifecycleOwner lifecycleOwner;
 
     private int toolbarVisibility = VISIBLE;
@@ -329,6 +329,10 @@ public class CometChatUsers extends MaterialCardView {
         usersViewModel = new ViewModelProvider.NewInstanceFactory().create(UsersViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+    }
+
+    public void attachObservers() {
         usersViewModel.getMutableUsersList().observe(lifecycleOwner, listObserver);
         usersViewModel.getStates().observe(lifecycleOwner, stateChangeObserver);
         usersViewModel.insertAtTop().observe(lifecycleOwner, insertAtTop);
@@ -1715,33 +1719,6 @@ public class CometChatUsers extends MaterialCardView {
         usersAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            usersViewModel.removeListeners();
-            disposeObservers();
-            lifecycleOwner = null;
-            usersViewModel = null;
-            binding = null;
-            usersAdapter = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: ", e);
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        if (lifecycleOwner != null) {
-            usersViewModel.getMutableUsersList().removeObservers(lifecycleOwner);
-            usersViewModel.getStates().removeObservers(lifecycleOwner);
-            usersViewModel.insertAtTop().removeObservers(lifecycleOwner);
-            usersViewModel.moveToTop().removeObservers(lifecycleOwner);
-            usersViewModel.updateUser().removeObservers(lifecycleOwner);
-            usersViewModel.removeUser().removeObservers(lifecycleOwner);
-            usersViewModel.getCometChatException().removeObservers(lifecycleOwner);
-        }
-    }
-
     public int getLoadingView() {
         return loadingViewId;
     }
@@ -2644,7 +2621,31 @@ public class CometChatUsers extends MaterialCardView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
         usersViewModel.addListeners();
         usersViewModel.fetchUsers();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        usersViewModel.removeListeners();
+        disposeObservers();
+        isDetachedFromWindow = true;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        if (lifecycleOwner != null) {
+            usersViewModel.getMutableUsersList().removeObservers(lifecycleOwner);
+            usersViewModel.getStates().removeObservers(lifecycleOwner);
+            usersViewModel.insertAtTop().removeObservers(lifecycleOwner);
+            usersViewModel.moveToTop().removeObservers(lifecycleOwner);
+            usersViewModel.updateUser().removeObservers(lifecycleOwner);
+            usersViewModel.removeUser().removeObservers(lifecycleOwner);
+            usersViewModel.getCometChatException().removeObservers(lifecycleOwner);
+        }
     }
 }

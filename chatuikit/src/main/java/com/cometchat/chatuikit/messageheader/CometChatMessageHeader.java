@@ -46,6 +46,8 @@ import java.util.Map;
  * display the header of a chat conversation.
  */
 public class CometChatMessageHeader extends MaterialCardView {
+    private boolean isDetachedFromWindow;
+
     private static final String TAG = CometChatMessageHeader.class.getSimpleName();
     private CometchatMessageHeaderBinding binding;
     private LifecycleOwner lifecycleOwner;
@@ -165,6 +167,13 @@ public class CometChatMessageHeader extends MaterialCardView {
         messageHeaderViewModel = new ViewModelProvider.NewInstanceFactory().create(MessageHeaderViewModel.class);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+        attachObservers();
+        configureBackIcon();
+        configureMenuIcon();
+        aiAssistantButtonClickListeners();
+    }
+
+    public void attachObservers() {
         messageHeaderViewModel.getMemberCount().observe(lifecycleOwner, this::setMembersCount);
         messageHeaderViewModel.getUserPresenceStatus().observe(lifecycleOwner, this::showUserStatusAndLastSeen);
         messageHeaderViewModel.getUpdatedGroup().observe(lifecycleOwner, this::setGroup);
@@ -173,9 +182,6 @@ public class CometChatMessageHeader extends MaterialCardView {
             if (onError != null) onError.onError(e);
         });
         messageHeaderViewModel.getTyping().observe(lifecycleOwner, this::setTypingIndicator);
-        configureBackIcon();
-        configureMenuIcon();
-        aiAssistantButtonClickListeners();
     }
 
     private void configureMenuIcon() {
@@ -449,35 +455,6 @@ public class CometChatMessageHeader extends MaterialCardView {
         }
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        try {
-            messageHeaderViewModel.removeListeners();
-            disposeObservers();
-            messageHeaderViewModel = null;
-            lifecycleOwner = null;
-            binding = null;
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "onDetachedFromWindow: " + e.getMessage());
-        }
-        super.onDetachedFromWindow();
-    }
-
-    private void disposeObservers() {
-        try {
-            if (messageHeaderViewModel != null && lifecycleOwner != null) {
-                messageHeaderViewModel.getMemberCount().removeObservers(lifecycleOwner);
-                messageHeaderViewModel.getUserPresenceStatus().removeObservers(lifecycleOwner);
-                messageHeaderViewModel.getUpdatedGroup().removeObservers(lifecycleOwner);
-                messageHeaderViewModel.getUpdatedUser().removeObservers(lifecycleOwner);
-                messageHeaderViewModel.getException().removeObservers(lifecycleOwner);
-                messageHeaderViewModel.getTyping().removeObservers(lifecycleOwner);
-            }
-        } catch (Exception e) {
-            CometChatLogger.e(TAG, "dispose: " + e.getMessage());
-        }
-    }
-
     /**
      * Sets a callback for handling back button presses.
      *
@@ -639,17 +616,6 @@ public class CometChatMessageHeader extends MaterialCardView {
      */
     public @Dimension int getStrokeWidth() {
         return strokeWidth;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (user != null) {
-            setUser(messageHeaderViewModel.getUser());
-        } else if (group != null) {
-            setGroup(messageHeaderViewModel.getGroup());
-        }
-        messageHeaderViewModel.addListener();
     }
 
     /**
@@ -1328,4 +1294,43 @@ public class CometChatMessageHeader extends MaterialCardView {
     public void setPopupMenuStyle(@StyleRes int customHeaderPopUpMenuStyle) {
         this.popUpMenuStyle = customHeaderPopUpMenuStyle;
     }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+        if (user != null) {
+            setUser(messageHeaderViewModel.getUser());
+        } else if (group != null) {
+            setGroup(messageHeaderViewModel.getGroup());
+        }
+        messageHeaderViewModel.addListener();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        messageHeaderViewModel.removeListeners();
+        disposeObservers();
+        isDetachedFromWindow = false;
+        super.onDetachedFromWindow();
+    }
+
+    public void disposeObservers() {
+        try {
+            if (messageHeaderViewModel != null && lifecycleOwner != null) {
+                messageHeaderViewModel.getMemberCount().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUserPresenceStatus().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUpdatedGroup().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getUpdatedUser().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getException().removeObservers(lifecycleOwner);
+                messageHeaderViewModel.getTyping().removeObservers(lifecycleOwner);
+            }
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, "dispose: " + e.getMessage());
+        }
+    }
+
 }

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class CometChatScopeChange extends MaterialCardView {
+    private boolean isDetachedFromWindow;
     private static final String TAG = CometChatScopeChange.class.getSimpleName();
     /**
      * Default role titles used in the layout.
@@ -175,7 +176,7 @@ public class CometChatScopeChange extends MaterialCardView {
         applyStyleAttributes(attrs, defStyleAttr, 0);
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner != null) {
-            viewModel.getStates().observe(lifecycleOwner, this::setDialogState);
+            attachObservers();
         }
         binding.cometchatScopeChangeCancelButton.setOnClickListener(v -> {
             if (onNegativeButtonClick != null) {
@@ -190,6 +191,10 @@ public class CometChatScopeChange extends MaterialCardView {
                 viewModel.changeScope(scopeAdapter.getSelectedRole());
             }
         });
+    }
+
+    public void attachObservers() {
+        viewModel.getStates().observe(lifecycleOwner, this::setDialogState);
     }
 
     /**
@@ -800,22 +805,28 @@ public class CometChatScopeChange extends MaterialCardView {
         }
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (isDetachedFromWindow) {
+            attachObservers();
+            isDetachedFromWindow = false;
+        }
+    }
+
     /**
      * Called when the view is detached from a window. Removes observers.
      */
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        dispose();
+        disposeObservers();
+        isDetachedFromWindow = true;
     }
 
-    private void dispose() {
+    public void disposeObservers() {
         if (lifecycleOwner != null && viewModel != null) {
             viewModel.getStates().removeObservers(lifecycleOwner);
         }
-        viewModel = null;
-        scopeAdapter = null;
-        binding = null;
-        lifecycleOwner = null;
     }
 }
