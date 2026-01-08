@@ -42,6 +42,7 @@ public class AdditionParameter {
     private int groupActionMessageVisibility = View.VISIBLE;
     private int moderationViewVisibility = View.VISIBLE;
     private int flagOptionVisibility = View.VISIBLE;
+    private int markUnreadOptionVisibility = View.GONE;
 
     private OnItemClick<BaseMessage> onMessagePreviewClick;
 
@@ -607,5 +608,13 @@ public class AdditionParameter {
 
     public void setFlagOptionVisibility(int flagOptionVisibility) {
         this.flagOptionVisibility = flagOptionVisibility;
+    }
+
+    public int getMarkUnreadOptionVisibility() {
+        return markUnreadOptionVisibility;
+    }
+
+    public void setMarkUnreadOptionVisibility(int markUnreadOptionVisibility) {
+        this.markUnreadOptionVisibility = markUnreadOptionVisibility;
     }
 }

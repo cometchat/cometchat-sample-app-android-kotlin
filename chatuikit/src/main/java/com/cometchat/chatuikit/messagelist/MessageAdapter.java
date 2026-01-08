@@ -36,6 +36,7 @@ import com.cometchat.chatuikit.shared.models.StreamMessage;
 import com.cometchat.chatuikit.shared.resources.localise.CometChatLocalize;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderAdapter;
+import com.cometchat.chatuikit.shared.resources.utils.unread_message_decoration.NewMessageIndicatorDecorationAdapter;
 import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.utils.MessageReceiptUtils;
 import com.cometchat.chatuikit.shared.views.date.CometChatDate;
@@ -52,7 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<MessageAdapter.DateItemHolder> {
+public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<MessageAdapter.DateItemHolder>, NewMessageIndicatorDecorationAdapter<MessageAdapter.NewMessageIndicatorViewHolder> {
     private static final String TAG = MessageAdapter.class.getSimpleName();
     // Message Type Constants
     private static final String LEFT_MESSAGE = "1";
@@ -76,6 +77,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private CometChatMessageList.ThreadReplyClick threadReplyClick;
     private boolean disableReadReceipt;
     private boolean hideModerationView;
+    private View customUnreadHeaderView;
     private UIKitConstants.MessageListAlignment listAlignment = UIKitConstants.MessageListAlignment.STANDARD;
     private boolean showAvatar = false;
     private boolean showLeftBubbleUserAvatar = false;
@@ -764,6 +766,26 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    @Override
+    public BaseMessage getNewMessageIndicatorId(int position) {
+        if (baseMessageList != null && position >= 0 && position < baseMessageList.size()) {
+            return baseMessageList.get(position);
+        }
+        return null;
+    }
+
+    @Override
+    public NewMessageIndicatorViewHolder onCreateNewMessageViewHolder(ViewGroup var1) {
+        if (customUnreadHeaderView != null) {
+            return new NewMessageIndicatorViewHolder(customUnreadHeaderView);
+        }
+        return new NewMessageIndicatorViewHolder(LayoutInflater.from(var1.getContext()).inflate(R.layout.cometchat_new_message_indicator, var1, false));
+    }
+
+    @Override
+    public void onBindNewMessageViewHolder(NewMessageIndicatorViewHolder var1, int position, long messageId) {
+    }
+
     /**
      * Retrieves the date separator pattern formatted for a given message. This
      * method returns a formatted string representing the date separator for the
@@ -854,6 +876,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (right >= 0) this.rightBubbleMarginEnd = Utils.convertDpToPx(context, right);
         // Notify the adapter that the data has changed to refresh the view
         notifyDataSetChanged();
+    }
+
+    public void setNewMessageIndicatorView(View view) {
+        this.customUnreadHeaderView = view;
     }
 
     /**
@@ -7231,6 +7257,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         DateItemHolder(@NonNull View itemView) {
             super(itemView);
             txtMessageDate = itemView.findViewById(R.id.txt_message_date); // Initialize date text view
+        }
+    }
+
+    public static class NewMessageIndicatorViewHolder extends RecyclerView.ViewHolder {
+
+        /**
+         * Constructs a DateItemHolder with the specified item view.
+         *
+         * @param itemView The inflated view for the date item.
+         */
+        NewMessageIndicatorViewHolder(@NonNull View itemView) {
+            super(itemView);
         }
     }
 

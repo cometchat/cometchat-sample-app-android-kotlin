@@ -328,6 +328,7 @@ public final class UIKitConstants {
         public static final String REPLY_IN_THREAD = "reply_in_thread";
         public static final String REPLY_TO_MESSAGE = "reply_to_message";
         public static final String REPORT = "report";
+        public static final String MARK_UNREAD = "mark_unread";
     }
 
     public static final class files {

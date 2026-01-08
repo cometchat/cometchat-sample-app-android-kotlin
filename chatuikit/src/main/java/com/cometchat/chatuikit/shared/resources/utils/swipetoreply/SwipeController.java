@@ -45,11 +45,14 @@ public class SwipeController extends ItemTouchHelper.Callback {
             }
         }
         if (messageAdapter != null && messageAdapter.getBaseMessageList() != null && !messageAdapter.getBaseMessageList().isEmpty()) {
-            BaseMessage baseMessage = messageAdapter.getBaseMessageList().get(viewHolder.getAbsoluteAdapterPosition());
-            if (baseMessage != null && (baseMessage.getDeletedAt() > 0 || baseMessage.getSentAt() == 0)
-                    || baseMessage != null && baseMessage.getId() == 0
-                    || (baseMessage instanceof TextMessage && UIKitConstants.ModerationConstants.DISAPPROVED.equals(((TextMessage) baseMessage).getModerationStatus()))) {
-                return ItemTouchHelper.Callback.makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, 0);
+            int position = viewHolder.getAbsoluteAdapterPosition();
+            if (position != RecyclerView.NO_POSITION && position < messageAdapter.getBaseMessageList().size()) {
+                BaseMessage baseMessage = messageAdapter.getBaseMessageList().get(position);
+                if (baseMessage != null && (baseMessage.getDeletedAt() > 0 || baseMessage.getSentAt() == 0)
+                        || baseMessage != null && baseMessage.getId() == 0
+                        || (baseMessage instanceof TextMessage && UIKitConstants.ModerationConstants.DISAPPROVED.equals(((TextMessage) baseMessage).getModerationStatus()))) {
+                    return ItemTouchHelper.Callback.makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, 0);
+                }
             }
         }
         return ItemTouchHelper.Callback.makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.RIGHT);

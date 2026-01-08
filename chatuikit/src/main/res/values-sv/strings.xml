@@ -252,5 +252,7 @@ Vänligen försök igen.</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">Häleri / Mobbningsbeteende</string>
     <string name="cometchat_notify_everyone_in_this_group">Meddela alla i denna grupp</string>
     <string name="cometchat_notify_all" translatable="true">alla</string>
+    <string name="cometchat_mark_unread">Markera som oläst</string>
+    <string name="cometchat_new">Ny</string>
 
 </resources>

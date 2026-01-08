@@ -245,5 +245,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Assédio / Bullying</string>
     <string name="cometchat_notify_everyone_in_this_group">Notificar todos neste grupo</string>
     <string name="cometchat_notify_all" translatable="true">todos</string>
+    <string name="cometchat_mark_unread">Marcar como não lido</string>
+    <string name="cometchat_new">Novo</string>
 
 </resources>

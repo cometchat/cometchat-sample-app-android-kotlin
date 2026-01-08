@@ -246,5 +246,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Gangguan / Membuli</string>
     <string name="cometchat_notify_everyone_in_this_group">Beritahu semua orang dalam kumpulan ini</string>
     <string name="cometchat_notify_all" translatable="true">semua</string>
+    <string name="cometchat_mark_unread">Tandakan sebagai belum dibaca</string>
+    <string name="cometchat_new">Baru</string>
 
 </resources>

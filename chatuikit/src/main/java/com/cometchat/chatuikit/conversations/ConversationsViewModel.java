@@ -73,6 +73,7 @@ public class ConversationsViewModel extends ViewModel {
     private ConversationsRequest conversationsRequest;
     private ConversationsRequest.ConversationsRequestBuilder conversationsRequestBuilder;
     private Handler handler = new Handler();
+    private long latestMessageId = -1;
 
     public ConversationsViewModel() {
         typing = new MutableLiveData<>();
@@ -172,22 +173,10 @@ public class ConversationsViewModel extends ViewModel {
                 if (conversation.getLastMessage() instanceof CustomMessage) {
                     incrementUnreadCount = shouldUpdateConversationForCustomMessage((CustomMessage) conversation.getLastMessage());
                 }
-                boolean isCategoryMessage = conversation
-                    .getLastMessage()
-                    .getCategory()
-                    .equalsIgnoreCase(CometChatConstants.CATEGORY_MESSAGE) || (conversation
-                    .getLastMessage()
-                    .getCategory()
-                    .equalsIgnoreCase(CometChatConstants.CATEGORY_ACTION) && conversation
-                    .getLastMessage()
-                    .getType()
-                    .equalsIgnoreCase(CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER)) || conversation
-                    .getLastMessage()
-                    .getCategory()
-                    .equalsIgnoreCase(CometChatConstants.CATEGORY_INTERACTIVE) || conversation
-                    .getLastMessage()
-                    .getCategory()
-                    .equalsIgnoreCase(CometChatConstants.CATEGORY_CALL);
+                boolean isCategoryMessage = conversation.getLastMessage().getCategory().equalsIgnoreCase(CometChatConstants.CATEGORY_MESSAGE)
+                        || (conversation.getLastMessage().getCategory().equalsIgnoreCase(CometChatConstants.CATEGORY_ACTION) && conversation.getLastMessage().getType().equalsIgnoreCase(CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER))
+                        || conversation.getLastMessage().getCategory().equalsIgnoreCase(CometChatConstants.CATEGORY_INTERACTIVE)
+                        || conversation.getLastMessage().getCategory().equalsIgnoreCase(CometChatConstants.CATEGORY_CALL);
                 if (!conversation.getLastMessage().getSender().getUid().equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
                     if (conversation.getLastMessage().getReadAt() == 0) {
                         if (isActionMessage) {
@@ -241,6 +230,7 @@ public class ConversationsViewModel extends ViewModel {
         } else {
             conversation.setUnreadMessageCount(oldConversation.getUnreadMessageCount());
         }
+        conversation.setLatestMessageId(latestMessageId);
         updateConversationObject(oldConversationIndex, conversation);
     }
 
@@ -248,6 +238,19 @@ public class ConversationsViewModel extends ViewModel {
         conversationList.remove(oldConversationIndex);
         conversationList.add(0, conversation);
         moveToTop.setValue(oldConversationIndex);
+    }
+
+    private void updateConversationInList(Conversation conversation) {
+        for (int i = 0; i < conversationList.size(); i++) {
+            Conversation tempConversation = conversationList.get(i);
+            if (tempConversation.getConversationId().equals(conversation.getConversationId())) {
+                tempConversation.setUnreadMessageCount(conversation.getUnreadMessageCount());
+                conversationList.set(i, tempConversation);
+                updateConversation.setValue(i);
+                mutableConversationList.setValue(conversationList);
+                break;
+            }
+        }
     }
 
     public void addListener() {
@@ -323,6 +326,11 @@ public class ConversationsViewModel extends ViewModel {
             @Override
             public void ccConversationDeleted(Conversation conversation) {
                 remove(conversation);
+            }
+
+            @Override
+            public void ccUpdateConversation(Conversation conversation) {
+                updateConversationInList(conversation);
             }
         });
 
@@ -413,6 +421,7 @@ public class ConversationsViewModel extends ViewModel {
             @Override
             public void ccMessageSent(BaseMessage baseMessage, int status) {
                 if (status == MessageStatus.SUCCESS && baseMessage != null) {
+                    latestMessageId = baseMessage.getId();
                     checkAndUpdateConversation(baseMessage, false);
                 }
             }
@@ -436,16 +445,19 @@ public class ConversationsViewModel extends ViewModel {
 
             @Override
             public void onTextMessageReceived(TextMessage message) {
+                latestMessageId = message.getId();
                 checkAndUpdateConversation(message, true);
             }
 
             @Override
             public void onMediaMessageReceived(MediaMessage message) {
+                latestMessageId = message.getId();
                 checkAndUpdateConversation(message, true);
             }
 
             @Override
             public void onCustomMessageReceived(CustomMessage message) {
+                latestMessageId = message.getId();
                 checkAndUpdateConversation(message, true);
             }
 
@@ -486,21 +498,25 @@ public class ConversationsViewModel extends ViewModel {
 
             @Override
             public void onFormMessageReceived(FormMessage formMessage) {
+                latestMessageId = formMessage.getId();
                 checkAndUpdateConversation(formMessage, true);
             }
 
             @Override
             public void onSchedulerMessageReceived(@NonNull SchedulerMessage schedulerMessage) {
+                latestMessageId = schedulerMessage.getId();
                 checkAndUpdateConversation(schedulerMessage, true);
             }
 
             @Override
             public void onCardMessageReceived(CardMessage cardMessage) {
+                latestMessageId = cardMessage.getId();
                 checkAndUpdateConversation(cardMessage, true);
             }
 
             @Override
             public void onCustomInteractiveMessageReceived(CustomInteractiveMessage customInteractiveMessage) {
+                latestMessageId = customInteractiveMessage.getId();
                 checkAndUpdateConversation(customInteractiveMessage, true);
             }
 

@@ -382,6 +382,13 @@ public class CometChatUIKitHelper {
         }
     }
 
+    public static void onConversationUpdate(Conversation conversation) {
+        List<CometChatConversationEvents> events = new ArrayList<>(CometChatConversationEvents.conversationEvents.values());
+        for (CometChatConversationEvents event : events) {
+            event.ccUpdateConversation(conversation);
+        }
+    }
+
     public static void onAIToolArgumentsReceived(AIToolArgumentMessage aiToolArgumentMessage) {
         List<CometChatMessageEvents> events = new ArrayList<>(CometChatMessageEvents.messageEvents.values());
         for (CometChatMessageEvents event : events) {

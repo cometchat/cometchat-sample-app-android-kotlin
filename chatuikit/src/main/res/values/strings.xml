@@ -238,6 +238,7 @@
     <string name="cometchat_details" translatable="true">Details</string>
     <string name="cometchat_search_in" translatable="true">Search in</string>
     <string name="cometchat_report">Report</string>
+    <string name="cometchat_mark_unread">Mark Unread</string>
     <string name="cometchat_report_a_message" translatable="true">Report A Message</string>
     <string name="cometchat_report_message_title" translatable="true">Report a message</string>
     <string name="cometchat_report_message_description" translatable="true">Report this chat if it goes against our Community Standards. We won\'t tell the account you reported them.</string>
@@ -255,4 +256,5 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Harassment / Bullying</string>
     <string name="cometchat_notify_everyone_in_this_group">Notify everyone in this group</string>
     <string name="cometchat_notify_all" translatable="true">all</string>
+    <string name="cometchat_new">New</string>
 </resources>

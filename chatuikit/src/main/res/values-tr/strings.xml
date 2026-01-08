@@ -247,5 +247,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Taciz / Zorbalık</string>
     <string name="cometchat_notify_everyone_in_this_group">Bu gruptaki herkesi bilgilendir</string>
     <string name="cometchat_notify_all" translatable="true">hepsi</string>
+    <string name="cometchat_mark_unread">Okunmamış olarak işaretle</string>
+    <string name="cometchat_new">Yeni</string>
 
 </resources>

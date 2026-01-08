@@ -253,5 +253,7 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">Priekabiavimas / Terorizavimas</string>
     <string name="cometchat_notify_everyone_in_this_group">Pranešti visiems šioje grupėje</string>
     <string name="cometchat_notify_all" translatable="true">visi</string>
+    <string name="cometchat_mark_unread">Pažymėti kaip neperskaitytą</string>
+    <string name="cometchat_new">Naujas</string>
 
 </resources>

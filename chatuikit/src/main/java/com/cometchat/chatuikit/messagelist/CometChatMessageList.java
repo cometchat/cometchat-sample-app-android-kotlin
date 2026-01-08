@@ -101,6 +101,7 @@ import com.cometchat.chatuikit.shared.resources.utils.custom_dialog.CometChatCon
 import com.cometchat.chatuikit.shared.resources.utils.sticker_header.StickyHeaderDecoration;
 import com.cometchat.chatuikit.shared.resources.utils.swipetoreply.SwipeActions;
 import com.cometchat.chatuikit.shared.resources.utils.swipetoreply.SwipeController;
+import com.cometchat.chatuikit.shared.resources.utils.unread_message_decoration.NewMessageIndicatorDecoration;
 import com.cometchat.chatuikit.shared.views.aiconversationstarter.CometChatAIConversationStarterView;
 import com.cometchat.chatuikit.shared.views.aiconversationsummary.view.CometChatAIConversationSummaryView;
 import com.cometchat.chatuikit.shared.views.aismartreplies.CometChatAISmartRepliesView;
@@ -181,6 +182,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private int avatarVisibility = VISIBLE;
     private int receiptsVisibility = VISIBLE;
     private int moderationViewVisibility = VISIBLE;
+    private int markAsUnreadOptionVisibility = GONE;
+
+    private boolean startFromUnreadMessages = false;
     // User and Group
     private User user;
     private Group group;
@@ -190,7 +194,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private CometChatSoundManager soundManager;
     // Message and Template Management
     private BaseMessage baseMessage;
-    private long gotoMessageId;
+    private long gotoMessageId = -1;
     private CometChatMessageBubble messageBubble;
     private CometChatMessageTemplate messageTemplate;
     private List<CometChatMessageOption> customOption = new ArrayList<>();
@@ -200,6 +204,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private LinearLayoutManager linearLayoutManager;
     private MessageAdapter messageAdapter;
     private StickyHeaderDecoration stickyHeaderDecoration;
+    private NewMessageIndicatorDecoration newMessageIndicatorDecoration;
     private boolean autoFetch = true;
     private boolean isAgentChat = false;
     private boolean hasMore;
@@ -623,7 +628,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             if (isScrolling) rvChatListView.stopScroll();
             messageListViewModel.resetMessageRequest();
             messageListViewModel.clear();
-            messageListViewModel.fetchMessages();
+            messageListViewModel.clearGoToMessageId();
+            if (atBottom()) messageListViewModel.fetchMessages();
+            else messageListViewModel.fetchMessagesWithUnreadCount();
             newMessageLayout.setVisibility(GONE);
         });
 
@@ -639,8 +646,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                         setHighlightMessageId(message.getId(), index);
                     }
                 }
-            } else
-                messageListViewModel.goToMessage(message.getId());
+            } else messageListViewModel.goToMessage(message.getId());
         });
     }
 
@@ -707,19 +713,35 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         footerView.removeView(aiConversationSummaryView);
     }
 
+    /** Sets the summary text for the AI conversation summary view.
+     *
+     * @param summary The summary text to be displayed.
+     */
     private void setConversationSummary(String summary) {
         aiConversationSummaryView.setSummary(summary);
     }
 
+    /** Checks if the AI conversation summary feature is enabled.
+     *
+     * @return A boolean indicating whether the AI conversation summary feature is enabled.
+     */
     public boolean isEnableConversationSummary() {
         return enableConversationSummary;
     }
 
+    /** Enables or disables the AI conversation summary feature.
+     *
+     * @param enableConversationSummary A boolean indicating whether to enable or disable the feature.
+     */
     public void setEnableConversationSummary(boolean enableConversationSummary) {
         this.enableConversationSummary = enableConversationSummary;
         messageListViewModel.setEnableConversationSummary(enableConversationSummary);
     }
 
+    /** Sets the threshold for unread messages to display the unread header.
+     *
+     * @param unreadTresHold The threshold value for unread messages.
+     */
     public void setUnreadMessageThreshold(int unreadTresHold) {
         this.unreadMessageThreshold = unreadTresHold;
         messageListViewModel.setUnreadThreshold(unreadTresHold);
@@ -777,6 +799,31 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.getMutableConversationSummary().observe(lifecycleOwner, this::setConversationSummary);
         messageListViewModel.getRemoveConversationSummary().observe(lifecycleOwner, this::removeAIView);
         messageListViewModel.getConversationSummaryUIState().observe(lifecycleOwner, this::handleConversationSummaryUIState);
+        messageListViewModel.getUnreadMessageAnchorLiveData().observe(lifecycleOwner, this::setUnreadMessageAnchorDecoration);
+        messageListViewModel.getUnreadCountLiveData().observe(lifecycleOwner, this::setUnreadMessageCount);
+    }
+
+    private void setUnreadMessageCount(Integer count) {
+        newMessageCount = count;
+        if (messageAdapter != null && ((messageAdapter.getItemCount() - 1) - linearLayoutManager.findLastVisibleItemPosition() < 2)) {
+            newMessageLayout.setVisibility(GONE);
+        } else {
+            newMessageLayout.setVisibility(VISIBLE);
+            if (newMessageCount == 0) badge.setVisibility(GONE);
+            else {
+                badge.setVisibility(VISIBLE);
+                badge.setCount(newMessageCount);
+            }
+        }
+    }
+
+    private void setUnreadMessageAnchorDecoration(BaseMessage message) {
+        if (newMessageIndicatorDecoration == null) {
+            newMessageIndicatorDecoration = new NewMessageIndicatorDecoration(messageAdapter);
+            rvChatListView.addItemDecoration(newMessageIndicatorDecoration);
+        }
+        newMessageIndicatorDecoration.setUnreadMessageId(message.getId());
+        rvChatListView.invalidateItemDecorations();
     }
 
     public void scrollToMessageId(long messageId) {
@@ -788,8 +835,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                 int centerOffset = rvChatListView.getHeight() / 2;
                 linearLayoutManager.scrollToPositionWithOffset(position, centerOffset);
                 messageAdapter.notifyDataSetChanged();
-                setHighlightMessageId(messageId, position);
-
+                rvChatListView.post(() -> setUnreadMessageCount(newMessageCount));
+                if (messageListViewModel.isHighlightScroll()) {
+                    setHighlightMessageId(messageId, position);
+                }
             }
         }
     }
@@ -905,10 +954,19 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         Utils.handleView(this.footerView, footerView, false);
     }
 
+    /*
+     * Detaches the AI conversation starter view from the footer.
+     */
     public void detachedAIConversationStarterView() {
         footerView.removeView(aiConversationStarterView);
     }
 
+    /*
+     * Removes the AI views (smart replies, conversation starter, and conversation summary)
+     * based on the provided boolean flag.
+     *
+     * @param aBoolean A boolean flag indicating whether to remove the AI views.
+     */
     private void removeAIView(Boolean aBoolean) {
         if (aBoolean) {
             detachedAISmartRepliesView();
@@ -917,6 +975,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Sets the list of smart replies in the AI Smart Replies view.
+     *
+     * @param strings A list of strings representing the smart replies.
+     */
     private void setConversationStarters(List<String> strings) {
         aiConversationStarterView.setReplyList(strings);
     }
@@ -959,7 +1022,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         // Hide the new message layout if the user scrolls near the bottom
         if (messageAdapter != null && ((messageAdapter.getItemCount() - 1) - linearLayoutManager.findLastVisibleItemPosition() < 2)) {
             newMessageLayout.setVisibility(GONE);
-            newMessageCount = 0;
         } else {
             newMessageLayout.setVisibility(VISIBLE);
             if (newMessageCount == 0) badge.setVisibility(GONE);
@@ -1074,10 +1136,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /* Sets the smart replies in the AI Smart Replies view.
+     */
     private void setSmartReplies(List<String> replies) {
         aiSmartRepliesView.setReplyList(replies);
     }
 
+    /*
+     *  Initializes the AI Smart Replies view and sets its layout parameters and click handler.
+     */
     public void initializeSmartRepliesView() {
         aiSmartRepliesView = new CometChatAISmartRepliesView(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1095,28 +1162,52 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         });
     }
 
+    /** Gets the current DateTimeFormatterCallback used for formatting date and time in messages.
+     *
+     * @return The current DateTimeFormatterCallback.
+     */
     public DateTimeFormatterCallback getDateTimeFormatter() {
         return dateTimeFormatter;
     }
 
+    /** Sets a custom DateTimeFormatterCallback for formatting date and time in messages.
+     *
+     * @param dateTimeFormatter The DateTimeFormatterCallback to be set.
+     */
     public void setDateTimeFormatter(DateTimeFormatterCallback dateTimeFormatter) {
         this.dateTimeFormatter = dateTimeFormatter;
         messageAdapter.setDateTimeFormatter(dateTimeFormatter);
     }
 
+    /** Checks if AI conversation starters are enabled in the message list.
+     *
+     * @return true if AI conversation starters are enabled, false otherwise
+     */
     public boolean isEnableConversationStarter() {
         return enableConversationStarter;
     }
 
+    /** Enables or disables AI conversation starters in the message list.
+     *
+     * @param enableConversationStarter true to enable AI conversation starters, false to disable
+     */
     public void setEnableConversationStarter(boolean enableConversationStarter) {
         this.enableConversationStarter = enableConversationStarter;
         messageListViewModel.setEnableConversationStarter(enableConversationStarter);
     }
 
+    /** Checks if AI smart replies are enabled in the message list.
+     *
+     * @return true if AI smart replies are enabled, false otherwise
+     */
     public boolean isEnableSmartReplies() {
         return enableSmartReplies;
     }
 
+    /** Enables or disables AI smart replies in the message list.
+     *
+     * @param enableSmartReplies true to enable AI smart replies, false to disable
+     */
     public void setEnableSmartReplies(boolean enableSmartReplies) {
         this.enableSmartReplies = enableSmartReplies;
         messageListViewModel.setEnableSmartReplies(enableSmartReplies);
@@ -1149,28 +1240,57 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         return swipeToReplyEnabled;
     }
 
+    /**
+     * Gets the keywords for AI smart replies.
+     *
+     * @return the list of keywords for AI smart replies
+     */
     public List<String> getSmartRepliesKeywords() {
         return smartRepliesKeywords;
     }
 
+    /**
+     * Sets the keywords for AI smart replies.
+     *
+     * @param smartRepliesKeywords the list of keywords for AI smart replies
+     */
     public void setAISmartRepliesKeywords(List<String> smartRepliesKeywords) {
         this.smartRepliesKeywords = smartRepliesKeywords;
         messageListViewModel.setSmartReplyKeywords(smartRepliesKeywords);
     }
 
+    /**
+     * Gets the delay duration for AI smart replies.
+     *
+     * @return the delay duration in milliseconds
+     */
     public int getAISmartRepliesDelayDuration() {
         return smartRepliesDelayDuration;
     }
 
+    /**
+     * Sets the delay duration for AI smart replies.
+     *
+     * @param smartRepliesDelayDuration the delay duration in milliseconds
+     */
     public void setSmartRepliesDelayDuration(int smartRepliesDelayDuration) {
         this.smartRepliesDelayDuration = smartRepliesDelayDuration;
         messageListViewModel.setSmartRepliesDelay(smartRepliesDelayDuration);
     }
 
+    /**
+     * Gets the style for AI smart replies view.
+     *
+     * @return the style resource ID for the AI smart replies view
+     */
     public int getAISmartRepliesStyle() {
         return smartRepliesStyle;
     }
 
+    /**
+     * Apply style from style resource
+     * @param styleResId Style resource ID
+     */
     public void setAISmartRepliesStyle(@StyleRes int styleResId) {
         this.smartRepliesStyle = styleResId;
         aiSmartRepliesView.setStyle(styleResId);
@@ -1185,10 +1305,20 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         this.flagMessageStyle = styleResId;
     }
 
+    /**
+     * Gets the style for AI conversation starter view.
+     *
+     * @return the style resource ID for the AI conversation starter view
+     */
     public int getAIConversationStarterStyle() {
         return conversationStarterStyle;
     }
 
+    /**
+     * Sets the style for AI conversation starter view using the specified style resource.
+     *
+     * @param styleResId the style resource ID for the AI conversation starter view
+     */
     public void setAIConversationStarterStyle(@StyleRes int styleResId) {
         this.conversationStarterStyle = styleResId;
         aiConversationStarterView.setStyle(styleResId);
@@ -1471,6 +1601,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         int insertPosition = messageAdapter.getItemCount() - finalRange;
         messageAdapter.notifyItemRangeInserted(insertPosition, finalRange);
         newMessagesPaginationIcon.setVisibility(GONE);
+
+        BaseMessage firstUnreadMessage = messageListViewModel.getFirstUnreadMessage();
+        if (firstUnreadMessage != null && firstUnreadMessage.getId() > -1) {
+            markConversationAsRead();
+        }
     }
 
     /**
@@ -1507,9 +1642,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      * @param messageCount the number of new messages to display
      */
     public void showNewMessage(int messageCount) {
-        newMessageLayout.setVisibility(VISIBLE);
-        badge.setVisibility(VISIBLE);
-        badge.setCount(messageCount);
+        newMessageCount = messageCount;
+        if (newMessageCount > 0) {
+            newMessageLayout.setVisibility(VISIBLE);
+            badge.setVisibility(VISIBLE);
+            badge.setCount(newMessageCount);
+        } else {
+            newMessageLayout.setVisibility(GONE);
+        }
     }
 
     /**
@@ -1540,7 +1680,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         } else scrollToBottom();
     }
-
 
     /**
      * Sets a custom header view for the message list.
@@ -1684,6 +1823,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageListViewModel.setMessagesRequestBuilder(builder);
     }
 
+    /**
+     * Sets the ReactionsRequestBuilder for fetching reactions in the message list.
+     *
+     * @param builder The ReactionsRequestBuilder to set.
+     */
     public void setReactionsRequestBuilder(ReactionsRequest.ReactionsRequestBuilder builder) {
         this.reactionRequestBuilder = builder;
     }
@@ -1786,6 +1930,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /**
+     * Fetches the message filter based on the current message templates.
+     * This method populates the message types, categories, and view types
+     * based on the provided message templates. It also updates the message
+     * adapter and ViewModel with the new message template mappings.
+     */
     public void fetchMessageFilter() {
         messageTypesToRetrieve.clear();
         messageCategoriesToRetrieve.clear();
@@ -1846,6 +1996,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Sets the visibility of the AI assistant empty state layout based on whether
+     * it is an agent chat.
+     */
     private void setAIAssistantEmptyStateVisibility() {
         if (isAgentChat) {
             aiAssistantEmptyChatGreetingLayout.setVisibility(View.GONE);
@@ -1937,6 +2091,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Sets up the AI assistant greeting view by extracting the greeting title,
+     * subtitle, and suggested messages from the user's metadata.
+     */
     private void setUpAIAssistantGreetingView() {
         JSONObject metadata = user.getMetadata();
         String greetingTitle = extractStringFromMetadata(metadata, UIKitConstants.AIAssistantJsonConstants.GREETING_MESSAGE);
@@ -1949,6 +2107,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         showAIAgentGreetingView(greetingTitle, greetingSubtitle, suggestedMessages);
     }
 
+    /*
+     * Displays the AI assistant greeting view with the provided title, subtitle,
+     * and suggested messages.
+     *
+     * @param greetingTitle     The title of the greeting message.
+     * @param greetingSubtitle  The subtitle of the greeting message.
+     * @param suggestedMessages A list of suggested messages to be displayed.
+     */
     private void showAIAgentGreetingView(String greetingTitle, String greetingSubtitle, List<String> suggestedMessages) {
         aiAssistantEmptyChatGreetingTextView.setText(!greetingTitle.isEmpty() ? greetingTitle : getResources().getString(R.string.cometchat_empty_chat_title));
         aiAssistantEmptyChatGreetingSubtitleTextView.setText(!greetingSubtitle.isEmpty() ? greetingSubtitle : getResources().getString(R.string.cometchat_empty_chat_subtitle));
@@ -1957,6 +2123,13 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         aiAssistantEmptyChatGreetingImageView.setVisibility(VISIBLE);
     }
 
+    /*
+     * Extracts a string value from the provided metadata JSON object.
+     *
+     * @param metadata The JSONObject containing metadata.
+     * @param key      The key for which the string value needs to be extracted.
+     * @return The extracted string value, or an empty string if not found or an error occurs.
+     */
     private String extractStringFromMetadata(JSONObject metadata, String key) {
         if (metadata == null) return "";
 
@@ -1968,6 +2141,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Extracts suggested messages from the provided metadata JSON object.
+     *
+     * @param metadata The JSONObject containing metadata with suggested messages.
+     * @return A list of suggested messages extracted from the metadata.
+     */
     private List<String> extractSuggestedMessages(JSONObject metadata) {
         List<String> messages = new ArrayList<>();
         if (metadata == null) return messages;
@@ -1988,6 +2167,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         return messages;
     }
 
+    /*
+     * Sets up the suggested messages in the AI assistant greeting view.
+     *
+     * @param suggestedMessages A list of suggested messages to be displayed.
+     */
     private void setupSuggestedMessages(List<String> suggestedMessages) {
         if (!suggestedMessages.isEmpty()) {
             aiAssistantSuggestedMessageContainer.removeAllViews();
@@ -2043,6 +2227,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Creates and returns an ImageView for the suggested message end icon.
+     *
+     * @param i The index of the suggested message in the list.
+     * @return An ImageView configured with the suggested message end icon.
+     */
     private ImageView getSuggestedMessageEndIcon(int i) {
         ImageView suggestedMessageEndIcon = new ImageView(getContext());
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
@@ -2056,6 +2246,13 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         return suggestedMessageEndIcon;
     }
 
+    /*
+     * Creates and returns a TextView for a suggested message.
+     *
+     * @param i                 The index of the suggested message in the list.
+     * @param suggestedMessages The list of suggested messages.
+     * @return A TextView configured with the suggested message text and styles.
+     */
     private TextView getSuggestedMessageTextView(int i, List<String> suggestedMessages) {
         TextView tvSuggestedMessage = new TextView(getContext());
         tvSuggestedMessage.setGravity(Gravity.CENTER);
@@ -2070,6 +2267,13 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         return tvSuggestedMessage;
     }
 
+    /*
+     * Applies styles to the suggested message card, end icon, and text view.
+     *
+     * @param suggestedMessagesCard   The MaterialCardView representing the suggested message card.
+     * @param suggestedMessageEndIcon The ImageView representing the end icon of the suggested message.
+     * @param tvSuggestedMessage      The TextView representing the suggested message text.
+     */
     private void setSuggestedMessagesStyle(MaterialCardView suggestedMessagesCard, ImageView suggestedMessageEndIcon, TextView tvSuggestedMessage) {
         tvSuggestedMessage.setTextColor(aiAssistantSuggestedMessageTextColor);
         tvSuggestedMessage.setTextAppearance(aiAssistantSuggestedMessageTextAppearance);
@@ -2114,7 +2318,22 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         messageAdapter.setBaseMessageList(messageList);
         if (onLoad != null) onLoad.onLoad(messageList);
         messageAdapter.setMessageTemplateHashMap(messageTemplateHashMap, messageViewTypes);
+        BaseMessage firstUnreadMessage = messageListViewModel.getFirstUnreadMessage();
+        if (gotoMessageId == -1 || firstUnreadMessage != null && firstUnreadMessage.getId() > -1) {
+            markConversationAsRead();
+        }
         scrollToBottom();
+    }
+
+    /*
+     * Marks the current conversation as read.
+     *
+     * <p>
+     * This method updates the read status of the conversation in the ViewModel,
+     * indicating that all messages in the conversation have been read by the user.
+     */
+    private void markConversationAsRead() {
+        messageListViewModel.markConversationRead();
     }
 
     /**
@@ -2141,23 +2360,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
             linearLayoutManager.scrollToPositionWithOffset(messageAdapter.getItemCount() - 1, -1000000000);
             messageAdapter.notifyDataSetChanged();
-            markLastMessageAsRead();
-        }
-    }
-
-    /**
-     * Marks the last message in the message list as read if it has not been marked
-     * already.
-     *
-     * <p>
-     * This method retrieves the last message from the message list view model and
-     * checks if it has not been read yet. If the message's read timestamp is 0, it
-     * updates the message state to mark it as read.
-     */
-    public void markLastMessageAsRead() {
-        BaseMessage lastMessage = messageListViewModel.getLastMessage();
-        if (lastMessage != null && lastMessage.getReadAt() == 0) {
-            messageListViewModel.markLastMessageAsRead(lastMessage);
         }
     }
 
@@ -2251,6 +2453,84 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void setErrorStateVisibility(int visibility) {
         errorStateVisibility = visibility;
+    }
+
+    /** Checks whether to start loading messages from unread messages.
+     *
+     * @return true if starting from unread messages, false otherwise.
+     */
+    public boolean isStartFromUnreadMessages() {
+        return startFromUnreadMessages;
+    }
+
+    /** Sets whether to start loading messages from unread messages.
+     *
+     * @param startFromUnreadMessages true to start from unread messages, false otherwise.
+     */
+    public void setStartFromUnreadMessages(boolean startFromUnreadMessages) {
+        this.startFromUnreadMessages = startFromUnreadMessages;
+        messageListViewModel.setStartFromUnreadMessages(startFromUnreadMessages);
+    }
+
+    /** Sets a custom view to be displayed as the unread header in the message list.
+     *
+     * @param view The custom view to be set as the unread header.
+     */
+    public void setNewMessageIndicatorView(View view) {
+        if (messageAdapter != null) {
+            messageAdapter.setNewMessageIndicatorView(view);
+        }
+    }
+
+    /** get mark as unread option visibility
+     *
+     * @return An integer representing the visibility of the unread option.
+     */
+    public int getMarkAsUnreadOptionVisibility() {
+        return markAsUnreadOptionVisibility;
+    }
+
+    /** Sets the visibility of the mark as unread option.
+     *
+     * @param visibility An integer representing the visibility status of the unread option.
+     */
+    public void setMarkAsUnreadOptionVisibility(int visibility) {
+        this.markAsUnreadOptionVisibility = visibility;
+        additionParameter.setMarkUnreadOptionVisibility(visibility);
+    }
+
+    /**
+     * get message reaction option visibility
+     *
+     * @return An integer representing the visibility of the reaction option.
+     */
+    public int getMessageReactionOptionVisibility() {
+        return messageReactionOptionVisibility;
+    }
+
+    /**
+     * Sets the visibility of the message reaction option.
+     *
+     * @param visibility An integer representing the visibility status of the reaction option.
+     */
+    public void setMessageReactionOptionVisibility(int visibility) {
+        this.messageReactionOptionVisibility = visibility;
+    }
+
+    /** Sets the visibility of the "Report" option.
+     *
+     * @param visibility An integer representing the visibility status of the report option.
+     */
+    public void setFlagOptionVisibility(int visibility) {
+        additionParameter.setFlagOptionVisibility(visibility);
+    }
+
+    /** Retrieves the visibility status of the "Report" option.
+     *
+     * @return An integer representing the visibility of the report option.
+     */
+    public int getFlagOptionVisibility() {
+        return additionParameter.getFlagOptionVisibility();
     }
 
     /**
@@ -2493,12 +2773,15 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /** Sets the message ID to navigate to.
+     *
+     * @param gotoMessageId The ID of the message to navigate to.
+     */
     public void gotoMessage(long gotoMessageId) {
         if (gotoMessageId != 0) {
             this.gotoMessageId = gotoMessageId;
         }
     }
-
 
     /**
      * Opens a bottom sheet for message options.
@@ -2570,22 +2853,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         });
         cometchatPopUpMenuMessage.show(messageBubble.getContentView(), this, baseMessage);
-    }
-
-    /** Sets the visibility of the "Report" option.
-     *
-     * @param visibility An integer representing the visibility status of the report option.
-     */
-    public void setFlagOptionVisibility(int visibility) {
-        additionParameter.setFlagOptionVisibility(visibility);
-    }
-
-    /** Retrieves the visibility status of the "Report" option.
-     *
-     * @return An integer representing the visibility of the report option.
-     */
-    public int getFlagOptionVisibility() {
-        return additionParameter.getFlagOptionVisibility();
     }
 
     /**
@@ -2674,7 +2941,19 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             case UIKitConstants.MessageOption.REPORT:
                 showFlagMessageDialog(baseMessage);
                 break;
+            case UIKitConstants.MessageOption.MARK_UNREAD:
+                markMessageAsUnread(baseMessage);
+                break;
         }
+    }
+
+    /*
+     * Marks the specified message as unread.
+     *
+     * @param baseMessage the message to be marked as unread.
+     */
+    private void markMessageAsUnread(BaseMessage baseMessage) {
+        messageListViewModel.markMessageAsUnread(baseMessage);
     }
 
     /**
@@ -2954,7 +3233,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             if (isAgentChat) {
                 setStickyDateVisibility(View.GONE);
                 if (parentMessageId != -1) {
-                    if (gotoMessageId > 0) {
+                    if (gotoMessageId > -1) {
                         messageListViewModel.goToMessage(gotoMessageId);
                     } else {
                         messageListViewModel.fetchMessages();
@@ -2963,11 +3242,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                     handleEmptyState();
                 }
             } else {
-                if (autoFetch && gotoMessageId == 0) {
-                    messageListViewModel.fetchMessagesWithUnreadCount();
-                } else {
-                    messageListViewModel.goToMessage(gotoMessageId);
-                }
+                if (autoFetch) messageListViewModel.fetchMessagesWithUnreadCount();
             }
             aiConversationStarterView.setUid(user.getUid());
             aiSmartRepliesView.setUid(user.getUid());
@@ -2976,6 +3251,10 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /*
+     * Initializes the ItemTouchHelper for swipe-to-reply functionality if
+     * applicable.
+     */
     private void initializeItemTouchHelper() {
         if (!isAgentChat) {
             itemTouchHelper = new ItemTouchHelper(controller);
@@ -3012,8 +3291,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                                           new ArrayList<>(messageTypesToRetrieve.values()),
                                           new ArrayList<>(messageCategoriesToRetrieve.values()),
                                           parentMessageId, gotoMessageId);
-            if (autoFetch && gotoMessageId == 0) messageListViewModel.fetchMessagesWithUnreadCount();
-            else messageListViewModel.goToMessage(gotoMessageId);
+            if (autoFetch) messageListViewModel.fetchMessagesWithUnreadCount();
             aiConversationStarterView.setUid(group.getGuid());
             aiSmartRepliesView.setUid(group.getGuid());
             processFormatters();
@@ -3806,24 +4084,6 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public int getConversationStarterStyle() {
         return conversationStarterStyle;
-    }
-
-    /**
-     * get message reaction option visibility
-     *
-     * @return
-     */
-    public int getMessageReactionOptionVisibility() {
-        return messageReactionOptionVisibility;
-    }
-
-    /**
-     * Sets the visibility of the message reaction option.
-     *
-     * @param messageReactionOptionVisibility
-     */
-    public void setMessageReactionOptionVisibility(int messageReactionOptionVisibility) {
-        this.messageReactionOptionVisibility = messageReactionOptionVisibility;
     }
 
     /**

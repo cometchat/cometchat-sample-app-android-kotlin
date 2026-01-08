@@ -247,5 +247,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">괴롭힘 / 따돌림</string>
     <string name="cometchat_notify_everyone_in_this_group">이 그룹의 모든 사람에게 알림</string>
     <string name="cometchat_notify_all" translatable="true">모든</string>
+    <string name="cometchat_mark_unread">읽지 않음으로 표시</string>
+    <string name="cometchat_new">새로운</string>
 
 </resources>

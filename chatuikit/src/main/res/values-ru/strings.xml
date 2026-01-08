@@ -254,5 +254,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Домогательства / Запугивание</string>
     <string name="cometchat_notify_everyone_in_this_group">Уведомить всех в этой группе</string>
     <string name="cometchat_notify_all" translatable="true">все</string>
+    <string name="cometchat_mark_unread">Пометить как непрочитанное</string>
+    <string name="cometchat_new">Новое</string>
 
 </resources>

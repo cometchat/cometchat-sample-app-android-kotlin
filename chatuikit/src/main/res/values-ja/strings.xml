@@ -247,5 +247,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">嫌がらせ / いじめ</string>
     <string name="cometchat_notify_everyone_in_this_group">このグループのすべての人に通知する</string>
     <string name="cometchat_notify_all" translatable="true">すべて</string>
+    <string name="cometchat_mark_unread">未読にマーク</string>
+    <string name="cometchat_new">新しい</string>
 
 </resources>

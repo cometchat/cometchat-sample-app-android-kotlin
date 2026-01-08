@@ -248,5 +248,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">騷擾 / 欺凌</string>
     <string name="cometchat_notify_everyone_in_this_group">通知該群組中的每個人</string>
     <string name="cometchat_notify_all" translatable="true">所有</string>
+    <string name="cometchat_mark_unread">標記為未讀</string>
+    <string name="cometchat_new">新</string>
 
 </resources>

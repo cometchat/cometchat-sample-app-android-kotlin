@@ -249,5 +249,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">उत्पीड़न / धमकाना</string>
     <string name="cometchat_notify_everyone_in_this_group">इस समूह में सभी को सूचित करें</string>
     <string name="cometchat_notify_all" translatable="true">सभी</string>
+    <string name="cometchat_mark_unread">अविकसित के रूप में चिह्नित करें</string>
+    <string name="cometchat_new">नया</string>
 
 </resources>

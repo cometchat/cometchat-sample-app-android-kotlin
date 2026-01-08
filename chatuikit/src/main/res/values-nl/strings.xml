@@ -247,5 +247,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">Hinderen / Pesten</string>
     <string name="cometchat_notify_everyone_in_this_group">Iedereen in deze groep op de hoogte stellen</string>
     <string name="cometchat_notify_all" translatable="true">iedereen</string>
+    <string name="cometchat_mark_unread">Markeer als ongelezen</string>
+    <string name="cometchat_new">Nieuw</string>
 
 </resources>

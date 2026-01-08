@@ -254,5 +254,7 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_flag_reason_harassment" translatable="true">Zaklatás / Zaklatás</string>
     <string name="cometchat_notify_everyone_in_this_group">Mindenkit értesíteni ebben a csoportban</string>
     <string name="cometchat_notify_all" translatable="true">mindenkit</string>
+    <string name="cometchat_mark_unread">Olvasatlanként jelölés</string>
+    <string name="cometchat_new">Új</string>
 
 </resources>

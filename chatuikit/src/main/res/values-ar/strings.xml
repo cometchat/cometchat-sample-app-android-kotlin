@@ -245,5 +245,7 @@
     <string name="cometchat_flag_reason_harassment" translatable="true">تحرش / تنمر</string>
     <string name="cometchat_notify_everyone_in_this_group">إخطار الجميع في هذه المجموعة</string>
     <string name="cometchat_notify_all" translatable="true">الجميع</string>
+    <string name="cometchat_mark_unread">علامة غير مقروء</string>
+    <string name="cometchat_new">جديد</string>
 
 </resources>

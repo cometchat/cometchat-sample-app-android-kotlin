@@ -1,12 +1,9 @@
 package com.cometchat.chatuikit.shared.framework;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.cometchat.chatuikit.shared.resources.utils.Utils.isNotParticipant;
 import android.content.Context;
 import android.text.SpannableString;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -44,8 +41,6 @@ import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.viewholders.MessagesViewHolderListener;
 import com.cometchat.chatuikit.shared.views.audiobubble.CometChatAudioBubble;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
-import com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview;
-import com.google.android.flexbox.FlexboxLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +82,10 @@ public class MessagesDataSource implements DataSource {
             if (additionParameter.getReplyToMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getReplyToMessageOption(context));
             if (additionParameter.getShareMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getShareOption(context));
             if (additionParameter.getCopyMessageOptionVisibility() == View.VISIBLE) cometchatOptions.add(_getCopyOption(context));
+            if (!isMyMessage(baseMessage) && baseMessage.getParentMessageId() == 0) {
+                if (additionParameter.getMarkUnreadOptionVisibility() == View.VISIBLE)
+                    cometchatOptions.add(_getMarkUnreadOption(context));
+            }
             if (_isCommon(baseMessage, group)) {
                 if (isMyMessage(baseMessage)) {
                     if (additionParameter.getMessageInfoOptionVisibility() == View.VISIBLE) {
@@ -189,6 +188,13 @@ public class MessagesDataSource implements DataSource {
         return new CometChatMessageOption(UIKitConstants.MessageOption.REPORT,
                 context.getString(R.string.cometchat_report),
                 R.drawable.cometchat_ic_info,
+                null);
+    }
+
+    private CometChatMessageOption _getMarkUnreadOption(Context context) {
+        return new CometChatMessageOption(UIKitConstants.MessageOption.MARK_UNREAD,
+                context.getString(R.string.cometchat_mark_unread),
+                R.drawable.cometchat_ic_unread_outlined,
                 null);
     }
 
@@ -1288,6 +1294,10 @@ public class MessagesDataSource implements DataSource {
             } else {
                 if (isMyMessage(baseMessage)) {
                     if (additionParameter.getMessageInfoOptionVisibility() == View.VISIBLE) messageOptions.add(_getMessageInformation(context));
+                }
+                if (!isMyMessage(baseMessage)) {
+                    if (additionParameter.getMarkUnreadOptionVisibility() == View.VISIBLE)
+                        messageOptions.add(_getMarkUnreadOption(context));
                 }
                 if (baseMessage.getParentMessageId() == 0) {
                     if (additionParameter.getReplyInThreadOptionVisibility() == View.VISIBLE) messageOptions.add(_getReplyInThreadOption(context));

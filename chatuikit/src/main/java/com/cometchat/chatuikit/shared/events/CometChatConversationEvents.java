@@ -23,6 +23,14 @@ public abstract class CometChatConversationEvents {
     }
 
     /**
+     * Called when a conversation is updated.
+     *
+     * @param conversation The updated conversation object.
+     */
+    public void ccUpdateConversation(Conversation conversation) {
+    }
+
+    /**
      * Adds a conversation event listener with the specified tag.
      *
      * @param tag                         The tag to identify the listener.
