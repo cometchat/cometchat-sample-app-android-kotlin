@@ -393,6 +393,8 @@ public class MessagesActivity extends AppCompatActivity {
             updateGroupJoinedStatus(group);
         }
 
+        binding.messageList.setMarkAsUnreadOptionVisibility(View.VISIBLE);
+        binding.messageList.setStartFromUnreadMessages(true);
         // Set up back button behavior
         binding.messageHeader.setOnBackButtonPressed(() -> {
             Utils.hideKeyBoard(this, binding.getRoot());

@@ -406,6 +406,9 @@ class MessagesActivity : AppCompatActivity() {
             updateGroupJoinedStatus(group!!)
         }
 
+        binding.messageList.isStartFromUnreadMessages = true
+        binding.messageList.markAsUnreadOptionVisibility = View.VISIBLE
+
         // Set up back button behavior
         binding.messageHeader.setOnBackButtonPressed {
             Utils.hideKeyBoard(this, binding.root)
