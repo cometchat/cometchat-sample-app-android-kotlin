@@ -69,5 +69,11 @@
         <attr name="cometchatUsersRetryButtonStrokeWidth" format="dimension" />
         <attr name="cometchatUsersRetryButtonCornerRadius" format="dimension" />
 
+        <attr name="cometchatUsersSelectedUsersAvatarStyle" format="reference" />
+        <attr name="cometchatUsersSelectedUsersItemTextColor" format="color" />
+        <attr name="cometchatUsersSelectedUsersItemTextAppearance" format="reference" />
+        <attr name="cometchatUsersSelectedUsersItemRemoveIcon" format="reference"/>
+        <attr name="cometchatUsersSelectedUsersItemRemoveIconTint" format="color"/>
+
     </declare-styleable>
 </resources>

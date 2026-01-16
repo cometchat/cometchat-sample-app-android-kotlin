@@ -68,5 +68,11 @@
         <attr name="cometchatGroupsSubtitleTextAppearance" format="reference" />
         <attr name="cometchatGroupsSubtitleColor" format="color" />
 
+        <attr name="cometchatGroupsSelectedGroupsAvatarStyle" format="reference" />
+        <attr name="cometchatGroupsSelectedGroupsItemTextColor" format="color" />
+        <attr name="cometchatGroupsSelectedGroupsItemTextAppearance" format="reference" />
+        <attr name="cometchatGroupsSelectedGroupsItemRemoveIcon" format="reference"/>
+        <attr name="cometchatGroupsSelectedGroupsItemRemoveIconTint" format="color"/>
+
     </declare-styleable>
 </resources>

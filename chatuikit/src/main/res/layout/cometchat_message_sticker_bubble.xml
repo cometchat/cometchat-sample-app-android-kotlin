@@ -5,7 +5,7 @@
 
     <ImageView
         android:id="@+id/cometchat_sticker_bubble_image_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:importantForAccessibility="no" />

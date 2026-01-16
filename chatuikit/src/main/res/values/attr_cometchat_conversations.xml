@@ -73,5 +73,11 @@
         <attr name="cometchatConversationsSearchInputCornerRadius" format="dimension" />
         <attr name="cometchatConversationsSearchInputStrokeWidth" format="dimension" />
         <attr name="cometchatConversationsSearchInputStrokeColor" format="color" />
+
+        <attr name="cometchatConversationsSelectedConversationsAvatarStyle" format="reference" />
+        <attr name="cometchatConversationsSelectedConversationsItemTextColor" format="color" />
+        <attr name="cometchatConversationsSelectedConversationsItemTextAppearance" format="reference" />
+        <attr name="cometchatConversationsSelectedConversationsItemRemoveIcon" format="reference"/>
+        <attr name="cometchatConversationsSelectedConversationsItemRemoveIconTint" format="color"/>
     </declare-styleable>
 </resources>

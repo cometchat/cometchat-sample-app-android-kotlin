@@ -60,6 +60,12 @@
         <attr name="cometchatGroupMemberScopeChangeStyle" format="reference" />
         <attr name="cometchatGroupMembersStyle" format="reference" />
 
+        <attr name="cometchatGroupMemberSelectedGroupMembersAvatarStyle" format="reference" />
+        <attr name="cometchatGroupMemberSelectedGroupMembersItemTextColor" format="color" />
+        <attr name="cometchatGroupMemberSelectedGroupMembersItemTextAppearance" format="reference" />
+        <attr name="cometchatGroupMemberSelectedGroupMembersItemRemoveIcon" format="reference"/>
+        <attr name="cometchatGroupMemberSelectedGroupMembersItemRemoveIconTint" format="color"/>
+
     </declare-styleable>
 
 </resources>

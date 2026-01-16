@@ -67,6 +67,7 @@ public class CometChatGroups extends MaterialCardView {
     private boolean isGroupListEmpty = true;
     private GroupsViewModel groupsViewModel;
     private GroupsAdapter groupsAdapter;
+    private SelectedGroupsAdapter selectedGroupsAdapter;
     private LifecycleOwner lifecycleOwner;
     /**
      * Observer that updates an item in the list.
@@ -163,6 +164,11 @@ public class CometChatGroups extends MaterialCardView {
     private @ColorInt int errorStateTextColor;
     private @StyleRes int errorStateSubtitleTextAppearance;
     private @ColorInt int errorStateSubtitleColor;
+    private Drawable selectedGroupItemRemoveIcon;
+    private @ColorInt int selectedGroupItemTextColor;
+    private @StyleRes int selectedGroupItemTextAppearance;
+    private @StyleRes int selectedGroupAvatarStyle;
+    private @ColorInt int selectedGroupItemRemoveIconTint;
     private @ColorInt int retryButtonTextColor;
     private @StyleRes int retryButtonTextAppearance;
     private @ColorInt int retryButtonBackgroundColor;
@@ -200,6 +206,7 @@ public class CometChatGroups extends MaterialCardView {
     private int emptyStateVisibility = VISIBLE;
     private int loadingStateVisibility = VISIBLE;
     private int errorStateVisibility = VISIBLE;
+    private int selectedGroupsListVisibility = VISIBLE;
     /**
      * Observer that handles state changes for the UI.
      */
@@ -299,6 +306,7 @@ public class CometChatGroups extends MaterialCardView {
         initRecyclerView();
         initViewModels();
         initClickEvents();
+        configureSelectedGroupsView();
     }
 
     /**
@@ -491,7 +499,14 @@ public class CometChatGroups extends MaterialCardView {
                                                          CometChatTheme.getColorWhite(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsCheckBoxSelectIcon);
             checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsCheckBoxCheckedBackgroundColor,
-                                                                 CometChatTheme.getIconTintHighlight(getContext()));
+                    CometChatTheme.getIconTintHighlight(getContext()));
+            selectedGroupAvatarStyle = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsSelectedGroupsAvatarStyle,0);
+            selectedGroupItemTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSelectedGroupsItemTextColor,
+                    CometChatTheme.getTextColorSecondary(getContext()));
+            selectedGroupItemTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsSelectedGroupsItemTextAppearance,0);
+            selectedGroupItemRemoveIcon = typedArray.getDrawable(R.styleable.CometChatGroups_cometchatGroupsSelectedGroupsItemRemoveIcon);
+            selectedGroupItemRemoveIconTint = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsSelectedGroupsItemRemoveIconTint,
+                    CometChatTheme.getIconTintWhite(getContext()));
             emptyStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatGroups_cometchatGroupsEmptyStateTextAppearance, 0);
             emptyStateTextColor = typedArray.getColor(R.styleable.CometChatGroups_cometchatGroupsEmptyStateTextColor,
                                                       CometChatTheme.getPrimaryColor(getContext()));
@@ -583,11 +598,73 @@ public class CometChatGroups extends MaterialCardView {
         setCheckBoxSelectIconTint(checkBoxSelectIconTint);
         setSubtitleTextAppearance(subtitleTextAppearance);
         setSubtitleTextColor(subtitleTextColor);
+        setSelectedGroupAvatarStyle(selectedGroupAvatarStyle);
+        setSelectedGroupItemTextColor(selectedGroupItemTextColor);
+        setSelectedGroupItemTextAppearance(selectedGroupItemTextAppearance);
+        setSelectedGroupItemRemoveIcon(selectedGroupItemRemoveIcon);
+        setSelectedGroupItemRemoveIconTint(selectedGroupItemRemoveIconTint);
 
         binding.tvSelectionCount.setTextAppearance(itemTitleTextAppearance);
         binding.tvSelectionCount.setTextColor(itemTitleTextColor);
 
         setSelectionMode(UIKitConstants.SelectionMode.NONE);
+    }
+
+    /**
+     * Sets up the layout and adapter for displaying selected groups recyclerview.
+     */
+    private void configureSelectedGroupsView() {
+        selectedGroupsAdapter = new SelectedGroupsAdapter();
+        selectedGroupsAdapter.setOnRemoveClickListener(group -> {
+            hashMap.remove(group);
+            groupsAdapter.selectGroup(hashMap);
+            updateSelectionUI();
+        });
+
+        binding.rvSelectedGroups.setLayoutManager(
+                new LinearLayoutManager(
+                        getContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                )
+        );
+        binding.rvSelectedGroups.setVisibility(View.GONE);
+    }
+
+    /**
+     * Updates the selected groups list based on the current selection.
+     */
+    private void refreshSelectedGroups() {
+        List<Group> selectedGroups = getSelectedGroups();
+        List<Group> currentGroups = selectedGroupsAdapter.getGroups();
+
+        for (Group group : selectedGroups) {
+            if (!containsGroupWithId(currentGroups, group)) {
+                selectedGroupsAdapter.addGroup(group);
+            }
+        }
+
+        for (Group group : currentGroups) {
+            if (!containsGroupWithId(selectedGroups, group)) {
+                selectedGroupsAdapter.removeGroup(group);
+            }
+        }
+
+        if (!selectedGroups.isEmpty()) {
+            binding.rvSelectedGroups.smoothScrollToPosition(
+                    selectedGroups.size() - 1
+            );
+        }
+    }
+
+    /**
+     * Helper method to check if the given group is present in the provided list.
+     */
+    private boolean containsGroupWithId(List<Group> list, Group group) {
+        for (Group g : list) {
+            if (g.getGuid().equals(group.getGuid())) return true;
+        }
+        return false;
     }
 
     /**
@@ -2024,7 +2101,35 @@ public class CometChatGroups extends MaterialCardView {
                     setTitleVisibility(GONE);
                 }
                 groupsAdapter.selectGroup(hashMap);
+                updateSelectionUI();
             }
+        }
+    }
+    private void updateSelectionUI() {
+        boolean hasSelection = !getSelectedGroups().isEmpty();
+        if (selectedGroupsListVisibility == VISIBLE && hasSelection) {
+            if (binding.rvSelectedGroups.getAdapter() == null) {
+                binding.rvSelectedGroups.setAdapter(selectedGroupsAdapter);
+            }
+            binding.rvSelectedGroups.setVisibility(VISIBLE);
+            refreshSelectedGroups();
+        } else {
+            binding.rvSelectedGroups.setVisibility(GONE);
+            if (binding.rvSelectedGroups.getAdapter() != null) {
+                binding.rvSelectedGroups.setAdapter(null);
+            }
+        }
+
+        setSelectionCount(getSelectedGroups().size());
+
+        if (hasSelection) {
+            setDiscardSelectionVisibility(VISIBLE);
+            setTitleVisibility(GONE);
+        } else {
+            setDiscardSelectionVisibility(GONE);
+            setSubmitSelectionIconVisibility(GONE);
+            setTitleVisibility(VISIBLE);
+            binding.tvSelectionCount.setVisibility(GONE);
         }
     }
 
@@ -2222,10 +2327,12 @@ public class CometChatGroups extends MaterialCardView {
      */
     public void clearSelection() {
         hashMap.clear();
+        binding.rvSelectedGroups.setAdapter(null);
         setSelectionCount(0);
         setSelectionCountVisibility(GONE);
+        setDiscardSelectionVisibility(GONE);
         setTitleVisibility(VISIBLE);
-        setSelectionCountVisibility(GONE);
+        binding.rvSelectedGroups.setVisibility(GONE);
         setSubmitSelectionIconVisibility(GONE);
         groupsAdapter.selectGroup(hashMap);
     }
@@ -2407,6 +2514,123 @@ public class CometChatGroups extends MaterialCardView {
     public void setTitleVisibility(int visibility) {
         this.titleVisibility = visibility;
         binding.tvTitle.setVisibility(visibility);
+    }
+
+    /**
+     * Retrieves the visibility status of the selected groups recyclerview.
+     *
+     * @return An integer representing the visibility of the selected groups recyclerview.
+     */
+    public int getSelectedGroupsListVisibility(){
+        return selectedGroupsListVisibility;
+    }
+
+    /**
+     * Sets the visibility of the selected groups recyclerview.
+     * If the visibility is not {@code View.VISIBLE}, the selected groups recyclerview is hidden.
+     *
+     * @param visibility An integer representing the visibility status of the selected groups recyclerview.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setSelectedGroupsListVisibility(int visibility){
+        this.selectedGroupsListVisibility = visibility;
+        binding.rvSelectedGroups.setVisibility(visibility);
+    }
+
+    /**
+     * Gets the selected group avatar style resource.
+     *
+     * @return the selected group avatar style resource.
+     */
+    public @StyleRes int getSelectedGroupAvatarStyle() {
+        return selectedGroupAvatarStyle;
+    }
+
+    /**
+     * Sets the avatar style resource for the selected group list.
+     *
+     * @param avatarStyle the avatar style resource to set.
+     */
+    public void setSelectedGroupAvatarStyle(@StyleRes int avatarStyle) {
+        this.selectedGroupAvatarStyle = avatarStyle;
+        selectedGroupsAdapter.setAvatarStyle(avatarStyle);
+    }
+
+    /**
+     * Gets the selected group item text color.
+     *
+     * @return the selected group text color.
+     */
+    public @ColorInt int getSelectedGroupItemTextColor() {
+        return selectedGroupItemTextColor;
+    }
+
+    /**
+     * Sets the title text color.
+     *
+     * @param groupItemTextColor the title text color to set.
+     */
+    public void setSelectedGroupItemTextColor(@ColorInt int groupItemTextColor) {
+        this.selectedGroupItemTextColor = groupItemTextColor;
+        selectedGroupsAdapter.setItemTitleTextColor(groupItemTextColor);
+    }
+
+    /**
+     * Gets the text appearance for the selected group item.
+     *
+     * @return the text appearance for the selected group item.
+     */
+    public @StyleRes int getSelectedGroupItemTextAppearance() {
+        return selectedGroupItemTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the selected group item.
+     *
+     * @param groupItemTextAppearance the text appearance for the selected group item.
+     */
+    public void setSelectedGroupItemTextAppearance(@StyleRes int groupItemTextAppearance) {
+        this.selectedGroupItemTextAppearance = groupItemTextAppearance;
+        selectedGroupsAdapter.setItemTitleTextAppearance(groupItemTextAppearance);
+    }
+
+    /**
+     * Returns the selected groups list remove item icon drawable.
+     *
+     * @return the selected groups list remove item
+     */
+    public Drawable getSelectedGroupItemRemoveIcon() {
+        return selectedGroupItemRemoveIcon;
+    }
+
+    /**
+     * Sets the selected group list remove item icon drawable.
+     *
+     * @param removeItemIcon the drawable to set as the selected group list remove item icon
+     */
+    public void setSelectedGroupItemRemoveIcon(Drawable removeItemIcon) {
+        this.selectedGroupItemRemoveIcon = removeItemIcon;
+        selectedGroupsAdapter.setRemoveButtonIcon(removeItemIcon);
+    }
+
+    /**
+     * Returns the tint color for the selected group list remove icon.
+     *
+     * @return the selected group list remove item icon tint color
+     */
+    public @ColorInt int getSelectedGroupItemRemoveIconTint() {
+        return selectedGroupItemRemoveIconTint;
+    }
+
+    /**
+     * Sets the tint color for the selected group list remove icon.
+     *
+     * @param groupItemRemoveIconTint the tint color to set selected group list remove icon tint color
+     */
+    public void setSelectedGroupItemRemoveIconTint(@ColorInt int groupItemRemoveIconTint) {
+        this.selectedGroupItemRemoveIconTint = groupItemRemoveIconTint;
+        selectedGroupsAdapter.setRemoveButtonIconTint(groupItemRemoveIconTint);
     }
 
     /**

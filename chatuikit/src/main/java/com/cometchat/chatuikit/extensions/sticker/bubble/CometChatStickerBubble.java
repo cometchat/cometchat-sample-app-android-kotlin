@@ -3,12 +3,15 @@ package com.cometchat.chatuikit.extensions.sticker.bubble;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.cometchat.chat.models.CustomMessage;
 import com.cometchat.chatuikit.R;
+import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 
@@ -16,6 +19,7 @@ public class CometChatStickerBubble extends MaterialCardView {
     private static final String TAG = CometChatStickerBubble.class.getSimpleName();
     private ImageView stickerImageView;
     private String imageUrl;
+    private LinearLayout rootLayout;
     private CustomMessage message;
 
     /**
@@ -69,6 +73,7 @@ public class CometChatStickerBubble extends MaterialCardView {
         // Inflate and set up the view
         Utils.initMaterialCard(this);
         View view = View.inflate(context, R.layout.cometchat_message_sticker_bubble, null);
+        this.rootLayout = (LinearLayout) view;
         stickerImageView = view.findViewById(R.id.cometchat_sticker_bubble_image_view);
         // Add the inflated view to this view
         addView(view);
@@ -113,6 +118,16 @@ public class CometChatStickerBubble extends MaterialCardView {
         try {
             setImageUrl(message.getCustomData().getString("sticker_url"));
         } catch (Exception ignored) {
+        }
+    }
+
+    public void setAlignment(UIKitConstants.MessageBubbleAlignment alignment) {
+        if (rootLayout == null) return;
+
+        if (UIKitConstants.MessageBubbleAlignment.LEFT.equals(alignment)) {
+            rootLayout.setGravity(Gravity.START);
+        } else if (UIKitConstants.MessageBubbleAlignment.RIGHT.equals(alignment)) {
+            rootLayout.setGravity(Gravity.END);
         }
     }
 

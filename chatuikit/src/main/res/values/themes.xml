@@ -231,6 +231,9 @@
         <item name="cometchatGroupMembersErrorStateTitleTextAppearance">?attr/cometchatTextAppearanceHeading3Bold</item>
         <item name="cometchatGroupMembersErrorStateSubtitleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometchatGroupMemberScopeChangeStyle">?attr/cometchatScopeChangeStyle</item>
+        <item name="cometchatGroupMemberSelectedGroupMembersAvatarStyle">?attr/cometchatAvatarStyle</item>
+        <item name="cometchatGroupMemberSelectedGroupMembersItemRemoveIcon">@drawable/cometchat_ic_remove</item>
+        <item name="cometchatGroupMemberSelectedGroupMembersItemTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
     </style>
 
     <style name="CometChatScopeChangeStyle">
@@ -687,6 +690,9 @@
         <item name="cometchatConversationsSearchInputStartIcon">@drawable/cometchat_ic_search</item>
         <item name="cometchatConversationsSearchInputCornerRadius">@dimen/cometchat_radius_max</item>
         <item name="cometchatConversationsSearchInputPlaceHolderTextAppearance">?attr/cometchatTextAppearanceHeading4Regular</item>
+        <item name="cometchatConversationsSelectedConversationsAvatarStyle">?attr/cometchatAvatarStyle</item>
+        <item name="cometchatConversationsSelectedConversationsItemRemoveIcon">@drawable/cometchat_ic_remove</item>
+        <item name="cometchatConversationsSelectedConversationsItemTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
 
     </style>
 
@@ -780,7 +786,7 @@
         <item name="cometchatMediaRecorderDeleteIconRadius">@dimen/cometchat_radius_max</item>
         <item name="cometchatMediaRecorderDeleteIconStrokeWidth">@dimen/cometchat_1dp</item>
         <item name="cometchatMediaRecorderDeleteIconElevation">@dimen/cometchat_4dp</item>
-        <item name="cometchatMediaRecorderStartIcon">@drawable/cometchat_ic_media_recorder_start</item>
+        <item name="cometchatMediaRecorderStartIcon">@drawable/cometchat_ic_media_recorder_play</item>
         <item name="cometchatMediaRecorderStartIconRadius">@dimen/cometchat_radius_max</item>
         <item name="cometchatMediaRecorderStartIconStrokeWidth">@dimen/cometchat_1dp</item>
         <item name="cometchatMediaRecorderStartIconElevation">@dimen/cometchat_4dp</item>
@@ -846,6 +852,9 @@
         <item name="cometchatUsersRetryButtonStrokeColor">@color/cometchat_color_transparent</item>
         <item name="cometchatUsersRetryButtonStrokeWidth">0dp</item>
         <item name="cometchatUsersRetryButtonCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatUsersSelectedUsersAvatarStyle">?attr/cometchatAvatarStyle</item>
+        <item name="cometchatUsersSelectedUsersItemRemoveIcon">@drawable/cometchat_ic_remove</item>
+        <item name="cometchatUsersSelectedUsersItemTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
     </style>
 
     <style name="CometChatGroupsStyle">
@@ -879,6 +888,9 @@
         <item name="cometchatGroupsRetryButtonStrokeWidth">0dp</item>
         <item name="cometchatGroupsRetryButtonCornerRadius">@dimen/cometchat_radius_2</item>
         <item name="cometchatGroupsSubtitleTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatGroupsSelectedGroupsAvatarStyle">?attr/cometchatAvatarStyle</item>
+        <item name="cometchatGroupsSelectedGroupsItemRemoveIcon">@drawable/cometchat_ic_remove</item>
+        <item name="cometchatGroupsSelectedGroupsItemTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
     </style>
 
     <style name="CometChatCallLogsStyle">

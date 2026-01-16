@@ -70,6 +70,7 @@ public class CometChatConversations extends MaterialCardView {
     private boolean isConversationListEmpty = true;
     private boolean disableSoundForMessages;
     private ConversationsAdapter conversationsAdapter;
+    private SelectedConversationsAdapter selectedConversationsAdapter;
     private LifecycleOwner lifecycleOwner;
 
     private Drawable searchInputStartIcon;
@@ -129,6 +130,7 @@ public class CometChatConversations extends MaterialCardView {
     private int errorStateVisibility = View.VISIBLE;
     private int loadingStateVisibility = View.VISIBLE;
     private int emptyStateVisibility = View.VISIBLE;
+    private int selectedConversationsListVisibility = VISIBLE;
     private AdditionParameter additionParameter;
     private OnBackPress onBackPress;
     private OnSearchClick onSearchClick;
@@ -251,6 +253,11 @@ public class CometChatConversations extends MaterialCardView {
     private @ColorInt int deleteOptionIconTint;
     private @ColorInt int deleteOptionTextColor;
     private @StyleRes int deleteOptionTextAppearance;
+    private Drawable selectedConversationItemRemoveIcon;
+    private @ColorInt int selectedConversationItemTextColor;
+    private @StyleRes int selectedConversationItemTextAppearance;
+    private @StyleRes int selectedConversationAvatarStyle;
+    private @ColorInt int selectedConversationItemRemoveIconTint;
     private @LayoutRes int emptyView;
     private @LayoutRes int errorView;
     private @LayoutRes int loadingView;
@@ -351,6 +358,7 @@ public class CometChatConversations extends MaterialCardView {
         getDefaultMentionsFormatter();
         initViewModels();
         clickEvents();
+        configureSelectedConversationsView();
     }
 
     /**
@@ -465,7 +473,7 @@ public class CometChatConversations extends MaterialCardView {
 
         binding.ivSubmitSelection.setOnClickListener(v -> {
             if (onSelection != null) {
-                onSelection.onSelection(getSelectedConversation());
+                onSelection.onSelection(getSelectedConversations());
             }
         });
 
@@ -493,6 +501,8 @@ public class CometChatConversations extends MaterialCardView {
      */
     public void clearSelection() {
         hashMap.clear();
+        binding.rvSelectedConversation.setAdapter(null);
+        binding.rvSelectedConversation.setVisibility(GONE);
         setSelectionCount(0);
         setDiscardSelectionVisibility(GONE);
         setTitleVisibility(VISIBLE);
@@ -538,7 +548,36 @@ public class CometChatConversations extends MaterialCardView {
                     setSelectionCountVisibility(VISIBLE);
                 }
                 conversationsAdapter.selectConversation(hashMap);
+                updateSelectionUI();
             }
+        }
+    }
+
+    private void updateSelectionUI() {
+        boolean hasSelection = !getSelectedConversations().isEmpty();
+        if (selectedConversationsListVisibility == VISIBLE && hasSelection) {
+            if (binding.rvSelectedConversation.getAdapter() == null) {
+                binding.rvSelectedConversation.setAdapter(selectedConversationsAdapter);
+            }
+            binding.rvSelectedConversation.setVisibility(VISIBLE);
+            refreshSelectedConversations();
+        } else {
+            binding.rvSelectedConversation.setVisibility(GONE);
+            if (binding.rvSelectedConversation.getAdapter() != null) {
+                binding.rvSelectedConversation.setAdapter(null);
+            }
+        }
+
+        setSelectionCount(getSelectedConversations().size());
+
+        if (hasSelection) {
+            setDiscardSelectionVisibility(VISIBLE);
+            setTitleVisibility(GONE);
+        } else {
+            setDiscardSelectionVisibility(GONE);
+            setSubmitSelectionIconVisibility(GONE);
+            setTitleVisibility(VISIBLE);
+            binding.tvSelectionCount.setVisibility(GONE);
         }
     }
 
@@ -983,6 +1022,13 @@ public class CometChatConversations extends MaterialCardView {
             separatorColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSeparatorColor, CometChatTheme.getStrokeColorLight(getContext()));
             separatorHeight = typedArray.getDimensionPixelSize(R.styleable.CometChatConversations_cometchatConversationsSeparatorHeight, 1);
 
+            selectedConversationAvatarStyle = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsSelectedConversationsAvatarStyle,0);
+            selectedConversationItemTextColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSelectedConversationsItemTextColor,
+                    CometChatTheme.getTextColorSecondary(getContext()));
+            selectedConversationItemTextAppearance = typedArray.getResourceId(R.styleable.CometChatConversations_cometchatConversationsSelectedConversationsItemTextAppearance,0);
+            selectedConversationItemRemoveIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsSelectedConversationsItemRemoveIcon);
+            selectedConversationItemRemoveIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsSelectedConversationsItemRemoveIconTint,
+                    CometChatTheme.getIconTintWhite(getContext()));
             discardSelectionIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsDiscardSelectionIcon);
             discardSelectionIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsDiscardSelectionIconTint, CometChatTheme.getIconTintPrimary(getContext()));
             submitSelectionIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsSubmitSelectionIcon);
@@ -993,7 +1039,7 @@ public class CometChatConversations extends MaterialCardView {
             checkBoxBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
             checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxCheckedBackgroundColor, CometChatTheme.getIconTintHighlight(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIcon);
-            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIconTint, CometChatTheme.getWarningColor(getContext()));
+            checkBoxSelectIconTint = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsCheckBoxSelectIconTint, CometChatTheme.getColorWhite(getContext()));
             itemSelectedBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemSelectedBackgroundColor, CometChatTheme.getBackgroundColor4(getContext()));
             itemBackgroundColor = typedArray.getColor(R.styleable.CometChatConversations_cometchatConversationsItemBackgroundColor, CometChatTheme.getBackgroundColor1(getContext()));
             // Drawables
@@ -1098,6 +1144,68 @@ public class CometChatConversations extends MaterialCardView {
         setSearchInputCornerRadius(searchInputCornerRadius);
         setSearchInputStrokeWidth(searchInputStrokeWidth);
         setSearchInputStrokeColor(searchInputStrokeColor);
+        setSelectedConversationAvatarStyle(selectedConversationAvatarStyle);
+        setSelectedConversationItemTextColor(selectedConversationItemTextColor);
+        setSelectedConversationItemTextAppearance(selectedConversationItemTextAppearance);
+        setSelectedConversationItemRemoveIcon(selectedConversationItemRemoveIcon);
+        setSelectedConversationItemRemoveIconTint(selectedConversationItemRemoveIconTint);
+    }
+
+    /**
+     * Sets up the layout and adapter for displaying selected conversations avatar.
+     */
+    private void configureSelectedConversationsView() {
+        selectedConversationsAdapter = new SelectedConversationsAdapter();
+        selectedConversationsAdapter.setOnRemoveClickListener(group -> {
+            hashMap.remove(group);
+            conversationsAdapter.selectConversation(hashMap);
+            updateSelectionUI();
+        });
+
+        binding.rvSelectedConversation.setLayoutManager(
+                new LinearLayoutManager(
+                        getContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                )
+        );
+        binding.rvSelectedConversation.setVisibility(View.GONE);
+    }
+
+    /**
+     * Updates the selected conversations list based on the current selection.
+     */
+    private void refreshSelectedConversations() {
+        List<Conversation> selectedConversations = getSelectedConversations();
+        List<Conversation> currentConversations = selectedConversationsAdapter.getConversations();
+
+        for (Conversation conversation : selectedConversations) {
+            if (!containsConversationWithId(currentConversations, conversation)) {
+                selectedConversationsAdapter.addConversation(conversation);
+            }
+        }
+
+        for (Conversation conversation : currentConversations) {
+            if (!containsConversationWithId(selectedConversations, conversation)) {
+                selectedConversationsAdapter.removeConversation(conversation);
+            }
+        }
+
+        if (!selectedConversations.isEmpty()) {
+            binding.rvSelectedConversation.smoothScrollToPosition(
+                    selectedConversations.size() - 1
+            );
+        }
+    }
+
+    /**
+     * Helper method to check if the given conversation is present in the provided list.
+     */
+    private boolean containsConversationWithId(List<Conversation> list, Conversation conversation) {
+        for (Conversation c : list) {
+            if (c.getConversationId().equals(conversation.getConversationId())) return true;
+        }
+        return false;
     }
 
     /**
@@ -2075,7 +2183,7 @@ public class CometChatConversations extends MaterialCardView {
      *
      * @return The list of selected Conversation objects.
      */
-    public List<Conversation> getSelectedConversation() {
+    public List<Conversation> getSelectedConversations() {
         return new ArrayList<>(hashMap.keySet());
     }
 
@@ -2097,6 +2205,123 @@ public class CometChatConversations extends MaterialCardView {
      */
     public void addOptions(Function2<Context, Conversation, List<CometChatPopupMenu.MenuItem>> options) {
         addOptions = options;
+    }
+
+    /**
+     * Retrieves the visibility status of the selected conversations recyclerview.
+     *
+     * @return An integer representing the visibility of the selected conversations recyclerview.
+     */
+    public int getSelectedConversationsListVisibility(){
+        return selectedConversationsListVisibility;
+    }
+
+    /**
+     * Sets the visibility of the selected conversations recyclerview.
+     * If the visibility is not {@code View.VISIBLE}, the selected conversations recyclerview is hidden.
+     *
+     * @param visibility An integer representing the visibility status of the selected conversations recyclerview.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setSelectedConversationsListVisibility(int visibility){
+        this.selectedConversationsListVisibility = visibility;
+        binding.rvSelectedConversation.setVisibility(visibility);
+    }
+
+    /**
+     * Gets the selected conversation avatar style resource.
+     *
+     * @return the selected conversation avatar style resource.
+     */
+    public @StyleRes int getSelectedConversationAvatarStyle() {
+        return selectedConversationAvatarStyle;
+    }
+
+    /**
+     * Sets the avatar style resource for the selected conversation list.
+     *
+     * @param avatarStyle the avatar style resource to set.
+     */
+    public void setSelectedConversationAvatarStyle(@StyleRes int avatarStyle) {
+        this.selectedConversationAvatarStyle = avatarStyle;
+        selectedConversationsAdapter.setAvatarStyle(avatarStyle);
+    }
+
+    /**
+     * Gets the selected conversation item text color.
+     *
+     * @return the selected conversation text color.
+     */
+    public @ColorInt int getSelectedConversationItemTextColor() {
+        return selectedConversationItemTextColor;
+    }
+
+    /**
+     * Sets the selected conversation title text color.
+     *
+     * @param conversationItemTextColor the conversation title text color to set.
+     */
+    public void setSelectedConversationItemTextColor(@ColorInt int conversationItemTextColor) {
+        this.selectedConversationItemTextColor = conversationItemTextColor;
+        selectedConversationsAdapter.setItemTitleTextColor(conversationItemTextColor);
+    }
+
+    /**
+     * Gets the text appearance for the selected conversation item.
+     *
+     * @return the text appearance for the selected conversation item.
+     */
+    public @StyleRes int getSelectedConversationItemTextAppearance() {
+        return selectedConversationItemTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the selected conversation item.
+     *
+     * @param conversationItemTextAppearance the text appearance for the selected conversation item.
+     */
+    public void setSelectedConversationItemTextAppearance(@StyleRes int conversationItemTextAppearance) {
+        this.selectedConversationItemTextAppearance = conversationItemTextAppearance;
+        selectedConversationsAdapter.setItemTitleTextAppearance(conversationItemTextAppearance);
+    }
+
+    /**
+     * Returns the selected conversations list remove item icon drawable.
+     *
+     * @return the selected conversations list remove item
+     */
+    public Drawable getSelectedConversationItemRemoveIcon() {
+        return selectedConversationItemRemoveIcon;
+    }
+
+    /**
+     * Sets the selected conversation list remove item icon drawable.
+     *
+     * @param removeItemIcon the drawable to set as the selected conversation list remove item icon
+     */
+    public void setSelectedConversationItemRemoveIcon(Drawable removeItemIcon) {
+        this.selectedConversationItemRemoveIcon = removeItemIcon;
+        selectedConversationsAdapter.setRemoveButtonIcon(removeItemIcon);
+    }
+
+    /**
+     * Returns the tint color for the selected conversation list remove icon.
+     *
+     * @return the selected conversation list remove item icon tint color
+     */
+    public @ColorInt int getSelectedConversationItemRemoveIconTint() {
+        return selectedConversationItemRemoveIconTint;
+    }
+
+    /**
+     * Sets the tint color for the selected conversation list remove icon.
+     *
+     * @param conversationItemRemoveIconTint the tint color to set selected conversation list remove icon tint color
+     */
+    public void setSelectedConversationItemRemoveIconTint(@ColorInt int conversationItemRemoveIconTint) {
+        this.selectedConversationItemRemoveIconTint = conversationItemRemoveIconTint;
+        selectedConversationsAdapter.setRemoveButtonIconTint(conversationItemRemoveIconTint);
     }
 
     public Function2<Context, Conversation, List<CometChatPopupMenu.MenuItem>> getOptions() {

@@ -6,7 +6,7 @@
 
     <com.cometchat.chatuikit.extensions.sticker.bubble.CometChatStickerBubble
         android:id="@+id/cometchat_sticker_bubble"
-        android:layout_width="@dimen/cometchat_180dp"
+        android:layout_width="@dimen/cometchat_240dp"
         android:layout_height="@dimen/cometchat_196dp" />
 
     <com.cometchat.chatuikit.shared.views.deletebubble.CometChatDeleteBubble

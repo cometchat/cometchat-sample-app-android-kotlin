@@ -89,6 +89,7 @@ public class CometChatGroupMembers extends MaterialCardView {
     // Adapter for group members
     private GroupMembersAdapter groupMembersAdapter;
     // Views for handling different states
+    private SelectedGroupMemberAdapter selectedGroupMemberAdapter;
     private View customEmptyStateView = null;
     private View customErrorStateView = null;
     private View customLoadingView = null;
@@ -122,6 +123,7 @@ public class CometChatGroupMembers extends MaterialCardView {
     private int emptyStateVisibility = VISIBLE;
     private int loadingStateVisibility = VISIBLE;
     private int errorStateVisibility = VISIBLE;
+    private int selectedGroupMembersListVisibility = VISIBLE;
 
     private Function3<Context, GroupMember, Group, List<CometChatPopupMenu.MenuItem>> options;
     private Function3<Context, GroupMember, Group, List<CometChatPopupMenu.MenuItem>> addOptions;
@@ -160,6 +162,11 @@ public class CometChatGroupMembers extends MaterialCardView {
     private @StyleRes int emptyStateSubtitleTextAppearance;
     private @StyleRes int errorStateTitleTextAppearance;
     private @StyleRes int errorStateSubtitleTextAppearance;
+    private Drawable selectedGroupMemberItemRemoveIcon;
+    private @ColorInt int selectedGroupMemberItemRemoveIconTint;
+    private @ColorInt int selectedGroupMemberItemTextColor;
+    private @StyleRes int selectedGroupMemberItemTextAppearance;
+    private @StyleRes int selectedGroupMemberAvatarStyle;
     private @StyleRes int itemTitleTextAppearance;
     private @StyleRes int avatarStyle;
     private @StyleRes int statusIndicatorStyle;
@@ -261,6 +268,8 @@ public class CometChatGroupMembers extends MaterialCardView {
         // Initialize the ViewModel and observe various live data updates
         initViewModel();
 
+        configureSelectedGroupMembersView();
+
         // Set up the back button click event
         binding.ivBack.setOnClickListener(view -> {
             if (onBackPress != null) {
@@ -303,10 +312,7 @@ public class CometChatGroupMembers extends MaterialCardView {
         // Set up the discard selection button click event
         binding.ivDiscardSelection.setOnClickListener(v -> {
             // Clear the selection and update the UI accordingly
-            hashMap.clear();
-            setSelectionCount(0);
-            setSelectionCountVisibility(GONE);
-            groupMembersAdapter.selectGroupMember(hashMap);
+            clearSelection();
         });
 
         // Set up the submit selection button click event
@@ -602,8 +608,48 @@ public class CometChatGroupMembers extends MaterialCardView {
                     setTitleVisibility(GONE);
                 }
                 groupMembersAdapter.selectGroupMember(hashMap);
+                updateSelectionUI();
             }
         }
+    }
+
+    private void updateSelectionUI() {
+        boolean hasSelection = !getSelectedGroupMembers().isEmpty();
+        if (selectedGroupMembersListVisibility == VISIBLE && hasSelection) {
+            if (binding.rvSelectedGroupMembers.getAdapter() == null) {
+                binding.rvSelectedGroupMembers.setAdapter(selectedGroupMemberAdapter);
+            }
+            binding.rvSelectedGroupMembers.setVisibility(VISIBLE);
+            refreshSelectedGroupMembers();
+        } else {
+            binding.rvSelectedGroupMembers.setVisibility(GONE);
+            if (binding.rvSelectedGroupMembers.getAdapter() != null) {
+                binding.rvSelectedGroupMembers.setAdapter(null);
+            }
+        }
+
+        setSelectionCount(getSelectedGroupMembers().size());
+
+        if (hasSelection) {
+            setDiscardSelectionIconVisibility(VISIBLE);
+            setTitleVisibility(GONE);
+        } else {
+            setDiscardSelectionIconVisibility(GONE);
+            setSubmitSelectionIconVisibility(GONE);
+            setTitleVisibility(VISIBLE);
+            binding.tvSelectionCount.setVisibility(GONE);
+        }
+    }
+
+    private void clearSelection(){
+        hashMap.clear();
+        binding.rvSelectedGroupMembers.setAdapter(null);
+        binding.rvSelectedGroupMembers.setVisibility(GONE);
+        binding.tvTitle.setVisibility(VISIBLE);
+        setSelectionCount(0);
+        setSelectionCountVisibility(GONE);
+        setDiscardSelectionIconVisibility(GONE);
+        groupMembersAdapter.selectGroupMember(hashMap);
     }
 
     /**
@@ -627,12 +673,12 @@ public class CometChatGroupMembers extends MaterialCardView {
             optionsArrayList = options.apply(getContext(), groupMember, group);
         } else {
             optionsArrayList = MembersUtils.getDefaultGroupMemberOptions(getContext(),
-                                                                         groupMember,
-                                                                         group,
-                                                                         null,
-                                                                         kickMemberOptionVisibility,
-                                                                         banMemberOptionVisibility,
-                                                                         scopeChangeOptionVisibility);
+                    groupMember,
+                    group,
+                    null,
+                    kickMemberOptionVisibility,
+                    banMemberOptionVisibility,
+                    scopeChangeOptionVisibility);
             if (addOptions != null) {
                 optionsArrayList.addAll(addOptions.apply(getContext(), groupMember, group));
             }
@@ -1876,7 +1922,15 @@ public class CometChatGroupMembers extends MaterialCardView {
             setErrorStateTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMembersErrorStateTitleTextAppearance,
                                                                       0));
             setErrorStateSubtitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMembersErrorStateSubtitleTextAppearance,
-                                                                         0));
+                    0));
+
+            setSelectedGroupMemberItemRemoveIcon(typedArray.getDrawable(R.styleable.CometChatGroupMembers_cometchatGroupMemberSelectedGroupMembersItemRemoveIcon));
+            setSelectedGroupMemberItemRemoveIconTint(typedArray.getColor(R.styleable.CometChatGroupMembers_cometchatGroupMemberSelectedGroupMembersItemRemoveIconTint,
+                    CometChatTheme.getIconTintWhite(getContext())));
+            setSelectedGroupMemberItemTextColor(typedArray.getColor(R.styleable.CometChatGroupMembers_cometchatGroupMemberSelectedGroupMembersItemTextColor,
+                    CometChatTheme.getTextColorSecondary(getContext())));
+            setSelectedGroupMemberItemTextAppearance(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMemberSelectedGroupMembersItemTextAppearance, 0));
+            setSelectedGroupMemberAvatarStyle(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMemberSelectedGroupMembersAvatarStyle, 0));
             setItemTitleTextAppearance(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMembersItemTitleTextAppearance, 0));
             setAvatarStyle(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMembersAvatarStyle, 0));
             setStatusIndicatorStyle(typedArray.getResourceId(R.styleable.CometChatGroupMembers_cometchatGroupMembersStatusIndicatorStyle, 0));
@@ -1909,6 +1963,53 @@ public class CometChatGroupMembers extends MaterialCardView {
         } finally {
             typedArray.recycle();
         }
+    }
+
+    private void configureSelectedGroupMembersView() {
+        selectedGroupMemberAdapter = new SelectedGroupMemberAdapter();
+        selectedGroupMemberAdapter.setOnRemoveClickListener(groupMember -> {
+            hashMap.remove(groupMember);
+            groupMembersAdapter.selectGroupMember(hashMap);
+            updateSelectionUI();
+        });
+
+        binding.rvSelectedGroupMembers.setLayoutManager(
+                new LinearLayoutManager(
+                        getContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                )
+        );
+        binding.rvSelectedGroupMembers.setVisibility(View.GONE);
+    }
+
+    private void refreshSelectedGroupMembers() {
+        List<GroupMember> selectedGroupMembers = getSelectedGroupMembers();
+        List<GroupMember> currentGroupMembers = selectedGroupMemberAdapter.getGroupMembers();
+
+        for (GroupMember groupMember : selectedGroupMembers) {
+            if (!containsGroupMemberWithId(currentGroupMembers, groupMember)) {
+                selectedGroupMemberAdapter.addGroupMember(groupMember);
+            }
+        }
+
+        for (GroupMember groupMember : currentGroupMembers) {
+            if (!containsGroupMemberWithId(selectedGroupMembers, groupMember)) {
+                selectedGroupMemberAdapter.removeGroupMember(groupMember);
+            }
+        }
+
+        if (!selectedGroupMembers.isEmpty()) {
+            binding.rvSelectedGroupMembers.smoothScrollToPosition(
+                    selectedGroupMembers.size() - 1
+            );
+        }
+    }
+    private boolean containsGroupMemberWithId(List<GroupMember> list, GroupMember groupMember) {
+        for (GroupMember m : list) {
+            if (m.getUid().equals(groupMember.getUid())) return true;
+        }
+        return false;
     }
 
     /**
@@ -2472,6 +2573,110 @@ public class CometChatGroupMembers extends MaterialCardView {
     public void setLoadingStateVisibility(int visibility) {
         this.loadingStateVisibility = visibility;
         setShimmerVisibility(visibility);
+    }
+
+    public int getSelectedGroupMembersListVisibility(){
+        return selectedGroupMembersListVisibility;
+    }
+
+    public void setSelectedGroupMembersListVisibility(int visibility){
+        this.selectedGroupMembersListVisibility = visibility;
+        binding.rvSelectedGroupMembers.setVisibility(visibility);
+    }
+
+    /**
+     * Gets the selected group member avatar style resource.
+     *
+     * @return the selected group member avatar style resource.
+     */
+    public @StyleRes int getSelectedGroupMemberAvatarStyle() {
+        return selectedGroupMemberAvatarStyle;
+    }
+
+    /**
+     * Sets the avatar style resource for the selected group member list.
+     *
+     * @param avatarStyle the avatar style resource to set.
+     */
+    public void setSelectedGroupMemberAvatarStyle(@StyleRes int avatarStyle) {
+        this.selectedGroupMemberAvatarStyle = avatarStyle;
+        selectedGroupMemberAdapter.setAvatarStyle(avatarStyle);
+    }
+
+    /**
+     * Gets the selected group member item text color.
+     *
+     * @return the selected group member text color.
+     */
+    public @ColorInt int getSelectedGroupMemberItemTextColor() {
+        return selectedGroupMemberItemTextColor;
+    }
+
+    /**
+     * Sets the selected group member item text color.
+     *
+     * @param groupMemberItemTextColor the item text color to set.
+     */
+    public void setSelectedGroupMemberItemTextColor(@ColorInt int groupMemberItemTextColor) {
+        this.selectedGroupMemberItemTextColor = groupMemberItemTextColor;
+        selectedGroupMemberAdapter.setItemTitleTextColor(groupMemberItemTextColor);
+    }
+
+    /**
+     * Gets the text appearance for the selected group member item.
+     *
+     * @return the text appearance for the selected group member item.
+     */
+    public @StyleRes int getSelectedGroupMemberItemTextAppearance() {
+        return selectedGroupMemberItemTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the selected group member item.
+     *
+     * @param groupMemberItemTextAppearance the text appearance for the selected group member item.
+     */
+    public void setSelectedGroupMemberItemTextAppearance(@StyleRes int groupMemberItemTextAppearance) {
+        this.selectedGroupMemberItemTextAppearance = groupMemberItemTextAppearance;
+        selectedGroupMemberAdapter.setItemTitleTextAppearance(groupMemberItemTextAppearance);
+    }
+
+    /**
+     * Returns the selected group members list remove item icon drawable.
+     *
+     * @return the selected group members list remove item
+     */
+    public Drawable getSelectedGroupMemberItemRemoveIcon() {
+        return selectedGroupMemberItemRemoveIcon;
+    }
+
+    /**
+     * Sets the selected group members list remove item icon drawable.
+     *
+     * @param removeItemIcon the drawable to set as the selected group members list remove item icon
+     */
+    public void setSelectedGroupMemberItemRemoveIcon(Drawable removeItemIcon) {
+        this.selectedGroupMemberItemRemoveIcon = removeItemIcon;
+        selectedGroupMemberAdapter.setRemoveButtonIcon(removeItemIcon);
+    }
+
+    /**
+     * Returns the tint color for the selected group member list remove icon.
+     *
+     * @return the selected group member list remove item icon tint color
+     */
+    public @ColorInt int getSelectedGroupMemberItemRemoveIconTint() {
+        return selectedGroupMemberItemRemoveIconTint;
+    }
+
+    /**
+     * Sets the tint color for the selected group members list remove icon.
+     *
+     * @param groupMemberItemRemoveIconTint the tint color to set selected group members list remove icon tint color
+     */
+    public void setSelectedGroupMemberItemRemoveIconTint(@ColorInt int groupMemberItemRemoveIconTint) {
+        this.selectedGroupMemberItemRemoveIconTint = groupMemberItemRemoveIconTint;
+        selectedGroupMemberAdapter.setRemoveButtonIconTint(groupMemberItemRemoveIconTint);
     }
 
     /**

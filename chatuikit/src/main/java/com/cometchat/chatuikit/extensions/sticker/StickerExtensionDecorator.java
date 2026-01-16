@@ -390,6 +390,7 @@ public class StickerExtensionDecorator extends DataSourceDecorator {
                         if (message.getDeletedAt() == 0) {
                             deletedBubble.setVisibility(View.GONE);
                             stickerBubble.setVisibility(View.VISIBLE);
+                            stickerBubble.setAlignment(alignment);
                             stickerBubble.setMessage((CustomMessage) message);
                         } else {
                             stickerBubble.setVisibility(View.GONE);

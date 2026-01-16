@@ -93,6 +93,7 @@ public class MessageListViewModel extends ViewModel {
     private final MutableLiveData<UIKitConstants.States> smartReplayUIState;
     private final MutableLiveData<UIKitConstants.States> conversationStarterUIState;
 
+    private boolean highlightScroll = true;
     public boolean firstFetch = true;
     private boolean enableConversationSummary = true;
     private boolean isAgentChat;
@@ -127,7 +128,6 @@ public class MessageListViewModel extends ViewModel {
     private String type;
     private List<String> messagesTypes;
     private List<String> messagesCategories;
-    private String conversationId;
     private List<String> smartRepliesKeywords;
     private Timer smartReplyDelayTimer;
 
@@ -337,8 +337,6 @@ public class MessageListViewModel extends ViewModel {
         return parentMessageId;
     }
 
-    private boolean highlightScroll = true;
-
     public boolean isHighlightScroll() {
         return highlightScroll;
     }
@@ -525,19 +523,21 @@ public class MessageListViewModel extends ViewModel {
         CometChatMessageEvents.addListener(LISTENERS_TAG, new CometChatMessageEvents() {
             @Override
             public void ccMessageSent(BaseMessage message, int status) {
-                if (status == MessageStatus.IN_PROGRESS) {
-                    if (isThreadedMessageForTheCurrentChat(message)) {
-                        addMessage(message);
-                    }
-                } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) {
-                    lastMessage = message;
-                    latestMessageId = message.getId();
-                    updateOptimisticMessage(message);
-                    if (isAgentChat && parentMessageId == -1 && !messageArrayList.isEmpty() && status == MessageStatus.SUCCESS) {
-                        parentMessageId = message.getId();
-                    }
-                    if (parentMessageId != -1 && status == MessageStatus.SUCCESS && message instanceof TextMessage && isAgentChat) {
-                        addStreamMessage((TextMessage) message);
+                if (isFromCurrentChat(message)) {
+                    if (status == MessageStatus.IN_PROGRESS) {
+                        if (isThreadedMessageForTheCurrentChat(message)) {
+                            addMessage(message);
+                        }
+                    } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) {
+                        lastMessage = message;
+                        latestMessageId = message.getId();
+                        updateOptimisticMessage(message);
+                        if (isAgentChat && parentMessageId == -1 && !messageArrayList.isEmpty() && status == MessageStatus.SUCCESS) {
+                            parentMessageId = message.getId();
+                        }
+                        if (parentMessageId != -1 && status == MessageStatus.SUCCESS && message instanceof TextMessage && isAgentChat) {
+                            addStreamMessage((TextMessage) message);
+                        }
                     }
                 }
             }
@@ -718,9 +718,12 @@ public class MessageListViewModel extends ViewModel {
 
                 @Override
                 public void ccMessageSent(BaseMessage message, int status) {
-                    if (status == MessageStatus.IN_PROGRESS) {
-                        if (isThreadedMessageForTheCurrentChat(message)) addMessage(message);
-                    } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) updateOptimisticMessage(message);
+                    if (isFromCurrentChat(message)){
+                        if (status == MessageStatus.IN_PROGRESS) {
+                            if (isThreadedMessageForTheCurrentChat(message)) addMessage(message);
+                        } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) updateOptimisticMessage(message);
+                    }
+
                 }
             });
 
@@ -803,30 +806,34 @@ public class MessageListViewModel extends ViewModel {
     }
 
     private void onReactionAdded(ReactionEvent reactionEvent) {
-        if (reactionEvent.getConversationId().equals(conversationId)) {
+        if (messageArrayList != null && !messageArrayList.isEmpty()) {
             for (int i = messageArrayList.size() - 1; i >= 0; i--) {
                 BaseMessage baseMessage = messageArrayList.get(i);
-                if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
-                    BaseMessage modifiedBaseMessage = CometChatHelper.updateMessageWithReactionInfo(baseMessage,
-                                                                                                    reactionEvent.getReaction(),
-                                                                                                    CometChatConstants.REACTION_ADDED);
-                    updateMessage(modifiedBaseMessage);
-                    break;
+                if (reactionEvent.getConversationId().equals(baseMessage.getConversationId())) {
+                    if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
+                        BaseMessage modifiedBaseMessage = CometChatHelper.updateMessageWithReactionInfo(baseMessage,
+                                reactionEvent.getReaction(),
+                                CometChatConstants.REACTION_ADDED);
+                        updateMessage(modifiedBaseMessage);
+                        break;
+                    }
                 }
             }
         }
     }
 
     private void onReactionRemoved(ReactionEvent reactionEvent) {
-        if (reactionEvent.getConversationId().equals(conversationId)) {
+        if (messageArrayList != null && !messageArrayList.isEmpty()) {
             for (int i = messageArrayList.size() - 1; i >= 0; i--) {
                 BaseMessage baseMessage = messageArrayList.get(i);
-                if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
-                    BaseMessage modifiedBaseMessage = CometChatHelper.updateMessageWithReactionInfo(baseMessage,
-                                                                                                    reactionEvent.getReaction(),
-                                                                                                    CometChatConstants.REACTION_REMOVED);
-                    updateMessage(modifiedBaseMessage);
-                    break;
+                if (reactionEvent.getConversationId().equals(baseMessage.getConversationId())) {
+                    if (baseMessage.getId() == reactionEvent.getReaction().getMessageId()) {
+                        BaseMessage modifiedBaseMessage = CometChatHelper.updateMessageWithReactionInfo(baseMessage,
+                                reactionEvent.getReaction(),
+                                CometChatConstants.REACTION_REMOVED);
+                        updateMessage(modifiedBaseMessage);
+                        break;
+                    }
                 }
             }
         }
@@ -843,6 +850,22 @@ public class MessageListViewModel extends ViewModel {
             return true;
         } else return parentMessageId > -1 && parentMessageId == baseMessage.getParentMessageId(); // True in case of Thread messages.
     }
+
+    public boolean isFromCurrentChat(BaseMessage message) {
+        if (id == null || message == null) return false;
+
+        if (message.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+            if (id.equalsIgnoreCase(message.getSender().getUid())) {
+                return true;
+            } else return id.equalsIgnoreCase(message.getReceiverUid()) && message
+                    .getSender()
+                    .getUid()
+                    .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid());
+        } else {
+            return id.equalsIgnoreCase(message.getReceiverUid());
+        }
+    }
+
 
     public void hideDeleteMessages(boolean hide) {
         this.hideDeleteMessage = hide;
@@ -996,7 +1019,6 @@ public class MessageListViewModel extends ViewModel {
                                 mutableIsInProgress.setValue(false);
                                 states.setValue(UIKitConstants.States.LOADED);
                                 states.setValue(checkIsEmpty(messageArrayList));
-                                conversationId = !messageArrayList.isEmpty() ? messageArrayList.get(0).getConversationId() : null;
                             });
                         }).start();
                     }

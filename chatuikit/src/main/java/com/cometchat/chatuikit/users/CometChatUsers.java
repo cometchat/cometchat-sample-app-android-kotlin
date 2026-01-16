@@ -73,6 +73,7 @@ public class CometChatUsers extends MaterialCardView {
     private CometchatUserListBinding binding;
     private UsersViewModel usersViewModel;
     private UsersAdapter usersAdapter;
+    private SelectedUsersAdapter selectedUsersAdapter;
     /**
      * Observer to handle updates to items in the list.
      */
@@ -98,7 +99,7 @@ public class CometChatUsers extends MaterialCardView {
     private int separatorVisibility = VISIBLE;
     private int titleVisibility = VISIBLE;
     private int userStatusVisibility = VISIBLE;
-
+    private int selectedUsersListVisibility = VISIBLE;
     private View emptyView = null;
     private View errorView = null;
     private View customLoadingView = null;
@@ -196,6 +197,11 @@ public class CometChatUsers extends MaterialCardView {
     private @ColorInt int errorStateTextColor;
     private @StyleRes int errorStateSubtitleTextAppearance;
     private @ColorInt int errorStateSubtitleColor;
+    private Drawable selectedUserItemRemoveIcon;
+    private @ColorInt int selectedUserItemTextColor;
+    private @StyleRes int selectedUserItemTextAppearance;
+    private @StyleRes int selectedUserAvatarStyle;
+    private @ColorInt int selectedUserItemRemoveIconTint;
     private @ColorInt int retryButtonTextColor;
     private @StyleRes int retryButtonTextAppearance;
     private @ColorInt int retryButtonBackgroundColor;
@@ -296,6 +302,7 @@ public class CometChatUsers extends MaterialCardView {
         initViewModels();
         initRecyclerView();
         initClickEvents();
+        configureSelectedUsersView();
     }
 
     /**
@@ -370,9 +377,11 @@ public class CometChatUsers extends MaterialCardView {
             if (state.equals(CometChatSearchBox.SearchState.TextChange)) {
                 if (text.isEmpty()) {
                     usersViewModel.searchUsers(null);
-                } else {
+                } else if (!text.trim().isEmpty()) {
                     usersViewModel.searchUsers(text);
                 }
+            } else if (state.equals(CometChatSearchBox.SearchState.Clear)) {
+                usersViewModel.refreshList();
             }
         });
 
@@ -496,7 +505,14 @@ public class CometChatUsers extends MaterialCardView {
                                                          CometChatTheme.getColorWhite(getContext()));
             checkBoxSelectIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersCheckBoxSelectIcon);
             checkBoxCheckedBackgroundColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersCheckBoxCheckedBackgroundColor,
-                                                                 CometChatTheme.getIconTintHighlight(getContext()));
+                    CometChatTheme.getIconTintHighlight(getContext()));
+            selectedUserAvatarStyle = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersSelectedUsersAvatarStyle,0);
+            selectedUserItemTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSelectedUsersItemTextColor,
+                    CometChatTheme.getTextColorSecondary(getContext()));
+            selectedUserItemTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersSelectedUsersItemTextAppearance,0);
+            selectedUserItemRemoveIcon = typedArray.getDrawable(R.styleable.CometChatUsers_cometchatUsersSelectedUsersItemRemoveIcon);
+            selectedUserItemRemoveIconTint = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersSelectedUsersItemRemoveIconTint,
+                    CometChatTheme.getIconTintWhite(getContext()));
             emptyStateTextAppearance = typedArray.getResourceId(R.styleable.CometChatUsers_cometchatUsersEmptyStateTextAppearance, 0);
             emptyStateTextColor = typedArray.getColor(R.styleable.CometChatUsers_cometchatUsersEmptyStateTextColor,
                                                       CometChatTheme.getTextColorPrimary(getContext()));
@@ -584,11 +600,72 @@ public class CometChatUsers extends MaterialCardView {
         setSearchInputEndIconTint(searchInputEndIconTint);
         setCheckBoxSelectIcon(checkBoxSelectIcon);
         setCheckBoxSelectIconTint(checkBoxSelectIconTint);
+        setSelectedUserAvatarStyle(selectedUserAvatarStyle);
+        setSelectedUserItemTextColor(selectedUserItemTextColor);
+        setSelectedUserItemTextAppearance(selectedUserItemTextAppearance);
+        setSelectedUserItemRemoveIcon(selectedUserItemRemoveIcon);
+        setSelectedUserItemRemoveIconTint(selectedUserItemRemoveIconTint);
 
         binding.tvSelectionCount.setTextAppearance(itemTitleTextAppearance);
         binding.tvSelectionCount.setTextColor(itemTitleTextColor);
 
         setSelectionMode(UIKitConstants.SelectionMode.NONE);
+    }
+
+    /**
+     * Sets up the layout and adapter for displaying selected users avatar.
+     */
+    private void configureSelectedUsersView() {
+        selectedUsersAdapter = new SelectedUsersAdapter();
+        selectedUsersAdapter.setOnRemoveClickListener(user -> {
+            usersViewModel.selectUser(user, false);
+            updateSelectionUI();
+        });
+
+        binding.rvSelectedUsers.setLayoutManager(
+                new LinearLayoutManager(
+                        getContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                )
+        );
+        binding.rvSelectedUsers.setVisibility(View.GONE);
+    }
+
+    /**
+     * Updates the selected users list based on the current selection.
+     */
+    private void refreshSelectedUsers() {
+        List<User> selectedUsers = getSelectedUsers();
+        List<User> currentUsers = selectedUsersAdapter.getUsers();
+
+        for (User user : selectedUsers) {
+            if (!containsUserWithId(currentUsers, user)) {
+                selectedUsersAdapter.addUser(user);
+            }
+        }
+
+        for (User user : currentUsers) {
+            if (!containsUserWithId(selectedUsers, user)) {
+                selectedUsersAdapter.removeUser(user);
+            }
+        }
+
+        if (!selectedUsers.isEmpty()) {
+            binding.rvSelectedUsers.smoothScrollToPosition(
+                    selectedUsers.size() - 1
+            );
+        }
+    }
+
+    /**
+     * Helper method to check if the given user is present in the provided list.
+     */
+    private boolean containsUserWithId(List<User> list, User user) {
+        for (User u : list) {
+            if (u.getUid().equals(user.getUid())) return true;
+        }
+        return false;
     }
 
     /**
@@ -1711,6 +1788,8 @@ public class CometChatUsers extends MaterialCardView {
      */
     public void clearSelection() {
         usersViewModel.clearSelection();
+        binding.rvSelectedUsers.setAdapter(null);
+        binding.rvSelectedUsers.setVisibility(GONE);
         setSelectionCount(0);
         setDiscardSelectionVisibility(GONE);
         setTitleVisibility(VISIBLE);
@@ -2134,18 +2213,32 @@ public class CometChatUsers extends MaterialCardView {
             }
         }
     }
-
     private void updateSelectionUI() {
-        if (usersViewModel.getSelectedUsers().isEmpty()) {
+        boolean hasSelection = !usersViewModel.getSelectedUsers().isEmpty();
+        if (selectedUsersListVisibility == VISIBLE && hasSelection) {
+            if (binding.rvSelectedUsers.getAdapter() == null) {
+                binding.rvSelectedUsers.setAdapter(selectedUsersAdapter);
+            }
+            binding.rvSelectedUsers.setVisibility(VISIBLE);
+            refreshSelectedUsers();
+        } else {
+            binding.rvSelectedUsers.setVisibility(GONE);
+            if (binding.rvSelectedUsers.getAdapter() != null) {
+                binding.rvSelectedUsers.setAdapter(null);
+            }
+        }
+        setSelectionCount(usersViewModel.getSelectedUsers().size());
+        if (hasSelection) {
+            binding.tvSelectionCount.setVisibility(VISIBLE);
+            setDiscardSelectionVisibility(VISIBLE);
+            setSubmitSelectionIconVisibility(submitSelectionIconVisibility);
+            setTitleVisibility(GONE);
+        } else {
+            binding.tvSelectionCount.setVisibility(GONE);
             setDiscardSelectionVisibility(GONE);
             setSubmitSelectionIconVisibility(GONE);
             setSelectionCountVisibility(GONE);
             setTitleVisibility(VISIBLE);
-        } else {
-            setSelectionCount(usersViewModel.getSelectedUsers().size());
-            setDiscardSelectionVisibility(VISIBLE);
-            setSubmitSelectionIconVisibility(submitSelectionIconVisibility == VISIBLE ? VISIBLE : GONE);
-            setSelectionCountVisibility(VISIBLE);
         }
     }
 
@@ -2504,6 +2597,123 @@ public class CometChatUsers extends MaterialCardView {
         usersAdapter.hideUserStatus(visibility != VISIBLE);
     }
 
+    /**
+     * Retrieves the visibility status of the selected users recyclerview.
+     *
+     * @return An integer representing the visibility of the selected users recyclerview.
+     */
+    public int getSelectedUsersListVisibility(){
+        return selectedUsersListVisibility;
+    }
+
+    /**
+     * Sets the visibility of the selected users recyclerview.
+     * If the visibility is not {@code View.VISIBLE}, the selected users recyclerview is hidden.
+     *
+     * @param visibility An integer representing the visibility status of the selected users recyclerview.
+     *                   Accepts values such as {@code View.VISIBLE}, {@code View.INVISIBLE},
+     *                   or {@code View.GONE}.
+     */
+    public void setSelectedUsersListVisibility(int visibility){
+        this.selectedUsersListVisibility = visibility;
+        binding.rvSelectedUsers.setVisibility(visibility);
+    }
+
+    /**
+     * Gets the selected user avatar style resource.
+     *
+     * @return the selected user avatar style resource.
+     */
+    public @StyleRes int getSelectedUserAvatarStyle() {
+        return selectedUserAvatarStyle;
+    }
+
+    /**
+     * Sets the avatar style resource for the selected user list.
+     *
+     * @param avatarStyle the avatar style resource to set.
+     */
+    public void setSelectedUserAvatarStyle(@StyleRes int avatarStyle) {
+        this.selectedUserAvatarStyle = avatarStyle;
+        selectedUsersAdapter.setAvatarStyle(avatarStyle);
+    }
+
+    /**
+     * Gets the selected user item text color.
+     *
+     * @return the selected user text color.
+     */
+    public @ColorInt int getSelectedUserItemTextColor() {
+        return selectedUserItemTextColor;
+    }
+
+    /**
+     * Sets the title text color.
+     *
+     * @param userItemTextColor the title text color to set.
+     */
+    public void setSelectedUserItemTextColor(@ColorInt int userItemTextColor) {
+        this.selectedUserItemTextColor = userItemTextColor;
+        selectedUsersAdapter.setItemTitleTextColor(userItemTextColor);
+    }
+
+    /**
+     * Gets the text appearance for the selected user item.
+     *
+     * @return the text appearance for the selected user item.
+     */
+    public @StyleRes int getSelectedUserItemTextAppearance() {
+        return selectedUserItemTextAppearance;
+    }
+
+    /**
+     * Sets the text appearance for the selected user item.
+     *
+     * @param userItemTextAppearance the text appearance for the selected user item.
+     */
+    public void setSelectedUserItemTextAppearance(@StyleRes int userItemTextAppearance) {
+        this.selectedUserItemTextAppearance = userItemTextAppearance;
+        selectedUsersAdapter.setItemTitleTextAppearance(userItemTextAppearance);
+    }
+
+    /**
+     * Returns the selected users list remove item icon drawable.
+     *
+     * @return the selected users list remove item
+     */
+    public Drawable getSelectedUserItemRemoveIcon() {
+        return selectedUserItemRemoveIcon;
+    }
+
+    /**
+     * Sets the selected users list remove item icon drawable.
+     *
+     * @param removeItemIcon the drawable to set as the selected users list remove item icon
+     */
+    public void setSelectedUserItemRemoveIcon(Drawable removeItemIcon) {
+        this.selectedUserItemRemoveIcon = removeItemIcon;
+        selectedUsersAdapter.setRemoveButtonIcon(removeItemIcon);
+    }
+
+    /**
+     * Returns the tint color for the selected user list remove icon.
+     *
+     * @return the selected users list remove item icon tint color
+     */
+    public @ColorInt int getSelectedUserItemRemoveIconTint() {
+        return selectedUserItemRemoveIconTint;
+    }
+
+    /**
+     * Sets the tint color for the selected user list remove icon.
+     *
+     * @param userItemRemoveIconTint the tint color to set selected user list remove icon tint color
+     */
+    public void setSelectedUserItemRemoveIconTint(@ColorInt int userItemRemoveIconTint) {
+        this.selectedUserItemRemoveIconTint = userItemRemoveIconTint;
+        selectedUsersAdapter.setRemoveButtonIconTint(userItemRemoveIconTint);
+    }
+
     public Function2<Context, User, List<CometChatPopupMenu.MenuItem>> getAddOptions() {
         return addOptions;
     }
@@ -2563,13 +2773,11 @@ public class CometChatUsers extends MaterialCardView {
             usersAdapter.isSelectionEnabled(true);
             setDiscardSelectionVisibility(VISIBLE);
             setSubmitSelectionIconVisibility(GONE);
-            setSelectionCountVisibility(VISIBLE);
         } else {
             isFurtherSelectionEnabled = false;
             usersAdapter.isSelectionEnabled(false);
             setDiscardSelectionVisibility(GONE);
             setSubmitSelectionIconVisibility(GONE);
-            setSelectionCountVisibility(GONE);
         }
     }
 

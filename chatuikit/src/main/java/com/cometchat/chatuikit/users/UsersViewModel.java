@@ -52,7 +52,6 @@ public class UsersViewModel extends ViewModel {
         cometchatException = new MutableLiveData<>();
         states = new MutableLiveData<>();
         usersRequestBuilder = new UsersRequest.UsersRequestBuilder().setLimit(limit);
-        searchUsersRequestBuilder = new UsersRequest.UsersRequestBuilder();
         usersRequest = usersRequestBuilder.build();
         selectedUsers = new HashMap<>();
     }
@@ -342,7 +341,6 @@ public class UsersViewModel extends ViewModel {
      */
     public void refreshList() {
         if (usersRequestBuilder != null) {
-            clear();
             usersRequest = usersRequestBuilder.build();
             hasMore = true;
             fetchUsersList(true);
@@ -357,8 +355,9 @@ public class UsersViewModel extends ViewModel {
     public void searchUsers(String search) {
         clear();
         hasMore = true;
-        if (search != null) usersRequest = searchUsersRequestBuilder.setSearchKeyword(search).build();
-        else usersRequest = usersRequestBuilder.build();
+        if (searchUsersRequestBuilder == null)
+            usersRequest = usersRequestBuilder.setSearchKeyword(search).build();
+        else usersRequest = searchUsersRequestBuilder.setSearchKeyword(search).build();
         fetchUsers();
     }
 
