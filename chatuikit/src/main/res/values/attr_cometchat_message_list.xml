@@ -42,5 +42,8 @@
         <attr name="cometchatMessageListReactionListStyle" format="reference" />
         <attr name="cometchatMessageListAIConversationSummaryStyle" format="reference" />
 
+        <attr name="cometchatMessageListNewMessageIndicatorSeparatorColor" format="color" />
+        <attr name="cometchatMessageListNewMessageIndicatorTextColor" format="color" />
+        <attr name="cometchatMessageListNewMessageIndicatorTextAppearance" format="reference" />
     </declare-styleable>
 </resources>

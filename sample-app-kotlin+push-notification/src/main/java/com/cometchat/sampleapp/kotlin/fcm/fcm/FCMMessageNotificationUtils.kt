@@ -177,6 +177,11 @@ object FCMMessageNotificationUtils {
             )
         ).setAutoCancel(true).setOnlyAlertOnce(true)
 
+        fcmMessageDTO.unreadMessageCount?.toIntOrNull()?.takeIf { it >= 0 }?.let { count ->
+            mNotificationBuilder.setNumber(count)
+            mNotificationBuilder.setSubText("$count unread messages")
+        }
+
         if (bitmap != null) {
             mNotificationBuilder.setLargeIcon(bitmap)
         } else {

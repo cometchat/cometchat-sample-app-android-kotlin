@@ -152,4 +152,22 @@ public class CometChatModerationView extends MaterialCardView {
     public void setModerationViewMessageTextAppearance(@StyleRes int styleRes) {
         binding.message.setTextAppearance(styleRes);
     }
+
+    /**
+     * Sets the text of the moderation message.
+     * @param text the message text to display.
+     */
+    public void setModerationViewMessageText(String text) {
+        if (text != null) {
+            binding.message.setText(text);
+        }
+    }
+
+    /**
+     * Sets the text of the moderation message from a string resource.
+     * @param resId the string resource id.
+     */
+    public void setModerationViewMessageText(int resId) {
+        binding.message.setText(resId);
+    }
 }

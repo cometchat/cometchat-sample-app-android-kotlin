@@ -20,6 +20,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cometchat.chat.models.BaseMessage;
@@ -170,9 +171,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
         binding.tvBannedMembers.setCompoundDrawableTintList(ColorStateList.valueOf(CometChatTheme.getIconTintHighlight(this)));
         binding.tvBannedMembers.setTextColor(CometChatTheme.getTextColorSecondary(this));
         binding.viewDivider.setBackgroundColor(CometChatTheme.getStrokeColorLight(this));
-        binding.ivLeaveGroup.setImageTintList(ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
+        TextViewCompat.setCompoundDrawableTintList(binding.tvLeaveGroup, ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
         binding.tvLeaveGroup.setTextColor(CometChatTheme.getErrorColor(this));
-        binding.ivDeleteGroup.setImageTintList(ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
+        TextViewCompat.setCompoundDrawableTintList(binding.tvDeleteGroup, ColorStateList.valueOf(CometChatTheme.getErrorColor(this)));
         binding.tvDeleteGroup.setTextColor(CometChatTheme.getErrorColor(this));
 
         setOptionsVisibility();
@@ -200,7 +201,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
             }
         });
 
-        binding.leaveGroupLay.setOnClickListener(view -> {
+        binding.tvLeaveGroup.setOnClickListener(view -> {
             if (!CometChatUIKit.getLoggedInUser().getUid().equals(group.getOwner())) {
                 showAlertDialog(getString(R.string.app_leave_this_group),
                                 getString(R.string.app_leave_this_group_description),
@@ -235,7 +236,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
             }
         });
 
-        binding.deleteGroupLay.setOnClickListener(view -> showAlertDialog(getString(R.string.app_delete_and_exit_action),
+        binding.tvDeleteGroup.setOnClickListener(view -> showAlertDialog(getString(R.string.app_delete_and_exit_action),
                                                                           getString(R.string.app_delete_and_exit_description),
                                                                           getString(R.string.app_btn_cancel),
                                                                           getString(R.string.app_btn_delete),
@@ -285,7 +286,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
                     viewModel.fetchAndTransferOwnerShip();
                 } else if (group.getMembersCount() == 1) {
                     confirmDialog.dismiss();
-                    binding.deleteGroupLay.performClick();
+                    binding.tvDeleteGroup.performClick();
                 }
             }
         });
@@ -298,15 +299,15 @@ public class GroupDetailsActivity extends AppCompatActivity {
     private void setOptionsVisibility() {
         binding.viewAddMembers.setVisibility(View.GONE);
         binding.viewBannedMembers.setVisibility(View.GONE);
-        binding.deleteGroupLay.setVisibility(View.GONE);
+        binding.tvDeleteGroup.setVisibility(View.GONE);
         binding.viewMembers.setVisibility(View.GONE);
-        binding.leaveGroupLay.setVisibility(View.GONE);
+        binding.tvLeaveGroup.setVisibility(View.GONE);
         if (group.isJoined()) {
             showGroupMembers();
             switch (group.getScope()) {
                 case UIKitConstants.GroupMemberScope.PARTICIPANTS:
                     binding.viewMembers.setVisibility(View.VISIBLE);
-                    binding.leaveGroupLay.setVisibility(View.VISIBLE);
+                    binding.tvLeaveGroup.setVisibility(View.VISIBLE);
                     break;
                 case UIKitConstants.GroupMemberScope.MODERATOR:
                     addMemberSetup();
@@ -314,7 +315,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
                     binding.viewAddMembers.setVisibility(View.GONE);
                     binding.viewBannedMembers.setVisibility(View.GONE);
                     binding.viewMembers.setVisibility(View.VISIBLE);
-                    binding.leaveGroupLay.setVisibility(View.VISIBLE);
+                    binding.tvLeaveGroup.setVisibility(View.VISIBLE);
                     break;
                 case UIKitConstants.GroupMemberScope.ADMIN:
                     addMemberSetup();
@@ -322,8 +323,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
                     binding.viewAddMembers.setVisibility(View.VISIBLE);
                     binding.viewBannedMembers.setVisibility(View.VISIBLE);
                     binding.viewMembers.setVisibility(View.VISIBLE);
-                    if (group.getMembersCount() > 1) binding.leaveGroupLay.setVisibility(View.VISIBLE);
-                    binding.deleteGroupLay.setVisibility(View.VISIBLE);
+                    if (group.getMembersCount() > 1) binding.tvLeaveGroup.setVisibility(View.VISIBLE);
+                    binding.tvDeleteGroup.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -502,7 +503,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 if (dialog != null) dialog.dismiss();
                 if (confirmDialog != null) {
                     confirmDialog.dismiss();
-                    binding.leaveGroupLay.performClick();
+                    binding.tvLeaveGroup.performClick();
                 }
                 break;
             case FAILURE:

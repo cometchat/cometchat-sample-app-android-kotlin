@@ -4,7 +4,6 @@ import static com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKitHelper
 import static com.cometchat.chatuikit.shared.resources.utils.Utils.isCallingAvailable;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -383,7 +382,7 @@ public final class CometChatUIKit {
 
             @Override
             public void onError(CometChatException e) {
-                mediaMessage.setMetadata(Utils.placeErrorObjectInMetaData(e));
+                mediaMessage.setMetadata(Utils.placeErrorObjectInMetaData(e, mediaMessage.getMetadata()));
                 CometChatUIKitHelper.onMessageSent(mediaMessage, MessageStatus.ERROR);
                 triggerMessageCallback(messageCallbackListener, null, e);
             }

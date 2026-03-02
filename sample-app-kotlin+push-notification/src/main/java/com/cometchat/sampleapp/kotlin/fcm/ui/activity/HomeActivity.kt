@@ -26,6 +26,7 @@ import com.cometchat.sampleapp.kotlin.fcm.voip.interfaces.VoIPPermissionListener
 import com.cometchat.sampleapp.kotlin.fcm.voip.model.CometChatVoIPError
 import com.cometchat.sampleapp.kotlin.fcm.voip.utils.CometChatVoIPConstant
 import com.google.gson.Gson
+import me.leolin.shortcutbadger.ShortcutBadger
 
 class HomeActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var binding: ActivityHomeBinding
@@ -51,6 +52,11 @@ class HomeActivity : AppCompatActivity(), OnItemClickListener {
         configureBottomNavigation()
         configureVoIP()
         handleDeepLinking()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ShortcutBadger.removeCount(this)
     }
 
     /**

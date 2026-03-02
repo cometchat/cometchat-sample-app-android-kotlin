@@ -337,6 +337,18 @@ public class FCMMessageNotificationUtils {
             .setAutoCancel(true)
             .setOnlyAlertOnce(true);
 
+        if (fcmMessageDTO.getUnreadMessageCount() != null) {
+            try {
+                int count = Integer.parseInt(fcmMessageDTO.getUnreadMessageCount());
+                if (count >= 0) {
+                    mNotificationBuilder.setNumber(count);
+                    mNotificationBuilder.setSubText(count + " unread messages");
+                }
+            } catch (NumberFormatException e) {
+                // Ignore invalid number format
+            }
+        }
+
         if (bitmap != null) {
             mNotificationBuilder.setLargeIcon(bitmap);
         } else {

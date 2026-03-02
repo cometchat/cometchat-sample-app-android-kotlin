@@ -67,6 +67,8 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
     private static final String TAG = CometChatSearchMessageListAdapter.class.getSimpleName();
     private final Context context;
     private List<BaseMessage> messagesList = new ArrayList<>();
+    private String uid;
+    private String guid;
 
     private List<CometChatTextFormatter> textFormatters;
 
@@ -99,7 +101,7 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
 
     public CometChatSearchMessageListAdapter(Context context) {
         this.context = context;
-        this.dateSeparatorFormat = new SimpleDateFormat("MMM dd, yyyy", CometChatLocalize.getDefault());
+        this.dateSeparatorFormat = new SimpleDateFormat("MMM, yyyy", CometChatLocalize.getDefault());
         this.dateTimeFormatter = CometChatUIKit.getAuthSettings().getDateTimeFormatterCallback();
         textFormatters = new ArrayList<>();
     }
@@ -212,20 +214,29 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
     }
 
     private void bindTailView(CometChatDate date, BaseMessage baseMessage, int textColor, int textAppearance) {
-        date.setDate(baseMessage.getUpdatedAt(), Pattern.DAY_DATE_TIME);
-        date.setDateFormat(messageTimestampDateFormat);
+        long timestamp = baseMessage.getUpdatedAt() * 1000;
+        String formattedDate;
+        if (messageTimestampDateFormat != null) {
+            formattedDate = messageTimestampDateFormat.format(new java.util.Date(timestamp));
+        } else {
+            formattedDate = new SimpleDateFormat("dd MMM, yyyy", CometChatLocalize.getDefault()).format(new java.util.Date(timestamp));
+        }
+        date.setDateText(formattedDate);
         date.setDateTextColor(textColor);
         if (textAppearance != 0) date.setDateTextAppearance(textAppearance);
     }
 
-
     private void bindSubtitleView(SubtitleView messageSubtitle, TextMessage textMessage) {
-        String sender = !Objects.equals(textMessage.getSender().getUid(), CometChatUIKit.getLoggedInUser().getUid()) ? textMessage.getSender().getName() : context.getString(R.string.cometchat_you);
         messageSubtitle.showTypingIndicator(false);
         messageSubtitle.showSubtitleViewContainer(true);
         messageSubtitle.hideMessageReceiptIcon(true);
         messageSubtitle.showMessageTypeIconView(false);
-        messageSubtitle.setSenderNameText(sender + ": ");
+        if (uid != null || guid != null) {
+            messageSubtitle.setSenderNameText("");
+        } else {
+            String sender = !Objects.equals(textMessage.getSender().getUid(), CometChatUIKit.getLoggedInUser().getUid()) ? textMessage.getSender().getName() : context.getString(R.string.cometchat_you);
+            messageSubtitle.setSenderNameText(sender + ": ");
+        }
         SpannableString spannableString = SpannableString.valueOf(FormatterUtils.getFormattedText(context,
                 textMessage,
                 UIKitConstants.FormattingType.CONVERSATIONS,
@@ -250,6 +261,13 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
     }
 
     private String getConversationTitle(BaseMessage baseMessage) {
+        if (uid != null || guid != null) {
+            String senderUid = baseMessage.getSender().getUid();
+            if (Objects.equals(senderUid, CometChatUIKit.getLoggedInUser().getUid())) {
+                return context.getString(R.string.cometchat_you);
+            }
+            return baseMessage.getSender().getName();
+        }
         String title;
         AppEntity appEntity = baseMessage.getReceiver();
         if (appEntity instanceof Group) {
@@ -342,6 +360,14 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
 
     public void setMessageThreadIcon(Drawable threadIcon) {
         this.messageThreadIcon = threadIcon;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 
     private class SearchImageViewHolder extends RecyclerView.ViewHolder {
@@ -643,7 +669,7 @@ public class CometChatSearchMessageListAdapter extends RecyclerView.Adapter<Recy
     public long getHeaderId(int var1) {
         if (messagesList.size() > var1 && IGNORE_MESSAGE != getItemViewTypes(var1)) {
             BaseMessage baseMessage = messagesList.get(var1);
-            return Long.parseLong(Utils.getDateId(baseMessage.getSentAt() * 1000));
+            return Utils.getMonthId(baseMessage.getSentAt() * 1000);
         } else return 0;
     }
 

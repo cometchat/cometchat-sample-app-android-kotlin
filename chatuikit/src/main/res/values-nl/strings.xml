@@ -207,6 +207,7 @@
     <string name="cometchat_cancel_button">Annuleren</string>
     <string name="cometchat_settings_button">Instellingen</string>
     <string name="cometchat_moderation_block_message">Je bericht werd geblokkeerd vanwege het moderatiebeleid.</string>
+    <string name="cometchat_mime_type_not_allowed_message">Dit bestandstype is niet toegestaan.</string>
     <string name="cometchat_no_conversations_history_title">Geen gesprekshistorie gevonden</string>
     <string name="cometchat_ask_anything">Vraag iets</string>
     <string name="cometchat_something_went_wrong_try_again">Er ging iets mis aan onze kant. Probeer het opnieuw</string>

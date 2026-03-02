@@ -18,6 +18,7 @@ cometchatUIKit = "5.2.9"
 recyclerview = "1.3.2"
 kotlin = "1.9.24"
 coreKtx = "1.15.0"
+shortcutbadger = "1.1.22"
 
 [libraries]
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
@@ -47,6 +48,7 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 syntax-highlight = { module = "io.noties.markwon:syntax-highlight", version.ref = "core" }
 chat-uikit-android = { module = "com.cometchat:chat-uikit-android", version.ref = "cometchatUIKit" }
+shortcutbadger = { module = "me.leolin:ShortcutBadger", version.ref = "shortcutbadger" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

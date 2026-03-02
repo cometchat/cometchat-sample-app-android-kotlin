@@ -185,7 +185,7 @@
 
     <TextView
         android:id="@+id/tv_block"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawablePadding="@dimen/cometchat_padding_3"
         android:gravity="center_vertical"
@@ -200,7 +200,7 @@
 
     <TextView
         android:id="@+id/tv_delete_chat"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawablePadding="@dimen/cometchat_padding_3"
         android:gravity="center_vertical"

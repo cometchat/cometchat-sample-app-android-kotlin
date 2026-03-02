@@ -556,4 +556,19 @@ public class CometChatMessageInput extends MaterialCardView {
     public void setPlaceHolderText(String text) {
         binding.cometchatComposeBox.setHint(text);
     }
+
+    /**
+     * This method is used to set the media selected listener for the compose box.
+     *
+     * @param onEditTextMediaListener The listener to be set for media selection.
+     */
+    public void setMediaSelected(CometChatEditText.OnEditTextMediaListener onEditTextMediaListener) {
+        binding.cometchatComposeBox.setMediaSelected(onEditTextMediaListener);
+    }
+    /**
+     * This method is used to remove the media selected listener.
+     */
+    public void removeMediaSelected() {
+        binding.cometchatComposeBox.removeMediaSelected();
+    }
 }

@@ -27,6 +27,7 @@ import com.cometchat.sampleapp.kotlin.fcm.voip.model.CometChatVoIPError
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import me.leolin.shortcutbadger.ShortcutBadger
 
 class FCMService : FirebaseMessagingService() {
 
@@ -48,6 +49,15 @@ class FCMService : FirebaseMessagingService() {
             return
         }
 
+        val unreadCountStr: String? = message.data.get("unreadMessageCount")
+        unreadCountStr?.toIntOrNull()?.let { count ->
+            if (count >= 0) {
+                ShortcutBadger.applyCount(applicationContext, count)
+            } else {
+                CometChatLogger.w(TAG, "Invalid badge count: $count")
+            }
+        } ?: CometChatLogger.d(TAG, "No unreadMessageCount in payload")
+
         try {
             if (message.data.containsKey("type")) {
                 val type = message.data["type"]
@@ -55,6 +65,7 @@ class FCMService : FirebaseMessagingService() {
                     val fcmMessageDTO: FCMMessageDTO = Gson().fromJson(
                         Gson().toJson(message.data), FCMMessageDTO::class.java
                     )
+                    fcmMessageDTO.unreadMessageCount = unreadCountStr
                     CometChat.markAsDelivered(
                         fcmMessageDTO.tag!!.toLong(),
                         fcmMessageDTO.sender!!,

@@ -234,12 +234,18 @@ public class MessageBubbleUtils {
                     }
                 } else if (message instanceof MediaMessage) {
                     MediaMessage mediaMessage = (MediaMessage) message;
+                    boolean hasMimeTypeError = Utils.hasMimeTypeNotAllowedError(mediaMessage);
                     if (UIKitConstants.ModerationConstants.DISAPPROVED.equals(mediaMessage.getModerationStatus())) {
                         params.width = MATCH_PARENT;
-                        moderationView.setVisibility(View.VISIBLE);
+                        moderationView.setModerationViewMessageText(R.string.cometchat_moderation_block_message);
+                        view.setVisibility(View.VISIBLE);
+                    } else if (hasMimeTypeError) {
+                        params.width = MATCH_PARENT;
+                        moderationView.setModerationViewMessageText(R.string.cometchat_mime_type_not_allowed_message);
+                        view.setVisibility(View.VISIBLE);
                     } else {
                         params.width = WRAP_CONTENT;
-                        moderationView.setVisibility(View.GONE);
+                        view.setVisibility(View.GONE);
                     }
                 }
                 parent.setLayoutParams(params);

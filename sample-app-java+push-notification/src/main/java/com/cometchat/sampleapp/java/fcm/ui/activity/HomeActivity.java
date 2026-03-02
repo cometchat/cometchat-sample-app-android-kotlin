@@ -26,6 +26,7 @@ import com.cometchat.sampleapp.java.fcm.voip.interfaces.VoIPPermissionListener;
 import com.cometchat.sampleapp.java.fcm.voip.model.CometChatVoIPError;
 import com.cometchat.sampleapp.java.fcm.voip.utils.CometChatVoIPConstant;
 import com.google.gson.Gson;
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class HomeActivity extends AppCompatActivity implements OnItemClickListener {
     private static final String TAG = HomeActivity.class.getSimpleName();
@@ -65,6 +66,12 @@ public class HomeActivity extends AppCompatActivity implements OnItemClickListen
         configureBottomNavigation();
         configureVoIP();
         handleDeepLinking();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ShortcutBadger.removeCount(this);
     }
 
     /**

@@ -13,7 +13,7 @@ android {
         //noinspection OldTargetApi
         targetSdk 35
         versionCode 1
-        versionName "5.2.8"
+        versionName "5.2.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -52,5 +52,5 @@ dependencies {
     implementation libs.lottie
     implementation libs.glide
     implementation libs.gson
-
+    implementation libs.shortcutbadger
 }

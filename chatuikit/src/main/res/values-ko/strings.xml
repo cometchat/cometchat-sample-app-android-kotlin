@@ -207,6 +207,7 @@
     <string name="cometchat_cancel_button">취소</string>
     <string name="cometchat_settings_button">설정</string>
     <string name="cometchat_moderation_block_message">귀하의 메시지는 관리 정책으로 인해 차단되었습니다.</string>
+    <string name="cometchat_mime_type_not_allowed_message">이 파일 형식은 허용되지 않습니다.</string>
     <string name="cometchat_no_conversations_history_title">대화 기록이 없습니다</string>
     <string name="cometchat_ask_anything">무엇이든 물어보세요</string>
     <string name="cometchat_something_went_wrong_try_again">우리 측에서 문제가 발생했습니다. 다시 시도해주세요</string>

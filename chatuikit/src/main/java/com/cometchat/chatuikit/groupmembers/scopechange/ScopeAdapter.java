@@ -27,6 +27,7 @@ public class ScopeAdapter extends RecyclerView.Adapter<ScopeAdapter.RoleViewHold
     private final Context context;
     private List<String> roles;
     private int selectedPosition = -1; // To keep track of the selected position
+    private int initialPosition = -1;
     private Group group;
 
     private @ColorInt int itemTextColor;
@@ -34,6 +35,7 @@ public class ScopeAdapter extends RecyclerView.Adapter<ScopeAdapter.RoleViewHold
     private @StyleRes int itemTextAppearance;
     private @ColorInt int disableRadioButtonTint;
     private @ColorInt int radioButtonTint;
+    private OnScopeSelectionChangeListener onScopeSelectionChangeListener;
 
     public ScopeAdapter(Context context, List<String> roles) {
         this.context = context;
@@ -66,12 +68,14 @@ public class ScopeAdapter extends RecyclerView.Adapter<ScopeAdapter.RoleViewHold
             holder.itemView.setOnClickListener(v -> {
                 selectedPosition = holder.getAbsoluteAdapterPosition();
                 notifyDataSetChanged();
+                notifySelectionChangeListener();
             });
 
             // Handle the RadioButton click
             holder.radioButton.setOnClickListener(v -> {
                 selectedPosition = holder.getAbsoluteAdapterPosition();
                 notifyDataSetChanged();
+                notifySelectionChangeListener();
             });
         }
     }
@@ -119,8 +123,24 @@ public class ScopeAdapter extends RecyclerView.Adapter<ScopeAdapter.RoleViewHold
             } else {
                 selectedPosition = 2;
             }
+            initialPosition = selectedPosition;
             notifyDataSetChanged();
+            notifySelectionChangeListener();
         }
+    }
+
+    public void setOnScopeSelectionChangeListener(OnScopeSelectionChangeListener listener) {
+        this.onScopeSelectionChangeListener = listener;
+    }
+
+    private void notifySelectionChangeListener() {
+        if (onScopeSelectionChangeListener != null) {
+            onScopeSelectionChangeListener.onSelectionChanged(selectedPosition == initialPosition);
+        }
+    }
+
+    public interface OnScopeSelectionChangeListener {
+        void onSelectionChanged(boolean isSameAsOriginal);
     }
 
     public static class RoleViewHolder extends RecyclerView.ViewHolder {

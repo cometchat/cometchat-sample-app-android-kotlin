@@ -52,7 +52,6 @@ import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -144,29 +143,27 @@ public class Utils {
         mainThread.post(runnable);
     }
 
-    public static Bitmap captureScreen(Activity activity) {
+    public static Bitmap captureScreen(View view) {
+        if (view == null || view.getWidth() <= 0 || view.getHeight() <= 0) {
+            return null;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return captureScreenUsingPixelCopy(activity);
+            return captureScreenUsingPixelCopy(view);
         } else {
-            return captureScreenLegacy(activity);
+            return captureScreenLegacy(view);
         }
     }
 
     // ✅ **Best method for Android O (API 26+)**
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private static Bitmap captureScreenUsingPixelCopy(Activity activity) {
+    private static Bitmap captureScreenUsingPixelCopy(View view) {
         try {
-            // Get the Window Decor View
-            Window window = activity.getWindow();
-            final View decorView = window.getDecorView();
-            final Bitmap bitmap = Bitmap.createBitmap(decorView.getWidth(), decorView.getHeight(), Bitmap.Config.ARGB_8888);
-
-            PixelCopy.request(window, bitmap, copyResult -> {
-                if (copyResult != PixelCopy.SUCCESS) {
-                    throw new RuntimeException("PixelCopy failed");
-                }
-            }, new android.os.Handler());
-
+            if (!view.isAttachedToWindow()) {
+                return null;
+            }
+            final Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
             return bitmap;
         } catch (Exception e) {
             CometChatLogger.e(TAG, "Error capturing screen: " + e.getMessage());
@@ -175,12 +172,12 @@ public class Utils {
     }
 
     // ✅ **Fallback for Older Versions**
-    private static Bitmap captureScreenLegacy(Activity activity) {
+    private static Bitmap captureScreenLegacy(View view) {
         try {
-            View rootView = activity.getWindow().getDecorView().getRootView();
-            rootView.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
-            rootView.setDrawingCacheEnabled(false);
+            view.setDrawingCacheEnabled(true);
+            view.buildDrawingCache();
+            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+            view.setDrawingCacheEnabled(false);
             return bitmap;
         } catch (Exception e) {
             CometChatLogger.e(TAG, "Error capturing screen: " + e.getMessage());
@@ -188,9 +185,9 @@ public class Utils {
         }
     }
 
-    public static Bitmap applyRenderScriptBlur(Activity activity, Bitmap bitmap) {
+    public static Bitmap applyRenderScriptBlur(Context context, Bitmap bitmap) {
         Bitmap outputBitmap = Bitmap.createBitmap(bitmap);
-        RenderScript rs = RenderScript.create(activity, RenderScript.ContextType.NORMAL);
+        RenderScript rs = RenderScript.create(context, RenderScript.ContextType.NORMAL);
         Allocation input = Allocation.createFromBitmap(rs, bitmap);
         Allocation output = Allocation.createFromBitmap(rs, outputBitmap);
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, input.getElement());
@@ -772,6 +769,12 @@ public class Utils {
         return DateFormat.format("ddMMyyyy", var2).toString();
     }
 
+    public static long getMonthId(long var0) {
+        Calendar var2 = Calendar.getInstance(Locale.ENGLISH);
+        var2.setTimeInMillis(var0);
+        return var2.get(Calendar.YEAR) * 100L + var2.get(Calendar.MONTH);
+    }
+
     public static String getCallDate(long var0) {
         Calendar var2 = Calendar.getInstance(Locale.ENGLISH);
         var2.setTimeInMillis(var0);
@@ -1340,13 +1343,55 @@ public class Utils {
     }
 
     public static JSONObject placeErrorObjectInMetaData(CometChatException exception) {
-        JSONObject metaData = new JSONObject();
+        return placeErrorObjectInMetaData(exception, null);
+    }
+
+    public static JSONObject placeErrorObjectInMetaData(CometChatException exception, JSONObject existingMetadata) {
+        JSONObject metaData = existingMetadata != null ? existingMetadata : new JSONObject();
         try {
             metaData.put("error", exception.toString());
+            metaData.put("errorCode", exception.getCode());
+            metaData.put("errorMessage", exception.getMessage());
         } catch (Exception e) {
             CometChatLogger.e(TAG, e.toString());
         }
         return metaData;
+    }
+
+    /**
+     * Extracts the error code from message metadata.
+     * @param message The message to extract error code from.
+     * @return The error code string, or null if not found.
+     */
+    public static String getErrorCodeFromMetaData(BaseMessage message) {
+        if (message == null || message.getMetadata() == null) {
+            return null;
+        }
+        try {
+            return message.getMetadata().optString("errorCode", null);
+        } catch (Exception e) {
+            CometChatLogger.e(TAG, e.toString());
+            return null;
+        }
+    }
+
+    /**
+     * Checks if the message has a MIME type not allowed error.
+     * @param message The message to check.
+     * @return true if the message has a MIME type not allowed error.
+     */
+    public static boolean hasMimeTypeNotAllowedError(BaseMessage message) {
+        String errorCode = getErrorCodeFromMetaData(message);
+        if (errorCode == null) {
+            return false;
+        }
+        if ("ERR_PERMISSION_DENIED".equals(errorCode)) {
+            if (message.getMetadata() != null) {
+                String errorMessage = message.getMetadata().optString("errorMessage", "");
+                return errorMessage.contains("MIME type not allowed") || errorMessage.contains("MIME type '");
+            }
+        }
+        return false;
     }
 
     public static BaseMessage convertToUIKitMessage(BaseMessage baseMessage) {

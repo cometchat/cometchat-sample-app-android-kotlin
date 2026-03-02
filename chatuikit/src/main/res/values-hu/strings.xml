@@ -214,6 +214,7 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_cancel_button">Mégse</string>
     <string name="cometchat_settings_button">Beállítások</string>
     <string name="cometchat_moderation_block_message">Üzenetét moderálási irányelvek miatt blokkolták.</string>
+    <string name="cometchat_mime_type_not_allowed_message">Ez a fájltípus nem engedélyezett.</string>
     <string name="cometchat_no_conversations_history_title">Nincs beszélgetési előzmény</string>
     <string name="cometchat_ask_anything">Kérdezz bármit</string>
     <string name="cometchat_something_went_wrong_try_again">Valami hiba történt nálunk. Kérjük, próbálja újra</string>

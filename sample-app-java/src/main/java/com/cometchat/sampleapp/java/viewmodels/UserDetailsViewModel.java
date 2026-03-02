@@ -110,7 +110,7 @@ public class UserDetailsViewModel extends ViewModel {
                         isUserBlocked.setValue(true);
                         isUserBlockedByMe.setValue(true);
                         user.getValue().setBlockedByMe(true);
-                        setUser(user.getValue());
+                        user.setValue(user.getValue());
                     } else {
                         isUserBlocked.setValue(false);
                     }
@@ -135,7 +135,7 @@ public class UserDetailsViewModel extends ViewModel {
                         isUserUnblocked.setValue(true);
                         isUserBlockedByMe.setValue(false);
                         user.getValue().setBlockedByMe(false);
-                        setUser(user.getValue());
+                        user.setValue(user.getValue());
                     } else {
                         isUserUnblocked.setValue(false);
                     }

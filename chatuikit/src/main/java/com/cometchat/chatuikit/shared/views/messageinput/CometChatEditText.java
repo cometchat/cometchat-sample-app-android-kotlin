@@ -121,6 +121,13 @@ public class CometChatEditText extends AppCompatEditText {
     /**
      * This method is used to remove the media selected listener.
      */
+    public void removeMediaSelected() {
+        this.onEditTextMediaListener = null;
+    }
+
+    /**
+     * This method is used to remove the media selected listener.
+     */
     public void setTextWatcher(CometChatTextWatcher textWatcher) {
         this.textWatcher = textWatcher;
     }

@@ -31,7 +31,6 @@ class ThreadMessageActivity : AppCompatActivity() {
     private var user: User? = null
     private var group: Group? = null
     private var goToMessage: BaseMessage? = null
-    private var isBlockedByMe: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,25 +45,14 @@ class ThreadMessageActivity : AppCompatActivity() {
         val goToMessageJson = intent.getStringExtra(getString(R.string.app_go_to_message))
         val rawMessage = intent.getStringExtra(AppConstants.JSONConstants.RAW_JSON)
         val replyCount = intent.getIntExtra(AppConstants.JSONConstants.REPLY_COUNT, 0)
-        val userJson = intent.getStringExtra(getString(R.string.app_user))
-        val groupJson = intent.getStringExtra(getString(R.string.app_group))
         try {
-            isBlockedByMe = intent.getBooleanExtra("isBlockedByMe", false)
-
             if (goToMessageJson != null) {
                 goToMessage = BaseMessage.processMessage(JSONObject(goToMessageJson))
             }
-
             if (rawMessage != null) {
                 val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
                 parentMessage.replyCount = replyCount
                 viewModel.setParentMessage(parentMessage)
-            }
-            if (userJson != null) {
-                user = User.fromJson(userJson)
-            }
-            if (groupJson != null) {
-                group = Group.fromJson(groupJson)
             }
         } catch (e: JSONException) {
             throw RuntimeException(e)
@@ -72,7 +60,6 @@ class ThreadMessageActivity : AppCompatActivity() {
         viewModel.addUserListener()
         viewModel.parentMessage.observe(this, this::setParentMessage)
         viewModel.userBlockStatus.observe(this, this::updateUserBlockStatus)
-        viewModel.userBlockStatus.observe(this, this::setUserBlockedStatus)
         viewModel.unblockButtonState.observe(this, this::setUnblockButtonState)
 
         if (user != null)
@@ -83,22 +70,6 @@ class ThreadMessageActivity : AppCompatActivity() {
         setupUI()
     }
 
-    private fun setUserBlockedStatus(user: User) {
-        if (this.user != null && this.user!!.uid == user.uid) {
-            isBlockedByMe = user.isBlockedByMe
-            updateUserBlockStatus()
-        }
-    }
-
-    private fun updateUserBlockStatus() {
-        if (isBlockedByMe) {
-            binding.messageComposer.visibility = View.GONE
-            binding.unblockLayout.visibility = View.VISIBLE
-        } else {
-            binding.messageComposer.visibility = View.VISIBLE
-            binding.unblockLayout.visibility = View.GONE
-        }
-    }
     private fun setUpTheme() {
         binding.backIcon.setColorFilter(CometChatTheme.getIconTintPrimary(this))
         binding.tvTitle.setTextColor(CometChatTheme.getTextColorPrimary(this))
@@ -158,7 +129,6 @@ class ThreadMessageActivity : AppCompatActivity() {
         if (user != null) {
             updateUserBlockStatus(user!!)
         }
-        updateUserBlockStatus()
     }
 
     private fun setParentMessage(parentMessage: BaseMessage) {

@@ -117,7 +117,7 @@ class GroupDetailsActivity : AppCompatActivity() {
 
         binding.ivBack.setOnClickListener { view: View? -> finish() }
 
-        binding.leaveGroupLay.setOnClickListener { view: View? ->
+        binding.tvLeaveGroup.setOnClickListener { view: View? ->
             if (CometChatUIKit.getLoggedInUser().uid != group.owner) {
                 showAlertDialog(
                     getString(R.string.app_leave_this_group),
@@ -146,7 +146,7 @@ class GroupDetailsActivity : AppCompatActivity() {
             }
         }
 
-        binding.deleteGroupLay.setOnClickListener { view: View? ->
+        binding.tvDeleteGroup.setOnClickListener { view: View? ->
             showAlertDialog(
                 getString(R.string.app_delete_and_exit_action),
                 getString(R.string.app_delete_and_exit_description),
@@ -198,7 +198,7 @@ class GroupDetailsActivity : AppCompatActivity() {
                     viewModel.fetchAndTransferOwnerShip()
                 } else if (group.membersCount == 1) {
                     confirmDialog!!.dismiss()
-                    binding.deleteGroupLay.performClick()
+                    binding.tvLeaveGroup.performClick()
                 }
             }
         }
@@ -211,15 +211,15 @@ class GroupDetailsActivity : AppCompatActivity() {
     private fun setOptionsVisibility() {
         binding.viewAddMembers.visibility = View.GONE
         binding.viewBannedMembers.visibility = View.GONE
-        binding.deleteGroupLay.visibility = View.GONE
+        binding.tvDeleteGroup.visibility = View.GONE
         binding.viewMembers.visibility = View.GONE
-        binding.leaveGroupLay.visibility = View.GONE
+        binding.tvLeaveGroup.visibility = View.GONE
         if (group.isJoined) {
             showGroupMembers()
             when (group.scope) {
                 UIKitConstants.GroupMemberScope.PARTICIPANTS -> {
                     binding.viewMembers.visibility = View.VISIBLE
-                    binding.leaveGroupLay.visibility = View.VISIBLE
+                    binding.tvLeaveGroup.visibility = View.VISIBLE
                 }
 
                 UIKitConstants.GroupMemberScope.MODERATOR -> {
@@ -228,7 +228,7 @@ class GroupDetailsActivity : AppCompatActivity() {
                     binding.viewAddMembers.visibility = View.GONE
                     binding.viewBannedMembers.visibility = View.GONE
                     binding.viewMembers.visibility = View.VISIBLE
-                    binding.leaveGroupLay.visibility = View.VISIBLE
+                    binding.tvLeaveGroup.visibility = View.VISIBLE
                 }
 
                 UIKitConstants.GroupMemberScope.ADMIN -> {
@@ -237,8 +237,8 @@ class GroupDetailsActivity : AppCompatActivity() {
                     binding.viewAddMembers.visibility = View.VISIBLE
                     binding.viewBannedMembers.visibility = View.VISIBLE
                     binding.viewMembers.visibility = View.VISIBLE
-                    if (group.membersCount > 1) binding.leaveGroupLay.visibility = View.VISIBLE
-                    binding.deleteGroupLay.visibility = View.VISIBLE
+                    if (group.membersCount > 1) binding.tvLeaveGroup.visibility = View.VISIBLE
+                    binding.tvDeleteGroup.visibility = View.VISIBLE
                 }
             }
         }
@@ -427,7 +427,7 @@ class GroupDetailsActivity : AppCompatActivity() {
             DialogState.SUCCESS -> if (confirmDialog != null) {
                 dialog.dismiss()
                 confirmDialog!!.dismiss()
-                binding.leaveGroupLay.performClick()
+                binding.tvLeaveGroup.performClick()
             }
 
             DialogState.FAILURE -> {

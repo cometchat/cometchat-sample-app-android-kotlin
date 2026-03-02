@@ -120,6 +120,7 @@ public class CometChatScopeChange extends MaterialCardView {
     private @ColorInt int negativeButtonTextColor;
     private @StyleRes int buttonTextAppearance;
     private @ColorInt int positiveButtonBackgroundColor;
+    private @ColorInt int positiveButtonDisabledBackgroundColor;
     private @ColorInt int negativeButtonBackgroundColor;
 
     /**
@@ -190,6 +191,10 @@ public class CometChatScopeChange extends MaterialCardView {
             } else {
                 viewModel.changeScope(scopeAdapter.getSelectedRole());
             }
+        });
+
+        scopeAdapter.setOnScopeSelectionChangeListener(isSameAsOriginal -> {
+            setPositiveButtonEnabled(!isSameAsOriginal);
         });
     }
 
@@ -271,6 +276,8 @@ public class CometChatScopeChange extends MaterialCardView {
             setButtonTextAppearance(typedArray.getResourceId(R.styleable.CometChatScopeChange_cometchatScopeChangeButtonTextAppearance, 0));
             setPositiveButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonBackgroundColor,
                                                                  CometChatTheme.getPrimaryColor(getContext())));
+            setPositiveButtonDisabledBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangePositiveButtonDisabledBackgroundColor,
+                                                                 CometChatTheme.getNeutralColor300(getContext())));
             setNegativeButtonBackgroundColor(typedArray.getColor(R.styleable.CometChatScopeChange_cometchatScopeChangeNegativeButtonBackgroundColor,
                                                                  CometChatTheme.getBackgroundColor1(getContext())));
         } finally {
@@ -764,6 +771,10 @@ public class CometChatScopeChange extends MaterialCardView {
         binding.cometchatScopeChangeSaveButton.setCardBackgroundColor(positiveButtonBackgroundColor);
     }
 
+    public void setPositiveButtonDisabledBackgroundColor(@ColorInt int color) {
+        this.positiveButtonDisabledBackgroundColor = color;
+    }
+
     /**
      * Gets the background color for the negative button.
      *
@@ -781,6 +792,18 @@ public class CometChatScopeChange extends MaterialCardView {
     public void setNegativeButtonBackgroundColor(@ColorInt int negativeButtonBackgroundColor) {
         this.negativeButtonBackgroundColor = negativeButtonBackgroundColor;
         binding.cometchatScopeChangeCancelButton.setCardBackgroundColor(negativeButtonBackgroundColor);
+    }
+
+    /**
+     * Enables or disables the positive (save) button.
+     *
+     * @param enabled true to enable the button, false to disable it.
+     */
+    public void setPositiveButtonEnabled(boolean enabled) {
+        binding.cometchatScopeChangeSaveButton.setEnabled(enabled);
+        binding.cometchatScopeChangeSaveButton.setCardBackgroundColor(
+                enabled ? positiveButtonBackgroundColor : positiveButtonDisabledBackgroundColor
+        );
     }
 
     /**

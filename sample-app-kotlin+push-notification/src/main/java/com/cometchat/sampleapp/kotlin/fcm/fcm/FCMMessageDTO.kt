@@ -39,4 +39,7 @@ class FCMMessageDTO {
 
     @SerializedName("senderName")
     var senderName: String? = null
+
+    @SerializedName("unreadMessageCount")
+    var unreadMessageCount: String? = null
 }

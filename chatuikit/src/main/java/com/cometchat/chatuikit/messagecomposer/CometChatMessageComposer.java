@@ -360,7 +360,15 @@ public class CometChatMessageComposer extends MaterialCardView {
         setupSuggestionListScrollListener();
         setupSuggestionListClickListener();
         setMessageInputTextChangeListener();
+        setMediaSelectedListener();
         applyStyleAttributes(attributeSet, defStyleAttr, 0);
+    }
+
+    private void setMediaSelectedListener() {
+        binding.messageInput.setMediaSelected(i -> {
+            File file = MediaUtils.getRealPath(getContext(), i.getContentUri(), false);
+            sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_IMAGE);
+        });
     }
 
     private void setupMicroPhonePermissions() {
@@ -2412,9 +2420,9 @@ public class CometChatMessageComposer extends MaterialCardView {
     }
 
     /**
-     * Gets the visibility state of the voice note button.
+     * Gets the visibility status of the voice note button.
      *
-     * @return The visibility state of the voice note button.
+     * @return The visibility status of the voice note button.
      */
     public int getVoiceNoteButtonVisibility() {
         return voiceNoteButtonVisibility;

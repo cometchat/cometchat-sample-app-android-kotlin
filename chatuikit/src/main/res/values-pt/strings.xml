@@ -205,6 +205,7 @@
     <string name="cometchat_cancel_button">Cancelar</string>
     <string name="cometchat_settings_button">Configurações</string>
     <string name="cometchat_moderation_block_message">Sua mensagem foi bloqueada devido às políticas de moderação.</string>
+    <string name="cometchat_mime_type_not_allowed_message">Este tipo de arquivo não é permitido.</string>
     <string name="cometchat_no_conversations_history_title">Nenhum histórico de conversa encontrado</string>
     <string name="cometchat_ask_anything">Pergunte qualquer coisa</string>
     <string name="cometchat_something_went_wrong_try_again">Algo deu errado da nossa parte. Por favor, tente novamente</string>

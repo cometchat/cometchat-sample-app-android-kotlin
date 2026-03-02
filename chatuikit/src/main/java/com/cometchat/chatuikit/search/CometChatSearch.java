@@ -1177,6 +1177,7 @@ public class CometChatSearch extends MaterialCardView {
     public void setUid(String uid) {
         this.uid = uid;
         cometChatSearchViewModel.setUid(uid);
+        cometChatSearchMessageAdapter.setUid(uid);
     }
 
     /** * Returns the group ID (GUID) for group-specific searches.
@@ -1194,6 +1195,7 @@ public class CometChatSearch extends MaterialCardView {
     public void setGuid(String guid) {
         this.guid = guid;
         cometChatSearchViewModel.setGuid(guid);
+        cometChatSearchMessageAdapter.setGuid(guid);
     }
 
     /** * Sets the ConversationsRequestBuilder for fetching conversations.

@@ -208,6 +208,7 @@
     <string name="cometchat_cancel_button">取消</string>
     <string name="cometchat_settings_button">设置</string>
     <string name="cometchat_moderation_block_message">您的消息因审核政策而被屏蔽</string>
+    <string name="cometchat_mime_type_not_allowed_message">不允许此文件类型。</string>
     <string name="cometchat_no_conversations_history_title">找不到对话历史</string>
     <string name="cometchat_no_conversations_history_subtitle">通过点击“新聊天”按钮开始聊天</string>
     <string name="cometchat_new_chat">新聊天</string>

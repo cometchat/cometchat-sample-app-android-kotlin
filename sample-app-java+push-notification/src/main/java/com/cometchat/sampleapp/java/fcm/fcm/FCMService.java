@@ -30,6 +30,7 @@ import com.cometchat.sampleapp.java.fcm.voip.model.CometChatVoIPError;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class FCMService extends FirebaseMessagingService {
     private static final String TAG = FCMService.class.getSimpleName();
@@ -52,11 +53,28 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
+        String unreadCountStr = message.getData().get("unreadMessageCount");
+        if (unreadCountStr != null) {
+            try {
+                int count = Integer.parseInt(unreadCountStr);
+                if (count >= 0) {
+                    ShortcutBadger.applyCount(getApplicationContext(), count);
+                } else {
+                    CometChatLogger.w(TAG, "Invalid badge count: " + count);
+                }
+            } catch (NumberFormatException e) {
+                CometChatLogger.d(TAG, "Invalid unreadMessageCount format: " + unreadCountStr);
+            }
+        } else {
+            CometChatLogger.d(TAG, "No unreadMessageCount in payload");
+        }
+
         try {
             if (message.getData().containsKey("type")) {
                 String type = message.getData().get("type");
                 if ("chat".equalsIgnoreCase(type)) {
                     FCMMessageDTO fcmMessageDTO = new Gson().fromJson(new Gson().toJson(message.getData()), FCMMessageDTO.class);
+                    fcmMessageDTO.setUnreadMessageCount(unreadCountStr);
 
                     CometChat.markAsDelivered(Long.parseLong(fcmMessageDTO.getTag()),
                                               fcmMessageDTO.getSender(),

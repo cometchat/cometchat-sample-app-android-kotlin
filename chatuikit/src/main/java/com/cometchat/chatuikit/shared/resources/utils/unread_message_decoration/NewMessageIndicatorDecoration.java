@@ -33,6 +33,10 @@ public class NewMessageIndicatorDecoration extends RecyclerView.ItemDecoration {
         mStickyHeaderCache.clear();
     }
 
+    public long getUnreadMessageId() {
+        return unreadMessageId;
+    }
+
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         int position = getPosition(parent, view);

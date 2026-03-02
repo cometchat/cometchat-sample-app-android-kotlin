@@ -209,6 +209,7 @@
     <string name="cometchat_cancel_button">रद्द करें</string>
     <string name="cometchat_settings_button">सेटिंग्स</string>
     <string name="cometchat_moderation_block_message">आपका संदेश मोडरेशन नीतियों के कारण ब्लॉक कर दिया गया।</string>
+    <string name="cometchat_mime_type_not_allowed_message">इस फ़ाइल प्रकार की अनुमति नहीं है।</string>
     <string name="cometchat_no_conversations_history_title">कोई बातचीत का इतिहास नहीं मिला</string>
     <string name="cometchat_ask_anything">कुछ भी पूछें</string>
     <string name="cometchat_something_went_wrong_try_again">हमारी ओर से कुछ गलत हो गया। कृपया पुनः प्रयास करें</string>

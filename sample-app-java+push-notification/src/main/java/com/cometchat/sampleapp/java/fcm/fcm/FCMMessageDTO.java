@@ -40,6 +40,9 @@ public class FCMMessageDTO {
     @SerializedName("senderName")
     private String senderName;
 
+    @SerializedName("unreadMessageCount")
+    private String unreadMessageCount;
+
     // Getters and Setters
     public String getConversationId() {
         return conversationId;
@@ -135,5 +138,13 @@ public class FCMMessageDTO {
 
     public void setSenderName(String senderName) {
         this.senderName = senderName;
+    }
+
+    public String getUnreadMessageCount() {
+        return unreadMessageCount;
+    }
+
+    public void setUnreadMessageCount(String unreadMessageCount) {
+        this.unreadMessageCount = unreadMessageCount;
     }
 }

@@ -146,6 +146,8 @@ public class MessageListViewModel extends ViewModel {
     private long latestMessageId = -1;
     private int unreadCount = 0;
     private long lastUnreadMessageId = -1;
+    private int pendingNewMessageCount = 0;
+    private BaseMessage firstPendingUnreadMessage = null;
 
     public MessageListViewModel() {
         mutableMessageList = new MutableLiveData<>();
@@ -336,6 +338,11 @@ public class MessageListViewModel extends ViewModel {
     public long getParentMessageId() {
         return parentMessageId;
     }
+
+    public long getLastReadMessageId() {
+        return lastReadMessageId;
+    }
+
 
     public boolean isHighlightScroll() {
         return highlightScroll;
@@ -529,8 +536,10 @@ public class MessageListViewModel extends ViewModel {
                             addMessage(message);
                         }
                     } else if (status == MessageStatus.SUCCESS || status == MessageStatus.ERROR) {
-                        lastMessage = message;
-                        latestMessageId = message.getId();
+                        if (isThreadedMessageForTheCurrentChat(message)) {
+                            lastMessage = message;
+                            latestMessageId = message.getId();
+                        }
                         updateOptimisticMessage(message);
                         if (isAgentChat && parentMessageId == -1 && !messageArrayList.isEmpty() && status == MessageStatus.SUCCESS) {
                             parentMessageId = message.getId();
@@ -1013,7 +1022,10 @@ public class MessageListViewModel extends ViewModel {
                                         if (messageList.get(messageList.size() - 1) instanceof TextMessage)
                                             fetchSmartRepliesWithDelay((TextMessage) messageList.get(messageList.size() - 1));
                                     }
-
+                                }
+                                if (!messageArrayList.isEmpty()) {
+                                    BaseMessage lastInList = messageArrayList.get(messageArrayList.size() - 1);
+                                    latestMessageId = lastInList.getId();
                                 }
                                 mutableHasMorePreviousMessages.setValue(hasMorePreviousMessages);
                                 mutableIsInProgress.setValue(false);
@@ -1210,7 +1222,15 @@ public class MessageListViewModel extends ViewModel {
                             messageArrayList.addAll(baseMessages);
                             mutableMessagesRangeChangedAtEnd.setValue(baseMessages.size());
                         }
+                        if (!messageArrayList.isEmpty()) {
+                            BaseMessage lastInList = messageArrayList.get(messageArrayList.size() - 1);
+                            latestMessageId = lastInList.getId();
+                        }
                     } else {
+                        if (!messageArrayList.isEmpty()) {
+                            BaseMessage lastInList = messageArrayList.get(messageArrayList.size() - 1);
+                            latestMessageId = lastInList.getId();
+                        }
                         CometChatUIKitHelper.onActiveChatChanged(getIdMap(), messageArrayList.get(messageArrayList.size() - 1), user, group);
                     }
                     mutableHasMoreNewMessages.setValue(!baseMessages.isEmpty());
@@ -1252,6 +1272,13 @@ public class MessageListViewModel extends ViewModel {
             if (messageArrayList.isEmpty()) addList(messageArrayList);
             removeInterruptedStreamMessage();
             messageArrayList.add(message);
+            // Track first pending unread message for indicator decoration
+            if (pendingNewMessageCount == 0 && message.getSender() != null 
+                    && CometChatUIKit.getLoggedInUser() != null 
+                    && !message.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid())) {
+                firstPendingUnreadMessage = message;
+            }
+            pendingNewMessageCount++;
             addMessage.setValue(message);
             states.setValue(checkIsEmpty(messageArrayList));
         }
@@ -1267,6 +1294,23 @@ public class MessageListViewModel extends ViewModel {
                 }
             }
         }
+    }
+
+    public int getAndResetPendingNewMessageCount() {
+        int count = pendingNewMessageCount;
+        pendingNewMessageCount = 0;
+        return count;
+    }
+
+    public BaseMessage getAndResetFirstPendingUnreadMessage() {
+        BaseMessage message = firstPendingUnreadMessage;
+        firstPendingUnreadMessage = null;
+        return message;
+    }
+
+    public void resetPendingNewMessageCount() {
+        pendingNewMessageCount = 0;
+        firstPendingUnreadMessage = null;
     }
 
     public void addList(List<BaseMessage> messageList) {
@@ -1378,21 +1422,31 @@ public class MessageListViewModel extends ViewModel {
     public void onMessageReceived(BaseMessage message) {
         BaseMessage lastMessageInArrayList = getLastMessage();
         if (message != null && (messageArrayList.isEmpty() || (latestMessageId != -1 && lastMessageInArrayList != null && lastMessageInArrayList.getId() == latestMessageId))) {
-            lastMessage = message;
-            latestMessageId = message.getId();
             if (messageTemplateHashMap.containsKey(message.getCategory() + "_" + message.getType())) {
                 markAsDeliverInternally(message);
                 if (message.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                     if (id != null && id.equalsIgnoreCase(message.getSender().getUid())) {
+                        if (isThreadedMessageForTheCurrentChat(message)) {
+                            lastMessage = message;
+                            latestMessageId = message.getId();
+                        }
                         setMessage(message);
                     } else if (id != null && id.equalsIgnoreCase(message.getReceiverUid()) && message
                         .getSender()
                         .getUid()
                         .equalsIgnoreCase(CometChatUIKit.getLoggedInUser().getUid())) {
+                        if (isThreadedMessageForTheCurrentChat(message)) {
+                            lastMessage = message;
+                            latestMessageId = message.getId();
+                        }
                         setMessage(message);
                     }
                 } else {
                     if (id != null && id.equalsIgnoreCase(message.getReceiverUid())) {
+                        if (isThreadedMessageForTheCurrentChat(message)) {
+                            lastMessage = message;
+                            latestMessageId = message.getId();
+                        }
                         setMessage(message);
                     }
                 }
@@ -1594,6 +1648,11 @@ public class MessageListViewModel extends ViewModel {
         scrollToMessage.setValue(gotoMessage.getId());
         states.setValue(UIKitConstants.States.NON_EMPTY);
 
+        if (!messageArrayList.isEmpty()) {
+            BaseMessage lastInList = messageArrayList.get(messageArrayList.size() - 1);
+            latestMessageId = lastInList.getId();
+        }
+
         handleUnreadMessageState();
         buildMessagesRequestForOlderMessages();
     }
@@ -1603,8 +1662,10 @@ public class MessageListViewModel extends ViewModel {
             BaseMessage firstUnread = getFirstUnreadMessage();
             if (firstUnread != null) {
                 unreadMessageAnchor.setValue(firstUnread);
+                return;
             }
         }
+        unreadCountLiveData.setValue(unreadCount);
     }
 
     public BaseMessage getFirstUnreadMessage() {

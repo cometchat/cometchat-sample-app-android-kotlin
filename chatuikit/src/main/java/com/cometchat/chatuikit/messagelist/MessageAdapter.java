@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
@@ -78,6 +79,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean disableReadReceipt;
     private boolean hideModerationView;
     private View customUnreadHeaderView;
+    private @ColorInt int newMessageIndicatorSeparatorColor;
+    private @ColorInt int newMessageIndicatorTextColor;
+    private @StyleRes int newMessageIndicatorTextAppearance;
     private UIKitConstants.MessageListAlignment listAlignment = UIKitConstants.MessageListAlignment.STANDARD;
     private boolean showAvatar = false;
     private boolean showLeftBubbleUserAvatar = false;
@@ -784,6 +788,23 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindNewMessageViewHolder(NewMessageIndicatorViewHolder var1, int position, long messageId) {
+        View itemView = var1.itemView;
+        View leftDivider = itemView.findViewById(R.id.cometchat_unread_messages_header_divider_left);
+        View rightDivider = itemView.findViewById(R.id.cometchat_unread_messages_header_divider_right);
+        TextView textView = itemView.findViewById(R.id.cometchat_unread_messages_header_text);
+
+        if (newMessageIndicatorSeparatorColor != 0) {
+            if (leftDivider != null) leftDivider.setBackgroundColor(newMessageIndicatorSeparatorColor);
+            if (rightDivider != null) rightDivider.setBackgroundColor(newMessageIndicatorSeparatorColor);
+        }
+        if (textView != null) {
+            if (newMessageIndicatorTextAppearance != 0) {
+                textView.setTextAppearance(newMessageIndicatorTextAppearance);
+            }
+            if (newMessageIndicatorTextColor != 0) {
+                textView.setTextColor(newMessageIndicatorTextColor);
+            }
+        }
     }
 
     /**
@@ -880,6 +901,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void setNewMessageIndicatorView(View view) {
         this.customUnreadHeaderView = view;
+    }
+
+    public void setNewMessageIndicatorSeparatorColor(@ColorInt int color) {
+        this.newMessageIndicatorSeparatorColor = color;
+    }
+
+    public void setNewMessageIndicatorTextColor(@ColorInt int color) {
+        this.newMessageIndicatorTextColor = color;
+    }
+
+    public void setNewMessageIndicatorTextAppearance(@StyleRes int textAppearance) {
+        this.newMessageIndicatorTextAppearance = textAppearance;
     }
 
     /**

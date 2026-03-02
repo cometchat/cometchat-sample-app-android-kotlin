@@ -431,6 +431,11 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private Drawable aiAssistantSuggestedMessageEndIcon;
     private @ColorInt int aiAssistantSuggestedMessageEndIconTint;
 
+    // Mark as unread indicator view
+    private @ColorInt int newMessageIndicatorSeparatorColor;
+    private @ColorInt int newMessageIndicatorTextColor;
+    private @ColorInt int newMessageIndicatorTextAppearance;
+
     private AttributeSet attrs;
     private @StyleRes int defStyleAttr;
     private @StyleRes int style;
@@ -623,16 +628,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             }
         });
 
-        newMessageLayout.setOnClickListener(v -> {
-            newMessageCount = 0;
-            if (isScrolling) rvChatListView.stopScroll();
-            messageListViewModel.resetMessageRequest();
-            messageListViewModel.clear();
-            messageListViewModel.clearGoToMessageId();
-            if (atBottom()) messageListViewModel.fetchMessages();
-            else messageListViewModel.fetchMessagesWithUnreadCount();
-            newMessageLayout.setVisibility(GONE);
-        });
+        newMessageLayout.setOnClickListener(v -> handleNewMessageLayoutClick());
 
         additionParameter.setOnMessagePreviewClick((messagePreview, position, message) -> {
             if (messageListViewModel.getMessageList().contains(message)) {
@@ -985,6 +981,48 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
+     * Handles the click event on the new message layout.
+     * Checks if the lastReadMessageId is already visible in the viewport.
+     * If visible, scrolls directly to bottom. Otherwise, fetches messages with unread count.
+     */
+    private void handleNewMessageLayoutClick() {
+        newMessageCount = 0;
+        messageListViewModel.resetPendingNewMessageCount();
+        if (isScrolling) rvChatListView.stopScroll();
+
+        // Check if the first unread message (or its indicator) is visible or near visible in viewport
+        boolean isFirstUnreadMessageVisible = false;
+
+        if (messageAdapter != null && newMessageIndicatorDecoration != null) {
+            // Use the unread message ID from the decoration (same as what's displayed)
+            long unreadMessageId = newMessageIndicatorDecoration.getUnreadMessageId();
+            if (unreadMessageId > 0) {
+                int unreadPosition = messageAdapter.findPositionById(unreadMessageId);
+                if (unreadPosition >= 0) {
+                    int firstVisible = linearLayoutManager.findFirstVisibleItemPosition();
+                    int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
+                    // Check if unread message indicator is within visible range or nearby
+                    isFirstUnreadMessageVisible = (unreadPosition >= firstVisible - 1 && unreadPosition <= lastVisible + 1);
+                }
+            }
+        }
+
+        messageListViewModel.resetMessageRequest();
+        messageListViewModel.clear();
+        messageListViewModel.clearGoToMessageId();
+
+        if (isFirstUnreadMessageVisible) {
+            // First unread message is already visible, scroll to bottom directly
+            messageListViewModel.fetchMessages();
+        } else {
+            // Existing behavior - navigate to lastReadMessageId if needed
+            messageListViewModel.fetchMessagesWithUnreadCount();
+        }
+
+        newMessageLayout.setVisibility(GONE);
+    }
+
+    /**
      * Handles changes in the RecyclerView scroll state.
      *
      * @param newState The new scroll state of the RecyclerView.
@@ -1079,6 +1117,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             setAiAssistantSuggestedMessageCornerRadius(typedArray.getDimension(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageCornerRadius, 0));
             setAiAssistantSuggestedMessageEndIcon(typedArray.getDrawable(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageEndIcon));
             setAiAssistantSuggestedMessageEndIconTint(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListAIAssistantSuggestedMessageEndIconTint,0));
+            setNewMessageIndicatorSeparatorColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListNewMessageIndicatorSeparatorColor,0));
+            setNewMessageIndicatorTextColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListNewMessageIndicatorTextColor,0));
+            setNewMessageIndicatorTextAppearance(typedArray.getResourceId(R.styleable.CometChatMessageList_cometchatMessageListNewMessageIndicatorTextAppearance,0));
             setCardBackgroundColor(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListBackgroundColor, CometChatTheme.getBackgroundColor3(getContext())));
             setStrokeColor(ColorStateList.valueOf(typedArray.getColor(R.styleable.CometChatMessageList_cometchatMessageListStrokeColor, 0)));
             setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CometChatMessageList_cometchatMessageListStrokeWidth, 0));
@@ -1604,6 +1645,7 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
 
         BaseMessage firstUnreadMessage = messageListViewModel.getFirstUnreadMessage();
         if (firstUnreadMessage != null && firstUnreadMessage.getId() > -1) {
+            setUnreadMessageAnchorDecoration(firstUnreadMessage);
             markConversationAsRead();
         }
     }
@@ -1660,6 +1702,18 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     public void addMessage(BaseMessage baseMessage) {
         if (!disableSoundForMessages) soundManager.play(Sound.incomingMessage, customSoundForMessages);
 
+        // Get accumulated count and first unread message from ViewModel (handles case when observer was paused)
+        int pendingCount = messageListViewModel.getAndResetPendingNewMessageCount();
+        BaseMessage firstPendingUnread = messageListViewModel.getAndResetFirstPendingUnreadMessage();
+
+        // Set unread message indicator decoration only if:
+        // 1. There are pending unread messages from when observer was paused (pendingCount > 1 means messages accumulated)
+        // 2. Indicator hasn't been set yet
+        // This ensures indicator only shows when returning from thread screen, not during normal real-time messaging
+        if (firstPendingUnread != null && newMessageIndicatorDecoration == null && pendingCount > 1) {
+            setUnreadMessageAnchorDecoration(firstPendingUnread);
+        }
+
         if (!scrollToBottomOnNewMessage) {
             if (rvChatListView.getLayoutManager() != null) {
                 if ((messageAdapter.getItemCount() - 1) - ((LinearLayoutManager) rvChatListView.getLayoutManager()).findLastVisibleItemPosition() < 5)
@@ -1668,15 +1722,21 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
                     if (baseMessage != null && baseMessage.getSender() != null && CometChatUIKit.getLoggedInUser() != null && !CometChatUIKit
                         .getLoggedInUser()
                         .getUid()
-                        .equalsIgnoreCase(baseMessage.getSender().getUid())) showNewMessage(++newMessageCount);
-                    else messageAdapter.notifyItemInserted(messageAdapter.getItemCount() - 1);
+                        .equalsIgnoreCase(baseMessage.getSender().getUid())) {
+                        newMessageCount += pendingCount;
+                        showNewMessage(newMessageCount);
+                    } else
+                        messageAdapter.notifyItemInserted(messageAdapter.getItemCount() - 1);
                 }
             } else {
                 if (baseMessage != null && baseMessage.getSender() != null && CometChatUIKit.getLoggedInUser() != null && !CometChatUIKit
                     .getLoggedInUser()
                     .getUid()
-                    .equalsIgnoreCase(baseMessage.getSender().getUid())) showNewMessage(++newMessageCount);
-                else messageAdapter.notifyItemInserted(messageAdapter.getItemCount() - 1);
+                    .equalsIgnoreCase(baseMessage.getSender().getUid())) {
+                    newMessageCount += pendingCount;
+                    showNewMessage(newMessageCount);
+                } else
+                    messageAdapter.notifyItemInserted(messageAdapter.getItemCount() - 1);
             }
         } else scrollToBottom();
     }
@@ -3355,6 +3415,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         }
     }
 
+    /**
+     * Sets the moderation view style for the message list.
+     */
     public void setModerationViewStyle(@StyleRes int moderationViewStyle) {
         messageAdapter.setModerationViewStyle(moderationViewStyle);
     }
@@ -3695,6 +3758,56 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
         this.aiAssistantSuggestedMessageTextColor = color;
     }
 
+    /** Returns the separator color integer for the new message indicator.
+     *
+     * @return the separator color for the new message indicator
+     */
+    public int getNewMessageIndicatorSeparatorColor() {
+        return newMessageIndicatorSeparatorColor;
+    }
+
+    /** Sets the separator color for the new message indicator.
+     *
+     * @param newMessageIndicatorSeparatorColor The color to be set for the separator.
+     */
+    public void setNewMessageIndicatorSeparatorColor(int newMessageIndicatorSeparatorColor) {
+        this.newMessageIndicatorSeparatorColor = newMessageIndicatorSeparatorColor;
+        messageAdapter.setNewMessageIndicatorSeparatorColor(newMessageIndicatorSeparatorColor);
+    }
+
+    /** Returns the text color integer for the new message indicator.
+     *
+     * @return the text color for the new message indicator
+     */
+    public int getNewMessageIndicatorTextColor() {
+        return newMessageIndicatorTextColor;
+    }
+
+    /** Sets the text color for the new message indicator.
+     *
+     * @param newMessageIndicatorTextColor The color to be set for the text.
+     */
+    public void setNewMessageIndicatorTextColor(int newMessageIndicatorTextColor) {
+        this.newMessageIndicatorTextColor = newMessageIndicatorTextColor;
+        messageAdapter.setNewMessageIndicatorTextColor(newMessageIndicatorTextColor);
+    }
+
+    /** Returns the text appearance resource ID for the new message indicator.
+     *
+     * @return the resource ID for the new message indicator text appearance
+     */
+    public int getNewMessageIndicatorTextAppearance() {
+        return newMessageIndicatorTextAppearance;
+    }
+
+    /** Sets the text appearance for the new message indicator.
+     *
+     * @param newMessageIndicatorTextAppearance The style resource for the new message indicator text appearance.
+     */
+    public void setNewMessageIndicatorTextAppearance(int newMessageIndicatorTextAppearance) {
+        this.newMessageIndicatorTextAppearance = newMessageIndicatorTextAppearance;
+        messageAdapter.setNewMessageIndicatorTextAppearance(newMessageIndicatorTextAppearance);
+    }
 
     /**
      * Sets the style resource for message information.

@@ -207,6 +207,7 @@
     <string name="cometchat_cancel_button">Cancel</string>
     <string name="cometchat_settings_button">Settings</string>
     <string name="cometchat_moderation_block_message" translatable="true">Your message was blocked due to moderation policies</string>
+    <string name="cometchat_mime_type_not_allowed_message" translatable="true">This file type is not allowed.</string>
     <string name="cometchat_empty_chat_title" translatable="false">Hey, How can I help?</string>
     <string name="cometchat_empty_chat_subtitle" translatable="false">You can ask me anything…</string>
     <string name="cometchat_no_conversations_history_title" translatable="true">No conversation history found</string>

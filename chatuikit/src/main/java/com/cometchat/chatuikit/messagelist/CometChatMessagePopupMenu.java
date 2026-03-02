@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
@@ -14,7 +13,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -328,10 +327,7 @@ class CometChatMessagePopupMenu {
         relativeParam.topMargin = Utils.convertDpToPx(context, 0);
         cardView.setLayoutParams(relativeParam);
         // Show the popup window at the calculated position
-        Activity activity = Utils.getActivity(context);
-        if (Utils.isActivityUsable(activity)) {
-            dimBackground(activity);
-        }
+        dimBackground(anchorView);
 
         popupWindow.showAtLocation(anchorView,
                                    Gravity.TOP | Gravity.CENTER,
@@ -339,46 +335,49 @@ class CometChatMessagePopupMenu {
                                    (location[1] - 1000) > 550 ? (location[1] - 1000) : Math.max(Math.max(-(location[1] - 500), location[1] - 500),
                                                                                                 300));
 
-        popupWindow.setOnDismissListener(() -> {
-            if (Utils.isActivityUsable(activity)) {
-                removeDimBackground(activity);
-            }
-        });
+        popupWindow.setOnDismissListener(this::removeDimBackground);
         popupView.setOnTouchListener((v, event) -> {
             dismiss();
             return true;
         });
     }
 
-    private void dimBackground(Activity activity) {
-        if (blurIv == null) {
-            blurIv = new ImageView(activity);
-            Bitmap bitmap = Utils.captureScreen(activity);
+    private void dimBackground(View anchorView) {
+        if (blurIv != null || anchorView == null) return;
+        
+        Activity activity = Utils.getActivity(context);
+        if (!Utils.isActivityUsable(activity)) return;
+        
+        View rootView = anchorView.getRootView();
+        if (!(rootView instanceof ViewGroup)) return;
+        
+        Bitmap bitmap = Utils.captureScreen(rootView);
+        if (bitmap == null) return;
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                blurIv.setImageBitmap(Utils.applyRenderScriptBlur(activity, bitmap));
-                blurIv.setAlpha(1f);
-            } else {
-                blurIv.setImageBitmap(bitmap);
-                blurIv.setRenderEffect(RenderEffect.createBlurEffect(70f, 70f, Shader.TileMode.CLAMP));
-            }
-            blurIv.setScaleType(ImageView.ScaleType.FIT_XY);
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
-                                                                               WindowManager.LayoutParams.MATCH_PARENT,
-                                                                               WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
-                                                                               WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                                                                               PixelFormat.TRANSLUCENT);
-
-            params.gravity = Gravity.CENTER;
-            WindowManager windowManager = activity.getWindowManager();
-            windowManager.addView(blurIv, params);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            bitmap = Utils.applyRenderScriptBlur(context, bitmap);
         }
+
+        blurIv = new ImageView(context);
+        blurIv.setImageBitmap(bitmap);
+        blurIv.setScaleType(ImageView.ScaleType.FIT_XY);
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            blurIv.setRenderEffect(RenderEffect.createBlurEffect(70f, 70f, Shader.TileMode.CLAMP));
+        }
+
+        ViewGroup rootViewGroup = (ViewGroup) rootView;
+        View contentView = rootViewGroup.findViewById(android.R.id.content);
+        ViewGroup blurParent = (contentView instanceof ViewGroup) ? (ViewGroup) contentView : rootViewGroup;
+        blurParent.addView(blurIv, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ));
     }
 
-    private void removeDimBackground(Activity activity) {
-        if (blurIv != null) {
-            WindowManager windowManager = activity.getWindowManager();
-            windowManager.removeView(blurIv);
+    private void removeDimBackground() {
+        if (blurIv != null && blurIv.getParent() instanceof ViewGroup) {
+            ((ViewGroup) blurIv.getParent()).removeView(blurIv);
             blurIv = null;
         }
     }

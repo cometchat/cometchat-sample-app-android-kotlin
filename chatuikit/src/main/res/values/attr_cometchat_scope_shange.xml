@@ -34,6 +34,7 @@
         <attr name="cometchatScopeChangeNegativeButtonTextColor" format="color" />
         <attr name="cometchatScopeChangeButtonTextAppearance" format="reference" />
         <attr name="cometchatScopeChangePositiveButtonBackgroundColor" format="color" />
+        <attr name="cometchatScopeChangePositiveButtonDisabledBackgroundColor" format="color" />
         <attr name="cometchatScopeChangeNegativeButtonBackgroundColor" format="color" />
 
         <attr name="cometchatScopeChangeStyle" format="reference" />

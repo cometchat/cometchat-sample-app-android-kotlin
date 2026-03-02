@@ -1,5 +1,6 @@
 package com.cometchat.sampleapp.kotlin.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.cometchat.chat.constants.CometChatConstants
@@ -84,7 +85,7 @@ class UserDetailsViewModel : ViewModel() {
                         isUserBlocked.value = true
                         isUserBlockedByMe.setValue(true)
                         user.value!!.isBlockedByMe = true
-                        setUser(user.value!!)
+                        user.value = user.value
                     } else {
                         isUserBlocked.setValue(false)
                     }
@@ -110,7 +111,7 @@ class UserDetailsViewModel : ViewModel() {
                         isUserUnblocked.value = true
                         isUserBlockedByMe.setValue(false)
                         user.value!!.isBlockedByMe = false
-                        setUser(user.value!!)
+                        user.value = user.value
                     } else {
                         isUserUnblocked.setValue(false)
                     }

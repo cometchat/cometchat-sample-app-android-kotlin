@@ -4,6 +4,7 @@
     android:id="@+id/search_box_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="@dimen/cometchat_padding_3"
     android:paddingTop="@dimen/cometchat_padding_2"
@@ -18,14 +19,16 @@
         android:background="@drawable/cometchat_ic_search"
         tools:ignore="ContentDescription" />
 
-    <com.google.android.material.textfield.TextInputEditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/et_search"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="@null"
+        android:gravity="center_vertical"
         android:hint="@string/cometchat_search"
         android:imeOptions="actionSearch"
+        android:includeFontPadding="false"
         android:lines="1"
         android:maxLines="1"
         android:singleLine="true" />
