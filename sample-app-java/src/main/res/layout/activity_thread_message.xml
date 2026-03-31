@@ -130,8 +130,8 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
-    <com.cometchat.chatuikit.messagecomposer.CometChatMessageComposer
-        android:id="@+id/message_composer"
+    <com.cometchat.chatuikit.compactmessagecomposer.CometChatCompactMessageComposer
+        android:id="@+id/single_line_composer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

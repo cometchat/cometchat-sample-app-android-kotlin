@@ -485,7 +485,7 @@ public class Utils {
         }
 
         messagePreview.setMessagePreviewTitleText(sender);
-        messagePreview.setMessagePreviewSubtitleText(spannableStringBuilder + "");
+        messagePreview.setMessagePreviewSubtitleText(spannableStringBuilder);
         messagePreview.setMessageIconVisibility(View.GONE);
     }
 
@@ -1792,5 +1792,167 @@ public class Utils {
         }
 
         return dateFormat.format(date);
+    }
+
+    /**
+     * Callback interface for Add Link dialog results.
+     */
+    public interface OnLinkAddedListener {
+        void onLinkAdded(String displayText, String url);
+    }
+
+    /**
+     * Shows the Add Link dialog with Text and Link input fields.
+     */
+    public static void showAddLinkDialog(
+            Context context,
+            @Nullable String initialText,
+            @Nullable String initialUrl,
+            @Nullable OnLinkAddedListener listener) {
+        showAddLinkDialog(context, initialText, initialUrl, null, listener);
+    }
+
+    /**
+     * Shows the Add/Edit Link dialog with Text and Link input fields.
+     * @param title Optional title for the dialog. If null, defaults to "Add Link".
+     */
+    public static void showAddLinkDialog(
+            Context context,
+            @Nullable String initialText,
+            @Nullable String initialUrl,
+            @Nullable String title,
+            @Nullable OnLinkAddedListener listener) {
+
+        if (context == null) {
+            return;
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+
+        View dialogView = LayoutInflater.from(context)
+                .inflate(R.layout.cometchat_dialog_add_link, null);
+        builder.setView(dialogView);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Set custom title if provided
+        TextView dialogTitle = dialogView.findViewById(R.id.cometchat_dialog_title);
+        if (title != null && dialogTitle != null) {
+            dialogTitle.setText(title);
+        }
+
+        com.google.android.material.textfield.TextInputEditText textInput = 
+                dialogView.findViewById(R.id.cometchat_text_input);
+        com.google.android.material.textfield.TextInputEditText linkInput = 
+                dialogView.findViewById(R.id.cometchat_link_input);
+        android.widget.ImageButton closeButton = 
+                dialogView.findViewById(R.id.cometchat_close_button);
+        com.google.android.material.button.MaterialButton cancelButton = 
+                dialogView.findViewById(R.id.cometchat_cancel_button);
+        com.google.android.material.button.MaterialButton saveButton = 
+                dialogView.findViewById(R.id.cometchat_save_button);
+
+        if (initialText != null && textInput != null) {
+            textInput.setText(initialText);
+        }
+        if (initialUrl != null && linkInput != null) {
+            linkInput.setText(initialUrl);
+        }
+
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> dialog.dismiss());
+        }
+        if (cancelButton != null) {
+            cancelButton.setOnClickListener(v -> dialog.dismiss());
+        }
+        if (saveButton != null) {
+            saveButton.setOnClickListener(v -> {
+                String text = textInput != null ? textInput.getText().toString().trim() : "";
+                String url = linkInput != null ? linkInput.getText().toString().trim() : "";
+
+                if (!text.isEmpty() && !url.isEmpty() && listener != null) {
+                    listener.onLinkAdded(text, url);
+                    dialog.dismiss();
+                }
+            });
+        }
+
+        dialog.show();
+    }
+
+    /**
+     * Callback interface for Edit Link dialog actions.
+     */
+    public interface OnLinkEditListener {
+        void onEditClicked(String currentText, String currentUrl);
+        void onRemoveClicked();
+    }
+
+    /**
+     * Shows the Edit Link dialog with URL display and Edit/Remove buttons.
+     */
+    public static void showEditLinkDialog(
+            Context context,
+            String currentText,
+            String currentUrl,
+            @Nullable OnLinkEditListener listener) {
+
+        if (context == null) {
+            return;
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+
+        View dialogView = LayoutInflater.from(context)
+                .inflate(R.layout.cometchat_dialog_edit_link, null);
+        builder.setView(dialogView);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView linkUrlText = dialogView.findViewById(R.id.cometchat_link_url);
+        com.google.android.material.button.MaterialButton editButton =
+                dialogView.findViewById(R.id.cometchat_edit_button);
+        com.google.android.material.button.MaterialButton removeButton =
+                dialogView.findViewById(R.id.cometchat_remove_button);
+
+        if (linkUrlText != null && currentUrl != null) {
+            linkUrlText.setText(currentUrl);
+            linkUrlText.setOnClickListener(v -> {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(currentUrl));
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    CometChatLogger.e(TAG, "Error opening URL: " + e.getMessage());
+                }
+            });
+        }
+
+        if (editButton != null) {
+            editButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onEditClicked(currentText, currentUrl);
+                }
+                dialog.dismiss();
+            });
+        }
+
+        if (removeButton != null) {
+            removeButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onRemoveClicked();
+                }
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
     }
 }

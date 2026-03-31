@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CometChatSingleLineComposer">
+
+        <!-- Container styles -->
+        <attr name="cometchatSingleLineComposerBackgroundColor" format="color" />
+        <attr name="cometchatSingleLineComposerStrokeWidth" format="dimension" />
+        <attr name="cometchatSingleLineComposerStrokeColor" format="color" />
+        <attr name="cometchatSingleLineComposerCornerRadius" format="dimension" />
+        <attr name="cometchatSingleLineComposerBackgroundDrawable" format="reference" />
+
+        <!-- Compose box styles -->
+        <attr name="cometchatSingleLineComposerComposeBoxBackgroundColor" format="color" />
+        <attr name="cometchatSingleLineComposerComposeBoxStrokeWidth" format="dimension" />
+        <attr name="cometchatSingleLineComposerComposeBoxStrokeColor" format="color" />
+        <attr name="cometchatSingleLineComposerComposeBoxCornerRadius" format="dimension" />
+        <attr name="cometchatSingleLineComposerComposeBoxBackgroundDrawable" format="reference" />
+
+        <!-- Input field styles -->
+        <attr name="cometchatSingleLineComposerInputTextColor" format="color" />
+        <attr name="cometchatSingleLineComposerInputHintColor" format="color" />
+        <attr name="cometchatSingleLineComposerInputTextAppearance" format="reference" />
+        <attr name="cometchatSingleLineComposerInputBackgroundColor" format="color" />
+
+        <!-- Send button styles -->
+        <attr name="cometchatSingleLineComposerActiveSendButtonDrawable" format="reference" />
+        <attr name="cometchatSingleLineComposerInactiveSendButtonDrawable" format="reference" />
+        <attr name="cometchatSingleLineComposerSendButtonBackgroundColor" format="color" />
+
+        <!-- Attachment button styles -->
+        <attr name="cometchatSingleLineComposerAttachmentIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerAttachmentIconTint" format="color" />
+
+        <!-- Voice recording button styles -->
+        <attr name="cometchatSingleLineComposerVoiceRecordingIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerVoiceRecordingIconTint" format="color" />
+
+        <!-- Toggle toolbar button styles -->
+        <attr name="cometchatSingleLineComposerToggleToolbarIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerToggleToolbarIconTint" format="color" />
+        <attr name="cometchatSingleLineComposerToggleToolbarActiveIconTint" format="color" />
+
+        <!-- AI button styles -->
+        <attr name="cometchatSingleLineComposerAIIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerAIIconTint" format="color" />
+
+        <!-- Sticker button styles -->
+        <attr name="cometchatSingleLineComposerStickerIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerStickerIconTint" format="color" />
+
+        <!-- Emoji button styles -->
+        <attr name="cometchatSingleLineComposerEmojiIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerEmojiIconTint" format="color" />
+
+        <!-- Edit preview styles -->
+        <attr name="cometchatSingleLineComposerEditPreviewTitleTextAppearance" format="reference" />
+        <attr name="cometchatSingleLineComposerEditPreviewMessageTextAppearance" format="reference" />
+        <attr name="cometchatSingleLineComposerEditPreviewTitleTextColor" format="color" />
+        <attr name="cometchatSingleLineComposerEditPreviewMessageTextColor" format="color" />
+        <attr name="cometchatSingleLineComposerEditPreviewBackgroundColor" format="color" />
+        <attr name="cometchatSingleLineComposerEditPreviewCornerRadius" format="dimension" />
+        <attr name="cometchatSingleLineComposerEditPreviewStrokeColor" format="color" />
+        <attr name="cometchatSingleLineComposerEditPreviewStrokeWidth" format="dimension" />
+        <attr name="cometchatSingleLineComposerEditPreviewCloseIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerEditPreviewCloseIconTint" format="color" />
+
+        <!-- Mention banner styles -->
+        <attr name="cometchatSingleLineComposerMentionBannerBackgroundColor" format="color" />
+        <attr name="cometchatSingleLineComposerMentionBannerTextColor" format="color" />
+        <attr name="cometchatSingleLineComposerMentionBannerTextAppearance" format="reference" />
+        <attr name="cometchatSingleLineComposerMentionBannerIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerMentionBannerIconTint" format="color" />
+        <attr name="cometchatSingleLineComposerMentionBannerCloseIcon" format="reference" />
+        <attr name="cometchatSingleLineComposerMentionBannerCloseIconTint" format="color" />
+        <attr name="cometchatSingleLineComposerMentionBannerCornerRadius" format="dimension" />
+
+        <!-- Rich text toolbar style reference -->
+        <attr name="cometchatSingleLineComposerRichTextToolbarStyle" format="reference" />
+
+        <!-- Component style references -->
+        <attr name="cometchatSingleLineComposerStyle" format="reference" />
+        <attr name="cometchatSingleLineComposerSuggestionListStyle" format="reference" />
+        <attr name="cometchatSingleLineComposerAttachmentOptionSheetStyle" format="reference" />
+        <attr name="cometchatSingleLineComposerMessagePreviewStyle" format="reference" />
+
+    </declare-styleable>
+
+</resources>

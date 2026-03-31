@@ -23,6 +23,7 @@ import com.cometchat.ai.sampleapp.viewmodels.MessagesViewModel
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
+import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.google.gson.Gson
 import org.json.JSONException
@@ -177,7 +178,7 @@ class AIAssistantChatActivity : AppCompatActivity() {
             val isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             val bottomInset = max(ime.bottom.toDouble(), nav.bottom.toDouble()).toInt()
 
-            if (isImeVisible && binding.messageComposer.messageInput.composeBox.isFocused) {
+            if (isImeVisible && binding.compactMessageComposer.isFocused) {
                 binding.messageList.scrollToBottom()
             }
 
@@ -227,14 +228,14 @@ class AIAssistantChatActivity : AppCompatActivity() {
                 // Here we are setting parent message id to message list to fetch messages and message composer to send reply to that message.
                 // Here this is being used for AIAssistantChatHistory
                 binding.messageList.setParentMessage(parentMessage!!.getId())
-                binding.messageComposer.setParentMessageId(parentMessage!!.getId())
+                binding.compactMessageComposer.setParentMessageId(parentMessage!!.getId())
             }
             binding.messageHeader.user = user!!
             binding.messageList.user = user
-            binding.messageComposer.user = user
+            binding.compactMessageComposer.setUser(user)
+            binding.compactMessageComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
             if (isAgentChat) {
                 binding.messageList.setStyle(R.style.CustomCometChatMessageListStyle)
-                binding.messageComposer.style = R.style.CustomMessageComposerStyle
             }
         }
 

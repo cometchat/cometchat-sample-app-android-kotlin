@@ -15,14 +15,18 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import android.text.Html
+import android.text.Spanned
+import android.text.SpannedString
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chatuikit.logger.CometChatLogger
+import com.cometchat.chatuikit.shared.spans.MarkdownConverter
 import com.cometchat.sampleapp.kotlin.fcm.R
 import com.cometchat.sampleapp.kotlin.fcm.utils.AppConstants
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -76,7 +80,8 @@ object FCMMessageNotificationUtils {
                     val extras = notification.notification.extras
                     val uid = extras.getString(AppConstants.FCMConstants.KEY_UID)
                     if (uid != null && uid == userId) {
-                        val mText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT) as String?
+                        // Use toString() to handle both String and SpannableString (from formatted notifications)
+                        val mText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
 
                         if (isMessageDeleted) {
                             val originalMessage = existingNotificationMessages[currentMessageId]
@@ -167,8 +172,16 @@ object FCMMessageNotificationUtils {
             context, AppConstants.FCMConstants.DEFAULT_NOTIFICATION_CHANNEL_ID
         )
 
-        mNotificationBuilder.setSmallIcon(R.drawable.ic_cometchat_notification).setContentTitle(userName).setContentText(fcmMessageDTO.text).setStyle(
-            NotificationCompat.BigTextStyle().bigText(currentText)
+        // Format the message text for notification display
+        // Convert markdown to HTML for rich text formatting in notifications
+        val formattedContentText = formatNotificationText(fcmMessageDTO.text)
+        val formattedBigText = formatNotificationText(currentText)
+
+        val contentSpanned = fromHtml(formattedContentText)
+        val bigTextSpanned = fromHtml(formattedBigText)
+
+        mNotificationBuilder.setSmallIcon(R.drawable.ic_cometchat_notification).setContentTitle(userName).setContentText(contentSpanned).setStyle(
+            NotificationCompat.BigTextStyle().bigText(bigTextSpanned)
         ).setGroup(AppConstants.FCMConstants.GROUP_KEY).setExtras(bundle).setPriority(
             NotificationCompat.PRIORITY_HIGH
         ).setCategory(notificationCategory).setContentIntent(pendingIntent).addAction(
@@ -192,6 +205,49 @@ object FCMMessageNotificationUtils {
             )
         }
         return mNotificationBuilder
+    }
+
+    /**
+     * Formats notification text by converting markdown to HTML.
+     * This enables rich text formatting (bold, italic, etc.) in notifications.
+     *
+     * @param text The raw text that may contain markdown formatting.
+     * @return HTML-formatted text suitable for notification display.
+     */
+    private fun formatNotificationText(text: String?): String {
+        if (text.isNullOrEmpty()) {
+            return ""
+        }
+        return try {
+            MarkdownConverter.toHtml(text)
+        } catch (e: Exception) {
+            CometChatLogger.e(TAG, "Error converting markdown to HTML: ${e.message}")
+            text // Return original text if conversion fails
+        }
+    }
+
+    /**
+     * Converts HTML string to Spanned for notification display.
+     * Handles API level differences for Html.fromHtml().
+     *
+     * @param html The HTML string to convert.
+     * @return Spanned text for notification display.
+     */
+    @Suppress("DEPRECATION")
+    private fun fromHtml(html: String?): Spanned {
+        if (html.isNullOrEmpty()) {
+            return SpannedString("")
+        }
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+            } else {
+                Html.fromHtml(html)
+            }
+        } catch (e: Exception) {
+            CometChatLogger.e(TAG, "Error converting HTML to Spanned: ${e.message}")
+            SpannedString(html) // Return as plain text if conversion fails
+        }
     }
 
     private fun handleReplyFromNotification(

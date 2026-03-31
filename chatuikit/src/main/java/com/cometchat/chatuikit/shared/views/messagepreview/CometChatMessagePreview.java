@@ -148,6 +148,10 @@ public class CometChatMessagePreview extends MaterialCardView {
         binding.tvMessageLayoutSubtitle.setText(text);
     }
 
+    public void setMessagePreviewSubtitleText(CharSequence text) {
+        binding.tvMessageLayoutSubtitle.setText(text);
+    }
+
     public void setMessageIconVisibility(int visibility) {
         binding.messageIcon.setVisibility(visibility);
     }

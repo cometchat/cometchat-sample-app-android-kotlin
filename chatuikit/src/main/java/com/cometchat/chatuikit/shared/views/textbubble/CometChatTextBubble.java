@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
+import com.cometchat.chatuikit.shared.spans.LinkFormatSpan;
 import com.cometchat.chatuikit.shared.spans.MentionMovementMethod;
 import com.google.android.material.card.MaterialCardView;
 
@@ -274,6 +276,10 @@ public class CometChatTextBubble extends MaterialCardView {
     public void setText(SpannableString text) {
         messageTextView.setText(text, TextView.BufferType.SPANNABLE);
         messageTextView.setMovementMethod(MentionMovementMethod.getInstance());
+        // Apply the stored link color to any LinkFormatSpan instances in the new text
+        if (textLinkColor != 0) {
+            updateLinkFormatSpanColors(textLinkColor);
+        }
     }
 
     public void setLinkPreview(String title, String description, String url, String bannerImage, String fabIcon) {
@@ -478,6 +484,28 @@ public class CometChatTextBubble extends MaterialCardView {
     public void setTextLinkColor(@ColorInt int color) {
         this.textLinkColor = color;
         messageTextView.setLinkTextColor(color);
+        // Also update LinkFormatSpan instances in the text to override their default color
+        updateLinkFormatSpanColors(color);
+    }
+
+    /**
+     * Updates the color of all LinkFormatSpan instances in the message text.
+     * This ensures that links created by MarkdownConverter use the correct color
+     * based on the bubble style (white for outgoing, blue for incoming).
+     *
+     * @param color The color to apply to link spans.
+     */
+    private void updateLinkFormatSpanColors(@ColorInt int color) {
+        CharSequence text = messageTextView.getText();
+        if (text instanceof Spannable) {
+            Spannable spannable = (Spannable) text;
+            LinkFormatSpan[] linkSpans = spannable.getSpans(0, spannable.length(), LinkFormatSpan.class);
+            for (LinkFormatSpan span : linkSpans) {
+                span.setLinkColor(color);
+            }
+            // Force redraw to apply the new colors
+            messageTextView.invalidate();
+        }
     }
 
     public int getSeparatorColor() {

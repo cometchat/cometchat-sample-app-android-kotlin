@@ -15,6 +15,7 @@ import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.SearchScope;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
+import com.cometchat.chatuikit.shared.formatters.CometChatRichTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.interfaces.DateTimeFormatterCallback;
 import com.cometchat.chatuikit.shared.interfaces.OnBackPress;
@@ -1089,7 +1090,8 @@ public class CometChatSearch extends MaterialCardView {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
                 cometchatMentionsFormatter.setMentionAllLabel(mentionAllLabelId, mentionAllLabel);
-                break;
+            } else if (textFormatter instanceof CometChatRichTextFormatter) {
+                this.textFormatters.add(textFormatter);
             }
         }
         this.textFormatters.add(cometchatMentionsFormatter);

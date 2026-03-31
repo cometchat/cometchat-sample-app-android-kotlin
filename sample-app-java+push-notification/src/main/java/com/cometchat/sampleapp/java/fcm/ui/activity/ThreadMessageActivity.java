@@ -24,6 +24,7 @@ import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
+import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityThreadMessageBinding;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
@@ -116,7 +117,7 @@ public class ThreadMessageActivity extends AppCompatActivity {
                 int bottomInset = Math.max(ime.bottom, nav.bottom);
                 boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
 
-                if (binding.messageComposer.getMessageInput().getComposeBox().isFocused() && isImeVisible) {
+                if (binding.singleLineComposer.isFocused() && isImeVisible) {
                     if (binding.messageList.atBottom()) {
                         binding.messageList.scrollToBottom();
                     }
@@ -145,18 +146,23 @@ public class ThreadMessageActivity extends AppCompatActivity {
 
         if (goToMessage != null) binding.messageList.gotoMessage(goToMessage.getId());
         binding.messageList.setParentMessage(parentMessage.getId());
-        binding.messageComposer.setParentMessageId(parentMessage.getId());
+        binding.singleLineComposer.setParentMessageId(parentMessage.getId());
+        binding.singleLineComposer.setRichTextFormattingOptionsVisibility(View.VISIBLE);
+        binding.singleLineComposer.setShowTextSelectionMenuItems(true);
+        binding.singleLineComposer.setEnableRichTextFormatting(true);
+        binding.singleLineComposer.setUseInlineAudioRecorder(false);
+        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE);
         binding.threadHeader.setParentMessage(parentMessage);
         binding.threadHeader.setReactionVisibility(View.GONE);
         binding.tvSubtitle.setText(user != null ? user.getName() : group != null ? group.getName() : "");
         binding.tvSubtitle.setVisibility(binding.tvSubtitle.getText().toString().isEmpty() ? View.GONE : View.VISIBLE);
-        // Set user or group data to the message header and composer
+
         if (user != null) {
             binding.messageList.setUser(user);
-            binding.messageComposer.setUser(user);
+            binding.singleLineComposer.setUser(user);
         } else if (group != null) {
             binding.messageList.setGroup(group);
-            binding.messageComposer.setGroup(group);
+            binding.singleLineComposer.setGroup(group);
         }
     }
 
@@ -183,10 +189,10 @@ public class ThreadMessageActivity extends AppCompatActivity {
 
     private void updateUserBlockStatus() {
         if (isBlockedByMe) {
-            binding.messageComposer.setVisibility(View.GONE);
+            binding.singleLineComposer.setVisibility(View.GONE);
             binding.unblockLayout.setVisibility(View.VISIBLE);
         } else {
-            binding.messageComposer.setVisibility(View.VISIBLE);
+            binding.singleLineComposer.setVisibility(View.VISIBLE);
             binding.unblockLayout.setVisibility(View.GONE);
         }
     }

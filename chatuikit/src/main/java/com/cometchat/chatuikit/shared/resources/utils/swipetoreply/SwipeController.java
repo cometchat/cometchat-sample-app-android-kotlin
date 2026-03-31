@@ -99,7 +99,10 @@ public class SwipeController extends ItemTouchHelper.Callback {
             swipeBack = event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
             if (swipeBack) {
                 if (Math.abs(view.getTranslationX()) >= convertToDp(100)) {
-                    swipeControllerActions.onSwipePerformed(viewHolder.getAbsoluteAdapterPosition());
+                    int position = viewHolder.getAbsoluteAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        swipeControllerActions.onSwipePerformed(position);
+                    }
                 }
             }
             return false;

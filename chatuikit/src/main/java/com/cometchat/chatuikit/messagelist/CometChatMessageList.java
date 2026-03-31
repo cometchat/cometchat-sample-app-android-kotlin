@@ -40,6 +40,8 @@ import androidx.annotation.RawRes;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -384,7 +386,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     SwipeController controller = new SwipeController(getContext(), new SwipeActions() {
         @Override
         public void onSwipePerformed(int position) {
-            BaseMessage message = messageAdapter.getBaseMessageList().get(position);
+            List<BaseMessage> messages = messageAdapter.getBaseMessageList();
+            if (position < 0 || position >= messages.size()) return;
+            BaseMessage message = messages.get(position);
             if (message != null) {
                 CometChatUIKitHelper.onMessageReply(message, MessageStatus.IN_PROGRESS);
             }
@@ -762,6 +766,14 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     private void observeMessageListChanges() {
         lifecycleOwner = Utils.getLifecycleOwner(getContext());
         if (lifecycleOwner == null) return;
+
+        // Stop audio playback when the app goes to background
+        lifecycleOwner.getLifecycle().addObserver((LifecycleEventObserver) (source, event) -> {
+            if (event == Lifecycle.Event.ON_STOP) {
+                AudioPlayer.getInstance().reset();
+            }
+        });
+
         attachObservers();
     }
 
@@ -3121,12 +3133,12 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
     }
 
     /**
-     * Copies the message text from the provided BaseMessage to the clipboard.
-     *
+     * Copies the text of a given message to the system clipboard.
      * <p>
-     * The method formats the message using {@link FormatterUtils} and stores it in
-     * the system clipboard. It also shows a toast notification indicating that the
-     * text has been copied.
+     * The raw message text (including markdown formatting syntax) is placed on
+     * the clipboard so that when pasted into the composer, the markdown can be
+     * parsed back into rich text formatting spans.
+     * </p>
      *
      * @param baseMessage The message to be copied, expected to be of type
      *                    {@link TextMessage}.
@@ -3135,14 +3147,8 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
      */
     public void copyMessage(BaseMessage baseMessage) {
         String message = ((TextMessage) baseMessage).getText();
-        String formatterString = String.valueOf(FormatterUtils.getFormattedText(getContext(),
-                                                                                baseMessage,
-                                                                                UIKitConstants.FormattingType.MESSAGE_BUBBLE,
-                                                                                UIKitConstants.MessageBubbleAlignment.RIGHT,
-                                                                                message,
-                                                                                textFormatters));
         ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newPlainText("Messages", formatterString);
+        ClipData clipData = ClipData.newPlainText("Messages", message);
         clipboardManager.setPrimaryClip(clipData);
     }
 
@@ -3176,21 +3182,9 @@ public class CometChatMessageList extends MaterialCardView implements MessageAda
             intent.putExtra(android.content.Intent.EXTRA_SUBJECT, getContext().getString(R.string.cometchat_share));
             intent.putExtra(android.content.Intent.EXTRA_TEXT, formatterString);
             getContext().startActivity(Intent.createChooser(intent, getContext().getString(R.string.cometchat_share)));
-        } else if (baseMessage != null && baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
-            String mediaName = ((MediaMessage) baseMessage).getAttachment().getFileName();
-            Glide.with(getContext()).asBitmap().load(((MediaMessage) baseMessage).getAttachment().getFileUrl()).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    String path = MediaStore.Images.Media.insertImage(getContext().getContentResolver(), resource, mediaName, null);
-                    Intent shareIntent = new Intent();
-                    shareIntent.setAction(Intent.ACTION_SEND);
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(path));
-                    shareIntent.setType(((MediaMessage) baseMessage).getAttachment().getFileMimeType());
-                    Intent intent = Intent.createChooser(shareIntent, getResources().getString(R.string.cometchat_share));
-                    getContext().startActivity(intent);
-                }
-            });
         } else if (baseMessage instanceof MediaMessage) {
+            // Use downloadFileInNewThread for all media types (image, video, audio, file)
+            // This properly handles secure URLs with FAT headers
             MediaMessage message = (MediaMessage) baseMessage;
             if (message.getAttachment() != null) {
                 MediaUtils.downloadFileInNewThread(getContext(),

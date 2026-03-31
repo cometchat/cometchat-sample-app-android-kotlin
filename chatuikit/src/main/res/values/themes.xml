@@ -125,6 +125,7 @@
         <item name="cometchatAvatarStyle">@style/CometChatAvatarStyle</item>
         <item name="cometchatMessageListStyle">@style/CometChatMessageListStyle</item>
         <item name="cometchatMessageComposerStyle">@style/CometChatMessageComposerStyle</item>
+        <item name="cometchatSingleLineComposerStyle">@style/CometChatSingleLineComposerStyle</item>
         <item name="cometchatStatusIndicatorStyle">@style/CometChatStatusIndicatorStyle</item>
         <item name="cometchatBadgeStyle">@style/CometChatBadgeStyle</item>
         <item name="cometchatMessageReceiptStyle">@style/CometChatMessageReceiptStyle</item>
@@ -140,6 +141,7 @@
         <item name="cometchatMessageInformationStyle">@style/CometChatMessageInformationStyle</item>
         <item name="cometchatSuggestionListStyle">@style/CometChatSuggestionListStyle</item>
         <item name="cometchatMediaRecorderStyle">@style/CometChatMediaRecorderStyle</item>
+        <item name="cometchatInlineAudioRecorderStyle">@style/CometChatInlineAudioRecorderStyle</item>
         <item name="cometchatThreadHeaderStyle">@style/CometChatThreadHeaderStyle</item>
         <item name="cometchatGroupMembersStyle">@style/CometChatGroupMembersStyle</item>
         <item name="cometchatPopupMenuStyle">@style/CometChatPopupMenuStyle</item>
@@ -187,6 +189,28 @@
         <item name="cometchatMessageComposerInfoCornerRadius">@dimen/cometchat_radius_1</item>
         <item name="cometchatMessageComposerAttachmentOptionSheetStyle">?attr/cometchatAttachmentOptionSheetStyle</item>
         <item name="cometchatMessageComposerAIOptionSheetStyle">?attr/cometchatAIOptionSheetStyle</item>
+    </style>
+
+    <style name="CometChatSingleLineComposerStyle">
+        <item name="cometchatSingleLineComposerComposeBoxStrokeWidth">@dimen/cometchat_1dp</item>
+        <item name="cometchatSingleLineComposerComposeBoxCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatSingleLineComposerAttachmentIcon">@drawable/cometchat_ic_attachment</item>
+        <item name="cometchatSingleLineComposerVoiceRecordingIcon">@drawable/cometchat_ic_mic</item>
+        <item name="cometchatSingleLineComposerToggleToolbarIcon">@drawable/cometchat_ic_text_format</item>
+        <item name="cometchatSingleLineComposerAIIcon">@drawable/cometchat_ic_ai</item>
+        <item name="cometchatSingleLineComposerStickerIcon">@drawable/cometchat_ic_sticker</item>
+        <item name="cometchatSingleLineComposerInputTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatSingleLineComposerEditPreviewTitleTextAppearance">?attr/cometchatTextAppearanceCaption1Medium</item>
+        <item name="cometchatSingleLineComposerEditPreviewMessageTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatSingleLineComposerEditPreviewCornerRadius">@dimen/cometchat_radius_1</item>
+        <item name="cometchatSingleLineComposerEditPreviewCloseIcon">@drawable/cometchat_ic_close</item>
+        <item name="cometchatSingleLineComposerMentionBannerIcon">@drawable/cometchat_ic_info</item>
+        <item name="cometchatSingleLineComposerMentionBannerCloseIcon">@drawable/cometchat_ic_close</item>
+        <item name="cometchatSingleLineComposerMentionBannerTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
+        <item name="cometchatSingleLineComposerMentionBannerCornerRadius">@dimen/cometchat_radius_1</item>
+        <item name="cometchatSingleLineComposerMessagePreviewStyle">@style/CometChatMessageComposerPreviewStyle</item>
+        <item name="cometchatSingleLineComposerAttachmentOptionSheetStyle">?attr/cometchatAttachmentOptionSheetStyle</item>
+        <item name="cometchatSingleLineComposerSuggestionListStyle">?attr/cometchatSuggestionListStyle</item>
     </style>
 
     <style name="CometChatCreatePollStyle">
@@ -807,6 +831,10 @@
         <item name="cometchatMediaRecorderRestartIconStrokeWidth">@dimen/cometchat_1dp</item>
         <item name="cometchatMediaRecorderRestartIconElevation">4dp</item>
         <item name="cometchatMediaRecorderOutgoingMessageBubbleStyle">?attr/cometchatOutgoingMessageBubbleStyle</item>
+    </style>
+
+    <style name="CometChatInlineAudioRecorderStyle">
+        <!-- Default style for inline audio recorder - uses theme colors -->
     </style>
 
     <style name="CometChatAttachmentOptionSheetStyle">

@@ -458,21 +458,23 @@ public class CometChatThreadHeader extends MaterialCardView {
     }
 
     /**
-     * Processes and adds the {@link CometChatMentionsFormatter} to the list of text
-     * formatters if it's available in the data source. This method iterates through
-     * the formatters provided by the data source and sets the
-     * `cometchatMentionsFormatter` if found. It ensures that the mentions formatter
-     * is included in the text formatters for consistent styling of mentions within
-     * messages.
+     * Processes and adds all text formatters from the data source, including
+     * {@link CometChatMentionsFormatter} and {@link CometChatRichTextFormatter}.
+     * This method iterates through the formatters provided by the data source,
+     * extracts the mentions formatter for reference, and adds all formatters
+     * to ensure consistent styling of mentions and rich text formatting
+     * (bold, italic, code blocks, etc.) within messages.
      */
     private void processMentionsFormatter() {
-        for (CometChatTextFormatter textFormatter : CometChatUIKit.getDataSource().getTextFormatters(getContext(), additionParameter)) {
+        List<CometChatTextFormatter> formatters = CometChatUIKit.getDataSource().getTextFormatters(getContext(), additionParameter);
+        for (CometChatTextFormatter textFormatter : formatters) {
             if (textFormatter instanceof CometChatMentionsFormatter) {
                 cometchatMentionsFormatter = (CometChatMentionsFormatter) textFormatter;
                 break;
             }
         }
-        this.textFormatters.add(cometchatMentionsFormatter);
+        // Add all formatters (mentions + rich text) to ensure proper formatting
+        this.textFormatters.addAll(formatters);
     }
 
     /**

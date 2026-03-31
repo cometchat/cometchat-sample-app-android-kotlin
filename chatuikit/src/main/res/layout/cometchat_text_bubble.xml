@@ -105,8 +105,9 @@
                 android:gravity="center_vertical"
                 android:minWidth="@dimen/cometchat_100dp"
                 android:paddingStart="@dimen/cometchat_padding_3"
-                android:paddingTop="@dimen/cometchat_padding_3"
-                android:paddingEnd="@dimen/cometchat_padding_3" />
+                android:paddingTop="@dimen/cometchat_padding_4"
+                android:paddingEnd="@dimen/cometchat_padding_3"
+                android:paddingBottom="@dimen/cometchat_padding_2" />
 
             <LinearLayout
                 android:id="@+id/translation_message_container"

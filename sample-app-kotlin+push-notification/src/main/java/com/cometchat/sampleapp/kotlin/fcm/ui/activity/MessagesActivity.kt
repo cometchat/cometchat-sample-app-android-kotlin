@@ -20,6 +20,7 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.logger.CometChatLogger
+import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
@@ -252,7 +253,7 @@ class MessagesActivity : AppCompatActivity() {
             val isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             val bottomInset = max(ime.bottom.toDouble(), nav.bottom.toDouble()).toInt()
 
-            if (isImeVisible && binding.messageComposer.messageInput.composeBox.isFocused) {
+            if (isImeVisible && binding.singleLineComposer.isFocused) {
                 if (binding.messageList.atBottom()) {
                     binding.messageList.scrollToBottom()
                 }
@@ -293,11 +294,11 @@ class MessagesActivity : AppCompatActivity() {
     private fun updateGroupJoinedStatus(group: Group) {
         if (!group.isJoined) {
             binding.unblockBtn.visibility = View.GONE
-            binding.messageComposer.visibility = View.GONE
+            binding.singleLineComposer.visibility = View.GONE
             binding.infoLayout.visibility = View.VISIBLE
         } else {
             binding.unblockBtn.visibility = View.GONE
-            binding.messageComposer.visibility = View.VISIBLE
+            binding.singleLineComposer.visibility = View.VISIBLE
             binding.infoLayout.visibility = View.GONE
         }
     }
@@ -314,10 +315,10 @@ class MessagesActivity : AppCompatActivity() {
      */
     private fun updateUserBlockStatus(user: User) {
         if (user.isBlockedByMe) {
-            binding.messageComposer.visibility = View.GONE
+            binding.singleLineComposer.visibility = View.GONE
             binding.unblockLayout.visibility = View.VISIBLE
         } else {
-            binding.messageComposer.visibility = View.VISIBLE
+            binding.singleLineComposer.visibility = View.VISIBLE
             binding.unblockLayout.visibility = View.GONE
         }
     }
@@ -383,21 +384,28 @@ class MessagesActivity : AppCompatActivity() {
 
     /** Initializes UI components */
     private fun addViews() {
-        // Set user or group data to the message header and composer
         if (goToMessage != null) binding.messageList.gotoMessage(goToMessage!!.id)
         if (user != null) {
             binding.messageHeader.user = user!!
             binding.messageList.user = user
-            binding.messageComposer.user = user
+            binding.singleLineComposer.setUser(user)
             updateUserBlockStatus(user!!)
         } else if (group != null) {
             binding.messageHeader.group = group!!
             binding.messageList.group = group
-            binding.messageComposer.group = group
+            binding.singleLineComposer.setGroup(group)
             updateGroupJoinedStatus(group!!)
         }
 
-        // Set up back button behavior
+        binding.singleLineComposer.richTextFormattingOptionsVisibility = View.VISIBLE
+        binding.singleLineComposer.isShowTextSelectionMenuItems = true
+        binding.singleLineComposer.isEnableRichTextFormatting = true
+        binding.singleLineComposer.isUseInlineAudioRecorder = true
+        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
+
+        binding.messageList.isStartFromUnreadMessages = true
+        binding.messageList.markAsUnreadOptionVisibility = View.VISIBLE
+
         binding.messageHeader.setOnBackButtonPressed {
             Utils.hideKeyBoard(this, binding.root)
             finish()

@@ -29,6 +29,7 @@ import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
+import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior;
 import com.cometchat.sampleapp.java.R;
 import com.cometchat.sampleapp.java.databinding.ActivityMessagesBinding;
 import com.cometchat.sampleapp.java.databinding.OverflowMenuLayoutBinding;
@@ -270,7 +271,7 @@ public class MessagesActivity extends AppCompatActivity {
                 boolean isImeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
                 int bottomInset = Math.max(ime.bottom, nav.bottom);
 
-                if (isImeVisible && binding.messageComposer.getMessageInput().getComposeBox().isFocused() && binding.messageList.atBottom()) {
+                if (isImeVisible && binding.singleLineComposer.isFocused() && binding.messageList.atBottom()) {
                     binding.messageList.scrollToBottom();
                 }
 
@@ -306,11 +307,11 @@ public class MessagesActivity extends AppCompatActivity {
     private void updateGroupJoinedStatus(Group group) {
         if (!group.isJoined()) {
             binding.unblockBtn.setVisibility(View.GONE);
-            binding.messageComposer.setVisibility(View.GONE);
+            binding.singleLineComposer.setVisibility(View.GONE);
             binding.infoLayout.setVisibility(View.VISIBLE);
         } else {
             binding.unblockBtn.setVisibility(View.GONE);
-            binding.messageComposer.setVisibility(View.VISIBLE);
+            binding.singleLineComposer.setVisibility(View.VISIBLE);
             binding.infoLayout.setVisibility(View.GONE);
         }
     }
@@ -326,10 +327,10 @@ public class MessagesActivity extends AppCompatActivity {
      */
     private void updateUserBlockStatus(User user) {
         if (user.isBlockedByMe()) {
-            binding.messageComposer.setVisibility(View.GONE);
+            binding.singleLineComposer.setVisibility(View.GONE);
             binding.unblockLayout.setVisibility(View.VISIBLE);
         } else {
-            binding.messageComposer.setVisibility(View.VISIBLE);
+            binding.singleLineComposer.setVisibility(View.VISIBLE);
             binding.unblockLayout.setVisibility(View.GONE);
         }
     }
@@ -377,26 +378,30 @@ public class MessagesActivity extends AppCompatActivity {
      * Initializes UI components and sets up the keyboard visibility listener.
      */
     private void addViews() {
-        // Set user or group data to the message header and composer
         if (goToMessage != null) {
             binding.messageList.gotoMessage(goToMessage.getId());
         }
         if (user != null) {
             binding.messageHeader.setUser(user);
             binding.messageList.setUser(user);
-            binding.messageComposer.setUser(user);
+            binding.singleLineComposer.setUser(user);
             updateUserBlockStatus(user);
         } else if (group != null) {
             binding.messageHeader.setGroup(group);
             binding.messageList.setGroup(group);
-            binding.messageComposer.setGroup(group);
+            binding.singleLineComposer.setGroup(group);
             updateGroupJoinedStatus(group);
         }
+
+        binding.singleLineComposer.setRichTextFormattingOptionsVisibility(View.VISIBLE);
+        binding.singleLineComposer.setShowTextSelectionMenuItems(true);
+        binding.singleLineComposer.setEnableRichTextFormatting(true);
+        binding.singleLineComposer.setUseInlineAudioRecorder(true);
+        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE);
 
         binding.messageList.setStartFromUnreadMessages(true);
         binding.messageList.setMarkAsUnreadOptionVisibility(View.VISIBLE);
 
-        // Set up back button behavior
         binding.messageHeader.setOnBackButtonPressed(() -> {
             Utils.hideKeyBoard(this, binding.getRoot());
             finish();

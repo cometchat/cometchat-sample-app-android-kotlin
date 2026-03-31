@@ -1,21 +1,29 @@
 package com.cometchat.chatuikit.shared.views.messageinput;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Patterns;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import com.cometchat.chatuikit.logger.CometChatLogger;
+import com.cometchat.chatuikit.shared.spans.MarkdownConverter;
 import com.cometchat.chatuikit.shared.spans.NonEditableSpan;
+import com.cometchat.chatuikit.shared.spans.RichTextFormatSpan;
 
 /**
  * CometChatEditText class is a subclass of AppCompatEditText which is a widget
@@ -28,10 +36,11 @@ import com.cometchat.chatuikit.shared.spans.NonEditableSpan;
 public class CometChatEditText extends AppCompatEditText {
     private static final String TAG = CometChatEditText.class.getSimpleName();
 
-
     public OnEditTextMediaListener onEditTextMediaListener;
     public CometChatTextWatcher textWatcher;
     public Context context;
+    private OnPasteLinkListener onPasteLinkListener;
+    private OnRichTextPasteListener onRichTextPasteListener;
 
     /**
      * Constructor with parameter
@@ -48,6 +57,11 @@ public class CometChatEditText extends AppCompatEditText {
      * This method is used to initialize the views and listeners.
      */
     private void init() {
+        // Force software rendering so that LineBackgroundSpan backgrounds
+        // and the cursor are drawn in a deterministic order.  Without this,
+        // hardware-accelerated partial invalidations can cause the code-block
+        // background to paint over the blinking cursor (AOSP bug b/37044606).
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
         addTextChangedListener(new TagWatcher());
     }
 
@@ -106,7 +120,8 @@ public class CometChatEditText extends AppCompatEditText {
         if (ic == null) {
             return null;
         }
-        return InputConnectionCompat.createWrapper(ic, outAttrs, callback);
+        InputConnection wrapped = InputConnectionCompat.createWrapper(ic, outAttrs, callback);
+        return wrapped;
     }
 
     /**
@@ -137,6 +152,23 @@ public class CometChatEditText extends AppCompatEditText {
      */
     public void removeTextWatcher() {
         this.textWatcher = null;
+    }
+
+    /**
+     * Guard against AOSP bug where {@code Editor$InsertionPointCursorController}
+     * is null when software rendering is enabled (LAYER_TYPE_SOFTWARE).
+     * This manifests as a NullPointerException on certain devices (e.g. Pixel Fold)
+     * when the user long-presses the EditText.
+     */
+    @Override
+    public boolean performLongClick() {
+        try {
+            return super.performLongClick();
+        } catch (NullPointerException e) {
+            // Swallow the NPE from Editor.performLongClick() when
+            // InsertionPointCursorController is null due to software rendering.
+            return true;
+        }
     }
 
     /**
@@ -198,6 +230,200 @@ public class CometChatEditText extends AppCompatEditText {
     }
 
     /**
+     * Sets the listener for paste-link-on-selection events.
+     *
+     * @param listener The listener to set, or null to remove.
+     */
+    public void setOnPasteLinkListener(@Nullable OnPasteLinkListener listener) {
+        this.onPasteLinkListener = listener;
+    }
+
+    /**
+     * Sets the listener for rich text paste events.
+     * When set, pasted text containing markdown formatting will be parsed
+     * and inserted with formatting spans instead of plain text.
+     *
+     * @param listener The listener to set, or null to remove.
+     */
+    public void setOnRichTextPasteListener(@Nullable OnRichTextPasteListener listener) {
+        this.onRichTextPasteListener = listener;
+    }
+
+    /**
+     * Intercepts copy, cut, and paste actions to preserve rich text formatting.
+     * <p>
+     * For copy/cut: Converts formatting spans in the selected text to markdown
+     * syntax before placing it on the clipboard. This ensures that when the text
+     * is pasted back, the markdown can be parsed to restore formatting.
+     * </p>
+     * <p>
+     * For paste: Parses markdown from clipboard content and inserts it with
+     * the appropriate formatting spans. Also handles paste-link-on-selection.
+     * </p>
+     *
+     * @param id The identifier of the context menu item.
+     * @return true if the action was handled, false to let the default behavior proceed.
+     */
+    @Override
+    public boolean onTextContextMenuItem(int id) {
+        // Handle copy and cut: convert spans to markdown for clipboard
+        if (id == android.R.id.copy || id == android.R.id.cut) {
+            if (onRichTextPasteListener != null) {
+                Editable editable = getText();
+                if (editable != null) {
+                    int selStart = getSelectionStart();
+                    int selEnd = getSelectionEnd();
+                    if (selStart != selEnd && selStart >= 0 && selEnd <= editable.length()) {
+                        // Check if the selected text has any formatting spans
+                        RichTextFormatSpan[] spans = editable.getSpans(selStart, selEnd, RichTextFormatSpan.class);
+                        if (spans != null && spans.length > 0) {
+                            // Extract the selected portion as a new Spannable with spans preserved
+                            SpannableStringBuilder selectedSpannable = new SpannableStringBuilder(editable, selStart, selEnd);
+                            // Convert to markdown
+                            String markdown = MarkdownConverter.toMarkdown(selectedSpannable);
+                            if (markdown != null && !markdown.isEmpty()) {
+                                // Place markdown on clipboard
+                                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                if (clipboard != null) {
+                                    ClipData clipData = ClipData.newPlainText("Formatted Text", markdown);
+                                    clipboard.setPrimaryClip(clipData);
+                                    // For cut, delete the selected text after copying
+                                    if (id == android.R.id.cut) {
+                                        editable.delete(selStart, selEnd);
+                                    }
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Fall through to default behavior if no formatting spans found
+        }
+
+        if (id == android.R.id.paste || id == android.R.id.pasteAsPlainText) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+
+            // First, check for paste-link-on-selection (existing behavior)
+            if (selStart != selEnd && onPasteLinkListener != null) {
+                String clipboardUrl = getClipboardUrl();
+                if (clipboardUrl != null) {
+                    String selectedText = getText() != null
+                            ? getText().subSequence(selStart, selEnd).toString()
+                            : "";
+                    if (onPasteLinkListener.onPasteLink(selectedText, clipboardUrl, selStart, selEnd)) {
+                        return true;
+                    }
+                }
+            }
+
+            // Then, check for rich text paste (markdown in clipboard)
+            if (onRichTextPasteListener != null) {
+                String clipboardText = getClipboardText();
+                if (clipboardText != null && !clipboardText.isEmpty()) {
+                    SpannableString parsed = MarkdownConverter.fromMarkdown(clipboardText, getContext(), false);
+                    // Check if fromMarkdown actually produced any formatting spans
+                    boolean hasFormatting = parsed.getSpans(0, parsed.length(), RichTextFormatSpan.class).length > 0;
+                    if (hasFormatting) {
+                        Editable editable = getText();
+                        if (editable != null) {
+                            // Delete any selected text first
+                            if (selStart != selEnd) {
+                                editable.delete(selStart, selEnd);
+                            }
+                            // Insert the parsed spannable at the cursor position
+                            editable.insert(selStart, parsed);
+                            // Place cursor at the end of the inserted text
+                            setSelection(selStart + parsed.length());
+                            // Notify the listener so the composer can update toolbar state
+                            onRichTextPasteListener.onRichTextPaste(selStart, selStart + parsed.length());
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return super.onTextContextMenuItem(id);
+    }
+
+    /**
+     * Extracts a URL from the clipboard if the clipboard contains a single URL string.
+     *
+     * @return The URL string if the clipboard contains a valid URL, null otherwise.
+     */
+    @Nullable
+    private String getClipboardUrl() {
+        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null || !clipboard.hasPrimaryClip()) {
+            return null;
+        }
+        ClipData clipData = clipboard.getPrimaryClip();
+        if (clipData == null || clipData.getItemCount() == 0) {
+            return null;
+        }
+        CharSequence clipText = clipData.getItemAt(0).getText();
+        if (clipText == null) {
+            return null;
+        }
+        String text = clipText.toString().trim();
+        if (Patterns.WEB_URL.matcher(text).matches()) {
+            return text;
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the text content from the clipboard.
+     *
+     * @return The clipboard text, or null if the clipboard is empty or unavailable.
+     */
+    @Nullable
+    private String getClipboardText() {
+        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null || !clipboard.hasPrimaryClip()) {
+            return null;
+        }
+        ClipData clipData = clipboard.getPrimaryClip();
+        if (clipData == null || clipData.getItemCount() == 0) {
+            return null;
+        }
+        CharSequence clipText = clipData.getItemAt(0).getText();
+        return clipText != null ? clipText.toString() : null;
+    }
+
+    /**
+     * Listener interface for when a URL is pasted over selected text.
+     */
+    public interface OnPasteLinkListener {
+        /**
+         * Called when a URL is pasted while text is selected.
+         *
+         * @param selectedText The currently selected text.
+         * @param url          The URL from the clipboard.
+         * @param selStart     The start position of the selection.
+         * @param selEnd       The end position of the selection.
+         * @return true if the event was handled (link was embedded), false to proceed with default paste.
+         */
+        boolean onPasteLink(String selectedText, String url, int selStart, int selEnd);
+    }
+
+    /**
+     * Listener interface for when text with rich formatting (markdown) is pasted.
+     */
+    public interface OnRichTextPasteListener {
+        /**
+         * Called after markdown-formatted text has been parsed and inserted with
+         * formatting spans. The composer should update its toolbar state to reflect
+         * the formats present in the pasted content.
+         *
+         * @param pasteStart The start position of the pasted content.
+         * @param pasteEnd   The end position of the pasted content.
+         */
+        void onRichTextPaste(int pasteStart, int pasteEnd);
+    }
+
+    /**
      * This interface is used to handle the media selection event.
      */
     public interface OnEditTextMediaListener {
@@ -208,6 +434,7 @@ public class CometChatEditText extends AppCompatEditText {
      * This class is used to watch the text changes in the CometChatEditText.
      */
     private class TagWatcher implements TextWatcher {
+
         @Override
         public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
             if (textWatcher != null) {

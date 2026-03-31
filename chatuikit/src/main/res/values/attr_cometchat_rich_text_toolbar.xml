@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CometChatRichTextToolbar">
+
+        <!-- Background -->
+        <attr name="cometchatRichTextToolbarBackgroundColor" format="color" />
+        <attr name="cometchatRichTextToolbarBackgroundDrawable" format="reference" />
+
+        <!-- Icon styling -->
+        <attr name="cometchatRichTextToolbarIconTint" format="color" />
+        <attr name="cometchatRichTextToolbarActiveIconTint" format="color" />
+        <attr name="cometchatRichTextToolbarActiveIconBackgroundColor" format="color" />
+        <attr name="cometchatRichTextToolbarIconSize" format="dimension" />
+        <attr name="cometchatRichTextToolbarIconPadding" format="dimension" />
+        <attr name="cometchatRichTextToolbarIconGap" format="dimension" />
+
+        <!-- Separator styling -->
+        <attr name="cometchatRichTextToolbarSeparatorColor" format="color" />
+        <attr name="cometchatRichTextToolbarSeparatorWidth" format="dimension" />
+        <attr name="cometchatRichTextToolbarSeparatorHeight" format="dimension" />
+
+        <!-- Individual format button icons (optional overrides) -->
+        <attr name="cometchatRichTextToolbarBoldIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarItalicIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarStrikethroughIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarInlineCodeIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarCodeBlockIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarLinkIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarBulletListIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarOrderedListIcon" format="reference" />
+        <attr name="cometchatRichTextToolbarBlockquoteIcon" format="reference" />
+
+        <!-- Style reference -->
+        <attr name="cometchatRichTextToolbarStyle" format="reference" />
+
+    </declare-styleable>
+
+</resources>

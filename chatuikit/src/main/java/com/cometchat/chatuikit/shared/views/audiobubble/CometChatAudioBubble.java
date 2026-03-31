@@ -28,8 +28,13 @@ import com.cometchat.chatuikit.R;
 import com.cometchat.chatuikit.shared.interfaces.OnClick;
 import com.cometchat.chatuikit.shared.resources.utils.AudioPlayer;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
+import com.cometchat.chatuikit.shared.views.waveform.AudioWaveformExtractor;
+import com.cometchat.chatuikit.shared.views.waveform.AudioWaveformVisualizer;
+import com.cometchat.chatuikit.shared.views.waveform.WaveformCache;
 import com.google.android.material.card.MaterialCardView;
 
+import java.io.File;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -57,21 +62,41 @@ public class CometChatAudioBubble extends MaterialCardView {
     private ImageView playIconImageView, pauseIconImageView;
     private MaterialCardView buttonCardView;
     private TextView subtitle;
-    private LottieAnimationView audioWaveAnimation;
+    private LottieAnimationView lottieAnimationView;
+    private AudioWaveformVisualizer waveformVisualizer;
 
     // Audio player and related properties
     private String audioUrl;
     private AudioPlayer audioPlayer;
     private OnClick onClick;
+    
+    // Local file for sent messages (to avoid buffering)
+    private File localFile;
+    
+    // Message ID for caching
+    private long messageId = 0;
+    
+    // Flag to track if waveform extraction is in progress
+    private boolean isExtractingWaveform = false;
+    
+    // Track if THIS bubble's audio is currently paused
+    private boolean isThisBubblePaused = false;
+    // Track the current audio URL being played by the singleton
+    private static String currentlyPlayingUrl = null;
 
     // Customizable colors for play, pause, and button tints
     private @ColorInt int playIconTint, pauseIconTint, buttonTint;
+    private @ColorInt int audioWaveColor;
+    private @ColorInt int waveformPlayedColor, waveformUnplayedColor;
 
     // Customizable icons for play and pause
     private @DrawableRes int playIcon, pauseIcon;
     private Handler handler;
     private Runnable updateRunnable;
     private @StyleRes int style;
+    
+    // Waveform amplitude data
+    private List<Float> waveformAmplitudes;
 
     /**
      * Default constructor for creating a CometChatAudioBubble programmatically.
@@ -104,6 +129,7 @@ public class CometChatAudioBubble extends MaterialCardView {
         inflateAndInitializeView(attrs, defStyleAttr);
     }
 
+
     /**
      * Inflates the layout and initializes the view components.
      *
@@ -117,12 +143,15 @@ public class CometChatAudioBubble extends MaterialCardView {
         audioPlayer = AudioPlayer.getInstance(); // Initialize audio player instance
 
         // View components initialization
-        audioWaveAnimation = view1.findViewById(R.id.animationView);
+        lottieAnimationView = view1.findViewById(R.id.lottie_animation);
+        // Set larger height with negative top margin for overflow effect (like v5)
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                                                                                getContext()
                                                                                    .getResources()
                                                                                    .getDimensionPixelSize(R.dimen.cometchat_50dp));
-        setMargin(0, -45, 0, 0, layoutParams);
+        setLottieMargin(0, -45, 0, 0, layoutParams);
+        // Initialize waveform visualizer
+        waveformVisualizer = view1.findViewById(R.id.waveform_visualizer);
         layout = view1.findViewById(R.id.parent);
         subtitle = view1.findViewById(R.id.tv_subtitle);
         playIconImageView = view1.findViewById(R.id.iv_play);
@@ -135,6 +164,22 @@ public class CometChatAudioBubble extends MaterialCardView {
         progressBar.setVisibility(GONE);
         pauseIconImageView.setVisibility(GONE);
         subtitle.setVisibility(GONE);
+        
+        // Initialize waveform with flat/uniform amplitudes (straight lines)
+        waveformAmplitudes = AudioWaveformVisualizer.generateFlatAmplitudes();
+        waveformVisualizer.setAmplitudes(waveformAmplitudes);
+        waveformVisualizer.setPlaybackProgress(0f);
+        waveformVisualizer.setAllowSeeking(true);
+        
+        // Set up seek listener for waveform
+        waveformVisualizer.setOnSeekListener(progress -> {
+            if (audioPlayer != null && audioPlayer.getMediaPlayer() != null) {
+                int duration = audioPlayer.getMediaPlayer().getDuration();
+                int seekPosition = (int) (progress * duration);
+                audioPlayer.getMediaPlayer().seekTo(seekPosition);
+                waveformVisualizer.setPlaybackProgress(progress);
+            }
+        });
 
         addView(view1);
 
@@ -146,55 +191,179 @@ public class CometChatAudioBubble extends MaterialCardView {
             if (onClick != null) {
                 onClick.onClick();
             } else {
-                startPlaying();
+                // Check if THIS bubble's audio is paused - if so, resume instead of starting fresh
+                String currentUrl = localFile != null && localFile.exists() ? localFile.getAbsolutePath() : audioUrl;
+                if (isThisBubblePaused && currentUrl != null && currentUrl.equals(currentlyPlayingUrl) && audioPlayer.isPaused()) {
+                    resumePlaying();
+                } else {
+                    startPlaying();
+                }
             }
         });
 
-        // Set pause button click listener
-        pauseIconImageView.setOnClickListener(view -> stopPlaying());
+        // Set pause button click listener - pause instead of stop
+        pauseIconImageView.setOnClickListener(view -> pausePlaying());
 
         // Apply custom style attributes
         applyStyleAttributes(attributeSet, defStyleAttr);
     }
-
-    public void setMargin(int left, int top, int right, int bottom, LinearLayout.LayoutParams layoutParams) {
+    
+    /**
+     * Sets the margin for the Lottie animation view.
+     * Used to create overflow effect for the waveform animation.
+     */
+    public void setLottieMargin(int left, int top, int right, int bottom, LinearLayout.LayoutParams layoutParams) {
         layoutParams.topMargin = top;
         layoutParams.bottomMargin = bottom;
         layoutParams.leftMargin = left;
         layoutParams.rightMargin = right;
-        audioWaveAnimation.setLayoutParams(layoutParams);
+        lottieAnimationView.setLayoutParams(layoutParams);
     }
-
+    
     /**
      * Starts the audio playback and updates the UI states.
+     * Prioritizes local file playback to avoid buffering for sent messages.
      */
     public void startPlaying() {
+        // Reset paused state when starting fresh
+        isThisBubblePaused = false;
+        
+        // Check if we have a local file (sent message) - play directly without buffering
+        if (localFile != null && localFile.exists()) {
+            currentlyPlayingUrl = localFile.getAbsolutePath();
+            startPlayingFromLocalFile();
+            return;
+        }
+        
         if (audioUrl == null || audioUrl.isEmpty()) return;
+        
+        // Track the currently playing URL
+        currentlyPlayingUrl = audioUrl;
+        
         playIconImageView.setVisibility(GONE);
         progressBar.setVisibility(VISIBLE);
+        
+        // Check if waveform is already cached
+        if (messageId > 0 && WaveformCache.containsByMessageId(messageId)) {
+            // Waveform already extracted, play immediately
+            startPlayingWithWaveform();
+            return;
+        }
+        
+        // For received messages, extract waveform first, then play
+        isExtractingWaveform = true;
+        final long msgId = this.messageId;
+        
+        AudioWaveformExtractor.extractWaveform(getContext(), audioUrl, 
+            new AudioWaveformExtractor.WaveformExtractionCallback() {
+                @Override
+                public void onSuccess(List<Float> amplitudes) {
+                    // Cache the result
+                    if (msgId > 0) {
+                        WaveformCache.putByMessageId(msgId, amplitudes);
+                    }
+                    handler.post(() -> {
+                        waveformAmplitudes = amplitudes;
+                        waveformVisualizer.setAmplitudes(amplitudes);
+                        isExtractingWaveform = false;
+                        // Now start playing
+                        startPlayingWithWaveform();
+                    });
+                }
 
+                @Override
+                public void onError(String error) {
+                    android.util.Log.e(TAG, "Waveform extraction error: " + error);
+                    handler.post(() -> {
+                        isExtractingWaveform = false;
+                        // Play anyway with flat waveform
+                        startPlayingWithWaveform();
+                    });
+                }
+            });
+    }
+    
+    /**
+     * Starts playing audio after waveform is ready.
+     * Called after waveform extraction completes.
+     */
+    private void startPlayingWithWaveform() {
+        if (audioUrl == null || audioUrl.isEmpty()) return;
+        
         // Reset and prepare the audio player
         audioPlayer.reset();
+        
+        // Set context for secure media support
+        audioPlayer.setContext(getContext());
+        
+        // Reset waveform progress
+        waveformVisualizer.setPlaybackProgress(0f);
+        waveformVisualizer.setIsPlaying(true);
 
         audioPlayer.setAudioUrl(
             audioUrl,
             mediaPlayer -> {
                 progressBar.setVisibility(GONE);
                 playIconImageView.setVisibility(GONE);
-                playIconImageView.setVisibility(GONE);
                 pauseIconImageView.setVisibility(VISIBLE);
                 subtitle.setVisibility(VISIBLE);
+                
+                // Start Lottie animation
+                lottieAnimationView.playAnimation();
+                
+                // Get the duration after audio is prepared
+                final int totalDuration = mediaPlayer.getDuration();
+                
+                // Start playing audio
+                audioPlayer.start();
+
+                // Start updating the subtitle text
+                startProgressUpdater(totalDuration);
             },
             mediaPlayer -> stopPlaying()
         );
+    }
 
-        // Get the duration of the audio
-        final int totalDuration = audioPlayer.getMediaPlayer().getDuration(); // Assuming audioPlayer provides this
-
-        // Start playing audio
-        audioPlayer.start();
-
-        // Start updating the subtitle text with the current position
+    
+    /**
+     * Starts playing from local file - no buffering needed.
+     * Used for sent voice recordings.
+     * Waveform should already be set from metadata or cache, so just play.
+     */
+    private void startPlayingFromLocalFile() {
+        playIconImageView.setVisibility(GONE);
+        progressBar.setVisibility(VISIBLE);
+        
+        // Reset waveform progress
+        waveformVisualizer.setPlaybackProgress(0f);
+        waveformVisualizer.setIsPlaying(true);
+        
+        String filePath = localFile.getAbsolutePath();
+        
+        // Play directly from local file (waveform should already be set)
+        audioPlayer.playFromLocalFile(
+            filePath,
+            mediaPlayer -> {
+                progressBar.setVisibility(GONE);
+                playIconImageView.setVisibility(GONE);
+                pauseIconImageView.setVisibility(VISIBLE);
+                subtitle.setVisibility(VISIBLE);
+                
+                // Start Lottie animation
+                lottieAnimationView.playAnimation();
+                
+                final int totalDuration = mediaPlayer.getDuration();
+                audioPlayer.start();
+                startProgressUpdater(totalDuration);
+            },
+            mediaPlayer -> stopPlaying()
+        );
+    }
+    
+    /**
+     * Starts the progress updater runnable.
+     */
+    private void startProgressUpdater(final int totalDuration) {
         if (updateRunnable != null) {
             handler.removeCallbacks(updateRunnable);
         }
@@ -202,26 +371,60 @@ public class CometChatAudioBubble extends MaterialCardView {
             @Override
             public void run() {
                 if (audioPlayer.isPlaying()) {
-                    if (!audioWaveAnimation.isAnimating()) audioWaveAnimation.playAnimation();
+                    int currentPosition = audioPlayer.getMediaPlayer().getCurrentPosition();
+                    int duration = audioPlayer.getMediaPlayer().getDuration();
 
-                    int currentPosition = audioPlayer.getMediaPlayer().getCurrentPosition(); // Assuming audioPlayer
-                    // provides this method
+                    // Update waveform progress - use actual duration from MediaPlayer for accuracy
+                    if (duration > 0) {
+                        float progress = (float) currentPosition / duration;
+                        waveformVisualizer.setPlaybackProgress(progress);
+                    }
 
-                    // Update subtitle text immediately
+                    // Update subtitle text
                     subtitle.setText(formatTime(currentPosition) + "/" + formatTime(totalDuration));
 
                     // Continue updating until the audio ends
                     if (currentPosition < totalDuration) {
-                        // Schedule the next update after a short interval (200 ms)
-                        handler.postDelayed(this, 200);
+                        handler.postDelayed(this, 100);
                     } else {
-                        // Ensure the final subtitle shows the total duration
                         subtitle.setText(formatTime(totalDuration) + "/" + formatTime(totalDuration));
+                        waveformVisualizer.setPlaybackProgress(1f);
                     }
                 }
             }
         };
-        handler.post(updateRunnable); // Post immediately to update at the start
+        handler.post(updateRunnable);
+    }
+    
+    /**
+     * Pauses the audio playback without resetting.
+     * Allows resuming from the same position.
+     */
+    public void pausePlaying() {
+        audioPlayer.pause();
+        isThisBubblePaused = true;
+        playIconImageView.setVisibility(VISIBLE);
+        pauseIconImageView.setVisibility(GONE);
+        // Pause Lottie animation
+        lottieAnimationView.pauseAnimation();
+        waveformVisualizer.setIsPlaying(false);
+        handler.removeCallbacks(updateRunnable);
+    }
+    
+    /**
+     * Resumes audio playback from the paused position.
+     */
+    public void resumePlaying() {
+        audioPlayer.resume();
+        isThisBubblePaused = false;
+        playIconImageView.setVisibility(GONE);
+        pauseIconImageView.setVisibility(VISIBLE);
+        // Resume Lottie animation
+        lottieAnimationView.resumeAnimation();
+        waveformVisualizer.setIsPlaying(true);
+        
+        final int totalDuration = audioPlayer.getMediaPlayer().getDuration();
+        startProgressUpdater(totalDuration);
     }
 
     /**
@@ -229,11 +432,18 @@ public class CometChatAudioBubble extends MaterialCardView {
      */
     public void stopPlaying() {
         audioPlayer.stop();
+        isThisBubblePaused = false;
+        currentlyPlayingUrl = null;
         playIconImageView.setVisibility(VISIBLE);
         pauseIconImageView.setVisibility(GONE);
-        audioWaveAnimation.pauseAnimation();
+        // Stop Lottie animation
+        lottieAnimationView.cancelAnimation();
+        lottieAnimationView.setProgress(0f);
+        waveformVisualizer.setIsPlaying(false);
+        waveformVisualizer.setPlaybackProgress(0f);
         handler.removeCallbacks(updateRunnable);
     }
+
 
     /**
      * Apply custom style attributes to the view.
@@ -280,15 +490,38 @@ public class CometChatAudioBubble extends MaterialCardView {
     }
 
     /**
-     * Sets the color for the audio wave animation.
+     * Sets the color for the audio waveform/animation.
      *
-     * @param color The color to apply to the audio wave.
+     * @param color The color to apply to the audio wave animation.
      */
     private void setAudioWaveColor(@ColorInt int color) {
-        audioWaveAnimation.addValueCallback(new KeyPath("**"),
-                                            // Target the layer for color change
+        this.audioWaveColor = color;
+        // Apply color to Lottie animation using PorterDuffColorFilter (like v5)
+        lottieAnimationView.addValueCallback(new KeyPath("**"),
                                             LottieProperty.COLOR_FILTER,
                                             new LottieValueCallback<>(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)));
+        // Apply color to waveform visualizer
+        this.waveformPlayedColor = color;
+        waveformVisualizer.setPlayedBarColor(color);
+    }
+    
+    /**
+     * Sets the color for the unplayed portion of the waveform.
+     *
+     * @param color The color to apply to the unplayed portion of the waveform.
+     */
+    public void setWaveformUnplayedColor(@ColorInt int color) {
+        this.waveformUnplayedColor = color;
+        waveformVisualizer.setUnplayedBarColor(color);
+    }
+    
+    /**
+     * Gets the waveform visualizer for additional customization.
+     *
+     * @return The AudioWaveformVisualizer instance.
+     */
+    public AudioWaveformVisualizer getWaveformVisualizer() {
+        return waveformVisualizer;
     }
 
     /**
@@ -424,6 +657,13 @@ public class CometChatAudioBubble extends MaterialCardView {
     }
 
     public void setMessage(MediaMessage mediaMessage) {
+        // Store message ID and MUID for caching
+        this.messageId = mediaMessage.getId();
+        String muid = mediaMessage.getMuid();
+        
+        // Get local file for sent messages (to avoid buffering)
+        this.localFile = Utils.getFileFromLocalPath(mediaMessage);
+        
         Attachment attachment = mediaMessage.getAttachment();
         if (attachment != null) {
             int size = attachment.getFileSize();
@@ -431,10 +671,105 @@ public class CometChatAudioBubble extends MaterialCardView {
         } else {
             setAudioUrl(null, Utils.getFileSize((int) mediaMessage.getFile().length()));
         }
+        
+        // Check cache by message ID first to prevent flicker on rebind
+        if (messageId > 0 && WaveformCache.containsByMessageId(messageId)) {
+            List<Float> cachedAmplitudes = WaveformCache.getByMessageId(messageId);
+            if (cachedAmplitudes != null && !cachedAmplitudes.isEmpty()) {
+                waveformAmplitudes = cachedAmplitudes;
+                waveformVisualizer.setAmplitudes(cachedAmplitudes);
+                return;
+            }
+        }
+        
+        // Check cache by MUID (for sent messages before server assigns ID)
+        List<Float> muidAmplitudes = WaveformCache.getByMuid(muid);
+        if (muidAmplitudes != null && !muidAmplitudes.isEmpty()) {
+            waveformAmplitudes = muidAmplitudes;
+            waveformVisualizer.setAmplitudes(muidAmplitudes);
+            // Also cache by message ID if available
+            if (messageId > 0) {
+                WaveformCache.putByMessageId(messageId, muidAmplitudes);
+                // Clean up MUID cache since we now have message ID
+                WaveformCache.removeByMuid(muid);
+            }
+            return;
+        }
+        
+        // Try to get waveform from message metadata (fallback, should not happen with new flow)
+        List<Float> metadataAmplitudes = getWaveformFromMetadata(mediaMessage);
+        if (metadataAmplitudes != null && !metadataAmplitudes.isEmpty()) {
+            waveformAmplitudes = metadataAmplitudes;
+            waveformVisualizer.setAmplitudes(metadataAmplitudes);
+            // Cache it
+            if (messageId > 0) {
+                WaveformCache.putByMessageId(messageId, metadataAmplitudes);
+            }
+            return;
+        }
+        
+        // For sent messages with local file, extract immediately
+        if (localFile != null && localFile.exists()) {
+            extractWaveformFromLocalFile();
+        }
+        // For received messages, keep flat waveform - will extract when play is tapped
+    }
+    
+    /**
+     * Extracts waveform amplitudes from message metadata if available.
+     * This is used for sent messages recorded with the inline audio recorder.
+     */
+    private List<Float> getWaveformFromMetadata(MediaMessage mediaMessage) {
+        try {
+            if (mediaMessage.getMetadata() != null && mediaMessage.getMetadata().has("waveform_amplitudes")) {
+                org.json.JSONArray amplitudesArray = mediaMessage.getMetadata().getJSONArray("waveform_amplitudes");
+                List<Float> amplitudes = new java.util.ArrayList<>();
+                for (int i = 0; i < amplitudesArray.length(); i++) {
+                    amplitudes.add((float) amplitudesArray.getDouble(i));
+                }
+                return amplitudes;
+            }
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "Error reading waveform from metadata: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
+     * Extracts waveform from local file for sent messages.
+     * Called immediately when message is set.
+     */
+    private void extractWaveformFromLocalFile() {
+        if (localFile == null || !localFile.exists()) return;
+        
+        String filePath = localFile.getAbsolutePath();
+        final long msgId = this.messageId;
+        
+        AudioWaveformExtractor.extractWaveformFromFile(filePath, 
+            new AudioWaveformExtractor.WaveformExtractionCallback() {
+                @Override
+                public void onSuccess(List<Float> amplitudes) {
+                    // Cache the result
+                    if (msgId > 0) {
+                        WaveformCache.putByMessageId(msgId, amplitudes);
+                    }
+                    handler.post(() -> {
+                        waveformAmplitudes = amplitudes;
+                        waveformVisualizer.setAmplitudes(amplitudes);
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    android.util.Log.e(TAG, "Waveform extraction error: " + error);
+                    // Keep flat waveform on error
+                }
+            });
     }
 
     /**
      * Sets the audio URL and corresponding title and subtitle texts.
+     * TODO: When waveform visualizer is ready, shows flat waveform initially - dynamic waveform is extracted when audio is played.
      *
      * @param audioUrl     The URL of the audio file to be played.
      * @param subtitleText The subtitle text to be displayed.
@@ -443,8 +778,16 @@ public class CometChatAudioBubble extends MaterialCardView {
         if (audioUrl != null && !audioUrl.isEmpty()) {
             this.audioUrl = audioUrl;
             playIconImageView.setEnabled(true);
+            
+            // Show flat waveform initially - dynamic waveform will be extracted when played
+            waveformAmplitudes = AudioWaveformVisualizer.generateFlatAmplitudes();
+            waveformVisualizer.setAmplitudes(waveformAmplitudes);
+            waveformVisualizer.setPlaybackProgress(0f);
         } else {
             playIconImageView.setEnabled(false);
+            // Use flat waveform for null/empty URLs
+            waveformAmplitudes = AudioWaveformVisualizer.generateFlatAmplitudes();
+            waveformVisualizer.setAmplitudes(waveformAmplitudes);
         }
         playIconImageView.setVisibility(VISIBLE);
         setSubtitleText(subtitleText);

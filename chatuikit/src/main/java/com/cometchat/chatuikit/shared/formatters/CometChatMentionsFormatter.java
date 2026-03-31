@@ -249,6 +249,16 @@ public class CometChatMentionsFormatter extends CometChatTextFormatter {
         return conversationsMentionTextStyle;
     }
 
+    /**
+     * Returns the composer tag style used for regular (non-self) mentions.
+     * This is the {@link PromptTextStyle} derived from
+     * {@link #setMessageComposerMentionTextStyle(Context, int)}.
+     */
+    @Nullable
+    public PromptTextStyle getComposerTagStyle() {
+        return tagStyle;
+    }
+
     public void setDisableMentionAll(boolean disableMentionAll) {
         this.disableMentionAll = disableMentionAll;
     }

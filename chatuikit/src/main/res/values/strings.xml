@@ -258,4 +258,43 @@
     <string name="cometchat_notify_everyone_in_this_group">Notify everyone in this group</string>
     <string name="cometchat_notify_all" translatable="true">all</string>
     <string name="cometchat_new">New</string>
+
+    <!-- Rich Text Toolbar -->
+    <string name="cometchat_bold" translatable="true">Bold</string>
+    <string name="cometchat_italic" translatable="true">Italic</string>
+    <string name="cometchat_strikethrough" translatable="true">Strikethrough</string>
+    <string name="cometchat_underline" translatable="true">Underline</string>
+    <string name="cometchat_inline_code" translatable="true">Inline Code</string>
+    <string name="cometchat_code_block" translatable="true">Code Block</string>
+    <string name="cometchat_link" translatable="true">Link</string>
+    <string name="cometchat_bullet_list" translatable="true">Bullet List</string>
+    <string name="cometchat_numbered_list" translatable="true">Numbered List</string>
+    <string name="cometchat_blockquote" translatable="true">Blockquote</string>
+    <string name="cometchat_toggle_formatting" translatable="true">Toggle Formatting</string>
+    <string name="cometchat_close" translatable="true">Close</string>
+    <!-- Rich Text Toolbar Accessibility -->
+    <string name="cometchat_format_enabled" translatable="true">%s enabled</string>
+    <string name="cometchat_format_disabled" translatable="true">%s disabled</string>
+    
+    <!-- Link Dialog -->
+    <string name="cometchat_add_link" translatable="true">Add Link</string>
+    <string name="cometchat_edit_link" translatable="true">Edit Link</string>
+    <string name="cometchat_text" translatable="true">Text</string>
+    <string name="cometchat_enter_url" translatable="true">Enter URL</string>
+    <string name="cometchat_url_hint" translatable="true">https://example.com</string>
+    <string name="cometchat_ok" translatable="true">OK</string>
+    <string name="cometchat_select_text_for_link" translatable="true">Please select text to add a link</string>
+    <string name="cometchat_mention_limit_message" translatable="true">You can mention up to 10 users at once.</string>
+    <string name="cometchat_type_message" translatable="true">Type a message…</string>
+    <string name="cometchat_attachment" translatable="true">Attachment</string>
+    <string name="cometchat_voice_recording" translatable="true">Voice Recording</string>
+    <string name="cometchat_emoji" translatable="true">Emoji</string>
+    <string name="cometchat_sticker" translatable="true">Sticker</string>
+    <string name="cometchat_ai" translatable="true">AI</string>
+    <string name="cometchat_editing" translatable="true">Editing</string>
+
+    <!-- Inline Audio Recorder -->
+    <string name="cometchat_play" translatable="true">Play</string>
+    <string name="cometchat_pause" translatable="true">Pause</string>
+    <string name="cometchat_record" translatable="true">Record</string>
 </resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatInlineAudioRecorder">
+        <!-- Style reference - uses attr defined in attr_cometchat_theme.xml -->
+        <attr name="cometchatInlineAudioRecorderStyle" />
+
+        <!-- Background -->
+        <attr name="cometchatInlineAudioRecorderBackgroundColor" format="color" />
+
+        <!-- Waveform colors -->
+        <attr name="cometchatInlineAudioRecorderWaveformRecordingColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderWaveformPlayingColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderWaveformUnplayedColor" format="color" />
+
+        <!-- Duration text -->
+        <attr name="cometchatInlineAudioRecorderDurationTextColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderDurationTextAppearance" format="reference" />
+
+        <!-- Button icon colors -->
+        <attr name="cometchatInlineAudioRecorderDeleteButtonIconColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderSendButtonIconColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderPlayButtonIconColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderPauseButtonIconColor" format="color" />
+        <attr name="cometchatInlineAudioRecorderRecordButtonIconColor" format="color" />
+
+        <!-- Button background colors -->
+        <attr name="cometchatInlineAudioRecorderSendButtonBackgroundColor" format="color" />
+
+        <!-- Recording indicator -->
+        <attr name="cometchatInlineAudioRecorderRecordingIndicatorColor" format="color" />
+
+        <!-- Waveform dimensions -->
+        <attr name="cometchatInlineAudioRecorderWaveformBarWidth" format="dimension" />
+        <attr name="cometchatInlineAudioRecorderWaveformBarSpacing" format="dimension" />
+        <attr name="cometchatInlineAudioRecorderWaveformMinBarHeight" format="dimension" />
+        <attr name="cometchatInlineAudioRecorderWaveformMaxBarHeight" format="dimension" />
+        <attr name="cometchatInlineAudioRecorderWaveformMaxBarCount" format="integer" />
+
+        <!-- Custom icons -->
+        <attr name="cometchatInlineAudioRecorderDeleteIcon" format="reference" />
+        <attr name="cometchatInlineAudioRecorderRecordIcon" format="reference" />
+        <attr name="cometchatInlineAudioRecorderPauseIcon" format="reference" />
+        <attr name="cometchatInlineAudioRecorderPlayIcon" format="reference" />
+        <attr name="cometchatInlineAudioRecorderSendIcon" format="reference" />
+        <attr name="cometchatInlineAudioRecorderMicIcon" format="reference" />
+    </declare-styleable>
+</resources>

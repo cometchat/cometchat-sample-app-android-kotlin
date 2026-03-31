@@ -27,6 +27,7 @@ import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.formatters.CometChatMentionsFormatter;
+import com.cometchat.chatuikit.shared.formatters.CometChatRichTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.CometChatTextFormatter;
 import com.cometchat.chatuikit.shared.formatters.FormatterUtils;
 import com.cometchat.chatuikit.shared.models.AdditionParameter;
@@ -40,6 +41,7 @@ import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.chatuikit.shared.utils.MessageBubbleUtils;
 import com.cometchat.chatuikit.shared.viewholders.MessagesViewHolderListener;
 import com.cometchat.chatuikit.shared.views.audiobubble.CometChatAudioBubble;
+import com.cometchat.chatuikit.shared.resources.utils.AudioPlayer;
 import com.cometchat.chatuikit.shared.views.messagebubble.CometChatMessageBubble;
 
 import java.util.ArrayList;
@@ -503,8 +505,11 @@ public class MessagesDataSource implements DataSource {
             audioBubble.setOnClick(() -> {
                 if (currentlyPlayingPosition == position) {
                     if (audioBubble.isPlaying()) {
-                        audioBubble.stopPlaying();
+                        audioBubble.pausePlaying();  // Pause instead of stop to allow resume
+                    } else if (AudioPlayer.getInstance().isPaused()) {
+                        audioBubble.resumePlaying();  // Resume from paused position
                     } else {
+                        // Audio completed or was stopped - start fresh
                         audioBubble.startPlaying();
                     }
                 } else {
@@ -1538,8 +1543,12 @@ public class MessagesDataSource implements DataSource {
 
     private List<CometChatTextFormatter> _getTextFormatters(Context context) {
         CometChatMentionsFormatter cometchatMentionsFormatter = new CometChatMentionsFormatter(context);
+        CometChatRichTextFormatter cometchatRichTextFormatter = new CometChatRichTextFormatter();
         List<CometChatTextFormatter> list = new ArrayList<>();
+        // Mentions formatter should be applied first to process <@uid:name> patterns
+        // Then rich text formatter parses markdown while preserving mention spans
         list.add(cometchatMentionsFormatter);
+        list.add(cometchatRichTextFormatter);
         return list;
     }
 

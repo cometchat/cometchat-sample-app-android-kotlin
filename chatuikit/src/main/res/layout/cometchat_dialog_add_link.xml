@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cometchat_add_link_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/cometchat_margin_6"
+    app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+    app:cardCornerRadius="@dimen/cometchat_radius_4"
+    app:cardElevation="@dimen/cometchat_spacing_2">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/cometchat_padding_6">
+
+        <!-- Header with Title and Close Button -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/cometchat_margin_6">
+
+            <TextView
+                android:id="@+id/cometchat_dialog_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/cometchat_add_link"
+                android:textAppearance="?attr/cometchatTextAppearanceHeading2Bold"
+                android:textColor="?attr/cometchatTextColorPrimary" />
+
+            <ImageButton
+                android:id="@+id/cometchat_close_button"
+                android:layout_width="@dimen/cometchat_24dp"
+                android:layout_height="@dimen/cometchat_24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cometchat_close"
+                android:src="@drawable/cometchat_ic_close"
+                app:tint="?attr/cometchatIconTintSecondary" />
+
+        </RelativeLayout>
+
+        <!-- Text Input Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cometchat_text_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/cometchat_margin_4"
+            android:hint="@string/cometchat_text"
+            app:boxCornerRadiusBottomEnd="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusBottomStart="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusTopEnd="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusTopStart="@dimen/cometchat_radius_2"
+            app:boxStrokeColor="?attr/cometchatStrokeColorDefault"
+            app:hintTextColor="?attr/cometchatTextColorSecondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/cometchat_text_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
+                android:textColor="?attr/cometchatTextColorPrimary" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Link Input Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cometchat_link_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/cometchat_margin_6"
+            android:hint="@string/cometchat_link"
+            app:boxCornerRadiusBottomEnd="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusBottomStart="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusTopEnd="@dimen/cometchat_radius_2"
+            app:boxCornerRadiusTopStart="@dimen/cometchat_radius_2"
+            app:boxStrokeColor="?attr/cometchatStrokeColorDefault"
+            app:hintTextColor="?attr/cometchatTextColorSecondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/cometchat_link_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
+                android:textColor="?attr/cometchatTextColorPrimary" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cometchat_cancel_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cometchat_margin_2"
+                android:layout_weight="1"
+                android:text="@string/cometchat_cancel"
+                android:textAllCaps="false"
+                android:textAppearance="?attr/cometchatTextAppearanceButtonMedium"
+                android:textColor="?attr/cometchatTextColorPrimary"
+                app:backgroundTint="?attr/cometchatBackgroundColor1"
+                app:cornerRadius="@dimen/cometchat_radius_2"
+                app:strokeColor="?attr/cometchatStrokeColorDefault"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cometchat_save_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/cometchat_margin_2"
+                android:layout_weight="1"
+                android:text="@string/cometchat_save"
+                android:textAllCaps="false"
+                android:textAppearance="?attr/cometchatTextAppearanceButtonMedium"
+                android:textColor="?attr/cometchatTextColorWhite"
+                android:stateListAnimator="@null"
+                app:backgroundTint="?attr/cometchatPrimaryColor"
+                app:cornerRadius="@dimen/cometchat_radius_2"
+                app:elevation="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

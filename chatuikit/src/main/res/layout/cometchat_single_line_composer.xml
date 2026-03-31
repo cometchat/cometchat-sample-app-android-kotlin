@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Header View Slot -->
+    <FrameLayout
+        android:id="@+id/header_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <!-- Suggestion List (for mentions) -->
+    <com.cometchat.chatuikit.shared.views.suggestionlist.CometChatSuggestionList
+        android:id="@+id/suggestion_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/cometchat_margin_2"
+        android:layout_marginEnd="@dimen/cometchat_margin_2"
+        android:layout_marginBottom="@dimen/cometchat_margin_2"
+        android:minHeight="@dimen/cometchat_56dp"
+        android:visibility="gone" />
+
+    <!-- Main Compose Box Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/compose_box_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/cometchat_margin_2"
+        android:layout_marginEnd="@dimen/cometchat_margin_2"
+        android:layout_marginBottom="@dimen/cometchat_margin_2"
+        app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+        app:cardCornerRadius="@dimen/cometchat_radius_2"
+        app:cardElevation="0dp"
+        app:strokeColor="?attr/cometchatStrokeColorLight"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:id="@+id/compose_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Edit/Reply Preview -->
+            <include
+                android:id="@+id/edit_preview_layout"
+                layout="@layout/cometchat_edit_message_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/cometchat_margin_1"
+                android:visibility="gone" />
+
+            <!-- Message Preview (for replies) -->
+            <com.cometchat.chatuikit.shared.views.messagepreview.CometChatMessagePreview
+                android:id="@+id/message_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <!-- Mention Limit Info Banner -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/mention_limit_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/cometchat_margin_1"
+                android:visibility="gone"
+                app:cardBackgroundColor="?attr/cometchatErrorColor"
+                app:cardCornerRadius="@dimen/cometchat_radius_1"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/cometchat_padding_2">
+
+                    <ImageView
+                        android:id="@+id/mention_info_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/cometchat_ic_info"
+                        app:tint="?attr/cometchatTextColorWhite" />
+
+                    <TextView
+                        android:id="@+id/mention_info_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/cometchat_margin_2"
+                        android:layout_weight="1"
+                        android:text="cometchat_mention_limit_message"
+                        android:textColor="?attr/cometchatTextColorWhite"
+                        android:textSize="12sp" />
+
+                    <ImageView
+                        android:id="@+id/mention_banner_close"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="cometchat_close"
+                        android:src="@drawable/cometchat_ic_close"
+                        app:tint="?attr/cometchatTextColorWhite" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Input Row -->
+            <LinearLayout
+                android:id="@+id/input_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/cometchat_56dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp">
+
+                <!-- Attachment Button -->
+                <ImageView
+                    android:id="@+id/btn_attachment"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/cometchat_margin_2"
+                    android:background="@null"
+                    android:stateListAnimator="@null"
+                    android:contentDescription="cometchat_attachment"
+                    android:padding="8dp"
+                    android:src="@drawable/cometchat_ic_add"
+                    app:tint="?attr/cometchatIconTintSecondary" />
+
+                <!-- Input Field -->
+                <com.cometchat.chatuikit.shared.views.messageinput.CometChatEditText
+                    android:id="@+id/input_field"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Type your message..."
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:maxLines="5"
+                    android:minHeight="40dp"
+                    android:paddingStart="@dimen/cometchat_padding_2"
+                    android:paddingEnd="@dimen/cometchat_padding_2"
+                    android:textColor="?attr/cometchatTextColorPrimary"
+                    android:textColorHint="?attr/cometchatTextColorSecondary"
+                    android:textSize="14sp"
+                    android:privateImeOptions="nm,com.google.android.inputmethod.latin.noMicrophoneKey" />
+
+                <!-- Auxiliary Buttons Container -->
+                <LinearLayout
+                    android:id="@+id/auxiliary_buttons_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Sticker Button -->
+                    <ImageView
+                        android:id="@+id/btn_sticker"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@null"
+                        android:contentDescription="cometchat_sticker"
+                        android:padding="8dp"
+                        android:src="@drawable/cometchat_ic_sticker"
+                        android:visibility="visible"
+                        app:tint="?attr/cometchatIconTintSecondary" />
+
+                    <!-- AI Button -->
+                    <ImageView
+                        android:id="@+id/btn_ai"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@null"
+                        android:contentDescription="cometchat_ai"
+                        android:padding="8dp"
+                        android:src="@drawable/cometchat_ic_ai"
+                        android:visibility="gone"
+                        app:tint="?attr/cometchatIconTintSecondary" />
+                </LinearLayout>
+
+                <!-- Voice Recording Button -->
+                <ImageView
+                    android:id="@+id/btn_voice_recording"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@null"
+                    android:contentDescription="cometchat_voice_recording"
+                    android:padding="8dp"
+                    android:src="@drawable/cometchat_ic_mic"
+                    app:tint="?attr/cometchatIconTintSecondary" />
+
+                <!-- Send Button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/send_button_card"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="@dimen/cometchat_margin_3"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="@dimen/cometchat_radius_max"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@android:color/transparent"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:id="@+id/btn_send"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:contentDescription="@string/cometchat_send"
+                        android:padding="0dp"
+                        android:src="@drawable/cometchat_ic_send_inactive" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- Rich Text Toolbar -->
+            <com.cometchat.chatuikit.shared.views.richtexttoolbar.CometChatRichTextToolbar
+                android:id="@+id/rich_text_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <!-- Inline Audio Recorder (hidden by default) -->
+            <com.cometchat.chatuikit.shared.views.inlineaudiorecorder.CometChatInlineAudioRecorder
+                android:id="@+id/inline_audio_recorder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Footer View Slot -->
+    <FrameLayout
+        android:id="@+id/footer_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <!-- Sticker Keyboard Container (shows inline like soft keyboard) -->
+    <FrameLayout
+        android:id="@+id/sticker_keyboard_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cometchat_296dp"
+        android:visibility="gone" />
+</LinearLayout>

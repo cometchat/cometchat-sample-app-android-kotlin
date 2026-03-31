@@ -113,4 +113,7 @@
     <attr name="cometchatFontMedium" format="reference" />
     <attr name="cometchatFontRegular" format="reference" />
 
+    <!-- Component Styles -->
+    <attr name="cometchatInlineAudioRecorderStyle" format="reference" />
+
 </resources>

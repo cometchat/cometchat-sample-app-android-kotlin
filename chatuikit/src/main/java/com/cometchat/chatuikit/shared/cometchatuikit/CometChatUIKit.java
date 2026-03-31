@@ -25,7 +25,7 @@ import com.cometchat.chatuikit.calls.CallingExtension;
 import com.cometchat.chatuikit.extensions.DefaultExtensions;
 import com.cometchat.chatuikit.shared.constants.MessageStatus;
 import com.cometchat.chatuikit.shared.framework.ChatConfigurator;
-import com.cometchat.chatuikit.shared.framework.DataSource;
+import com.cometchat.chatuikit.shared.framework.DataSource;   
 import com.cometchat.chatuikit.shared.framework.ExtensionsDataSource;
 import com.cometchat.chatuikit.shared.models.interactivemessage.CardMessage;
 import com.cometchat.chatuikit.shared.models.interactivemessage.CustomInteractiveMessage;
@@ -372,7 +372,12 @@ public final class CometChatUIKit {
             .isEmpty() ? System.currentTimeMillis() + "" : mediaMessage.getMuid());
         mediaMessage.setSentAt(mediaMessage.getSentAt() == 0 ? System.currentTimeMillis() / 1000 : mediaMessage.getSentAt());
 
+        // Cache waveform amplitudes by MUID before stripping from metadata
+        // This allows AudioBubble to retrieve them even after we remove from metadata
+        com.cometchat.chatuikit.shared.views.waveform.WaveformCache.cacheAndStripFromMetadata(mediaMessage);
+
         onMessageSent(mediaMessage, MessageStatus.IN_PROGRESS);
+        
         CometChat.sendMediaMessage(mediaMessage, new CometChat.CallbackListener<MediaMessage>() {
             @Override
             public void onSuccess(MediaMessage mediaMessage) {

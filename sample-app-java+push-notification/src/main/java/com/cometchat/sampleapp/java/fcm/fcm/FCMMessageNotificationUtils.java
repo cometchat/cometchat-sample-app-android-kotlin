@@ -15,16 +15,20 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.StatusBarNotification;
+import android.text.Html;
+import android.text.Spanned;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
 
 import com.cometchat.chat.constants.CometChatConstants;
 import com.cometchat.chatuikit.logger.CometChatLogger;
+import com.cometchat.chatuikit.shared.spans.MarkdownConverter;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.utils.AppConstants;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -241,7 +245,9 @@ public class FCMMessageNotificationUtils {
                     Bundle extras = notification.getNotification().extras;
                     String UID = extras.getString(AppConstants.FCMConstants.KEY_UID);
                     if (UID != null && UID.equals(userId)) {
-                        String mText = (String) extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                        // Use toString() to handle both String and SpannableString (from formatted notifications)
+                        CharSequence charSeq = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                        String mText = charSeq != null ? charSeq.toString() : null;
                         if (isMessageDeleted) {
                             String originalMessage = existingNotificationMessages.get(currentMessageId);
                             if (originalMessage != null & mText != null)
@@ -323,11 +329,16 @@ public class FCMMessageNotificationUtils {
             AppConstants.FCMConstants.DEFAULT_NOTIFICATION_CHANNEL_ID
         );
 
+        // Format the message text for notification display
+        // Convert markdown to HTML for rich text formatting in notifications
+        String formattedContentText = formatNotificationText(fcmMessageDTO.getText());
+        String formattedBigText = formatNotificationText(currentText);
+
         mNotificationBuilder
             .setSmallIcon(R.drawable.ic_cometchat_notification)
             .setContentTitle(userName)
-            .setContentText(fcmMessageDTO.getText())
-            .setStyle(new NotificationCompat.BigTextStyle().bigText(currentText))
+            .setContentText(fromHtml(formattedContentText))
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(fromHtml(formattedBigText)))
             .setGroup(AppConstants.FCMConstants.GROUP_KEY)
             .setExtras(bundle)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -358,6 +369,39 @@ public class FCMMessageNotificationUtils {
             ));
         }
         return mNotificationBuilder;
+    }
+
+    /**
+     * Formats notification text by converting markdown to HTML.
+     * This enables rich text formatting (bold, italic, etc.) in notifications.
+     *
+     * @param text The raw text that may contain markdown formatting.
+     * @return HTML-formatted text suitable for notification display.
+     */
+    private static String formatNotificationText(String text) {
+        if (text == null || text.isEmpty()) {
+            return "";
+        }
+        return MarkdownConverter.toHtml(text);
+    }
+
+    /**
+     * Converts HTML string to Spanned for notification display.
+     * Handles API level differences for Html.fromHtml().
+     *
+     * @param html The HTML string to convert.
+     * @return Spanned text for notification display.
+     */
+    @SuppressWarnings("deprecation")
+    private static Spanned fromHtml(String html) {
+        if (html == null || html.isEmpty()) {
+            return new android.text.SpannedString("");
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
     }
 
     private static NotificationCompat.Action handleReplyFromNotification(

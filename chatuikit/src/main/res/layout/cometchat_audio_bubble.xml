@@ -52,13 +52,19 @@
         android:orientation="vertical">
 
         <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/animationView"
+            android:id="@+id/lottie_animation"
             android:layout_width="match_parent"
             android:layout_height="@dimen/cometchat_24dp"
             android:scaleType="fitXY"
+            android:visibility="gone"
             app:lottie_autoPlay="false"
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/cometchat_wave_animation" />
+
+        <com.cometchat.chatuikit.shared.views.waveform.AudioWaveformVisualizer
+            android:id="@+id/waveform_visualizer"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_32dp" />
 
         <TextView
             android:id="@+id/tv_subtitle"

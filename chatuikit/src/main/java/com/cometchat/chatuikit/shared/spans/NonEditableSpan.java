@@ -86,5 +86,13 @@ public class NonEditableSpan extends ClickableSpan {
 
         if (textAppearance.getBackgroundColor() != 0)
             ds.bgColor = (Utils.applyColorWithAlphaValue(textAppearance.getBackgroundColor(), 51));
+
+        // Explicitly clear text decorations that may bleed through from
+        // overlapping RichTextFormatSpan instances (e.g., UnderlineFormatSpan).
+        // Even when removeFormatsFromMentions() splits format spans around the
+        // mention, Android may still apply the decoration if the span boundaries
+        // overlap by even one position. Clearing here acts as a defensive measure.
+        ds.setUnderlineText(false);
+        ds.setStrikeThruText(false);
     }
 }
