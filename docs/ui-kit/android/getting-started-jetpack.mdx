@@ -1,0 +1,257 @@
+---
+title: "Getting Started With Jetpack Compose UI Kit"
+sidebarTitle: "Jetpack Compose"
+description: "Step-by-step guide to integrate the CometChat Jetpack Compose UI Kit into your Android app."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Package | `com.cometchat:chat-uikit-compose` |
+| UI Layer | Jetpack Compose (Material 3) |
+| Init | `CometChatUIKit.init(context, UIKitSettings, callback)` — must resolve before `login()` |
+| Login | `CometChatUIKit.login("UID", callback)` — must resolve before rendering components |
+| Order | `init()` → `login()` → render. Breaking this order = blank screen |
+| Auth Key | Dev/testing only. Use Auth Token in production |
+| Calling | Optional. Add `com.cometchat:calls-sdk-android` to enable voice/video |
+| Min SDK | Android 9.0 (API 28) |
+
+</Accordion>
+
+This guide walks you through integrating the CometChat Jetpack Compose UI Kit into an Android app. All UI components are native Compose composables built with Material 3. By the end you'll have a working chat UI.
+
+---
+
+## Prerequisites
+
+You need three things from the [CometChat Dashboard](https://app.cometchat.com/):
+
+| Credential | Where to find it |
+| --- | --- |
+| App ID | Dashboard → Your App → Credentials |
+| Auth Key | Dashboard → Your App → Credentials |
+| Region | Dashboard → Your App → Credentials (e.g. `us`, `eu`, `in`) |
+
+You also need:
+- Android Studio (Hedgehog or later recommended)
+- An Android emulator or physical device running Android 9.0 (API 28) or higher
+- Kotlin configured with Compose compiler plugin
+- Gradle plugin 8.0+ with Kotlin DSL
+
+<Warning>
+Auth Key is for development only. In production, generate Auth Tokens server-side via the [REST API](https://api-explorer.cometchat.com/) and use `loginWithAuthToken()`. Never ship Auth Keys in client code.
+</Warning>
+
+---
+
+## Step 1 — Create an Android Project
+
+1. Open Android Studio and start a new project.
+2. Choose Empty Activity (Compose) as the project template.
+3. Set minimum API level to 28 or higher.
+
+---
+
+## Step 2 — Install Dependencies
+
+### Add the CometChat Repository
+
+Add the CometChat Maven repository to your `settings.gradle.kts`:
+
+```kotlin settings.gradle.kts lines
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://dl.cloudsmith.io/public/cometchat/cometchat/maven/")
+    }
+}
+```
+
+### Add Dependencies
+
+
+Open your app-level `build.gradle.kts` and enable Compose, then add the dependencies:
+
+```kotlin build.gradle.kts lines
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    // ...
+    buildFeatures {
+        compose = true
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+    // CometChat Jetpack Compose UI Kit
+    implementation("com.cometchat:chat-uikit-compose:latest")
+
+    // (Optional) Voice/video calling
+    implementation("com.cometchat:calls-sdk-android:latest")
+}
+```
+
+---
+
+## Step 3 — Initialize and Login
+
+Create your `MainActivity.kt` with the CometChat initialization and login flow. Since Compose uses a declarative approach, we track the auth state and render UI conditionally:
+
+```kotlin MainActivity.kt lines
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.UIKitSettings
+
+class MainActivity : ComponentActivity() {
+
+    private val TAG = "MainActivity"
+
+    private val appID = "APP_ID"       // Replace with your App ID
+    private val region = "REGION"      // Replace with your App Region
+    private val authKey = "AUTH_KEY"   // Replace with your Auth Key
+
+    private var isReady by mutableStateOf(false)
+    private var error by mutableStateOf<String?>(null)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        val uiKitSettings = UIKitSettings.UIKitSettingsBuilder()
+            .setRegion(region)
+            .setAppId(appID)
+            .setAuthKey(authKey)
+            .subscribePresenceForAllUsers()
+            .build()
+
+        CometChatUIKit.init(this, uiKitSettings, object : CometChat.CallbackListener<String?>() {
+            override fun onSuccess(s: String?) {
+                Log.d(TAG, "Initialization completed successfully")
+                loginUser()
+            }
+
+            override fun onError(e: CometChatException?) {
+                error = "Init failed: ${e?.message}"
+            }
+        })
+
+        setContent {
+            when {
+                error != null -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(error ?: "Unknown error")
+                    }
+                }
+                !isReady -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                else -> {
+                    ChatApp()
+                }
+            }
+        }
+    }
+
+    private fun loginUser() {
+        CometChatUIKit.login("cometchat-uid-1", object : CometChat.CallbackListener<User>() {
+            override fun onSuccess(user: User) {
+                Log.d(TAG, "Login successful: ${user.uid}")
+                isReady = true
+            }
+
+            override fun onError(e: CometChatException) {
+                error = "Login failed: ${e.message}"
+            }
+        })
+    }
+}
+```
+
+<Warning>
+`init()` must resolve before you call `login()`. Calling `login()` before init completes will fail silently.
+</Warning>
+
+---
+
+## Step 4 — Choose a Chat Experience
+
+Integrate a conversation view that suits your app's UX. Each option below includes a step-by-step guide.
+
+### Conversation List + Message View
+
+Sequential navigation — conversation list as the entry point, tap a conversation to open a full-screen message view.
+
+<Card title="Build Conversation List + Message View" href="/ui-kit/android/v6/conversation-message-view" icon="comments">
+  Step-by-step guide to build this layout with Jetpack Compose
+</Card>
+
+---
+
+### One-to-One / Group Chat
+
+Single chat window — no sidebar. Loads a specific user or group chat directly. Ideal for support chat, direct messages, or notification-driven flows.
+
+<Card title="Build One-to-One / Group Chat" href="/ui-kit/android/v6/one-to-one-chat" icon="message">
+  Step-by-step guide to build this layout
+</Card>
+
+---
+
+### Tab-Based Chat
+
+Bottom navigation with tabs for Chats, Calls, Users, and Settings.
+
+<Card title="Build Tab-Based Chat" href="/ui-kit/android/v6/tab-based-chat" icon="table-columns">
+  Step-by-step guide to build this layout
+</Card>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Browse all available UI Kit components
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles
+  </Card>
+  <Card title="Core Features" icon="comments" href="/ui-kit/android/v6/core-features">
+    Chat features included out of the box
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/ui-kit/android/v6/troubleshooting">
+    Common issues and fixes
+  </Card>
+</CardGroup>

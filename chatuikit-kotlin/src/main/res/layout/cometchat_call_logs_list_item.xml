@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/cometchat_padding_4"
+        android:paddingTop="@dimen/cometchat_padding_3"
+        android:paddingEnd="@dimen/cometchat_padding_4"
+        android:paddingBottom="@dimen/cometchat_padding_3">
+
+        <!-- Leading View Container (Avatar) -->
+        <FrameLayout
+            android:id="@+id/leading_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/cometchat_48dp"
+                android:layout_height="@dimen/cometchat_48dp" />
+
+        </FrameLayout>
+
+        <!-- Content Container -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/cometchat_margin_3"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Title View Container -->
+            <FrameLayout
+                android:id="@+id/title_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="John Doe" />
+
+            </FrameLayout>
+
+            <!-- Subtitle View Container (Direction Icon + Date) -->
+            <FrameLayout
+                android:id="@+id/subtitle_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/cometchat_margin_1">
+
+                <LinearLayout
+                    android:id="@+id/default_subtitle_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Direction Icon (Incoming/Outgoing/Missed) -->
+                    <ImageView
+                        android:id="@+id/iv_direction_icon"
+                        android:layout_width="@dimen/cometchat_16dp"
+                        android:layout_height="@dimen/cometchat_16dp"
+                        android:importantForAccessibility="no"
+                        tools:src="@drawable/cometchat_ic_incoming_call" />
+
+                    <!-- Date/Time -->
+                    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
+                        android:id="@+id/date_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/cometchat_margin_1"
+                        tools:text="Yesterday, 2:30 PM" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <!-- Trailing View Container (Call Type Icon) -->
+        <FrameLayout
+            android:id="@+id/trailing_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/cometchat_margin_3">
+
+            <ImageView
+                android:id="@+id/iv_call_type_icon"
+                android:layout_width="@dimen/cometchat_24dp"
+                android:layout_height="@dimen/cometchat_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/cometchat_audio_call"
+                tools:src="@drawable/cometchat_ic_call_voice" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Separator -->
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/cometchat_margin_4"
+        android:layout_marginEnd="@dimen/cometchat_margin_4" />
+
+</LinearLayout>

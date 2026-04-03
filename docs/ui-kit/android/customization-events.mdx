@@ -1,0 +1,227 @@
+---
+title: "Events & Callbacks"
+description: "Handle user interaction events, selection mode, and global UI Kit events."
+---
+
+The UI Kit provides two levels of event handling: component-level callbacks set directly on a component, and global events via the `CometChatEvents` singleton using Kotlin `SharedFlow`.
+
+---
+
+## Component-Level Callbacks
+
+### Click Callbacks
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnItemClick { conversation ->
+    // Navigate to chat screen
+}
+
+conversations.setOnItemLongClick { conversation ->
+    // Show context menu
+}
+
+conversations.setOnBackPress {
+    // Handle back navigation
+}
+
+conversations.setOnSearchClick {
+    // Open search
+}
+
+conversations.setOnError { exception ->
+    Log.e("Conversations", "Error: ${exception.message}")
+}
+
+conversations.setOnLoad { list ->
+    Log.d("Conversations", "Loaded ${list.size} conversations")
+}
+
+conversations.setOnEmpty {
+    Log.d("Conversations", "No conversations")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onItemClick = { conversation ->
+        // Navigate to chat screen
+    },
+    onItemLongClick = { conversation ->
+        // Show context menu
+    },
+    onBackPress = {
+        // Handle back navigation
+    },
+    onSearchClick = {
+        // Open search
+    },
+    onError = { exception ->
+        Log.e("Conversations", "Error: ${exception.message}")
+    },
+    onLoad = { list ->
+        Log.d("Conversations", "Loaded ${list.size} conversations")
+    },
+    onEmpty = {
+        Log.d("Conversations", "No conversations")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Selection Mode
+
+Enable single or multi-select on list components:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Enable multi-select mode
+conversations.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+
+// Listen for selection changes
+conversations.setOnSelection { selectedList ->
+    updateToolbar(selectedList.size)
+}
+
+// Get selected items
+val selected = conversations.getSelectedConversations()
+
+// Clear selection
+conversations.clearSelection()
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    selectionMode = UIKitConstants.SelectionMode.MULTIPLE,
+    onSelection = { selectedList ->
+        updateToolbar(selectedList.size)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Global Events (CometChatEvents)
+
+Global events are emitted by UI Kit components when actions happen anywhere in the app. They use Kotlin `SharedFlow` for reactive, type-safe event distribution. Subscribe from any coroutine scope.
+
+### Event Flows
+
+| Flow | Sealed Class | Fires When |
+| --- | --- | --- |
+| `CometChatEvents.messageEvents` | `CometChatMessageEvent` | Messages sent, edited, deleted, reactions, typing |
+| `CometChatEvents.callEvents` | `CometChatCallEvent` | Calls initiated, accepted, rejected, ended |
+| `CometChatEvents.conversationEvents` | `CometChatConversationEvent` | Conversations deleted or updated |
+| `CometChatEvents.groupEvents` | `CometChatGroupEvent` | Groups created, updated, members changed |
+| `CometChatEvents.userEvents` | `CometChatUserEvent` | Users blocked/unblocked |
+| `CometChatEvents.uiEvents` | `CometChatUIEvent` | UI-level events (panels, dialogs) |
+
+### Subscribing to Events
+
+```kotlin lines
+import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.events.CometChatMessageEvent
+
+// Subscribe in a ViewModel or lifecycle-aware scope
+viewModelScope.launch {
+    CometChatEvents.messageEvents.collect { event ->
+        when (event) {
+            is CometChatMessageEvent.MessageSent -> {
+                // Handle sent message: event.message, event.status
+            }
+            is CometChatMessageEvent.MessageDeleted -> {
+                // Handle deleted message: event.message
+            }
+            is CometChatMessageEvent.MessageEdited -> {
+                // Handle edited message: event.message
+            }
+            is CometChatMessageEvent.ReactionAdded -> {
+                // Handle reaction: event.event
+            }
+            else -> { /* other message events */ }
+        }
+    }
+}
+```
+
+### Emitting Events
+
+```kotlin lines
+// Emit from anywhere — thread-safe
+CometChatEvents.emitMessageEvent(
+    CometChatMessageEvent.MessageSent(message, MessageStatus.SUCCESS)
+)
+
+CometChatEvents.emitCallEvent(
+    CometChatCallEvent.OutgoingCall(call)
+)
+
+CometChatEvents.emitConversationEvent(
+    CometChatConversationEvent.ConversationDeleted(conversation)
+)
+```
+
+### Key Event Types
+
+**Message Events:**
+
+| Event | Data |
+| --- | --- |
+| `MessageSent` | `message`, `status` |
+| `MessageEdited` | `message`, `status` |
+| `MessageDeleted` | `message` |
+| `MessageRead` | `message` |
+| `ReactionAdded` / `ReactionRemoved` | `event` (ReactionEvent) |
+| `TypingStarted` / `TypingEnded` | `indicator` (TypingIndicator) |
+| `MessagesDelivered` / `MessagesRead` | `receipt` (MessageReceipt) |
+
+**Call Events:**
+
+| Event | Data |
+| --- | --- |
+| `OutgoingCall` | `call` |
+| `CallAccepted` | `call` |
+| `CallRejected` | `call` |
+| `CallEnded` | `call` |
+
+**Conversation Events:**
+
+| Event | Data |
+| --- | --- |
+| `ConversationDeleted` | `conversation` |
+| `ConversationUpdated` | `conversation` |
+
+---
+
+## Component vs Global Events
+
+| Aspect | Component Callbacks | Global Events |
+| --- | --- | --- |
+| Scope | Single component instance | App-wide |
+| Registration | `setOnItemClick {}` or composable parameter | `CometChatEvents.*.collect {}` |
+| Use case | Handle user interaction on a specific screen | Cross-component coordination |
+| Example | Tap a conversation → navigate | Message sent → update conversation list |
+
+---
+
+## Related
+
+- [Events Reference](/ui-kit/android/v6/events) — Full list of all event types.
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — SDK Listeners vs UIKit Events distinction.

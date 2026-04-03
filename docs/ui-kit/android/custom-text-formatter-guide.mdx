@@ -1,0 +1,174 @@
+---
+title: "Custom Text Formatter"
+sidebarTitle: "Custom Text Formatter"
+description: "Extend CometChatTextFormatter to build custom inline text patterns with tracking characters and suggestion lists."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key class | `CometChatTextFormatter` (abstract base class for custom formatters) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login("UID")` |
+| Purpose | Extend to create custom inline text patterns with tracking characters, suggestion lists, and span formatting |
+| Features | Tracking character activation, suggestion list, span formatting per context (composer, bubbles, conversations), pre-send hooks |
+| Sample app | [GitHub](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin) |
+| Related | [Mentions Formatter](/ui-kit/android/v6/mentions-formatter-guide) \| [ShortCut Formatter](/ui-kit/android/v6/shortcut-formatter-guide) \| [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+`CometChatTextFormatter` is an abstract class for formatting text in the message composer and message bubbles. Extend it to build custom formatters — hashtags, shortcuts, or any pattern triggered by a tracking character.
+
+| Capability | Description |
+| --- | --- |
+| Tracking character | Activates the formatter when the user types a specific character (e.g., `#`, `!`) |
+| Suggestion list | Populates a dropdown of `SuggestionItem` objects as the user types |
+| Span formatting | Applies `SpannableStringBuilder` spans per context: composer, left/right bubbles, conversations |
+| Pre-send hook | `handlePreMessageSend` lets you modify the message before it's sent |
+| Component integration | Plugs into any component via `setTextFormatters()` |
+
+---
+
+## Steps
+
+### 1. Create a class extending CometChatTextFormatter
+
+Pass your tracking character to the superclass constructor.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+class HashTagFormatter : CometChatTextFormatter('#') {
+    private val suggestions: MutableList<SuggestionItem> = ArrayList()
+}
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+// Same class — formatters are shared between both modules
+class HashTagFormatter : CometChatTextFormatter('#') {
+    private val suggestions: MutableList<SuggestionItem> = ArrayList()
+}
+```
+</Tab>
+</Tabs>
+
+### 2. Override the search method
+
+Called when the user types after the tracking character. Match input against your data and update the suggestion list.
+
+```kotlin lines
+override fun search(context: Context, queryString: String?) {
+    suggestions.clear()
+    val query = "#${queryString ?: ""}"
+    // Match against your hashtag data source
+    val matchingTags = getMatchingTags(query)
+    for (tag in matchingTags) {
+        val item = SuggestionItem("", tag, null, null, tag, null, null)
+        item.isHideLeadingIcon = true
+        suggestions.add(item)
+    }
+    setSuggestionItemList(suggestions)
+}
+```
+
+### 3. Override onScrollToBottom
+
+Required by the base class. Implement pagination logic or leave empty.
+
+```kotlin
+override fun onScrollToBottom() {
+    // Load more suggestions if needed
+}
+```
+
+### 4. Override span formatting methods (optional)
+
+Customize how matched text renders in different contexts using `SpannableStringBuilder`.
+
+```kotlin lines
+override fun prepareLeftMessageBubbleSpan(
+    context: Context, baseMessage: BaseMessage, spannable: SpannableStringBuilder
+): SpannableStringBuilder? {
+    // Apply custom spans for incoming message bubbles
+    return applyHashTagSpans(spannable, Color.parseColor("#5dff05"))
+}
+
+override fun prepareRightMessageBubbleSpan(
+    context: Context, baseMessage: BaseMessage, spannable: SpannableStringBuilder
+): SpannableStringBuilder? {
+    // Apply custom spans for outgoing message bubbles
+    return applyHashTagSpans(spannable, Color.parseColor("#30b3ff"))
+}
+```
+
+### 5. Integrate with a component
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+import com.cometchat.uikit.core.CometChatUIKit
+
+val textFormatters = CometChatUIKit.getDataSource().getTextFormatters(this, messageComposer.additionParameter)
+textFormatters.add(HashTagFormatter())
+messageComposer.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.core.CometChatUIKit
+
+// In your composable or ViewModel setup
+val textFormatters = CometChatUIKit.getDataSource().getTextFormatters(context, additionParameter)
+textFormatters.add(HashTagFormatter())
+
+CometChatMessageComposer(
+    user = user,
+    textFormatters = textFormatters
+)
+```
+</Tab>
+</Tabs>
+
+Pass the same list to `CometChatMessageList` and `CometChatConversations` via their `setTextFormatters()` methods to apply formatting across all contexts.
+
+---
+
+## Methods Reference
+
+| Method | Description |
+| --- | --- |
+| `search(Context, String)` | Abstract — called when user types after the tracking character. Update the suggestion list here. |
+| `onScrollToBottom()` | Abstract — called when the suggestion list scrolls to the bottom. Implement pagination or leave empty. |
+| `onItemClick(Context, SuggestionItem, User, Group)` | Called when a suggestion item is selected. Override to customize insertion behavior. |
+| `handlePreMessageSend(Context, BaseMessage)` | Called before a message is sent. Override to modify the message (e.g., add metadata). |
+| `prepareLeftMessageBubbleSpan(Context, BaseMessage, SpannableStringBuilder)` | Override to format text in incoming message bubbles. |
+| `prepareRightMessageBubbleSpan(Context, BaseMessage, SpannableStringBuilder)` | Override to format text in outgoing message bubbles. |
+| `prepareComposerSpan(Context, BaseMessage, SpannableStringBuilder)` | Override to format text in the message composer. |
+| `prepareConversationSpan(Context, BaseMessage, SpannableStringBuilder)` | Override to format text in the conversations list preview. |
+| `setSuggestionItemList(List<SuggestionItem>)` | Updates the suggestion dropdown with new items. |
+| `setDisableSuggestions(boolean)` | Disables the suggestion dropdown entirely. (`protected` — accessible from subclasses only.) |
+| `setInfoText(String)` | Sets informational text displayed above the suggestion list. |
+| `setInfoVisibility(boolean)` | Toggles visibility of the info text. |
+| `setShowLoadingIndicator(boolean)` | Shows/hides a loading spinner in the suggestion dropdown. |
+| `getTrackingCharacter()` | Returns the tracking character passed to the constructor. |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Mentions Formatter" icon="at" href="/ui-kit/android/v6/mentions-formatter-guide">
+    Built-in @mention formatting with styled tokens
+  </Card>
+  <Card title="ShortCut Formatter" icon="bolt" href="/ui-kit/android/v6/shortcut-formatter-guide">
+    Shortcut text expansion via the message-shortcuts extension
+  </Card>
+  <Card title="All Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Browse all feature and formatter guides
+  </Card>
+  <Card title="Sample App" icon="github" href="https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin">
+    Full working sample application on GitHub
+  </Card>
+</CardGroup>

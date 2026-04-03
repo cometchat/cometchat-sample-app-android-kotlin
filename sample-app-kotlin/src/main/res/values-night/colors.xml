@@ -1,8 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Dark Mode Colors for CometChat Sample App
+    
+    This file contains color overrides for dark mode.
+    These colors are automatically used when the system is in dark mode.
+    
+    ## Dark Mode Design Guidelines:
+    1. Use lighter text on darker backgrounds
+    2. Reduce contrast slightly to avoid eye strain
+    3. Use desaturated colors for large surfaces
+    4. Keep accent colors vibrant but not too bright
+    
+    Validates: Requirements 13.1, 13.5
+-->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="progress_bar_color">#FFFFFF</color>
-    <color name="cometchat_calling_background">#333333</color>
-
+    <!-- ================================================================== -->
+    <!-- PRIMARY COLORS (Dark Mode)                                          -->
+    <!-- Lighter variants for visibility on dark backgrounds                -->
+    <!-- ================================================================== -->
+    
+    <color name="primary">#CFBCFF</color>
+    <color name="primary_variant">#B8A0FF</color>
+    <color name="on_primary">#381E72</color>
+    
+    <color name="primary_container">#4F378B</color>
+    <color name="on_primary_container">#EADDFF</color>
+    
+    <!-- ================================================================== -->
+    <!-- SECONDARY COLORS (Dark Mode)                                        -->
+    <!-- ================================================================== -->
+    
+    <color name="secondary">#CCC2DC</color>
+    <color name="secondary_variant">#B8AEC8</color>
+    <color name="on_secondary">#332D41</color>
+    
+    <color name="secondary_container">#4A4458</color>
+    <color name="on_secondary_container">#E8DEF8</color>
+    
+    <!-- ================================================================== -->
+    <!-- TERTIARY COLORS (Dark Mode)                                         -->
+    <!-- ================================================================== -->
+    
+    <color name="tertiary">#EFB8C8</color>
+    <color name="on_tertiary">#492532</color>
+    <color name="tertiary_container">#633B48</color>
+    <color name="on_tertiary_container">#FFD8E4</color>
+    
+    <!-- ================================================================== -->
+    <!-- BACKGROUND AND SURFACE COLORS (Dark Mode)                           -->
+    <!-- Dark backgrounds with light text                                   -->
+    <!-- ================================================================== -->
+    
+    <color name="background">#1C1B1F</color>
+    <color name="on_background">#E6E1E5</color>
+    <color name="surface">#1C1B1F</color>
+    <color name="on_surface">#E6E1E5</color>
+    <color name="surface_variant">#49454F</color>
+    <color name="on_surface_variant">#CAC4D0</color>
+    
+    <!-- ================================================================== -->
+    <!-- STATUS COLORS (Dark Mode)                                           -->
+    <!-- Slightly adjusted for dark backgrounds                             -->
+    <!-- ================================================================== -->
+    
+    <color name="error">#F2B8B5</color>
+    <color name="on_error">#601410</color>
+    <color name="error_container">#8C1D18</color>
+    <color name="on_error_container">#F9DEDC</color>
+    
+    <color name="success">#4ADE80</color>
+    <color name="warning">#FBBF24</color>
+    <color name="info">#60A5FA</color>
+    
+    <!-- ================================================================== -->
+    <!-- OUTLINE COLORS (Dark Mode)                                          -->
+    <!-- ================================================================== -->
+    
+    <color name="outline">#938F99</color>
+    <color name="outline_variant">#49454F</color>
+    
+    <!-- ================================================================== -->
+    <!-- UTILITY COLORS (Dark Mode)                                          -->
+    <!-- ================================================================== -->
+    
+    <color name="loading_overlay_background">#80000000</color>
+    <color name="online_status">#4ADE80</color>
+    <color name="offline_status">#6B7280</color>
 </resources>

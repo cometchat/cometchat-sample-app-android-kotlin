@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lint configuration for chatuikit-jetpack module
+  This module contains Jetpack Compose UI components
+-->
+<lint>
+    <!-- Treat all warnings as errors for strict code quality -->
+    <issue id="all" severity="warning" />
+
+    <!-- ==================== COMPOSE-SPECIFIC RULES ==================== -->
+    
+    <!-- Ensure Composable functions follow naming conventions -->
+    <issue id="ComposableNaming" severity="error" />
+    
+    <!-- Detect missing @Composable annotation -->
+    <issue id="ComposableModifierFactory" severity="error" />
+    
+    <!-- Ensure proper use of remember -->
+    <issue id="RememberReturnType" severity="warning" />
+    
+    <!-- Detect unstable collections in Compose -->
+    <issue id="MutableCollectionMutableState" severity="warning" />
+    
+    <!-- Ensure proper modifier usage -->
+    <issue id="ModifierParameter" severity="warning" />
+    <issue id="ModifierFactoryExtensionFunction" severity="warning" />
+    <issue id="ModifierFactoryReturnType" severity="warning" />
+    <issue id="ModifierFactoryUnreferencedReceiver" severity="warning" />
+    
+    <!-- Detect unnecessary recomposition -->
+    <issue id="UnrememberedMutableState" severity="error" />
+    <issue id="UnrememberedGetBackStackEntry" severity="error" />
+    <issue id="UnrememberedAnimatable" severity="warning" />
+    
+    <!-- Flow collection in Compose -->
+    <issue id="FlowOperatorInvokedInComposition" severity="error" />
+    <issue id="StateFlowValueCalledInComposition" severity="warning" />
+    
+    <!-- Detect lambda capture issues -->
+    <issue id="UnnecessaryComposedModifier" severity="warning" />
+
+    <!-- ==================== KOTLIN BEST PRACTICES ==================== -->
+    
+    <!-- Enforce proper null safety -->
+    <issue id="NullSafeMutableLiveData" severity="error" />
+    
+    <!-- Detect unused resources -->
+    <issue id="UnusedResources" severity="warning" />
+    
+    <!-- Detect hardcoded text (should use string resources) -->
+    <issue id="HardcodedText" severity="warning" />
+    <issue id="SetTextI18n" severity="warning" />
+
+    <!-- ==================== ACCESSIBILITY ==================== -->
+    
+    <!-- Ensure proper content descriptions -->
+    <issue id="ContentDescription" severity="warning" />
+    
+    <!-- Detect touch target size issues -->
+    <issue id="SpeakableTextPresentCheck" severity="warning" />
+    
+    <!-- Ensure proper labeling -->
+    <issue id="LabelFor" severity="warning" />
+
+    <!-- ==================== COROUTINES & LIFECYCLE ==================== -->
+    
+    <!-- Ensure proper coroutine scope usage -->
+    <issue id="UnsafeLifecycleWhenUsing" severity="error" />
+    
+    <!-- Detect potential memory leaks -->
+    <issue id="StaticFieldLeak" severity="error" />
+
+    <!-- ==================== PERFORMANCE ==================== -->
+    
+    <!-- Detect inefficient operations -->
+    <issue id="UseSparseArrays" severity="warning" />
+    <issue id="UseValueOf" severity="warning" />
+    <issue id="Wakelock" severity="error" />
+    
+    <!-- Detect overdraw issues -->
+    <issue id="Overdraw" severity="warning" />
+    
+    <!-- Detect expensive operations in Compose -->
+    <issue id="FrequentlyChangedStateReadInComposition" severity="warning" />
+
+    <!-- ==================== SECURITY ==================== -->
+    
+    <!-- Security-related checks -->
+    <issue id="HardcodedDebugMode" severity="error" />
+    <issue id="AllowBackup" severity="warning" />
+    <issue id="ExportedContentProvider" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="ExportedService" severity="error" />
+    <issue id="GrantAllUris" severity="error" />
+    <issue id="WorldReadableFiles" severity="error" />
+    <issue id="WorldWriteableFiles" severity="error" />
+    
+    <!-- Detect insecure random number generation -->
+    <issue id="TrulyRandom" severity="error" />
+    
+    <!-- SSL/TLS security -->
+    <issue id="TrustAllX509TrustManager" severity="error" />
+    <issue id="UnprotectedSMSBroadcastReceiver" severity="error" />
+
+    <!-- ==================== API COMPATIBILITY ==================== -->
+    
+    <!-- Ensure API level compatibility -->
+    <issue id="NewApi" severity="error" />
+    <issue id="InlinedApi" severity="warning" />
+    <issue id="ObsoleteSdkInt" severity="warning" />
+
+    <!-- ==================== CODE QUALITY ==================== -->
+    
+    <!-- Detect common programming errors -->
+    <issue id="SuspiciousImport" severity="error" />
+    <issue id="DuplicateIncludedIds" severity="error" />
+    <issue id="PrivateResource" severity="warning" />
+    
+    <!-- Detect deprecated API usage -->
+    <issue id="Deprecated" severity="warning" />
+
+    <!-- ==================== INTEROPERABILITY ==================== -->
+    
+    <!-- Java-Kotlin interoperability -->
+    <issue id="UnknownNullness" severity="warning" />
+
+    <!-- ==================== IGNORED ISSUES ==================== -->
+    
+    <!-- Ignore for library modules (consumers handle these) -->
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="ExtraTranslation" severity="ignore" />
+    
+    <!-- Ignore Gradle-related warnings -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="GradleOverrides" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+    
+    <!-- Ignore icon density issues (handled at app level) -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+</lint>

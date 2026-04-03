@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- External storage path (root directory of external storage) -->
+    <external-path
+        name="external_storage"
+        path="." />
+
+    <!-- App-specific external storage files (e.g., /Android/data/your-package-name/files) -->
+    <external-files-path
+        name="external_files"
+        path="." />
+
+    <!-- Cache directory in internal storage -->
+    <cache-path
+        name="internal_cache"
+        path="." />
+
+    <!-- Cache directory in external storage -->
+    <external-cache-path
+        name="external_cache"
+        path="." />
+
+    <!-- Files directory in internal storage -->
+    <files-path
+        name="internal_files"
+        path="." />
+</paths>

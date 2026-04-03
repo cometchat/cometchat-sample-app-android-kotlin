@@ -1,0 +1,412 @@
+package com.cometchat.uikit.compose.presentation.messagecomposer
+
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.boolean
+import io.kotest.property.arbitrary.element
+import io.kotest.property.checkAll
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+
+/**
+ * Property-based tests for CometChatMessageComposer attachment option callbacks.
+ * Uses Kotest property testing to verify correctness properties.
+ * 
+ * Feature: message-composer-attachment-options
+ */
+class CometChatMessageComposerPropertyTest : FunSpec({
+
+    /**
+     * Interface to mock the MediaSelectionState behavior for testing.
+     * This allows us to verify whether default media selection methods are called.
+     */
+    interface MockMediaSelectionState {
+        fun launchCamera()
+        fun launchImagePicker()
+        fun launchVideoPicker()
+        fun launchAudioPicker()
+        fun launchFilePicker()
+    }
+
+    /**
+     * Helper function that replicates the callback handling logic from CometChatMessageComposer.
+     * This is the logic we're testing - extracted for unit testability.
+     */
+    fun handleAttachmentOptionClick(
+        id: String,
+        mediaSelectionState: MockMediaSelectionState,
+        onCameraClick: (() -> Boolean)? = null,
+        onImageClick: (() -> Boolean)? = null,
+        onVideoClick: (() -> Boolean)? = null,
+        onAudioClick: (() -> Boolean)? = null,
+        onDocumentClick: (() -> Boolean)? = null
+    ) {
+        when (id) {
+            "camera" -> {
+                val handled = onCameraClick?.invoke() ?: false
+                if (!handled) mediaSelectionState.launchCamera()
+            }
+            "image" -> {
+                val handled = onImageClick?.invoke() ?: false
+                if (!handled) mediaSelectionState.launchImagePicker()
+            }
+            "video" -> {
+                val handled = onVideoClick?.invoke() ?: false
+                if (!handled) mediaSelectionState.launchVideoPicker()
+            }
+            "audio" -> {
+                val handled = onAudioClick?.invoke() ?: false
+                if (!handled) mediaSelectionState.launchAudioPicker()
+            }
+            "document" -> {
+                val handled = onDocumentClick?.invoke() ?: false
+                if (!handled) mediaSelectionState.launchFilePicker()
+            }
+        }
+    }
+
+    // ==================== Generators ====================
+
+    /**
+     * Generator for attachment option IDs.
+     */
+    val attachmentOptionIdArb = Arb.element("camera", "image", "video", "audio", "document")
+
+    // ==================== Property Tests ====================
+
+    /**
+     * Feature: message-composer-attachment-options, Property 10: Custom Callback Override Behavior
+     * 
+     * *For any* attachment option callback that returns `true`, the default behavior 
+     * SHALL be skipped.
+     * 
+     * **Validates: Requirements 12.2, 12.4**
+     */
+    test("Property 10: Custom Callback Override Behavior").config(invocations = 100) {
+        checkAll(attachmentOptionIdArb) { optionId ->
+            // Given
+            val mediaSelectionState = mock<MockMediaSelectionState>()
+            var callbackInvoked = false
+            
+            // Create callback that returns true (override)
+            val callback: () -> Boolean = {
+                callbackInvoked = true
+                true // Skip default behavior
+            }
+            
+            // When - invoke with the callback for the specific option
+            when (optionId) {
+                "camera" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onCameraClick = callback
+                )
+                "image" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onImageClick = callback
+                )
+                "video" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onVideoClick = callback
+                )
+                "audio" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onAudioClick = callback
+                )
+                "document" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onDocumentClick = callback
+                )
+            }
+            
+            // Then - callback was invoked and default behavior was skipped
+            callbackInvoked.shouldBeTrue()
+            
+            // Verify no default behavior was called
+            verify(mediaSelectionState, never()).launchCamera()
+            verify(mediaSelectionState, never()).launchImagePicker()
+            verify(mediaSelectionState, never()).launchVideoPicker()
+            verify(mediaSelectionState, never()).launchAudioPicker()
+            verify(mediaSelectionState, never()).launchFilePicker()
+        }
+    }
+
+    /**
+     * Feature: message-composer-attachment-options, Property 11: Custom Callback Non-Override Behavior
+     * 
+     * *For any* attachment option callback that returns `false` or is `null`, 
+     * the default behavior SHALL execute after the callback (if provided) completes.
+     * 
+     * **Validates: Requirements 12.4**
+     */
+    test("Property 11: Custom Callback Non-Override Behavior - Returns False").config(invocations = 100) {
+        checkAll(attachmentOptionIdArb) { optionId ->
+            // Given
+            val mediaSelectionState = mock<MockMediaSelectionState>()
+            var callbackInvoked = false
+            
+            // Create callback that returns false (don't override)
+            val callback: () -> Boolean = {
+                callbackInvoked = true
+                false // Execute default behavior
+            }
+            
+            // When - invoke with the callback for the specific option
+            when (optionId) {
+                "camera" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onCameraClick = callback
+                )
+                "image" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onImageClick = callback
+                )
+                "video" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onVideoClick = callback
+                )
+                "audio" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onAudioClick = callback
+                )
+                "document" -> handleAttachmentOptionClick(
+                    id = optionId,
+                    mediaSelectionState = mediaSelectionState,
+                    onDocumentClick = callback
+                )
+            }
+            
+            // Then - callback was invoked and default behavior was executed
+            callbackInvoked.shouldBeTrue()
+            
+            // Verify the correct default behavior was called
+            when (optionId) {
+                "camera" -> verify(mediaSelectionState, times(1)).launchCamera()
+                "image" -> verify(mediaSelectionState, times(1)).launchImagePicker()
+                "video" -> verify(mediaSelectionState, times(1)).launchVideoPicker()
+                "audio" -> verify(mediaSelectionState, times(1)).launchAudioPicker()
+                "document" -> verify(mediaSelectionState, times(1)).launchFilePicker()
+            }
+        }
+    }
+
+    /**
+     * Feature: message-composer-attachment-options, Property 11: Custom Callback Non-Override Behavior
+     * 
+     * *For any* attachment option with null callback, the default behavior SHALL execute.
+     * 
+     * **Validates: Requirements 12.4**
+     */
+    test("Property 11: Custom Callback Non-Override Behavior - Null Callback").config(invocations = 100) {
+        checkAll(attachmentOptionIdArb) { optionId ->
+            // Given
+            val mediaSelectionState = mock<MockMediaSelectionState>()
+            
+            // When - invoke with null callback
+            handleAttachmentOptionClick(
+                id = optionId,
+                mediaSelectionState = mediaSelectionState,
+                onCameraClick = null,
+                onImageClick = null,
+                onVideoClick = null,
+                onAudioClick = null,
+                onDocumentClick = null
+            )
+            
+            // Then - the correct default behavior was called
+            when (optionId) {
+                "camera" -> verify(mediaSelectionState, times(1)).launchCamera()
+                "image" -> verify(mediaSelectionState, times(1)).launchImagePicker()
+                "video" -> verify(mediaSelectionState, times(1)).launchVideoPicker()
+                "audio" -> verify(mediaSelectionState, times(1)).launchAudioPicker()
+                "document" -> verify(mediaSelectionState, times(1)).launchFilePicker()
+            }
+        }
+    }
+
+    /**
+     * Feature: message-composer-attachment-options, Property 10 & 11: Callback Isolation
+     * 
+     * *For any* attachment option click, only the callback for that specific option 
+     * SHALL be invoked, not callbacks for other options.
+     * 
+     * **Validates: Requirements 12.2, 12.4**
+     */
+    test("Property 10 & 11: Callback Isolation").config(invocations = 100) {
+        checkAll(attachmentOptionIdArb) { optionId ->
+            // Given
+            val mediaSelectionState = mock<MockMediaSelectionState>()
+            var cameraCallbackInvoked = false
+            var imageCallbackInvoked = false
+            var videoCallbackInvoked = false
+            var audioCallbackInvoked = false
+            var documentCallbackInvoked = false
+            
+            val onCameraClick: () -> Boolean = { cameraCallbackInvoked = true; true }
+            val onImageClick: () -> Boolean = { imageCallbackInvoked = true; true }
+            val onVideoClick: () -> Boolean = { videoCallbackInvoked = true; true }
+            val onAudioClick: () -> Boolean = { audioCallbackInvoked = true; true }
+            val onDocumentClick: () -> Boolean = { documentCallbackInvoked = true; true }
+            
+            // When
+            handleAttachmentOptionClick(
+                id = optionId,
+                mediaSelectionState = mediaSelectionState,
+                onCameraClick = onCameraClick,
+                onImageClick = onImageClick,
+                onVideoClick = onVideoClick,
+                onAudioClick = onAudioClick,
+                onDocumentClick = onDocumentClick
+            )
+            
+            // Then - only the relevant callback was invoked
+            when (optionId) {
+                "camera" -> {
+                    cameraCallbackInvoked.shouldBeTrue()
+                    imageCallbackInvoked.shouldBeFalse()
+                    videoCallbackInvoked.shouldBeFalse()
+                    audioCallbackInvoked.shouldBeFalse()
+                    documentCallbackInvoked.shouldBeFalse()
+                }
+                "image" -> {
+                    cameraCallbackInvoked.shouldBeFalse()
+                    imageCallbackInvoked.shouldBeTrue()
+                    videoCallbackInvoked.shouldBeFalse()
+                    audioCallbackInvoked.shouldBeFalse()
+                    documentCallbackInvoked.shouldBeFalse()
+                }
+                "video" -> {
+                    cameraCallbackInvoked.shouldBeFalse()
+                    imageCallbackInvoked.shouldBeFalse()
+                    videoCallbackInvoked.shouldBeTrue()
+                    audioCallbackInvoked.shouldBeFalse()
+                    documentCallbackInvoked.shouldBeFalse()
+                }
+                "audio" -> {
+                    cameraCallbackInvoked.shouldBeFalse()
+                    imageCallbackInvoked.shouldBeFalse()
+                    videoCallbackInvoked.shouldBeFalse()
+                    audioCallbackInvoked.shouldBeTrue()
+                    documentCallbackInvoked.shouldBeFalse()
+                }
+                "document" -> {
+                    cameraCallbackInvoked.shouldBeFalse()
+                    imageCallbackInvoked.shouldBeFalse()
+                    videoCallbackInvoked.shouldBeFalse()
+                    audioCallbackInvoked.shouldBeFalse()
+                    documentCallbackInvoked.shouldBeTrue()
+                }
+            }
+        }
+    }
+
+    /**
+     * Feature: message-composer-attachment-options, Property 10 & 11: Mixed Configuration
+     * 
+     * *For any* combination of callback configurations (some returning true, some false, some null),
+     * each option SHALL behave according to its own callback configuration independently.
+     * 
+     * **Validates: Requirements 12.2, 12.4**
+     */
+    test("Property 10 & 11: Mixed Configuration Behavior").config(invocations = 100) {
+        checkAll(
+            Arb.boolean(), // cameraOverride
+            Arb.boolean(), // imageOverride
+            Arb.boolean(), // videoOverride
+            Arb.boolean(), // audioOverride
+            Arb.boolean()  // documentOverride
+        ) { cameraOverride, imageOverride, videoOverride, audioOverride, documentOverride ->
+            // Given
+            val mediaSelectionState = mock<MockMediaSelectionState>()
+            
+            val onCameraClick: () -> Boolean = { cameraOverride }
+            val onImageClick: () -> Boolean = { imageOverride }
+            val onVideoClick: () -> Boolean = { videoOverride }
+            val onAudioClick: () -> Boolean = { audioOverride }
+            val onDocumentClick: () -> Boolean = { documentOverride }
+            
+            // When - test camera
+            handleAttachmentOptionClick(
+                id = "camera",
+                mediaSelectionState = mediaSelectionState,
+                onCameraClick = onCameraClick
+            )
+            
+            // Then - camera default behavior depends on cameraOverride
+            if (cameraOverride) {
+                verify(mediaSelectionState, never()).launchCamera()
+            } else {
+                verify(mediaSelectionState, times(1)).launchCamera()
+            }
+            
+            // When - test image
+            handleAttachmentOptionClick(
+                id = "image",
+                mediaSelectionState = mediaSelectionState,
+                onImageClick = onImageClick
+            )
+            
+            // Then - image default behavior depends on imageOverride
+            if (imageOverride) {
+                verify(mediaSelectionState, never()).launchImagePicker()
+            } else {
+                verify(mediaSelectionState, times(1)).launchImagePicker()
+            }
+            
+            // When - test video
+            handleAttachmentOptionClick(
+                id = "video",
+                mediaSelectionState = mediaSelectionState,
+                onVideoClick = onVideoClick
+            )
+            
+            // Then - video default behavior depends on videoOverride
+            if (videoOverride) {
+                verify(mediaSelectionState, never()).launchVideoPicker()
+            } else {
+                verify(mediaSelectionState, times(1)).launchVideoPicker()
+            }
+            
+            // When - test audio
+            handleAttachmentOptionClick(
+                id = "audio",
+                mediaSelectionState = mediaSelectionState,
+                onAudioClick = onAudioClick
+            )
+            
+            // Then - audio default behavior depends on audioOverride
+            if (audioOverride) {
+                verify(mediaSelectionState, never()).launchAudioPicker()
+            } else {
+                verify(mediaSelectionState, times(1)).launchAudioPicker()
+            }
+            
+            // When - test document
+            handleAttachmentOptionClick(
+                id = "document",
+                mediaSelectionState = mediaSelectionState,
+                onDocumentClick = onDocumentClick
+            )
+            
+            // Then - document default behavior depends on documentOverride
+            if (documentOverride) {
+                verify(mediaSelectionState, never()).launchFilePicker()
+            } else {
+                verify(mediaSelectionState, times(1)).launchFilePicker()
+            }
+        }
+    }
+})

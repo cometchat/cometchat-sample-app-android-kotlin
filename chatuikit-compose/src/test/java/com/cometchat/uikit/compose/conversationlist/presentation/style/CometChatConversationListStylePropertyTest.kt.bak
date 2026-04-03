@@ -1,0 +1,362 @@
+package com.cometchat.uikit.compose.conversationlist.presentation.style
+
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cometchat.uikit.compose.presentation.conversationlist.style.CometChatConversationsStyle
+import com.cometchat.uikit.compose.shared.baseelements.avatar.AvatarStyle
+import com.cometchat.uikit.compose.shared.baseelements.badgecount.BadgeCountStyle
+import com.cometchat.uikit.compose.shared.baseelements.date.DateStyle
+import com.cometchat.uikit.compose.shared.conversationlistitem.CometChatConversationListItemStyle
+import com.cometchat.uikit.compose.shared.conversationlistitem.TypingIndicatorStyle
+import com.cometchat.uikit.compose.shared.defaultstates.CometChatEmptyStateStyle
+import com.cometchat.uikit.compose.shared.defaultstates.CometChatErrorStateStyle
+import com.cometchat.uikit.compose.shared.defaultstates.CometChatLoadingStateStyle
+import com.cometchat.uikit.compose.shared.receipts.CometChatReceiptsStyle
+import com.cometchat.uikit.compose.shared.statusindicator.CometChatStatusIndicatorStyle
+import com.cometchat.uikit.compose.shared.views.popupmenu.CometChatPopupMenuStyle
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for CometChatConversationsStyle.
+ *
+ * Feature: conversations-compose
+ * Properties tested:
+ * - Property 12: Style Immutability
+ */
+class CometChatConversationsStylePropertyTest : StringSpec({
+
+    /**
+     * Property 12: Style Immutability
+     *
+     * For any CometChatConversationsStyle instance, calling copy() with modified parameters
+     * SHALL return a new instance with the modified values while leaving the original
+     * instance unchanged.
+     *
+     * Feature: conversations-compose, Property 12: Style Immutability
+     * Validates: Requirements 16.1
+     */
+    "Property 12: Style copy should create new instance with modified values while original remains unchanged" {
+        // Generator for random style values
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.int(0, 255),      // strokeColor alpha
+            Arb.float(0f, 10f),   // strokeWidth
+            Arb.float(0f, 20f),   // cornerRadius
+            Arb.int(0, 255),      // titleTextColor alpha
+            Arb.int(0, 255),      // separatorColor alpha
+            Arb.float(0f, 5f),    // separatorHeight
+            Arb.int(0, 255),      // searchBackgroundColor alpha
+            Arb.float(0f, 20f),   // searchCornerRadius
+            Arb.float(0f, 5f)     // searchStrokeWidth
+        ) { bgAlpha, strokeAlpha, strokeWidth, cornerRadius, titleAlpha, sepAlpha, sepHeight, searchBgAlpha, searchCorner, searchStroke ->
+            createTestStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                strokeColor = Color(0.5f, 0.5f, 0.5f, strokeAlpha / 255f),
+                strokeWidth = strokeWidth.dp,
+                cornerRadius = cornerRadius.dp,
+                titleTextColor = Color(0f, 0f, 0f, titleAlpha / 255f),
+                separatorColor = Color(0.8f, 0.8f, 0.8f, sepAlpha / 255f),
+                separatorHeight = sepHeight.dp,
+                searchBackgroundColor = Color(0.9f, 0.9f, 0.9f, searchBgAlpha / 255f),
+                searchCornerRadius = searchCorner.dp,
+                searchStrokeWidth = searchStroke.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalStrokeColor = originalStyle.strokeColor
+            val originalStrokeWidth = originalStyle.strokeWidth
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalSeparatorColor = originalStyle.separatorColor
+            val originalSeparatorHeight = originalStyle.separatorHeight
+            val originalSearchBackgroundColor = originalStyle.searchBackgroundColor
+            val originalSearchCornerRadius = originalStyle.searchCornerRadius
+            val originalSearchStrokeWidth = originalStyle.searchStrokeWidth
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.strokeColor shouldBe originalStrokeColor
+            originalStyle.strokeWidth shouldBe originalStrokeWidth
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.titleTextColor shouldBe originalTitleTextColor
+            originalStyle.separatorColor shouldBe originalSeparatorColor
+            originalStyle.separatorHeight shouldBe originalSeparatorHeight
+            originalStyle.searchBackgroundColor shouldBe originalSearchBackgroundColor
+            originalStyle.searchCornerRadius shouldBe originalSearchCornerRadius
+            originalStyle.searchStrokeWidth shouldBe originalSearchStrokeWidth
+
+            // Verify the copied style retained other values
+            copiedStyle.strokeColor shouldBe originalStrokeColor
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.separatorColor shouldBe originalSeparatorColor
+            copiedStyle.separatorHeight shouldBe originalSeparatorHeight
+            copiedStyle.searchBackgroundColor shouldBe originalSearchBackgroundColor
+            copiedStyle.searchCornerRadius shouldBe originalSearchCornerRadius
+            copiedStyle.searchStrokeWidth shouldBe originalSearchStrokeWidth
+
+            // Verify they are different instances
+            copiedStyle shouldNotBe originalStyle
+        }
+    }
+
+    "Property 12: Style copy with multiple modified parameters should preserve unmodified values" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 10f),   // strokeWidth
+            Arb.float(0f, 20f),   // cornerRadius
+            Arb.float(0f, 5f)     // separatorHeight
+        ) { strokeWidth, cornerRadius, sepHeight ->
+            createTestStyle(
+                strokeWidth = strokeWidth.dp,
+                cornerRadius = cornerRadius.dp,
+                separatorHeight = sepHeight.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalSearchBackgroundColor = originalStyle.searchBackgroundColor
+            val originalSeparatorColor = originalStyle.separatorColor
+
+            // Create a copy with multiple modified values
+            val newBackgroundColor = Color.Blue
+            val newStrokeWidth = 5.dp
+            val newCornerRadius = 16.dp
+            val copiedStyle = originalStyle.copy(
+                backgroundColor = newBackgroundColor,
+                strokeWidth = newStrokeWidth,
+                cornerRadius = newCornerRadius
+            )
+
+            // Verify modified values
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.cornerRadius shouldBe newCornerRadius
+
+            // Verify unmodified values are preserved
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.searchBackgroundColor shouldBe originalSearchBackgroundColor
+            copiedStyle.separatorColor shouldBe originalSeparatorColor
+
+            // Verify original is unchanged
+            originalStyle.titleTextColor shouldBe originalTitleTextColor
+            originalStyle.searchBackgroundColor shouldBe originalSearchBackgroundColor
+            originalStyle.separatorColor shouldBe originalSeparatorColor
+        }
+    }
+
+    "Property 12: Copying style with same values should create equal but distinct instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(0f, 10f)
+        ) { alpha, strokeWidth ->
+            createTestStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                strokeWidth = strokeWidth.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.titleTextColor shouldBe originalStyle.titleTextColor
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+})
+
+/**
+ * Helper function to create a test style with customizable values.
+ * Uses null for Painter properties since they can't be easily created in tests.
+ */
+private fun createTestStyle(
+    backgroundColor: Color = Color.White,
+    strokeColor: Color = Color.Transparent,
+    strokeWidth: Dp = 0.dp,
+    cornerRadius: Dp = 0.dp,
+    titleTextColor: Color = Color.Black,
+    separatorColor: Color = Color.LightGray,
+    separatorHeight: Dp = 1.dp,
+    searchBackgroundColor: Color = Color.LightGray,
+    searchCornerRadius: Dp = 8.dp,
+    searchStrokeWidth: Dp = 0.dp
+): CometChatConversationsStyle {
+    return CometChatConversationsStyle(
+        backgroundColor = backgroundColor,
+        strokeColor = strokeColor,
+        strokeWidth = strokeWidth,
+        cornerRadius = cornerRadius,
+        titleTextColor = titleTextColor,
+        titleTextStyle = TextStyle(fontSize = 18.sp),
+        backIcon = null,
+        backIconTint = Color.Black,
+        emptyStateTitleTextColor = Color.Black,
+        emptyStateTitleTextStyle = TextStyle(fontSize = 16.sp),
+        emptyStateSubtitleTextColor = Color.Gray,
+        emptyStateSubtitleTextStyle = TextStyle(fontSize = 14.sp),
+        emptyStateIcon = null,
+        errorStateTitleTextColor = Color.Black,
+        errorStateTitleTextStyle = TextStyle(fontSize = 16.sp),
+        errorStateSubtitleTextColor = Color.Gray,
+        errorStateSubtitleTextStyle = TextStyle(fontSize = 14.sp),
+        errorStateIcon = null,
+        separatorColor = separatorColor,
+        separatorHeight = separatorHeight,
+        searchBackgroundColor = searchBackgroundColor,
+        searchTextColor = Color.Black,
+        searchTextStyle = TextStyle(fontSize = 14.sp),
+        searchPlaceholderColor = Color.Gray,
+        searchPlaceholderTextStyle = TextStyle(fontSize = 14.sp),
+        searchStartIcon = null,
+        searchStartIconTint = Color.Gray,
+        searchEndIcon = null,
+        searchEndIconTint = Color.Gray,
+        searchCornerRadius = searchCornerRadius,
+        searchStrokeWidth = searchStrokeWidth,
+        searchStrokeColor = Color.Transparent,
+        discardSelectionIcon = null,
+        discardSelectionIconTint = Color.Black,
+        submitSelectionIcon = null,
+        submitSelectionIconTint = Color.Black,
+        selectionCountTextColor = Color.Black,
+        selectionCountTextStyle = TextStyle(fontSize = 16.sp),
+        deleteOptionIcon = null,
+        deleteOptionIconTint = Color.Red,
+        deleteOptionTextColor = Color.Red,
+        deleteOptionTextStyle = TextStyle(fontSize = 14.sp),
+        itemStyle = createTestItemStyle(),
+        popupMenuStyle = CometChatPopupMenuStyle(
+            elevation = 8.dp,
+            cornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            strokeColor = Color.LightGray,
+            strokeWidth = 1.dp,
+            itemTextColor = Color.Black,
+            itemTextStyle = TextStyle(fontSize = 14.sp),
+            startIconTint = Color.Black,
+            endIconTint = Color.Black,
+            itemPaddingHorizontal = 16.dp,
+            itemPaddingVertical = 12.dp,
+            minWidth = 180.dp
+        ),
+        emptyStateStyle = CometChatEmptyStateStyle(
+            backgroundColor = backgroundColor,
+            icon = null,
+            iconTint = Color.Gray,
+            iconSize = 80.dp,
+            titleTextColor = Color.Black,
+            titleTextStyle = TextStyle(fontSize = 16.sp),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = TextStyle(fontSize = 14.sp)
+        ),
+        errorStateStyle = CometChatErrorStateStyle(
+            backgroundColor = backgroundColor,
+            icon = null,
+            iconTint = Color.Gray,
+            iconSize = 80.dp,
+            titleTextColor = Color.Black,
+            titleTextStyle = TextStyle(fontSize = 16.sp),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = TextStyle(fontSize = 14.sp),
+            retryButtonText = "Retry",
+            retryButtonBackgroundColor = Color.Blue,
+            retryButtonTextColor = Color.White,
+            retryButtonTextStyle = TextStyle(fontSize = 14.sp)
+        ),
+        loadingStateStyle = CometChatLoadingStateStyle(
+            backgroundColor = backgroundColor,
+            shimmerColor = Color.LightGray,
+            itemCount = 8,
+            avatarSize = 48.dp,
+            avatarShape = CircleShape,
+            placeholderCornerRadius = 4.dp
+        )
+    )
+}
+
+/**
+ * Helper function to create a test item style with correct parameters.
+ */
+private fun createTestItemStyle(): CometChatConversationListItemStyle {
+    return CometChatConversationListItemStyle(
+        backgroundColor = Color.White,
+        selectedBackgroundColor = Color.LightGray,
+        titleTextColor = Color.Black,
+        titleTextStyle = TextStyle(fontSize = 16.sp),
+        subtitleTextColor = Color.Gray,
+        subtitleTextStyle = TextStyle(fontSize = 14.sp),
+        messageTypeIconTint = Color.Gray,
+        avatarStyle = AvatarStyle(cornerRadius = 24.dp),
+        statusIndicatorStyle = CometChatStatusIndicatorStyle(
+            strokeWidth = 2.dp,
+            strokeColor = Color.White,
+            cornerRadius = 8.dp,
+            onlineIcon = null,
+            privateGroupIcon = null,
+            protectedGroupIcon = null,
+            size = 15.dp
+        ),
+        dateStyle = DateStyle(
+            textColor = Color.Gray,
+            textStyle = TextStyle(fontSize = 12.sp)
+        ),
+        badgeStyle = BadgeCountStyle(cornerRadius = 12.dp),
+        receiptStyle = CometChatReceiptsStyle(
+            waitIcon = null,
+            sentIcon = null,
+            deliveredIcon = null,
+            readIcon = null,
+            errorIcon = null,
+            waitIconTint = Color.Gray,
+            sentIconTint = Color.Gray,
+            deliveredIconTint = Color.Gray,
+            readIconTint = Color.Blue,
+            errorIconTint = Color.Red,
+            size = 16.dp
+        ),
+        typingIndicatorStyle = TypingIndicatorStyle(
+            textColor = Color.Green,
+            textStyle = TextStyle(fontSize = 14.sp)
+        ),
+        checkBoxStrokeWidth = 1.5.dp,
+        checkBoxCornerRadius = 4.dp,
+        checkBoxStrokeColor = Color.Gray,
+        checkBoxBackgroundColor = Color.Transparent,
+        checkBoxCheckedBackgroundColor = Color.Blue,
+        checkBoxSelectIcon = Icons.Default.Check,
+        checkBoxSelectIconTint = Color.White,
+        separatorColor = Color.LightGray,
+        separatorHeight = 1.dp
+    )
+}

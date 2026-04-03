@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/cometchat_padding_2"
+        android:paddingEnd="@dimen/cometchat_padding_2"
+        android:paddingBottom="@dimen/cometchat_padding_2"
+        android:paddingTop="0dp">
+
+        <!-- Header View Slot -->
+        <FrameLayout
+            android:id="@+id/headerViewLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <!-- Suggestion List Container -->
+        <FrameLayout
+            android:id="@+id/suggestionListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="200dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/headerViewLayout"
+            tools:visibility="visible" />
+
+        <!-- Info Panel (outside compose box) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/infoPanelCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_2"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/cometchat_corner_radius_2"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/suggestionListLayout"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/cometchat_padding_3">
+
+                <ImageView
+                    android:id="@+id/ivInfoIcon"
+                    android:layout_width="@dimen/cometchat_icon_size_5"
+                    android:layout_height="@dimen/cometchat_icon_size_5"
+                    android:contentDescription="@string/cometchat_info"
+                    android:src="@drawable/cometchat_ic_info" />
+
+                <TextView
+                    android:id="@+id/tvInfoText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/cometchat_margin_2"
+                    android:layout_weight="1"
+                    tools:text="Info message" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Compose Box Card - contains edit preview, reply preview, and input -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/composeBoxCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/cometchat_radius_2"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/infoPanelCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Edit Preview Panel (inside compose box) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/editPreviewCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/cometchat_margin_1"
+                    android:visibility="gone"
+                    app:cardCornerRadius="@dimen/cometchat_corner_radius_2"
+                    app:cardElevation="0dp"
+                    tools:visibility="visible">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/cometchat_padding_2">
+
+                        <TextView
+                            android:id="@+id/tvEditPreviewTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cometchat_edit_message"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@id/ivEditPreviewClose"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tvEditPreviewMessage"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            app:layout_constraintEnd_toStartOf="@id/ivEditPreviewClose"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tvEditPreviewTitle"
+                            tools:text="Message being edited" />
+
+                        <ImageView
+                            android:id="@+id/ivEditPreviewClose"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginBottom="10dp"
+                            android:contentDescription="@string/cometchat_close"
+                            android:src="@drawable/cometchat_ic_close"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Reply/Message Preview Panel (inside compose box) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/messagePreviewCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/cometchat_margin_1"
+                    android:visibility="gone"
+                    app:cardCornerRadius="@dimen/cometchat_corner_radius_2"
+                    app:cardElevation="0dp"
+                    tools:visibility="visible">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/cometchat_padding_2">
+
+                        <!-- Colored separator bar -->
+                        <View
+                            android:id="@+id/messagePreviewSeparator"
+                            android:layout_width="4dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tvMessagePreviewTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/cometchat_margin_2"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@id/ivMessagePreviewClose"
+                            app:layout_constraintStart_toEndOf="@id/messagePreviewSeparator"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Replying to John" />
+
+                        <TextView
+                            android:id="@+id/tvMessagePreviewSubtitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/cometchat_margin_2"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            app:layout_constraintEnd_toStartOf="@id/ivMessagePreviewClose"
+                            app:layout_constraintStart_toEndOf="@id/messagePreviewSeparator"
+                            app:layout_constraintTop_toBottomOf="@id/tvMessagePreviewTitle"
+                            tools:text="Original message content" />
+
+                        <ImageView
+                            android:id="@+id/ivMessagePreviewClose"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginBottom="10dp"
+                            android:contentDescription="@string/cometchat_close"
+                            android:src="@drawable/cometchat_ic_close"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Input row -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:padding="@dimen/cometchat_padding_3">
+
+                    <!-- Secondary Button (Attachment) - initially centered, dynamically changes to bottom for multi-line -->
+                    <FrameLayout
+                        android:id="@+id/secondaryButtonLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="@id/etMessageInput"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/etMessageInput">
+
+                        <ImageView
+                            android:id="@+id/ivAttachment"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/cometchat_attachment"
+                            android:src="@drawable/cometchat_ic_attachment" />
+                    </FrameLayout>
+
+                    <!-- Separator - 12dp margin from attachment button (Figma: padding_3) -->
+                    <View
+                        android:id="@+id/separatorView"
+                        android:layout_width="1dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="@dimen/cometchat_padding_3"
+                        app:layout_constraintBottom_toBottomOf="@id/secondaryButtonLayout"
+                        app:layout_constraintStart_toEndOf="@id/secondaryButtonLayout"
+                        app:layout_constraintTop_toTopOf="@id/secondaryButtonLayout" />
+
+                    <!-- Message Input - expands upward, bottom aligned -->
+                    <EditText
+                        android:id="@+id/etMessageInput"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:ellipsize="end"
+                        android:gravity="center_vertical|start"
+                        android:hint="@string/cometchat_composer_place_holder_text"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLines="3"
+                        android:minLines="1"
+                        android:minHeight="36dp"
+                        android:paddingStart="@dimen/cometchat_padding_2"
+                        android:paddingEnd="@dimen/cometchat_padding_2"
+                        android:singleLine="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/auxiliaryButtonLayout"
+                        app:layout_constraintStart_toEndOf="@id/separatorView"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="1.0" />
+
+                    <!-- Auxiliary Button Layout - initially centered, dynamically changes to bottom for multi-line -->
+                    <LinearLayout
+                        android:id="@+id/auxiliaryButtonLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintBottom_toBottomOf="@id/etMessageInput"
+                        app:layout_constraintEnd_toStartOf="@id/sendButtonLayout"
+                        app:layout_constraintTop_toTopOf="@id/etMessageInput">
+
+                        <!-- Rich text toggle button removed - toolbar visibility is now automatic -->
+
+                        <ImageView
+                            android:id="@+id/ivSticker"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="@dimen/cometchat_margin_4"
+                            android:contentDescription="@string/cometchat_sticker"
+                            android:src="@drawable/cometchat_ic_sticker"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/ivAI"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="@dimen/cometchat_margin_4"
+                            android:contentDescription="@string/cometchat_ai"
+                            android:src="@drawable/cometchat_ic_ai"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/ivVoiceRecording"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="@dimen/cometchat_margin_4"
+                            android:contentDescription="@string/cometchat_voice_recording"
+                            android:src="@drawable/cometchat_ic_mic"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+                    </LinearLayout>
+
+                    <!-- Send Button - 32dp circular container, 12dp left margin (Figma: padding_3), initially centered -->
+                    <FrameLayout
+                        android:id="@+id/sendButtonLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/cometchat_padding_3"
+                        app:layout_constraintBottom_toBottomOf="@id/auxiliaryButtonLayout"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/auxiliaryButtonLayout">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/sendButtonCard"
+                            android:layout_width="@dimen/cometchat_32dp"
+                            android:layout_height="@dimen/cometchat_32dp"
+                            android:layout_gravity="center"
+                            app:cardBackgroundColor="?attr/cometchatPrimaryColor"
+                            app:cardCornerRadius="@dimen/cometchat_radius_max"
+                            app:cardElevation="@dimen/cometchat_0dp"
+                            app:strokeColor="@color/cometchat_color_transparent"
+                            app:strokeWidth="@dimen/cometchat_0dp">
+
+                            <ImageView
+                                android:id="@+id/ivSend"
+                                android:layout_width="@dimen/cometchat_32dp"
+                                android:layout_height="@dimen/cometchat_32dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/cometchat_send"
+                                android:src="@drawable/cometchat_ic_send_active" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </FrameLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Separator between input and toolbar -->
+                <View
+                    android:id="@+id/toolbarInputSeparator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <!-- Rich Text Toolbar (inside compose box, at bottom, automatic visibility based on text) -->
+                <HorizontalScrollView
+                    android:id="@+id/richTextToolbarScrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <LinearLayout
+                        android:id="@+id/richTextToolbarLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/cometchat_padding_2"
+                        android:paddingTop="@dimen/cometchat_padding_1"
+                        android:paddingEnd="@dimen/cometchat_padding_2"
+                        android:paddingBottom="@dimen/cometchat_padding_1">
+
+                        <!-- Text styles group -->
+                        <ImageView
+                            android:id="@+id/ivFormatBold"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_bold"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_bold" />
+
+                        <ImageView
+                            android:id="@+id/ivFormatItalic"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_italic"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_italic" />
+
+                        <ImageView
+                            android:id="@+id/ivFormatStrikethrough"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_strikethrough"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_strikethrough" />
+
+                        <!-- Separator after text styles -->
+                        <View
+                            android:id="@+id/toolbarSeparator1"
+                            android:layout_width="1dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="@dimen/cometchat_margin_1"
+                            android:layout_marginEnd="@dimen/cometchat_margin_1" />
+
+                        <!-- Code group -->
+                        <ImageView
+                            android:id="@+id/ivFormatCode"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_code"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_code" />
+
+                        <ImageView
+                            android:id="@+id/ivFormatCodeBlock"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_code_block"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_code_block" />
+
+                        <!-- Separator after code -->
+                        <View
+                            android:id="@+id/toolbarSeparator2"
+                            android:layout_width="1dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="@dimen/cometchat_margin_1"
+                            android:layout_marginEnd="@dimen/cometchat_margin_1" />
+
+                        <!-- Link -->
+                        <ImageView
+                            android:id="@+id/ivFormatLink"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_link"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_link_outlined" />
+
+                        <!-- Separator after link -->
+                        <View
+                            android:id="@+id/toolbarSeparator3"
+                            android:layout_width="1dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="@dimen/cometchat_margin_1"
+                            android:layout_marginEnd="@dimen/cometchat_margin_1" />
+
+                        <!-- Lists group -->
+                        <ImageView
+                            android:id="@+id/ivFormatBulletList"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_bullet_list"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_list_bullet" />
+
+                        <ImageView
+                            android:id="@+id/ivFormatOrderedList"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_ordered_list"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_list_numbered" />
+
+                        <!-- Separator after lists -->
+                        <View
+                            android:id="@+id/toolbarSeparator4"
+                            android:layout_width="1dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="@dimen/cometchat_margin_1"
+                            android:layout_marginEnd="@dimen/cometchat_margin_1" />
+
+                        <!-- Blockquote -->
+                        <ImageView
+                            android:id="@+id/ivFormatBlockquote"
+                            android:layout_width="@dimen/cometchat_36dp"
+                            android:layout_height="@dimen/cometchat_36dp"
+                            android:contentDescription="@string/cometchat_format_blockquote"
+                            android:padding="@dimen/cometchat_padding_2"
+                            android:src="@drawable/cometchat_ic_format_quote" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Footer View Slot -->
+        <FrameLayout
+            android:id="@+id/footerViewLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_2"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/composeBoxCard"
+            tools:visibility="visible" />
+
+        <!-- Bottom Panel Slot (for Sticker Keyboard, etc.) -->
+        <FrameLayout
+            android:id="@+id/bottomPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/footerViewLayout"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</merge>

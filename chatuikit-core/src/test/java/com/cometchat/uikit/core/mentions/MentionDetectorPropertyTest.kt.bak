@@ -1,0 +1,221 @@
+package com.cometchat.uikit.core.mentions
+
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotBeEmpty
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.arbitrary
+import io.kotest.property.arbitrary.char
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for MentionDetector.
+ * Uses Kotest property testing to verify correctness properties.
+ * 
+ * Feature: cometchat-message-composer
+ */
+class MentionDetectorPropertyTest : FunSpec({
+
+    // ==================== Generators ====================
+
+    /**
+     * Generator for valid tracking characters.
+     */
+    val trackingCharArb = Arb.char('!'..'~').filter { it != ' ' && it != '\n' }
+
+    /**
+     * Generator for mention queries (alphanumeric strings without spaces).
+     */
+    val mentionQueryArb = Arb.string(0..20).map { it.filter { c -> c.isLetterOrDigit() } }
+
+    /**
+     * Generator for text with a mention trigger.
+     */
+    fun textWithMentionArb(trackingChar: Char) = arbitrary {
+        val prefix = Arb.string(0..10).bind().filter { !it.contains(trackingChar) }
+        val query = mentionQueryArb.bind()
+        val prefixWithSpace = if (prefix.isEmpty()) "" else "$prefix "
+        "$prefixWithSpace$trackingChar$query"
+    }
+
+    // ==================== Property Tests ====================
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions
+     * 
+     * For any text containing a tracking character (@) at a valid position,
+     * the mention detector SHALL detect the mention and extract the query.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Detection").config(invocations = 100) {
+        checkAll(trackingCharArb, mentionQueryArb) { trackingChar, query ->
+            val detector = MentionDetector(trackingChar)
+            
+            // Test 1: Tracking character at start of text
+            val textAtStart = "$trackingChar$query"
+            val resultAtStart = detector.detectMention(textAtStart, textAtStart.length)
+            
+            resultAtStart.isActive.shouldBeTrue()
+            resultAtStart.query shouldBe query
+            resultAtStart.triggerIndex shouldBe 0
+            resultAtStart.cursorPosition shouldBe textAtStart.length
+            
+            // Test 2: Tracking character after space
+            val textAfterSpace = "Hello $trackingChar$query"
+            val resultAfterSpace = detector.detectMention(textAfterSpace, textAfterSpace.length)
+            
+            resultAfterSpace.isActive.shouldBeTrue()
+            resultAfterSpace.query shouldBe query
+            resultAfterSpace.triggerIndex shouldBe 6 // "Hello " is 6 chars
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - Query Extraction
+     * 
+     * For any mention being typed, the query SHALL be the text between the tracking
+     * character and the cursor position.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Query Extraction").config(invocations = 100) {
+        checkAll(mentionQueryArb) { query ->
+            val detector = MentionDetector('@')
+            val text = "@$query"
+            
+            // Test at various cursor positions within the query
+            for (cursorPos in 1..text.length) {
+                val result = detector.detectMention(text, cursorPos)
+                
+                result.isActive.shouldBeTrue()
+                result.query shouldBe query.take(cursorPos - 1)
+                result.triggerIndex shouldBe 0
+            }
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - No Detection Without Trigger
+     * 
+     * For any text without a tracking character, the mention detector SHALL NOT
+     * detect a mention.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - No Detection Without Trigger").config(invocations = 100) {
+        checkAll(Arb.string(1..50).filter { !it.contains('@') }) { text ->
+            val detector = MentionDetector('@')
+            
+            for (cursorPos in 1..text.length) {
+                val result = detector.detectMention(text, cursorPos)
+                result.isActive.shouldBeFalse()
+            }
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - Space Terminates
+     * 
+     * For any text where a space appears after the tracking character and before
+     * the cursor, the mention SHALL NOT be detected.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Space Terminates Mention").config(invocations = 100) {
+        checkAll(mentionQueryArb, Arb.string(1..10).filter { !it.contains('@') }) { query, suffix ->
+            val detector = MentionDetector('@')
+            
+            // Text with space after mention
+            val text = "@$query $suffix"
+            val cursorAtEnd = text.length
+            
+            val result = detector.detectMention(text, cursorAtEnd)
+            
+            // Should not detect mention because cursor is after space
+            result.isActive.shouldBeFalse()
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - Multiple Mentions
+     * 
+     * For text with multiple tracking characters, the detector SHALL detect
+     * the mention closest to the cursor.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Multiple Mentions").config(invocations = 100) {
+        checkAll(mentionQueryArb, mentionQueryArb) { query1, query2 ->
+            val detector = MentionDetector('@')
+            
+            // Text with two mentions
+            val text = "@$query1 @$query2"
+            val secondMentionStart = query1.length + 2 // "@query1 " length
+            
+            // Cursor at end should detect second mention
+            val resultAtEnd = detector.detectMention(text, text.length)
+            
+            resultAtEnd.isActive.shouldBeTrue()
+            resultAtEnd.query shouldBe query2
+            resultAtEnd.triggerIndex shouldBe secondMentionStart
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - Cursor Position Bounds
+     * 
+     * For any cursor position, the trigger index SHALL be less than or equal to
+     * the cursor position, and the query length SHALL match the difference.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Cursor Position Bounds").config(invocations = 100) {
+        checkAll(mentionQueryArb) { query ->
+            val detector = MentionDetector('@')
+            val text = "@$query"
+            
+            for (cursorPos in 1..text.length) {
+                val result = detector.detectMention(text, cursorPos)
+                
+                if (result.isActive) {
+                    result.triggerIndex shouldBeLessThanOrEqual cursorPos
+                    result.cursorPosition shouldBe cursorPos
+                    result.query.length shouldBe (cursorPos - result.triggerIndex - 1)
+                }
+            }
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 10: Mention Trigger Shows Suggestions - Empty Text
+     * 
+     * For empty text or invalid cursor positions, the detector SHALL return inactive.
+     * 
+     * **Validates: Requirements 7.3**
+     */
+    test("Property 10: Mention Trigger Shows Suggestions - Edge Cases").config(invocations = 100) {
+        val detector = MentionDetector('@')
+        
+        // Empty text
+        detector.detectMention("", 0).isActive.shouldBeFalse()
+        detector.detectMention("", 1).isActive.shouldBeFalse()
+        
+        // Cursor at 0
+        detector.detectMention("@test", 0).isActive.shouldBeFalse()
+        
+        // Cursor beyond text length
+        detector.detectMention("@test", 100).isActive.shouldBeFalse()
+        
+        // Negative cursor
+        detector.detectMention("@test", -1).isActive.shouldBeFalse()
+    }
+})

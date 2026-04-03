@@ -1,0 +1,216 @@
+---
+title: "Core"
+description: "Overview of CometChat's core chat features including instant messaging, media sharing, read receipts, typing indicators, user presence, reactions, mentions, threaded conversations, and moderation."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chat-uikit-kotlin` (Kotlin XML Views), `com.cometchat:chat-uikit-compose` (Jetpack Compose) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` — must complete before rendering any component |
+| Core features | Instant Messaging, Media Sharing, Read Receipts, Mark as Unread, Typing Indicator, User Presence, Reactions, Mentions, Quoted Reply, Threaded Conversations, Moderation, Report Message, Group Chat |
+| Key components | `CometChatConversations`, `CometChatMessageList`, `CometChatMessageComposer`, `CometChatMessageHeader`, `CometChatUsers`, `CometChatGroups`, `CometChatGroupMembers`, `CometChatMessageInformation`, `CometChatThreadHeader` |
+| Theming | See [Theming](/ui-kit/android/v6/theme-introduction) |
+
+</Accordion>
+
+The UI Kit components work together to deliver a complete chat experience. The sections below map each core feature to the components that power it.
+
+## Instant Messaging
+
+Real-time text messaging — users can send and receive instant messages.
+
+<Frame>
+  <img src="/images/4c141125-Instant_Messaging-3e86359342605c94dc912604de8f6617.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Enables users to write and send text messages. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Renders sent and received messages using text bubbles. |
+
+## Media Sharing
+
+Share images, videos, audio files, and documents within conversations.
+
+<Frame>
+  <img src="/images/8fa177a9-Media_Sharing-e84fa670d754f58294c0c31611107ef7.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Provides an action sheet with options for sharing media files. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Renders media message bubbles — [Image](/ui-kit/android/v6/message-bubble-styling#image-bubble), [File](/ui-kit/android/v6/message-bubble-styling#file-bubble), [Audio](/ui-kit/android/v6/message-bubble-styling#audio-bubble), [Video](/ui-kit/android/v6/message-bubble-styling#video-bubble). |
+
+## Read Receipts
+
+Visibility into message status — delivered and read indicators.
+
+<Frame>
+  <img src="/images/f829cdd9-Read_receipts-a80d8b2b78b4491ef118cf971d26172f.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Displays delivery status of the last message in each conversation item. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Shows read receipt status on every message bubble. |
+| [CometChatMessageInformation](/ui-kit/android/v6/component-styling#message-information) | Shows detailed delivery and read status for a specific sent message. |
+
+## Mark as Unread
+
+Users can manually mark messages as unread to revisit important conversations later. The message list can start from the first unread message automatically.
+
+<Frame>
+  <img src="/images/mark-as-unread.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Provides the "Mark as unread" option in message actions and supports starting from the first unread message. |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Reflects updated unread count in real-time. |
+
+## Typing Indicators
+
+Shows when a user is typing a response in real-time.
+
+<Frame>
+  <img src="/images/487fa6c8-Typing_Indicator-7031ffbfb2da1bca5f70799de5250157.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Shows real-time typing status in conversation items. |
+| [CometChatMessageHeader](/ui-kit/android/v6/message-header) | Displays a "typing..." indicator when the other user or a group member is typing. |
+
+## User Presence
+
+See whether contacts are online or offline.
+
+<Frame>
+  <img src="/images/7fa65ca5-User_Presence-10eed341028f3a7812c410accc46fa66.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Shows user presence in conversation items. |
+| [CometChatMessageHeader](/ui-kit/android/v6/message-header) | Displays user presence in the chat header. |
+| [CometChatUsers](/ui-kit/android/v6/users) | Shows presence indicators in the user list. |
+| [CometChatGroupMembers](/ui-kit/android/v6/group-members) | Shows presence indicators for group members. |
+
+## Reactions
+
+React to messages with emojis without typing a full response.
+
+<Frame>
+  <img src="/images/d2e11729-Reactions-683bff07964d09dee60dec2d7e4f25d9.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Displays reactions on message bubbles and provides the reaction picker. |
+
+## Mentions
+
+Address specific users in a conversation by typing `@` to trigger mention suggestions.
+
+<Frame>
+  <img src="/images/3baa8c0d-Mentions-d49539d8def32f2c894fc16c51fcf89e.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Shows where users have been mentioned from the conversation list. |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Triggers mention suggestions on `@` and inserts formatted mentions. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Renders mentions with distinct styling in the message flow. |
+
+## Threaded Conversations
+
+Respond directly to a specific message, keeping conversations organized.
+
+<Frame>
+  <img src="/images/a6e3a880-Threads-5f934d4ff0595625af777471e5e162dc.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatThreadHeader](/ui-kit/android/v6/threaded-messages-header) | Displays all replies made to a particular message. |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Allows composing messages within a thread. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Displays threaded messages in context. |
+
+## Quoted Replies
+
+Reply to specific messages by selecting "Reply" from the message action menu, maintaining context in the conversation.
+
+<Frame>
+  <img src="/images/android-quoted-reply.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Provides the "Reply" option in message actions. |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Shows the quoted reply above the input field for context. |
+
+## Group Chats
+
+Conversations with multiple participants — team collaborations, group discussions, and communities.
+
+<Frame>
+  <img src="/images/583bd229-Group_Conversation-19f24a8fa85e09324c28f4fd335e2951.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatGroups](/ui-kit/android/v6/groups) | Lists and manages groups. |
+| [CometChatGroupMembers](/ui-kit/android/v6/group-members) | Displays and manages group members with roles and actions. |
+
+## Moderation
+
+Automatically filter and manage inappropriate content based on predefined rules.
+
+<Frame>
+  <img src="/images/mobile-uikit-moderation-overview.png" />
+</Frame>
+
+<Note>
+Learn more about setting up moderation rules in the [Moderation](/moderation/overview) documentation.
+</Note>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Handles moderated messages, displaying blocked content based on your moderation settings. |
+
+## Report Message
+
+Users can report inappropriate messages by choosing from predefined reasons with optional remarks.
+
+<Note>
+Learn more about flagged messages in the [Flagged Messages](/moderation/flagged-messages) documentation.
+</Note>
+
+<Frame>
+  <img src="/images/android-flag-message.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Provides the "Report Message" option in message actions. |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Browse all available UI Kit components
+  </Card>
+  <Card title="Theme" icon="palette" href="/ui-kit/android/v6/theme-introduction">
+    Customize the look and feel of your chat UI
+  </Card>
+  <Card title="Call Features" icon="phone" href="/ui-kit/android/v6/call-features">
+    Add audio and video calling
+  </Card>
+  <Card title="AI Features" icon="robot" href="/ui-kit/android/v6/ai-features">
+    Explore AI-powered chat capabilities
+  </Card>
+</CardGroup>

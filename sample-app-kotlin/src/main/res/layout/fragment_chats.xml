@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Chats Fragment Layout
+    
+    Contains CometChatConversations component for displaying chat conversations.
+    Uses the component's built-in toolbar with overflow menu for search icon and user avatar.
+    
+    Validates: Requirements 8.1, 8.3, 8.4, 10.1
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ui.fragments.ChatsFragment">
+    tools:context=".ui.chats.ChatsFragment">
 
-    <com.cometchat.chatuikit.conversations.CometChatConversations
-        android:id="@+id/cometchat_conversations"
+    <com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+        android:id="@+id/conversationList"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

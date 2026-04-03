@@ -1,0 +1,510 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatarStyle
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Unit tests for [CometChatPollBubbleStyle].
+ *
+ * Validates:
+ * - Style extends CometChatMessageBubbleStyle (inheritance)
+ * - All properties are accessible and have valid values
+ * - Incoming and outgoing styles have different colors
+ * - optionAvatarStyle property is accessible
+ * - Wrapper properties are non-nullable and inherited from parent
+ */
+class CometChatPollBubbleStyleTest {
+
+    // Helper function to create a default avatar style for tests
+    private fun createTestAvatarStyle() = CometChatAvatarStyle(
+        backgroundColor = Color.Gray,
+        cornerRadius = 10.dp,
+        borderWidth = 0.dp,
+        borderColor = Color.Transparent,
+        textColor = Color.White,
+        textStyle = androidx.compose.ui.text.TextStyle()
+    )
+
+    private fun createTestStyle(
+        titleTextColor: Color = Color.Black,
+        optionTextColor: Color = Color.Black,
+        backgroundColor: Color = Color.White,
+        cornerRadius: androidx.compose.ui.unit.Dp = 12.dp
+    ) = CometChatPollBubbleStyle(
+        titleTextColor = titleTextColor,
+        titleTextStyle = androidx.compose.ui.text.TextStyle(),
+        optionTextColor = optionTextColor,
+        optionTextStyle = androidx.compose.ui.text.TextStyle(),
+        selectedRadioButtonStrokeColor = Color.Blue,
+        selectedRadioButtonStrokeWidth = 2.dp,
+        selectedRadioButtonCornerRadius = 12.dp,
+        selectedIconTint = Color.Blue,
+        unselectedRadioButtonStrokeColor = Color.Gray,
+        unselectedRadioButtonStrokeWidth = 1.dp,
+        unselectedRadioButtonCornerRadius = 12.dp,
+        unselectedIconTint = Color.Gray,
+        progressColor = Color.Blue,
+        progressBackgroundColor = Color.LightGray,
+        progressIndeterminateTint = Color.Gray,
+        voteCountTextColor = Color.Gray,
+        voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+        optionAvatarStyle = createTestAvatarStyle(),
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = 0.dp,
+        strokeColor = Color.Transparent,
+        padding = PaddingValues(0.dp),
+        senderNameTextColor = Color.Gray,
+        senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+        threadIndicatorTextColor = Color.Gray,
+        threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+        threadIndicatorIconTint = Color.Gray
+    )
+
+
+    @Test
+    fun `style extends CometChatMessageBubbleStyle`() {
+        /**
+         * Validates: Requirements 2.1
+         * Verifies that CometChatPollBubbleStyle extends CometChatMessageBubbleStyle
+         */
+        val style = createTestStyle()
+        assertTrue(style is CometChatMessageBubbleStyle)
+    }
+
+    @Test
+    fun `default style has valid properties`() {
+        val style = createTestStyle()
+
+        assertNotNull(style)
+        assertEquals(Color.White, style.backgroundColor)
+        assertEquals(12.dp, style.cornerRadius)
+        assertEquals(0.dp, style.strokeWidth)
+        assertEquals(Color.Transparent, style.strokeColor)
+        assertEquals(Color.Black, style.titleTextColor)
+        assertEquals(Color.Black, style.optionTextColor)
+        assertEquals(Color.Blue, style.selectedRadioButtonStrokeColor)
+        assertEquals(Color.Blue, style.progressColor)
+        assertNotNull(style.optionAvatarStyle)
+    }
+
+    @Test
+    fun `optionAvatarStyle property is accessible`() {
+        /**
+         * Validates: Requirements 1.5, 6.1
+         * Verifies that optionAvatarStyle property exists and can be accessed
+         */
+        val avatarStyle = CometChatAvatarStyle(
+            backgroundColor = Color.Red,
+            cornerRadius = 15.dp,
+            borderWidth = 1.dp,
+            borderColor = Color.Blue,
+            textColor = Color.White,
+            textStyle = androidx.compose.ui.text.TextStyle()
+        )
+        
+        val style = CometChatPollBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.Black,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.Blue,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.Blue,
+            unselectedRadioButtonStrokeColor = Color.Gray,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.Gray,
+            progressColor = Color.Blue,
+            progressBackgroundColor = Color.LightGray,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color.Gray,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = avatarStyle,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertNotNull(style.optionAvatarStyle)
+        assertEquals(Color.Red, style.optionAvatarStyle.backgroundColor)
+        assertEquals(15.dp, style.optionAvatarStyle.cornerRadius)
+        assertEquals(1.dp, style.optionAvatarStyle.borderWidth)
+        assertEquals(Color.Blue, style.optionAvatarStyle.borderColor)
+    }
+
+
+    @Test
+    fun `all properties are accessible`() {
+        val style = CometChatPollBubbleStyle(
+            titleTextColor = Color.Green,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.Yellow,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.Cyan,
+            selectedRadioButtonStrokeWidth = 3.dp,
+            selectedRadioButtonCornerRadius = 8.dp,
+            selectedIconTint = Color.Magenta,
+            unselectedRadioButtonStrokeColor = Color.DarkGray,
+            unselectedRadioButtonStrokeWidth = 2.dp,
+            unselectedRadioButtonCornerRadius = 10.dp,
+            unselectedIconTint = Color.LightGray,
+            progressColor = Color.Black,
+            progressBackgroundColor = Color.White,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color(0xFF123456),
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = Color.Red,
+            cornerRadius = 16.dp,
+            strokeWidth = 1.dp,
+            strokeColor = Color.Blue,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color(0xFF654321),
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color(0xFFABCDEF),
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color(0xFFFEDCBA)
+        )
+
+        // Content-specific properties
+        assertEquals(Color.Green, style.titleTextColor)
+        assertNotNull(style.titleTextStyle)
+        assertEquals(Color.Yellow, style.optionTextColor)
+        assertNotNull(style.optionTextStyle)
+        assertEquals(Color.Cyan, style.selectedRadioButtonStrokeColor)
+        assertEquals(3.dp, style.selectedRadioButtonStrokeWidth)
+        assertEquals(8.dp, style.selectedRadioButtonCornerRadius)
+        assertEquals(Color.Magenta, style.selectedIconTint)
+        assertEquals(Color.DarkGray, style.unselectedRadioButtonStrokeColor)
+        assertEquals(2.dp, style.unselectedRadioButtonStrokeWidth)
+        assertEquals(10.dp, style.unselectedRadioButtonCornerRadius)
+        assertEquals(Color.LightGray, style.unselectedIconTint)
+        assertEquals(Color.Black, style.progressColor)
+        assertEquals(Color.White, style.progressBackgroundColor)
+        assertEquals(Color.Gray, style.progressIndeterminateTint)
+        assertEquals(Color(0xFF123456), style.voteCountTextColor)
+        assertNotNull(style.voteCountTextStyle)
+        assertNotNull(style.optionAvatarStyle)
+        
+        // Wrapper properties (inherited from parent, non-nullable)
+        assertEquals(Color.Red, style.backgroundColor)
+        assertEquals(16.dp, style.cornerRadius)
+        assertEquals(1.dp, style.strokeWidth)
+        assertEquals(Color.Blue, style.strokeColor)
+        assertEquals(PaddingValues(8.dp), style.padding)
+        assertEquals(Color(0xFF654321), style.senderNameTextColor)
+        assertNotNull(style.senderNameTextStyle)
+        assertEquals(Color(0xFFABCDEF), style.threadIndicatorTextColor)
+        assertNotNull(style.threadIndicatorTextStyle)
+        assertEquals(Color(0xFFFEDCBA), style.threadIndicatorIconTint)
+    }
+
+
+    @Test
+    fun `style is immutable data class`() {
+        val style1 = createTestStyle()
+        val style2 = style1.copy(backgroundColor = Color.Black)
+
+        // Original should be unchanged
+        assertEquals(Color.White, style1.backgroundColor)
+        // Copy should have new value
+        assertEquals(Color.Black, style2.backgroundColor)
+        // Other properties should be same
+        assertEquals(style1.cornerRadius, style2.cornerRadius)
+        assertEquals(style1.titleTextColor, style2.titleTextColor)
+        assertEquals(style1.selectedRadioButtonStrokeColor, style2.selectedRadioButtonStrokeColor)
+        assertEquals(style1.optionAvatarStyle, style2.optionAvatarStyle)
+    }
+
+    @Test
+    fun `incoming and outgoing styles have different backgrounds`() {
+        val incomingBg = Color(0xFFF5F5F5)
+        val outgoingBg = Color(0xFF6852D6)
+
+        val incomingStyle = createTestStyle(
+            titleTextColor = Color.Black,
+            optionTextColor = Color.Black,
+            backgroundColor = incomingBg
+        )
+
+        val outgoingStyle = CometChatPollBubbleStyle(
+            titleTextColor = Color.White,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.White,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.White,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.White,
+            unselectedRadioButtonStrokeColor = Color.White,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.White,
+            progressColor = Color.White,
+            progressBackgroundColor = Color.DarkGray,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color.White,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = outgoingBg,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertTrue(incomingStyle.backgroundColor != outgoingStyle.backgroundColor)
+        assertTrue(incomingStyle.titleTextColor != outgoingStyle.titleTextColor)
+        assertTrue(incomingStyle.optionTextColor != outgoingStyle.optionTextColor)
+    }
+
+
+    @Test
+    fun `outgoing style has different text colors than incoming`() {
+        val incomingStyle = createTestStyle(
+            titleTextColor = Color.Black,
+            optionTextColor = Color.Black,
+            backgroundColor = Color(0xFFF5F5F5)
+        )
+
+        val outgoingStyle = CometChatPollBubbleStyle(
+            titleTextColor = Color.White,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.White,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.White,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.White,
+            unselectedRadioButtonStrokeColor = Color.White,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.White,
+            progressColor = Color.White,
+            progressBackgroundColor = Color.DarkGray,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color.White,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = Color(0xFF6852D6),
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify outgoing has different text colors
+        assertTrue(incomingStyle.titleTextColor != outgoingStyle.titleTextColor)
+        assertTrue(incomingStyle.optionTextColor != outgoingStyle.optionTextColor)
+        assertTrue(incomingStyle.voteCountTextColor != outgoingStyle.voteCountTextColor)
+        assertTrue(incomingStyle.selectedRadioButtonStrokeColor != outgoingStyle.selectedRadioButtonStrokeColor)
+        assertTrue(incomingStyle.progressColor != outgoingStyle.progressColor)
+    }
+
+    @Test
+    fun `radio button properties are accessible`() {
+        val style = createTestStyle()
+
+        // Selected radio button properties
+        assertEquals(Color.Blue, style.selectedRadioButtonStrokeColor)
+        assertEquals(2.dp, style.selectedRadioButtonStrokeWidth)
+        assertEquals(12.dp, style.selectedRadioButtonCornerRadius)
+        assertEquals(Color.Blue, style.selectedIconTint)
+
+        // Unselected radio button properties
+        assertEquals(Color.Gray, style.unselectedRadioButtonStrokeColor)
+        assertEquals(1.dp, style.unselectedRadioButtonStrokeWidth)
+        assertEquals(12.dp, style.unselectedRadioButtonCornerRadius)
+        assertEquals(Color.Gray, style.unselectedIconTint)
+    }
+
+
+    @Test
+    fun `progress properties are accessible`() {
+        val style = CometChatPollBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.Black,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.Blue,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.Blue,
+            unselectedRadioButtonStrokeColor = Color.Gray,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.Gray,
+            progressColor = Color.Green,
+            progressBackgroundColor = Color.Yellow,
+            progressIndeterminateTint = Color.Magenta,
+            voteCountTextColor = Color.Gray,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(Color.Green, style.progressColor)
+        assertEquals(Color.Yellow, style.progressBackgroundColor)
+        assertEquals(Color.Magenta, style.progressIndeterminateTint)
+    }
+
+    @Test
+    fun `vote count properties are accessible`() {
+        val style = CometChatPollBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.Black,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.Blue,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.Blue,
+            unselectedRadioButtonStrokeColor = Color.Gray,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.Gray,
+            progressColor = Color.Blue,
+            progressBackgroundColor = Color.LightGray,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color.Red,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(Color.Red, style.voteCountTextColor)
+        assertNotNull(style.voteCountTextStyle)
+    }
+
+
+    @Test
+    fun `wrapper properties are non-nullable and inherited from parent`() {
+        /**
+         * Validates: Requirements 2.1
+         * Verifies that wrapper properties are inherited from CometChatMessageBubbleStyle
+         * and are non-nullable (required in constructor)
+         */
+        val style = createTestStyle()
+
+        // Wrapper properties should be non-null (inherited from parent)
+        assertNotNull(style.backgroundColor)
+        assertNotNull(style.cornerRadius)
+        assertNotNull(style.strokeWidth)
+        assertNotNull(style.strokeColor)
+        assertNotNull(style.padding)
+        assertNotNull(style.senderNameTextColor)
+        assertNotNull(style.senderNameTextStyle)
+        assertNotNull(style.threadIndicatorTextColor)
+        assertNotNull(style.threadIndicatorTextStyle)
+        assertNotNull(style.threadIndicatorIconTint)
+    }
+
+    @Test
+    fun `title and option text properties are accessible`() {
+        val style = CometChatPollBubbleStyle(
+            titleTextColor = Color.Cyan,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionTextColor = Color.Magenta,
+            optionTextStyle = androidx.compose.ui.text.TextStyle(),
+            selectedRadioButtonStrokeColor = Color.Blue,
+            selectedRadioButtonStrokeWidth = 2.dp,
+            selectedRadioButtonCornerRadius = 12.dp,
+            selectedIconTint = Color.Blue,
+            unselectedRadioButtonStrokeColor = Color.Gray,
+            unselectedRadioButtonStrokeWidth = 1.dp,
+            unselectedRadioButtonCornerRadius = 12.dp,
+            unselectedIconTint = Color.Gray,
+            progressColor = Color.Blue,
+            progressBackgroundColor = Color.LightGray,
+            progressIndeterminateTint = Color.Gray,
+            voteCountTextColor = Color.Gray,
+            voteCountTextStyle = androidx.compose.ui.text.TextStyle(),
+            optionAvatarStyle = createTestAvatarStyle(),
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(Color.Cyan, style.titleTextColor)
+        assertNotNull(style.titleTextStyle)
+        assertEquals(Color.Magenta, style.optionTextColor)
+        assertNotNull(style.optionTextStyle)
+    }
+
+    @Test
+    fun `selectedRadioButtonStrokeWidth can be set to 2dp`() {
+        val style = createTestStyle()
+        assertEquals(2.dp, style.selectedRadioButtonStrokeWidth)
+    }
+
+    @Test
+    fun `unselectedRadioButtonStrokeWidth can be set to 1dp`() {
+        val style = createTestStyle()
+        assertEquals(1.dp, style.unselectedRadioButtonStrokeWidth)
+    }
+
+    @Test
+    fun `style can be cast to parent type`() {
+        /**
+         * Validates: Requirements 2.1
+         * Verifies that CometChatPollBubbleStyle can be used where CometChatMessageBubbleStyle is expected
+         */
+        val style: CometChatMessageBubbleStyle = createTestStyle()
+        
+        // Should be able to access parent properties through parent type
+        assertEquals(Color.White, style.backgroundColor)
+        assertEquals(12.dp, style.cornerRadius)
+        assertEquals(0.dp, style.strokeWidth)
+        assertEquals(Color.Transparent, style.strokeColor)
+    }
+}

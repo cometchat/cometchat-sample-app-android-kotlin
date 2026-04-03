@@ -1,0 +1,252 @@
+<resources>
+    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+    <string name="cometchat_user" translatable="true">utilisateur</string>
+    <string name="cometchat_group" translatable="true">groupe</string>
+    <string name="cometchat_conversation" translatable="true">conversation</string>
+    <string name="cometchat_reply_lowercase" translatable="true">répondre</string>
+    <string name="cometchat_call" translatable="true">Appel</string>
+    <string name="cometchat_sticker_lowercase" translatable="true">autocollant</string>
+    <string name="cometchat_message" translatable="true">Écrire un message</string>
+    <string name="cometchat_start_conv_hint" translatable="true">Appuyez pour démarrer une conversation</string>
+    <string name="cometchat_admin" translatable="true">Administrateur</string>
+    <string name="cometchat_moderator" translatable="true">Modérateur</string>
+    <string name="cometchat_member" translatable="true">Membre</string>
+    <string name="cometchat_join" translatable="true">Rejoindre</string>
+    <string name="cometchat_camera_perm" translatable="true">Veuillez accorder la permission d’utiliser la caméra dans les paramètres de l’application</string>
+    <string name="cometchat_storage_perm" translatable="true">Veuillez accorder la permission de stockage dans les paramètres de l’application</string>
+    <string name="cometchat_file_not_exist" translatable="true">Le fichier n’existe pas</string>
+    <string name="cometchat_ended" translatable="true">Terminé</string>
+    <string name="cometchat_outgoing" translatable="true">Sortant</string>
+    <string name="cometchat_incoming" translatable="true">Entrant</string>
+    <string name="cometchat_missed_call" translatable="true">Manqué</string>
+    <string name="cometchat_cancel_call" translatable="true">Annulé</string>
+    <string name="cometchat_rejected_call" translatable="true">Rejeté</string>
+    <string name="cometchat_busy_call" translatable="true">Occupé</string>
+    <string name="cometchat_you" translatable="true">Vous</string>
+    <string name="cometchat_edit" translatable="true">Modifier</string>
+    <string name="cometchat_delete" translatable="true">Supprimer</string>
+    <string name="cometchat_share" translatable="true">Partager</string>
+    <string name="cometchat_copy" translatable="true">Copier</string>
+    <string name="cometchat_translate" translatable="true">Traduire</string>
+    <string name="cometchat_message_privately" translatable="true">Envoyer un message privé</string>
+    <string name="cometchat_reply_uppercase" translatable="true">Répondre</string>
+    <string name="cometchat_info" translatable="true">Info</string>
+    <string name="cometchat_online" translatable="true">En ligne</string>
+    <string name="cometchat_offline" translatable="true">Hors ligne</string>
+    <string name="cometchat_attach_image" translatable="true">Joindre une image</string>
+    <string name="cometchat_attach_video" translatable="true">Joindre une vidéo</string>
+    <string name="cometchat_poll" translatable="true">Sondage</string>
+    <string name="cometchat_camera" translatable="true">Caméra</string>
+    <string name="cometchat_yes" translatable="true">Oui</string>
+    <string name="cometchat_shared_sticker" translatable="true">A partagé un autocollant</string>
+    <string name="cometchat_attach_audio" translatable="true">Joindre un fichier audio</string>
+    <string name="cometchat_attach_document" translatable="true">Joindre un document</string>
+    <string name="cometchat_no" translatable="true">Non</string>
+    <string name="cometchat_question" translatable="true">Question</string>
+    <string name="cometchat_collaborative_whiteboard" translatable="true">Tableau blanc collaboratif</string>
+    <string name="cometchat_collaborative_doc" translatable="true">Document collaboratif</string>
+    <string name="cometchat_yesterday" translatable="true">Hier</string>
+    <string name="cometchat_ban" translatable="true">Bannir</string>
+    <string name="cometchat_document" translatable="true">Document</string>
+    <string name="cometchat_polls" translatable="true">Sondages</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">Autocollant</string>
+    <string name="cometchat_custom_message_whiteboard" translatable="true">Tableau blanc</string>
+    <string name="cometchat_error" translatable="true">Erreur</string>
+    <string name="cometchat_added" translatable="true">ajouté</string>
+    <string name="cometchat_kicked_by" translatable="true">expulsé</string>
+    <string name="cometchat_left" translatable="true">quitté</string>
+    <string name="cometchat_joined" translatable="true">rejoint</string>
+    <string name="cometchat_unban" translatable="true">Débannir</string>
+    <string name="cometchat_made" translatable="true">fait</string>
+    <string name="cometchat_participant" translatable="true">Participant</string>
+    <string name="cometchat_translation_error" translatable="true">La langue sélectionnée pour la traduction est identique à la langue du message original</string>
+    <string name="cometchat_group_call" translatable="true">Appel de groupe</string>
+    <string name="cometchat_updating" translatable="true">Mise à jour</string>
+    <string name="cometchat_chats" translatable="true">Chats</string>
+    <string name="cometchat_downloading" translatable="true">Téléchargement</string>
+    <string name="cometchat_today" translatable="true">Aujourd’hui</string>
+    <string name="cometchat_replies" translatable="true">Réponses</string>
+    <string name="cometchat_new_message" translatable="true">nouveau message</string>
+    <string name="cometchat_new_messages" translatable="true">nouveaux messages</string>
+    <string name="cometchat_channel_description" translatable="true">Description de la chaîne</string>
+    <string name="cometchat_action_item" translatable="true">action_item</string>
+    <string name="cometchat_try_again" translatable="true">Réessayer</string>
+    <string name="cometchat_something_went_wrong" translatable="true">Un problème est survenu.</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Transférer la propriété</string>
+    <string name="cometchat_add_members" translatable="true">Ajouter des membres</string>
+    <string name="cometchat_owner" translatable="true">Propriétaire</string>
+    <string name="cometchat_banned" translatable="true">Banni</string>
+    <string name="cometchat_calling" translatable="true">appel en cours</string>
+    <string name="cometchat_accepted" translatable="true">accepté</string>
+    <string name="cometchat_unanswered" translatable="true">sans réponse</string>
+    <string name="cometchat_message_receipt" translatable="true">Accusé de réception du message</string>
+    <string name="cometchat_file_download_failed" translatable="true">Échec du téléchargement du fichier.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Suggérer une réponse</string>
+    <string name="cometchat_enter_a_text" translatable="true">Saisir un texte</string>
+    <string name="cometchat_form_completion_message" translatable="true">Merci d’avoir rempli le formulaire.</string>
+    <string name="cometchat_conversation_summary" translatable="true">Résumé de la conversation</string>
+    <string name="cometchat_generate_summary" translatable="true">Générer un résumé</string>
+    <string name="cometchat_more_times" translatable="true">Plus de créneaux</string>
+    <string name="cometchat_select_a_day" translatable="true">Sélectionner un jour</string>
+    <string name="cometchat_meeting_scheduled" translatable="true">Votre réunion a été programmée.</string>
+    <string name="cometchat_meet_with" translatable="true">"Rencontre avec "</string>
+    <string name="cometchat_min_meeting" translatable="true">min de réunion</string>
+    <string name="cometchat_select_a_time" translatable="true">Sélectionnez une heure</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">Aucun créneau horaire disponible pour cette date. Veuillez essayer une autre date.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Réserver un nouveau créneau</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Un problème est survenu. Veuillez réessayer.</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Le créneau n’est plus disponible. Veuillez en choisir un autre.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Aucun créneau horaire disponible.</string>
+    <string name="cometchat_tag_item" translatable="true">Taguer l’élément</string>
+    <string name="cometchat_you_can_mention_up_to" translatable="true">Vous pouvez mentionner jusqu’à</string>
+    <string name="cometchat_time_at_a_time" translatable="true">fois à la fois</string>
+    <string name="cometchat_reply" translatable="true">Répondre</string>
+    <string name="cometchat_all" translatable="true">Tous</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Appuyez pour retirer</string>
+    <string name="cometchat_avatar" translatable="true">CometChat Avatar</string>
+    <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Aucune conversation pour l’instant</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Commencez une nouvelle discussion ou invitez d’autres personnes à rejoindre la\nconversation.</string>
+    <string name="cometchat_error_conversations_title" translatable="true">Oups!</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">On dirait qu’il y a un problème.\nVeuillez réessayer.</string>
+    <string name="cometchat_typing" translatable="true">Tape…</string>
+    <string name="cometchat_is_typing" translatable="true">est en train d’écrire…</string>
+    <string name="cometchat_message_image" translatable="true">Photo</string>
+    <string name="cometchat_message_video" translatable="true">Vidéo</string>
+    <string name="cometchat_message_audio" translatable="true">Audio</string>
+    <string name="cometchat_message_sticker" translatable="true">Autocollant</string>
+    <string name="cometchat_message_gif" translatable="true">GIF</string>
+    <string name="cometchat_message_poll" translatable="true">Sondage</string>
+    <string name="cometchat_message_document" translatable="true">Document</string>
+    <string name="cometchat_message_location" translatable="true">Localisation</string>
+    <string name="cometchat_message_collaborative_whiteboard" translatable="true">Tableau blanc collaboratif</string>
+    <string name="cometchat_message_collaborative_document" translatable="true">Document collaboratif</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Supprimer cette conversation ?</string>
+    <string name="cometchat_delete_message_title" translatable="true">Supprimer ce message ?</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.</string>
+    <string name="cometchat_delete_message_subtitle" translatable="true">Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.</string>
+    <string name="cometchat_cancel" translatable="true">Annuler</string>
+    <string name="cometchat_reaction_list_error" translatable="true">On dirait qu’il y a un problème.\nVeuillez réessayer.</string>
+    <string name="cometchat_text_translated" translatable="true">Texte traduit</string>
+    <string name="cometchat_composer_place_holder_text" translatable="true">Tapez votre message…</string>
+    <string name="cometchat_last_seen" translatable="true">Dernière connexion</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Impossible de supprimer la conversation</string>
+    <string name="cometchat_message_info" translatable="true">Informations sur le message</string>
+    <string name="cometchat_read" translatable="true">Lu</string>
+    <string name="cometchat_deliver" translatable="true">Distribué</string>
+    <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
+    <string name="cometchat_message_delete_error" translatable="true">Impossible de supprimer le message</string>
+    <string name="cometchat_no_stickers_available" translatable="true">Aucun autocollant disponible</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">Vous n’avez pas encore d’autocollants.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">On dirait qu’il y a un problème.\n Veuillez réessayer.</string>
+    <string name="cometchat_retry" translatable="true">Réessayer</string>
+    <string name="cometchat_group_members_empty_title" translatable="true">Aucun membre disponible</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Ajoutez des membres au groupe et voyez-les s’afficher ici.</string>
+    <string name="cometchat_remove" translatable="true">Retirer</string>
+    <string name="cometchat_scope_change" translatable="true">Modifier le rôle</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Vous pouvez modifier les rôles pour gérer les permissions et responsabilités du groupe.</string>
+    <string name="cometchat_save" translatable="true">Enregistrer</string>
+    <string name="cometchat_users" translatable="true">Utilisateurs</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">Aucun utilisateur disponible</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Ajoutez des contacts pour démarrer des conversations et les voir listés ici.</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">Oups!</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">On dirait qu’il y a un problème. Veuillez réessayer.</string>
+    <string name="cometchat_search" translatable="true">Recherche</string>
+    <string name="cometchat_groups" translatable="true">Groupes</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">Aucun groupe trouvé</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Créez ou rejoignez des groupes pour les voir listés ici et commencer à collaborer.</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">Oups!</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">On dirait qu’il y a un problème. Veuillez réessayer.</string>
+    <string name="cometchat_members" translatable="true">Membres</string>
+    <string name="cometchat_call_logs_title" translatable="true">Appels</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Aucun historique d’appels pour l’instant</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Passez ou recevez des appels pour voir votre historique ici</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">Oups!</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">On dirait qu’il y a un problème. Veuillez réessayer.</string>
+    <string name="cometchat_this_message_deleted" translatable="true">Ce message a été supprimé</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">Ce type de message n’est pas pris en charge</string>
+    <string name="cometchat_message_form" translatable="true">Formulaire</string>
+    <string name="cometchat_message_card" translatable="true">Carte</string>
+    <string name="cometchat_message_scheduler" translatable="true">Planificateur</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Vous pouvez mentionner jusqu’à 10 fois à la fois</string>
+    <string name="cometchat_ask_question" translatable="true">Poser une question</string>
+    <string name="cometchat_options" translatable="true">Options</string>
+    <string name="cometchat_send" translatable="true">Envoyer</string>
+    <string name="cometchat_submit" translatable="true">Soumettre</string>
+    <string name="cometchat_add" translatable="true">Ajouter</string>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">il y a une minute</string>
+
+    <!-- Plurals -->
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true">
+        <item quantity="one" translatable="true">il y a %d min</item>
+        <item quantity="other" translatable="true">il y a %d minutes</item>
+    </plurals>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true">
+        <item quantity="one" translatable="true">il y a %d heure</item>
+        <item quantity="other" translatable="true">il y a %d heures</item>
+    </plurals>
+
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s a initié un appel de groupe</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s a initié un appel de groupe</string>
+    <string name="cometchat_edited" translatable="true">Modifié</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Accepter</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Refuser</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Appel %s entrant</string>
+    <string name="cometchat_kick">Expulser</string>
+    <string name="cometchat_open_document_to_edit_content_together">Ouvrir un document pour modifier le contenu ensemble</string>
+    <string name="cometchat_open_document">Ouvrir un document</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together">Ouvrir un tableau blanc pour modifier le contenu ensemble</string>
+    <string name="cometchat_open_whiteboard">Ouvrir le tableau blanc</string>
+    <string name="cometchat_video_call">Appel vidéo</string>
+    <string name="cometchat_audio_call">Appel audio</string>
+    <string name="cometchat_incoming_call_audio">audio</string>
+    <string name="cometchat_incoming_call_video">vidéo</string>
+    <string name="cometchat_permission_required">Autorisation Requise</string>
+    <string name="cometchat_microphone_permission_warning">L\'autorisation du microphone est requise pour enregistrer l\'audio.</string>
+    <string name="cometchat_camera_permission_warning">L\'autorisation de la caméra est requise pour prendre des photos.</string>
+    <string name="cometchat_storage_permission_warning">L\'autorisation de stockage est requise pour accéder aux fichiers.</string>
+    <string name="cometchat_cancel_button">Annuler</string>
+    <string name="cometchat_settings_button">Paramètres</string>
+    <string name="cometchat_messages">Berichten</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Recherche</string>
+    <string name="cometchat_menu_conversation_summary">Résumé de la conversation</string>
+    <string name="cometchat_see_more">Voir plus</string>
+    <string name="cometchat_no_results">Aucun résultat</string>
+    <string name="cometchat_no_matches_found">Nous n\'avons trouvé aucune correspondance. Veuillez essayer un mot-clé de recherche différent.</string>
+    <string name="cometchat_start_your_search">Commencez votre recherche</string>
+    <string name="cometchat_search_for_conversations_or_messages">Recherchez des conversations ou des messages en tapant un mot-clé ci-dessus.</string>
+    <string name="cometchat_moderation_block_message">Votre message a été bloqué en raison des politiques de modération.</string>
+    <string name="cometchat_no_conversations_history_title">Aucun historique de conversation trouvé</string>
+    <string name="cometchat_ask_anything">Demandez n\'importe quoi</string>
+    <string name="cometchat_something_went_wrong_try_again">Quelque chose a mal tourné de notre côté. Veuillez réessayer</string>
+    <string name="cometchat_no_conversations_history_subtitle">Commencez un chat en appuyant sur le bouton \'Nouvelle conversation\'</string>
+    <string name="cometchat_new_chat">Nouvelle conversation</string>
+    <string name="cometchat_chat_history">Historique des chats</string>
+    <string name="cometchat_unread" translatable="true">Non lu</string>
+    <string name="cometchat_photos" translatable="true">Photos</string>
+    <string name="cometchat_videos" translatable="true">Vidéos</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Documents</string>
+    <string name="cometchat_links" translatable="true">Liens</string>
+    <string name="cometchat_details" translatable="true">Détails</string>
+    <string name="cometchat_report">Signaler</string>
+    <string name="cometchat_report_a_message">Signaler un message</string>
+    <string name="cometchat_report_message_title">Signaler un message</string>
+    <string name="cometchat_report_message_description">Signalez cette conversation si elle enfreint nos Standards de la communauté. Nous n’informerons pas le compte concerné.</string>
+    <string name="cometchat_report_reason_label">Raison</string>
+    <string name="cometchat_report_optional_label">(Facultatif)</string>
+    <string name="cometchat_report_remark_hint">Fournissez plus de contexte pour votre signalement…</string>
+    <string name="cometchat_report_button_report">Signaler</string>
+    <string name="cometchat_report_success_message">Message signalé</string>
+    <string name="cometchat_report_error_message">Échec du signalement</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Une erreur s’est produite. Veuillez vérifier et réessayer.</string>
+    <string name="cometchat_unable_to_flag_message">Impossible de signaler le message</string>
+    <string name="cometchat_flag_message_success">Message signalé</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Contenu indésirable</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Contenu sexuel</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Harcèlement / Intimidation</string>
+    <string name="cometchat_notify_everyone_in_this_group">Notifier tout le monde dans ce groupe</string>
+    <string name="cometchat_notify_all" translatable="true">tous</string>
+
+</resources>

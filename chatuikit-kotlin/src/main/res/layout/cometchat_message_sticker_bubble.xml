@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/cometchat_240dp"
+    android:layout_height="@dimen/cometchat_196dp">
+
+    <ImageView
+        android:id="@+id/cometchat_sticker_bubble_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:importantForAccessibility="no" />
+
+</LinearLayout>

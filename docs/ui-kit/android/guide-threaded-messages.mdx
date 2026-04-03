@@ -1,0 +1,294 @@
+---
+title: "Threaded Messages"
+sidebarTitle: "Threaded Messages"
+description: "Implement threaded replies so users can respond to specific messages in a focused sub-conversation."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key components | `CometChatThreadHeader`, `CometChatMessageList`, `CometChatMessageComposer` |
+| Purpose | Implement threaded replies so users can respond to specific messages in a focused sub-conversation. |
+| Related | [Threaded Messages Header](/ui-kit/android/v6/threaded-messages-header), [Message List](/ui-kit/android/v6/message-list), [Message Composer](/ui-kit/android/v6/message-composer), [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+Implement threaded replies in your Android chat app using CometChat's UI Kit, enabling users to reply to specific messages in a focused sub-conversation.
+
+## Overview
+
+Threaded replies allow users to respond directly to a specific message in one-on-one or group chats, improving context and readability:
+
+- Organizes related replies into a dedicated thread view.  
+- Mirrors functionality in Slack, Discord, and WhatsApp.  
+- Maintains clarity in active conversations.
+
+Users tap a message → open thread screen → view parent message + replies → compose within thread.
+
+## Prerequisites
+
+- Android project in Android Studio.  
+- CometChat Android UI Kit v5 (`com.cometchat:chatuikit-kotlin` or `com.cometchat:chatuikit-jetpack`) added to your `build.gradle`.  
+- Valid CometChat **App ID**, **Auth Key**, and **Region** initialized.  
+- `<uses-permission android:name="android.permission.INTERNET"/>` in `AndroidManifest.xml`.  
+- Logged-in user via `CometChatUIKit.login()`.  
+- Existing `MessagesActivity` using `CometChatMessageList`.
+
+## Components
+
+| Component                  | Role                                                          |
+|----------------------------|---------------------------------------------------------------|
+| `activity_thread_message.xml` | Defines thread UI: header, message list, composer, unblock. |
+| `ThreadMessageActivity`    | Hosts thread screen; initializes UI & ViewModel.             |
+| `ThreadMessageViewModel`   | Fetches parent message & thread replies; manages state.       |
+| `CometChatMessageList`     | Displays threaded replies when given parent message ID.      |
+| `CometChatMessageComposer` | Composes and sends replies with `parentMessageId`.           |
+| `CometChatThreadHeader`    | Displays the parent message context at the top of the thread.|
+
+## Integration Steps
+
+### Step 1: Add Thread Layout
+
+Create `res/layout/activity_thread_message.xml`:
+
+```xml activity_thread_message.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+        android:id="@+id/threadHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+        android:id="@+id/threadMessageList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/unblockLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/unblockBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unblock" />
+    </LinearLayout>
+
+    <com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+        android:id="@+id/threadComposer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
+```
+
+### Step 2: Set up ThreadMessageActivity
+
+Initialize UI & handle blocked-user flows:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+import com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+import com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+
+class ThreadMessageActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_thread_message)
+        val header = findViewById<CometChatThreadHeader>(R.id.threadHeader)
+        val messageList = findViewById<CometChatMessageList>(R.id.threadMessageList)
+        val composer = findViewById<CometChatMessageComposer>(R.id.threadComposer)
+        val unblock = findViewById<View>(R.id.unblockLayout)
+
+        val rawMessage = intent.getStringExtra("raw_json")
+        val viewModel = ViewModelProvider(this)[ThreadMessageViewModel::class.java]
+        if (rawMessage != null) {
+            val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
+            viewModel.setParentMessage(parentMessage)
+        }
+
+        lifecycleScope.launch {
+            viewModel.parentMessage.collect { msg ->
+                msg?.let {
+                    header.setParentMessage(it)
+                    messageList.setParentMessage(it.id)
+                    composer.setParentMessageId(it.id)
+                }
+            }
+        }
+
+        // Handle blocked user
+        if (isBlockedByMe) {
+            composer.visibility = View.GONE
+            unblock.visibility = View.VISIBLE
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.compose.presentation.threadheader.ui.CometChatThreadHeader
+import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+
+@Composable
+fun ThreadMessageScreen(rawJson: String, isBlockedByMe: Boolean = false) {
+    val parentMessage = remember {
+        BaseMessage.processMessage(JSONObject(rawJson))
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        CometChatThreadHeader(parentMessage = parentMessage)
+
+        CometChatMessageList(
+            parentMessageId = parentMessage.id,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (isBlockedByMe) {
+            UnblockPrompt(onUnblock = { /* unblock logic */ })
+        } else {
+            CometChatMessageComposer(parentMessageId = parentMessage.id)
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### Step 3: Create ThreadMessageViewModel
+
+Store parent message and expose via StateFlow:
+
+```kotlin lines
+class ThreadMessageViewModel : ViewModel() {
+    private val _parentMessage = MutableStateFlow<BaseMessage?>(null)
+    val parentMessage: StateFlow<BaseMessage?> = _parentMessage.asStateFlow()
+    var id: Long = 0
+        private set
+
+    fun setParentMessage(message: BaseMessage?) {
+        if (message != null) {
+            id = message.id
+            _parentMessage.value = message
+        }
+    }
+}
+```
+
+### Step 4: Hook Thread Entry from Message List
+
+In your `MessagesActivity`, capture thread icon taps:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+messageList.setOnThreadRepliesClick { context, baseMessage, template ->
+    val intent = Intent(context, ThreadMessageActivity::class.java)
+    intent.putExtra("raw_json", baseMessage.rawMessage.toString())
+    intent.putExtra("reply_count", baseMessage.replyCount)
+    context.startActivity(intent)
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+CometChatMessageList(
+    user = user,
+    onThreadRepliesClick = { baseMessage, template ->
+        navController.navigate("thread/${baseMessage.rawMessage}")
+    },
+    modifier = Modifier.weight(1f)
+)
+```
+</Tab>
+</Tabs>
+
+## Implementation Flow
+
+1. User taps thread icon on a message.  
+2. `Intent` launches `ThreadMessageActivity` with raw message JSON (or Compose navigation).  
+3. ViewModel stores parent message and exposes via StateFlow.  
+4. Header & `MessageList` render parent + replies.  
+5. Composer sends new replies under the parent message.  
+6. Live updates flow automatically via UI Kit.
+
+## Customization Options
+
+- **Styling:** Override theme attributes or call setter methods on views.  
+- **Header Height:** `threadHeader.setMaxHeight(...)`.  
+- **Hide Reactions:** `threadHeader.setReactionVisibility(View.GONE)`.
+
+## Filtering & Edge Cases
+
+- **Group Membership:** Verify membership before enabling composer.  
+- **Empty Thread:** Show placeholder if no replies.  
+- **Blocked Users:** Composer hidden; use unblock layout.
+
+## Blocked-User Handling
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+if (user.isBlockedByMe) {
+    composer.visibility = View.GONE
+    unblockLayout.visibility = View.VISIBLE
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+if (user.isBlockedByMe) {
+    UnblockPrompt(onUnblock = { /* unblock logic */ })
+} else {
+    CometChatMessageComposer(parentMessageId = parentMessage.id)
+}
+```
+</Tab>
+</Tabs>
+
+## Group vs. User-Level Differences
+
+| Scenario                   | Behavior                                      |
+|----------------------------|-----------------------------------------------|
+| `ReceiverType.USER`       | Direct replies allowed if not blocked.        |
+| `ReceiverType.GROUP`      | Checks membership before thread access.       |
+| Blocked User              | Composer hidden; unblock layout shown.        |
+| Not in Group              | Show option to join group first.              |
+
+## Summary / Feature Matrix
+
+| Feature                   | Component / Method                                   |
+|---------------------------|------------------------------------------------------|
+| Show thread option        | `setOnThreadRepliesClick()`                          |
+| Display thread messages   | `messageList.setParentMessage(parentMessage.getId())`|
+| Show parent message       | `header.setParentMessage(parentMessage)`             |
+| Compose reply             | `composer.setParentMessageId(parentMessage.getId())` |
+| Handle blocked users      | `isBlockedByMe()`, hide composer + show unblock UI  |
+
+## Next Steps & Further Reading
+
+<CardGroup>
+  <Card title="Android Sample App (Kotlin)">
+    Explore this feature in the CometChat SampleApp:
+    [GitHub → SampleApp](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin)
+  </Card>
+</CardGroup>

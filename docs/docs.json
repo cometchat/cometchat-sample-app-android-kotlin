@@ -1,0 +1,127 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "CometChat Android UI Kit",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#6852D6",
+    "light": "#8B7BE8",
+    "dark": "#5243AA"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": " ",
+        "pages": [
+          "ui-kit/android/overview",
+          "ui-kit/android/architecture-data-flow",
+          {
+            "group": "Getting Started",
+            "pages": [
+              "ui-kit/android/getting-started",
+              "ui-kit/android/getting-started-kotlin",
+              "ui-kit/android/getting-started-jetpack",
+              "ui-kit/android/conversation-message-view",
+              "ui-kit/android/one-to-one-chat",
+              "ui-kit/android/tab-based-chat",
+              "ui-kit/android/calling-integration"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              {
+                "group": "Chat",
+                "pages": [
+                  "ui-kit/android/core-features",
+                  "ui-kit/android/extensions",
+                  "ui-kit/android/ai-features"
+                ]
+              },
+              "ui-kit/android/call-features"
+            ]
+          },
+          {
+            "group": "Theming",
+            "pages": [
+              "ui-kit/android/theme-introduction",
+              "ui-kit/android/color-resources",
+              "ui-kit/android/component-styling",
+              "ui-kit/android/message-bubble-styling",
+              "ui-kit/android/localize",
+              "ui-kit/android/sound-manager"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "ui-kit/android/customization-overview",
+              "ui-kit/android/customization-view-slots",
+              "ui-kit/android/customization-styles",
+              "ui-kit/android/customization-viewmodel-data",
+              "ui-kit/android/customization-events",
+              "ui-kit/android/customization-state-views",
+              "ui-kit/android/customization-text-formatters",
+              "ui-kit/android/customization-menu-options"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "ui-kit/android/components-overview",
+              "ui-kit/android/conversations",
+              "ui-kit/android/users",
+              "ui-kit/android/groups",
+              "ui-kit/android/group-members",
+              "ui-kit/android/message-header",
+              "ui-kit/android/message-list",
+              "ui-kit/android/message-composer",
+              "ui-kit/android/message-template",
+              "ui-kit/android/threaded-messages-header",
+              "ui-kit/android/incoming-call",
+              "ui-kit/android/outgoing-call",
+              "ui-kit/android/call-buttons",
+              "ui-kit/android/call-logs"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "ui-kit/android/methods",
+              "ui-kit/android/events"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "ui-kit/android/guide-overview",
+              "ui-kit/android/guide-threaded-messages",
+              "ui-kit/android/guide-block-unblock-user",
+              "ui-kit/android/guide-new-chat",
+              "ui-kit/android/guide-message-privately",
+              "ui-kit/android/guide-call-log-details",
+              "ui-kit/android/guide-group-chat",
+              "ui-kit/android/custom-text-formatter-guide",
+              "ui-kit/android/mentions-formatter-guide",
+              "ui-kit/android/shortcut-formatter-guide"
+            ]
+          },
+          {
+            "group": "Migration Guide",
+            "pages": [
+              "ui-kit/android/upgrading-from-v5"
+            ]
+          },
+          "ui-kit/android/troubleshooting",
+          "ui-kit/android/link/sample",
+          "ui-kit/android/link/figma",
+          "ui-kit/android/link/changelog"
+        ]
+      }
+    ]
+  }
+}

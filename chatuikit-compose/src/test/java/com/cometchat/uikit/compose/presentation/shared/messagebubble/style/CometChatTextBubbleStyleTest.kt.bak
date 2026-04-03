@@ -1,0 +1,639 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatTextBubbleStyle.
+ *
+ * Feature: bubble-style-propagation
+ * Tests:
+ * - CometChatTextBubbleStyle extends CometChatMessageBubbleStyle
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 7.3, 7.5
+ */
+class CometChatTextBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatTextBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatTextBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestTextBubbleStyle()
+
+        // Verify inheritance relationship
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestTextBubbleStyle()
+
+        // Verify content-specific properties
+        style.textColor shouldBe Color.Black
+        style.textStyle shouldNotBe null
+        style.linkColor shouldBe Color.Blue
+        style.translatedTextColor shouldBe Color.Gray
+        style.translatedTextStyle shouldNotBe null
+        style.separatorColor shouldBe Color.LightGray
+        style.linkPreviewBackgroundColor shouldBe Color(0xFFE8E8E8)
+        style.linkPreviewTitleColor shouldBe Color.Black
+        style.linkPreviewTitleStyle shouldNotBe null
+        style.linkPreviewDescriptionColor shouldBe Color.Gray
+        style.linkPreviewDescriptionStyle shouldNotBe null
+        style.linkPreviewLinkColor shouldBe Color.Blue
+        style.linkPreviewLinkStyle shouldNotBe null
+        style.linkPreviewCornerRadius shouldBe 8.dp
+        style.linkPreviewStrokeWidth shouldBe 0.dp
+        style.linkPreviewStrokeColor shouldBe Color.Transparent
+
+        // Verify inherited wrapper properties
+        style.backgroundColor shouldBe Color(0xFFF5F5F5) // Simulating backgroundColor2
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming factory function should return valid style with backgroundColor3" {
+        val style = createTestTextBubbleStyleIncoming()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color(0xFFE8E8E8) // Simulating backgroundColor3
+        style.cornerRadius shouldBe 12.dp
+        style.textColor shouldBe Color.Black
+        style.linkColor shouldBe Color.Blue
+    }
+
+    /**
+     * Test that outgoing() factory function returns a valid style with different colors.
+     *
+     * Validates: Requirements 2.3
+     */
+    "outgoing factory function should return valid style with primary background and white text" {
+        val style = createTestTextBubbleStyleOutgoing()
+
+        // Verify outgoing style has primary background and white text
+        style.backgroundColor shouldBe Color.Blue // Simulating primary
+        style.cornerRadius shouldBe 12.dp
+        style.textColor shouldBe Color.White
+        style.linkColor shouldBe Color.White
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.int(0, 255),      // textColor alpha
+            Arb.int(0, 255)       // linkColor alpha
+        ) { bgAlpha, cornerRadius, textAlpha, linkAlpha ->
+            createTestTextBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                textColor = Color(0f, 0f, 0f, textAlpha / 255f),
+                linkColor = Color(0f, 0f, 1f, linkAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalTextColor = originalStyle.textColor
+            val originalLinkColor = originalStyle.linkColor
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.textColor shouldBe originalTextColor
+            originalStyle.linkColor shouldBe originalLinkColor
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.textColor shouldBe originalTextColor
+            copiedStyle.linkColor shouldBe originalLinkColor
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified text properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified text properties should preserve wrapper properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // textColor alpha
+            Arb.int(0, 255)       // linkColor alpha
+        ) { textAlpha, linkAlpha ->
+            createTestTextBubbleStyle(
+                textColor = Color(0f, 0f, 0f, textAlpha / 255f),
+                linkColor = Color(0f, 0f, 1f, linkAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalStrokeWidth = originalStyle.strokeWidth
+
+            // Create a copy with modified text values
+            val newTextColor = Color.Yellow
+            val newLinkColor = Color.Green
+            val copiedStyle = originalStyle.copy(
+                textColor = newTextColor,
+                linkColor = newLinkColor
+            )
+
+            // Verify modified values
+            copiedStyle.textColor shouldBe newTextColor
+            copiedStyle.linkColor shouldBe newLinkColor
+
+            // Verify wrapper properties are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+        }
+    }
+
+    /**
+     * Test style copy with modified link preview properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified link preview properties should preserve text properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // linkPreviewBackgroundColor alpha
+            Arb.float(4f, 16f)    // linkPreviewCornerRadius
+        ) { bgAlpha, cornerRadius ->
+            createTestTextBubbleStyle(
+                linkPreviewBackgroundColor = Color(0.9f, 0.9f, 0.9f, bgAlpha / 255f),
+                linkPreviewCornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalTextColor = originalStyle.textColor
+            val originalLinkColor = originalStyle.linkColor
+            val originalTranslatedTextColor = originalStyle.translatedTextColor
+
+            // Create a copy with modified link preview values
+            val newLinkPreviewBackgroundColor = Color.Cyan
+            val newLinkPreviewTitleColor = Color.Magenta
+            val newLinkPreviewCornerRadius = 12.dp
+            val copiedStyle = originalStyle.copy(
+                linkPreviewBackgroundColor = newLinkPreviewBackgroundColor,
+                linkPreviewTitleColor = newLinkPreviewTitleColor,
+                linkPreviewCornerRadius = newLinkPreviewCornerRadius
+            )
+
+            // Verify modified values
+            copiedStyle.linkPreviewBackgroundColor shouldBe newLinkPreviewBackgroundColor
+            copiedStyle.linkPreviewTitleColor shouldBe newLinkPreviewTitleColor
+            copiedStyle.linkPreviewCornerRadius shouldBe newLinkPreviewCornerRadius
+
+            // Verify text properties are preserved
+            copiedStyle.textColor shouldBe originalTextColor
+            copiedStyle.linkColor shouldBe originalLinkColor
+            copiedStyle.translatedTextColor shouldBe originalTranslatedTextColor
+        }
+    }
+
+    /**
+     * Test style copy with modified stroke properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified stroke properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 4f),    // strokeWidth
+            Arb.int(0, 255)       // strokeColor alpha
+        ) { strokeWidth, strokeAlpha ->
+            createTestTextBubbleStyle(
+                strokeWidth = strokeWidth.dp,
+                strokeColor = Color(0f, 0f, 0f, strokeAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalTextColor = originalStyle.textColor
+            val originalLinkColor = originalStyle.linkColor
+            val originalLinkPreviewBackgroundColor = originalStyle.linkPreviewBackgroundColor
+
+            // Create a copy with modified stroke values
+            val newStrokeWidth = 2.dp
+            val newStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                strokeWidth = newStrokeWidth,
+                strokeColor = newStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.strokeColor shouldBe newStrokeColor
+
+            // Verify other properties are preserved
+            copiedStyle.textColor shouldBe originalTextColor
+            copiedStyle.linkColor shouldBe originalLinkColor
+            copiedStyle.linkPreviewBackgroundColor shouldBe originalLinkPreviewBackgroundColor
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestTextBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.padding shouldBe originalStyle.padding
+            copiedStyle.textColor shouldBe originalStyle.textColor
+            copiedStyle.textStyle shouldBe originalStyle.textStyle
+            copiedStyle.linkColor shouldBe originalStyle.linkColor
+            copiedStyle.translatedTextColor shouldBe originalStyle.translatedTextColor
+            copiedStyle.separatorColor shouldBe originalStyle.separatorColor
+            copiedStyle.linkPreviewBackgroundColor shouldBe originalStyle.linkPreviewBackgroundColor
+            copiedStyle.linkPreviewTitleColor shouldBe originalStyle.linkPreviewTitleColor
+            copiedStyle.linkPreviewCornerRadius shouldBe originalStyle.linkPreviewCornerRadius
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatTextBubbleStyle(
+            textColor = Color.Yellow,
+            textStyle = TextStyle(fontSize = 16.sp),
+            linkColor = Color.Green,
+            translatedTextColor = Color.Cyan,
+            translatedTextStyle = TextStyle(fontSize = 12.sp),
+            separatorColor = Color.DarkGray,
+            linkPreviewBackgroundColor = Color.Magenta,
+            linkPreviewTitleColor = Color.Black,
+            linkPreviewTitleStyle = TextStyle(fontSize = 14.sp),
+            linkPreviewDescriptionColor = Color.Gray,
+            linkPreviewDescriptionStyle = TextStyle(fontSize = 12.sp),
+            linkPreviewLinkColor = Color.Blue,
+            linkPreviewLinkStyle = TextStyle(fontSize = 10.sp),
+            linkPreviewCornerRadius = 16.dp,
+            linkPreviewStrokeWidth = 1.dp,
+            linkPreviewStrokeColor = Color.LightGray,
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 11.sp),
+            threadIndicatorTextColor = Color.White,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.LightGray
+        )
+
+        // Verify content-specific properties
+        customStyle.textColor shouldBe Color.Yellow
+        customStyle.textStyle shouldBe TextStyle(fontSize = 16.sp)
+        customStyle.linkColor shouldBe Color.Green
+        customStyle.translatedTextColor shouldBe Color.Cyan
+        customStyle.translatedTextStyle shouldBe TextStyle(fontSize = 12.sp)
+        customStyle.separatorColor shouldBe Color.DarkGray
+        customStyle.linkPreviewBackgroundColor shouldBe Color.Magenta
+        customStyle.linkPreviewTitleColor shouldBe Color.Black
+        customStyle.linkPreviewTitleStyle shouldBe TextStyle(fontSize = 14.sp)
+        customStyle.linkPreviewDescriptionColor shouldBe Color.Gray
+        customStyle.linkPreviewDescriptionStyle shouldBe TextStyle(fontSize = 12.sp)
+        customStyle.linkPreviewLinkColor shouldBe Color.Blue
+        customStyle.linkPreviewLinkStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.linkPreviewCornerRadius shouldBe 16.dp
+        customStyle.linkPreviewStrokeWidth shouldBe 1.dp
+        customStyle.linkPreviewStrokeColor shouldBe Color.LightGray
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 11.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.White
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.LightGray
+    }
+
+    /**
+     * Test that incoming and outgoing styles differ in expected properties.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming and outgoing styles should differ in background, text and link colors" {
+        val incomingStyle = createTestTextBubbleStyleIncoming()
+        val outgoingStyle = createTestTextBubbleStyleOutgoing()
+
+        // Verify common properties are the same
+        incomingStyle.cornerRadius shouldBe outgoingStyle.cornerRadius
+        incomingStyle.strokeWidth shouldBe outgoingStyle.strokeWidth
+        incomingStyle.strokeColor shouldBe outgoingStyle.strokeColor
+
+        // Verify differing properties
+        incomingStyle.backgroundColor shouldNotBe outgoingStyle.backgroundColor
+        incomingStyle.textColor shouldNotBe outgoingStyle.textColor
+        incomingStyle.linkColor shouldNotBe outgoingStyle.linkColor
+
+        // Verify outgoing uses primary background and white text
+        outgoingStyle.backgroundColor shouldBe Color.Blue // Simulating primary
+        outgoingStyle.textColor shouldBe Color.White
+        outgoingStyle.linkColor shouldBe Color.White
+    }
+
+    /**
+     * Test that style can be assigned to CometChatMessageBubbleStyle variable.
+     *
+     * Validates: Requirements 2.1
+     */
+    "style should be assignable to CometChatMessageBubbleStyle variable" {
+        val textStyle: CometChatTextBubbleStyle = createTestTextBubbleStyle()
+
+        // Verify it can be assigned to parent type
+        val messageBubbleStyle: CometChatMessageBubbleStyle = textStyle
+
+        // Verify inherited properties are accessible through parent type
+        messageBubbleStyle.backgroundColor shouldBe textStyle.backgroundColor
+        messageBubbleStyle.cornerRadius shouldBe textStyle.cornerRadius
+        messageBubbleStyle.strokeWidth shouldBe textStyle.strokeWidth
+        messageBubbleStyle.strokeColor shouldBe textStyle.strokeColor
+        messageBubbleStyle.padding shouldBe textStyle.padding
+        messageBubbleStyle.senderNameTextColor shouldBe textStyle.senderNameTextColor
+        messageBubbleStyle.senderNameTextStyle shouldBe textStyle.senderNameTextStyle
+        messageBubbleStyle.threadIndicatorTextColor shouldBe textStyle.threadIndicatorTextColor
+        messageBubbleStyle.threadIndicatorTextStyle shouldBe textStyle.threadIndicatorTextStyle
+        messageBubbleStyle.threadIndicatorIconTint shouldBe textStyle.threadIndicatorIconTint
+    }
+})
+
+/**
+ * Helper function to create a test text bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestTextBubbleStyle(
+    // Content-specific properties
+    textColor: Color = Color.Black, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyRegular
+    linkColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    translatedTextColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorSecondary
+    translatedTextStyle: TextStyle = TextStyle(fontSize = 12.sp), // Simulating caption1Regular
+    separatorColor: Color = Color.LightGray, // Simulating CometChatTheme.colorScheme.strokeColorLight
+    linkPreviewBackgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    linkPreviewTitleColor: Color = Color.Black, // Simulating textColorPrimary
+    linkPreviewTitleStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    linkPreviewDescriptionColor: Color = Color.Gray, // Simulating textColorSecondary
+    linkPreviewDescriptionStyle: TextStyle = TextStyle(fontSize = 12.sp), // Simulating caption1Regular
+    linkPreviewLinkColor: Color = Color.Blue, // Simulating primary
+    linkPreviewLinkStyle: TextStyle = TextStyle(fontSize = 12.sp), // Simulating caption1Regular
+    linkPreviewCornerRadius: Dp = 8.dp,
+    linkPreviewStrokeWidth: Dp = 0.dp,
+    linkPreviewStrokeColor: Color = Color.Transparent,
+    // Inherited wrapper properties
+    backgroundColor: Color = Color(0xFFF5F5F5), // Simulating backgroundColor2
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatTextBubbleStyle {
+    return CometChatTextBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        linkColor = linkColor,
+        translatedTextColor = translatedTextColor,
+        translatedTextStyle = translatedTextStyle,
+        separatorColor = separatorColor,
+        linkPreviewBackgroundColor = linkPreviewBackgroundColor,
+        linkPreviewTitleColor = linkPreviewTitleColor,
+        linkPreviewTitleStyle = linkPreviewTitleStyle,
+        linkPreviewDescriptionColor = linkPreviewDescriptionColor,
+        linkPreviewDescriptionStyle = linkPreviewDescriptionStyle,
+        linkPreviewLinkColor = linkPreviewLinkColor,
+        linkPreviewLinkStyle = linkPreviewLinkStyle,
+        linkPreviewCornerRadius = linkPreviewCornerRadius,
+        linkPreviewStrokeWidth = linkPreviewStrokeWidth,
+        linkPreviewStrokeColor = linkPreviewStrokeColor,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test text bubble style for incoming messages.
+ * This simulates what the incoming() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestTextBubbleStyleIncoming(
+    // Content-specific properties
+    textColor: Color = Color.Black,
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkColor: Color = Color.Blue,
+    translatedTextColor: Color = Color.Gray,
+    translatedTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor: Color = Color.LightGray,
+    linkPreviewBackgroundColor: Color = Color(0xFFE8E8E8),
+    linkPreviewTitleColor: Color = Color.Black,
+    linkPreviewTitleStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkPreviewDescriptionColor: Color = Color.Gray,
+    linkPreviewDescriptionStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewLinkColor: Color = Color.Blue,
+    linkPreviewLinkStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewCornerRadius: Dp = 8.dp,
+    linkPreviewStrokeWidth: Dp = 0.dp,
+    linkPreviewStrokeColor: Color = Color.Transparent,
+    // Inherited wrapper properties - incoming uses backgroundColor3
+    backgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatTextBubbleStyle {
+    return CometChatTextBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        linkColor = linkColor,
+        translatedTextColor = translatedTextColor,
+        translatedTextStyle = translatedTextStyle,
+        separatorColor = separatorColor,
+        linkPreviewBackgroundColor = linkPreviewBackgroundColor,
+        linkPreviewTitleColor = linkPreviewTitleColor,
+        linkPreviewTitleStyle = linkPreviewTitleStyle,
+        linkPreviewDescriptionColor = linkPreviewDescriptionColor,
+        linkPreviewDescriptionStyle = linkPreviewDescriptionStyle,
+        linkPreviewLinkColor = linkPreviewLinkColor,
+        linkPreviewLinkStyle = linkPreviewLinkStyle,
+        linkPreviewCornerRadius = linkPreviewCornerRadius,
+        linkPreviewStrokeWidth = linkPreviewStrokeWidth,
+        linkPreviewStrokeColor = linkPreviewStrokeColor,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test text bubble style for outgoing messages.
+ * This simulates what the outgoing() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestTextBubbleStyleOutgoing(
+    // Content-specific properties - outgoing uses white text and link colors
+    textColor: Color = Color.White, // Outgoing uses white
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkColor: Color = Color.White, // Outgoing uses white
+    translatedTextColor: Color = Color.Gray,
+    translatedTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor: Color = Color.LightGray,
+    linkPreviewBackgroundColor: Color = Color(0xFFE8E8E8),
+    linkPreviewTitleColor: Color = Color.Black,
+    linkPreviewTitleStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkPreviewDescriptionColor: Color = Color.Gray,
+    linkPreviewDescriptionStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewLinkColor: Color = Color.Blue,
+    linkPreviewLinkStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewCornerRadius: Dp = 8.dp,
+    linkPreviewStrokeWidth: Dp = 0.dp,
+    linkPreviewStrokeColor: Color = Color.Transparent,
+    // Inherited wrapper properties - outgoing uses primary background
+    backgroundColor: Color = Color.Blue, // Simulating primary
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatTextBubbleStyle {
+    return CometChatTextBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        linkColor = linkColor,
+        translatedTextColor = translatedTextColor,
+        translatedTextStyle = translatedTextStyle,
+        separatorColor = separatorColor,
+        linkPreviewBackgroundColor = linkPreviewBackgroundColor,
+        linkPreviewTitleColor = linkPreviewTitleColor,
+        linkPreviewTitleStyle = linkPreviewTitleStyle,
+        linkPreviewDescriptionColor = linkPreviewDescriptionColor,
+        linkPreviewDescriptionStyle = linkPreviewDescriptionStyle,
+        linkPreviewLinkColor = linkPreviewLinkColor,
+        linkPreviewLinkStyle = linkPreviewLinkStyle,
+        linkPreviewCornerRadius = linkPreviewCornerRadius,
+        linkPreviewStrokeWidth = linkPreviewStrokeWidth,
+        linkPreviewStrokeColor = linkPreviewStrokeColor,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}

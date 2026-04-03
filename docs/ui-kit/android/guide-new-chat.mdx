@@ -1,0 +1,296 @@
+---
+title: "New Chat"
+sidebarTitle: "New Chat"
+description: "Enable users to start one-on-one or group chats from a new chat screen with user and group browsing."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key components | `CometChatUsers`, `CometChatGroups`, `CometChatMessageList`, `CometChatMessageComposer`, `CometChatMessageHeader` |
+| Purpose | Enable users to start one-on-one or group chats from a new chat screen with user and group browsing. |
+| Related | [Users](/ui-kit/android/v6/users), [Groups](/ui-kit/android/v6/groups), [Conversations](/ui-kit/android/v6/conversations), [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+Enable users to start one-on-one or group chats by integrating CometChat's **New Chat** screen (`CometChatUsers` + `CometChatGroups`), providing a seamless flow from your conversation list to a specific chat.
+
+## Overview
+
+Users can tap the "+" icon in the conversation toolbar or bottom navigation to:
+
+- Browse and search CometChat users.  
+- Browse and search CometChat groups.  
+- Select a user or group to launch a chat.
+
+This streamlines contact/group discovery and boosts engagement by reducing friction in starting conversations.
+
+## Prerequisites
+
+- Android project with **CometChat UIKit Android v5** (`com.cometchat:chatuikit-kotlin` or `com.cometchat:chatuikit-jetpack`) added in `build.gradle`.  
+- CometChat credentials (**App ID**, **Auth Key**, **Region**) initialized.  
+- Navigation configured: `ConversationActivity` → `NewChatActivity` → `MessagesActivity`.  
+- Internet and network permissions granted in `AndroidManifest.xml`.
+
+## Components
+
+| Component / Class          | Role                                                    |
+|:---------------------------|:--------------------------------------------------------|
+| `ConversationActivity`     | Entry point; hosts "+" icon to launch New Chat screen.  |
+| `NewChatActivity`          | Displays tabbed Users/Groups lists.                     |
+| `activity_new_chat.xml`    | Layout defining `TabLayout`, `CometChatUsers`, `CometChatGroups`.| 
+| `CometChatUsers`           | Lists and searches users; exposes `setOnItemClick()`.   |
+| `CometChatGroups`          | Lists and searches groups; exposes `setOnItemClick()`.  |
+| `UsersRequestBuilder`      | Configures user query filters (e.g. pagination).        |
+| `GroupsRequestBuilder`     | Configures group query filters (e.g. pagination).       |
+| `MessagesActivity`         | Chat UI for the selected user or group.                 |
+
+## Integration Steps
+
+### 1. Add Entry Point to New Chat
+
+Show a "+" icon that launches `NewChatActivity`.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin ConversationActivity.kt lines
+// In ConversationActivity.kt
+toolbar.inflateMenu(R.menu.conversation_menu)
+toolbar.setOnMenuItemClickListener { item ->
+    if (item.itemId == R.id.action_new_chat) {
+        startActivity(Intent(this, NewChatActivity::class.java))
+        true
+    } else false
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin ConversationScreen.kt lines
+// In ConversationScreen.kt
+@Composable
+fun ConversationScreen(navController: NavController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Chats") },
+                actions = {
+                    IconButton(onClick = { navController.navigate("new_chat") }) {
+                        Icon(Icons.Default.Add, contentDescription = "New Chat")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        CometChatConversations(
+            modifier = Modifier.padding(padding),
+            onItemClick = { conversation ->
+                navController.navigate("messages/${Gson().toJson(conversation)}")
+            }
+        )
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### 2. Implement New Chat Screen
+
+Build a tabbed interface with Users and Groups lists.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin NewChatActivity.kt lines
+// In NewChatActivity.kt
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_new_chat)
+
+    val tabs = findViewById<TabLayout>(R.id.tabLayout)
+    val pager = findViewById<ViewPager2>(R.id.viewPager)
+    val adapter = NewChatPagerAdapter(this)
+    pager.adapter = adapter
+    TabLayoutMediator(tabs, pager) { tab, pos ->
+        tab.text = if (pos == 0) "Users" else "Groups"
+    }.attach()
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin NewChatScreen.kt lines
+// In NewChatScreen.kt
+@Composable
+fun NewChatScreen(navController: NavController) {
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Users", "Groups")
+
+    Column {
+        TabRow(selectedTabIndex = selectedTab) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = { Text(title) }
+                )
+            }
+        }
+
+        when (selectedTab) {
+            0 -> CometChatUsers(
+                onItemClick = { user ->
+                    navController.navigate("messages/user/${Gson().toJson(user)}")
+                }
+            )
+            1 -> CometChatGroups(
+                onItemClick = { group ->
+                    navController.navigate("messages/group/${Gson().toJson(group)}")
+                }
+            )
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### 3. Handle User or Group Selection
+
+Launch `MessagesActivity` when an item is tapped.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin NewChatActivity.kt lines
+// In NewChatActivity.kt (Users fragment)
+cometChatUsers.setOnItemClick { view, position, user ->
+    val intent = Intent(this, MessagesActivity::class.java)
+    intent.putExtra("app_user", Gson().toJson(user))
+    startActivity(intent)
+}
+
+// Similarly for CometChatGroups:
+cometChatGroups.setOnItemClick { view, position, group ->
+    val intent = Intent(this, MessagesActivity::class.java)
+    intent.putExtra("app_group", Gson().toJson(group))
+    startActivity(intent)
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// Handled inline via onItemClick lambdas in the NewChatScreen composable above
+```
+</Tab>
+</Tabs>
+
+### 4. Open the Messages Screen
+
+Read intent extras and configure chat UI.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin MessagesActivity.kt lines
+// In MessagesActivity.kt
+import com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_messages)
+
+    val userJson = intent.getStringExtra("app_user")
+    val groupJson = intent.getStringExtra("app_group")
+
+    if (userJson != null) {
+        val user = Gson().fromJson(userJson, User::class.java)
+        messageHeader.setUser(user)
+        messageList.setUser(user)
+        composer.setUser(user)
+    } else if (groupJson != null) {
+        val group = Gson().fromJson(groupJson, Group::class.java)
+        messageHeader.setGroup(group)
+        messageList.setGroup(group)
+        composer.setGroup(group)
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin MessagesScreen.kt lines
+// In MessagesScreen.kt
+import com.cometchat.uikit.compose.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+
+@Composable
+fun MessagesScreen(userJson: String? = null, groupJson: String? = null) {
+    val user = userJson?.let { Gson().fromJson(it, User::class.java) }
+    val group = groupJson?.let { Gson().fromJson(it, Group::class.java) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (user != null) {
+            CometChatMessageHeader(user = user)
+            CometChatMessageList(user = user, modifier = Modifier.weight(1f))
+            CometChatMessageComposer(user = user)
+        } else if (group != null) {
+            CometChatMessageHeader(group = group)
+            CometChatMessageList(group = group, modifier = Modifier.weight(1f))
+            CometChatMessageComposer(group = group)
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+## Implementation Flow
+
+1. User taps the "+" icon → `NewChatActivity` launches (or Compose navigation).  
+2. Tabs switch between **Users** and **Groups**.  
+3. Selection triggers `MessagesActivity` with JSON payload.  
+4. Chat UI initializes with the passed user/group.  
+5. Real-time messaging begins via the UI Kit.
+
+## Customization Options
+
+- **Styling:** Apply `cometchatTheme` attributes to `TabLayout` and list items.  
+- **Filtering:** Customize `UsersRequestBuilder` / `GroupsRequestBuilder` (e.g., `hideBlockedUsers(true)`).  
+- **Navigation:** Replace default `MessagesActivity` with a custom screen.  
+- **Layout Tweaks:** Use `android:fitsSystemWindows="true"` to avoid overlap.
+
+## Filtering & Edge Cases
+
+- **Empty States:** Built-in empty views in `CometChatUsers` and `CometChatGroups`.  
+- **Protected Groups:** Prompt for password or disable selection.  
+- **Network Errors:** Observe error callbacks and show `Snackbar` messages.
+
+## Error Handling
+
+- Default loading and error states are handled by the UI Kit.  
+- Attach observers on `CometChatUsers` / `CometChatGroups` to handle failures.  
+- Use Toast or Snackbar for custom error feedback.
+
+## Summary / Feature Matrix
+
+| Feature                | Component / Method                          |
+|:-----------------------|:--------------------------------------------|
+| Launch New Chat screen | Menu item click in `ConversationActivity`   |
+| Tabbed lists           | `TabLayout` + `ViewPager2` or Compose `TabRow` |
+| List/search users      | `CometChatUsers` + `UsersRequestBuilder`   |
+| List/search groups     | `CometChatGroups` + `GroupsRequestBuilder` |
+| Selection handling     | `setOnItemClick()` / `onItemClick` lambda   |
+| Initialize chat        | `messageHeader`, `messageList`, `composer` |
+
+## Next Steps & Further Reading
+
+<CardGroup>
+  <Card title="Android Sample App (Kotlin)">
+    Explore this feature in the CometChat SampleApp:
+    [GitHub → SampleApp](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin)
+  </Card>
+</CardGroup>

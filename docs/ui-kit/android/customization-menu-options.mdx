@@ -1,0 +1,182 @@
+---
+title: "Menu & Options"
+description: "Add, replace, or extend context menu actions on components."
+---
+
+Components provide context menus (e.g., long-press on a conversation or message). You can replace all options or append custom ones.
+
+---
+
+## setOptions vs addOptions
+
+| Method | Behavior |
+| --- | --- |
+| `setOptions` | Replaces all default options with your custom list |
+| `addOptions` | Appends your custom options to the existing defaults |
+
+Use `addOptions` to keep defaults (like "Delete") and add your own. Use `setOptions` for full control.
+
+---
+
+## Adding Custom Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+import com.cometchat.uikit.kotlin.presentation.shared.popupmenu.CometChatPopupMenu
+
+conversations.addOptions { context, conversation ->
+    listOf(
+        CometChatPopupMenu.MenuItem(
+            id = "pin",
+            name = "Pin Conversation",
+            startIcon = ContextCompat.getDrawable(context, R.drawable.ic_pin),
+            onClick = { pinConversation(conversation) }
+        )
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
+
+CometChatConversations(
+    addOptions = { context, conversation ->
+        listOf(
+            MenuItem(
+                id = "pin",
+                name = "Pin Conversation",
+                startIcon = painterResource(R.drawable.ic_pin),
+                onClick = { pinConversation(conversation) }
+            )
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Replacing All Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOptions { context, conversation ->
+    listOf(
+        CometChatPopupMenu.MenuItem(
+            id = "archive",
+            name = "Archive",
+            startIcon = ContextCompat.getDrawable(context, R.drawable.ic_archive),
+            onClick = { archiveConversation(conversation) }
+        ),
+        CometChatPopupMenu.MenuItem(
+            id = "mute",
+            name = "Mute",
+            startIcon = ContextCompat.getDrawable(context, R.drawable.ic_mute),
+            onClick = { muteConversation(conversation) }
+        )
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    options = { context, conversation ->
+        listOf(
+            MenuItem(
+                id = "archive",
+                name = "Archive",
+                startIcon = painterResource(R.drawable.ic_archive),
+                onClick = { archiveConversation(conversation) }
+            ),
+            MenuItem(
+                id = "mute",
+                name = "Mute",
+                startIcon = painterResource(R.drawable.ic_mute),
+                onClick = { muteConversation(conversation) }
+            )
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## MenuItem Properties
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+`CometChatPopupMenu.MenuItem`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `id` | `String` | Unique identifier |
+| `name` | `String` | Display text |
+| `startIcon` | `Drawable?` | Icon at the start |
+| `endIcon` | `Drawable?` | Icon at the end |
+| `startIconTint` | `@ColorInt Int` | Start icon tint |
+| `textColor` | `@ColorInt Int` | Text color |
+| `textAppearance` | `@StyleRes Int` | Text appearance |
+| `onClick` | `(() -> Unit)?` | Click callback |
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+`MenuItem`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `id` | `String` | Unique identifier |
+| `name` | `String` | Display text |
+| `startIcon` | `Painter?` | Icon at the start |
+| `endIcon` | `Painter?` | Icon at the end |
+| `startIconTint` | `Color?` | Start icon tint |
+| `textColor` | `Color?` | Text color |
+| `textStyle` | `TextStyle?` | Text style |
+| `onClick` | `(() -> Unit)?` | Click callback |
+
+</Tab>
+</Tabs>
+
+Both modules provide convenience factory methods:
+
+```kotlin lines
+// Simple menu item (no icons)
+MenuItem.simple(id = "pin", name = "Pin") { /* onClick */ }
+
+// Menu item with icons (Compose)
+MenuItem.withIcons(id = "pin", name = "Pin", startIcon = painterResource(R.drawable.ic_pin)) { /* onClick */ }
+```
+
+---
+
+## Components with Menu Options
+
+| Component | Data passed to callback |
+| --- | --- |
+| `CometChatConversations` | `(Context, Conversation)` |
+| `CometChatUsers` | `(Context, User)` |
+| `CometChatGroups` | `(Context, Group)` |
+| `CometChatGroupMembers` | `(Context, GroupMember)` |
+| `CometChatCallLogs` | `(Context, CallLog)` |
+
+---
+
+## Related
+
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — See all customization categories.

@@ -1,0 +1,496 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatDeleteBubbleStyle.
+ *
+ * Feature: bubble-style-propagation
+ * Tests:
+ * - CometChatDeleteBubbleStyle extends CometChatMessageBubbleStyle
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ * - textStyle includes italic font style
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 7.3, 7.5
+ */
+class CometChatDeleteBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatDeleteBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatDeleteBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestDeleteBubbleStyle()
+
+        // Verify inheritance relationship
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestDeleteBubbleStyle()
+
+        // Verify content-specific properties
+        style.textColor shouldBe Color.Gray
+        style.textStyle.fontStyle shouldBe FontStyle.Italic
+        style.iconTint shouldBe Color.Gray
+
+        // Verify inherited wrapper properties
+        style.backgroundColor shouldBe Color(0xFFF5F5F5) // Simulating backgroundColor2
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that textStyle includes italic font style.
+     *
+     * Validates: Requirements 2.2
+     */
+    "textStyle should include italic font style" {
+        val style = createTestDeleteBubbleStyle()
+
+        style.textStyle.fontStyle shouldBe FontStyle.Italic
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming factory function should return valid style with backgroundColor3" {
+        val style = createTestDeleteBubbleStyleIncoming()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color(0xFFE8E8E8) // Simulating backgroundColor3
+        style.cornerRadius shouldBe 12.dp
+        style.textColor shouldBe Color.Gray
+        style.iconTint shouldBe Color.Gray
+        style.textStyle.fontStyle shouldBe FontStyle.Italic
+    }
+
+    /**
+     * Test that outgoing() factory function returns a valid style with different colors.
+     *
+     * Validates: Requirements 2.3
+     */
+    "outgoing factory function should return valid style with primary background and white text and icon" {
+        val style = createTestDeleteBubbleStyleOutgoing()
+
+        // Verify outgoing style has primary background and white colors for text and icon
+        style.backgroundColor shouldBe Color.Blue // Simulating primary
+        style.cornerRadius shouldBe 12.dp
+        style.textColor shouldBe Color.White.copy(alpha = 0.7f)
+        style.iconTint shouldBe Color.White.copy(alpha = 0.7f)
+        style.textStyle.fontStyle shouldBe FontStyle.Italic
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.int(0, 255)       // textColor alpha
+        ) { bgAlpha, cornerRadius, textAlpha ->
+            createTestDeleteBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                textColor = Color(0.5f, 0.5f, 0.5f, textAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalTextColor = originalStyle.textColor
+            val originalIconTint = originalStyle.iconTint
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.textColor shouldBe originalTextColor
+            originalStyle.iconTint shouldBe originalIconTint
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.textColor shouldBe originalTextColor
+            copiedStyle.iconTint shouldBe originalIconTint
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified content properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified content properties should preserve wrapper properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // textColor alpha
+            Arb.int(0, 255)       // iconTint alpha
+        ) { textAlpha, iconAlpha ->
+            createTestDeleteBubbleStyle(
+                textColor = Color(0.5f, 0.5f, 0.5f, textAlpha / 255f),
+                iconTint = Color(0.5f, 0.5f, 0.5f, iconAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalStrokeWidth = originalStyle.strokeWidth
+
+            // Create a copy with modified content values
+            val newTextColor = Color.Yellow
+            val newIconTint = Color.Green
+            val copiedStyle = originalStyle.copy(
+                textColor = newTextColor,
+                iconTint = newIconTint
+            )
+
+            // Verify modified values
+            copiedStyle.textColor shouldBe newTextColor
+            copiedStyle.iconTint shouldBe newIconTint
+
+            // Verify wrapper properties are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+        }
+    }
+
+    /**
+     * Test style copy with modified stroke properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified stroke properties should preserve content properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 4f),    // strokeWidth
+            Arb.int(0, 255)       // strokeColor alpha
+        ) { strokeWidth, strokeAlpha ->
+            createTestDeleteBubbleStyle(
+                strokeWidth = strokeWidth.dp,
+                strokeColor = Color(0f, 0f, 0f, strokeAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalTextColor = originalStyle.textColor
+            val originalIconTint = originalStyle.iconTint
+            val originalTextStyle = originalStyle.textStyle
+
+            // Create a copy with modified stroke values
+            val newStrokeWidth = 2.dp
+            val newStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                strokeWidth = newStrokeWidth,
+                strokeColor = newStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.strokeColor shouldBe newStrokeColor
+
+            // Verify content properties are preserved
+            copiedStyle.textColor shouldBe originalTextColor
+            copiedStyle.iconTint shouldBe originalIconTint
+            copiedStyle.textStyle shouldBe originalTextStyle
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestDeleteBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.padding shouldBe originalStyle.padding
+            copiedStyle.textColor shouldBe originalStyle.textColor
+            copiedStyle.textStyle shouldBe originalStyle.textStyle
+            copiedStyle.iconTint shouldBe originalStyle.iconTint
+            copiedStyle.senderNameTextColor shouldBe originalStyle.senderNameTextColor
+            copiedStyle.senderNameTextStyle shouldBe originalStyle.senderNameTextStyle
+            copiedStyle.threadIndicatorTextColor shouldBe originalStyle.threadIndicatorTextColor
+            copiedStyle.threadIndicatorTextStyle shouldBe originalStyle.threadIndicatorTextStyle
+            copiedStyle.threadIndicatorIconTint shouldBe originalStyle.threadIndicatorIconTint
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatDeleteBubbleStyle(
+            textColor = Color.Yellow,
+            textStyle = TextStyle(fontSize = 16.sp, fontStyle = FontStyle.Italic),
+            iconTint = Color.Green,
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 11.sp),
+            threadIndicatorTextColor = Color.White,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.Cyan
+        )
+
+        // Verify content-specific properties
+        customStyle.textColor shouldBe Color.Yellow
+        customStyle.textStyle shouldBe TextStyle(fontSize = 16.sp, fontStyle = FontStyle.Italic)
+        customStyle.iconTint shouldBe Color.Green
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 11.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.White
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.Cyan
+    }
+
+    /**
+     * Test that incoming and outgoing styles differ in expected properties.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming and outgoing styles should differ in background, text and icon colors" {
+        val incomingStyle = createTestDeleteBubbleStyleIncoming()
+        val outgoingStyle = createTestDeleteBubbleStyleOutgoing()
+
+        // Verify common properties are the same
+        incomingStyle.cornerRadius shouldBe outgoingStyle.cornerRadius
+        incomingStyle.strokeWidth shouldBe outgoingStyle.strokeWidth
+        incomingStyle.strokeColor shouldBe outgoingStyle.strokeColor
+        incomingStyle.textStyle.fontStyle shouldBe outgoingStyle.textStyle.fontStyle
+
+        // Verify differing properties
+        incomingStyle.backgroundColor shouldNotBe outgoingStyle.backgroundColor
+        incomingStyle.textColor shouldNotBe outgoingStyle.textColor
+        incomingStyle.iconTint shouldNotBe outgoingStyle.iconTint
+
+        // Verify outgoing uses primary background and white colors
+        outgoingStyle.backgroundColor shouldBe Color.Blue // Simulating primary
+        outgoingStyle.textColor shouldBe Color.White.copy(alpha = 0.7f)
+        outgoingStyle.iconTint shouldBe Color.White.copy(alpha = 0.7f)
+    }
+
+    /**
+     * Test that style can be assigned to CometChatMessageBubbleStyle variable.
+     *
+     * Validates: Requirements 2.1
+     */
+    "style should be assignable to CometChatMessageBubbleStyle variable" {
+        val deleteStyle: CometChatDeleteBubbleStyle = createTestDeleteBubbleStyle()
+
+        // Verify it can be assigned to parent type
+        val messageBubbleStyle: CometChatMessageBubbleStyle = deleteStyle
+
+        // Verify inherited properties are accessible through parent type
+        messageBubbleStyle.backgroundColor shouldBe deleteStyle.backgroundColor
+        messageBubbleStyle.cornerRadius shouldBe deleteStyle.cornerRadius
+        messageBubbleStyle.strokeWidth shouldBe deleteStyle.strokeWidth
+        messageBubbleStyle.strokeColor shouldBe deleteStyle.strokeColor
+        messageBubbleStyle.padding shouldBe deleteStyle.padding
+        messageBubbleStyle.senderNameTextColor shouldBe deleteStyle.senderNameTextColor
+        messageBubbleStyle.senderNameTextStyle shouldBe deleteStyle.senderNameTextStyle
+        messageBubbleStyle.threadIndicatorTextColor shouldBe deleteStyle.threadIndicatorTextColor
+        messageBubbleStyle.threadIndicatorTextStyle shouldBe deleteStyle.threadIndicatorTextStyle
+        messageBubbleStyle.threadIndicatorIconTint shouldBe deleteStyle.threadIndicatorIconTint
+    }
+})
+
+
+/**
+ * Helper function to create a test delete bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestDeleteBubbleStyle(
+    // Content-specific properties
+    textColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorTertiary
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp, fontStyle = FontStyle.Italic), // Simulating bodyRegular with italic
+    iconTint: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.iconTintTertiary
+    // Inherited wrapper properties
+    backgroundColor: Color = Color(0xFFF5F5F5), // Simulating backgroundColor2
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatDeleteBubbleStyle {
+    return CometChatDeleteBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        iconTint = iconTint,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+
+/**
+ * Helper function to create a test delete bubble style for incoming messages.
+ * This simulates what the incoming() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestDeleteBubbleStyleIncoming(
+    // Content-specific properties
+    textColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorTertiary
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp, fontStyle = FontStyle.Italic), // Simulating bodyRegular with italic
+    iconTint: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.iconTintTertiary
+    // Inherited wrapper properties - incoming uses backgroundColor3
+    backgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatDeleteBubbleStyle {
+    return CometChatDeleteBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        iconTint = iconTint,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+
+/**
+ * Helper function to create a test delete bubble style for outgoing messages.
+ * This simulates what the outgoing() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestDeleteBubbleStyleOutgoing(
+    // Content-specific properties - outgoing uses white with alpha for text and icon
+    textColor: Color = Color.White.copy(alpha = 0.7f), // Outgoing uses white with alpha
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp, fontStyle = FontStyle.Italic), // Simulating bodyRegular with italic
+    iconTint: Color = Color.White.copy(alpha = 0.7f), // Outgoing uses white with alpha
+    // Inherited wrapper properties - outgoing uses primary background
+    backgroundColor: Color = Color.Blue, // Simulating primary
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatDeleteBubbleStyle {
+    return CometChatDeleteBubbleStyle(
+        textColor = textColor,
+        textStyle = textStyle,
+        iconTint = iconTint,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}

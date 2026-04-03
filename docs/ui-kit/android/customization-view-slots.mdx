@@ -1,0 +1,263 @@
+---
+title: "View Slots"
+description: "Replace specific regions of a component's UI without rebuilding the entire component."
+---
+
+View Slots let you swap out specific parts of a component's list item — the avatar area, title, subtitle, trailing section, or the entire row — while keeping the rest of the component's behavior intact.
+
+---
+
+## Available View Slots
+
+| Slot | Region | Description |
+| --- | --- | --- |
+| `leadingView` | Left section | Replaces the avatar / leading area |
+| `titleView` | Title text | Replaces the name / title text |
+| `subtitleView` | Subtitle text | Replaces the last message preview |
+| `trailingView` | Right section | Replaces the timestamp / badge area |
+| `itemView` | Entire row | Replaces the entire list item layout |
+
+<Warning>
+When you use `itemView`, all other slot setters are ignored since the entire row is replaced.
+</Warning>
+
+---
+
+## How It Works
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Each list-based component defines a `ViewHolderListener` abstract class with two callbacks:
+
+| Callback | Purpose |
+| --- | --- |
+| `createView(context, binding)` | Return a `View` for the slot. Called once when the ViewHolder is created. |
+| `bindView(context, createdView, data, ...)` | Bind data to your custom view. Called every time the item is bound. |
+
+Pass the listener to the component via `setLeadingView()`, `setTitleView()`, `setSubtitleView()`, `setTrailingView()`, or `setItemView()`.
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Each component accepts `@Composable` lambda parameters for each slot:
+
+```kotlin lines
+CometChatConversations(
+    leadingView = { conversation, typingIndicator -> /* your composable */ },
+    titleView = { conversation, typingIndicator -> /* your composable */ },
+    subtitleView = { conversation, typingIndicator -> /* your composable */ },
+    trailingView = { conversation, typingIndicator -> /* your composable */ },
+    itemView = { conversation, typingIndicator -> /* your composable */ }
+)
+```
+
+The lambda receives the data model directly — no `createView`/`bindView` split needed.
+
+</Tab>
+</Tabs>
+
+---
+
+## Example: Custom Leading View
+
+Replace the default avatar with a custom view showing the first letter of the conversation name.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setLeadingView(object : ConversationsViewHolderListener() {
+    override fun createView(
+        context: Context,
+        binding: CometchatConversationsListItemsBinding
+    ): View {
+        return TextView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+            gravity = Gravity.CENTER
+            textSize = 18f
+            setTextColor(Color.WHITE)
+        }
+    }
+
+    override fun bindView(
+        context: Context,
+        createdView: View,
+        conversation: Conversation,
+        typingIndicator: TypingIndicator?,
+        holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>,
+        position: Int
+    ) {
+        val textView = createdView as TextView
+        val name = conversation.conversationWith?.name ?: ""
+        textView.text = name.firstOrNull()?.uppercase() ?: "?"
+        textView.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(Color.parseColor("#6851D6"))
+        }
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    leadingView = { conversation, _ ->
+        val name = conversation.conversationWith?.name ?: ""
+        val initial = name.firstOrNull()?.uppercase() ?: "?"
+
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(Color(0xFF6851D6), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initial,
+                color = Color.White,
+                fontSize = 18.sp
+            )
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Example: Custom Subtitle View
+
+Show a custom last message format in the subtitle area.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setSubtitleView(object : ConversationsViewHolderListener() {
+    override fun createView(
+        context: Context,
+        binding: CometchatConversationsListItemsBinding
+    ): View {
+        return TextView(context).apply {
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+        }
+    }
+
+    override fun bindView(
+        context: Context,
+        createdView: View,
+        conversation: Conversation,
+        typingIndicator: TypingIndicator?,
+        holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>,
+        position: Int
+    ) {
+        val textView = createdView as TextView
+        // Show typing indicator if available
+        if (typingIndicator != null) {
+            textView.text = "typing..."
+            return
+        }
+        textView.text = when (val msg = conversation.lastMessage) {
+            is TextMessage -> msg.text
+            is MediaMessage -> "📎 ${msg.attachment?.fileExtension ?: "Media"}"
+            else -> "New conversation"
+        }
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    subtitleView = { conversation, typingIndicator ->
+        val text = if (typingIndicator != null) {
+            "typing..."
+        } else {
+            when (val msg = conversation.lastMessage) {
+                is TextMessage -> msg.text
+                is MediaMessage -> "📎 ${msg.attachment?.fileExtension ?: "Media"}"
+                else -> "New conversation"
+            }
+        }
+
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = CometChatTheme.typography.bodyRegular,
+            color = CometChatTheme.colorScheme.textColorSecondary
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Toolbar Overflow Menu
+
+Inject a custom view into the component's toolbar area. This is separate from list item view slots.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val menuButton = ImageButton(context).apply {
+    setImageResource(R.drawable.ic_filter)
+    setOnClickListener { /* show filter dialog */ }
+}
+conversations.setOverflowMenu(menuButton)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    overflowMenu = {
+        IconButton(onClick = { /* show filter dialog */ }) {
+            Icon(
+                painter = painterResource(R.drawable.ic_filter),
+                contentDescription = "Filter"
+            )
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Components with View Slots
+
+View slots are available on all list-based components:
+
+| Component | ViewHolderListener (Kotlin XML) | Composable Lambdas (Compose) |
+| --- | --- | --- |
+| `CometChatConversations` | `ConversationsViewHolderListener` | `(Conversation, TypingIndicator?) -> Unit` |
+| `CometChatUsers` | `UsersViewHolderListener` | `(User) -> Unit` |
+| `CometChatGroups` | `GroupsViewHolderListener` | `(Group) -> Unit` |
+| `CometChatGroupMembers` | `GroupMembersViewHolderListener` | `(GroupMember) -> Unit` |
+| `CometChatCallLogs` | `CallLogsViewHolderListener` | `(CallLog) -> Unit` |
+| `CometChatReactionList` | `ReactionListViewHolderListener` | `(Reaction) -> Unit` |
+| `CometChatMessageHeader` | `MessageHeaderViewHolderListener` | `(User?, Group?) -> Unit` |
+
+---
+
+## Related
+
+- [Styles](/ui-kit/android/v6/customization-styles) — Customize visual appearance without replacing views.
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — See all customization categories.

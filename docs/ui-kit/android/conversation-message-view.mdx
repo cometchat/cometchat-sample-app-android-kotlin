@@ -1,0 +1,446 @@
+---
+title: "Building A Conversation List + Message View"
+sidebarTitle: "Conversation List + Message View"
+description: "Build a conversation list with a full-screen message view using the Kotlin XML Views or Jetpack Compose UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Components | `CometChatConversations`, `CometChatMessageHeader`, `CometChatMessageList`, `CometChatMessageComposer` |
+| Layout | Sequential navigation — conversation list → full-screen message view |
+| Prerequisite | Complete [Kotlin Integration](/ui-kit/android/v6/getting-started-kotlin) or [Jetpack Compose Integration](/ui-kit/android/v6/getting-started-jetpack) Steps 1–3 first |
+| Pattern | WhatsApp, Slack, Telegram |
+
+</Accordion>
+
+This guide builds a sequential navigation chat layout — conversation list as the entry point, tap a conversation to open a full-screen message view.
+
+This assumes you've already completed the integration guide for your chosen UI toolkit (project created, dependencies installed, init + login working).
+
+---
+
+## What You're Building
+
+Three sections working together:
+
+1. **Conversation list** — shows all active conversations (users and groups)
+2. **Message header** — displays user/group name, avatar, and status
+3. **Message list + composer** — chat history with real-time updates and text input
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+This implementation uses Android's standard Activity navigation: `ConversationActivity` displays the list, user taps a conversation, `MessageActivity` launches with the selected user/group data via Intent extras.
+</Tab>
+<Tab title="Jetpack Compose">
+This implementation uses Compose state to manage navigation between the conversation list and message screen — no Activities or Fragments needed beyond your `MainActivity`.
+</Tab>
+</Tabs>
+
+---
+
+## Step 1: Set Up the Conversation List
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Create a new Activity called `ConversationActivity` to display the list of conversations.
+
+**Layout** — `activity_conversation.xml`:
+
+```xml activity_conversation.xml lines
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+        android:id="@+id/conversations"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+**Activity** — `ConversationActivity.kt`:
+
+```kotlin ConversationActivity.kt lines
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+
+class ConversationActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_conversation)
+
+        val conversations = findViewById<CometChatConversations>(R.id.conversations)
+
+        conversations.setTitle("Chats")
+        conversations.setOnItemClick { conversation ->
+            val intent = Intent(this, MessageActivity::class.java)
+            when (val entity = conversation.conversationWith) {
+                is User -> intent.putExtra("user", entity)
+                is Group -> intent.putExtra("group", entity)
+                else -> Log.e("ConversationActivity", "Unknown conversation type")
+            }
+            startActivity(intent)
+        }
+    }
+}
+```
+
+<Warning>
+You must use an activity that supports the **lifecycle** API (`AppCompatActivity`, `ComponentActivity`, or `FragmentActivity`) to properly manage the UI Kit's lifecycle events.
+</Warning>
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Create a `ChatApp.kt` file with the root composable that manages navigation between the conversation list and message screen:
+
+```kotlin ChatApp.kt lines
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+
+@Composable
+fun ChatApp() {
+    var selectedUser by remember { mutableStateOf<User?>(null) }
+    var selectedGroup by remember { mutableStateOf<Group?>(null) }
+
+    val inChat = selectedUser != null || selectedGroup != null
+
+    if (!inChat) {
+        ConversationsScreen(
+            onConversationClick = { user, group ->
+                selectedUser = user
+                selectedGroup = group
+            }
+        )
+    } else {
+        MessageScreen(
+            user = selectedUser,
+            group = selectedGroup,
+            onBack = {
+                selectedUser = null
+                selectedGroup = null
+            }
+        )
+    }
+}
+```
+
+Add the `ConversationsScreen` composable:
+
+```kotlin ChatApp.kt lines
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConversations
+
+@Composable
+fun ConversationsScreen(
+    onConversationClick: (User?, Group?) -> Unit
+) {
+    CometChatConversations(
+        modifier = Modifier.fillMaxSize(),
+        title = "Chats",
+        onItemClick = { conversation ->
+            when (val entity = conversation.conversationWith) {
+                is User -> onConversationClick(entity, null)
+                is Group -> onConversationClick(null, entity)
+            }
+        }
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 2: Set Up the Message Screen
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Create a new Activity — `MessageActivity` to display the chat interface.
+
+**Layout** — `activity_message.xml`:
+
+```xml activity_message.xml lines
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+        android:id="@+id/message_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+        android:id="@+id/message_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+        android:id="@+id/message_composer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
+```
+
+**Activity** — `MessageActivity.kt`:
+
+```kotlin MessageActivity.kt lines
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+import com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+
+class MessageActivity : AppCompatActivity() {
+
+    private lateinit var messageHeader: CometChatMessageHeader
+    private lateinit var messageList: CometChatMessageList
+    private lateinit var messageComposer: CometChatMessageComposer
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_message)
+
+        messageHeader = findViewById(R.id.message_header)
+        messageList = findViewById(R.id.message_list)
+        messageComposer = findViewById(R.id.message_composer)
+
+        val user = intent.getSerializableExtra("user") as? User
+        val group = intent.getSerializableExtra("group") as? Group
+
+        when {
+            user != null -> {
+                messageHeader.setUser(user)
+                messageList.setUser(user)
+                messageComposer.setUser(user)
+            }
+            group != null -> {
+                messageHeader.setGroup(group)
+                messageList.setGroup(group)
+                messageComposer.setGroup(group)
+            }
+            else -> {
+                Toast.makeText(this, "Missing user or group data", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+
+        messageHeader.setOnBackPress { finish() }
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Add the `MessageScreen` composable with header, list, and composer stacked vertically:
+
+```kotlin ChatApp.kt lines
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+import com.cometchat.uikit.compose.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
+
+@Composable
+fun MessageScreen(
+    user: User? = null,
+    group: Group? = null,
+    onBack: () -> Unit
+) {
+    Scaffold(
+        contentWindowInsets = WindowInsets.statusBars
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .navigationBarsPadding()
+                .imePadding()
+        ) {
+            CometChatMessageHeader(
+                modifier = Modifier.fillMaxWidth(),
+                user = user,
+                group = group,
+                hideBackButton = false,
+                onBackPress = onBack
+            )
+
+            CometChatMessageList(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                user = user,
+                group = group
+            )
+
+            CometChatMessageComposer(
+                modifier = Modifier.fillMaxWidth(),
+                user = user,
+                group = group
+            )
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 3: Update MainActivity
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Update your `MainActivity` to launch `ConversationActivity` after successful login:
+
+```kotlin MainActivity.kt lines
+private fun loginUser() {
+    CometChatUIKit.login("cometchat-uid-1", object : CometChat.CallbackListener<User>() {
+        override fun onSuccess(user: User) {
+            Log.d(TAG, "Login successful: ${user.uid}")
+
+            // Launch Conversation List + Message View
+            startActivity(Intent(this@MainActivity, ConversationActivity::class.java))
+        }
+
+        override fun onError(e: CometChatException) {
+            Log.e(TAG, "Login failed: ${e.message}")
+        }
+    })
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Update your `MainActivity` to render `ChatApp()` after successful login:
+
+```kotlin MainActivity.kt lines
+setContent {
+    when {
+        error != null -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(error ?: "Unknown error")
+            }
+        }
+        !isReady -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        else -> {
+            ChatApp()
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 4: Register Activities & Permissions
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add the new activities to your `AndroidManifest.xml`:
+
+```xml AndroidManifest.xml lines
+<application ...>
+    <activity android:name=".MainActivity" android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    <activity android:name=".ConversationActivity" />
+    <activity android:name=".MessageActivity" />
+</application>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+No additional activities needed — everything runs inside your existing `MainActivity`.
+
+</Tab>
+</Tabs>
+
+Ensure you've added the required permissions in your `AndroidManifest.xml`:
+
+```xml AndroidManifest.xml lines
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Explore all available UI Kit components and their customization options
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles to match your brand
+  </Card>
+  <Card title="Integration" icon="rocket" href="/ui-kit/android/v6/getting-started">
+    Back to the main integration guide
+  </Card>
+  <Card title="Feature Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Add capabilities like threaded messages, blocking, and group management
+  </Card>
+</CardGroup>

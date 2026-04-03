@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="end"
+    app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+    app:cardCornerRadius="@dimen/cometchat_radius_2"
+    app:cardElevation="@dimen/cometchat_elevation_1"
+    app:strokeColor="?attr/cometchatStrokeColorDefault"
+    app:strokeWidth="@dimen/cometchat_1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Create Conversation -->
+        <TextView
+            android:id="@+id/tv_create_conversation"
+            style="?attr/cometchatTextAppearanceBodyRegular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/cometchat_padding_2"
+            android:gravity="center_vertical"
+            android:padding="@dimen/cometchat_padding_4"
+            android:text="@string/create_conversation"
+            android:textColor="?attr/cometchatTextColorPrimary"
+            app:drawableStartCompat="@drawable/ic_start_conversation"
+            app:drawableTint="?attr/cometchatIconTintSecondary" />
+
+        <!-- Separator -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_1dp"
+            android:background="?attr/cometchatStrokeColorDefault" />
+
+        <!-- User Name -->
+        <TextView
+            android:id="@+id/tv_user_name"
+            style="?attr/cometchatTextAppearanceBodyRegular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/cometchat_padding_2"
+            android:gravity="center_vertical"
+            android:padding="@dimen/cometchat_padding_4"
+            android:textColor="?attr/cometchatTextColorPrimary"
+            app:drawableStartCompat="@drawable/ic_user_profile"
+            app:drawableTint="?attr/cometchatIconTintSecondary" />
+
+        <!-- Logout -->
+        <TextView
+            android:id="@+id/tv_logout"
+            style="?attr/cometchatTextAppearanceBodyRegular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/cometchat_padding_2"
+            android:gravity="center_vertical"
+            android:padding="@dimen/cometchat_padding_4"
+            android:text="@string/logout"
+            android:textColor="?attr/cometchatErrorColor"
+            app:drawableStartCompat="@drawable/ic_logout"
+            app:drawableTint="?attr/cometchatErrorColor" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

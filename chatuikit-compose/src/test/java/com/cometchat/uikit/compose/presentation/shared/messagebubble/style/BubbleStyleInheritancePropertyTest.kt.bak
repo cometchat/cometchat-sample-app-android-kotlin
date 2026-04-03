@@ -1,0 +1,986 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatarStyle
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for verifying that all per-bubble-type styles are subtypes
+ * of CometChatMessageBubbleStyle.
+ *
+ * **Feature: bubble-style-propagation**
+ * **Property 1: All per-bubble-type styles are subtypes of CometChatMessageBubbleStyle**
+ *
+ * **Validates: Requirements 2.1**
+ *
+ * For any per-bubble-type style instance (TextBubbleStyle, ImageBubbleStyle, AudioBubbleStyle,
+ * VideoBubbleStyle, FileBubbleStyle, DeleteBubbleStyle, StickerBubbleStyle, PollBubbleStyle,
+ * CollaborativeBubbleStyle, MeetCallBubbleStyle, ActionBubbleStyle, CallActionBubbleStyle),
+ * the instance should be assignable to a variable of type `CometChatMessageBubbleStyle` —
+ * confirming the inheritance relationship holds.
+ */
+class BubbleStyleInheritancePropertyTest : StringSpec({
+
+    // ============================================================================
+    // Arbitrary generators for common wrapper properties
+    // ============================================================================
+
+    /**
+     * Generates random Color values for testing.
+     */
+    val colorArb = Arb.bind(
+        Arb.int(0, 255),
+        Arb.int(0, 255),
+        Arb.int(0, 255),
+        Arb.int(0, 255)
+    ) { r, g, b, a -> Color(r / 255f, g / 255f, b / 255f, a / 255f) }
+
+
+    /**
+     * Generates random Dp values for testing.
+     */
+    val dpArb: Arb<Dp> = Arb.float(0f, 24f).map { value -> value.dp }
+
+    /**
+     * Generates random TextStyle values for testing.
+     */
+    val textStyleArb: Arb<TextStyle> = Arb.float(10f, 24f).map { fontSize -> TextStyle(fontSize = fontSize.sp) }
+
+    /**
+     * Generates random PaddingValues for testing.
+     */
+    val paddingArb: Arb<PaddingValues> = Arb.float(0f, 16f).map { padding -> PaddingValues(padding.dp) }
+
+    // ============================================================================
+    // Property Test: CometChatTextBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatTextBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatTextBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val textBubbleStyleArb = Arb.bind(
+            colorArb, // textColor
+            colorArb, // linkColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { textColor, linkColor, backgroundColor, cornerRadius ->
+            createTestTextBubbleStyle(
+                textColor = textColor,
+                linkColor = linkColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, textBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatImageBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatImageBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatImageBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val imageBubbleStyleArb = Arb.bind(
+            dpArb,    // imageCornerRadius
+            colorArb, // captionTextColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { imageCornerRadius, captionTextColor, backgroundColor, cornerRadius ->
+            createTestImageBubbleStyle(
+                imageCornerRadius = imageCornerRadius,
+                captionTextColor = captionTextColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, imageBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatAudioBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatAudioBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatAudioBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val audioBubbleStyleArb = Arb.bind(
+            colorArb, // playIconTint
+            colorArb, // audioWaveColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { playIconTint, audioWaveColor, backgroundColor, cornerRadius ->
+            createTestAudioBubbleStyle(
+                playIconTint = playIconTint,
+                audioWaveColor = audioWaveColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, audioBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatVideoBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatVideoBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatVideoBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val videoBubbleStyleArb = Arb.bind(
+            dpArb,    // videoCornerRadius
+            colorArb, // playIconTint
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { videoCornerRadius, playIconTint, backgroundColor, cornerRadius ->
+            createTestVideoBubbleStyle(
+                videoCornerRadius = videoCornerRadius,
+                playIconTint = playIconTint,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, videoBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatFileBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatFileBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatFileBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val fileBubbleStyleArb = Arb.bind(
+            dpArb,    // innerCornerRadius
+            colorArb, // titleTextColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { innerCornerRadius, titleTextColor, backgroundColor, cornerRadius ->
+            createTestFileBubbleStyle(
+                innerCornerRadius = innerCornerRadius,
+                titleTextColor = titleTextColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, fileBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatDeleteBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatDeleteBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatDeleteBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val deleteBubbleStyleArb = Arb.bind(
+            colorArb, // textColor
+            colorArb, // iconTint
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { textColor, iconTint, backgroundColor, cornerRadius ->
+            createTestDeleteBubbleStyle(
+                textColor = textColor,
+                iconTint = iconTint,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, deleteBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatStickerBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatStickerBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatStickerBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val stickerBubbleStyleArb = Arb.bind(
+            colorArb, // backgroundColor
+            dpArb,    // cornerRadius
+            colorArb, // senderNameTextColor
+            colorArb  // threadIndicatorIconTint
+        ) { backgroundColor, cornerRadius, senderNameTextColor, threadIndicatorIconTint ->
+            createTestStickerBubbleStyle(
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius,
+                senderNameTextColor = senderNameTextColor,
+                threadIndicatorIconTint = threadIndicatorIconTint
+            )
+        }
+
+        checkAll(100, stickerBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatPollBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatPollBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatPollBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val pollBubbleStyleArb = Arb.bind(
+            colorArb, // titleTextColor
+            colorArb, // progressColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { titleTextColor, progressColor, backgroundColor, cornerRadius ->
+            createTestPollBubbleStyle(
+                titleTextColor = titleTextColor,
+                progressColor = progressColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, pollBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatCollaborativeBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatCollaborativeBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatCollaborativeBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val collaborativeBubbleStyleArb = Arb.bind(
+            colorArb, // titleTextColor
+            colorArb, // iconTint
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { titleTextColor, iconTint, backgroundColor, cornerRadius ->
+            createTestCollaborativeBubbleStyle(
+                titleTextColor = titleTextColor,
+                iconTint = iconTint,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, collaborativeBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatMeetCallBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatMeetCallBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatMeetCallBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val meetCallBubbleStyleArb = Arb.bind(
+            colorArb, // callIconTint
+            colorArb, // titleTextColor
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { callIconTint, titleTextColor, backgroundColor, cornerRadius ->
+            createTestMeetCallBubbleStyle(
+                callIconTint = callIconTint,
+                titleTextColor = titleTextColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, meetCallBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatActionBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatActionBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatActionBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val actionBubbleStyleArb = Arb.bind(
+            colorArb, // textColor
+            colorArb, // backgroundColor
+            dpArb,    // cornerRadius
+            colorArb  // senderNameTextColor
+        ) { textColor, backgroundColor, cornerRadius, senderNameTextColor ->
+            createTestActionBubbleStyle(
+                textColor = textColor,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius,
+                senderNameTextColor = senderNameTextColor
+            )
+        }
+
+        checkAll(100, actionBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: CometChatCallActionBubbleStyle is subtype of CometChatMessageBubbleStyle
+    // ============================================================================
+
+    /**
+     * Property test: CometChatCallActionBubbleStyle instances are subtypes of CometChatMessageBubbleStyle.
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "CometChatCallActionBubbleStyle should be a subtype of CometChatMessageBubbleStyle" {
+        val callActionBubbleStyleArb = Arb.bind(
+            colorArb, // textColor
+            colorArb, // iconTint
+            colorArb, // backgroundColor
+            dpArb     // cornerRadius
+        ) { textColor, iconTint, backgroundColor, cornerRadius ->
+            createTestCallActionBubbleStyle(
+                textColor = textColor,
+                iconTint = iconTint,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+        }
+
+        checkAll(100, callActionBubbleStyleArb) { style ->
+            style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+        }
+    }
+})
+
+
+// ============================================================================
+// Helper functions to create test style instances without Compose context
+// ============================================================================
+
+/**
+ * Creates a test CometChatTextBubbleStyle instance with customizable values.
+ */
+private fun createTestTextBubbleStyle(
+    textColor: Color = Color.Black,
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkColor: Color = Color.Blue,
+    translatedTextColor: Color = Color.Gray,
+    translatedTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor: Color = Color.LightGray,
+    linkPreviewBackgroundColor: Color = Color(0xFFE8E8E8),
+    linkPreviewTitleColor: Color = Color.Black,
+    linkPreviewTitleStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkPreviewDescriptionColor: Color = Color.Gray,
+    linkPreviewDescriptionStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewLinkColor: Color = Color.Blue,
+    linkPreviewLinkStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewCornerRadius: Dp = 8.dp,
+    linkPreviewStrokeWidth: Dp = 0.dp,
+    linkPreviewStrokeColor: Color = Color.Transparent,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatTextBubbleStyle = CometChatTextBubbleStyle(
+    textColor = textColor,
+    textStyle = textStyle,
+    linkColor = linkColor,
+    translatedTextColor = translatedTextColor,
+    translatedTextStyle = translatedTextStyle,
+    separatorColor = separatorColor,
+    linkPreviewBackgroundColor = linkPreviewBackgroundColor,
+    linkPreviewTitleColor = linkPreviewTitleColor,
+    linkPreviewTitleStyle = linkPreviewTitleStyle,
+    linkPreviewDescriptionColor = linkPreviewDescriptionColor,
+    linkPreviewDescriptionStyle = linkPreviewDescriptionStyle,
+    linkPreviewLinkColor = linkPreviewLinkColor,
+    linkPreviewLinkStyle = linkPreviewLinkStyle,
+    linkPreviewCornerRadius = linkPreviewCornerRadius,
+    linkPreviewStrokeWidth = linkPreviewStrokeWidth,
+    linkPreviewStrokeColor = linkPreviewStrokeColor,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatImageBubbleStyle instance with customizable values.
+ */
+private fun createTestImageBubbleStyle(
+    imageCornerRadius: Dp = 8.dp,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    captionTextColor: Color = Color.Black,
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    progressIndicatorColor: Color = Color.Gray,
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatImageBubbleStyle = CometChatImageBubbleStyle(
+    imageCornerRadius = imageCornerRadius,
+    imageStrokeWidth = imageStrokeWidth,
+    imageStrokeColor = imageStrokeColor,
+    captionTextColor = captionTextColor,
+    captionTextStyle = captionTextStyle,
+    progressIndicatorColor = progressIndicatorColor,
+    gridSpacing = gridSpacing,
+    maxGridWidth = maxGridWidth,
+    moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+    moreOverlayTextColor = moreOverlayTextColor,
+    moreOverlayTextStyle = moreOverlayTextStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatAudioBubbleStyle instance with customizable values.
+ */
+private fun createTestAudioBubbleStyle(
+    playIconTint: Color = Color.Blue,
+    pauseIconTint: Color = Color.Blue,
+    buttonBackgroundColor: Color = Color.White,
+    audioWaveColor: Color = Color.Blue,
+    subtitleTextColor: Color = Color.Gray,
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatAudioBubbleStyle = CometChatAudioBubbleStyle(
+    playIconTint = playIconTint,
+    pauseIconTint = pauseIconTint,
+    buttonBackgroundColor = buttonBackgroundColor,
+    audioWaveColor = audioWaveColor,
+    subtitleTextColor = subtitleTextColor,
+    subtitleTextStyle = subtitleTextStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatVideoBubbleStyle instance with customizable values.
+ */
+private fun createTestVideoBubbleStyle(
+    videoCornerRadius: Dp = 8.dp,
+    videoStrokeWidth: Dp = 0.dp,
+    videoStrokeColor: Color = Color.Transparent,
+    playIconTint: Color = Color.White,
+    playIconBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    progressIndicatorColor: Color = Color.Gray,
+    captionTextColor: Color = Color.Black,
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatVideoBubbleStyle = CometChatVideoBubbleStyle(
+    videoCornerRadius = videoCornerRadius,
+    videoStrokeWidth = videoStrokeWidth,
+    videoStrokeColor = videoStrokeColor,
+    playIconTint = playIconTint,
+    playIconBackgroundColor = playIconBackgroundColor,
+    progressIndicatorColor = progressIndicatorColor,
+    captionTextColor = captionTextColor,
+    captionTextStyle = captionTextStyle,
+    gridSpacing = gridSpacing,
+    maxGridWidth = maxGridWidth,
+    moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+    moreOverlayTextColor = moreOverlayTextColor,
+    moreOverlayTextStyle = moreOverlayTextStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatFileBubbleStyle instance with customizable values.
+ */
+private fun createTestFileBubbleStyle(
+    innerCornerRadius: Dp = 2.dp,
+    itemSpacing: Dp = 1.dp,
+    titleTextColor: Color = Color.Black,
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor: Color = Color.Gray,
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp),
+    fileIconBackgroundColor: Color = Color.White,
+    fileIconCornerRadius: Dp = 4.dp,
+    fileIconSize: Dp = 32.dp,
+    downloadIconTint: Color = Color.Gray,
+    downloadAllButtonBackgroundColor: Color = Color.Blue,
+    downloadAllButtonTextColor: Color = Color.Black,
+    downloadAllButtonTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    downloadAllButtonCornerRadius: Dp = 8.dp,
+    downloadAllButtonHeight: Dp = 40.dp,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatFileBubbleStyle = CometChatFileBubbleStyle(
+    innerCornerRadius = innerCornerRadius,
+    itemSpacing = itemSpacing,
+    titleTextColor = titleTextColor,
+    titleTextStyle = titleTextStyle,
+    subtitleTextColor = subtitleTextColor,
+    subtitleTextStyle = subtitleTextStyle,
+    fileIconBackgroundColor = fileIconBackgroundColor,
+    fileIconCornerRadius = fileIconCornerRadius,
+    fileIconSize = fileIconSize,
+    downloadIconTint = downloadIconTint,
+    downloadAllButtonBackgroundColor = downloadAllButtonBackgroundColor,
+    downloadAllButtonTextColor = downloadAllButtonTextColor,
+    downloadAllButtonTextStyle = downloadAllButtonTextStyle,
+    downloadAllButtonCornerRadius = downloadAllButtonCornerRadius,
+    downloadAllButtonHeight = downloadAllButtonHeight,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatDeleteBubbleStyle instance with customizable values.
+ */
+private fun createTestDeleteBubbleStyle(
+    textColor: Color = Color.Gray,
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    iconTint: Color = Color.Gray,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatDeleteBubbleStyle = CometChatDeleteBubbleStyle(
+    textColor = textColor,
+    textStyle = textStyle,
+    iconTint = iconTint,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+/**
+ * Creates a test CometChatStickerBubbleStyle instance with customizable values.
+ */
+private fun createTestStickerBubbleStyle(
+    backgroundColor: Color = Color.Transparent,
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatStickerBubbleStyle = CometChatStickerBubbleStyle(
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatPollBubbleStyle instance with customizable values.
+ */
+private fun createTestPollBubbleStyle(
+    titleTextColor: Color = Color.Black,
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    optionTextColor: Color = Color.Black,
+    optionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    selectedRadioButtonStrokeColor: Color = Color.Blue,
+    selectedRadioButtonStrokeWidth: Dp = 2.dp,
+    selectedRadioButtonCornerRadius: Dp = 12.dp,
+    selectedIconTint: Color = Color.Blue,
+    unselectedRadioButtonStrokeColor: Color = Color.Gray,
+    unselectedRadioButtonStrokeWidth: Dp = 1.dp,
+    unselectedRadioButtonCornerRadius: Dp = 12.dp,
+    unselectedIconTint: Color = Color.Gray,
+    progressColor: Color = Color.Blue,
+    progressBackgroundColor: Color = Color.LightGray,
+    progressIndeterminateTint: Color = Color.Gray,
+    voteCountTextColor: Color = Color.Gray,
+    voteCountTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    optionAvatarStyle: CometChatAvatarStyle = CometChatAvatarStyle(
+        backgroundColor = Color.Gray,
+        cornerRadius = 10.dp,
+        borderWidth = 0.dp,
+        borderColor = Color.Transparent,
+        textColor = Color.White,
+        textStyle = TextStyle(fontSize = 12.sp)
+    ),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatPollBubbleStyle = CometChatPollBubbleStyle(
+    titleTextColor = titleTextColor,
+    titleTextStyle = titleTextStyle,
+    optionTextColor = optionTextColor,
+    optionTextStyle = optionTextStyle,
+    selectedRadioButtonStrokeColor = selectedRadioButtonStrokeColor,
+    selectedRadioButtonStrokeWidth = selectedRadioButtonStrokeWidth,
+    selectedRadioButtonCornerRadius = selectedRadioButtonCornerRadius,
+    selectedIconTint = selectedIconTint,
+    unselectedRadioButtonStrokeColor = unselectedRadioButtonStrokeColor,
+    unselectedRadioButtonStrokeWidth = unselectedRadioButtonStrokeWidth,
+    unselectedRadioButtonCornerRadius = unselectedRadioButtonCornerRadius,
+    unselectedIconTint = unselectedIconTint,
+    progressColor = progressColor,
+    progressBackgroundColor = progressBackgroundColor,
+    progressIndeterminateTint = progressIndeterminateTint,
+    voteCountTextColor = voteCountTextColor,
+    voteCountTextStyle = voteCountTextStyle,
+    optionAvatarStyle = optionAvatarStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatCollaborativeBubbleStyle instance with customizable values.
+ */
+private fun createTestCollaborativeBubbleStyle(
+    titleTextColor: Color = Color.Black,
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor: Color = Color.Gray,
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    iconTint: Color = Color.Blue,
+    buttonTextColor: Color = Color.Blue,
+    buttonTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    separatorColor: Color = Color.LightGray,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    imageCornerRadius: Dp = 8.dp,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatCollaborativeBubbleStyle = CometChatCollaborativeBubbleStyle(
+    titleTextColor = titleTextColor,
+    titleTextStyle = titleTextStyle,
+    subtitleTextColor = subtitleTextColor,
+    subtitleTextStyle = subtitleTextStyle,
+    iconTint = iconTint,
+    buttonTextColor = buttonTextColor,
+    buttonTextStyle = buttonTextStyle,
+    separatorColor = separatorColor,
+    imageStrokeWidth = imageStrokeWidth,
+    imageStrokeColor = imageStrokeColor,
+    imageCornerRadius = imageCornerRadius,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatMeetCallBubbleStyle instance with customizable values.
+ */
+private fun createTestMeetCallBubbleStyle(
+    callIconTint: Color = Color.Blue,
+    iconBackgroundColor: Color = Color.LightGray,
+    titleTextColor: Color = Color.Black,
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor: Color = Color.Gray,
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor: Color = Color.LightGray,
+    joinButtonTextColor: Color = Color.Blue,
+    joinButtonTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatMeetCallBubbleStyle = CometChatMeetCallBubbleStyle(
+    callIconTint = callIconTint,
+    iconBackgroundColor = iconBackgroundColor,
+    titleTextColor = titleTextColor,
+    titleTextStyle = titleTextStyle,
+    subtitleTextColor = subtitleTextColor,
+    subtitleTextStyle = subtitleTextStyle,
+    separatorColor = separatorColor,
+    joinButtonTextColor = joinButtonTextColor,
+    joinButtonTextStyle = joinButtonTextStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatActionBubbleStyle instance with customizable values.
+ */
+private fun createTestActionBubbleStyle(
+    textColor: Color = Color.Gray,
+    textStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 8.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatActionBubbleStyle = CometChatActionBubbleStyle(
+    textColor = textColor,
+    textStyle = textStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+/**
+ * Creates a test CometChatCallActionBubbleStyle instance with customizable values.
+ */
+private fun createTestCallActionBubbleStyle(
+    textColor: Color = Color.Gray,
+    textStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    iconTint: Color = Color.Gray,
+    missedCallTextColor: Color = Color.Red,
+    missedCallTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    missedCallBackgroundColor: Color = Color.Red.copy(alpha = 0.1f),
+    missedCallIconTint: Color = Color.Red,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 8.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatCallActionBubbleStyle = CometChatCallActionBubbleStyle(
+    textColor = textColor,
+    textStyle = textStyle,
+    iconTint = iconTint,
+    missedCallTextColor = missedCallTextColor,
+    missedCallTextStyle = missedCallTextStyle,
+    missedCallBackgroundColor = missedCallBackgroundColor,
+    missedCallIconTint = missedCallIconTint,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)

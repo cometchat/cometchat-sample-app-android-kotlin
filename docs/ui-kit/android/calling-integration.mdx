@@ -1,0 +1,123 @@
+---
+title: "Calling Integration"
+description: "Add voice and video calling to your Android UI Kit application using chatuikit-kotlin or chatuikit-jetpack."
+---
+
+## Overview
+
+This guide walks you through adding voice and video calling capabilities to your Android application using the CometChat UI Kit.
+
+<Info>
+Make sure you've completed the [Getting Started](/ui-kit/android/v6/getting-started) guide before proceeding.
+</Info>
+
+## Add the Calls SDK
+
+Add the CometChat Calls SDK dependency alongside your chosen UI Kit module:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-kotlin:5.2.9")
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-compose:5.2.9")
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+</Tabs>
+
+After adding this dependency, the Android UI Kit will automatically detect it and activate the calling features. You will see the `CometChatCallButtons` component rendered in the [MessageHeader](/ui-kit/android/v6/message-header) component.
+
+<Frame>
+  <img src="/images/81959c4b-Calling-ee689247c8cdd512c520b85f30683ad8.png" />
+</Frame>
+
+## Set Up Call Listener
+
+To receive incoming calls globally in your app, add a `CallListener` before initializing the CometChat UI Kit. We recommend creating a custom Application class:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+class BaseApplication : Application() {
+    companion object {
+        private val LISTENER_ID = "${BaseApplication::class.java.simpleName}${System.currentTimeMillis()}"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener {
+            override fun onIncomingCallReceived(call: Call) {
+                // Get the current activity context
+                val currentActivity = getCurrentActivity() // Implement this method
+
+                currentActivity?.let {
+                    val incomingCallView = CometChatIncomingCall(it)
+                    incomingCallView.call = call
+                    incomingCallView.fitsSystemWindows = true
+                    incomingCallView.onError = OnError { exception ->
+                        // Handle errors
+                    }
+
+                    // Display the component (e.g., as dialog or full-screen overlay)
+                }
+            }
+
+            override fun onOutgoingCallAccepted(call: Call) {
+                // Handle accepted outgoing call
+            }
+
+            override fun onOutgoingCallRejected(call: Call) {
+                // Handle rejected outgoing call
+            }
+
+            override fun onIncomingCallCancelled(call: Call) {
+                // Handle cancelled incoming call
+            }
+        })
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+class BaseApplication : Application() {
+    companion object {
+        private val LISTENER_ID = "${BaseApplication::class.java.simpleName}${System.currentTimeMillis()}"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener {
+            override fun onIncomingCallReceived(call: Call) {
+                CometChatCallActivity.launchIncomingCallScreen(this@BaseApplication, call, null)
+                // Pass null or IncomingCallConfiguration if need to configure CometChatIncomingCall component
+            }
+
+            override fun onOutgoingCallAccepted(call: Call) {
+                // Handle accepted outgoing call
+            }
+
+            override fun onOutgoingCallRejected(call: Call) {
+                // Handle rejected outgoing call
+            }
+
+            override fun onIncomingCallCancelled(call: Call) {
+                // Handle cancelled incoming call
+            }
+        })
+    }
+}
+```
+</Tab>
+</Tabs>

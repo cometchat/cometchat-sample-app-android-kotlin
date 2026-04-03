@@ -1,8 +1,0 @@
--d '/Users/darshan/Desktop/javadocs/'
--use
--splitindex
--windowtitle 'CometChat'
--doctitle 'UI Kit'
--header '<b>Java UI Kit </b>'
--bottom 'Copyright &copy; 2021 CometChat Inc. All rights reserved.'
---ignore-source-errors

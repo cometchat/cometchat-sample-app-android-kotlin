@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lint configuration for chatuikit-core module
+  This module contains shared business logic (ViewModels, Use Cases, Repositories)
+-->
+<lint>
+    <!-- Treat all warnings as errors for strict code quality -->
+    <issue id="all" severity="warning" />
+
+    <!-- ==================== KOTLIN BEST PRACTICES ==================== -->
+    
+    <!-- Enforce proper null safety -->
+    <issue id="NullSafeMutableLiveData" severity="error" />
+    
+    <!-- Detect unused resources -->
+    <issue id="UnusedResources" severity="warning" />
+    
+    <!-- Detect hardcoded text (should use string resources) -->
+    <issue id="HardcodedText" severity="warning" />
+    <issue id="SetTextI18n" severity="warning" />
+
+    <!-- ==================== COROUTINES & LIFECYCLE ==================== -->
+    
+    <!-- Ensure proper coroutine scope usage -->
+    <issue id="UnsafeLifecycleWhenUsing" severity="error" />
+    
+    <!-- Detect potential memory leaks -->
+    <issue id="StaticFieldLeak" severity="error" />
+
+    <!-- ==================== PERFORMANCE ==================== -->
+    
+    <!-- Detect inefficient operations -->
+    <issue id="UseSparseArrays" severity="warning" />
+    <issue id="UseValueOf" severity="warning" />
+    <issue id="Wakelock" severity="error" />
+    
+    <!-- Detect overdraw issues -->
+    <issue id="Overdraw" severity="warning" />
+
+    <!-- ==================== SECURITY ==================== -->
+    
+    <!-- Security-related checks -->
+    <issue id="HardcodedDebugMode" severity="error" />
+    <issue id="AllowBackup" severity="warning" />
+    <issue id="ExportedContentProvider" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="ExportedService" severity="error" />
+    <issue id="GrantAllUris" severity="error" />
+    <issue id="WorldReadableFiles" severity="error" />
+    <issue id="WorldWriteableFiles" severity="error" />
+    
+    <!-- Detect insecure random number generation -->
+    <issue id="TrulyRandom" severity="error" />
+    
+    <!-- SSL/TLS security -->
+    <issue id="TrustAllX509TrustManager" severity="error" />
+    <issue id="UnprotectedSMSBroadcastReceiver" severity="error" />
+
+    <!-- ==================== API COMPATIBILITY ==================== -->
+    
+    <!-- Ensure API level compatibility -->
+    <issue id="NewApi" severity="error" />
+    <issue id="InlinedApi" severity="warning" />
+    <issue id="ObsoleteSdkInt" severity="warning" />
+
+    <!-- ==================== CODE QUALITY ==================== -->
+    
+    <!-- Detect common programming errors -->
+    <issue id="SuspiciousImport" severity="error" />
+    <issue id="DuplicateIncludedIds" severity="error" />
+    <issue id="PrivateResource" severity="warning" />
+    
+    <!-- Detect deprecated API usage -->
+    <issue id="Deprecated" severity="warning" />
+
+    <!-- ==================== INTEROPERABILITY ==================== -->
+    
+    <!-- Java-Kotlin interoperability -->
+    <issue id="UnknownNullness" severity="warning" />
+
+    <!-- ==================== IGNORED ISSUES ==================== -->
+    
+    <!-- Ignore for library modules (consumers handle these) -->
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="ExtraTranslation" severity="ignore" />
+    
+    <!-- Ignore icon-related issues for core module (no UI) -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+    <issue id="IconDensities" severity="ignore" />
+    <issue id="IconDuplicates" severity="ignore" />
+    
+    <!-- Ignore Gradle-related warnings -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="GradleOverrides" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+</lint>

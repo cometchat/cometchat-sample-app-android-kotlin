@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Home Activity Layout
+
+    Home screen displayed after successful login.
+    Shows bottom navigation with Chats, Calls, Users, Groups tabs.
+    Matches master-app-kotlin flow (no intermediate App Flow card).
+
+    Validates: Requirements 2.2, 3.5
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/home"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="?attr/cometchatBackgroundColor1"
-    tools:context="ui.activity.HomeActivity">
+    tools:context=".ui.home.HomeActivity">
 
+    <!-- Fragment Container -->
     <LinearLayout
         android:id="@+id/fragment_parent_layout"
         android:layout_width="0dp"
@@ -27,15 +37,17 @@
 
     </LinearLayout>
 
+    <!-- Separator line above bottom navigation -->
     <View
         android:id="@+id/view_separator_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/cometchat_1dp"
+        android:layout_height="1dp"
         android:layout_gravity="center"
         android:background="?attr/cometchatStrokeColorLight"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintTop_toBottomOf="@+id/fragment_parent_layout" />
 
+    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
@@ -43,7 +55,7 @@
         android:background="?attr/cometchatBackgroundColor1"
         app:elevation="0dp"
         app:itemHorizontalTranslationEnabled="false"
-        app:itemIconSize="@dimen/cometchat_32dp"
+        app:itemIconSize="32dp"
         app:itemRippleColor="@android:color/transparent"
         app:itemTextAppearanceActive="?attr/cometchatTextAppearanceCaption1Medium"
         app:itemTextAppearanceInactive="?attr/cometchatTextAppearanceCaption1Regular"
@@ -51,5 +63,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
+    <!-- Loading Overlay -->
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

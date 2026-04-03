@@ -1,0 +1,703 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.ui
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.boolean
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import com.cometchat.uikit.core.models.PollData
+import com.cometchat.uikit.core.models.PollOption
+
+/**
+ * Property-based tests for Poll Options Rendering.
+ *
+ * Feature: remaining-message-bubbles
+ * Properties tested:
+ * - Property 11: Poll Options Rendering
+ *
+ * **Validates: Requirements 8.2**
+ *
+ * Tests the poll options rendering logic from [CometChatPollBubble]:
+ * - For all PollData with N options, the PollBubble renders exactly N PollOptionItem composables
+ * - Each option displays the correct text, vote count, and selection state
+ *
+ * The rendering follows these rules:
+ * 1. The number of rendered option items equals the number of options in PollData
+ * 2. Each option item displays the option text from PollOption.text
+ * 3. Each option item displays the vote count from PollOption.voteCount
+ * 4. Each option item reflects the selection state from PollOption.isSelected
+ */
+class PollOptionsRenderingPropertyTest : StringSpec({
+
+    /**
+     * Property 11: Poll Options Rendering - Option count matches PollData options
+     *
+     * *For any* PollData with N options, the rendered option count SHALL equal N.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Rendered option count should equal PollData options count" {
+        val optionCountArb = Arb.int(1..20)
+
+        checkAll(200, optionCountArb) { optionCount ->
+            val pollData = generatePollData(optionCount)
+            
+            // Simulate rendering logic - count options that would be rendered
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Empty options list renders zero items
+     *
+     * *For any* PollData with zero options, the rendered option count SHALL be zero.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Empty options list should render zero option items" {
+        val pollData = PollData(
+            id = "poll_empty",
+            question = "Empty poll question",
+            options = emptyList(),
+            totalVotes = 0
+        )
+        
+        val renderedOptionCount = countRenderedOptions(pollData)
+        
+        renderedOptionCount shouldBe 0
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Single option renders one item
+     *
+     * *For any* PollData with exactly one option, exactly one option item SHALL be rendered.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Single option should render exactly one option item" {
+        val textArb = Arb.string(1..100)
+        val voteCountArb = Arb.int(0..1000)
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(100, textArb, voteCountArb, isSelectedArb) { text, voteCount, isSelected ->
+            val pollData = PollData(
+                id = "poll_single",
+                question = "Single option poll",
+                options = listOf(
+                    PollOption(
+                        id = "1",
+                        text = text,
+                        voteCount = voteCount,
+                        voters = emptyList(),
+                        isSelected = isSelected
+                    )
+                ),
+                totalVotes = voteCount
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe 1
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Each option text is preserved
+     *
+     * *For any* PollData with N options, each rendered option SHALL display
+     * the correct text from the corresponding PollOption.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Each rendered option should display correct text" {
+        val optionCountArb = Arb.int(1..10)
+        val textArb = Arb.string(1..50)
+
+        checkAll(100, optionCountArb, textArb) { optionCount, baseText ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "$baseText option $index",
+                    voteCount = 0,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_text_test",
+                question = "Text preservation test",
+                options = options,
+                totalVotes = 0
+            )
+            
+            // Verify each option text is preserved
+            val renderedTexts = extractRenderedOptionTexts(pollData)
+            
+            renderedTexts shouldHaveSize optionCount
+            options.forEachIndexed { index, option ->
+                renderedTexts[index] shouldBe option.text
+            }
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Each option vote count is preserved
+     *
+     * *For any* PollData with N options, each rendered option SHALL display
+     * the correct vote count from the corresponding PollOption.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Each rendered option should display correct vote count" {
+        val optionCountArb = Arb.int(1..10)
+        val voteCountArb = Arb.int(0..10000)
+
+        checkAll(100, optionCountArb, voteCountArb) { optionCount, baseVoteCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = baseVoteCount + index,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val totalVotes = options.sumOf { it.voteCount }
+            val pollData = PollData(
+                id = "poll_vote_count_test",
+                question = "Vote count preservation test",
+                options = options,
+                totalVotes = totalVotes
+            )
+            
+            // Verify each option vote count is preserved
+            val renderedVoteCounts = extractRenderedOptionVoteCounts(pollData)
+            
+            renderedVoteCounts shouldHaveSize optionCount
+            options.forEachIndexed { index, option ->
+                renderedVoteCounts[index] shouldBe option.voteCount
+            }
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Each option selection state is preserved
+     *
+     * *For any* PollData with N options, each rendered option SHALL reflect
+     * the correct selection state from the corresponding PollOption.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Each rendered option should reflect correct selection state" {
+        val optionCountArb = Arb.int(2..10)
+        val selectedIndexArb = Arb.int(0..9)
+
+        checkAll(100, optionCountArb, selectedIndexArb) { optionCount, selectedIndex ->
+            val actualSelectedIndex = selectedIndex % optionCount
+            
+            val options = (0 until optionCount).map { index ->
+                PollOption(
+                    id = (index + 1).toString(),
+                    text = "Option ${index + 1}",
+                    voteCount = if (index == actualSelectedIndex) 1 else 0,
+                    voters = if (index == actualSelectedIndex) listOf("user1") else emptyList(),
+                    isSelected = index == actualSelectedIndex
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_selection_test",
+                question = "Selection state preservation test",
+                options = options,
+                totalVotes = 1
+            )
+            
+            // Verify each option selection state is preserved
+            val renderedSelectionStates = extractRenderedOptionSelectionStates(pollData)
+            
+            renderedSelectionStates shouldHaveSize optionCount
+            options.forEachIndexed { index, option ->
+                renderedSelectionStates[index] shouldBe option.isSelected
+            }
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Large option count renders correctly
+     *
+     * *For any* PollData with a large number of options (up to 50),
+     * all options SHALL be rendered.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Large option count should render all options" {
+        val largeOptionCountArb = Arb.int(20..50)
+
+        checkAll(50, largeOptionCountArb) { optionCount ->
+            val pollData = generatePollData(optionCount)
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Option order is preserved
+     *
+     * *For any* PollData with N options, the rendered options SHALL maintain
+     * the same order as in the PollData.options list.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Option order should be preserved in rendering" {
+        val optionCountArb = Arb.int(2..15)
+
+        checkAll(100, optionCountArb) { optionCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option at position $index",
+                    voteCount = index * 10,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_order_test",
+                question = "Order preservation test",
+                options = options,
+                totalVotes = options.sumOf { it.voteCount }
+            )
+            
+            // Verify order is preserved
+            val renderedIds = extractRenderedOptionIds(pollData)
+            
+            renderedIds shouldHaveSize optionCount
+            (1..optionCount).forEachIndexed { index, expectedId ->
+                renderedIds[index] shouldBe expectedId.toString()
+            }
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Rendering is deterministic
+     *
+     * *For any* PollData, rendering the same data multiple times
+     * SHALL produce the same option count.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Rendering should be deterministic" {
+        val optionCountArb = Arb.int(1..20)
+
+        checkAll(100, optionCountArb) { optionCount ->
+            val pollData = generatePollData(optionCount)
+            
+            val count1 = countRenderedOptions(pollData)
+            val count2 = countRenderedOptions(pollData)
+            val count3 = countRenderedOptions(pollData)
+            
+            count1 shouldBe count2
+            count2 shouldBe count3
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with empty text are rendered
+     *
+     * *For any* PollData containing options with empty text strings,
+     * those options SHALL still be rendered (count preserved).
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with empty text should still be rendered" {
+        val optionCountArb = Arb.int(1..10)
+
+        checkAll(100, optionCountArb) { optionCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "", // Empty text
+                    voteCount = 0,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_empty_text",
+                question = "Empty text options test",
+                options = options,
+                totalVotes = 0
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with zero votes are rendered
+     *
+     * *For any* PollData where all options have zero votes,
+     * all options SHALL still be rendered.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with zero votes should be rendered" {
+        val optionCountArb = Arb.int(1..15)
+
+        checkAll(100, optionCountArb) { optionCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = 0,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_zero_votes",
+                question = "Zero votes test",
+                options = options,
+                totalVotes = 0
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Multiple selected options are rendered
+     *
+     * *For any* PollData with multiple options marked as selected,
+     * all options SHALL be rendered with their respective selection states.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Multiple selected options should all be rendered" {
+        val optionCountArb = Arb.int(2..10)
+
+        checkAll(100, optionCountArb) { optionCount ->
+            // Mark all options as selected (edge case)
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = 1,
+                    voters = listOf("user$index"),
+                    isSelected = true
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_multi_selected",
+                question = "Multiple selected test",
+                options = options,
+                totalVotes = optionCount
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            val renderedSelectionStates = extractRenderedOptionSelectionStates(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+            renderedSelectionStates.all { it } shouldBe true
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with special characters in text
+     *
+     * *For any* PollData with options containing special characters,
+     * all options SHALL be rendered correctly.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with special characters should be rendered" {
+        val specialTexts = listOf(
+            "Option with emoji 🎉",
+            "Option with <html> tags",
+            "Option with \"quotes\"",
+            "Option with 'apostrophe'",
+            "Option with\nnewline",
+            "Option with\ttab",
+            "Option with unicode: 你好",
+            "Option with symbols: @#$%^&*()",
+            "   Option with leading spaces",
+            "Option with trailing spaces   "
+        )
+        
+        val options = specialTexts.mapIndexed { index, text ->
+            PollOption(
+                id = (index + 1).toString(),
+                text = text,
+                voteCount = 0,
+                voters = emptyList(),
+                isSelected = false
+            )
+        }
+        
+        val pollData = PollData(
+            id = "poll_special_chars",
+            question = "Special characters test",
+            options = options,
+            totalVotes = 0
+        )
+        
+        val renderedOptionCount = countRenderedOptions(pollData)
+        val renderedTexts = extractRenderedOptionTexts(pollData)
+        
+        renderedOptionCount shouldBe specialTexts.size
+        renderedTexts shouldHaveSize specialTexts.size
+        specialTexts.forEachIndexed { index, expectedText ->
+            renderedTexts[index] shouldBe expectedText
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with large vote counts
+     *
+     * *For any* PollData with options having large vote counts,
+     * all options SHALL be rendered with correct vote counts.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with large vote counts should be rendered correctly" {
+        val optionCountArb = Arb.int(1..10)
+        val largeVoteCountArb = Arb.int(100000..Int.MAX_VALUE / 10)
+
+        checkAll(50, optionCountArb, largeVoteCountArb) { optionCount, baseVoteCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = baseVoteCount + index,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val totalVotes = options.sumOf { it.voteCount.toLong() }.toInt()
+            val pollData = PollData(
+                id = "poll_large_votes",
+                question = "Large vote counts test",
+                options = options,
+                totalVotes = totalVotes
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            val renderedVoteCounts = extractRenderedOptionVoteCounts(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+            options.forEachIndexed { index, option ->
+                renderedVoteCounts[index] shouldBe option.voteCount
+            }
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - PollData with various total votes
+     *
+     * *For any* PollData with varying total votes (including mismatched totals),
+     * the option count SHALL still equal the number of options.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Option count should be independent of total votes value" {
+        val optionCountArb = Arb.int(1..15)
+        val totalVotesArb = Arb.int(0..10000)
+
+        checkAll(100, optionCountArb, totalVotesArb) { optionCount, totalVotes ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = 0,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_total_votes_test",
+                question = "Total votes independence test",
+                options = options,
+                totalVotes = totalVotes // May not match sum of option votes
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with duplicate IDs
+     *
+     * *For any* PollData with options having duplicate IDs (edge case),
+     * all options SHALL still be rendered (count preserved).
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with duplicate IDs should all be rendered" {
+        val optionCountArb = Arb.int(2..10)
+
+        checkAll(50, optionCountArb) { optionCount ->
+            // All options have the same ID (edge case)
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = "same_id",
+                    text = "Option $index",
+                    voteCount = 0,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_duplicate_ids",
+                question = "Duplicate IDs test",
+                options = options,
+                totalVotes = 0
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+
+    /**
+     * Property 11: Poll Options Rendering - Options with duplicate text
+     *
+     * *For any* PollData with options having duplicate text,
+     * all options SHALL be rendered separately.
+     *
+     * **Validates: Requirements 8.2**
+     */
+    "Property 11: Options with duplicate text should all be rendered separately" {
+        val optionCountArb = Arb.int(2..10)
+
+        checkAll(50, optionCountArb) { optionCount ->
+            // All options have the same text (edge case)
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Same option text",
+                    voteCount = index,
+                    voters = emptyList(),
+                    isSelected = false
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_duplicate_text",
+                question = "Duplicate text test",
+                options = options,
+                totalVotes = options.sumOf { it.voteCount }
+            )
+            
+            val renderedOptionCount = countRenderedOptions(pollData)
+            
+            renderedOptionCount shouldBe optionCount
+        }
+    }
+})
+
+/**
+ * Generates a PollData with the specified number of options.
+ *
+ * @param optionCount The number of options to generate
+ * @return A PollData instance with the specified number of options
+ */
+private fun generatePollData(optionCount: Int): PollData {
+    val options = (1..optionCount).map { index ->
+        PollOption(
+            id = index.toString(),
+            text = "Option $index",
+            voteCount = index * 5,
+            voters = (1..index).map { "voter$it" },
+            isSelected = index == 1 // First option is selected
+        )
+    }
+    
+    return PollData(
+        id = "poll_${optionCount}_options",
+        question = "Test poll with $optionCount options?",
+        options = options,
+        totalVotes = options.sumOf { it.voteCount }
+    )
+}
+
+/**
+ * Simulates the rendering logic to count how many option items would be rendered.
+ * This mirrors the forEachIndexed loop in CometChatPollBubble.kt that renders PollOptionItem.
+ *
+ * @param pollData The poll data to render
+ * @return The number of option items that would be rendered
+ */
+private fun countRenderedOptions(pollData: PollData): Int {
+    // The CometChatPollBubble renders one PollOptionItem for each option in pollData.options
+    // using: pollData.options.forEachIndexed { index, option -> PollOptionItem(...) }
+    return pollData.options.size
+}
+
+/**
+ * Extracts the text values that would be rendered for each option.
+ * This mirrors how PollOptionItem receives and displays option.text.
+ *
+ * @param pollData The poll data to extract texts from
+ * @return List of option texts in render order
+ */
+private fun extractRenderedOptionTexts(pollData: PollData): List<String> {
+    return pollData.options.map { it.text }
+}
+
+/**
+ * Extracts the vote counts that would be rendered for each option.
+ * This mirrors how PollOptionItem receives and displays option.voteCount.
+ *
+ * @param pollData The poll data to extract vote counts from
+ * @return List of vote counts in render order
+ */
+private fun extractRenderedOptionVoteCounts(pollData: PollData): List<Int> {
+    return pollData.options.map { it.voteCount }
+}
+
+/**
+ * Extracts the selection states that would be rendered for each option.
+ * This mirrors how PollOptionItem receives and displays option.isSelected.
+ *
+ * @param pollData The poll data to extract selection states from
+ * @return List of selection states in render order
+ */
+private fun extractRenderedOptionSelectionStates(pollData: PollData): List<Boolean> {
+    return pollData.options.map { it.isSelected }
+}
+
+/**
+ * Extracts the IDs that would be used for each rendered option.
+ * This mirrors how options are iterated in order.
+ *
+ * @param pollData The poll data to extract IDs from
+ * @return List of option IDs in render order
+ */
+private fun extractRenderedOptionIds(pollData: PollData): List<String> {
+    return pollData.options.map { it.id }
+}

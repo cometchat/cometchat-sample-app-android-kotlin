@@ -1,0 +1,196 @@
+package com.cometchat.uikit.compose.shared.events
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.enum
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * Property-based tests for CometChatEventsBridge.
+ *
+ * Feature: compose-events-system
+ * Property tested:
+ * - Property 8: Bridge Event Forwarding
+ *
+ * Validates: Requirements 11.1, 11.2, 11.3
+ *
+ * Note: Full integration testing with the Java event system requires Android instrumentation tests.
+ * These unit tests verify the bridge's state management and the event forwarding logic
+ * by testing the Kotlin event system's ability to receive and forward events correctly.
+ */
+class CometChatEventsBridgePropertyTest : StringSpec({
+
+    /**
+     * Property 8: Bridge Event Forwarding
+     *
+     * For any event emitted through the existing Java CometChatUIKitHelper,
+     * an equivalent event SHALL be emitted to the corresponding Kotlin SharedFlow.
+     *
+     * This test verifies that events emitted to the Kotlin event system are correctly
+     * received by subscribers, which is the core mechanism the bridge uses.
+     *
+     * Feature: compose-events-system, Property 8: Bridge Event Forwarding
+     * Validates: Requirements 11.1, 11.2
+     */
+    "Property 8: Bridge should correctly forward LiveReaction events to Kotlin flows" {
+        val iconIdArb = Arb.int(0, Int.MAX_VALUE)
+
+        checkAll(10, iconIdArb) { iconId ->
+            val originalEvent = CometChatMessageEvent.LiveReaction(iconId)
+            var receivedEvent: CometChatMessageEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.messageEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                // Simulate what the bridge does: emit to Kotlin flow
+                CometChatEvents.emitMessageEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify the event was forwarded correctly
+            receivedEvent shouldBe originalEvent
+            (receivedEvent as CometChatMessageEvent.LiveReaction).icon shouldBe iconId
+        }
+    }
+
+    "Property 8: Bridge should correctly forward ComposeMessage UI events to Kotlin flows" {
+        val composeMessageArb = Arb.bind(
+            Arb.string(1, 50),
+            Arb.string(0, 200)
+        ) { id, text ->
+            CometChatUIEvent.ComposeMessage(id, text)
+        }
+
+        checkAll(10, composeMessageArb) { originalEvent ->
+            var receivedEvent: CometChatUIEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                // Simulate what the bridge does: emit to Kotlin flow
+                CometChatEvents.emitUIEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify the event was forwarded correctly
+            receivedEvent shouldBe originalEvent
+            val received = receivedEvent as CometChatUIEvent.ComposeMessage
+            received.id shouldBe originalEvent.id
+            received.text shouldBe originalEvent.text
+        }
+    }
+
+    "Property 8: Bridge should correctly forward HidePanel UI events with position conversion" {
+        val hidePanelArb = Arb.bind(
+            Arb.string(1, 20),
+            Arb.string(1, 20),
+            Arb.enum<CustomUIPosition>()
+        ) { key, value, position ->
+            CometChatUIEvent.HidePanel(mapOf(key to value), position)
+        }
+
+        checkAll(10, hidePanelArb) { originalEvent ->
+            var receivedEvent: CometChatUIEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                // Simulate what the bridge does: emit to Kotlin flow
+                CometChatEvents.emitUIEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify the event was forwarded correctly with position preserved
+            receivedEvent shouldBe originalEvent
+            val received = receivedEvent as CometChatUIEvent.HidePanel
+            received.id shouldBe originalEvent.id
+            received.position shouldBe originalEvent.position
+        }
+    }
+
+    "Property 8: Bridge should correctly forward ActiveChatChanged events with unread count" {
+        val activeChatArb = Arb.bind(
+            Arb.string(1, 20),
+            Arb.string(1, 20),
+            Arb.int(0, 1000)
+        ) { key, value, unreadCount ->
+            CometChatUIEvent.ActiveChatChanged(
+                id = mapOf(key to value),
+                message = null,
+                user = null,
+                group = null,
+                unreadCount = unreadCount
+            )
+        }
+
+        checkAll(10, activeChatArb) { originalEvent ->
+            var receivedEvent: CometChatUIEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                // Simulate what the bridge does: emit to Kotlin flow
+                CometChatEvents.emitUIEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify the event was forwarded correctly with unread count preserved
+            receivedEvent shouldBe originalEvent
+            val received = receivedEvent as CometChatUIEvent.ActiveChatChanged
+            received.id shouldBe originalEvent.id
+            received.unreadCount shouldBe originalEvent.unreadCount
+        }
+    }
+
+    "Property 8: MessageStatus conversion should preserve status values during bridge forwarding" {
+        val statusArb = Arb.enum<MessageStatus>()
+
+        checkAll(10, statusArb) { status ->
+            // Test the conversion that the bridge uses
+            val intValue = status.value
+            val convertedStatus = MessageStatus.fromInt(intValue)
+
+            // Verify round-trip conversion preserves the status
+            convertedStatus shouldBe status
+        }
+    }
+
+    "Property 8: CustomUIPosition should map correctly for all position values" {
+        val positionArb = Arb.enum<CustomUIPosition>()
+
+        checkAll(10, positionArb) { position ->
+            // Verify all positions are valid and can be used in events
+            val event = CometChatUIEvent.HidePanel(mapOf("test" to "value"), position)
+            event.position shouldBe position
+        }
+    }
+})

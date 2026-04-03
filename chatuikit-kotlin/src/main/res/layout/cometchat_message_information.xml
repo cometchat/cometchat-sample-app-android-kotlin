@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Drag Handle -->
+        <View
+            android:id="@+id/dragHandle"
+            android:layout_width="@dimen/cometchat_32dp"
+            android:layout_height="@dimen/cometchat_4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/cometchat_padding_3"
+            android:layout_marginBottom="@dimen/cometchat_padding_3"
+            android:background="@drawable/cometchat_rounded_rect_background" />
+
+        <!-- Toolbar -->
+        <RelativeLayout
+            android:id="@+id/toolBarView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_64dp"
+            android:paddingStart="@dimen/cometchat_padding_4"
+            android:paddingEnd="@dimen/cometchat_padding_4">
+
+            <TextView
+                android:id="@+id/tvToolBarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/cometchat_message_info"
+                android:textAppearance="?attr/cometchatTextAppearanceHeading2Bold"
+                tools:text="Message Info" />
+
+        </RelativeLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Message Bubble Section -->
+                <RelativeLayout
+                    android:id="@+id/messageBubbleParentLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/cometchat_padding_4">
+
+                    <LinearLayout
+                        android:id="@+id/messageBubbleView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:gravity="end"
+                        android:orientation="vertical" />
+
+                    <!-- Overlay to block touches -->
+                    <LinearLayout
+                        android:id="@+id/messageBubbleViewOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical" />
+
+                </RelativeLayout>
+
+                <!-- User Receipt View (for USER conversations) -->
+                <LinearLayout
+                    android:id="@+id/messageReceiptsUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/cometchat_padding_4"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <!-- Read Section -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceipt
+                                android:id="@+id/messageReceiptRead"
+                                android:layout_width="@dimen/cometchat_16dp"
+                                android:layout_height="@dimen/cometchat_16dp" />
+
+                            <TextView
+                                android:id="@+id/tvReadReceiptUser"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/cometchat_padding_1"
+                                android:text="@string/cometchat_read"
+                                android:textAppearance="?attr/cometchatTextAppearanceBodyRegular" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvReadTimestampUser"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/cometchat_20dp"
+                            android:layout_marginTop="@dimen/cometchat_padding_1"
+                            android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                            android:visibility="gone"
+                            tools:text="12/3/2024, 10:30 AM"
+                            tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cometchat_padding_4" />
+
+                    <!-- Delivered Section -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceipt
+                                android:id="@+id/messageReceiptDelivered"
+                                android:layout_width="@dimen/cometchat_16dp"
+                                android:layout_height="@dimen/cometchat_16dp" />
+
+                            <TextView
+                                android:id="@+id/tvDeliveredReceiptUser"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/cometchat_padding_1"
+                                android:text="@string/cometchat_deliver"
+                                android:textAppearance="?attr/cometchatTextAppearanceBodyRegular" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvDeliveredTimestampUser"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/cometchat_20dp"
+                            android:layout_marginTop="@dimen/cometchat_padding_1"
+                            android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                            android:visibility="gone"
+                            tools:text="12/3/2024, 10:28 AM"
+                            tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Group Receipt List (for GROUP conversations) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/messageInfoRecyclerViewGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/cometchat_message_information_list_item"
+                    tools:visibility="visible" />
+
+                <!-- Shimmer Loading -->
+                <com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout
+                    android:id="@+id/shimmerEffectFrame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/shimmerRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

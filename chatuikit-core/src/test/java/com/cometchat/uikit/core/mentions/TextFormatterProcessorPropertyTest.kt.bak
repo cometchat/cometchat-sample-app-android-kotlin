@@ -1,0 +1,321 @@
+package com.cometchat.uikit.core.mentions
+
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for TextFormatterProcessor.
+ * Uses Kotest property testing to verify correctness properties.
+ * 
+ * Feature: cometchat-message-composer
+ */
+class TextFormatterProcessorPropertyTest : FunSpec({
+
+    // ==================== Generators ====================
+
+    /**
+     * Generator for user names.
+     */
+    val userNameArb = Arb.string(1..20).map { 
+        it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(20).ifEmpty { "User" } 
+    }
+
+    /**
+     * Generator for user IDs.
+     */
+    val userIdArb = Arb.string(5..20).map { 
+        it.filter { c -> c.isLetterOrDigit() }.take(20).ifEmpty { "user123" } 
+    }
+
+    /**
+     * Generator for message text without mentions.
+     */
+    val messageTextArb = Arb.string(1..100).map { 
+        it.filter { c -> c.isLetterOrDigit() || c == ' ' || c == '.' || c == '!' }.take(100).ifEmpty { "Hello" } 
+    }
+
+    // ==================== Property Tests ====================
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send
+     * 
+     * For any text with mentions, the processor SHALL replace all prompt text
+     * with their corresponding underlying text.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Single Mention").config(invocations = 100) {
+        checkAll(messageTextArb, userNameArb, userIdArb) { prefix, userName, userId ->
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            val originalText = "$prefix $promptText"
+            
+            val promptToUnderlyingMap = mapOf(promptText to underlyingText)
+            
+            val result = TextFormatterProcessor.processPrompts(originalText, promptToUnderlyingMap)
+            
+            // Processed text should contain underlying text
+            result.processedText shouldContain underlyingText
+            
+            // Processed text should NOT contain prompt text
+            result.processedText shouldNotContain promptText
+            
+            // Original text should be preserved in result
+            result.originalText shouldBe originalText
+            
+            // Prefix should be preserved
+            result.processedText shouldContain prefix
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Multiple Mentions
+     * 
+     * For any text with multiple mentions, ALL mentions SHALL be replaced
+     * with their underlying text.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Multiple Mentions").config(invocations = 100) {
+        checkAll(
+            userNameArb, userIdArb,
+            userNameArb, userIdArb,
+            messageTextArb
+        ) { userName1, userId1, userName2, userId2, middleText ->
+            // Ensure different users
+            val name1 = userName1
+            val name2 = if (userName2 == userName1) "${userName2}2" else userName2
+            val id1 = userId1
+            val id2 = if (userId2 == userId1) "${userId2}2" else userId2
+            
+            val promptText1 = "@$name1"
+            val underlyingText1 = "<@uid:$id1>"
+            val promptText2 = "@$name2"
+            val underlyingText2 = "<@uid:$id2>"
+            
+            val originalText = "$promptText1 $middleText $promptText2"
+            
+            val promptToUnderlyingMap = mapOf(
+                promptText1 to underlyingText1,
+                promptText2 to underlyingText2
+            )
+            
+            val result = TextFormatterProcessor.processPrompts(originalText, promptToUnderlyingMap)
+            
+            // Both underlying texts should be present
+            result.processedText shouldContain underlyingText1
+            result.processedText shouldContain underlyingText2
+            
+            // Neither prompt text should be present
+            result.processedText shouldNotContain promptText1
+            result.processedText shouldNotContain promptText2
+            
+            // Middle text should be preserved
+            result.processedText shouldContain middleText
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - No Mentions
+     * 
+     * For any text without mentions, the processor SHALL return the original
+     * text unchanged.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - No Mentions").config(invocations = 100) {
+        checkAll(messageTextArb) { text ->
+            val emptyMap = emptyMap<String, String>()
+            
+            val result = TextFormatterProcessor.processPrompts(text, emptyMap)
+            
+            // Text should be unchanged
+            result.processedText shouldBe text
+            result.originalText shouldBe text
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Preserves Non-Mention Text
+     * 
+     * For any text with mentions, all non-mention text SHALL be preserved
+     * in the processed output.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Preserves Non-Mention Text").config(invocations = 100) {
+        checkAll(messageTextArb, messageTextArb, userNameArb, userIdArb) { prefix, suffix, userName, userId ->
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            val originalText = "$prefix $promptText $suffix"
+            
+            val promptToUnderlyingMap = mapOf(promptText to underlyingText)
+            
+            val result = TextFormatterProcessor.processPrompts(originalText, promptToUnderlyingMap)
+            
+            // Prefix and suffix should be preserved
+            result.processedText shouldContain prefix
+            result.processedText shouldContain suffix
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Span Processing
+     * 
+     * For any text with span positions, the processor SHALL correctly replace
+     * text at the specified positions.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Span Position Processing").config(invocations = 100) {
+        checkAll(userNameArb, userIdArb) { userName, userId ->
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            val prefix = "Hello "
+            val suffix = " world"
+            val originalText = "$prefix$promptText$suffix"
+            
+            val spanStart = prefix.length
+            val spanEnd = prefix.length + promptText.length - 1
+            
+            val spanToUnderlyingMap = mapOf(
+                (spanStart..spanEnd) to underlyingText
+            )
+            
+            val result = TextFormatterProcessor.processSpans(originalText, spanToUnderlyingMap)
+            
+            // Underlying text should be present
+            result.processedText shouldContain underlyingText
+            
+            // Prefix and suffix should be preserved
+            result.processedText.startsWith(prefix).shouldBe(true)
+            result.processedText shouldContain suffix.trim()
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Order Independence
+     * 
+     * For any set of mentions, the processing order SHALL NOT affect the
+     * final result (when mentions don't overlap).
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Order Independence").config(invocations = 100) {
+        checkAll(
+            userNameArb, userIdArb,
+            userNameArb, userIdArb
+        ) { userName1, userId1, userName2, userId2 ->
+            // Ensure different users
+            val name1 = userName1
+            val name2 = if (userName2 == userName1) "${userName2}2" else userName2
+            val id1 = userId1
+            val id2 = if (userId2 == userId1) "${userId2}2" else userId2
+            
+            val promptText1 = "@$name1"
+            val underlyingText1 = "<@uid:$id1>"
+            val promptText2 = "@$name2"
+            val underlyingText2 = "<@uid:$id2>"
+            
+            val originalText = "$promptText1 and $promptText2"
+            
+            // Process in order 1, 2
+            val map1 = mapOf(
+                promptText1 to underlyingText1,
+                promptText2 to underlyingText2
+            )
+            
+            // Process in order 2, 1
+            val map2 = mapOf(
+                promptText2 to underlyingText2,
+                promptText1 to underlyingText1
+            )
+            
+            val result1 = TextFormatterProcessor.processPrompts(originalText, map1)
+            val result2 = TextFormatterProcessor.processPrompts(originalText, map2)
+            
+            // Results should be the same regardless of order
+            result1.processedText shouldBe result2.processedText
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Idempotence
+     * 
+     * For any already processed text, processing again with the same mappings
+     * SHALL NOT change the text (underlying text should not match prompt patterns).
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Idempotence").config(invocations = 100) {
+        checkAll(userNameArb, userIdArb) { userName, userId ->
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            val originalText = "Hello $promptText"
+            
+            val promptToUnderlyingMap = mapOf(promptText to underlyingText)
+            
+            // First processing
+            val result1 = TextFormatterProcessor.processPrompts(originalText, promptToUnderlyingMap)
+            
+            // Second processing (should not change anything since prompt is gone)
+            val result2 = TextFormatterProcessor.processPrompts(result1.processedText, promptToUnderlyingMap)
+            
+            // Results should be the same
+            result2.processedText shouldBe result1.processedText
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Empty Text
+     * 
+     * For empty text, the processor SHALL return empty text.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Empty Text").config(invocations = 100) {
+        val emptyMap = emptyMap<String, String>()
+        val nonEmptyMap = mapOf("@user" to "<@uid:123>")
+        
+        // Empty text with empty map
+        val result1 = TextFormatterProcessor.processPrompts("", emptyMap)
+        result1.processedText shouldBe ""
+        
+        // Empty text with non-empty map
+        val result2 = TextFormatterProcessor.processPrompts("", nonEmptyMap)
+        result2.processedText shouldBe ""
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 12: Text Formatter Processing Before Send - Length Change
+     * 
+     * For any mention replacement, the length change SHALL equal the difference
+     * between underlying and prompt text lengths.
+     * 
+     * **Validates: Requirements 7.7**
+     */
+    test("Property 12: Text Formatter Processing Before Send - Length Change").config(invocations = 100) {
+        checkAll(userNameArb, userIdArb) { userName, userId ->
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            val originalText = "Hello $promptText world"
+            
+            val promptToUnderlyingMap = mapOf(promptText to underlyingText)
+            
+            val result = TextFormatterProcessor.processPrompts(originalText, promptToUnderlyingMap)
+            
+            val expectedLengthChange = underlyingText.length - promptText.length
+            val actualLengthChange = result.processedText.length - originalText.length
+            
+            actualLengthChange shouldBe expectedLengthChange
+        }
+    }
+})

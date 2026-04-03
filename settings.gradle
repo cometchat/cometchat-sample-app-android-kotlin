@@ -26,6 +26,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name='Android UI Kit'
-include ':chatuikit',':sample-app-java',':sample-app-kotlin',':sample-app-java+push-notification',':sample-app-kotlin+push-notification',':ai-sample-app'
-
+rootProject.name = 'Android UI Kit'
+include ':chatuikit-compose'
+include ':chatuikit-kotlin'
+include ':chatuikit-core'
+include ':sample-app-kotlin'
+include ':sample-app-compose'

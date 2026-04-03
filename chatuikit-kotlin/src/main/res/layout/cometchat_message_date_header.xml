@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/txt_message_date"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center" />

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Thread Messages Activity Layout
+    
+    This layout contains the thread chat interface using CometChat UI Kit components:
+    - CometChatThreadHeader: Shows parent message info
+    - CometChatMessageList: Displays thread replies
+    - CometChatMessageComposer: Allows composing thread replies
+    
+    Validates: Requirements 6.9
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.messages.ThreadMessagesActivity">
+
+    <!-- Toolbar for back navigation -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/thread" />
+
+    <!-- Thread Header - shows parent message -->
+    <com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+        android:id="@+id/threadHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Message List - displays thread replies -->
+    <com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+        android:id="@+id/messageList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Message Composer - for composing thread replies -->
+    <com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+        android:id="@+id/messageComposer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

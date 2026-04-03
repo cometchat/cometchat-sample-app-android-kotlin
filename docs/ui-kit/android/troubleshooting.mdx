@@ -1,0 +1,171 @@
+---
+title: "Troubleshooting"
+description: "Common failure modes and fixes for the CometChat Android V5 UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Page type | Troubleshooting reference |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Scope | All CometChat Android UI Kit v5 issues — initialization, theming, components, calling, extensions, AI features, localization, sound, events, methods, text formatters |
+| When to reference | When a component fails to render, data is missing, styling doesn't apply, or a feature doesn't appear |
+
+</Accordion>
+
+## Initialization and Login
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `CometChatUIKit.init()` fails silently | Invalid App ID, Region, or Auth Key | Double-check credentials from the [CometChat Dashboard](https://app.cometchat.com/) |
+| Blank screen after login | Component rendered before `init()` or `login()` completes | Ensure `init()` → `login()` order completes before rendering any UI Kit component. See [Methods](/ui-kit/android/v6/methods) |
+| Component renders but shows no data | User not logged in | Call `CometChatUIKit.login("UID", callback)` after init resolves |
+| Login fails with "UID not found" | UID doesn't exist in your CometChat app | Create the user via Dashboard, SDK, or REST API first |
+| `getLoggedInUser()` returns null | User not logged in or session expired | Call `login()` or `loginWithAuthToken()` first |
+| Auth Key exposed in production | Using Auth Key instead of Auth Token | Switch to [`loginWithAuthToken()`](/ui-kit/android/v6/methods#login-using-auth-token) for production. Generate tokens server-side via the REST API |
+| `init()` callback never fires | Network blocked or incorrect region | Verify internet permission in `AndroidManifest.xml` and confirm the region matches your Dashboard (`us`, `eu`, `in`) |
+| `minSdk` build error | Project `minSdk` is below 24 | Set `minSdk` to 24 or higher in your app-level `build.gradle` — the UI Kit requires Android 7.0 (API 24)+ |
+| Dependency resolution failure | Missing CometChat Maven repository | Add `maven("https://dl.cloudsmith.io/public/cometchat/cometchat/maven/")` to `settings.gradle` repositories block |
+| Wrong import for `CometChatUIKit` | Using old package path | Use `import com.cometchat.uikit.core.CometChatUIKit` for both `chatuikit-kotlin` and `chatuikit-jetpack` modules |
+
+---
+
+
+## Theming and Styling
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Theme not applied / crash on launch | App theme does not extend `CometChatTheme.DayNight` | Set `parent="CometChatTheme.DayNight"` in your `themes.xml` style and apply it in `AndroidManifest.xml` |
+| Dark mode not working | System dark mode not propagated to CometChat theme | Ensure your app theme parent is `CometChatTheme.DayNight` — it inherits `Theme.MaterialComponents.DayNight.NoActionBar` and responds to system dark mode automatically |
+| Custom colors not applying | Overriding wrong theme attributes | Check the [Color Resources](/ui-kit/android/v6/color-resources) page for the correct attribute names |
+| Font not changing | Custom font set on wrong theme attribute | Override `cometchatFontFamily` in your theme to apply a custom font globally |
+| Styles leak into host app | CometChat theme attributes conflict with app theme | Scope CometChat theme overrides to the Activity hosting CometChat components rather than the application-level theme |
+| Styles apply to some screens but not others | Activity uses a different theme | Verify the Activity hosting CometChat components has `android:theme` set to your custom theme in `AndroidManifest.xml` |
+| Changes apply in light mode but not dark mode | Only `values/themes.xml` updated | Update both `values/themes.xml` and `values-night/themes.xml` with your overrides |
+| Drawable changes not visible | Stale build cache | Rebuild the app after adding or replacing drawable files |
+| Bubble style not applying | Custom style linked to wrong hub | Confirm the style is linked inside the correct hub (`CustomIncomingMessageBubbleStyle` or `CustomOutgoingMessageBubbleStyle`). See [Message Bubble Styling](/ui-kit/android/v6/message-bubble-styling) |
+| Only incoming or outgoing bubble changes | Separate styles required per direction | Define separate styles for incoming and outgoing bubbles — changing one does not affect the other |
+| Component style attribute not recognized | Wrong attribute name | Confirm the exact attribute name in the linked attribute reference file on the component page |
+| Compose theme not applying (`chatuikit-jetpack`) | Not wrapping in `CometChatTheme` composable | In `chatuikit-jetpack`, wrap your CometChat composables inside `CometChatTheme { }` to apply theming |
+
+---
+
+## Components
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Component not rendering | `init()` or `login()` not complete | Ensure both `init()` and `login()` resolve before inflating any CometChat view. Use a callback or state flag to gate rendering |
+| List is empty despite having data | User not logged in | Verify a user is logged in with `CometChatUIKit.login()` before displaying the component. Components fetch data for the logged-in user only |
+| Callback not firing | Wrong listener method or signature | Check the Actions section on the component page for the exact method name and parameter types |
+| `setOnItemClick` not firing | Selection mode set to `MULTIPLE` | Item clicks may be consumed by selection logic. Set `setSelectionMode(NONE)` if you need standard click behavior |
+| Messages not loading | Invalid `User` or `Group` object passed | Fetch the user or group via the SDK before passing it to the component |
+| View not appearing in XML layout (`chatuikit-kotlin`) | Missing fully qualified class name | Use the full XML element name, e.g. `<com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations />` |
+| Custom view not rendering | `createView` returns `null` | If `createView` returns `null`, the default view is used. Return a valid inflated `View` to replace the default |
+| `ActivityResultLauncher` not initialized | MessageComposer created outside `onCreate` | Create `CometChatMessageComposer` in the `onCreate` state of an Activity. In a Fragment, ensure the Fragment is loaded during the Activity's `onCreate` |
+| Sticker button disappears after setting auxiliary view | Auxiliary button overridden | Retrieve default auxiliary buttons via `CometChatUIKit.getDataSource().getAuxiliaryOption()` and include them in your custom layout before calling `setAuxiliaryButtonView()` |
+| Typing indicator not showing | Custom subtitle view overrides it | The typing indicator renders in the default subtitle area. When you provide a custom `setSubtitleView`, it replaces the entire subtitle layout including the typing indicator |
+| `disableSoundForMessages(true)` has no effect | Called after component starts loading | Call `disableSoundForMessages(true)` before the component starts loading |
+| Filters not applied | Builder not set on component | Ensure you call the appropriate `set*RequestBuilder(builder)` method on the component instance after creating and configuring the builder |
+| ProGuard/R8 strips CometChat classes | Missing keep rules for CometChat | Add `-keep class com.cometchat.** { *; }` to your `proguard-rules.pro` file |
+| Jetifier errors during build | `android.enableJetifier=true` not set | Add `android.enableJetifier=true` to `gradle.properties` |
+| `CometChatConversationList` not found | Component renamed in v6 | Use `CometChatConversations` instead of `CometChatConversationList` |
+| `CometChatThreadedMessagesHeader` not found | Component renamed in v5 | Use `CometChatThreadHeader` instead |
+
+---
+
+## Calling
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Call buttons not appearing | `com.cometchat:calls-sdk-android` not installed | Add the calls SDK dependency to your `build.gradle` — the UI Kit auto-detects it. See [Integration](/ui-kit/android/v6/getting-started) |
+| Incoming call screen not showing | `CometChatIncomingCall` not added to the Activity | Render `CometChatIncomingCall` at the root of your Activity layout so it can listen for incoming calls |
+| Incoming calls not detected | Call events not observed | Ensure you collect from `CometChatEvents.onIncomingCall` SharedFlow in your Application class or relevant scope |
+| Call connects but no audio/video | Missing runtime permissions | Request `CAMERA`, `RECORD_AUDIO`, and `INTERNET` permissions at runtime before initiating calls |
+| Call fails immediately | Calls SDK version mismatch | Ensure `com.cometchat:calls-sdk-android` version is compatible with your UI Kit version. Check the [Integration](/ui-kit/android/v6/getting-started) page for version pairing |
+| Sound still plays after disabling | `disableSoundForCalls(true)` called too late | Call `disableSoundForCalls(true)` before the component starts the call. If called after the call is initiated, it may not take effect |
+| Custom call sound not playing | Audio file missing or wrong path | Verify the sound file exists in `res/raw` and pass the correct `@RawRes int` resource ID to `setCustomSoundForCalls` |
+| Call events not received | Not collecting from SharedFlow | Use `CometChatEvents` singleton and collect from the appropriate SharedFlow (e.g., `onCallEnded`, `onIncomingCall`) in a coroutine scope |
+| Call events still firing after screen closed | Coroutine scope not cancelled | Cancel the coroutine scope collecting from `CometChatEvents` SharedFlows in `onDestroy()` or `onDestroyView()` |
+
+---
+
+## Extensions
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Extension feature not appearing | Extension not activated in CometChat Dashboard | Enable the specific extension from your [Dashboard](/fundamentals/extensions-overview) |
+| Stickers not showing in composer | Sticker extension not enabled | Activate [Sticker Extension](/fundamentals/stickers) in Dashboard |
+| Polls option missing from action sheet | Polls extension not enabled | Activate [Polls Extension](/fundamentals/polls) in Dashboard |
+| Link preview not rendering in messages | Link Preview extension not enabled | Activate [Link Preview Extension](/fundamentals/link-preview) in Dashboard |
+
+---
+
+## AI Features
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| AI features not appearing | Feature not activated in CometChat Dashboard | Enable the specific AI feature from your [Dashboard](/fundamentals/ai-user-copilot/overview) |
+| Conversation Starter not showing | Feature not enabled or no conversation context | Ensure [Conversation Starter](/fundamentals/ai-user-copilot/conversation-starter) is activated in Dashboard |
+| Smart Replies not appearing in composer | Feature not enabled in Dashboard | Ensure [Smart Replies](/fundamentals/ai-user-copilot/smart-replies) is activated in Dashboard |
+
+---
+
+## Localization
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| UI text not translated | Wrong language code | Use a `Language.Code` constant from the supported languages list in [Localize](/ui-kit/android/v6/localize) |
+| `setLocale` called after UI Kit screens render | Locale applied too late | Call `CometChatLocalize.setLocale(...)` before launching any UI Kit screen |
+| String overrides not appearing | Key name mismatch in `strings.xml` | Verify the key name matches exactly (e.g., `cometchat_chats`). See [Localize](/ui-kit/android/v6/localize) |
+| Changes not visible after editing `strings.xml` | Stale build cache | Clean and rebuild the project after editing string resources |
+| Date/time labels unchanged | `DateTimeFormatterCallback` not set | Add `setDateTimeFormatterCallback(...)` to the same `UIKitSettings` instance passed to `CometChatUIKit.init()`. See [Methods](/ui-kit/android/v6/methods#dateformatter) |
+
+---
+
+## Sound
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| No sound plays | `CometChatSoundManager` created with invalid `Context` | Ensure you pass a valid `Context` when instantiating `CometChatSoundManager`. See [Sound Manager](/ui-kit/android/v6/sound-manager) |
+| Custom sound not playing | Audio file missing or wrong format | Place audio files in `res/raw` and reference them as `R.raw.<file>`. Ensure the format is supported by Android (WAV/MP3/OGG) |
+| Sound plays only once | Creating a new `CometChatSoundManager` per event | Reuse the same `CometChatSoundManager` instance instead of creating one per event |
+| Silent on device | Device volume or ringer mode | Check device volume and ringer mode settings |
+
+---
+
+## Events
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Event not received | Not collecting from the correct `CometChatEvents` SharedFlow | Check the [Events](/ui-kit/android/v6/events) page for exact SharedFlow names and collect in a coroutine scope |
+| Duplicate event triggers | Multiple coroutine collectors active | Cancel previous collection scopes when re-subscribing, or use `lifecycleScope` to auto-cancel |
+| Event fires but UI doesn't update | Callback not running on main thread | Collect SharedFlows using `Dispatchers.Main` or `lifecycleScope.launch { }` to ensure UI updates run on the main thread |
+| Missed events after rotation | Collection scope not re-created after Activity recreation | Collect from `CometChatEvents` SharedFlows in `onCreate()` or `onViewCreated()` using `lifecycleScope` |
+| Not all event types received | Only collecting from some SharedFlows | Each event type has its own SharedFlow on `CometChatEvents`. Collect from every flow you need (e.g., `onGroupCreated`, `onGroupMemberJoined`) |
+
+---
+
+## Methods
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| UI Kit method fails | Called before `init()` completes | Call `CometChatUIKit.init()` first and wait for the `onSuccess` callback before calling `login()`, `sendTextMessage()`, or any other UI Kit method |
+| Messages sent but UI not updating | Using SDK method instead of UI Kit wrapper | Use `CometChatUIKit.sendTextMessage()` instead of `CometChat.sendTextMessage()`. The UI Kit wrapper automatically updates Message List and Conversations components via internal events |
+| Failures silently ignored | `onError` callback left empty | Every UI Kit method accepts a `CallbackListener` with `onError`. Log the `CometChatException` or display an error message to the user |
+| Session conflicts after switching users | Previous user not logged out | Call `CometChatUIKit.logout()` and wait for `onSuccess` before logging in a different user |
+| Custom message not appearing in Message List | No `MessageTemplate` registered | Custom messages and custom interactive messages require a registered [MessageTemplate](/ui-kit/android/v6/message-template) that defines how to render them |
+| Interactive message missing sender or receiver | `sender` or `receiver` not set | For `FormMessage`, `CardMessage`, `SchedulerMessage`, and `CustomInteractiveMessage`, set both `sender` (via `CometChatUIKit.getLoggedInUser()`) and `receiver` (the target `User` or `Group` object) before sending |
+
+---
+
+## Text Formatters
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Mentions render as plain text | Formatter not added to component | Create a `CometChatMentionsFormatter`, add it to a `List<CometChatTextFormatter>`, and pass the list to the component via `setTextFormatters()` |
+| `setTextFormatters()` has no effect | Called with empty list | Add at least one formatter to the list before calling `setTextFormatters()` |
+| Custom mention style not applied in composer | Style not set on formatter | Call `mentionFormatter.setMessageComposerMentionTextStyle(context, R.style.YourStyle)` before passing the formatter to the component |
+| Custom mention style not applied in bubbles | Only one direction styled | Call both `setOutgoingBubbleMentionTextStyle()` and `setIncomingBubbleMentionTextStyle()` — setting only one leaves the other with default style |
+| Shortcut suggestions not appearing | Formatter not registered or extension disabled | Confirm the `ShortCutFormatter` is added to the formatters list via `setTextFormatters()`, and that the `message-shortcuts` extension is enabled in the [Dashboard](https://app.cometchat.com/) |
+| `setOnMentionClick` callback not firing | Formatter not passed to component | Ensure the formatter is passed to the component via `setTextFormatters()` after calling `setOnMentionClick()` |

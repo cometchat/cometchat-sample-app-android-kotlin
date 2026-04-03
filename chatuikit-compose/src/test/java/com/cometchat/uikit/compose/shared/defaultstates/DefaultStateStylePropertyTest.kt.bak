@@ -1,0 +1,297 @@
+package com.cometchat.uikit.compose.shared.defaultstates
+
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for shared default state styles.
+ *
+ * Feature: shared-default-states
+ * Properties tested:
+ * - Property 1: Style defaults use CometChatTheme values
+ * - Property 2: Style immutability preserves values
+ */
+class DefaultStateStylePropertyTest : StringSpec({
+
+    /**
+     * Property 2: Style immutability preserves values
+     *
+     * For any CometChatEmptyStateStyle instance, calling copy() with modified parameters
+     * SHALL return a new instance with the modified values while leaving the original
+     * instance unchanged.
+     *
+     * Feature: shared-default-states, Property 2: Style immutability preserves values
+     * Validates: Requirements 5.2
+     */
+    "Property 2: CometChatEmptyStateStyle copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.int(0, 255),      // iconTint alpha
+            Arb.float(40f, 120f), // iconSize
+            Arb.int(0, 255),      // titleTextColor alpha
+            Arb.int(0, 255)       // subtitleTextColor alpha
+        ) { bgAlpha, iconTintAlpha, iconSize, titleAlpha, subtitleAlpha ->
+            createTestEmptyStateStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                iconTint = Color(0.5f, 0.5f, 0.5f, iconTintAlpha / 255f),
+                iconSize = iconSize.dp,
+                titleTextColor = Color(0f, 0f, 0f, titleAlpha / 255f),
+                subtitleTextColor = Color(0.5f, 0.5f, 0.5f, subtitleAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalIconTint = originalStyle.iconTint
+            val originalIconSize = originalStyle.iconSize
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalSubtitleTextColor = originalStyle.subtitleTextColor
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.iconTint shouldBe originalIconTint
+            originalStyle.iconSize shouldBe originalIconSize
+            originalStyle.titleTextColor shouldBe originalTitleTextColor
+            originalStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+
+            // Verify the copied style retained other values
+            copiedStyle.iconTint shouldBe originalIconTint
+            copiedStyle.iconSize shouldBe originalIconSize
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Property 2: Style immutability preserves values
+     *
+     * For any CometChatErrorStateStyle instance, calling copy() with modified parameters
+     * SHALL return a new instance with the modified values while leaving the original
+     * instance unchanged.
+     *
+     * Feature: shared-default-states, Property 2: Style immutability preserves values
+     * Validates: Requirements 5.2
+     */
+    "Property 2: CometChatErrorStateStyle copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.int(0, 255),      // retryButtonBackgroundColor alpha
+            Arb.int(0, 255),      // retryButtonTextColor alpha
+            Arb.string(5, 20)     // retryButtonText
+        ) { bgAlpha, retryBgAlpha, retryTextAlpha, retryText ->
+            createTestErrorStateStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                retryButtonBackgroundColor = Color(0f, 0f, 1f, retryBgAlpha / 255f),
+                retryButtonTextColor = Color(1f, 1f, 1f, retryTextAlpha / 255f),
+                retryButtonText = retryText
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalRetryButtonBackgroundColor = originalStyle.retryButtonBackgroundColor
+            val originalRetryButtonTextColor = originalStyle.retryButtonTextColor
+            val originalRetryButtonText = originalStyle.retryButtonText
+
+            // Create a copy with modified retryButtonText
+            val newRetryButtonText = "Try Again"
+            val copiedStyle = originalStyle.copy(retryButtonText = newRetryButtonText)
+
+            // Verify the copied style has the new value
+            copiedStyle.retryButtonText shouldBe newRetryButtonText
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.retryButtonBackgroundColor shouldBe originalRetryButtonBackgroundColor
+            originalStyle.retryButtonTextColor shouldBe originalRetryButtonTextColor
+            originalStyle.retryButtonText shouldBe originalRetryButtonText
+
+            // Verify the copied style retained other values
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.retryButtonBackgroundColor shouldBe originalRetryButtonBackgroundColor
+            copiedStyle.retryButtonTextColor shouldBe originalRetryButtonTextColor
+        }
+    }
+
+    /**
+     * Property 2: Style immutability preserves values
+     *
+     * For any CometChatLoadingStateStyle instance, calling copy() with modified parameters
+     * SHALL return a new instance with the modified values while leaving the original
+     * instance unchanged.
+     *
+     * Feature: shared-default-states, Property 2: Style immutability preserves values
+     * Validates: Requirements 5.2
+     */
+    "Property 2: CometChatLoadingStateStyle copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.int(0, 255),      // shimmerColor alpha
+            Arb.int(1, 20),       // itemCount
+            Arb.float(32f, 64f),  // avatarSize
+            Arb.float(2f, 12f)    // placeholderCornerRadius
+        ) { bgAlpha, shimmerAlpha, itemCount, avatarSize, cornerRadius ->
+            createTestLoadingStateStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                shimmerColor = Color(0.9f, 0.9f, 0.9f, shimmerAlpha / 255f),
+                itemCount = itemCount,
+                avatarSize = avatarSize.dp,
+                placeholderCornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalShimmerColor = originalStyle.shimmerColor
+            val originalItemCount = originalStyle.itemCount
+            val originalAvatarSize = originalStyle.avatarSize
+            val originalPlaceholderCornerRadius = originalStyle.placeholderCornerRadius
+
+            // Create a copy with modified itemCount
+            val newItemCount = 15
+            val copiedStyle = originalStyle.copy(itemCount = newItemCount)
+
+            // Verify the copied style has the new value
+            copiedStyle.itemCount shouldBe newItemCount
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.shimmerColor shouldBe originalShimmerColor
+            originalStyle.itemCount shouldBe originalItemCount
+            originalStyle.avatarSize shouldBe originalAvatarSize
+            originalStyle.placeholderCornerRadius shouldBe originalPlaceholderCornerRadius
+
+            // Verify the copied style retained other values
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.shimmerColor shouldBe originalShimmerColor
+            copiedStyle.avatarSize shouldBe originalAvatarSize
+            copiedStyle.placeholderCornerRadius shouldBe originalPlaceholderCornerRadius
+        }
+    }
+
+    "Property 2: Style copy with multiple modified parameters should preserve unmodified values" {
+        val styleArb = Arb.bind(
+            Arb.float(40f, 120f), // iconSize
+            Arb.int(0, 255)       // titleTextColor alpha
+        ) { iconSize, titleAlpha ->
+            createTestEmptyStateStyle(
+                iconSize = iconSize.dp,
+                titleTextColor = Color(0f, 0f, 0f, titleAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalSubtitleTextColor = originalStyle.subtitleTextColor
+            val originalSubtitleTextStyle = originalStyle.subtitleTextStyle
+
+            // Create a copy with multiple modified values
+            val newBackgroundColor = Color.Blue
+            val newIconSize = 100.dp
+            val copiedStyle = originalStyle.copy(
+                backgroundColor = newBackgroundColor,
+                iconSize = newIconSize
+            )
+
+            // Verify modified values
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+            copiedStyle.iconSize shouldBe newIconSize
+
+            // Verify unmodified values are preserved
+            copiedStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+            copiedStyle.subtitleTextStyle shouldBe originalSubtitleTextStyle
+        }
+    }
+})
+
+/**
+ * Helper function to create a test empty state style with customizable values.
+ */
+private fun createTestEmptyStateStyle(
+    backgroundColor: Color = Color.White,
+    iconTint: Color = Color.Gray,
+    iconSize: androidx.compose.ui.unit.Dp = 80.dp,
+    titleTextColor: Color = Color.Black,
+    subtitleTextColor: Color = Color.Gray
+): CometChatEmptyStateStyle {
+    return CometChatEmptyStateStyle(
+        backgroundColor = backgroundColor,
+        icon = null,
+        iconTint = iconTint,
+        iconSize = iconSize,
+        titleTextColor = titleTextColor,
+        titleTextStyle = TextStyle(fontSize = 18.sp),
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = TextStyle(fontSize = 14.sp)
+    )
+}
+
+/**
+ * Helper function to create a test error state style with customizable values.
+ */
+private fun createTestErrorStateStyle(
+    backgroundColor: Color = Color.White,
+    retryButtonBackgroundColor: Color = Color.Blue,
+    retryButtonTextColor: Color = Color.White,
+    retryButtonText: String = "Retry"
+): CometChatErrorStateStyle {
+    return CometChatErrorStateStyle(
+        backgroundColor = backgroundColor,
+        icon = null,
+        iconTint = Color.Gray,
+        iconSize = 80.dp,
+        titleTextColor = Color.Black,
+        titleTextStyle = TextStyle(fontSize = 18.sp),
+        subtitleTextColor = Color.Gray,
+        subtitleTextStyle = TextStyle(fontSize = 14.sp),
+        retryButtonText = retryButtonText,
+        retryButtonBackgroundColor = retryButtonBackgroundColor,
+        retryButtonTextColor = retryButtonTextColor,
+        retryButtonTextStyle = TextStyle(fontSize = 14.sp)
+    )
+}
+
+/**
+ * Helper function to create a test loading state style with customizable values.
+ */
+private fun createTestLoadingStateStyle(
+    backgroundColor: Color = Color.White,
+    shimmerColor: Color = Color.LightGray,
+    itemCount: Int = 8,
+    avatarSize: androidx.compose.ui.unit.Dp = 48.dp,
+    placeholderCornerRadius: androidx.compose.ui.unit.Dp = 4.dp
+): CometChatLoadingStateStyle {
+    return CometChatLoadingStateStyle(
+        backgroundColor = backgroundColor,
+        shimmerColor = shimmerColor,
+        itemCount = itemCount,
+        avatarSize = avatarSize,
+        avatarShape = CircleShape,
+        placeholderCornerRadius = placeholderCornerRadius
+    )
+}

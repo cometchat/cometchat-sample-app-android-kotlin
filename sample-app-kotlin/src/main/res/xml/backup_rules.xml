@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Sample backup rules for Android 11 and below
+   See https://developer.android.com/guide/topics/data/autobackup
+-->
+<full-backup-content>
+    <!-- Exclude sensitive credentials from backup -->
+    <exclude domain="sharedpref" path="app_credentials.xml"/>
+</full-backup-content>

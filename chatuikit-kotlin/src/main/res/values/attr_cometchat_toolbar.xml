@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatToolbar">
+        <attr name="cometchatToolbarBackgroundColor" format="color" />
+        <attr name="cometchatToolbarTitle" format="string" />
+        <attr name="cometchatToolbarTitleTextColor" format="color" />
+        <attr name="cometchatToolbarTitleTextAppearance" format="reference" />
+        <attr name="cometchatToolbarBackIcon" format="reference" />
+        <attr name="cometchatToolbarBackIconTint" format="color" />
+        <attr name="cometchatToolbarBackIconVisibility" format="enum">
+            <enum name="visible" value="0" />
+            <enum name="invisible" value="4" />
+            <enum name="gone" value="8" />
+        </attr>
+        <attr name="cometchatToolbarShowSeparator" format="boolean" />
+        <attr name="cometchatToolbarSeparatorColor" format="color" />
+        <attr name="cometchatToolbarSeparatorHeight" format="dimension" />
+        <attr name="cometchatToolbarDiscardIcon" format="reference" />
+        <attr name="cometchatToolbarDiscardIconTint" format="color" />
+        <attr name="cometchatToolbarSubmitIcon" format="reference" />
+        <attr name="cometchatToolbarSubmitIconTint" format="color" />
+        <attr name="cometchatToolbarSelectionCountTextColor" format="color" />
+        <attr name="cometchatToolbarSelectionCountTextAppearance" format="reference" />
+        <attr name="cometchatToolbarStyle" format="reference" />
+    </declare-styleable>
+</resources>

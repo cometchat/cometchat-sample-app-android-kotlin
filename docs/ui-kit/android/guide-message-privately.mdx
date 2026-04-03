@@ -1,0 +1,218 @@
+---
+title: "Message Privately"
+sidebarTitle: "Message Privately"
+description: "Allow users to start a private one-on-one chat from a user profile or list screen."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key components | `CometChatMessageList`, `CometChatMessageComposer`, `CometChatMessageHeader`, `CometChat.sendMessage()` |
+| Purpose | Allow users to start a private one-on-one chat from a user profile or list screen. |
+| Related | [Message List](/ui-kit/android/v6/message-list), [Message Composer](/ui-kit/android/v6/message-composer), [Message Header](/ui-kit/android/v6/message-header), [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+Allow users to initiate a private one-on-one chat from another user's profile or list screen using CometChat's Android UI Kit.
+
+## Overview
+
+The **Message Privately** feature streamlines direct messaging by enabling:
+
+- Quick entry into a one-on-one conversation from a user context.  
+- Automatic conversation creation if none exists.  
+- Optional initial message send to surface the chat in lists.
+
+Users tap **Message Privately** → launch `MessagesActivity` with the target user's UID → chat UI loads.
+
+## Prerequisites
+
+- Android Studio project with CometChat Android UI Kit v5 (`com.cometchat:chatuikit-kotlin` or `com.cometchat:chatuikit-jetpack`) added to `build.gradle`.  
+- Valid CometChat **App ID**, **Auth Key**, and **Region** initialized.  
+- `<uses-permission android:name="android.permission.INTERNET"/>` in `AndroidManifest.xml`.  
+- Users created in your CometChat app.  
+- User must be logged in via `CometChatUIKit.login()` before invoking this feature.  
+- Existing `MessagesActivity` capable of handling one-on-one chats.
+
+## Components
+
+| Component / Class                   | Responsibility                                                        |
+|:------------------------------------|:----------------------------------------------------------------------|
+| `UserDetailsActivity`               | Shows user profile UI and **Message Privately** button.               |
+| `MessagesActivity`                  | Chat screen for one-on-one conversation with a `User`.                |
+| `MainActivity`                      | (Optional) entry point for sending initial message programmatically. |
+| `CometChatUIKit.login()`            | Authenticates the current user session.                               |
+| `CometChat.sendMessage()`           | Sends a dummy text message to initialize conversation.                |
+
+## Integration Steps
+
+### 1. Launch One-on-One Chat from Profile
+
+Navigate from `UserDetailsActivity` to `MessagesActivity` with the selected user.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In UserDetailsActivity.kt
+import com.cometchat.uikit.core.CometChatUIKit
+
+binding.messagePrivatelyBtn.setOnClickListener {
+    val intent = Intent(this, MessagesActivity::class.java)
+    intent.putExtra(getString(R.string.app_user), Gson().toJson(user))
+    startActivity(intent)
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In UserDetailsScreen.kt
+@Composable
+fun MessagePrivatelyButton(user: User, navController: NavController) {
+    Button(onClick = {
+        navController.navigate("messages/${Gson().toJson(user)}")
+    }) {
+        Text("Message Privately")
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### 2. Handle Incoming Intent in Chat Screen
+
+Deserialize the `User` JSON extra and configure the chat UI.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In MessagesActivity.kt
+import com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_messages)
+
+    val userJson = intent.getStringExtra(getString(R.string.app_user))
+    if (userJson != null) {
+        val user = Gson().fromJson(userJson, User::class.java)
+        messageHeader.setUser(user)
+        messageList.setUser(user)
+        composer.setUser(user)
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In MessagesScreen.kt
+import com.cometchat.uikit.compose.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+
+@Composable
+fun MessagesScreen(userJson: String) {
+    val user = remember { Gson().fromJson(userJson, User::class.java) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        CometChatMessageHeader(user = user)
+        CometChatMessageList(
+            user = user,
+            modifier = Modifier.weight(1f)
+        )
+        CometChatMessageComposer(user = user)
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### 3. (Optional) Programmatically Create Conversation
+
+Send an initial greeting to ensure the chat appears in conversation lists.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In MainActivity.kt
+val txtMessage = TextMessage(
+    "cometchat-uid-2",
+    "👋",
+    CometChatConstants.RECEIVER_TYPE_USER
+)
+CometChat.sendMessage(txtMessage, object : CometChat.CallbackListener<BaseMessage>() {
+    override fun onSuccess(msg: BaseMessage) {
+        Log.d("SendMsg", "Initial message sent.")
+    }
+    override fun onError(e: CometChatException?) {
+        Log.e("SendMsg", e?.message ?: "Error sending message")
+    }
+})
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In your ViewModel
+fun sendInitialMessage(receiverUid: String) {
+    val txtMessage = TextMessage(
+        receiverUid,
+        "👋",
+        CometChatConstants.RECEIVER_TYPE_USER
+    )
+    CometChat.sendMessage(txtMessage, object : CometChat.CallbackListener<BaseMessage>() {
+        override fun onSuccess(msg: BaseMessage) {
+            Log.d("SendMsg", "Initial message sent.")
+        }
+        override fun onError(e: CometChatException?) {
+            Log.e("SendMsg", e?.message ?: "Error sending message")
+        }
+    })
+}
+```
+</Tab>
+</Tabs>
+
+## Implementation Flow
+
+| Step | Action                                                | Location                                 |
+|:-----|:------------------------------------------------------|:-----------------------------------------|
+| 1    | Tap **Message Privately** button                      | `UserDetailsActivity`                    |
+| 2    | Launch `MessagesActivity` with user JSON extra        | `UserDetailsActivity` onClick listener   |
+| 3    | Deserialize and bind `User` to UI Kit components      | `MessagesActivity.onCreate()`            |
+| 4    | (Optional) Send initial message to surface chat list  | `MainActivity.sendInitialMessage()`      |
+
+## Customization Options
+
+- **Button Text & Style:** Update `messagePrivatelyBtn` in `activity_user_details.xml`.  
+- **Intent Extras Key:** Use a custom key instead of `R.string.app_user`.  
+- **Dummy Message:** Customize initial message content or omit step if undesired.
+
+## Edge Cases
+
+| Condition                  | Behavior                                                             |
+|:---------------------------|:---------------------------------------------------------------------|
+| User never chatted before  | The conversation appears after the first message is sent.            |
+| Target user blocked        | Composer hidden; consider showing unblock prompt.                    |
+| Invalid user data          | Guard against `null` JSON and show error UI or fallback.            |
+| Missing JSON extra         | Do not initialize chat; optionally close screen with warning.        |
+
+## Summary / Feature Matrix
+
+| Feature                   | Component / Method                                 |
+|:--------------------------|:---------------------------------------------------|
+| Launch private chat       | Intent from `messagePrivatelyBtn`                  |
+| Initialize chat UI        | `messageHeader.setUser()`, `messageList.setUser()` |
+| Create conversation       | `CometChat.sendMessage()` optional                 |
+
+<CardGroup>
+  <Card title="Android Sample App (Kotlin)">
+    Explore this feature in the CometChat SampleApp:
+    [GitHub → SampleApp](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin)
+  </Card>
+</CardGroup>

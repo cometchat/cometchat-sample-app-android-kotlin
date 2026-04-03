@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Call Logs Fragment Layout
+    
+    Contains CometChatCallLogs component for displaying call history.
+    Uses the component's built-in toolbar.
+    
+    Validates: Requirements 5.3, 14.1, 14.2, 14.3, 14.4, 14.5
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.calls.CallsFragment">
+
+    <com.cometchat.uikit.kotlin.presentation.calllogs.ui.CometChatCallLogs
+        android:id="@+id/call_logs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>

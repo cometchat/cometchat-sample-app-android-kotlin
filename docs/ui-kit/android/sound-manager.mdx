@@ -1,0 +1,109 @@
+---
+title: "Sound Manager"
+description: "Play, pause, and customize audio cues for calls and messages using CometChatSoundManager."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Import | `com.cometchat.uikit.core.resources.soundmanager.CometChatSoundManager` |
+| Play sound | `CometChatSoundManager(context).play(Sound.INCOMING_CALL)` |
+| Custom sound | `CometChatSoundManager(context).play(Sound.INCOMING_CALL, R.raw.my_sound)` |
+| Pause | `pause()` (with disconnect tone) or `pauseSilently()` (silent) |
+| Sound events | `INCOMING_CALL`, `OUTGOING_CALL`, `INCOMING_MESSAGE`, `OUTGOING_MESSAGE`, `INCOMING_MESSAGE_FROM_OTHER` |
+| Related | [Localize](/ui-kit/android/v6/localize) |
+
+</Accordion>
+
+`CometChatSoundManager` handles audio playback for calls and messages. It lives in `chatuikit-core` and is shared by both the Kotlin XML Views and Jetpack Compose modules.
+
+---
+
+## Sound Events
+
+| Sound | When it plays |
+| --- | --- |
+| `Sound.INCOMING_CALL` | Incoming call received (with vibration) |
+| `Sound.OUTGOING_CALL` | Outgoing call initiated |
+| `Sound.INCOMING_MESSAGE` | Message received in the active conversation |
+| `Sound.OUTGOING_MESSAGE` | Message sent |
+| `Sound.INCOMING_MESSAGE_FROM_OTHER` | Message received from a different conversation |
+
+---
+
+## Usage
+
+The API is identical for both Kotlin XML Views and Jetpack Compose since `CometChatSoundManager` is a plain Kotlin class from `chatuikit-core`.
+
+```kotlin lines
+import com.cometchat.uikit.core.resources.soundmanager.CometChatSoundManager
+import com.cometchat.uikit.core.resources.soundmanager.Sound
+
+val soundManager = CometChatSoundManager(context)
+
+// Play default sounds
+soundManager.play(Sound.INCOMING_CALL)
+soundManager.play(Sound.OUTGOING_CALL)
+soundManager.play(Sound.INCOMING_MESSAGE)
+soundManager.play(Sound.OUTGOING_MESSAGE)
+soundManager.play(Sound.INCOMING_MESSAGE_FROM_OTHER)
+
+// Play custom sounds from res/raw
+soundManager.play(Sound.INCOMING_CALL, R.raw.my_incoming_call)
+soundManager.play(Sound.OUTGOING_MESSAGE, R.raw.my_sent_sound)
+
+// Pause with disconnect tone
+soundManager.pause()
+
+// Pause silently (no disconnect tone)
+soundManager.pauseSilently()
+
+// Release resources when done
+soundManager.release()
+```
+
+---
+
+## Disable Sounds on Components
+
+Both UI Kit modules let you disable sounds on individual components.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val conversations = findViewById<CometChatConversations>(R.id.conversations)
+conversations.setDisableSoundForMessages(true)
+
+val messageList = findViewById<CometChatMessageList>(R.id.message_list)
+messageList.setDisableSoundForMessages(true)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    disableSoundForMessages = true
+)
+
+CometChatMessageList(
+    disableSoundForMessages = true
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## API Reference
+
+| Method | Description |
+| --- | --- |
+| `play(sound: Sound)` | Plays the default sound for the given event |
+| `play(sound: Sound, rawFile: Int)` | Plays a custom `res/raw` resource for the event. Pass `0` to use default |
+| `pause()` | Stops playback and plays a disconnect tone |
+| `pauseSilently()` | Stops playback silently without any tone |
+| `release()` | Releases all resources. Call when the sound manager is no longer needed |

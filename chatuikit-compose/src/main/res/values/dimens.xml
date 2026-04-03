@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CometChat Radius -->
+    <dimen name="cometchat_radius_1">4dp</dimen>
+    <dimen name="cometchat_radius_2">8dp</dimen>
+    <dimen name="cometchat_radius_3">12dp</dimen>
+    <dimen name="cometchat_radius_4">16dp</dimen>
+    
+    <!-- CometChat Dimensions -->
+    <dimen name="cometchat_1000dp">1000dp</dimen>
+</resources>

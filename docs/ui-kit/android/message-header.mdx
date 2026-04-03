@@ -1,0 +1,450 @@
+---
+title: "Message Header"
+description: "Header bar displaying user/group avatar, name, status, typing indicator, call buttons, and back navigation."
+---
+
+`CometChatMessageHeader` is a header bar component that sits at the top of a chat screen, displaying the avatar, name, and status of the user or group in the conversation.
+
+<Frame>
+  <img src="/images/6fc1ac0d-message_header-3ef4b07948db07a2ec0b2aca8bcdc221.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatMessageHeader` sits at the top of a chat screen. Wire it alongside `CometChatMessageList` and `CometChatMessageComposer` to build a complete messaging layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+    android:id="@+id/message_header"
+    android:layout_width="match_parent"
+    android:layout_height="56dp" />
+```
+
+```kotlin lines
+val messageHeader = findViewById<CometChatMessageHeader>(R.id.message_header)
+messageHeader.setUser(user)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="56dp" />
+```
+
+Set a `User` or `Group` on the component — this is required for it to display data:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.your_layout)
+
+    val messageHeader = findViewById<CometChatMessageHeader>(R.id.header)
+    messageHeader.setUser(user)
+    // or messageHeader.setGroup(group)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun ChatHeader() {
+    CometChatMessageHeader(
+        user = user
+        // or group = group
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onBackPress`
+
+Fires when the user presses the back button in the header.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setOnBackPress {
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    onBackPress = { /* navigate back */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setOnError { exception ->
+    Log.e("MessageHeader", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    onError = { exception ->
+        Log.e("MessageHeader", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### SDK Events (Real-Time, Automatic)
+
+The component listens to these SDK events internally. No manual setup needed.
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onUserOnline` / `onUserOffline` | Updates online/offline status indicator |
+| `onTypingStarted` / `onTypingEnded` | Shows/hides typing indicator in subtitle |
+| `onGroupMemberJoined` / `onGroupMemberLeft` / `onGroupMemberKicked` / `onGroupMemberBanned` | Updates group member count |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setUser(user)` | `user = user` | Display a user's header details |
+| `setGroup(group)` | `group = group` | Display a group's header details |
+| `setBackButtonVisibility(View.VISIBLE)` | `hideBackButton = false` | Toggle back button |
+| `setOnBackPress { }` | `onBackPress = { }` | Back button callback |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Frame>
+  <img src="/images/e09af665-message_header_leading_view-6d0be5fa6870e2bd8acf0af4b6393c93.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setLeadingView(object : MessageHeaderViewHolderListener() {
+    override fun createView(context: Context, user: User?, group: Group?): View {
+        return ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }
+    }
+
+    override fun bindView(context: Context, createdView: View, user: User?, group: Group?) {
+        val imageView = createdView as ImageView
+        // Load avatar image
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    leadingView = { u, g ->
+        CometChatAvatar(
+            imageUrl = u?.avatar,
+            name = u?.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Subtitle View
+
+Replace the subtitle text below the user's or group's name.
+
+<Frame>
+  <img src="/images/691ae5e8-message_header_subtitle_view-dc68ccaa0e5b42749247bd5e0b736f8f.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setSubtitleView(object : MessageHeaderViewHolderListener() {
+    override fun createView(context: Context, user: User?, group: Group?): View {
+        return TextView(context)
+    }
+
+    override fun bindView(context: Context, createdView: View, user: User?, group: Group?) {
+        val textView = createdView as TextView
+        if (user != null) {
+            textView.text = user.status
+        } else if (group != null) {
+            textView.text = "${group.membersCount} members"
+        }
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    subtitleView = { u, g ->
+        Text(
+            text = u?.status ?: "${g?.membersCount} members",
+            style = CometChatTheme.typography.caption1Regular
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the right section (action buttons).
+
+<Frame>
+  <img src="/images/b2a0551c-message_header_trailing_view-64dbdd471059cf2e92dc9646fb3e676b.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setTrailingView(object : MessageHeaderViewHolderListener() {
+    override fun createView(context: Context, user: User?, group: Group?): View {
+        return ImageView(context).apply {
+            setImageResource(R.drawable.save_icon)
+            layoutParams = LinearLayout.LayoutParams(24.dp, 24.dp)
+        }
+    }
+
+    override fun bindView(context: Context, createdView: View, user: User?, group: Group?) {
+        // Bind trailing view data
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    trailingView = { u, g ->
+        IconButton(onClick = { /* action */ }) {
+            Icon(painterResource(R.drawable.save_icon), "Save")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Item View
+
+Replace the entire default header with a fully customized layout.
+
+<Frame>
+  <img src="/images/6fc1ac0d-message_header-3ef4b07948db07a2ec0b2aca8bcdc221.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setItemView(object : MessageHeaderViewHolderListener() {
+    override fun createView(context: Context, user: User?, group: Group?): View {
+        return LayoutInflater.from(context).inflate(R.layout.custom_message_header, null)
+    }
+
+    override fun bindView(context: Context, createdView: View, user: User?, group: Group?) {
+        val avatar = createdView.findViewById<CometChatAvatar>(R.id.avatar)
+        val title = createdView.findViewById<TextView>(R.id.title)
+        if (user != null) {
+            avatar.setAvatar(user.name, user.avatar)
+            title.text = user.name
+        } else if (group != null) {
+            avatar.setAvatar(group.name, group.icon)
+            title.text = group.name
+        }
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    itemView = { u, g ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CometChatAvatar(imageUrl = u?.avatar, name = u?.name)
+            Spacer(Modifier.width(8.dp))
+            Text(u?.name ?: g?.name ?: "")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomMessageHeaderStyle" parent="CometChatMessageHeaderStyle">
+    <item name="cometchatMessageHeaderBackgroundColor">#FEEDE1</item>
+    <item name="cometchatMessageHeaderTitleTextColor">#F76808</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatMessageHeaderStyle">@style/CustomMessageHeaderStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    style = CometChatMessageHeaderStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/c761803d-message_header_styling-ae4670a5a130374818f37e2144246748.png" />
+</Frame>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## ViewModel
+
+```kotlin lines
+val viewModel = ViewModelProvider(this)
+    .get(CometChatMessageHeaderViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    user = user,
+    messageHeaderViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for state observation and custom repositories.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="Message Composer" icon="pen-to-square" href="/ui-kit/android/v6/message-composer">
+    Rich input for sending messages
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference
+  </Card>
+  <Card title="ViewModel & Data" icon="database" href="/ui-kit/android/v6/customization-viewmodel-data">
+    Custom ViewModels and repositories
+  </Card>
+</CardGroup>

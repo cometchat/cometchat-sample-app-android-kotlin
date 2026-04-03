@@ -1,8 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Theme Customization Colors for CometChat Sample App
+    
+    This file demonstrates how to customize colors for the CometChat UI Kit.
+    Modify these colors to match your brand's color palette.
+    
+    ## Color Categories:
+    1. Primary colors - Main brand colors for buttons, links, and highlights
+    2. Secondary colors - Supporting colors for secondary actions
+    3. Background colors - Surface and background colors
+    4. Text colors - Different emphasis levels for text
+    5. Status colors - Success, warning, error states
+    
+    ## How to Customize:
+    1. Replace the hex values with your brand colors
+    2. Ensure sufficient contrast for accessibility
+    3. Test both light and dark modes
+    
+    Validates: Requirements 13.1, 13.3, 13.5
+-->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="progress_bar_color">#000000</color>
-    <color name="cometchat_calling_background">#333333</color>
-
+    <!-- ================================================================== -->
+    <!-- PRIMARY COLORS                                                      -->
+    <!-- Used for main actions, buttons, links, and highlights              -->
+    <!-- ================================================================== -->
+    
+    <!-- Main brand color - customize this to match your brand -->
+    <color name="primary">#6851D6</color>
+    <!-- Darker variant for pressed states -->
+    <color name="primary_variant">#5A45C0</color>
+    <!-- Text/icon color on primary backgrounds -->
+    <color name="on_primary">#FFFFFF</color>
+    
+    <!-- Primary container colors (Material 3) -->
+    <color name="primary_container">#E8E0FF</color>
+    <color name="on_primary_container">#1F0057</color>
+    
+    <!-- ================================================================== -->
+    <!-- SECONDARY COLORS                                                    -->
+    <!-- Used for secondary actions and less prominent elements             -->
+    <!-- ================================================================== -->
+    
+    <color name="secondary">#625B71</color>
+    <color name="secondary_variant">#7A7289</color>
+    <color name="on_secondary">#FFFFFF</color>
+    
+    <!-- Secondary container colors (Material 3) -->
+    <color name="secondary_container">#E8DEF8</color>
+    <color name="on_secondary_container">#1D192B</color>
+    
+    <!-- ================================================================== -->
+    <!-- TERTIARY COLORS                                                     -->
+    <!-- Used for accent elements and complementary colors                  -->
+    <!-- ================================================================== -->
+    
+    <color name="tertiary">#7D5260</color>
+    <color name="on_tertiary">#FFFFFF</color>
+    <color name="tertiary_container">#FFD8E4</color>
+    <color name="on_tertiary_container">#31111D</color>
+    
+    <!-- ================================================================== -->
+    <!-- BACKGROUND AND SURFACE COLORS                                       -->
+    <!-- Used for screen backgrounds and card surfaces                      -->
+    <!-- ================================================================== -->
+    
+    <color name="background">#FFFBFE</color>
+    <color name="on_background">#1C1B1F</color>
+    <color name="surface">#FFFBFE</color>
+    <color name="on_surface">#1C1B1F</color>
+    <color name="surface_variant">#E7E0EC</color>
+    <color name="on_surface_variant">#49454F</color>
+    
+    <!-- ================================================================== -->
+    <!-- STATUS COLORS                                                       -->
+    <!-- Used for success, warning, and error states                        -->
+    <!-- ================================================================== -->
+    
+    <!-- Error colors - for error messages and destructive actions -->
+    <color name="error">#B3261E</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#F9DEDC</color>
+    <color name="on_error_container">#410E0B</color>
+    
+    <!-- Success color - for success messages and online status -->
+    <color name="success">#09C26F</color>
+    
+    <!-- Warning color - for warning messages and blocked status -->
+    <color name="warning">#FFCA28</color>
+    
+    <!-- Info color - for informational messages -->
+    <color name="info">#2196F3</color>
+    
+    <!-- ================================================================== -->
+    <!-- OUTLINE COLORS                                                      -->
+    <!-- Used for borders and dividers                                      -->
+    <!-- ================================================================== -->
+    
+    <color name="outline">#79747E</color>
+    <color name="outline_variant">#CAC4D0</color>
+    
+    <!-- ================================================================== -->
+    <!-- UTILITY COLORS                                                      -->
+    <!-- Used for specific UI elements                                      -->
+    <!-- ================================================================== -->
+    
+    <!-- Loading overlay -->
+    <color name="loading_overlay_background">#80000000</color>
+    
+    <!-- Online status indicator -->
+    <color name="online_status">#09C26F</color>
+    
+    <!-- Offline status indicator -->
+    <color name="offline_status">#9E9E9E</color>
+    
+    <!-- ================================================================== -->
+    <!-- ALTERNATIVE BRAND COLORS (Examples)                                 -->
+    <!-- Uncomment and use these for different brand themes                 -->
+    <!-- ================================================================== -->
+    
+    <!-- Blue theme example
+    <color name="primary">#2196F3</color>
+    <color name="primary_variant">#1976D2</color>
+    -->
+    
+    <!-- Green theme example
+    <color name="primary">#4CAF50</color>
+    <color name="primary_variant">#388E3C</color>
+    -->
+    
+    <!-- Orange theme example
+    <color name="primary">#FF9800</color>
+    <color name="primary_variant">#F57C00</color>
+    -->
 </resources>
+

@@ -1,0 +1,176 @@
+package com.cometchat.uikit.compose.conversationlist.domain.usecase
+
+import com.cometchat.chat.core.ConversationsRequest
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.Conversation
+import com.cometchat.uikit.compose.domain.repository.ConversationListRepository
+import com.cometchat.uikit.compose.domain.usecase.RefreshConversationListUseCase
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.test.runTest
+import org.mockito.Mockito.mock
+
+/**
+ * Unit tests for RefreshConversationListUseCase.
+ * 
+ * Feature: conversations-compose
+ * Tests verify use case builds new request and fetches fresh data.
+ */
+class RefreshConversationListUseCaseTest : StringSpec({
+
+    "invoke should return success with conversations when repository succeeds" {
+        runTest {
+            // Arrange
+            val mockConversation1 = mock(Conversation::class.java)
+            val mockConversation2 = mock(Conversation::class.java)
+            val mockConversation3 = mock(Conversation::class.java)
+            val mockConversations = listOf(mockConversation1, mockConversation2, mockConversation3)
+            
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.success(mockConversations)
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = true
+            }
+            
+            val useCase = RefreshConversationListUseCase(mockRepository)
+            val requestBuilder = ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+
+            // Act
+            val result = useCase(requestBuilder)
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe mockConversations
+            result.getOrNull()?.size shouldBe 3
+        }
+    }
+
+    "invoke should return failure when repository fails" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("REFRESH_ERROR", "Refresh failed", "Cannot refresh list")
+            
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.failure(exception)
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            
+            val useCase = RefreshConversationListUseCase(mockRepository)
+            val requestBuilder = ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+
+            // Act
+            val result = useCase(requestBuilder)
+
+            // Assert
+            result.isFailure shouldBe true
+            result.exceptionOrNull().shouldBeInstanceOf<CometChatException>()
+        }
+    }
+
+    "invoke should return empty list when repository returns empty" {
+        runTest {
+            // Arrange
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            
+            val useCase = RefreshConversationListUseCase(mockRepository)
+            val requestBuilder = ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+
+            // Act
+            val result = useCase(requestBuilder)
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe emptyList()
+        }
+    }
+
+    "invoke should use request builder to create request" {
+        runTest {
+            // Arrange
+            var requestReceived: ConversationsRequest? = null
+            
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    requestReceived = request
+                    return Result.success(emptyList())
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            
+            val useCase = RefreshConversationListUseCase(mockRepository)
+            val requestBuilder = ConversationsRequest.ConversationsRequestBuilder()
+                .setLimit(50)
+
+            // Act
+            useCase(requestBuilder)
+
+            // Assert - request should have been received (not null)
+            // We can't compare request objects directly as build() creates new instances
+            (requestReceived != null) shouldBe true
+        }
+    }
+
+    "invoke should handle single conversation result" {
+        runTest {
+            // Arrange
+            val singleConversation = mock(Conversation::class.java)
+            val singleList = listOf(singleConversation)
+            
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.success(singleList)
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            
+            val useCase = RefreshConversationListUseCase(mockRepository)
+            val requestBuilder = ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+
+            // Act
+            val result = useCase(requestBuilder)
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull()?.size shouldBe 1
+        }
+    }
+})

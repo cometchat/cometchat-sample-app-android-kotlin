@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/cometchat_padding_4"
+        android:paddingTop="@dimen/cometchat_padding_3"
+        android:paddingEnd="@dimen/cometchat_padding_4"
+        android:paddingBottom="@dimen/cometchat_padding_3">
+
+        <!-- Checkbox for selection mode -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/checkbox_view"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/cometchat_margin_3"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="@dimen/cometchat_padding_1"
+                android:visibility="gone"
+                android:contentDescription="@string/cometchat_select_group" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="UselessParent">
+
+            <!-- Leading view container (avatar with group type indicator) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/leading_view_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true">
+
+                <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+                    android:id="@+id/groups_avatar"
+                    android:layout_width="@dimen/cometchat_48dp"
+                    android:layout_height="@dimen/cometchat_48dp"
+                    tools:ignore="MissingConstraints" />
+
+                <com.cometchat.uikit.kotlin.presentation.shared.statusindicator.CometChatStatusIndicator
+                    android:id="@+id/groups_type_indicator"
+                    android:layout_width="@dimen/cometchat_15dp"
+                    android:layout_height="@dimen/cometchat_15dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/cometchat_margin_3"
+                android:layout_toEndOf="@id/leading_view_container"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/groups_item_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <!-- Title view container -->
+                    <LinearLayout
+                        android:id="@+id/title_view_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/cometchat_margin_4"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_groups_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="Group Name" />
+                    </LinearLayout>
+
+                    <!-- Subtitle view container (member count) -->
+                    <LinearLayout
+                        android:id="@+id/subtitle_view_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/cometchat_2dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_groups_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="25 Members" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Trailing view container -->
+                <LinearLayout
+                    android:id="@+id/trailing_view_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/cometchat_margin_4"
+                    android:gravity="end"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- Separator -->
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/cometchat_76dp" />
+
+</LinearLayout>

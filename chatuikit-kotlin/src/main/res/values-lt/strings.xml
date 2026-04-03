@@ -1,0 +1,258 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+
+    <string name="cometchat_user" translatable="true">vartotojas</string>
+    <string name="cometchat_group" translatable="true">grupė</string>
+    <string name="cometchat_conversation" translatable="true">pokalbis</string>
+    <string name="cometchat_reply_lowercase" translatable="true">atsakyti</string>
+    <string name="cometchat_call" translatable="true">Skambutis</string>
+    <string name="cometchat_sticker_lowercase" translatable="true">lipdukas</string>
+    <string name="cometchat_message" translatable="true">Parašykite žinutę</string>
+    <string name="cometchat_start_conv_hint" translatable="true">Bakstelėkite, kad pradėtumėte pokalbį</string>
+    <string name="cometchat_admin" translatable="true">Administratorius</string>
+    <string name="cometchat_moderator" translatable="true">Moderatorius</string>
+    <string name="cometchat_member" translatable="true">Narys</string>
+    <string name="cometchat_join" translatable="true">Prisijungti</string>
+    <string name="cometchat_camera_perm" translatable="true">Prašome suteikti kamerai leidimą programėlės nustatymuose</string>
+    <string name="cometchat_storage_perm" translatable="true">Prašome suteikti atminties leidimą programėlės nustatymuose</string>
+    <string name="cometchat_file_not_exist" translatable="true">Failas neegzistuoja</string>
+    <string name="cometchat_ended" translatable="true">Baigta</string>
+    <string name="cometchat_outgoing" translatable="true">Išeinantis</string>
+    <string name="cometchat_incoming" translatable="true">Įeinantis</string>
+    <string name="cometchat_missed_call" translatable="true">Praleistas</string>
+    <string name="cometchat_cancel_call" translatable="true">Atšauktas</string>
+    <string name="cometchat_rejected_call" translatable="true">Atmestas</string>
+    <string name="cometchat_busy_call" translatable="true">Užimta</string>
+    <string name="cometchat_you" translatable="true">Jūs</string>
+    <string name="cometchat_edit" translatable="true">Redaguoti</string>
+    <string name="cometchat_delete" translatable="true">Ištrinti</string>
+    <string name="cometchat_share" translatable="true">Bendrinti</string>
+    <string name="cometchat_copy" translatable="true">Kopijuoti</string>
+    <string name="cometchat_translate" translatable="true">Išversti</string>
+    <string name="cometchat_message_privately" translatable="true">Siųsti privačią žinutę</string>
+    <string name="cometchat_reply_uppercase" translatable="true">Atsakyti</string>
+    <string name="cometchat_info" translatable="true">Info</string>
+    <string name="cometchat_online" translatable="true">Prisijungęs</string>
+    <string name="cometchat_offline" translatable="true">Atsijungęs</string>
+    <string name="cometchat_attach_image" translatable="true">Pridėti nuotrauką</string>
+    <string name="cometchat_attach_video" translatable="true">Pridėti vaizdo įrašą</string>
+    <string name="cometchat_poll" translatable="true">Apklausa</string>
+    <string name="cometchat_camera" translatable="true">Kamera</string>
+    <string name="cometchat_yes" translatable="true">Taip</string>
+    <string name="cometchat_shared_sticker" translatable="true">Pasidalino lipduku</string>
+    <string name="cometchat_attach_audio" translatable="true">Pridėti garso įrašą</string>
+    <string name="cometchat_attach_document" translatable="true">Pridėti dokumentą</string>
+    <string name="cometchat_no" translatable="true">Ne</string>
+    <string name="cometchat_question" translatable="true">Klausimas</string>
+    <string name="cometchat_collaborative_whiteboard" translatable="true">Bendrasis rašymo ekranas</string>
+    <string name="cometchat_collaborative_doc" translatable="true">Bendrasis dokumentas</string>
+    <string name="cometchat_yesterday" translatable="true">Vakar</string>
+    <string name="cometchat_ban" translatable="true">Užblokuoti</string>
+    <string name="cometchat_document" translatable="true">Dokumentas</string>
+    <string name="cometchat_polls" translatable="true">Apklausos</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">Lipdukas</string>
+    <string name="cometchat_custom_message_whiteboard" translatable="true">Rašymo ekranas</string>
+    <string name="cometchat_error" translatable="true">Klaida</string>
+    <string name="cometchat_added" translatable="true">pridėjo</string>
+    <string name="cometchat_kicked_by" translatable="true">išmetė</string>
+    <string name="cometchat_left" translatable="true">paliko</string>
+    <string name="cometchat_joined" translatable="true">prisijungė</string>
+    <string name="cometchat_unban" translatable="true">Atblokuoti</string>
+    <string name="cometchat_made" translatable="true">padarė</string>
+    <string name="cometchat_participant" translatable="true">Dalyvis</string>
+    <string name="cometchat_translation_error" translatable="true">Pasirinkta vertimo kalba sutampa su pranešimo originalo kalba</string>
+    <string name="cometchat_group_call" translatable="true">Grupinis skambutis</string>
+    <string name="cometchat_updating" translatable="true">Atnaujinama</string>
+    <string name="cometchat_chats" translatable="true">Pokalbiai</string>
+    <string name="cometchat_downloading" translatable="true">Atsisiunčiama</string>
+    <string name="cometchat_today" translatable="true">Šiandien</string>
+    <string name="cometchat_replies" translatable="true">Atsakymai</string>
+    <string name="cometchat_new_message" translatable="true">nauja žinutė</string>
+    <string name="cometchat_new_messages" translatable="true"> naujos žinutės</string>
+    <string name="cometchat_channel_description" translatable="true">Kanalo aprašymas</string>
+    <string name="cometchat_action_item" translatable="true">veiksmo_elementas</string>
+    <string name="cometchat_try_again" translatable="true">Bandykite dar kartą</string>
+    <string name="cometchat_something_went_wrong" translatable="true">Įvyko klaida.</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Perduoti nuosavybę</string>
+    <string name="cometchat_add_members" translatable="true">Pridėti narius</string>
+    <string name="cometchat_owner" translatable="true">Savininkas</string>
+    <string name="cometchat_banned" translatable="true">Užblokuotas</string>
+    <string name="cometchat_calling" translatable="true">skambina</string>
+    <string name="cometchat_accepted" translatable="true">priimta</string>
+    <string name="cometchat_unanswered" translatable="true">neatsakyta</string>
+    <string name="cometchat_message_receipt" translatable="true">Pranešimo patvirtinimas</string>
+    <string name="cometchat_file_download_failed" translatable="true">Nepavyko atsisiųsti failo.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Pasiūlykite atsakymą</string>
+    <string name="cometchat_enter_a_text" translatable="true">Įveskite tekstą</string>
+    <string name="cometchat_form_completion_message" translatable="true">Ačiū, kad užpildėte formą.</string>
+    <string name="cometchat_conversation_summary" translatable="true">Pokalbio santrauka</string>
+    <string name="cometchat_generate_summary" translatable="true">Generuoti santrauką</string>
+    <string name="cometchat_more_times" translatable="true">Daugiau laikų</string>
+    <string name="cometchat_select_a_day" translatable="true">Pasirinkite dieną</string>
+    <string name="cometchat_meeting_scheduled" translatable="true">Jūsų susitikimas buvo suplanuotas.</string>
+    <string name="cometchat_meet_with" translatable="true">"Susitikti su "</string>
+    <string name="cometchat_min_meeting" translatable="true">min susitikimas</string>
+    <string name="cometchat_select_a_time" translatable="true">Pasirinkite laiką</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">Šiai datai laisvo laiko nėra. Pabandykite kitą datą.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Užsakyti naują laiką</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Įvyko klaida. Bandykite dar kartą.</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Šis laikas nebėra prieinamas. Pasirinkite kitą.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Nėra laisvo laiko.</string>
+    <string name="cometchat_tag_item" translatable="true">Pažymėti elementą</string>
+    <string name="cometchat_you_can_mention_up_to" translatable="true">Galite paminėti iki</string>
+    <string name="cometchat_time_at_a_time" translatable="true">kartų vienu metu</string>
+    <string name="cometchat_reply" translatable="true">Atsakyti</string>
+    <string name="cometchat_all" translatable="true">Visi</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Bakstelėkite, kad pašalintumėte</string>
+    <string name="cometchat_avatar" translatable="true">CometChat Avatar</string>
+    <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Dar nėra pokalbių</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Pradėkite naują pokalbį arba pakvieskite kitus
+prisijungti prie pokalbio.</string>
+    <string name="cometchat_error_conversations_title" translatable="true">Oi!</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">Panašu, kad įvyko klaida.
+Pabandykite dar kartą.</string>
+    <string name="cometchat_typing" translatable="true">Rašo…</string>
+    <string name="cometchat_is_typing" translatable="true">rašo…</string>
+    <string name="cometchat_message_image" translatable="true">Nuotrauka</string>
+    <string name="cometchat_message_video" translatable="true">Vaizdo įrašas</string>
+    <string name="cometchat_message_audio" translatable="true">Garso įrašas</string>
+    <string name="cometchat_message_sticker" translatable="true">Lipdukas</string>
+    <string name="cometchat_message_gif" translatable="true">GIF</string>
+    <string name="cometchat_message_poll" translatable="true">Apklausa</string>
+    <string name="cometchat_message_document" translatable="true">Dokumentas</string>
+    <string name="cometchat_message_location" translatable="true">Vieta</string>
+    <string name="cometchat_message_collaborative_whiteboard" translatable="true">Bendrasis rašymo ekranas</string>
+    <string name="cometchat_message_collaborative_document" translatable="true">Bendrasis dokumentas</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Ištrinti šį pokalbį?</string>
+    <string name="cometchat_delete_message_title" translatable="true">Ištrinti šią žinutę?</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Ar tikrai norite ištrinti šį pokalbį? Šio veiksmo atšaukti negalima.</string>
+    <string name="cometchat_delete_message_subtitle" translatable="true">Ar tikrai norite ištrinti šią žinutę? Šio veiksmo atšaukti negalima.</string>
+    <string name="cometchat_cancel" translatable="true">Atšaukti</string>
+    <string name="cometchat_reaction_list_error" translatable="true">Panašu, kad įvyko klaida.
+Pabandykite dar kartą.</string>
+    <string name="cometchat_text_translated" translatable="true">Tekstas išverstas</string>
+    <string name="cometchat_composer_place_holder_text" translatable="true">Įveskite savo žinutę…</string>
+    <string name="cometchat_last_seen" translatable="true">Paskutinį kartą matytas</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Nepavyko ištrinti pokalbio</string>
+    <string name="cometchat_message_info" translatable="true">Žinutės informacija</string>
+    <string name="cometchat_read" translatable="true">Perskaityta</string>
+    <string name="cometchat_deliver" translatable="true">Pristatyta</string>
+    <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
+    <string name="cometchat_message_delete_error" translatable="true">Nepavyko ištrinti žinutės</string>
+    <string name="cometchat_no_stickers_available" translatable="true">Nėra lipdukų</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">Dar neturite jokių lipdukų.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Panašu, kad įvyko klaida.
+Pabandykite dar kartą.</string>
+    <string name="cometchat_retry" translatable="true">Bandyti iš naujo</string>
+    <string name="cometchat_group_members_empty_title" translatable="true">Nėra narių</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Pridėkite narių į grupę ir jie bus rodomi čia.</string>
+    <string name="cometchat_remove" translatable="true">Pašalinti</string>
+    <string name="cometchat_scope_change" translatable="true">Keisti teises</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Galite keisti vaidmenis, kad valdytumėte grupės teises ir atsakomybes.</string>
+    <string name="cometchat_save" translatable="true">Išsaugoti</string>
+    <string name="cometchat_users" translatable="true">Vartotojai</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">Nėra vartotojų</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Pridėkite kontaktų, kad pradėtumėte pokalbius, ir jie bus matomi čia.</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">Oi!</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Panašu, kad įvyko klaida. Pabandykite dar kartą.</string>
+    <string name="cometchat_search" translatable="true">Paieška</string>
+    <string name="cometchat_groups" translatable="true">Grupės</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">Nerasta jokių grupių</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Sukurkite arba prisijunkite prie grupių, kad matytumėte jas čia ir pradėtumėte bendradarbiauti.</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">Oi!</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Panašu, kad įvyko klaida. Pabandykite dar kartą.</string>
+    <string name="cometchat_members" translatable="true">Nariai</string>
+    <string name="cometchat_call_logs_title" translatable="true">Skambučių žurnalas</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Dar nėra skambučių žurnalo</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Paskambinkite arba priimkite skambučius, kad matytumėte jų istoriją čia</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">Oi!</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">Panašu, kad įvyko klaida. Pabandykite dar kartą.</string>
+    <string name="cometchat_this_message_deleted" translatable="true">Ši žinutė buvo ištrinta</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">Šis žinutės tipas nepalaikomas</string>
+    <string name="cometchat_message_form" translatable="true">Forma</string>
+    <string name="cometchat_message_card" translatable="true">Kortelė</string>
+    <string name="cometchat_message_scheduler" translatable="true">Tvarkyklė</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Galite paminėti iki 10 kartų iš karto</string>
+    <string name="cometchat_ask_question" translatable="true">Užduoti klausimą</string>
+    <string name="cometchat_options" translatable="true">Parinktys</string>
+    <string name="cometchat_send" translatable="true">Siųsti</string>
+    <string name="cometchat_submit" translatable="true">pateikti</string>
+    <string name="cometchat_add" translatable="true">Pridėti</string>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">prieš minutę</string>
+
+    <!-- Plurals -->
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true" tools:ignore="MissingQuantity">
+        <item quantity="one" translatable="true">%d min prieš</item>
+        <item quantity="other" translatable="true">%d min prieš</item>
+    </plurals>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true" tools:ignore="MissingQuantity">
+        <item quantity="one" translatable="true">%d val. prieš</item>
+        <item quantity="other" translatable="true">%d val. prieš</item>
+    </plurals>
+
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s pradėjo grupinį skambutį</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s pradėjo grupinį skambutį</string>
+    <string name="cometchat_edited" translatable="true">Redaguota</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Priimti</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Atmesti</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Įeinantis %s skambutis</string>
+    <string name="cometchat_kick">Išmesti</string>
+    <string name="cometchat_open_document_to_edit_content_together">Atidarykite dokumentą, kad galėtumėte kartu redaguoti turinį</string>
+    <string name="cometchat_open_document">Atidaryti dokumentą</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together">Atidarykite baltąją lentą, kad galėtumėte kartu redaguoti turinį</string>
+    <string name="cometchat_open_whiteboard">Atidaryti baltąją lentą</string>
+    <string name="cometchat_video_call">Vaizdo skambutis</string>
+    <string name="cometchat_audio_call">Garso skambutis</string>
+    <string name="cometchat_incoming_call_audio">garso</string>
+    <string name="cometchat_incoming_call_video">vaizdo</string>
+    <string name="cometchat_permission_required">Reikalingas Leidimas</string>
+    <string name="cometchat_microphone_permission_warning">Norint įrašyti garsą, reikalingas mikrofono leidimas.</string>
+    <string name="cometchat_camera_permission_warning">Norint fotografuoti, reikalingas kameros leidimas.</string>
+    <string name="cometchat_storage_permission_warning">Norint pasiekti failus, reikalingas saugyklos leidimas.</string>
+    <string name="cometchat_cancel_button">Atšaukti</string>
+    <string name="cometchat_settings_button">Nustatymai</string>
+    <string name="cometchat_moderation_block_message">Jūsų pranešimas buvo užblokuotas dėl moderavimo politikos.</string>
+    <string name="cometchat_mime_type_not_allowed_message">Šis failo tipas neleidžiamas.</string>
+    <string name="cometchat_no_conversations_history_title">Pokalbių istorija nerasta</string>
+    <string name="cometchat_ask_anything">Klauskite bet ko</string>
+    <string name="cometchat_something_went_wrong_try_again">Kažkas nepavyko iš mūsų pusės. Pabandykite dar kartą</string>
+    <string name="cometchat_no_conversations_history_subtitle">Pradėkite pokalbį paspaudę „Naujas pokalbis“ mygtuką</string>
+    <string name="cometchat_new_chat">Naujas pokalbis</string>
+    <string name="cometchat_chat_history">Pokalbių istorija</string>
+    <string name="cometchat_messages">Žinutės</string>
+    <string name="cometchat_menu">Meniu</string>
+    <string name="cometchat_menu_search">Paieška</string>
+    <string name="cometchat_menu_conversation_summary">Pokalbio santrauka</string>
+    <string name="cometchat_see_more">Rodyti daugiau</string>
+    <string name="cometchat_no_results">Nėra rezultatų</string>
+    <string name="cometchat_no_matches_found">Nepavyko rasti atitikmenų. Bandykite naudoti kitą paieškos raktažodį.</string>
+    <string name="cometchat_start_your_search">Pradėkite paiešką</string>
+    <string name="cometchat_search_for_conversations_or_messages">Ieškokite pokalbių ar žinučių įrašydami raktažodį aukščiau.</string>
+    <string name="cometchat_unread" translatable="true">Neperskaityta</string>
+    <string name="cometchat_photos" translatable="true">Nuotraukos</string>
+    <string name="cometchat_videos" translatable="true">Vaizdo įrašai</string>
+    <string name="cometchat_audio" translatable="true">Garsas</string>
+    <string name="cometchat_documents" translatable="true">Dokumentai</string>
+    <string name="cometchat_links" translatable="true">Nuorodos</string>
+    <string name="cometchat_details" translatable="true">Detales</string>
+    <string name="cometchat_report">Pranešti</string>
+    <string name="cometchat_report_a_message">Pranešti apie žinutę</string>
+    <string name="cometchat_report_message_title">Pranešti apie žinutę</string>
+    <string name="cometchat_report_message_description">Praneškite apie šį pokalbį, jei jis pažeidžia mūsų bendruomenės standartus. Mes nepranešime paskyrai, kurią pranešėte.</string>
+    <string name="cometchat_report_reason_label">Priežastis</string>
+    <string name="cometchat_report_optional_label">(Nebūtina)</string>
+    <string name="cometchat_report_remark_hint">Pateikite papildomą informaciją apie savo pranešimą…</string>
+    <string name="cometchat_report_button_report">Pranešti</string>
+    <string name="cometchat_report_success_message">Žinutė pranešta</string>
+    <string name="cometchat_report_error_message">Nepavyko pranešti žinutės</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Įvyko klaida. Patikrinkite ir bandykite dar kartą.</string>
+    <string name="cometchat_unable_to_flag_message">Nepavyko pažymėti žinutės</string>
+    <string name="cometchat_flag_message_success">Žinutė pranešta</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Šlamštas / Nepageidaujamas turinys</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Sexualus turinys</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Priekabiavimas / Terorizavimas</string>
+    <string name="cometchat_notify_everyone_in_this_group">Pranešti visiems šioje grupėje</string>
+    <string name="cometchat_notify_all" translatable="true">visi</string>
+
+</resources>

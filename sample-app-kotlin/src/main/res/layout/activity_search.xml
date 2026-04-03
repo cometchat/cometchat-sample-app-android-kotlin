@@ -1,16 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Search Activity Layout
+    
+    Note: CometChatSearch component is not yet available in chatuikit-kotlin.
+    This layout shows a placeholder until the component is implemented.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.SearchActivity">
+    android:orientation="vertical"
+    android:background="?attr/cometchatBackgroundColor1"
+    tools:context=".ui.search.SearchActivity">
 
-    <com.cometchat.chatuikit.search.CometChatSearch
-        android:id="@+id/cometchat_search"
+    <!-- Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cometchat_64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/cometchat_padding_4"
+        android:paddingEnd="@dimen/cometchat_padding_4">
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/cometchat_padding_2"
+            android:src="@drawable/cometchat_ic_back"
+            android:contentDescription="@string/back"
+            app:tint="?attr/cometchatIconTintPrimary"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/cometchat_margin_2"
+            android:text="@string/search"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading1Bold"
+            android:textColor="?attr/cometchatTextColorPrimary" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cometchat_1dp"
+        android:background="?attr/cometchatStrokeColorLight" />
+
+    <!-- Placeholder content -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/cometchat_padding_4">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:layout_width="@dimen/cometchat_120dp"
+            android:layout_height="@dimen/cometchat_120dp"
+            android:src="@drawable/cometchat_ic_search_large"
+            android:alpha="0.5"
+            app:tint="?attr/cometchatIconTintSecondary"
+            android:contentDescription="@null"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_4"
+            android:text="@string/search_coming_soon"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading3Medium"
+            android:textColor="?attr/cometchatTextColorPrimary"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_2"
+            android:text="@string/search_coming_soon_description"
+            android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
+            android:textColor="?attr/cometchatTextColorSecondary"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

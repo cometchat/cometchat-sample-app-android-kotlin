@@ -1,0 +1,535 @@
+---
+title: "Events"
+description: "Listen to UI Kit events for user actions, group changes, messages, and call lifecycle updates using CometChatEvents SharedFlow."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` |
+| Jetpack Compose | `com.cometchat:chat-uikit-compose` |
+| Import | `com.cometchat.uikit.core.events.CometChatEvents` |
+| Event flows | `CometChatEvents.messageEvents`, `CometChatEvents.callEvents`, `CometChatEvents.conversationEvents`, `CometChatEvents.groupEvents`, `CometChatEvents.userEvents`, `CometChatEvents.uiEvents` |
+| Pattern | Kotlin `SharedFlow` with sealed class event types — collect in `viewModelScope` or `lifecycleScope` |
+| Purpose | Decoupled communication between UI Kit components — subscribe to event flows to react to changes without direct component references |
+
+</Accordion>
+
+Events enable a decoupled, flexible architecture in the CometChat UI Kit. Components emit events via the `CometChatEvents` singleton, and other parts of your application collect these `SharedFlow` streams to react without direct references between components.
+
+## When to use this
+
+- You need to update your UI when a user is blocked or unblocked.
+- You need to respond to group actions such as member joins, kicks, bans, or ownership transfers.
+- You need to track conversation deletions or updates in real time.
+- You need to react to messages being sent, edited, deleted, or read.
+- You need to handle call lifecycle events (outgoing, accepted, rejected, ended).
+- You need to respond to UI-level events such as panel visibility changes or active chat changes.
+
+## Prerequisites
+
+- The `com.cometchat:chat-uikit-kotlin` or `com.cometchat:chat-uikit-compose` dependency added to your project.
+- `CometChatUIKit.init()` called and completed successfully.
+- A logged-in CometChat user (call `CometChatUIKit.login()` before collecting events).
+
+## CometChatEvents Singleton
+
+All events are accessed through the `CometChatEvents` singleton in `chatuikit-core`. Each domain has a dedicated `SharedFlow` that emits sealed class event types:
+
+```kotlin
+import com.cometchat.uikit.core.events.CometChatEvents
+```
+
+| Flow | Sealed Class | Description |
+|------|-------------|-------------|
+| `CometChatEvents.messageEvents` | `MessageEvent` | Message sent, edited, deleted, read, reactions |
+| `CometChatEvents.callEvents` | `CallEvent` | Call initiated, accepted, rejected, ended |
+| `CometChatEvents.conversationEvents` | `ConversationEvent` | Conversation deleted, updated |
+| `CometChatEvents.groupEvents` | `GroupEvent` | Group created, deleted, member changes |
+| `CometChatEvents.userEvents` | `UserEvent` | User blocked, unblocked |
+| `CometChatEvents.uiEvents` | `UIEvent` | Panel visibility, active chat changes |
+
+## API reference
+
+### Message Events
+
+`CometChatEvents.messageEvents` emits `MessageEvent` sealed class instances when messages are sent, edited, deleted, or read.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `MessageEvent.Sent(message, status)` | Triggered when a message is sent. Status can be `inProgress` or `sent`. |
+| `MessageEvent.Edited(message, status)` | Triggered when a message is edited. Status can be `inProgress` or `sent`. |
+| `MessageEvent.Deleted(message)` | Triggered when a message is deleted. |
+| `MessageEvent.Read(message)` | Triggered when a message is read. |
+| `MessageEvent.LiveReaction(icon)` | Triggered when a live reaction is sent. |
+| `MessageEvent.FormReceived(message)` | Triggered when a form message is received. |
+| `MessageEvent.CardReceived(message)` | Triggered when a card message is received. |
+| `MessageEvent.CustomInteractiveReceived(message)` | Triggered when a custom interactive message is received. |
+| `MessageEvent.InteractionGoalCompleted(message)` | Triggered when an interaction goal is completed. |
+| `MessageEvent.SchedulerReceived(message)` | Triggered when a scheduler message is received. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+// In an Activity or Fragment — use lifecycleScope
+lifecycleScope.launch {
+    CometChatEvents.messageEvents.collect { event ->
+        when (event) {
+            is MessageEvent.Sent -> {
+                val message = event.message
+                val status = event.status
+                // Update UI when message is sent
+            }
+            is MessageEvent.Edited -> {
+                val message = event.message
+                // Update UI when message is edited
+            }
+            is MessageEvent.Deleted -> {
+                val message = event.message
+                // Remove message from UI
+            }
+            is MessageEvent.Read -> {
+                val message = event.message
+                // Update read receipts
+            }
+            is MessageEvent.LiveReaction -> {
+                val icon = event.icon
+                // Show live reaction animation
+            }
+            is MessageEvent.FormReceived -> { /* Handle form message */ }
+            is MessageEvent.CardReceived -> { /* Handle card message */ }
+            is MessageEvent.CustomInteractiveReceived -> { /* Handle custom interactive */ }
+            is MessageEvent.InteractionGoalCompleted -> { /* Handle goal completion */ }
+            is MessageEvent.SchedulerReceived -> { /* Handle scheduler message */ }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun MessageEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.messageEvents.collect { event ->
+            when (event) {
+                is MessageEvent.Sent -> {
+                    val message = event.message
+                    val status = event.status
+                    // Update UI when message is sent
+                }
+                is MessageEvent.Edited -> {
+                    val message = event.message
+                    // Update UI when message is edited
+                }
+                is MessageEvent.Deleted -> {
+                    val message = event.message
+                    // Remove message from UI
+                }
+                is MessageEvent.Read -> {
+                    val message = event.message
+                    // Update read receipts
+                }
+                is MessageEvent.LiveReaction -> {
+                    val icon = event.icon
+                    // Show live reaction animation
+                }
+                is MessageEvent.FormReceived -> { /* Handle form message */ }
+                is MessageEvent.CardReceived -> { /* Handle card message */ }
+                is MessageEvent.CustomInteractiveReceived -> { /* Handle custom interactive */ }
+                is MessageEvent.InteractionGoalCompleted -> { /* Handle goal completion */ }
+                is MessageEvent.SchedulerReceived -> { /* Handle scheduler message */ }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Collects the `messageEvents` SharedFlow and pattern-matches on the sealed class to handle each message lifecycle event.
+
+---
+
+### Call Events
+
+`CometChatEvents.callEvents` emits `CallEvent` sealed class instances for call lifecycle changes.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `CallEvent.OutgoingCall(call)` | Triggered when the logged-in user initiates an outgoing call. |
+| `CallEvent.Accepted(call)` | Triggered when a call is accepted. |
+| `CallEvent.Rejected(call)` | Triggered when a call is rejected. |
+| `CallEvent.Ended(call)` | Triggered when a call is ended. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+lifecycleScope.launch {
+    CometChatEvents.callEvents.collect { event ->
+        when (event) {
+            is CallEvent.OutgoingCall -> {
+                val call = event.call
+                // Handle outgoing call initiated
+            }
+            is CallEvent.Accepted -> {
+                val call = event.call
+                // Handle call accepted
+            }
+            is CallEvent.Rejected -> {
+                val call = event.call
+                // Handle call rejected
+            }
+            is CallEvent.Ended -> {
+                val call = event.call
+                // Handle call ended
+            }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun CallEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.callEvents.collect { event ->
+            when (event) {
+                is CallEvent.OutgoingCall -> {
+                    // Handle outgoing call initiated
+                }
+                is CallEvent.Accepted -> {
+                    // Handle call accepted
+                }
+                is CallEvent.Rejected -> {
+                    // Handle call rejected
+                }
+                is CallEvent.Ended -> {
+                    // Handle call ended
+                }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+### Conversation Events
+
+`CometChatEvents.conversationEvents` emits `ConversationEvent` sealed class instances when conversations are deleted or updated.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `ConversationEvent.Deleted(conversation)` | Triggered when the logged-in user deletes a conversation. |
+| `ConversationEvent.Updated(conversation)` | Triggered when there is an update in the conversation. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+lifecycleScope.launch {
+    CometChatEvents.conversationEvents.collect { event ->
+        when (event) {
+            is ConversationEvent.Deleted -> {
+                val conversation = event.conversation
+                // Remove conversation from UI
+            }
+            is ConversationEvent.Updated -> {
+                val conversation = event.conversation
+                // Update conversation in UI
+            }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun ConversationEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.conversationEvents.collect { event ->
+            when (event) {
+                is ConversationEvent.Deleted -> {
+                    // Remove conversation from UI
+                }
+                is ConversationEvent.Updated -> {
+                    // Update conversation in UI
+                }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+### Group Events
+
+`CometChatEvents.groupEvents` emits `GroupEvent` sealed class instances when the logged-in user performs group-related actions.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `GroupEvent.Created(group)` | Triggered when the logged-in user creates a group. |
+| `GroupEvent.Deleted(group)` | Triggered when the logged-in user deletes a group. |
+| `GroupEvent.Left(actionMessage, leftUser, leftGroup)` | Triggered when the logged-in user leaves a group. |
+| `GroupEvent.MemberScopeChanged(actionMessage, updatedUser, scopeChangedTo, scopeChangedFrom, group)` | Triggered when a member's scope is changed. |
+| `GroupEvent.MemberBanned(actionMessage, bannedUser, bannedBy, bannedFrom)` | Triggered when a member is banned from a group. |
+| `GroupEvent.MemberKicked(actionMessage, kickedUser, kickedBy, kickedFrom)` | Triggered when a member is kicked from a group. |
+| `GroupEvent.MemberUnBanned(actionMessage, unbannedUser, unBannedBy, unBannedFrom)` | Triggered when a member is unbanned from a group. |
+| `GroupEvent.MemberJoined(joinedUser, joinedGroup)` | Triggered when the logged-in user joins a group. |
+| `GroupEvent.MemberAdded(actionMessages, usersAdded, userAddedIn, addedBy)` | Triggered when members are added to a group. |
+| `GroupEvent.OwnershipChanged(group, newOwner)` | Triggered when group ownership is transferred. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+lifecycleScope.launch {
+    CometChatEvents.groupEvents.collect { event ->
+        when (event) {
+            is GroupEvent.Created -> {
+                val group = event.group
+                // Add new group to UI
+            }
+            is GroupEvent.Deleted -> {
+                val group = event.group
+                // Remove group from UI
+            }
+            is GroupEvent.Left -> {
+                val leftUser = event.leftUser
+                val leftGroup = event.leftGroup
+                // Handle user leaving group
+            }
+            is GroupEvent.MemberScopeChanged -> {
+                val updatedUser = event.updatedUser
+                val newScope = event.scopeChangedTo
+                // Update member scope in UI
+            }
+            is GroupEvent.MemberBanned -> {
+                val bannedUser = event.bannedUser
+                // Remove banned user from member list
+            }
+            is GroupEvent.MemberKicked -> {
+                val kickedUser = event.kickedUser
+                // Remove kicked user from member list
+            }
+            is GroupEvent.MemberUnBanned -> {
+                val unbannedUser = event.unbannedUser
+                // Handle unbanned user
+            }
+            is GroupEvent.MemberJoined -> {
+                val joinedUser = event.joinedUser
+                // Add user to member list
+            }
+            is GroupEvent.MemberAdded -> {
+                val usersAdded = event.usersAdded
+                // Add users to member list
+            }
+            is GroupEvent.OwnershipChanged -> {
+                val newOwner = event.newOwner
+                // Update group owner in UI
+            }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun GroupEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.groupEvents.collect { event ->
+            when (event) {
+                is GroupEvent.Created -> { /* Add new group to UI */ }
+                is GroupEvent.Deleted -> { /* Remove group from UI */ }
+                is GroupEvent.Left -> { /* Handle user leaving group */ }
+                is GroupEvent.MemberScopeChanged -> { /* Update member scope */ }
+                is GroupEvent.MemberBanned -> { /* Remove banned user */ }
+                is GroupEvent.MemberKicked -> { /* Remove kicked user */ }
+                is GroupEvent.MemberUnBanned -> { /* Handle unbanned user */ }
+                is GroupEvent.MemberJoined -> { /* Add user to member list */ }
+                is GroupEvent.MemberAdded -> { /* Add users to member list */ }
+                is GroupEvent.OwnershipChanged -> { /* Update group owner */ }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+### User Events
+
+`CometChatEvents.userEvents` emits `UserEvent` sealed class instances when the logged-in user blocks or unblocks another user.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `UserEvent.Blocked(user)` | Triggered when the logged-in user blocks another user. |
+| `UserEvent.Unblocked(user)` | Triggered when the logged-in user unblocks another user. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+lifecycleScope.launch {
+    CometChatEvents.userEvents.collect { event ->
+        when (event) {
+            is UserEvent.Blocked -> {
+                val user = event.user
+                // Update UI to reflect blocked user
+            }
+            is UserEvent.Unblocked -> {
+                val user = event.user
+                // Update UI to reflect unblocked user
+            }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun UserEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.userEvents.collect { event ->
+            when (event) {
+                is UserEvent.Blocked -> {
+                    // Update UI to reflect blocked user
+                }
+                is UserEvent.Unblocked -> {
+                    // Update UI to reflect unblocked user
+                }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+### UI Events
+
+`CometChatEvents.uiEvents` emits `UIEvent` sealed class instances for UI-level actions such as panel visibility and active chat changes.
+
+**Event types:**
+
+| Event | Description |
+| ----- | ----------- |
+| `UIEvent.ShowPanel(id, alignment, view)` | Triggered to show an additional UI panel with custom elements. |
+| `UIEvent.HidePanel(id, alignment)` | Triggered to hide a previously shown UI panel. |
+| `UIEvent.ActiveChatChanged(id, message, user, group)` | Triggered when the active chat changes. |
+| `UIEvent.OpenChat(user, group)` | Triggered to open a chat with a specific user or group. |
+
+**Collecting events:**
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+lifecycleScope.launch {
+    CometChatEvents.uiEvents.collect { event ->
+        when (event) {
+            is UIEvent.ShowPanel -> {
+                val alignment = event.alignment
+                // Show custom UI panel
+            }
+            is UIEvent.HidePanel -> {
+                val alignment = event.alignment
+                // Hide custom UI panel
+            }
+            is UIEvent.ActiveChatChanged -> {
+                val user = event.user
+                val group = event.group
+                // React to active chat change
+            }
+            is UIEvent.OpenChat -> {
+                val user = event.user
+                val group = event.group
+                // Navigate to chat with user or group
+            }
+        }
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+@Composable
+fun UIEventsHandler() {
+    LaunchedEffect(Unit) {
+        CometChatEvents.uiEvents.collect { event ->
+            when (event) {
+                is UIEvent.ShowPanel -> { /* Show custom UI panel */ }
+                is UIEvent.HidePanel -> { /* Hide custom UI panel */ }
+                is UIEvent.ActiveChatChanged -> { /* React to active chat change */ }
+                is UIEvent.OpenChat -> { /* Navigate to chat */ }
+            }
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## Lifecycle Management
+
+Since `SharedFlow` collection is coroutine-based, lifecycle management is handled automatically:
+
+- In XML Views, use `lifecycleScope.launch` — the coroutine is cancelled when the lifecycle owner is destroyed.
+- In Jetpack Compose, use `LaunchedEffect` — the coroutine is cancelled when the composable leaves the composition.
+
+No manual `removeListener` calls are needed, unlike the old static listener pattern.
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Methods Reference" icon="code" href="/ui-kit/android/v6/methods">
+    UI Kit wrapper methods for initialization, authentication, and sending messages
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Display and manage the conversation list, which reacts to conversation events
+  </Card>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a chat, which reacts to message events
+  </Card>
+</CardGroup>

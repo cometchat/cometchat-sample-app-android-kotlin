@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CometChatAudioBubble">
+        <attr name="cometchatAudioBubbleBackgroundColor" format="color" />
+        <attr name="cometchatAudioBubbleBackgroundDrawable" format="reference" />
+        <attr name="cometchatAudioBubbleCornerRadius" format="dimension" />
+        <attr name="cometchatAudioBubbleStrokeWidth" format="integer" />
+        <attr name="cometchatAudioBubbleStrokeColor" format="color" />
+        <attr name="cometchatAudioBubblePlayIconTint" format="color" />
+        <attr name="cometchatAudioBubblePauseIconTint" format="color" />
+        <attr name="cometchatAudioBubbleAudioWaveColor" format="color" />
+        <attr name="cometchatAudioBubblePlayedWaveColor" format="color" />
+        <attr name="cometchatAudioBubbleUnplayedWaveColor" format="color" />
+        <attr name="cometchatAudioBubbleButtonBackgroundColor" format="color" />
+        <attr name="cometchatAudioBubbleSubtitleTextColor" format="color" />
+        <attr name="cometchatAudioBubbleSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatAudioBubbleThreadIndicatorTextAppearance" format="reference" />
+        <attr name="cometchatAudioBubbleThreadIndicatorTextColor" format="color" />
+        <attr name="cometchatAudioBubbleThreadIndicatorIconTint" format="color" />
+        <attr name="cometchatAudioBubbleSenderNameTextAppearance" format="reference" />
+        <attr name="cometchatAudioBubbleSenderNameTextColor" format="color" />
+        <attr name="cometchatAudioBubbleStyle" format="reference" />
+        <attr name="cometchatAudioBubbleDateStyle" format="reference" />
+        <attr name="cometchatAudioBubbleMessageReceiptStyle" format="reference" />
+        <attr name="cometchatAudioBubbleAvatarStyle" format="reference" />
+    </declare-styleable>
+
+</resources>

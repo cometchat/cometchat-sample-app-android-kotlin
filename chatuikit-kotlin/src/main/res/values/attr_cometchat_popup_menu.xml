@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CometChatPopupMenu">
+        <attr name="cometchatPopupMenuElevation" format="dimension" />
+        <attr name="cometchatPopupMenuCornerRadius" format="dimension" />
+        <attr name="cometchatPopupMenuBackgroundColor" format="color" />
+        <attr name="cometchatPopupMenuItemTextColor" format="color" />
+        <attr name="cometchatPopupMenuItemTextAppearance" format="reference" />
+        <attr name="cometchatPopupMenuStrokeColor" format="color" />
+        <attr name="cometchatPopupMenuStrokeWidth" format="dimension" />
+        <attr name="cometchatPopupMenuItemStartIconTint" format="color" />
+        <attr name="cometchatPopupMenuItemEndIconTint" format="color" />
+        <attr name="cometchatPopupMenuItemPaddingHorizontal" format="dimension" />
+        <attr name="cometchatPopupMenuItemPaddingVertical" format="dimension" />
+        <attr name="cometchatPopupMenuMinWidth" format="dimension" />
+        <attr name="cometchatPopupMenuStyle" format="reference" />
+    </declare-styleable>
+
+</resources>

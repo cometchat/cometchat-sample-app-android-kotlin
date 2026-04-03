@@ -1,0 +1,952 @@
+---
+title: "Conversations"
+description: "Scrollable list of recent one-on-one and group conversations for the logged-in user."
+---
+
+`CometChatConversations` renders a scrollable list of recent conversations with real-time updates for new messages, typing indicators, read receipts, and user presence.
+
+<Frame>
+  <img src="/images/f2c77c5b-Conversation-ac41cc6650fbb941c64f389aee910dbc.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatConversations` is a list component. It renders recent conversations and emits the selected `Conversation` via `onItemClick`. Wire it to `CometChatMessageHeader`, `CometChatMessageList`, and `CometChatMessageComposer` to build a standard chat layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+    android:id="@+id/conversations"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val conversations = findViewById<CometChatConversations>(R.id.conversations)
+
+conversations.setOnItemClick { conversation ->
+    when (val entity = conversation.conversationWith) {
+        is User -> navigateToUserChat(entity)
+        is Group -> navigateToGroupChat(entity)
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    modifier = Modifier.fillMaxSize(),
+    onItemClick = { conversation ->
+        when (val entity = conversation.conversationWith) {
+            is User -> navigateToUserChat(entity)
+            is Group -> navigateToGroupChat(entity)
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+> See the [Conversation List + Message View](/ui-kit/android/v6/conversation-message-view) guide for a complete layout.
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+    android:id="@+id/conversations"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Or programmatically:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(CometChatConversations(this))
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun ConversationsScreen() {
+    CometChatConversations(
+        modifier = Modifier.fillMaxSize()
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+Or in a Fragment:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return CometChatConversations(requireContext())
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return ComposeView(requireContext()).apply {
+        setContent { CometChatConversations() }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Filtering Conversations
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Pass a `ConversationsRequest.ConversationsRequestBuilder` to control what loads:
+
+```kotlin lines
+conversations.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder()
+        .setConversationType(CometChatConstants.CONVERSATION_TYPE_USER)
+        .setLimit(20)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    conversationsRequestBuilder = ConversationsRequest.ConversationsRequestBuilder()
+        .setConversationType(CometChatConstants.CONVERSATION_TYPE_USER)
+        .setLimit(20)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Filter Recipes
+
+| Recipe | Builder method |
+| --- | --- |
+| Only user conversations | `.setConversationType(CONVERSATION_TYPE_USER)` |
+| Only group conversations | `.setConversationType(CONVERSATION_TYPE_GROUP)` |
+| Limit per page | `.setLimit(10)` |
+| With tags | `.setTags(listOf("vip")).withTags(true)` |
+| Filter by user tags | `.withUserAndGroupTags(true).setUserTags(listOf("premium"))` |
+| Filter by group tags | `.withUserAndGroupTags(true).setGroupTags(listOf("support"))` |
+
+<Warning>
+Pass the builder object, not the result of `.build()`. The component calls `.build()` internally. Default page size is 30 with infinite scroll.
+</Warning>
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onItemClick`
+
+Fires when a conversation row is tapped. Primary navigation hook.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnItemClick { conversation ->
+    // Navigate to chat screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onItemClick = { conversation ->
+        // Navigate to chat screen
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+> Replaces the default item-click behavior. Your custom lambda executes instead of the built-in navigation.
+
+#### `onItemLongClick`
+
+Fires when a conversation row is long-pressed. Use for additional actions like delete or select.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnItemLongClick { conversation ->
+    // Show context menu
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onItemLongClick = { conversation ->
+        // Show context menu
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onBackPress`
+
+Fires when the user presses the back button in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnBackPress {
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onBackPress = { /* navigate back */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSearchClick`
+
+Fires when the user taps the search icon in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnSearchClick {
+    // Open search screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onSearchClick = { /* open search */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSelection`
+
+Fires when conversations are selected/deselected in multi-select mode.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+conversations.setOnSelection { selectedConversations ->
+    updateToolbar(selectedConversations.size)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    selectionMode = UIKitConstants.SelectionMode.MULTIPLE,
+    onSelection = { selectedConversations ->
+        updateToolbar(selectedConversations.size)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnError { exception ->
+    Log.e("Conversations", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onError = { exception ->
+        Log.e("Conversations", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onLoad`
+
+Fires when the list is successfully fetched and loaded.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnLoad { conversations ->
+    Log.d("Conversations", "Loaded ${conversations.size}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onLoad = { conversations ->
+        Log.d("Conversations", "Loaded ${conversations.size}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onEmpty`
+
+Fires when the list is empty after loading.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnEmpty {
+    Log.d("Conversations", "No conversations")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onEmpty = { /* no conversations */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Global Events
+
+The component emits events via `CometChatEvents` that can be subscribed to from anywhere:
+
+```kotlin lines
+viewModelScope.launch {
+    CometChatEvents.conversationEvents.collect { event ->
+        when (event) {
+            is CometChatConversationEvent.ConversationDeleted -> { /* handle */ }
+            is CometChatConversationEvent.ConversationUpdated -> { /* handle */ }
+        }
+    }
+}
+```
+
+### SDK Events (Real-Time, Automatic)
+
+The component listens to these SDK events internally. No manual setup needed.
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onTextMessageReceived` / `onMediaMessageReceived` / `onCustomMessageReceived` | Moves conversation to top, updates last message and unread count |
+| `onTypingStarted` / `onTypingEnded` | Shows/hides typing indicator in subtitle |
+| `onMessagesDelivered` / `onMessagesRead` | Updates receipt indicators |
+| `onUserOnline` / `onUserOffline` | Updates presence status dot |
+| `onGroupMemberJoined` / `onGroupMemberLeft` / `onGroupMemberKicked` / `onGroupMemberBanned` | Updates group conversation metadata |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setBackIconVisibility(View.VISIBLE)` | `hideBackIcon = false` | Toggle back button |
+| `setToolbarVisibility(View.GONE)` | `hideToolbar = true` | Toggle toolbar |
+| `setSearchBoxVisibility(View.GONE)` | `hideSearchBox = true` | Toggle search box |
+| `setDisableSoundForMessages(true)` | `disableSoundForMessages = true` | Disable message sounds |
+| `setCustomSoundForMessages(R.raw.sound)` | `customSoundForMessages = R.raw.sound` | Custom message sound |
+| `setSelectionMode(MULTIPLE)` | `selectionMode = MULTIPLE` | Enable selection mode |
+| `setTitle("Chats")` | `title = "Chats"` | Custom toolbar title |
+| `setSearchPlaceholderText("Search...")` | `searchPlaceholderText = "Search..."` | Search placeholder |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setLeadingView(object : ConversationsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatConversationsListItemsBinding): View {
+        return ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, conversation: Conversation,
+        typingIndicator: TypingIndicator?, holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>, position: Int
+    ) {
+        val imageView = createdView as ImageView
+        // Load avatar image
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    leadingView = { conversation, typingIndicator ->
+        CometChatAvatar(
+            imageUrl = conversation.conversationWith?.avatar,
+            name = conversation.conversationWith?.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Title View
+
+Replace the name / title text.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setTitleView(object : ConversationsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatConversationsListItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, conversation: Conversation,
+        typingIndicator: TypingIndicator?, holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>, position: Int
+    ) {
+        (createdView as TextView).text = conversation.conversationWith?.name ?: ""
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    titleView = { conversation, _ ->
+        Text(
+            text = conversation.conversationWith?.name ?: "",
+            style = CometChatTheme.typography.heading4Medium
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Subtitle View
+
+Replace the last message preview.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setSubtitleView(object : ConversationsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatConversationsListItemsBinding): View {
+        return TextView(context).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, conversation: Conversation,
+        typingIndicator: TypingIndicator?, holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>, position: Int
+    ) {
+        val textView = createdView as TextView
+        if (typingIndicator != null) {
+            textView.text = "typing..."
+        } else {
+            textView.text = when (val msg = conversation.lastMessage) {
+                is TextMessage -> msg.text
+                is MediaMessage -> "📎 ${msg.attachment?.fileExtension ?: "Media"}"
+                else -> "New conversation"
+            }
+        }
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    subtitleView = { conversation, typingIndicator ->
+        val text = if (typingIndicator != null) "typing..." else {
+            when (val msg = conversation.lastMessage) {
+                is TextMessage -> msg.text ?: ""
+                is MediaMessage -> "📎 ${msg.attachment?.fileExtension ?: "Media"}"
+                else -> "New conversation"
+            }
+        }
+        Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the timestamp / badge / right section.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setTrailingView(object : ConversationsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatConversationsListItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, conversation: Conversation,
+        typingIndicator: TypingIndicator?, holder: RecyclerView.ViewHolder,
+        conversations: List<Conversation>, position: Int
+    ) {
+        (createdView as TextView).text = "${conversation.unreadMessageCount} unread"
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    trailingView = { conversation, _ ->
+        if (conversation.unreadMessageCount > 0) {
+            Badge { Text("${conversation.unreadMessageCount}") }
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setEmptyView(customEmptyView)
+conversations.setErrorView(customErrorView)
+conversations.setLoadingView(customLoadingView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    emptyView = { Text("No conversations yet") },
+    errorView = { onRetry -> Button(onClick = onRetry) { Text("Retry") } },
+    loadingView = { CircularProgressIndicator() }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Overflow Menu
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOverflowMenu(ImageButton(context).apply {
+    setImageResource(R.drawable.ic_filter)
+    setOnClickListener { /* show filter */ }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    overflowMenu = {
+        IconButton(onClick = { /* show filter */ }) {
+            Icon(painterResource(R.drawable.ic_filter), "Filter")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Menu Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Replace all options
+conversations.setOptions { context, conversation ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "archive", name = "Archive", onClick = { /* ... */ }),
+        CometChatPopupMenu.MenuItem(id = "mute", name = "Mute", onClick = { /* ... */ })
+    )
+}
+
+// Append to defaults
+conversations.setAddOptions { context, conversation ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ })
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    options = { context, conversation ->
+        listOf(
+            MenuItem(id = "archive", name = "Archive", onClick = { /* ... */ }),
+            MenuItem(id = "mute", name = "Mute", onClick = { /* ... */ })
+        )
+    },
+    addOptions = { context, conversation ->
+        listOf(MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ }))
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Common Patterns
+
+### Minimal list — hide all chrome
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setToolbarVisibility(View.GONE)
+conversations.setSearchBoxVisibility(View.GONE)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    hideToolbar = true,
+    hideSearchBox = true
+)
+```
+
+</Tab>
+</Tabs>
+
+### Users-only conversations
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder()
+        .setConversationType(CometChatConstants.CONVERSATION_TYPE_USER)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    conversationsRequestBuilder = ConversationsRequest.ConversationsRequestBuilder()
+        .setConversationType(CometChatConstants.CONVERSATION_TYPE_USER)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Custom date formatting
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setDateTimeFormatter(object : DateTimeFormatterCallback {
+    override fun today(timestamp: Long) = "Today"
+    override fun yesterday(timestamp: Long) = "Yesterday"
+    override fun otherDays(timestamp: Long) = SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestamp))
+    override fun time(timestamp: Long) = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))
+    override fun minutes(diff: Long, timestamp: Long) = "${diff}m ago"
+    override fun hours(diff: Long, timestamp: Long) = "${diff}h ago"
+    override fun lastWeek(timestamp: Long) = "Last week"
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    dateTimeFormatter = object : DateTimeFormatterCallback {
+        override fun today(timestamp: Long) = "Today"
+        override fun yesterday(timestamp: Long) = "Yesterday"
+        override fun otherDays(timestamp: Long) = SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestamp))
+        override fun time(timestamp: Long) = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))
+        override fun minutes(diff: Long, timestamp: Long) = "${diff}m ago"
+        override fun hours(diff: Long, timestamp: Long) = "${diff}h ago"
+        override fun lastWeek(timestamp: Long) = "Last week"
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Advanced Methods
+
+### Programmatic Selection
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Enable selection
+conversations.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+
+// Select a conversation
+conversations.selectConversation(conversation, UIKitConstants.SelectionMode.MULTIPLE)
+
+// Get selected
+val selected = conversations.getSelectedConversations()
+
+// Clear
+conversations.clearSelection()
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Selection is managed via the `selectionMode` and `onSelection` parameters. The component handles selection state internally.
+
+</Tab>
+</Tabs>
+
+### ViewModel Access
+
+```kotlin lines
+val factory = CometChatConversationsViewModelFactory(
+    repository = MyCustomRepository() // optional
+)
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatConversationsViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    conversationsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for ListOperations, state observation, and custom repositories.
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomConversationsStyle" parent="CometChatConversationsStyle">
+    <item name="cometchatConversationsAvatarStyle">@style/CustomAvatarStyle</item>
+    <item name="cometchatConversationsBadgeStyle">@style/CustomBadgeStyle</item>
+    <item name="cometchatConversationsReceiptStyle">@style/CustomReceiptStyle</item>
+    <item name="cometchatConversationsDateStyle">@style/CustomDateStyle</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatConversationsStyle">@style/CustomConversationsStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5),
+        titleTextColor = Color(0xFF141414),
+        searchBoxStyle = CometChatSearchBoxStyle.default().copy(
+            backgroundColor = Color(0xFFFFFFFF)
+        ),
+        itemStyle = CometChatConversationsItemStyle.default().copy(
+            backgroundColor = Color.White,
+            titleTextColor = Color(0xFF141414),
+            subtitleTextColor = Color(0xFF727272),
+            avatarStyle = CometChatAvatarStyle.default().copy(cornerRadius = 12.dp),
+            badgeStyle = CometChatBadgeStyle.default().copy(backgroundColor = Color(0xFFF76808)),
+            dateStyle = CometChatDateStyle.default().copy(textColor = Color(0xFFA1A1A1)),
+            receiptStyle = CometChatReceiptStyle.default().copy(),
+            statusIndicatorStyle = CometChatStatusIndicatorStyle.default().copy(),
+            typingIndicatorStyle = CometChatTypingIndicatorStyle.default().copy()
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Style Properties
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background color |
+| `titleTextColor` | Toolbar title color |
+| `searchBoxStyle` | Search box appearance |
+| `itemStyle.backgroundColor` | Row background |
+| `itemStyle.selectedBackgroundColor` | Selected row background |
+| `itemStyle.titleTextColor` | Conversation name color |
+| `itemStyle.subtitleTextColor` | Last message preview color |
+| `itemStyle.separatorColor` | Row separator color |
+| `itemStyle.avatarStyle` | Avatar appearance |
+| `itemStyle.badgeStyle` | Unread badge appearance |
+| `itemStyle.dateStyle` | Timestamp appearance |
+| `itemStyle.receiptStyle` | Read receipt icons |
+| `itemStyle.statusIndicatorStyle` | Online/offline indicator |
+| `itemStyle.typingIndicatorStyle` | Typing indicator text |
+| `itemStyle.mentionStyle` | Mention highlight style |
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Conversation List + Message View" icon="comments" href="/ui-kit/android/v6/conversation-message-view">
+    Build a full chat layout with this component
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference with screenshots
+  </Card>
+  <Card title="ViewModel & Data" icon="database" href="/ui-kit/android/v6/customization-viewmodel-data">
+    Custom ViewModels, repositories, and ListOperations
+  </Card>
+  <Card title="View Slots" icon="puzzle-piece" href="/ui-kit/android/v6/customization-view-slots">
+    Replace specific UI regions across all components
+  </Card>
+</CardGroup>

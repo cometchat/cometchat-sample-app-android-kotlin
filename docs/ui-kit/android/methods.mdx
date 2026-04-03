@@ -1,0 +1,432 @@
+---
+title: "Methods"
+description: "Use CometChatUIKit wrapper methods for initialization, authentication, user creation, and message sending."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` |
+| Jetpack Compose | `com.cometchat:chat-uikit-compose` |
+| Import | `com.cometchat.uikit.core.CometChatUIKit` |
+| Init | `CometChatUIKit.init(context, uiKitSettings, callback)` |
+| Login (dev) | `CometChatUIKit.login("UID", callback)` |
+| Login (prod) | `CometChatUIKit.loginWithAuthToken("AUTH_TOKEN", callback)` |
+| Other methods | `CometChatUIKit.logout()`, `CometChatUIKit.getLoggedInUser()`, `CometChatUIKit.createUser(user, callback)` |
+| Send messages | `CometChatUIKit.sendTextMessage()`, `CometChatUIKit.sendMediaMessage()`, `CometChatUIKit.sendCustomMessage()` |
+| Note | Use these wrapper methods instead of raw SDK calls — they manage internal UI Kit eventing |
+
+</Accordion>
+
+`CometChatUIKit` provides wrapper methods around the CometChat SDK for initialization, authentication, user creation, date formatting, and sending messages — while automatically managing internal UI Kit events so that components like Message List and Conversations stay in sync.
+
+## When to use this
+
+- You need to initialize the CometChat UI Kit and SDK before rendering any UI components.
+- You need to log a user in or out of CometChat using an Auth Key (development) or Auth Token (production).
+- You need to create a new CometChat user dynamically from your app.
+- You need to send text, media, or custom messages through the UI Kit so that the Message List and Conversations components update automatically.
+- You need to customize how dates and times are displayed across all UI Kit components.
+
+## Prerequisites
+
+- The `com.cometchat:chat-uikit-kotlin` or `com.cometchat:chat-uikit-compose` dependency added to your project.
+- Your CometChat App ID, Region, and Auth Key (or Auth Token) from the [CometChat dashboard](https://app.cometchat.com/).
+- `CometChatUIKit.init()` called before invoking any other UI Kit method.
+
+## API reference
+
+### Initialization
+
+#### Init
+
+You must invoke this method before using any other methods provided by the UI Kit. This initialization ensures the UI Kit and Chat SDK function correctly in your application. Call this as one of the first lines of code in your application's lifecycle.
+
+<Warning>
+
+Make sure you replace the `APP_ID`, `REGION` and `AUTH_KEY` with your CometChat App ID, Region and Auth Key in the below code. The `Auth Key` is an optional property of the `UIKitSettings` Class. It is intended for use primarily during proof-of-concept (POC) development or in the early stages of application development. You can use the [Auth Token](#login-using-auth-token) to log in securely.
+
+</Warning>
+
+**Signature:**
+
+```kotlin
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.UIKitSettings
+
+CometChatUIKit.init(context: Context, authSettings: UIKitSettings, callbackListener: CometChat.CallbackListener<String>)
+```
+
+> **What this does:** Accepts a `Context`, a `UIKitSettings` configuration object, and a `CallbackListener` that reports success or failure.
+
+The `UIKitSettings` is an important parameter of the `init()` function. It serves as the base settings object, housing properties such as `appId`, `region`, and `authKey`.
+
+| Method                               | Type                          | Description                                                                                                                           |
+| ------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **setAppId**                         | `String`                      | Sets the unique ID for the app, available on dashboard                                                                                |
+| **setRegion**                        | `String`                      | Sets the region for the app ('us' or 'eu')                                                                                            |
+| **setAuthKey**                       | `String`                      | Sets the auth key for the app, available on dashboard                                                                                 |
+| **subscribePresenceForAllUsers**     | `String`                      | Sets subscription type for tracking the presence of all users                                                                         |
+| **subscribePresenceForFriends**      | `String`                      | Sets subscription type for tracking the presence of friends                                                                           |
+| **subscribePresenceForRoles**        | `String`                      | Sets subscription type for tracking the presence of users with specified roles                                                        |
+| **setAutoEstablishSocketConnection** | `Boolean`                     | Configures if web socket connections will established automatically on app initialization or be done manually, set to true by default |
+| **setAIFeatures**                    | `List<AIExtensionDataSource>` | Sets the AI Features that need to be added in UI Kit                                                                                  |
+| **setExtensions**                    | `List<ExtensionsDataSource>`  | Sets the list of extension that need to be added in UI Kit                                                                            |
+| **dateTimeFormatterCallback**        | `DateTimeFormatterCallback`   | Interface containing callback methods to format different types of timestamps.                                                        |
+
+**Usage:**
+
+```kotlin
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.UIKitSettings
+
+val uiKitSettings: UIKitSettings = UIKitSettingsBuilder()
+    .setRegion(your_region)
+    .setAppId(your_appID)
+    .setAuthKey(your_authKey)
+    .subscribePresenceForAllUsers()
+    .build()
+
+CometChatUIKit.init(context, uiKitSettings, object : CometChat.CallbackListener<String>() {
+    override fun onSuccess(response: String) {
+        Log.i(TAG, "CometChat init onSuccess: $response")
+    }
+
+    override fun onError(e: CometChatException) {
+        Log.e(TAG, "CometChat init exception: $e")
+    }
+})
+```
+
+> **What this does:** Creates a `UIKitSettings` object with your app ID, region, and auth key, then initializes the CometChat UI Kit. On success, the SDK and UI Kit are ready for use. On error, the `CometChatException` provides failure details.
+
+---
+
+### Authentication
+
+#### Login using Auth Key
+
+Only the `UID` of a user is needed to log in. This simple authentication procedure is useful when you are creating a POC or if you are in the development phase. For production apps, use [Auth Token](#login-using-auth-token) instead of Auth Key.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.login(uid: String, callbackListener: CometChat.CallbackListener<User>)
+```
+
+> **What this does:** Accepts a user ID string and a `CallbackListener` that returns the logged-in `User` object on success.
+
+**Usage:**
+
+```kotlin
+CometChatUIKit.login(UID, object : CometChat.CallbackListener<User>() {
+    override fun onSuccess(user: User) {
+        Log.i(TAG, "CometChat Login Successful : $user")
+    }
+
+    override fun onError(e: CometChatException) {
+        Log.e(TAG, "CometChat Login Failed : ${e.message}")
+    }
+})
+```
+
+> **What this does:** Logs in a user by their `UID` using the Auth Key configured during initialization. On success, the `User` object is returned.
+
+---
+
+#### Login using Auth Token
+
+This advanced authentication procedure does not use the Auth Key directly in your client code thus ensuring safety.
+
+1. [Create a User](https://api-explorer.cometchat.com/reference/creates-user) via the CometChat API when the user signs up in your app.
+2. [Create an Auth Token](https://api-explorer.cometchat.com/reference/create-authtoken) via the CometChat API for the new user and save the token in your database.
+3. Load the Auth Token in your client and pass it to the `loginWithAuthToken()` method.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.loginWithAuthToken(authToken: String, callbackListener: CometChat.CallbackListener<User>)
+```
+
+**Usage:**
+
+```kotlin
+CometChatUIKit.loginWithAuthToken(AuthToken, object : CometChat.CallbackListener<User>() {
+    override fun onSuccess(user: User) {
+        Log.i(TAG, "CometChat Login Successful : $user")
+    }
+
+    override fun onError(e: CometChatException) {
+        Log.e(TAG, "CometChat Login Failed : ${e.message}")
+    }
+})
+```
+
+> **What this does:** Logs in a user using a server-generated Auth Token instead of an Auth Key. This is the recommended approach for production apps because the Auth Key never appears in client code.
+
+---
+
+### Logout
+
+The CometChat UI Kit and Chat SDK effectively handle the session of the logged-in user within the framework. Before a new user logs in, it is crucial to clean this data to avoid potential conflicts or unexpected behavior. This can be achieved by invoking the `logout()` function.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.logout(callbackListener: CometChat.CallbackListener<String>)
+```
+
+**Usage:**
+
+```kotlin
+CometChatUIKit.logout(object : CometChat.CallbackListener<String>() {
+    override fun onSuccess(s: String) {
+        // your action on logout
+    }
+
+    override fun onError(e: CometChatException) {
+        // Error handling
+    }
+})
+```
+
+> **What this does:** Logs out the current user, clears the session data, and tears down the internal event system. Call this before logging in a different user to avoid conflicts.
+
+---
+
+### Create User
+
+You can dynamically create users on CometChat using the `createUser()` function. This is useful when users are registered or authenticated by your system and then need to be created on CometChat.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.createUser(user: User, callbackListener: CometChat.CallbackListener<User>)
+```
+
+**Usage:**
+
+```kotlin
+val user = User("user_uid", "user_name")
+user.setAvatar("user_avatar_url")
+
+CometChatUIKit.createUser(user, object : CometChat.CallbackListener<User>() {
+    override fun onSuccess(user: User) {
+        // Action on success
+    }
+
+    override fun onError(e: CometChatException) {
+        // Action on error
+    }
+})
+```
+
+> **What this does:** Creates a new user on CometChat with the specified UID, name, and avatar URL. On success, the created `User` object is returned.
+
+---
+
+### DateFormatter
+
+By providing a custom implementation of the `DateTimeFormatterCallback`, you can globally configure how time and date values are displayed across all UI components in the CometChat UI Kit. This ensures consistent formatting for labels such as "Today", "Yesterday", "X minutes ago", and more, throughout the entire application.
+
+Each method in the interface corresponds to a specific case:
+
+`time(long timestamp)` → Custom full timestamp format
+
+`today(long timestamp)` → Called when a message is from today
+
+`yesterday(long timestamp)` → Called for yesterday's messages
+
+`lastWeek(long timestamp)` → Messages from the past week
+
+`otherDays(long timestamp)` → Older messages
+
+`minute(long timestamp)` / `hour(long timestamp)` → Exact time unit
+
+`minutes(long diffInMinutesFromNow, long timestamp)` → e.g., "5 minutes ago"
+
+`hours(long diffInHourFromNow, long timestamp)` → e.g., "2 hours ago"
+
+**Usage:**
+
+```kotlin
+import java.text.SimpleDateFormat
+import java.util.*
+import com.cometchat.uikit.core.UIKitSettings
+
+val uiKitSettings = UIKitSettings.UIKitSettingsBuilder()
+    .setAppId(appId)
+    .setRegion(region)
+    .setDateTimeFormatterCallback(object : DateTimeFormatterCallback {
+
+        private val fullTimeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+        override fun time(timestamp: Long): String {
+            return fullTimeFormatter.format(Date(timestamp))
+        }
+
+        override fun today(timestamp: Long): String {
+            return "Today"
+        }
+
+        override fun yesterday(timestamp: Long): String {
+            return "Yesterday"
+        }
+
+        override fun lastWeek(timestamp: Long): String {
+            return "Last Week"
+        }
+
+        override fun otherDays(timestamp: Long): String {
+            return dateFormatter.format(Date(timestamp))
+        }
+
+        override fun minutes(diffInMinutesFromNow: Long, timestamp: Long): String {
+            return "$diffInMinutesFromNow mins ago"
+        }
+
+        override fun hours(diffInHourFromNow: Long, timestamp: Long): String {
+            return "$diffInHourFromNow hrs ago"
+        }
+    })
+    .setAuthKey(authKey)
+    .subscribePresenceForAllUsers()
+    .build()
+
+CometChatUIKit.init(context, uiKitSettings, object : CometChat.CallbackListener<String>() {
+    override fun onSuccess(s: String?) {
+        Log.d("CometChatInit", "Success: $s")
+    }
+
+    override fun onError(e: CometChatException?) {
+        Log.e("CometChatInit", "Error: ${e?.message}")
+    }
+})
+```
+
+> **What this does:** Configures a custom `DateTimeFormatterCallback` on `UIKitSettings` and passes it to `CometChatUIKit.init()`. This globally overrides how timestamps appear across all UI Kit components.
+
+---
+
+### Base Message
+
+#### Text Message
+
+To send a text message to a single user or a group, use the `sendTextMessage()` function. This function requires a `TextMessage` object as its argument, which contains the necessary information for delivering the message.
+
+> It's essential to understand the difference between `CometChatUIKit.sendTextMessage()` and `CometChat.sendTextMessage()`. When you use `CometChatUIKit.sendTextMessage()`, it automatically adds the message to the Message List and Conversations components, taking care of all related cases for you. On the other hand, `CometChat.sendTextMessage()` only sends the message and doesn't automatically update these components in the UI Kit.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.sendTextMessage(textMessage: TextMessage, messageCallbackListener: CometChat.CallbackListener<TextMessage>)
+```
+
+**Usage:**
+
+```kotlin
+val textMessage = TextMessage("receiver_uid", "your_text_message", CometChatConstants.RECEIVER_TYPE_USER)
+CometChatUIKit.sendTextMessage(textMessage, object : CometChat.CallbackListener<TextMessage>() {
+    override fun onSuccess(message: TextMessage) {
+        // Action on success
+    }
+
+    override fun onError(e: CometChatException) {
+        // Action on error
+    }
+})
+```
+
+> **What this does:** Creates a `TextMessage` targeting a user with the receiver type `RECEIVER_TYPE_USER`, then sends it through the UI Kit. The message automatically appears in the Message List and Conversations components.
+
+---
+
+#### Media Message
+
+To send a media message to a single user or a group, use the `sendMediaMessage()` function. This function requires a `MediaMessage` object as its argument.
+
+> When you use `CometChatUIKit.sendMediaMessage()`, it automatically adds the message to the Message List and Conversations components. `CometChat.sendMediaMessage()` only sends the message without updating UI Kit components.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.sendMediaMessage(mediaMessage: MediaMessage, messageCallbackListener: CometChat.CallbackListener<MediaMessage>)
+```
+
+**Usage:**
+
+```kotlin
+val mediaMessage = MediaMessage("receiver_uid", File("your_filePath"), CometChatConstants.MESSAGE_TYPE_FILE, CometChatConstants.RECEIVER_TYPE_USER)
+
+CometChatUIKit.sendMediaMessage(mediaMessage, object : CometChat.CallbackListener<MediaMessage>() {
+    override fun onSuccess(mediaMessage: MediaMessage) {
+        // Action on success
+    }
+
+    override fun onError(e: CometChatException) {
+        // Action on error
+    }
+})
+```
+
+> **What this does:** Creates a `MediaMessage` with a file path and message type `MESSAGE_TYPE_FILE`, then sends it through the UI Kit.
+
+---
+
+#### Custom Message
+
+To send a custom message to a single user or a group, use the `sendCustomMessage()` function. This function requires a `CustomMessage` object as its argument.
+
+> When you use `CometChatUIKit.sendCustomMessage()`, it automatically adds the message to the Message List and Conversations components. `CometChat.sendCustomMessage()` only sends the message without updating UI Kit components.
+
+**Signature:**
+
+```kotlin
+CometChatUIKit.sendCustomMessage(customMessage: CustomMessage, messageCallbackListener: CometChat.CallbackListener<CustomMessage>)
+```
+
+**Usage:**
+
+```kotlin
+val customType = "your_message_type"
+val customData = JSONObject()
+
+customData.put("key1", "value1")
+customData.put("key2", "value2")
+customData.put("key3", "value3")
+customData.put("key4", "value4")
+
+val customMessage = CustomMessage("receiver_uid", CometChatConstants.RECEIVER_TYPE_USER, customType, customData)
+
+CometChatUIKit.sendCustomMessage(customMessage, object : CometChat.CallbackListener<CustomMessage>() {
+    override fun onSuccess(customMessage: CustomMessage) {
+        // Action on success
+    }
+
+    override fun onError(e: CometChatException) {
+        // Action on error
+    }
+})
+```
+
+> **What this does:** Creates a `CustomMessage` with a custom type string and JSON data payload, then sends it through the UI Kit.
+
+> Note: To display custom messages in the [MessageList](/ui-kit/android/v6/message-list), you must create and register a new [MessageTemplate](/ui-kit/android/v6/message-template) that defines how to render your custom message type.
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Events Reference" icon="bolt" href="/ui-kit/android/v6/events">
+    Listen for real-time UI Kit events for users, groups, conversations, messages, and calls
+  </Card>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display and customize the message list where sent messages appear
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Display and customize the conversations list that updates when messages are sent
+  </Card>
+</CardGroup>

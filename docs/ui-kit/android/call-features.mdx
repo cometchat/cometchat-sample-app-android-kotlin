@@ -1,0 +1,200 @@
+---
+title: "Call"
+description: "Add one-on-one and group audio/video calling to your Android app using the CometChat Calls SDK and UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` + `com.cometchat:calls-sdk-android` |
+| Jetpack Compose | `com.cometchat:chat-uikit-compose` + `com.cometchat:calls-sdk-android` |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` — Calls SDK must also be installed |
+| Call features | Incoming Call, Outgoing Call, Call Logs, Call Buttons, Ongoing Call |
+| Key components | `CometChatCallButtons`, `CometChatIncomingCall`, `CometChatOutgoingCall`, `CometChatCallLogs`, `CometChatOngoingCall` |
+| Auto-detection | UI Kit automatically detects the Calls SDK and enables call UI components |
+| Related | [Getting Started](/ui-kit/android/v6/getting-started), [Core Features](/ui-kit/android/v6/core-features), [Call Log Details Guide](/ui-kit/android/v6/guide-call-log-details) |
+
+</Accordion>
+
+CometChat's Calls feature allows you to seamlessly integrate one-on-one as well as group audio and video calling capabilities into your application. This document provides a technical overview of these features, as implemented in the Android UI Kit.
+
+## Integration
+
+First, make sure that you've correctly integrated the UI Kit library into your project. If you haven't done this yet or are facing difficulties, refer to our [Getting Started](/ui-kit/android/v6/getting-started) guide.
+
+Once you've successfully integrated the UI Kit, the next step is to add the CometChat Calls SDK to your project. This is necessary to enable the calling features in the UI Kit.
+
+### Step 1: Add Calls SDK Dependency
+
+Add the following dependency to your `build.gradle.kts` file:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-kotlin:5.2.9")
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-compose:5.2.9")
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+</Tabs>
+
+After adding this dependency, sync your project. The Android UI Kit will automatically detect the Calls SDK and activate the calling features.
+
+### Step 2: Verify Call Buttons Appear
+
+Once the Calls SDK is integrated, you will see the `CometChatCallButtons` component automatically rendered in the [MessageHeader](/ui-kit/android/v6/message-header) component. This provides users with quick access to initiate audio and video calls.
+
+<Frame>
+  <img src="/images/81959c4b-Calling-ee689247c8cdd512c520b85f30683ad8.png" />
+</Frame>
+
+### Step 3: Add Call Listener for Incoming Calls
+
+To receive incoming calls globally in your app, you will need to add a `CallListener`. This should be added before you initialize the CometChat UI Kit. We recommend creating a custom Application class and adding the call listener there.
+
+When an incoming call is received, you can display the `CometChatIncomingCall` component using the current activity context.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+class BaseApplication : Application() {
+
+    companion object {
+        private val LISTENER_ID = "${BaseApplication::class.java.simpleName}${System.currentTimeMillis()}"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener {
+            override fun onIncomingCallReceived(call: Call) {
+                // Get the current activity context
+                val currentActivity = getCurrentActivity() // Implement this method
+
+                currentActivity?.let {
+                    // Create and display the incoming call component
+                    val incomingCallView = CometChatIncomingCall(it)
+                    incomingCallView.call = call
+                    incomingCallView.fitsSystemWindows = true
+                    incomingCallView.onError = OnError { exception ->
+                        // Handle errors
+                    }
+
+                    // Display the component (e.g., as dialog or snackbar)
+                }
+            }
+
+            override fun onOutgoingCallAccepted(call: Call) {
+                // Handle outgoing call acceptance
+            }
+
+            override fun onOutgoingCallRejected(call: Call) {
+                // Handle outgoing call rejection
+            }
+
+            override fun onIncomingCallCancelled(call: Call) {
+                // Handle incoming call cancellation
+            }
+        })
+    }
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin
+class BaseApplication : Application() {
+
+    companion object {
+        private val LISTENER_ID = "${BaseApplication::class.java.simpleName}${System.currentTimeMillis()}"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        CometChat.addCallListener(LISTENER_ID, object : CometChat.CallListener {
+            override fun onIncomingCallReceived(call: Call) {
+                CometChatCallActivity.launchIncomingCallScreen(this@BaseApplication, call, null)
+                // Pass null or IncomingCallConfiguration if need to configure CometChatIncomingCall component
+            }
+
+            override fun onOutgoingCallAccepted(call: Call) {
+                // Handle outgoing call acceptance
+            }
+
+            override fun onOutgoingCallRejected(call: Call) {
+                // Handle outgoing call rejection
+            }
+
+            override fun onIncomingCallCancelled(call: Call) {
+                // Handle incoming call cancellation
+            }
+        })
+    }
+}
+```
+</Tab>
+</Tabs>
+
+## Call Components
+
+The CometChat Android UI Kit provides five main components for implementing calling features in your app. Each component handles a specific part of the calling experience.
+
+### Call Buttons
+
+The `CometChatCallButtons` component provides users with quick access to initiate audio and video calls. This component is automatically rendered in the [MessageHeader](/ui-kit/android/v6/message-header) when the Calls SDK is integrated.
+
+<Frame>
+  <img src="/images/2338801e-call_button-90161ce159058183ff0d16adbf8f4734.png" />
+</Frame>
+
+[Learn more about Call Buttons →](/ui-kit/android/v6/call-buttons)
+
+### Incoming Call
+
+The `CometChatIncomingCall` component displays when a user receives an incoming call. It provides a full-screen interface showing caller information and call controls.
+
+<Frame>
+  <img src="/images/ef9ae7b8-Incoming_call-060686ee2b9aa89ad7c163fc8290d390.png" />
+</Frame>
+
+[Learn more about Incoming Call →](/ui-kit/android/v6/incoming-call)
+
+### Outgoing Call
+
+The `CometChatOutgoingCall` component manages the outgoing call experience. It displays while waiting for the recipient to answer and automatically transitions to the active call screen once accepted.
+
+<Frame>
+  <img src="/images/703120eb-outgoing_call-c24eb1936c04bb40ea873ac19b973b56.png" />
+</Frame>
+
+[Learn more about Outgoing Call →](/ui-kit/android/v6/outgoing-call)
+
+### Call Logs
+
+The `CometChatCallLogs` component displays a history of all call activities, including missed, received, and dialed calls. Users can view call details and initiate new calls from the log.
+
+<Frame>
+  <img src="/images/7fe2a6db-call_logs-7b4f502153923374898f3887441ab8d2.png" />
+</Frame>
+
+[Learn more about Call Logs →](/ui-kit/android/v6/call-logs)
+
+### Ongoing Call
+
+The `CometChatOngoingCall` component renders the active call screen with video feeds, mute/unmute controls, camera toggle, and end-call actions.
+
+### Call Log Details
+
+For detailed information about individual calls, including participants, join/leave history, and recordings, see the [Call Log Details](/ui-kit/android/v6/guide-call-log-details) guide.

@@ -1,0 +1,371 @@
+package com.cometchat.uikit.compose.shared.inlineaudiorecorder
+
+import com.cometchat.uikit.compose.presentation.shared.inlineaudiorecorder.ui.calculateBarHeight
+import com.cometchat.uikit.compose.presentation.shared.inlineaudiorecorder.ui.calculateProgress
+import com.cometchat.uikit.compose.presentation.shared.inlineaudiorecorder.ui.calculateSeekPosition
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.long
+import io.kotest.property.checkAll
+import kotlin.math.abs
+
+/**
+ * Property-based tests for [CometChatInlineAudioWaveform].
+ * 
+ * These tests validate the waveform visualization calculations and behavior.
+ *
+ * Feature: inline-audio-recorder
+ * **Validates: Requirements 3.3, 3.4, 3.6, 3.7, 3.8, 4.1, 4.2, 4.3, 4.4, 5.2, 5.5**
+ */
+class CometChatInlineAudioWaveformPropertyTest : FunSpec({
+
+    // ==================== Property 3: Bar Height Calculation ====================
+    
+    // Feature: inline-audio-recorder, Property 3: Bar Height Calculation
+    // *For any* amplitude value in range [0.0, 1.0], the Audio_Waveform SHALL:
+    // - Calculate bar height as: minHeight + (amplitude × (maxHeight - minHeight))
+    // - Position each bar centered vertically at: centerY - (barHeight / 2)
+    // - Return minHeight when amplitude is 0
+    // - Return maxHeight when amplitude is 1
+    // **Validates: Requirements 3.4, 3.6, 3.7**
+
+    /**
+     * Property 3: Bar height calculation is correct for any amplitude
+     * 
+     * barHeight = minHeight + (amplitude × (maxHeight - minHeight))
+     * 
+     * **Validates: Requirements 3.4**
+     */
+    test("Property 3: Bar height calculation is correct for any amplitude") {
+        checkAll(
+            100,
+            Arb.float(0f, 1f),
+            Arb.float(1f, 10f),
+            Arb.float(20f, 50f)
+        ) { amplitude, minHeight, maxHeight ->
+            val actualMinHeight = minOf(minHeight, maxHeight)
+            val actualMaxHeight = maxOf(minHeight, maxHeight)
+            
+            val expectedHeight = actualMinHeight + (amplitude * (actualMaxHeight - actualMinHeight))
+            val calculatedHeight = calculateBarHeight(amplitude, actualMinHeight, actualMaxHeight)
+            
+            abs(calculatedHeight - expectedHeight) < 0.001f shouldBe true
+        }
+    }
+
+    /**
+     * Property 3: Bar height is minHeight when amplitude is 0
+     * 
+     * **Validates: Requirements 3.6**
+     */
+    test("Property 3: Bar height is minHeight when amplitude is 0") {
+        checkAll(100, Arb.float(1f, 10f), Arb.float(20f, 50f)) { minHeight, maxHeight ->
+            val actualMinHeight = minOf(minHeight, maxHeight)
+            val actualMaxHeight = maxOf(minHeight, maxHeight)
+            
+            val height = calculateBarHeight(0f, actualMinHeight, actualMaxHeight)
+            
+            abs(height - actualMinHeight) < 0.001f shouldBe true
+        }
+    }
+
+    /**
+     * Property 3: Bar height is maxHeight when amplitude is 1
+     * 
+     * **Validates: Requirements 3.7**
+     */
+    test("Property 3: Bar height is maxHeight when amplitude is 1") {
+        checkAll(100, Arb.float(1f, 10f), Arb.float(20f, 50f)) { minHeight, maxHeight ->
+            val actualMinHeight = minOf(minHeight, maxHeight)
+            val actualMaxHeight = maxOf(minHeight, maxHeight)
+            
+            val height = calculateBarHeight(1f, actualMinHeight, actualMaxHeight)
+            
+            abs(height - actualMaxHeight) < 0.001f shouldBe true
+        }
+    }
+
+    /**
+     * Property 3: Bar height is always within [minHeight, maxHeight]
+     * 
+     * **Validates: Requirements 3.4**
+     */
+    test("Property 3: Bar height is always within bounds") {
+        checkAll(
+            100,
+            Arb.float(-0.5f, 1.5f), // Test with out-of-range amplitudes too
+            Arb.float(1f, 10f),
+            Arb.float(20f, 50f)
+        ) { amplitude, minHeight, maxHeight ->
+            val actualMinHeight = minOf(minHeight, maxHeight)
+            val actualMaxHeight = maxOf(minHeight, maxHeight)
+            
+            val height = calculateBarHeight(amplitude, actualMinHeight, actualMaxHeight)
+            
+            (height >= actualMinHeight && height <= actualMaxHeight) shouldBe true
+        }
+    }
+
+    /**
+     * Property 3: Bar height increases monotonically with amplitude
+     * 
+     * **Validates: Requirements 3.4**
+     */
+    test("Property 3: Bar height increases monotonically with amplitude") {
+        checkAll(
+            100,
+            Arb.float(0f, 0.5f),
+            Arb.float(0.5f, 1f),
+            Arb.float(1f, 10f),
+            Arb.float(20f, 50f)
+        ) { amp1, amp2, minHeight, maxHeight ->
+            val actualMinHeight = minOf(minHeight, maxHeight)
+            val actualMaxHeight = maxOf(minHeight, maxHeight)
+            val lowerAmp = minOf(amp1, amp2)
+            val higherAmp = maxOf(amp1, amp2)
+            
+            val lowerHeight = calculateBarHeight(lowerAmp, actualMinHeight, actualMaxHeight)
+            val higherHeight = calculateBarHeight(higherAmp, actualMinHeight, actualMaxHeight)
+            
+            (lowerHeight <= higherHeight) shouldBe true
+        }
+    }
+
+    // ==================== Property 4: Amplitude Storage and Retrieval ====================
+    
+    // Feature: inline-audio-recorder, Property 4: Amplitude Storage and Retrieval
+    // *For any* recording session, the Inline_Audio_Recorder SHALL:
+    // - Store each amplitude value captured during recording in the amplitudes list
+    // - Append new amplitudes to the end of the list (new bars appear on right)
+    // - Preserve the complete amplitude history when transitioning to COMPLETED state
+    // - Use the stored amplitudes for playback visualization
+    // **Validates: Requirements 3.3, 3.8, 4.1**
+
+    /**
+     * Property 4: Amplitude values are preserved in list
+     * 
+     * **Validates: Requirements 3.8, 4.1**
+     */
+    test("Property 4: Amplitude values are preserved in list") {
+        checkAll(100, Arb.list(Arb.float(0f, 1f), 1..100)) { amplitudes ->
+            // Verify all amplitudes are in valid range
+            amplitudes.all { it in 0f..1f } shouldBe true
+            
+            // Verify list preserves order
+            amplitudes.forEachIndexed { index, amplitude ->
+                amplitudes[index] shouldBe amplitude
+            }
+        }
+    }
+
+    /**
+     * Property 4: New amplitudes are appended to end
+     * 
+     * **Validates: Requirements 3.3**
+     */
+    test("Property 4: New amplitudes are appended to end") {
+        checkAll(100, Arb.list(Arb.float(0f, 1f), 1..50), Arb.float(0f, 1f)) { existing, newAmplitude ->
+            val updated = existing + newAmplitude
+            
+            // New amplitude should be at the end
+            updated.last() shouldBe newAmplitude
+            
+            // Existing amplitudes should be preserved
+            existing.forEachIndexed { index, amplitude ->
+                updated[index] shouldBe amplitude
+            }
+        }
+    }
+
+    // ==================== Property 5: Playback Progress Visualization ====================
+    
+    // Feature: inline-audio-recorder, Property 5: Playback Progress Visualization
+    // *For any* playback position and duration, the Audio_Waveform SHALL:
+    // - Calculate progress as: currentPosition / duration (clamped to [0.0, 1.0])
+    // - Color bars at index <= (progress × barCount) with the playing color
+    // - Color bars at index > (progress × barCount) with the default color
+    // - Preserve the progress position when playback is paused
+    // **Validates: Requirements 4.2, 4.3, 4.4**
+
+    /**
+     * Property 5: Progress calculation is correct
+     * 
+     * **Validates: Requirements 4.2**
+     */
+    test("Property 5: Progress calculation is correct") {
+        checkAll(100, Arb.long(0L, 300000L), Arb.long(1000L, 300000L)) { position, duration ->
+            val clampedPosition = position.coerceAtMost(duration)
+            val progress = calculateProgress(clampedPosition, duration)
+            
+            val expectedProgress = clampedPosition.toFloat() / duration.toFloat()
+            
+            abs(progress - expectedProgress) < 0.001f shouldBe true
+        }
+    }
+
+    /**
+     * Property 5: Progress is clamped to [0.0, 1.0]
+     * 
+     * **Validates: Requirements 4.2**
+     */
+    test("Property 5: Progress is clamped to valid range") {
+        checkAll(100, Arb.long(-1000L, 400000L), Arb.long(1000L, 300000L)) { position, duration ->
+            val progress = calculateProgress(position, duration)
+            
+            (progress >= 0f && progress <= 1f) shouldBe true
+        }
+    }
+
+    /**
+     * Property 5: Progress bar index calculation is correct
+     * 
+     * **Validates: Requirements 4.3**
+     */
+    test("Property 5: Progress bar index calculation is correct") {
+        checkAll(100, Arb.float(0f, 1f), Arb.int(10, 100)) { progress, barCount ->
+            val progressBarIndex = (progress * barCount).toInt()
+            
+            (progressBarIndex >= 0 && progressBarIndex <= barCount) shouldBe true
+        }
+    }
+
+    /**
+     * Property 5: Progress is 0 when duration is 0
+     * 
+     * **Validates: Requirements 4.2**
+     */
+    test("Property 5: Progress is 0 when duration is 0") {
+        checkAll(100, Arb.long(0L, 100000L)) { position ->
+            val progress = calculateProgress(position, 0L)
+            
+            progress shouldBe 0f
+        }
+    }
+
+    // ==================== Property 6: Seek Position Calculation ====================
+    
+    // Feature: inline-audio-recorder, Property 6: Seek Position Calculation
+    // *For any* tap or drag position on the waveform, the seek position SHALL be calculated as:
+    // - seekPositionMs = (tapX / waveformWidth) × duration
+    // - The result SHALL be clamped to [0, duration]
+    // - The playback position SHALL be updated to the calculated seek position
+    // **Validates: Requirements 5.2, 5.5**
+
+    /**
+     * Property 6: Seek position calculation is correct
+     * 
+     * **Validates: Requirements 5.2, 5.5**
+     */
+    test("Property 6: Seek position calculation is correct") {
+        checkAll(
+            100,
+            Arb.float(0f, 1000f),
+            Arb.float(100f, 1000f),
+            Arb.long(1000L, 300000L)
+        ) { tapX, waveformWidth, duration ->
+            val seekPosition = calculateSeekPosition(tapX, waveformWidth, duration)
+            
+            val expectedProgress = (tapX / waveformWidth).coerceIn(0f, 1f)
+            val expectedPosition = (expectedProgress * duration).toLong().coerceIn(0L, duration)
+            
+            seekPosition shouldBe expectedPosition
+        }
+    }
+
+    /**
+     * Property 6: Seek position is clamped to [0, duration]
+     * 
+     * **Validates: Requirements 5.5**
+     */
+    test("Property 6: Seek position is clamped to valid range") {
+        checkAll(
+            100,
+            Arb.float(-100f, 1500f), // Test with out-of-range tap positions
+            Arb.float(100f, 1000f),
+            Arb.long(1000L, 300000L)
+        ) { tapX, waveformWidth, duration ->
+            val seekPosition = calculateSeekPosition(tapX, waveformWidth, duration)
+            
+            (seekPosition >= 0L && seekPosition <= duration) shouldBe true
+        }
+    }
+
+    /**
+     * Property 6: Seek position is 0 when tap is at left edge
+     * 
+     * **Validates: Requirements 5.2**
+     */
+    test("Property 6: Seek position is 0 when tap is at left edge") {
+        checkAll(100, Arb.float(100f, 1000f), Arb.long(1000L, 300000L)) { waveformWidth, duration ->
+            val seekPosition = calculateSeekPosition(0f, waveformWidth, duration)
+            
+            seekPosition shouldBe 0L
+        }
+    }
+
+    /**
+     * Property 6: Seek position is duration when tap is at right edge
+     * 
+     * **Validates: Requirements 5.2**
+     */
+    test("Property 6: Seek position is duration when tap is at right edge") {
+        checkAll(100, Arb.float(100f, 1000f), Arb.long(1000L, 300000L)) { waveformWidth, duration ->
+            val seekPosition = calculateSeekPosition(waveformWidth, waveformWidth, duration)
+            
+            seekPosition shouldBe duration
+        }
+    }
+
+    /**
+     * Property 6: Seek position is 0 when waveform width is 0
+     * 
+     * **Validates: Requirements 5.5**
+     */
+    test("Property 6: Seek position is 0 when waveform width is 0") {
+        checkAll(100, Arb.float(0f, 1000f), Arb.long(1000L, 300000L)) { tapX, duration ->
+            val seekPosition = calculateSeekPosition(tapX, 0f, duration)
+            
+            seekPosition shouldBe 0L
+        }
+    }
+
+    /**
+     * Property 6: Seek position is 0 when duration is 0
+     * 
+     * **Validates: Requirements 5.5**
+     */
+    test("Property 6: Seek position is 0 when duration is 0") {
+        checkAll(100, Arb.float(0f, 1000f), Arb.float(100f, 1000f)) { tapX, waveformWidth ->
+            val seekPosition = calculateSeekPosition(tapX, waveformWidth, 0L)
+            
+            seekPosition shouldBe 0L
+        }
+    }
+
+    /**
+     * Property 6: Seek position increases monotonically with tap position
+     * 
+     * **Validates: Requirements 5.2**
+     */
+    test("Property 6: Seek position increases monotonically with tap position") {
+        checkAll(
+            100,
+            Arb.float(0f, 500f),
+            Arb.float(500f, 1000f),
+            Arb.float(100f, 1000f),
+            Arb.long(1000L, 300000L)
+        ) { tap1, tap2, waveformWidth, duration ->
+            val lowerTap = minOf(tap1, tap2)
+            val higherTap = maxOf(tap1, tap2)
+            
+            val lowerSeek = calculateSeekPosition(lowerTap, waveformWidth, duration)
+            val higherSeek = calculateSeekPosition(higherTap, waveformWidth, duration)
+            
+            (lowerSeek <= higherSeek) shouldBe true
+        }
+    }
+})

@@ -20,9 +20,6 @@ experience into an existing or a new app.
 Dive straight into our Sample Apps to see CometChat UI Kit in action! Whether you're building a messaging app or enhancing your existing project, this sample app showcases the full potential of our React UI components.
 - [Sample App for Java](sample-app-java#readme)
 - [Sample App for Kotlin](sample-app-kotlin#readme)
-- [Sample App for AI Agents](ai-sample-app#readme)
-- [Sample App for Java with Push Notifications](sample-app-java%2Bpush-notification#readme)
-- [Sample App for Kotlin with Push Notifications](sample-app-kotlin%2Bpush-notification#readme)
 
 ## Prerequisites
 

@@ -1,0 +1,304 @@
+---
+title: "Mentions Formatter"
+description: "Format and style @mentions in messages with customizable appearance and click handling."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key class | `CometChatMentionsFormatter` (extends `CometChatTextFormatter`) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login("UID")` |
+| Purpose | Format @mentions with styled tokens, suggestion list, and click handling for users and group members |
+| Sample app | [GitHub](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin) |
+| Related | [ShortCut Formatter](/ui-kit/android/v6/shortcut-formatter-guide) \| [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+`CometChatMentionsFormatter` extends `CometChatTextFormatter` to format @mentions in text messages. It styles mention tokens, generates suggestion lists as users type, and handles click events on rendered mentions across the message composer, message bubbles, and conversations list.
+
+| Capability | Description |
+| --- | --- |
+| Mention formatting | Auto-formats mention placeholders into styled spans |
+| Custom styles | Colors, fonts, and backgrounds per context (composer, bubbles, conversations) |
+| User and group mentions | Works with both individual users and group members |
+| Suggestion list | Generates mention candidates from user input |
+| Click handling | Listener interface for tap on rendered mentions |
+
+---
+
+## Usage
+
+### 1. Create the formatter
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+val mentionFormatter = CometChatMentionsFormatter(context)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin
+val mentionFormatter = CometChatMentionsFormatter(context)
+```
+</Tab>
+</Tabs>
+
+### 2. Add to a formatters list
+
+```kotlin
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+```
+
+### 3. Pass to a component
+
+Use `setTextFormatters()` on [CometChatMessageComposer](/ui-kit/android/v6/message-composer), [CometChatMessageList](/ui-kit/android/v6/message-list), or [CometChatConversations](/ui-kit/android/v6/conversations).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin
+messageComposer.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin
+CometChatMessageComposer(
+    user = user,
+    textFormatters = textFormatters
+)
+```
+</Tab>
+</Tabs>
+
+---
+
+## Styling Mentions
+
+### Mention Click Handling
+
+Set a click listener for mentions in message bubbles:
+
+<Frame>
+  <img src="/images/6edf49c4-mentions_actions-cb71d40bd7f1fb80d33459157efdb658.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+
+mentionFormatter.setOnMentionClick { context, user ->
+    Toast.makeText(context, user.name, Toast.LENGTH_SHORT).show()
+}
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+messageComposer.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+
+mentionFormatter.setOnMentionClick { ctx, user ->
+    Toast.makeText(ctx, user.name, Toast.LENGTH_SHORT).show()
+}
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+
+CometChatMessageComposer(
+    user = chatUser,
+    textFormatters = textFormatters
+)
+```
+</Tab>
+</Tabs>
+
+### Composer Mention Style
+
+Customize how mentions appear in the message composer input field:
+
+<Frame>
+  <img src="/images/b2f00911-mentions_message_composer-b1d1dd7961bc3c2953e7439bb516200b.png" />
+</Frame>
+
+```xml themes.xml lines
+<style name="CustomMessageComposerMentionsStyle" parent="CometChatMessageComposerMentionsStyle">
+    <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatMentionTextColor">#000000</item>
+    <item name="cometchatMentionBackgroundColor">#000000</item>
+    <item name="cometchatSelfMentionTextColor">#30A46C</item>
+    <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+</style>
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setMessageComposerMentionTextStyle(context, R.style.CustomMessageComposerMentionsStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+messageComposer.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setMessageComposerMentionTextStyle(context, R.style.CustomMessageComposerMentionsStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+
+CometChatMessageComposer(
+    user = chatUser,
+    textFormatters = textFormatters
+)
+```
+</Tab>
+</Tabs>
+
+### Message Bubble Mention Style
+
+Customize mentions in incoming and outgoing message bubbles:
+
+<Frame>
+  <img src="/images/e2732868-mentions_message_bubble-fccf9cbdd63a54c2f734803e4480418a.png" />
+</Frame>
+
+```xml themes.xml lines
+<style name="CustomIncomingMessageBubbleMentionStyle" parent="CometChatIncomingBubbleMentionsStyle">
+    <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatMentionTextColor">#D6409F</item>
+    <item name="cometchatMentionBackgroundColor">#D6409F</item>
+    <item name="cometchatSelfMentionTextColor">#30A46C</item>
+    <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+</style>
+
+<style name="CustomOutgoingMessageBubbleMentionStyle" parent="CometChatOutgoingBubbleMentionsStyle">
+    <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatMentionTextColor">#FFFFFF</item>
+    <item name="cometchatMentionBackgroundColor">#F9F8FD</item>
+    <item name="cometchatSelfMentionTextColor">#30A46C</item>
+    <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+</style>
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setOutgoingBubbleMentionTextStyle(context, R.style.CustomOutgoingMessageBubbleMentionStyle)
+mentionFormatter.setIncomingBubbleMentionTextStyle(context, R.style.CustomIncomingMessageBubbleMentionStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+messageList.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setOutgoingBubbleMentionTextStyle(context, R.style.CustomOutgoingMessageBubbleMentionStyle)
+mentionFormatter.setIncomingBubbleMentionTextStyle(context, R.style.CustomIncomingMessageBubbleMentionStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+
+CometChatMessageList(
+    user = chatUser,
+    textFormatters = textFormatters,
+    modifier = Modifier.weight(1f)
+)
+```
+</Tab>
+</Tabs>
+
+### Conversations Mention Style
+
+Customize mentions in the conversations list last-message preview:
+
+<Frame>
+  <img src="/images/55490fa9-mentions_conversations-1a7b847ad0af53848dc106216ac64e74.png" />
+</Frame>
+
+```xml themes.xml lines
+<style name="CustomConversationsMentionsStyle" parent="CometChatConversationsMentionsStyle">
+    <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatMentionTextColor">#D6409F</item>
+    <item name="cometchatMentionBackgroundColor">#D6409F</item>
+    <item name="cometchatSelfMentionTextColor">#30A46C</item>
+    <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+    <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+</style>
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setConversationsMentionTextStyle(context, R.style.CustomConversationsMentionsStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+cometChatConversations.setTextFormatters(textFormatters)
+```
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setConversationsMentionTextStyle(context, R.style.CustomConversationsMentionsStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+
+CometChatConversations(
+    textFormatters = textFormatters,
+    onItemClick = { conversation -> /* navigate */ }
+)
+```
+</Tab>
+</Tabs>
+
+---
+
+## Customization Matrix
+
+| What you want to change | Where | Property/API | Example |
+| ----------------------- | ----- | ------------ | ------- |
+| Maximum number of mentions allowed | `CometChatMentionsFormatter` | `setMentionLimit(int limit)` | `mentionFormatter.setMentionLimit(5)` |
+| Group members fetched for mention suggestions | `CometChatMentionsFormatter` | `.setGroupMembersRequestBuilder(...)` | `.setGroupMembersRequestBuilder(group -> GroupMembersRequest.GroupMembersRequestBuilder(group.guid))` |
+| Users fetched for mention suggestions | `CometChatMentionsFormatter` | `.setUsersRequestBuilder(...)` | `.setUsersRequestBuilder(UsersRequest.UsersRequestBuilder().friendsOnly(true))` |
+| Who can be mentioned | `CometChatMentionsFormatter` | `.setMentionsType(...)` | `.setMentionsType(UIKitConstants.MentionsType.USERS_AND_GROUP_MEMBERS)` |
+| Where mentions are visible | `CometChatMentionsFormatter` | `.setMentionsVisibility(...)` | `.setMentionsVisibility(UIKitConstants.MentionsVisibility.BOTH)` |
+| Click action on a mention | `CometChatMentionsFormatter` | `setOnMentionClick` | `mentionFormatter.setOnMentionClick { context, user -> }` |
+| Mention text style in composer | `CometChatMentionsFormatter` | `setMessageComposerMentionTextStyle(context, styleRes)` | `mentionFormatter.setMessageComposerMentionTextStyle(context, R.style.CustomStyle)` |
+| Mention text style in outgoing bubbles | `CometChatMentionsFormatter` | `setOutgoingBubbleMentionTextStyle(context, styleRes)` | `mentionFormatter.setOutgoingBubbleMentionTextStyle(context, R.style.CustomStyle)` |
+| Mention text style in incoming bubbles | `CometChatMentionsFormatter` | `setIncomingBubbleMentionTextStyle(context, styleRes)` | `mentionFormatter.setIncomingBubbleMentionTextStyle(context, R.style.CustomStyle)` |
+| Mention text style in conversations list | `CometChatMentionsFormatter` | `setConversationsMentionTextStyle(context, styleRes)` | `mentionFormatter.setConversationsMentionTextStyle(context, R.style.CustomStyle)` |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message Composer" icon="keyboard" href="/ui-kit/android/v6/message-composer">
+    Configure the composer where users type and send messages with mentions
+  </Card>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Configure the message list where mention-styled bubbles are displayed
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Configure the conversations list where mention-styled previews appear
+  </Card>
+  <Card title="ShortCut Formatter" icon="bolt" href="/ui-kit/android/v6/shortcut-formatter-guide">
+    Add shortcut text expansion to the message composer
+  </Card>
+</CardGroup>

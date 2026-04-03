@@ -1,0 +1,145 @@
+package com.cometchat.uikit.compose.conversationlist.domain.usecase
+
+import com.cometchat.chat.core.ConversationsRequest
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.Conversation
+import com.cometchat.uikit.compose.domain.repository.ConversationListRepository
+import com.cometchat.uikit.compose.domain.usecase.GetConversationListUseCase
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.test.runTest
+import org.mockito.Mockito.mock
+
+/**
+ * Unit tests for GetConversationListUseCase.
+ * 
+ * Feature: conversations-compose
+ * Tests verify use case invocation calls repository methods correctly.
+ */
+class GetConversationListUseCaseTest : StringSpec({
+
+    "invoke should return success with conversations when repository succeeds" {
+        runTest {
+            // Arrange
+            val mockConversation1 = mock(Conversation::class.java)
+            val mockConversation2 = mock(Conversation::class.java)
+            val mockConversations = listOf(mockConversation1, mockConversation2)
+            
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.success(mockConversations)
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = true
+            }
+            val useCase = GetConversationListUseCase(mockRepository)
+            val request = ConversationsRequest.ConversationsRequestBuilder().setLimit(30).build()
+
+            // Act
+            val result = useCase(request)
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe mockConversations
+        }
+    }
+
+    "invoke should return failure when repository fails" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("NETWORK_ERROR", "Network error", "Network unavailable")
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.failure(exception)
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            val useCase = GetConversationListUseCase(mockRepository)
+            val request = ConversationsRequest.ConversationsRequestBuilder().setLimit(30).build()
+
+            // Act
+            val result = useCase(request)
+
+            // Assert
+            result.isFailure shouldBe true
+            result.exceptionOrNull().shouldBeInstanceOf<CometChatException>()
+        }
+    }
+
+    "invoke should return empty list when repository returns empty" {
+        runTest {
+            // Arrange
+            val mockRepository = object : ConversationListRepository {
+                override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMoreConversations(): Boolean = false
+            }
+            val useCase = GetConversationListUseCase(mockRepository)
+            val request = ConversationsRequest.ConversationsRequestBuilder().setLimit(30).build()
+
+            // Act
+            val result = useCase(request)
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe emptyList()
+        }
+    }
+
+    "hasMore should delegate to repository hasMoreConversations" {
+        // Arrange - hasMore returns true
+        val mockRepositoryWithMore = object : ConversationListRepository {
+            override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                return Result.success(emptyList())
+            }
+            override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                return Result.success(Unit)
+            }
+            override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                return Result.success(Unit)
+            }
+            override fun hasMoreConversations(): Boolean = true
+        }
+        val useCaseWithMore = GetConversationListUseCase(mockRepositoryWithMore)
+
+        // Assert
+        useCaseWithMore.hasMore() shouldBe true
+
+        // Arrange - hasMore returns false
+        val mockRepositoryNoMore = object : ConversationListRepository {
+            override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+                return Result.success(emptyList())
+            }
+            override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+                return Result.success(Unit)
+            }
+            override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+                return Result.success(Unit)
+            }
+            override fun hasMoreConversations(): Boolean = false
+        }
+        val useCaseNoMore = GetConversationListUseCase(mockRepositoryNoMore)
+
+        // Assert
+        useCaseNoMore.hasMore() shouldBe false
+    }
+})

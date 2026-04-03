@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Navigation Graph for Home Screen
+    
+    Defines the navigation destinations for the bottom navigation tabs:
+    - Chats (ChatsFragment)
+    - Calls (CallsFragment)
+    - Users (UsersFragment)
+    - Groups (GroupsFragment)
+    
+    Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 10.1
+-->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_nav_graph"
+    app:startDestination="@id/nav_chats">
+
+    <!-- Chats Tab - Chats List -->
+    <fragment
+        android:id="@+id/nav_chats"
+        android:name="com.cometchat.sampleapp.kotlin.ui.chats.ChatsFragment"
+        android:label="@string/tab_chats"
+        tools:layout="@layout/fragment_chats" />
+
+    <!-- Calls Tab - Call Logs List -->
+    <fragment
+        android:id="@+id/nav_calls"
+        android:name="com.cometchat.sampleapp.kotlin.ui.calls.CallsFragment"
+        android:label="@string/tab_calls"
+        tools:layout="@layout/fragment_call_logs" />
+
+    <!-- Users Tab - Users List -->
+    <fragment
+        android:id="@+id/nav_users"
+        android:name="com.cometchat.sampleapp.kotlin.ui.users.UsersFragment"
+        android:label="@string/tab_users"
+        tools:layout="@layout/fragment_users" />
+
+    <!-- Groups Tab - Groups List -->
+    <fragment
+        android:id="@+id/nav_groups"
+        android:name="com.cometchat.sampleapp.kotlin.ui.groups.GroupsFragment"
+        android:label="@string/tab_groups"
+        tools:layout="@layout/fragment_groups" />
+
+</navigation>

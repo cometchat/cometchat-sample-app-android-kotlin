@@ -1,0 +1,250 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+    <string name="cometchat_shared_image_transition" translatable="false">peralihan_gambar_berkongsi_%1$d</string>
+    <string name="cometchat_user" translatable="true">pengguna</string>
+    <string name="cometchat_group" translatable="true">kumpulan</string>
+    <string name="cometchat_conversation" translatable="true">perbualan</string>
+    <string name="cometchat_reply_lowercase" translatable="true">balas</string>
+    <string name="cometchat_call" translatable="true">Panggilan</string>
+    <string name="cometchat_sticker_lowercase" translatable="true">pelekat</string>
+    <string name="cometchat_message" translatable="true">Tulis mesej</string>
+    <string name="cometchat_start_conv_hint" translatable="true">Ketuk untuk memulakan perbualan</string>
+    <string name="cometchat_admin" translatable="true">Pentadbir</string>
+    <string name="cometchat_moderator" translatable="true">Moderator</string>
+    <string name="cometchat_member" translatable="true">Ahli</string>
+    <string name="cometchat_join" translatable="true">Sertai</string>
+    <string name="cometchat_camera_perm" translatable="true">Sila beri kebenaran kamera dari tetapan aplikasi</string>
+    <string name="cometchat_storage_perm" translatable="true">Sila beri kebenaran storan dari tetapan aplikasi</string>
+    <string name="cometchat_file_not_exist" translatable="true">Fail tidak wujud</string>
+    <string name="cometchat_ended" translatable="true">Berakhir</string>
+    <string name="cometchat_outgoing" translatable="true">Keluar</string>
+    <string name="cometchat_incoming" translatable="true">Masuk</string>
+    <string name="cometchat_missed_call" translatable="true">Tertinggal</string>
+    <string name="cometchat_cancel_call" translatable="true">Dibatalkan</string>
+    <string name="cometchat_rejected_call" translatable="true">Ditolak</string>
+    <string name="cometchat_busy_call" translatable="true">Tengah sibuk</string>
+    <string name="cometchat_you" translatable="true">Anda</string>
+    <string name="cometchat_edit" translatable="true">Edit</string>
+    <string name="cometchat_delete" translatable="true">Padam</string>
+    <string name="cometchat_share" translatable="true">Kongsi</string>
+    <string name="cometchat_copy" translatable="true">Salin</string>
+    <string name="cometchat_translate" translatable="true">Terjemah</string>
+    <string name="cometchat_message_privately" translatable="true">Hantar Mesej Secara Peribadi</string>
+    <string name="cometchat_reply_uppercase" translatable="true">BALAS</string>
+    <string name="cometchat_info" translatable="true">"Info"</string>
+    <string name="cometchat_online" translatable="true">Dalam talian</string>
+    <string name="cometchat_offline" translatable="true">Luar talian</string>
+    <string name="cometchat_attach_image" translatable="true">Lampirkan Gambar</string>
+    <string name="cometchat_attach_video" translatable="true">Lampirkan Video</string>
+    <string name="cometchat_poll" translatable="true">Undian</string>
+    <string name="cometchat_camera" translatable="true">Kamera</string>
+    <string name="cometchat_yes" translatable="true">Ya</string>
+    <string name="cometchat_shared_sticker" translatable="true">Pelekat Dikongsi</string>
+    <string name="cometchat_attach_audio" translatable="true">Lampirkan Audio</string>
+    <string name="cometchat_attach_document" translatable="true">Lampirkan Dokumen</string>
+    <string name="cometchat_no" translatable="true">Tidak</string>
+    <string name="cometchat_question" translatable="true">Soalan</string>
+    <string name="cometchat_collaborative_whiteboard" translatable="true">Papan Putih Kolaboratif</string>
+    <string name="cometchat_collaborative_doc" translatable="true">Dokumen Kolaboratif</string>
+    <string name="cometchat_yesterday" translatable="true">Semalam</string>
+    <string name="cometchat_ban" translatable="true">Sekat</string>
+    <string name="cometchat_document" translatable="true">Dokumen</string>
+    <string name="cometchat_polls" translatable="true">Undian</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">STICKER</string>
+    <string name="cometchat_custom_message_whiteboard" translatable="true">Papan Putih</string>
+    <string name="cometchat_error" translatable="true">Ralat</string>
+    <string name="cometchat_added" translatable="true">ditambah</string>
+    <string name="cometchat_kicked_by" translatable="true">disingkirkan</string>
+    <string name="cometchat_left" translatable="true">keluar</string>
+    <string name="cometchat_joined" translatable="true">sertai</string>
+    <string name="cometchat_unban" translatable="true">Buka Sekatan</string>
+    <string name="cometchat_made" translatable="true">dibuat</string>
+    <string name="cometchat_participant" translatable="true">Peserta</string>
+    <string name="cometchat_translation_error" translatable="true">Bahasa yang dipilih untuk terjemahan adalah serupa dengan bahasa mesej asal</string>
+    <string name="cometchat_group_call" translatable="true">Panggilan Kumpulan</string>
+    <string name="cometchat_updating" translatable="true">Mengemas kini</string>
+    <string name="cometchat_chats" translatable="true">Sembang</string>
+    <string name="cometchat_downloading" translatable="true">Muat turun</string>
+    <string name="cometchat_today" translatable="true">Hari ini</string>
+    <string name="cometchat_replies" translatable="true">Balasan</string>
+    <string name="cometchat_new_message" translatable="true">mesej baru</string>
+    <string name="cometchat_new_messages" translatable="true">mesej baru</string>
+    <string name="cometchat_channel_description" translatable="true">Penerangan Saluran</string>
+    <string name="cometchat_action_item" translatable="true">item_tindakan</string>
+    <string name="cometchat_try_again" translatable="true">Cuba lagi</string>
+    <string name="cometchat_something_went_wrong" translatable="true">Ada sesuatu yang tidak kena.</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Pindah Milik</string>
+    <string name="cometchat_add_members" translatable="true">Tambah Ahli</string>
+    <string name="cometchat_owner" translatable="true">Pemilik</string>
+    <string name="cometchat_banned" translatable="true">Disekat</string>
+    <string name="cometchat_calling" translatable="true">memanggil</string>
+    <string name="cometchat_accepted" translatable="true">diterima</string>
+    <string name="cometchat_unanswered" translatable="true">belum dijawab</string>
+    <string name="cometchat_message_receipt" translatable="true">Resit Mesej</string>
+    <string name="cometchat_file_download_failed" translatable="true">Muatan fail gagal.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Cadangkan balasan</string>
+    <string name="cometchat_enter_a_text" translatable="true">Masukkan teks</string>
+    <string name="cometchat_form_completion_message" translatable="true">Terima kasih kerana mengisi borang.</string>
+    <string name="cometchat_conversation_summary" translatable="true">Ringkasan Perbualan</string>
+    <string name="cometchat_generate_summary" translatable="true">Hasilkan ringkasan</string>
+    <string name="cometchat_more_times" translatable="true">Lebih banyak masa</string>
+    <string name="cometchat_select_a_day" translatable="true">Pilih Hari</string>
+    <string name="cometchat_meeting_scheduled" translatable="true">Mesyuarat anda telah dijadualkan.</string>
+    <string name="cometchat_meet_with" translatable="true">Bertemu Dengan </string>
+    <string name="cometchat_min_meeting" translatable="true">min mesyuarat</string>
+    <string name="cometchat_select_a_time" translatable="true">Pilih Masa</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">Tiada slot masa yang tersedia untuk tarikh ini. Sila cuba tarikh lain.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Tempah slot baru</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Ada sesuatu yang tidak kena. Sila cuba lagi.</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Slot masa tidak lagi tersedia. Sila pilih yang lain.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Tiada slot masa cepat yang tersedia.</string>
+    <string name="cometchat_tag_item" translatable="true">Tag Item</string>
+    <string name="cometchat_you_can_mention_up_to" translatable="true">Anda boleh menyebut hingga</string>
+    <string name="cometchat_time_at_a_time" translatable="true">kali pada satu masa</string>
+    <string name="cometchat_reply" translatable="true">Balas</string>
+    <string name="cometchat_all" translatable="true">Semua</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Ketuk untuk buang</string>
+    <string name="cometchat_avatar" translatable="true">Avatar CometChat</string>
+    <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Tiada Perbualan</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Mulakan perbualan baru atau jemput orang lain untuk menyertai\nperbualan.</string>
+    <string name="cometchat_error_conversations_title" translatable="true">Oops!</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">Nampaknya ada masalah.\nSila cuba lagi.</string>
+    <string name="cometchat_typing" translatable="true">Sedang menaip…</string>
+    <string name="cometchat_is_typing" translatable="true">sedang menaip…</string>
+    <string name="cometchat_message_image" translatable="true">Gambar</string>
+    <string name="cometchat_message_video" translatable="true">Video</string>
+    <string name="cometchat_message_audio" translatable="true">Audio</string>
+    <string name="cometchat_message_sticker" translatable="true">Stiker</string>
+    <string name="cometchat_message_gif" translatable="true">GIF</string>
+    <string name="cometchat_message_poll" translatable="true">Undian</string>
+    <string name="cometchat_message_document" translatable="true">Dokumen</string>
+    <string name="cometchat_message_location" translatable="true">Lokasi</string>
+    <string name="cometchat_message_collaborative_whiteboard" translatable="true">Papan Putih Kolaboratif</string>
+    <string name="cometchat_message_collaborative_document" translatable="true">Dokumen Kolaboratif</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Padam perbualan ini?</string>
+    <string name="cometchat_delete_message_title" translatable="true">Padam mesej ini?</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Adakah anda pasti mahu memadamkan perbualan ini? Tindakan ini tidak boleh dibatalkan.</string>
+    <string name="cometchat_delete_message_subtitle" translatable="true">Adakah anda pasti mahu memadamkan mesej ini? Tindakan ini tidak boleh dibatalkan.</string>
+    <string name="cometchat_cancel" translatable="true">Batal</string>
+    <string name="cometchat_reaction_list_error" translatable="true">Nampaknya ada masalah.\nSila cuba lagi.</string>
+    <string name="cometchat_text_translated" translatable="true">Teks Terjemahan</string>
+    <string name="cometchat_composer_place_holder_text" translatable="true">Taip mesej anda…</string>
+    <string name="cometchat_last_seen" translatable="true">Terakhir dilihat</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Tidak dapat memadamkan perbualan</string>
+    <string name="cometchat_message_info" translatable="true">Info Mesej</string>
+    <string name="cometchat_read" translatable="true">Baca</string>
+    <string name="cometchat_deliver" translatable="true">Dihantar</string>
+    <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
+    <string name="cometchat_message_delete_error" translatable="true">Tidak dapat memadam mesej</string>
+    <string name="cometchat_no_stickers_available" translatable="true">Tiada Stiker Tersedia</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">Anda belum mempunyai sebarang stiker.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Nampaknya ada masalah.\nSila cuba lagi.</string>
+    <string name="cometchat_retry" translatable="true">Cuba lagi</string>
+    <string name="cometchat_group_members_empty_title" translatable="true">Tiada Ahli Tersedia</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Tambah ahli ke kumpulan dan lihat mereka disenaraikan di sini.</string>
+    <string name="cometchat_remove" translatable="true">Padam</string>
+    <string name="cometchat_scope_change" translatable="true">Tukar Skop</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Anda boleh menukar peranan untuk menguruskan kebenaran dan tanggungjawab kumpulan.</string>
+    <string name="cometchat_save" translatable="true">Simpan</string>
+    <string name="cometchat_users" translatable="true">Pengguna</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">Tiada Pengguna Tersedia</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Tambah kenalan untuk mula berbual dan lihat mereka disenaraikan di sini.</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">Oops!</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Nampaknya ada masalah. Sila cuba lagi.</string>
+    <string name="cometchat_search" translatable="true">Cari</string>
+    <string name="cometchat_groups" translatable="true">Kumpulan</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">Tiada Kumpulan Ditemui</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Cipta atau sertai kumpulan untuk melihatnya disenaraikan di sini dan mula berkolaborasi.</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">Oops!</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Nampaknya ada masalah. Sila cuba lagi.</string>
+    <string name="cometchat_members" translatable="true">Ahli</string>
+    <string name="cometchat_call_logs_title" translatable="true">Panggilan</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Tiada Rekod Panggilan</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Buat atau terima panggilan untuk melihat rekod panggilan anda disenaraikan di sini</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">Oops!</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">Nampaknya ada masalah. Sila cuba lagi.</string>
+    <string name="cometchat_this_message_deleted" translatable="true">Mesej ini telah dipadam</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">Jenis mesej ini tidak disokong</string>
+    <string name="cometchat_message_form" translatable="true">Borang</string>
+    <string name="cometchat_message_card" translatable="true">Kad</string>
+    <string name="cometchat_message_scheduler" translatable="true">Penjadual</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Anda boleh menyebut sehingga 10 kali sekali gus</string>
+    <string name="cometchat_ask_question" translatable="true">Tanya soalan</string>
+    <string name="cometchat_options" translatable="true">Pilihan</string>
+    <string name="cometchat_send" translatable="true">Hantar</string>
+    <string name="cometchat_submit" translatable="true">Hantar</string>
+    <string name="cometchat_add" translatable="true">Tambah</string>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">sekarang 1 minit yang lalu</string>
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true">
+        <item quantity="one" translatable="true">%d minit yang lalu</item>
+        <item quantity="other" translatable="true">%d minit yang lalu</item>
+    </plurals>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true">
+        <item quantity="one" translatable="true">%d jam yang lalu</item>
+        <item quantity="other" translatable="true">%d jam yang lalu</item>
+    </plurals>
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s telah memulakan panggilan kumpulan</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s telah memulakan panggilan kumpulan</string>
+    <string name="cometchat_edited" translatable="true">Diedit</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Terima</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Tolak</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Panggilan masuk %s</string>
+    <string name="cometchat_kick" translatable="true">Tendang</string>
+    <string name="cometchat_open_document_to_edit_content_together" translatable="true">Buka dokumen untuk menyunting kandungan bersama</string>
+    <string name="cometchat_open_document" translatable="true">Buka Dokumen</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together" translatable="true">Buka papan putih untuk menyunting kandungan bersama</string>
+    <string name="cometchat_open_whiteboard" translatable="true">Buka Papan Putih</string>
+    <string name="cometchat_video_call" translatable="true">Panggilan Video</string>
+    <string name="cometchat_audio_call" translatable="true">Panggilan Audio</string>
+    <string name="cometchat_incoming_call_audio" translatable="true">audio</string>
+    <string name="cometchat_incoming_call_video" translatable="true">video</string>
+    <string name="cometchat_permission_required">Kebenaran diperlukan</string>
+    <string name="cometchat_microphone_permission_warning">Kebenaran mikrofon diperlukan untuk merakam audio.</string>
+    <string name="cometchat_camera_permission_warning">Kebenaran kamera diperlukan untuk mengambil gambar.</string>
+    <string name="cometchat_storage_permission_warning">Kebenaran storan diperlukan untuk mengakses fail.</string>
+    <string name="cometchat_cancel_button">Batal</string>
+    <string name="cometchat_settings_button">Tetapan</string>
+    <string name="cometchat_moderation_block_message">Mesej anda telah disekat kerana dasar moderasi.</string>
+    <string name="cometchat_no_conversations_history_title">Tiada sejarah perbualan ditemui</string>
+    <string name="cometchat_ask_anything">Tanyakan apa-apa</string>
+    <string name="cometchat_something_went_wrong_try_again">Sesuatu yang salah berlaku di pihak kami. Sila cuba lagi</string>
+    <string name="cometchat_no_conversations_history_subtitle">Mulakan perbualan dengan mengetik butang \'Sembang Baru\'</string>
+    <string name="cometchat_new_chat">Sembang Baru</string>
+    <string name="cometchat_chat_history">Sejarah Sembang</string>
+    <string name="cometchat_messages">Mesej</string>
+    <string name="cometchat_menu">Menu</string>
+    <string name="cometchat_menu_search">Carian</string>
+    <string name="cometchat_menu_conversation_summary">Ringkasan Perbualan</string>
+    <string name="cometchat_see_more">Lihat Lagi</string>
+    <string name="cometchat_no_results">Tiada Hasil</string>
+    <string name="cometchat_no_matches_found">Kami tidak dapat mencari sebarang padanan. Sila cuba kata kunci carian yang berbeza.</string>
+    <string name="cometchat_start_your_search">Mulakan Carian Anda</string>
+    <string name="cometchat_search_for_conversations_or_messages">Cari perbualan atau mesej dengan menaipkan kata kunci di atas.</string>
+    <string name="cometchat_unread" translatable="true">Belum dibaca</string>
+    <string name="cometchat_photos" translatable="true">Foto</string>
+    <string name="cometchat_videos" translatable="true">Video</string>
+    <string name="cometchat_audio" translatable="true">Audio</string>
+    <string name="cometchat_documents" translatable="true">Dokumen</string>
+    <string name="cometchat_links" translatable="true">Pautan</string>
+    <string name="cometchat_details" translatable="true">Butiran</string>
+    <string name="cometchat_report">Laporkan</string>
+    <string name="cometchat_report_a_message">Laporkan Mesej</string>
+    <string name="cometchat_report_message_title">Laporkan mesej</string>
+    <string name="cometchat_report_message_description">Laporkan sembang ini jika ia melanggar Standard Komuniti kami. Kami tidak akan memberitahu akaun yang anda laporkan.</string>
+    <string name="cometchat_report_reason_label">Sebab</string>
+    <string name="cometchat_report_optional_label">(Pilihan)</string>
+    <string name="cometchat_report_remark_hint">Berikan konteks tambahan untuk laporan anda…</string>
+    <string name="cometchat_report_button_report">Laporkan</string>
+    <string name="cometchat_report_success_message">Mesej telah dilaporkan</string>
+    <string name="cometchat_report_error_message">Gagal melaporkan mesej</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Ada masalah. Sila semak dan cuba lagi.</string>
+    <string name="cometchat_unable_to_flag_message">Tidak dapat menandakan mesej</string>
+    <string name="cometchat_flag_message_success">Mesej telah dilaporkan</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Kandungan yang Tidak Diingini</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Kandungan Seksual</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Gangguan / Membuli</string>
+    <string name="cometchat_notify_everyone_in_this_group">Beritahu semua orang dalam kumpulan ini</string>
+    <string name="cometchat_notify_all" translatable="true">semua</string>
+
+</resources>

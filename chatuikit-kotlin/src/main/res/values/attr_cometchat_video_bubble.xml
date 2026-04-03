@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatVideoBubble">
+        <attr name="cometchatVideoBubbleCornerRadius" format="dimension" />
+        <attr name="cometchatVideoBubbleStrokeWidth" format="integer" />
+        <attr name="cometchatVideoBubbleStrokeColor" format="color" />
+        <attr name="cometchatVideoBubbleBackgroundColor" format="color" />
+        <attr name="cometchatVideoBubbleBackgroundDrawable" format="reference" />
+        <attr name="cometchatVideoBubblePlayIconTint" format="color" />
+        <attr name="cometchatVideoBubblePlayIconBackgroundColor" format="color" />
+        <attr name="cometchatVideoBubbleVideoCornerRadius" format="dimension" />
+        <attr name="cometchatVideoBubbleVideoStrokeColor" format="color" />
+        <attr name="cometchatVideoBubbleVideoStrokeWidth" format="integer" />
+        <attr name="cometchatVideoBubbleThreadIndicatorTextAppearance" format="reference" />
+        <attr name="cometchatVideoBubbleThreadIndicatorTextColor" format="color" />
+        <attr name="cometchatVideoBubbleThreadIndicatorIconTint" format="color" />
+        <attr name="cometchatVideoBubbleProgressIndeterminateTint" format="color" />
+        <attr name="cometchatVideoBubbleSenderNameTextAppearance" format="reference" />
+        <attr name="cometchatVideoBubbleSenderNameTextColor" format="color" />
+        <attr name="cometchatVideoBubbleCaptionTextColor" format="color" />
+        <attr name="cometchatVideoBubbleCaptionTextAppearance" format="reference" />
+        <attr name="cometchatVideoBubbleGridSpacing" format="dimension" />
+        <attr name="cometchatVideoBubbleMaxGridWidth" format="dimension" />
+        <attr name="cometchatVideoBubbleMoreOverlayBackgroundColor" format="color" />
+        <attr name="cometchatVideoBubbleMoreOverlayTextColor" format="color" />
+        <attr name="cometchatVideoBubbleMoreOverlayTextAppearance" format="reference" />
+        <attr name="cometchatVideoBubbleStyle" format="reference" />
+        <attr name="cometchatVideoBubbleDateStyle" format="reference" />
+        <attr name="cometchatVideoBubbleMessageReceiptStyle" format="reference" />
+        <attr name="cometchatVideoBubbleAvatarStyle" format="reference" />
+    </declare-styleable>
+</resources>

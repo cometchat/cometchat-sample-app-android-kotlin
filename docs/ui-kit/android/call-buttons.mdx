@@ -1,0 +1,304 @@
+---
+title: "Call Buttons"
+description: "Voice and video call buttons that initiate calls for a given user or group."
+---
+
+`CometChatCallButtons` renders voice and video call buttons and initiates calls for the bound `User` or `Group`. Place it in a `CometChatMessageHeader` or anywhere a call action is needed.
+
+---
+
+## Where It Fits
+
+`CometChatCallButtons` is a utility component. Wire it into a `CometChatMessageHeader` or place it standalone wherever a call action is needed.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.callbuttons.CometChatCallButtons
+    android:id="@+id/call_buttons"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+```
+
+```kotlin lines
+val callButtons = findViewById<CometChatCallButtons>(R.id.call_buttons)
+callButtons.setUser(user)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.callbuttons.CometChatCallButtons
+    android:id="@+id/call_buttons"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+```
+
+Set a `User` or `Group` — required before calls can be initiated:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.your_layout)
+
+    val callButtons = findViewById<CometChatCallButtons>(R.id.call_buttons)
+    callButtons.setUser(user)
+    // or callButtons.setGroup(group)
+}
+```
+
+Or programmatically:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val callButtons = CometChatCallButtons(this)
+    callButtons.setUser(user)
+    setContentView(callButtons)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun CallButtonsScreen() {
+    CometChatCallButtons(
+        user = user
+        // or group = group
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+> You must call `setUser(User)` or `setGroup(Group)` before the buttons can initiate a call. Without a target, button clicks have no effect.
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onVoiceCallClick`
+
+Fires when the voice call button is tapped. Replaces the default behavior of initiating an audio call.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callButtons.setOnVoiceCallClick { user, group ->
+    // Custom voice call logic
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user,
+    onVoiceCallClick = { u, g ->
+        // Custom voice call logic
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onVideoCallClick`
+
+Fires when the video call button is tapped. Replaces the default behavior of initiating a video call.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callButtons.setOnVideoCallClick { user, group ->
+    // Custom video call logic
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user,
+    onVideoCallClick = { u, g ->
+        // Custom video call logic
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callButtons.setOnError { exception ->
+    Log.e("CallButtons", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user,
+    onError = { exception ->
+        Log.e("CallButtons", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Global UI Events (CometChatCallEvents)
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `ccOutgoingCall` | An outgoing call is initiated | `Call` |
+| `ccCallAccepted` | A call is accepted by the recipient | `Call` |
+| `ccCallRejected` | A call is rejected by the recipient | `Call` |
+| `ccCallEnded` | A call is ended | `Call` |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setUser(user)` | `user = user` | Set the user to call (required for 1-on-1) |
+| `setGroup(group)` | `group = group` | Set the group to call (required for group calls) |
+| `setOnVoiceCallClick { }` | `onVoiceCallClick = { }` | Override voice call button behavior |
+| `setOnVideoCallClick { }` | `onVideoCallClick = { }` | Override video call button behavior |
+| `setOnError { }` | `onError = { }` | Error callback |
+| `setVoiceCallButtonVisibility(View.GONE)` | `hideVoiceCallButton = true` | Toggle voice call button |
+| `setVideoCallButtonVisibility(View.GONE)` | `hideVideoCallButton = true` | Toggle video call button |
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomCallButtonsStyle" parent="CometChatCallButtonsStyle">
+    <item name="cometchatCallButtonsVoiceCallIconTint">#4CAF50</item>
+    <item name="cometchatCallButtonsVideoCallIconTint">#2196F3</item>
+    <item name="cometchatCallButtonsVoiceCallBackgroundColor">#E8F5E9</item>
+    <item name="cometchatCallButtonsVideoCallBackgroundColor">#E3F2FD</item>
+</style>
+```
+
+```kotlin lines
+callButtons.setStyle(R.style.CustomCallButtonsStyle)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user,
+    style = CometChatCallButtonsStyle.default().copy(
+        voiceCallIconTint = Color(0xFF4CAF50),
+        videoCallIconTint = Color(0xFF2196F3),
+        voiceCallBackgroundColor = Color(0xFFE8F5E9),
+        videoCallBackgroundColor = Color(0xFFE3F2FD)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## ViewModel
+
+```kotlin lines
+val viewModel = ViewModelProvider(this)
+    .get(CometChatCallButtonsViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callButtons.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallButtons(
+    user = user,
+    callButtonsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for state observation and custom repositories.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Call Logs" icon="clock-rotate-left" href="/ui-kit/android/v6/call-logs">
+    View call history
+  </Card>
+  <Card title="Incoming Call" icon="phone-arrow-down-left" href="/ui-kit/android/v6/incoming-call">
+    Incoming call notification with accept/reject
+  </Card>
+  <Card title="Outgoing Call" icon="phone-arrow-up-right" href="/ui-kit/android/v6/outgoing-call">
+    Outgoing call screen with end-call button
+  </Card>
+  <Card title="Message Header" icon="heading" href="/ui-kit/android/v6/message-header">
+    Display user/group info in the toolbar
+  </Card>
+</CardGroup>

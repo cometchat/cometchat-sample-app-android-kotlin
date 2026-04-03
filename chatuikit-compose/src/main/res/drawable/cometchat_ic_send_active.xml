@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <group>
+        <clip-path android:pathData="M4,4h24v24h-24z" />
+        <path
+            android:fillColor="@color/cometchat_color_white"
+            android:pathData="M10.767,22.723C10.465,22.843 10.178,22.818 9.907,22.646C9.636,22.474 9.5,22.223 9.5,21.894V17.673L16.423,16L9.5,14.327V10.106C9.5,9.777 9.636,9.526 9.907,9.354C10.178,9.182 10.465,9.157 10.767,9.277L24.723,15.161C25.095,15.328 25.281,15.608 25.281,16.002C25.281,16.395 25.095,16.674 24.723,16.838L10.767,22.723Z" />
+    </group>
+</vector>

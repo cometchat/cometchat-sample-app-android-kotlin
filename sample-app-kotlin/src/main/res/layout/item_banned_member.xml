@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="@dimen/cometchat_padding_4"
+    android:background="?attr/selectableItemBackground">
+
+    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/cometchat_40dp"
+        android:layout_height="@dimen/cometchat_40dp" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/cometchat_margin_3"
+        android:layout_marginEnd="@dimen/cometchat_margin_3"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
+        android:textColor="?attr/cometchatTextColorPrimary" />
+
+    <ImageView
+        android:id="@+id/iv_unban"
+        android:layout_width="@dimen/cometchat_24dp"
+        android:layout_height="@dimen/cometchat_24dp"
+        android:src="@drawable/cometchat_ic_close"
+        android:contentDescription="@string/unblock"
+        app:tint="?attr/cometchatErrorColor" />
+
+</LinearLayout>

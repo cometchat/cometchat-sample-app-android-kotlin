@@ -1,0 +1,105 @@
+---
+title: "Extensions"
+description: "Enable built-in CometChat extensions like reactions, stickers, polls, and link previews from the dashboard."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chat-uikit-android` (Java), `com.cometchat:chat-uikit-kotlin` (Kotlin XML), `com.cometchat:chat-uikit-compose` (Jetpack Compose) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` + Extensions enabled in [CometChat Dashboard](/fundamentals/extensions-overview) |
+| Built-in extensions | Stickers, Polls, Collaborative Whiteboard, Collaborative Document, Message Translation, Link Preview, Thumbnail Generation, Profanity Filter |
+| Key components | [Message Composer](/ui-kit/android/v6/message-composer) (Stickers, Polls, Whiteboard, Document), [Message List](/ui-kit/android/v6/message-list) (Translation, Link Preview, Thumbnails) |
+| Activation | Enable each extension from the CometChat Dashboard — UI Kit auto-integrates them, no additional code required |
+| Related | [Core Features](/ui-kit/android/v6/core-features), [AI Features](/ui-kit/android/v6/ai-features), [Extensions Overview](/fundamentals/extensions-overview) |
+
+</Accordion>
+
+CometChat’s UI Kit comes with built-in support for a wide variety of extensions that provide additional functionality. These extensions enhance the chatting experience, making it more interactive, secure, and efficient.
+
+Activating any of the extensions in CometChat is a simple process done through your application's dashboard. Refer to our guide for detailed information on [Extensions](/fundamentals/extensions-overview).
+
+Once you have successfully enabled the desired extension in your dashboard, it will be reflected in your CometChat application upon initialization and successful login. Please note that extension features will only be available if they are supported by the CometChat UI Kit.
+
+CometChat’s UI Kit offers built-in support for 8 extensions. This seamless integration makes it easy for you to enhance your chat application with engaging features without any extra coding effort. Just enable the desired extensions from the CometChat Dashboard, and they will be automatically reflected in the relevant components of your application, providing a richer and more engaging experience for your users.
+
+## Built-in Extensions
+
+Here's a guide on how you can enable and integrate these extensions:
+
+### Stickers
+
+The Stickers extension allows users to express their emotions more creatively. It adds a much-needed fun element to the chat by allowing users to send various pre-designed stickers. For a comprehensive understanding and guide on implementing and using the Sticker Extension, refer to our specific guide on the [Sticker Extension](/fundamentals/stickers).
+
+Once you have successfully activated the [Sticker Extension](/fundamentals/stickers) from your CometChat Dashboard, the feature will automatically be incorporated into the [Message Composer](/ui-kit/android/v6/message-composer) component of UI Kits.
+
+<Frame>
+  <img src="/images/4be2f2ca-Stickers-da00005eb3724f1616d676ed38f7410c.png" />
+</Frame>
+
+### Polls
+
+The Polls extension enhances group discussions by allowing users to create polls. Users can ask questions with a predefined list of answers, enabling a quick, organized way to gather group opinions. For a comprehensive understanding and guide on implementing and using the Polls Extension, refer to our specific guide on the [Polls Extension](/fundamentals/polls).
+
+Once you have successfully activated the [Polls Extension](/fundamentals/polls) from your CometChat Dashboard, the feature will automatically be incorporated into the Action Sheet of the [Message Composer](/ui-kit/android/v6/message-composer) component of UI Kits.
+
+<Frame>
+  <img src="/images/660937b1-Polls-d74add1cb39e5aede880863aed044015.png" />
+</Frame>
+
+### Collaborative Whiteboard
+
+The Collaborative Whiteboard extension facilitates real-time collaboration. Users can draw, brainstorm, and share ideas on a shared digital whiteboard. For a comprehensive understanding and guide on implementing and using the Collaborative Whiteboard Extension, refer to our specific guide on the [Collaborative Whiteboard Extension](/ui-kit/android/v6/message-bubble-styling#collaborative-bubble).
+
+Once you have successfully activated the [Collaborative Whiteboard Extension](/fundamentals/collaborative-whiteboard) from your CometChat Dashboard, the feature will automatically be incorporated into the Action Sheet of the [Message Composer](/ui-kit/android/v6/message-composer) component of UI Kits.
+
+<Frame>
+  <img src="/images/fa77a5e8-Collaborative_Whiteboard-f8b4edbe03fdbe090896d4adcc76d0f4.png" />
+</Frame>
+
+### Collaborative Document
+
+With the Collaborative Document extension, users can work together on a shared document. This feature is essential for remote teams where document collaboration is a recurring requirement. For a comprehensive understanding and guide on implementing and using the Collaborative Document Extension, refer to our specific guide on the [Collaborative Document Extension](/ui-kit/android/v6/message-bubble-styling#collaborative-bubble).
+
+Once you have successfully activated the [Collaborative Document Extension](/fundamentals/collaborative-document) from your CometChat Dashboard, the feature will automatically be incorporated into the Action Sheet of the [Message Composer](/ui-kit/android/v6/message-composer) component of UI Kits.
+
+<Frame>
+  <img src="/images/03aa894f-Collaborative_document-dd0efc054c7851e8dcaa26dfaf323ab7.png" />
+</Frame>
+
+### Message Translation
+
+The Message Translation extension in CometChat is designed to translate any message into your local locale. It eliminates language barriers, making the chat more inclusive. For a comprehensive understanding and guide on implementing and using the Message Translation Extension, refer to our specific guide on the [Message Translation Extension](/fundamentals/message-translation).
+
+Once you have successfully activated the [Message Translation Extension](/fundamentals/message-translation) from your CometChat Dashboard, the feature will automatically be incorporated into the Action Sheet of [MessageList Component](/ui-kit/android/v6/message-list) component of UI Kits.
+
+<Frame>
+  <img src="/images/b5c54dbe-Message_Translation-4007b17e1d68cc483ebcc6e8ec6a441b.png" />
+</Frame>
+
+### Link Preview
+
+The Link Preview extension provides a summary of the URL shared in the chat. It includes the title, a description, and a thumbnail image from the web page. For a comprehensive understanding and guide on implementing and using the Link Preview Extension, refer to our specific guide on the [Link Preview Extension](/fundamentals/link-preview).
+
+Once you have successfully activated the [Link Preview Extension](/fundamentals/link-preview) from your CometChat Dashboard, the feature will automatically be incorporated into the Message Bubble of [MessageList Component](/ui-kit/android/v6/message-list) component of UI Kits.
+
+<Frame>
+  <img src="/images/b35b8ee3-Link_preview-3d4641b48f429e00c8d36791f3c573c7.png" />
+</Frame>
+
+### Thumbnail Generation
+
+The Thumbnail Generation extension automatically creates a smaller preview image whenever a larger image is shared, helping to reduce the upload/download time and bandwidth usage. For a comprehensive understanding and guide on implementing and using the Thumbnail Generation Extension, refer to our specific guide on the [Thumbnail Generation Extension](/fundamentals/thumbnail-generation).
+
+Once you have successfully activated the [Thumbnail Generation Extension](/fundamentals/thumbnail-generation) from your CometChat Dashboard, the feature will automatically be incorporated into the Message Bubble of [MessageList Component](/ui-kit/android/v6/message-list) component of UI Kits.
+
+<Frame>
+  <img src="/images/1ecec350-Thumbnail_Generation-ee865ec30804539cd8115697b8560a22.png" />
+</Frame>
+
+### Profanity Filter
+
+The Profanity Filter extension helps in maintaining the chat decorum by censoring obscene and inappropriate words in the messages. For a comprehensive understanding and guide on implementing and using the Profanity Filter Extension, refer to our specific guide on the [Legacy Extensions](/moderation/legacy-extensions).
+
+Once you have successfully activated the Profanity Filter Extension from your CometChat Dashboard, the feature will automatically be incorporated into the Message Bubble of [MessageList Component](/ui-kit/android/v6/message-list) component of UI Kits.

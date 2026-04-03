@@ -1,156 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">CometChat Sample App</string>
-    <string name="app_bottom_nav_chats" translatable="true">Chats</string>
-    <string name="app_bottom_nav_calls" translatable="true">Calls</string>
-    <string name="app_bottom_nav_users" translatable="true">Users</string>
-    <string name="app_bottom_nav_groups" translatable="true">Groups</string>
+    <!-- App Name -->
+    <string name="app_name">CometChat Sample</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+    <!-- Login Screen -->
+    <string name="app_login">Login</string>
+    <string name="app_choose_sample_user">Choose a Sample User</string>
+    <string name="app_or">Or</string>
+    <string name="app_enter_your_uid">Enter Your UID</string>
+    <string name="app_enter_uid">Enter UID</string>
+    <string name="app_continue">Continue</string>
+    <string name="app_change">Change</string>
+    <string name="app_app_credentials">App Credentials</string>
+    <string name="app_error_invalid_user_or_uid_login">Please select user or enter the correct UID</string>
 
-    <string name="app_login" translatable="true">Login</string>
-    <string name="app_continue_with_google" translatable="true">Continue with Google</string>
-    <string name="app_no_banned_members" translatable="true">No Banned Members</string>
-    <string name="app_banned_few_members_to_show_them_here" translatable="true">Banned few members to show them here</string>
-    <string name="app_failed_to_sign_in_with_google_no_account_found" translatable="true">Failed to sign in with Google, no account found.</string>
-    <string name="app_google_sign_in_failed" translatable="true">"Google Sign-In failed: "</string>
-    <string name="app_group" translatable="true">group</string>
-    <string name="app_btn_leave" translatable="true">Leave</string>
-    <string name="app_leave_this_group" translatable="true">Leave this group?</string>
-    <string name="app_leave_this_group_description" translatable="true">Are you sure you want to leave this group? You won\'t receive any more messages from this chat.</string>
-    <string name="app_btn_cancel" translatable="true">Cancel</string>
-    <string name="app_transfer_ownership_description" translatable="true">Are you sure you want to transfer ownership ? This can\'t be undone, and the new owner will take full control.</string>
-    <string name="app_transfer_ownership_information" translatable="true">You need to transfer ownership of this group to another group member before leaving this group.</string>
-    <string name="app_btn_continue" translatable="true">Continue</string>
-    <string name="app_delete_and_exit" translatable="true">Delete and Exit?</string>
-    <string name="app_delete_and_exit_action" translatable="true">Delete and Exit</string>
-    <string name="app_delete_and_exit_description" translatable="true">Are you sure you want to delete this chat and exit the group? This action cannot be undone.</string>
-    <string name="app_btn_delete" translatable="true">Delete</string>
-    <string name="app_add" translatable="true">Add</string>
-    <string name="app_member" translatable="true">Member</string>
-    <string name="app_members" translatable="true">Members</string>
-    <string name="app_base_message" translatable="true">baseMessage</string>
-    <string name="app_user" translatable="true">user</string>
-    <string name="app_session_id" translatable="true">sessionId</string>
-    <string name="app_call_type" translatable="true">callType</string>
-    <string name="app_not_logged_in" translatable="true">You are not logged in. Please log in and try again.</string>
-    <string name="app_transfer_ownership" translatable="true">Transfer Ownership</string>
+    <!-- Content Descriptions -->
+    <string name="content_desc_selected">Selected</string>
+    <string name="content_desc_user_avatar">User avatar</string>
 
-    <!--  Call Details  -->
-    <string name="app_call_details" translatable="true">Call Details</string>
-    <string name="app_call_details_history" translatable="true">History</string>
-    <string name="app_call_details_participants" translatable="true">Participants</string>
-    <string name="app_call_details_recordings" translatable="true">Recordings</string>
-    <string name="app_call_outgoing" translatable="true">Outgoing</string>
-    <string name="app_call_missed" translatable="true">Missed</string>
-    <string name="app_call_incoming" translatable="true">Incoming</string>
-    <string name="app_no_recordings_found" translatable="true">No Recordings Found</string>
+    <!-- Home Screen -->
+    <string name="app_home" translatable="true">Home</string>
+    <string name="app_app_flow" translatable="true">App Flow</string>
+    <string name="app_app_flow_description" translatable="true">Experience the full chat application with bottom navigation</string>
+    <string name="app_logged_in_as" translatable="true">Logged in as</string>
+    <string name="navigate">Navigate</string>
+    <string name="tab_chats">Chats</string>
+    <string name="tab_calls">Calls</string>
+    <string name="tab_users">Users</string>
+    <string name="tab_groups">Groups</string>
+    <string name="home_placeholder">Home Screen\n(Coming in Task 4.1)</string>
 
-    <string name="app_accept" translatable="true">Accept</string>
-    <string name="app_decline" translatable="true">Decline</string>
-    <string name="app_incoming_s_call" translatable="true">Incoming %s Call</string>
-    <string name="app_user_info" translatable="true">User Info</string>
-    <string name="app_voice" translatable="true">Voice</string>
-    <string name="app_video" translatable="true">Video</string>
+    <!-- Logout -->
+    <string name="logout">Logout</string>
+    <string name="create_conversation">Create conversation</string>
+    <string name="logout_confirmation_title">Logout</string>
+    <string name="logout_confirmation_message">Are you sure you want to logout?</string>
 
-    <string name="app_delete" translatable="true">Delete Chat</string>
-    <string name="app_delete_chat_title" translatable="true">Delete this chat?</string>
-    <string name="app_delete_chat_subtitle" translatable="true">Are you sure you want to delete this chat? This action cannot be undone.</string>
-    <string name="app_delete_chat_positive_button" translatable="true">Delete</string>
-    <string name="app_delete_chat_negative_button" translatable="true">Cancel</string>
-    <string name="app_delete_chat_error" translatable="true">Delete Failed</string>
-    <string name="app_delete_chat_success" translatable="true">Chat Deleted</string>
-
-    <string name="app_block" translatable="true">Block</string>
-    <string name="app_block_user_title" translatable="true">Block this contact?</string>
-    <string name="app_block_user_subtitle" translatable="true">Are you sure you want to block this contact? You won’t receive messages from them anymore.</string>
-    <string name="app_block_user_positive_button" translatable="true">Block</string>
-    <string name="app_block_user_negative_button" translatable="true">Cancel</string>
-    <string name="app_block_user_error" translatable="true">Block Failed</string>
-    <string name="app_block_user_success" translatable="true">User Blocked</string>
-
-    <string name="app_unblock" translatable="true">Unblock</string>
-    <string name="app_unblock_user_title" translatable="true">Unblock this contact?</string>
-    <string name="app_unblock_user_subtitle" translatable="true">Are you sure you want to unblock this contact?</string>
-    <string name="app_unblock_user_positive_button" translatable="true">Unblock</string>
-    <string name="app_unblock_user_negative_button" translatable="true">Cancel</string>
-    <string name="app_unblock_user_error" translatable="true">Unblock Failed</string>
-    <string name="app_unblock_user_success" translatable="true">User Unblocked</string>
-    <string name="app_message_id" translatable="true">message_id</string>
-    <string name="app_choose_sample_user" translatable="true">Choose a Sample User</string>
-    <string name="app_continue" translatable="true">Continue</string>
-    <string name="app_or" translatable="true">Or</string>
-    <string name="app_change" translatable="true">Change</string>
-    <string name="app_app_credentials" translatable="true">App Credentials</string>
-    <string name="app_enter_uid" translatable="true">Enter UID</string>
-    <string name="app_enter_your_uid" translatable="true">Enter Your UID</string>
-    <string name="app_error_invalid_user_or_uid_login" translatable="true">Please select user or enter the correct UID</string>
-    <string name="app_shared_pref" translatable="true">AppSharedPref</string>
-    <string name="app_cred_id" translatable="true">appId</string>
-    <string name="app_cred_region" translatable="true">appRegion</string>
-    <string name="app_cred_auth" translatable="true">appAuthKey</string>
-    <string name="app_region" translatable="true">Region</string>
-    <string name="app_region_us" translatable="true">US</string>
-    <string name="app_region_eu" translatable="true">EU</string>
-    <string name="app_region_in" translatable="true">IN</string>
-    <string name="app_app_id" translatable="true">App ID</string>
-    <string name="app_app_id_hint" translatable="true">Enter the App ID</string>
-    <string name="app_auth_key" translatable="true">Auth Key</string>
-    <string name="app_auth_key_hint" translatable="true">Enter the Auth Key</string>
-    <string name="app_please_select_app_region" translatable="true">Please select App Region</string>
-    <string name="app_invalid_app_id" translatable="true">Please enter valid App ID</string>
-    <string name="app_invalid_auth_token" translatable="true">Please enter valid Auth Token</string>
-    <string name="app_new_group" translatable="true">New Group</string>
-    <string name="app_group_type" translatable="true">Type</string>
-    <string name="app_group_name" translatable="true">Name</string>
-    <string name="app_group_hint_name" translatable="true">Enter the group name</string>
-    <string name="app_password" translatable="true">Password</string>
-    <string name="app_hint_enter_the_password" translatable="true">Enter the Password</string>
-    <string name="app_btn_create_group" translatable="true">Create Group</string>
-    <string name="app_create_conversation" translatable="true">Create conversation</string>
-    <string name="app_logout" translatable="true">Logout</string>
-    <string name="app_group_info" translatable="true">Group Info</string>
-    <string name="app_no_longer_part_of_this_group" translatable="true">You are no longer part of this group</string>
-    <string name="app_view_members" translatable="true">View Members</string>
-    <string name="app_add_members" translatable="true">Add Members</string>
-    <string name="app_banned_members" translatable="true">Banned Members</string>
-    <string name="app_view_members_chip" translatable="true">View \nMembers</string>
-    <string name="app_add_members_chip" translatable="true">Add \nMembers</string>
-    <string name="app_banned_members_chip" translatable="true">Banned \nMembers</string>
-    <string name="app_leave" translatable="true">Leave</string>
+    <!-- Messages Screen -->
+    <string name="thread">Thread</string>
+    <string name="messages">Messages</string>
     <string name="app_block_user_unable_to_send_message" translatable="true">You can\'t send message to this group because you\'re no longer a member.</string>
+    <string name="unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
     <string name="app_unblock_user" translatable="true">Unblock User</string>
-    <string name="app_description" translatable="true">Description</string>
-    <string name="app_steps_to_reproduce" translatable="true">Steps to reproduce</string>
-    <string name="app_join_group" translatable="true">Join group</string>
-    <string name="app_type" translatable="true">Type</string>
-    <string name="app_enter_the_password" translatable="true">Enter the Password</string>
-    <string name="app_something_went_wrong_please_try_again" translatable="true">Something went wrong. Please try again.</string>
-    <string name="app_retry" translatable="true">Retry</string>
-    <string name="app_looks_like_something_went_wrong_n_please_try_again" translatable="true">Looks like something went wrong.\n Please try again.</string>
-    <string name="app_type_public" translatable="true">Public</string>
 
-    <string name="app_transfer_ownership_text" translatable="true">Transfer Ownership</string>
-    <string name="app_type_private" translatable="true">Private</string>
-    <string name="app_type_protected" translatable="true">Protected</string>
-    <string name="app_thread_title" translatable="true">Thread</string>
-    <string name="app_error_conversations_title" translatable="true">Oops!</string>
-    <string name="app_group_members_empty_title" translatable="true">No Members Available</string>
-    <string name="app_group_member_empty_subtitle" translatable="true">Add members to the group and see them listed here.</string>
-    <string name="app_search" translatable="true">Search</string>
-    <string name="app_new_chat" translatable="true">New Chat</string>
-    <string name="app_report" translatable="true">Start Reporting</string>
-    <string name="app_has_blocked_you" translatable="true">has blocked you</string>
-    <string name="app_you_have_blocked_this_user" translatable="true">You have blocked</string>
-    <string name="app_unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
-    <string name="participant_scope_with_group" translatable="true">
-    Only group admins can perform this action. User %1$s has a scope \'participant\' in group %2$s.
-    </string>
-    <string name="participant_scope_without_group" translatable="true">
-    Only group admins can perform this action. User %1$s has a scope \'participant\'.
-    </string>
-    <string name="scan_qr_code" translatable="true">Scan QR Code</string>
-    <string name="app_reset_to_default" translatable="false">Reset to Default</string>
-    <string name="app_ai_assistant_chats" translatable="true">AI Assistants</string>
-    <string name="app_go_to_message" translatable="false">go to message</string>
-    <string name="cometchat_search_in">Search in</string>
+    <!-- Group Details -->
+    <string name="group_details">Group Details</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="leave_group_confirmation">Are you sure you want to leave this group?</string>
+    <string name="leave">Leave</string>
+    <string name="members">Members</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="delete_group_confirmation">Are you sure you want to delete this group? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_and_exit">Delete and Exit</string>
+    <string name="add_members">Add Members</string>
+
+    <!-- User Details -->
+    <string name="user_details">User Info</string>
+    <string name="message">Message</string>
+    <string name="block_user">Block</string>
+    <string name="unblock_user">Unblock</string>
+    <string name="block_user_title">Block User</string>
+    <string name="block_user_message">Are you sure you want to block this user?</string>
+    <string name="unblock_user_title">Unblock User</string>
+    <string name="unblock_user_message">Are you sure you want to unblock this user?</string>
+    <string name="block">Block</string>
+    <string name="unblock">Unblock</string>
+    <string name="blocked">Blocked</string>
+    <string name="you_have_blocked_this_user">You have blocked this user</string>
+    <string name="has_blocked_you">has blocked you</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+
+    <!-- Member Management -->
+    <string name="view_profile">View Profile</string>
+    <string name="remove_member">Remove Member</string>
+    <string name="remove_member_confirmation">Are you sure you want to remove %1$s from this group?</string>
+    <string name="remove">Remove</string>
+    <string name="change_role">Change Role</string>
+    <string name="role_admin">Admin</string>
+    <string name="role_moderator">Moderator</string>
+    <string name="role_member">Member</string>
+
+    <!-- Splash Screen -->
+    <string name="error_title">Error</string>
+    <string name="error_sdk_init_failed">Failed to initialize CometChat SDK. Please check your credentials and try again.</string>
+    <string name="app_not_logged_in">Please login to continue</string>
+
+    <!-- App Credentials Screen -->
+    <string name="credentials_title">App Credentials</string>
+    <string name="credentials_subtitle">Enter your CometChat app credentials to get started</string>
+    <string name="select_region">Select Region</string>
+    <string name="region_us">US</string>
+    <string name="region_eu">EU</string>
+    <string name="region_in">IN</string>
+    <string name="region_us_full">United States</string>
+    <string name="region_eu_full">Europe</string>
+    <string name="region_in_full">India</string>
+    <string name="app_id">App ID</string>
+    <string name="auth_key">Auth Key</string>
+    <string name="enter_app_id">Enter App ID</string>
+    <string name="enter_auth_key">Enter Auth Key</string>
+    <string name="error_app_id_required">App ID is required</string>
+    <string name="error_auth_key_required">Auth Key is required</string>
+    <string name="error_region_required">Please select a region</string>
+
+    <!-- New Chat Screen -->
+    <string name="new_chat">New Chat</string>
+    <string name="content_desc_back">Back</string>
+    <string name="back">Back</string>
+    
+    <!-- Details Screens -->
+    <string name="voice">Voice</string>
+    <string name="video">Video</string>
+    <string name="delete_chat">Delete Chat</string>
+    <string name="delete_chat_title">Delete Chat</string>
+    <string name="delete_chat_message">Are you sure you want to delete this chat? This action cannot be undone.</string>
+    <string name="view_members">View Members</string>
+    <string name="banned_members">Banned Members</string>
+    <string name="no_banned_members">No Banned Members</string>
+    <string name="no_banned_members_subtitle">There are no banned members in this group</string>
+    <string name="selected">Selected</string>
+    <string name="no_longer_part_of_group">You are no longer part of this group</string>
+
+    <!-- Call Details Screen -->
+    <string name="call_details">Call Details</string>
+    <string name="call_outgoing">Outgoing</string>
+    <string name="call_incoming">Incoming</string>
+    <string name="call_missed">Missed</string>
+    <string name="no_recordings_found">No Recordings Found</string>
+    <string name="tab_history">History</string>
+    <string name="tab_participants">Participants</string>
+    <string name="tab_recordings">Recordings</string>
+
+    <!-- Group Member Errors -->
+    <string name="participant_scope_with_group" translatable="true">Only group admins can perform this action. User %1$s has a scope \'participant\' in group %2$s.</string>
+    <string name="participant_scope_without_group" translatable="true">Only group admins can perform this action. User %1$s has a scope \'participant\'.</string>
+
+    <!-- Common -->
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="search">Search</string>
+    <string name="search_coming_soon">Search Coming Soon</string>
+    <string name="search_coming_soon_description">The search feature is not yet available in chatuikit-kotlin. Check back later for updates.</string>
+
+    <!-- Create Group -->
+    <string name="app_new_group">New Group</string>
+    <string name="app_group_type">Type</string>
+    <string name="app_group_name">Name</string>
+    <string name="app_group_hint_name">Enter the group name</string>
+    <string name="app_password">Password</string>
+    <string name="app_hint_enter_the_password">Enter the Password</string>
+    <string name="app_btn_create_group">Create Group</string>
+    <string name="app_type_public">Public</string>
+    <string name="app_type_private">Private</string>
+    <string name="app_type_protected">Protected</string>
+    <string name="app_something_went_wrong">Something went wrong. Please try again.</string>
+
+    <!-- Join Group -->
+    <string name="app_join_group">Join group</string>
+    <string name="app_enter_the_password">Enter the Password</string>
+    <string name="app_member">Member</string>
 </resources>

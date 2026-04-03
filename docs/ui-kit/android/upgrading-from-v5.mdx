@@ -1,0 +1,896 @@
+---
+title: "Upgrading from V5 to V6"
+description: "Migrate your Android app from CometChat UI Kit V5 to V6 with updated dependencies, architecture, and API changes."
+---
+
+## Introduction
+
+The **CometChat V5 Android UI Kit** was a single Java module (`com.cometchat:chat-uikit-android`) that shipped all UI components, ViewModels, and resources in one artifact under the `com.cometchat.chatuikit` package.
+
+**V6** splits the UI Kit into three modules built entirely in Kotlin:
+
+| Module | Artifact | Description |
+|:-------|:---------|:------------|
+| **Core** | `com.cometchat:chatuikit-core` | Shared ViewModels, Repositories, DataSources, and events — used by both UI modules. |
+| **Kotlin (XML Views)** | `com.cometchat:chat-uikit-kotlin` | Traditional XML-based Views for Activities and Fragments. |
+| **Jetpack Compose** | `com.cometchat:chat-uikit-compose` | Declarative Compose components. |
+
+Choose the UI module that fits your project — both depend on `chatuikit-core` automatically.
+
+<Frame>
+  <img src="/images/7e8b813d-chat_experience_full_tab_based-28115d603d38f5bbfbfe170739aa478c.png" />
+</Frame>
+
+## Key Migration Changes
+
+The following table summarizes the most impactful changes when migrating from V5 to V6:
+
+| Area | V5 | V6 |
+|:-----|:---|:---|
+| **Language** | Java | Kotlin |
+| **Modules** | Single `com.cometchat:chat-uikit-android` | `com.cometchat:chat-uikit-kotlin` (XML) or `com.cometchat:chat-uikit-compose` (Compose) + shared `chatuikit-core` |
+| **Import path** | `com.cometchat.chatuikit.*` | `com.cometchat.uikit.kotlin.presentation.*` or `com.cometchat.uikit.compose.presentation.*` |
+| **CometChatUIKit import** | `com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit` | `com.cometchat.uikit.core.CometChatUIKit` |
+| **UIKitSettings import** | `com.cometchat.chatuikit.shared.cometchatuikit.UIKitSettings` | `com.cometchat.uikit.core.UIKitSettings` |
+| **State management** | `LiveData` | `StateFlow` / Kotlin coroutines |
+| **Architecture** | View + ViewModel + Adapter (2-layer) | View → ViewModel → Repository → DataSource (4-layer Clean Architecture) |
+| **Conversation list** | `CometChatConversations` | `CometChatConversations` |
+| **Thread header** | `CometChatThreadedMessagesHeader` | `CometChatThreadHeader` |
+| **Events** | `CometChat*Events.addListener()` / `removeListener()` | `CometChatEvents` singleton with `SharedFlow` — collect in a coroutine scope |
+| **Theming** | `Palette` + `Typography` objects | XML theme attributes extending `CometChatTheme.DayNight` (Kotlin XML) or `CometChatTheme {}` composable (Compose) |
+| **Styling** | `setStyle(ComponentStyle)` methods with style objects | XML `@StyleRes` theme attributes (Kotlin XML) or style data classes with `.default().copy()` (Compose) |
+| **View slots** | `ConversationsViewHolderListener` with `createView`/`bindView` (Java) | Same pattern in Kotlin XML or `@Composable` lambdas in Compose |
+| **ViewModel access** | `getViewModel()` returns Java ViewModel with `LiveData` | `getViewModel()` / `setViewModel()` with Kotlin ViewModel using `StateFlow` |
+| **List operations** | Direct list manipulation via adapter | `ListOperations<T>` interface with `addItem`, `removeItem`, `updateItem`, `moveItemToTop`, `batch {}` |
+| **Repository** | Not exposed | Swappable via Factory pattern — implement interface, inject via `*ViewModelFactory` |
+| **Min SDK** | 24 | 28 |
+
+## Dependency Changes
+
+### V5 (before)
+
+```groovy title="build.gradle"
+dependencies {
+    implementation 'com.cometchat:chat-uikit-android:5.x.x'
+}
+```
+
+### V6 — Kotlin XML Views (after)
+
+```groovy title="build.gradle"
+dependencies {
+    implementation 'com.cometchat:chat-uikit-kotlin:6.x.x'
+    // chatuikit-core is pulled in transitively
+}
+```
+
+### V6 — Jetpack Compose (after)
+
+```groovy title="build.gradle"
+dependencies {
+    implementation 'com.cometchat:chat-uikit-compose:6.x.x'
+    // chatuikit-core is pulled in transitively
+}
+```
+
+<Note>
+
+V6 raises the minimum SDK from **24** to **28**. Update `minSdk` in your `build.gradle` accordingly.
+
+</Note>
+
+## Component Renames
+
+Most components keep the same class name but move to a new package. The following were also renamed:
+
+| V5 Name | V6 Name |
+|:--------|:--------|
+| `CometChatConversations` | `CometChatConversations` |
+| `CometChatThreadedMessagesHeader` | `CometChatThreadHeader` |
+
+All other components (`CometChatUsers`, `CometChatGroups`, `CometChatMessageHeader`, `CometChatMessageList`, `CometChatMessageComposer`, `CometChatIncomingCall`, `CometChatOutgoingCall`, `CometChatCallButtons`, `CometChatCallLogs`, `CometChatGroupMembers`) retain their names but live under the new V6 package paths.
+
+## Import Path Changes
+
+### CometChatUIKit & UIKitSettings
+
+```java title="V5 (Java)"
+import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit;
+import com.cometchat.chatuikit.shared.cometchatuikit.UIKitSettings;
+```
+
+```kotlin title="V6 (Kotlin)"
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.UIKitSettings
+```
+
+### UI Components
+
+```java title="V5 (Java)"
+import com.cometchat.chatuikit.conversations.CometChatConversations;
+import com.cometchat.chatuikit.users.CometChatUsers;
+import com.cometchat.chatuikit.groups.CometChatGroups;
+import com.cometchat.chatuikit.messageheader.CometChatMessageHeader;
+import com.cometchat.chatuikit.messagelist.CometChatMessageList;
+import com.cometchat.chatuikit.messagecomposer.CometChatMessageComposer;
+```
+
+```kotlin title="V6 — Kotlin XML"
+import com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+import com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
+import com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
+import com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+```
+
+```kotlin title="V6 — Jetpack Compose"
+import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConversations
+import com.cometchat.uikit.compose.presentation.users.ui.CometChatUsers
+import com.cometchat.uikit.compose.presentation.groups.ui.CometChatGroups
+import com.cometchat.uikit.compose.presentation.messageheader.ui.CometChatMessageHeader
+import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+```
+
+## Events Migration
+
+In **V5**, events used the `addListener` / `removeListener` pattern with unique string IDs:
+
+```java title="V5 (Java)"
+CometChatMessageEvents.addListener("unique-id", new CometChatMessageEvents() {
+    @Override
+    public void onMessageSent(BaseMessage message) {
+        // Handle message sent
+    }
+});
+// Cleanup
+CometChatMessageEvents.removeListener("unique-id");
+```
+
+In **V6**, events use the `CometChatEvents` singleton with Kotlin `SharedFlow`. Collect in a coroutine scope:
+
+```kotlin title="V6 (Kotlin)"
+lifecycleScope.launch {
+    CometChatEvents.messageEvents.collect { event ->
+        when (event) {
+            is MessageEvent.Sent -> { /* Handle message sent */ }
+            is MessageEvent.Edited -> { /* Handle message edited */ }
+            is MessageEvent.Deleted -> { /* Handle message deleted */ }
+        }
+    }
+}
+// No manual cleanup needed — lifecycleScope auto-cancels
+```
+
+## State Management Migration
+
+### V5 — LiveData observers (Java)
+
+```java title="V5"
+conversationsViewModel.getConversationList().observe(this, new Observer<List<Conversation>>() {
+    @Override
+    public void onChanged(List<Conversation> conversations) {
+        // Update UI with conversations
+    }
+});
+```
+
+### V6 — StateFlow collectors (Kotlin)
+
+```kotlin title="V6"
+lifecycleScope.launch {
+    conversationsViewModel.uiState.collect { state ->
+        when (state) {
+            is UIState.Loading -> { /* Show loading */ }
+            is UIState.Success -> { /* Update UI with state.data */ }
+            is UIState.Error -> { /* Show error */ }
+        }
+    }
+}
+```
+
+## Styling Migration
+
+### V5 — Style objects (Java)
+
+```java title="V5"
+ConversationsStyle style = new ConversationsStyle();
+style.setBackground(Color.WHITE);
+style.setTitleColor(Color.BLACK);
+style.setBorderWidth(1);
+style.setBorderColor(Color.GRAY);
+cometChatConversations.setStyle(style);
+```
+
+### V6 — Kotlin XML: Theme attributes in `themes.xml`
+
+```xml title="V6 — themes.xml"
+<resources>
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatPrimaryColor">#F76808</item>
+        <item name="cometchatBackgroundColor">#FFFFFF</item>
+        <item name="cometchatTextPrimaryColor">#141414</item>
+        <item name="android:fontFamily">@font/your_custom_font</item>
+    </style>
+
+    <!-- Override a specific component style -->
+    <style name="CustomConversationsStyle" parent="CometChatConversations">
+        <item name="cometchatSeparatorColor">#E0E0E0</item>
+        <item name="cometchatItemBackgroundColor">#FAFAFA</item>
+    </style>
+</resources>
+```
+
+### V6 — Jetpack Compose: Style data classes
+
+```kotlin title="V6 — Compose"
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        backgroundColor = Color.White,
+        titleColor = Color.Black,
+        separatorColor = Color.LightGray
+    )
+)
+```
+
+## Component-by-Component Migration
+
+### Conversations
+
+```java title="V5 — CometChatConversations (Java)"
+CometChatConversations conversations = findViewById(R.id.conversations);
+conversations.setOnItemClick(new OnItemClick<Conversation>() {
+    @Override
+    public void onItemClick(Conversation conversation, int position) {
+        // Handle click
+    }
+});
+```
+
+```kotlin title="V6 — CometChatConversations (Kotlin)"
+val conversations = findViewById<CometChatConversations>(R.id.conversations)
+conversations.setOnItemClick { conversation ->
+    // Handle click
+}
+```
+
+### Users
+
+```java title="V5 — CometChatUsers (Java)"
+CometChatUsers users = findViewById(R.id.users);
+users.setOnItemClick(new OnItemClick<User>() {
+    @Override
+    public void onItemClick(User user, int position) {
+        // Handle click
+    }
+});
+```
+
+```kotlin title="V6 — CometChatUsers (Kotlin)"
+val users = findViewById<CometChatUsers>(R.id.users)
+users.setOnItemClick { user ->
+    // Handle click
+}
+```
+
+### Groups
+
+```java title="V5 — CometChatGroups (Java)"
+CometChatGroups groups = findViewById(R.id.groups);
+groups.setOnItemClick(new OnItemClick<Group>() {
+    @Override
+    public void onItemClick(Group group, int position) {
+        // Handle click
+    }
+});
+```
+
+```kotlin title="V6 — CometChatGroups (Kotlin)"
+val groups = findViewById<CometChatGroups>(R.id.groups)
+groups.setOnItemClick { group ->
+    // Handle click
+}
+```
+
+### Message Header
+
+```java title="V5 — CometChatMessageHeader (Java)"
+CometChatMessageHeader header = findViewById(R.id.messageHeader);
+header.setOnBackButtonPressed(new OnBackPress() {
+    @Override
+    public void onBack() {
+        // Handle back
+    }
+});
+```
+
+```kotlin title="V6 — CometChatMessageHeader (Kotlin)"
+val header = findViewById<CometChatMessageHeader>(R.id.messageHeader)
+header.setOnBackPress {
+    // Handle back
+}
+```
+
+### Message List
+
+```java title="V5 — CometChatMessageList (Java)"
+CometChatMessageList messageList = findViewById(R.id.messageList);
+messageList.setOnThreadRepliesClick(new OnThreadRepliesClick() {
+    @Override
+    public void onThreadRepliesClick(Context context, BaseMessage message, CometChatMessageTemplate template) {
+        // Handle thread click
+    }
+});
+```
+
+```kotlin title="V6 — CometChatMessageList (Kotlin)"
+val messageList = findViewById<CometChatMessageList>(R.id.messageList)
+messageList.setOnThreadRepliesClick { context, message, template ->
+    // Handle thread click
+}
+```
+
+### Message Composer
+
+```java title="V5 — CometChatMessageComposer (Java)"
+CometChatMessageComposer composer = findViewById(R.id.messageComposer);
+composer.setOnSendButtonClick(new OnSendButtonClick() {
+    @Override
+    public void onSendButtonClick(Context context, BaseMessage message) {
+        // Handle send
+    }
+});
+```
+
+```kotlin title="V6 — CometChatMessageComposer (Kotlin)"
+val composer = findViewById<CometChatMessageComposer>(R.id.messageComposer)
+composer.setOnSendButtonClick { context, message ->
+    // Handle send
+}
+```
+
+### Call Components
+
+Call components (`CometChatIncomingCall`, `CometChatOutgoingCall`, `CometChatCallButtons`, `CometChatCallLogs`) keep the same class names in V6. Update the import paths:
+
+```java title="V5 (Java)"
+import com.cometchat.chatuikit.calls.incoming.CometChatIncomingCall;
+import com.cometchat.chatuikit.calls.outgoing.CometChatOutgoingCall;
+import com.cometchat.chatuikit.calls.callbuttons.CometChatCallButtons;
+import com.cometchat.chatuikit.calls.calllogs.CometChatCallLogs;
+```
+
+```kotlin title="V6 — Kotlin XML"
+import com.cometchat.uikit.kotlin.presentation.incomingcall.CometChatIncomingCall
+import com.cometchat.uikit.kotlin.presentation.outgoingcall.CometChatOutgoingCall
+import com.cometchat.uikit.kotlin.presentation.callbuttons.CometChatCallButtons
+import com.cometchat.uikit.kotlin.presentation.calllogs.ui.CometChatCallLogs
+```
+
+
+
+## Architecture Changes
+
+V6 introduces a **4-layer Clean Architecture** that replaces V5's 2-layer View + ViewModel pattern:
+
+```
+View → ViewModel → Repository → DataSource
+```
+
+### ViewModel Access
+
+```java title="V5 (Java)"
+// V5 — Java ViewModel with LiveData
+ConversationsViewModel viewModel = cometChatConversations.getViewModel();
+viewModel.getConversationList().observe(this, conversations -> {
+    // React to data
+});
+```
+
+```kotlin title="V6 (Kotlin)"
+// V6 — Kotlin ViewModel with StateFlow
+val viewModel = conversations.getViewModel()
+lifecycleScope.launch {
+    viewModel.uiState.collect { state ->
+        // React to data
+    }
+}
+
+// You can also inject a custom ViewModel
+conversations.setViewModel(myCustomViewModel)
+```
+
+### List Operations
+
+V5 required direct adapter manipulation. V6 provides a `ListOperations<T>` interface:
+
+```kotlin title="V6 — ListOperations"
+val viewModel = conversations.getViewModel()
+
+// Single operations
+viewModel.addItem(conversation)
+viewModel.removeItem(conversation)
+viewModel.updateItem(conversation)
+viewModel.moveItemToTop(conversation)
+
+// Batch operations
+viewModel.batch {
+    addItem(conversation1)
+    updateItem(conversation2)
+    removeItem(conversation3)
+}
+```
+
+### Custom Repository
+
+V6 exposes the repository layer, allowing you to swap data sources:
+
+```kotlin title="V6 — Custom Repository"
+// Implement the repository interface
+class MyConversationRepository : ConversationsRepository {
+    override suspend fun fetchConversations(): List<Conversation> {
+        // Your custom data source
+    }
+}
+
+// Inject via ViewModelFactory
+val factory = CometChatConversationsViewModelFactory(
+    repository = MyConversationRepository()
+)
+conversations.setViewModelFactory(factory)
+```
+
+***
+
+## Property Changes
+
+Below is a detailed reference of new, updated, and removed properties across all UI Kit components in the V5-to-V6 migration.
+
+
+### Conversations (now CometChatConversations)
+
+#### New Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| dateTimeFormatter | DateTimeFormatterCallback | Callback for custom date/time formatting in conversations |
+| toolbarVisibility | int | Controls visibility of the toolbar in conversations view |
+| deleteConversationOptionVisibility | int | Controls visibility of delete conversation option |
+| backIconVisibility | int | Controls visibility of back icon in toolbar |
+| userStatusVisibility | int | Controls visibility of user status indicators |
+| groupTypeVisibility | int | Controls visibility of group type indicators |
+| receiptsVisibility | int | Controls visibility of read receipts |
+| errorStateVisibility | int | Controls visibility of error state view |
+| loadingStateVisibility | int | Controls visibility of loading state view |
+| emptyStateVisibility | int | Controls visibility of empty state view |
+| separatorHeight | @Dimension int | Height of separator between conversation items |
+| separatorColor | @ColorInt int | Color of separator between conversation items |
+| separatorVisibility | int | Controls visibility of separator |
+| deleteOptionIcon | Drawable | Icon for delete option in popup menu |
+| deleteOptionIconTint | @ColorInt int | Tint color for delete option icon |
+| deleteOptionTextColor | @ColorInt int | Text color for delete option |
+| deleteOptionTextAppearance | @StyleRes int | Text appearance for delete option |
+| discardSelectionIcon | Drawable | Icon for discarding selection |
+| discardSelectionIconTint | @ColorInt int | Tint color for discard selection icon |
+| submitSelectionIcon | Drawable | Icon for submitting selection |
+| submitSelectionIconTint | @ColorInt int | Tint color for submit selection icon |
+| checkBoxStrokeWidth | @Dimension int | Stroke width for selection checkboxes |
+| checkBoxCornerRadius | @Dimension int | Corner radius for selection checkboxes |
+| checkBoxStrokeColor | @ColorInt int | Stroke color for selection checkboxes |
+| checkBoxBackgroundColor | @ColorInt int | Background color for selection checkboxes |
+| checkBoxCheckedBackgroundColor | @ColorInt int | Background color for checked checkboxes |
+| checkBoxSelectIcon | Drawable | Icon for selected checkboxes |
+| checkBoxSelectIconTint | @ColorInt int | Tint color for checkbox select icon |
+| itemSelectedBackgroundColor | @ColorInt int | Background color for selected items |
+| itemBackgroundColor | @ColorInt int | Background color for conversation items |
+| optionListStyle | @StyleRes int | Style for popup menu options |
+| mentionsStyle | @StyleRes int | Style for mentions in conversations |
+| typingIndicatorStyle | @StyleRes int | Style for typing indicators |
+| receiptStyle | @StyleRes int | Style for message receipts |
+| badgeStyle | @StyleRes int | Style for conversation badges |
+| dateStyle | @StyleRes int | Style for conversation dates |
+| statusIndicatorStyle | @StyleRes int | Style for status indicators |
+| avatarStyle | @StyleRes int | Style for conversation avatars |
+| emptyView | @LayoutRes int | Layout resource for empty state |
+| errorView | @LayoutRes int | Layout resource for error state |
+| loadingView | @LayoutRes int | Layout resource for loading state |
+| additionParameter | AdditionParameter | Additional parameters for conversations |
+| onBackPress | OnBackPress | Callback for back button press |
+| addOptions | Function2< Context, Conversation, List< CometChatPopupMenu.MenuItem >> | Function to add options to popup menu |
+| options | Function2< Context, Conversation, List< CometChatPopupMenu.MenuItem >> | Function to replace popup menu options |
+| overflowMenu | View | Custom overflow menu view |
+| onLoad | OnLoad< Conversation > | Callback when conversations are loaded |
+| onEmpty | OnEmpty | Callback when conversation list is empty |
+| onSelection | OnSelection< Conversation > | Callback for conversation selection |
+| onItemClick | OnItemClick< Conversation > | Callback for conversation item clicks |
+| onItemLongClick | OnItemLongClick< Conversation > | Callback for conversation item long clicks |
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setItemClickListener | setOnItemClick | Method | Sets click listener for conversation items |
+| setOnSelection | setOnSelect | Method | Sets selection listener for conversations |
+| setSubtitle | setSubtitleView | Method | Sets custom subtitle view |
+| setTailView | setTrailingView | Method | Sets custom trailing view |
+| setListItemView | setItemView | Method | Sets custom item view |
+| setDatePattern | setDateTimeFormatter | Method | Sets date formatting for conversations |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| hideError | boolean | Flag to hide error messages |
+| errorText | String | Custom error message text |
+| errorStateTextAppearance | int | Text appearance for error state |
+| errorMessageColor | int | Color for error messages |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| swipeHelper | RecyclerViewSwipeListener | Swipe gesture helper |
+| progressDialog | ProgressDialog | Progress dialog for operations |
+| conversationTemp | Conversation | Temporary conversation reference |
+| loadingIcon | ImageView | Loading icon view |
+| disableMentions | boolean | Flag to disable mentions |
+| cometChatMentionsFormatter | CometChatMentionsFormatter | Mentions formatter instance |
+| setStyle(ConversationsStyle) | Method | Sets conversation style using ConversationsStyle object |
+| emptyStateText | Method | Sets empty state text |
+| emptyStateTextColor | Method | Sets empty state text color |
+| emptyStateTextFont | Method | Sets empty state text font |
+| emptyStateTextAppearance | Method | Sets empty state text appearance |
+| errorStateTextAppearance | Method | Sets error state text appearance |
+| errorStateTextColor | Method | Sets error state text color |
+| errorStateText | Method | Sets error state text |
+| setEmptyStateView | Method | Sets empty state view |
+| setErrorStateView | Method | Sets error state view |
+| setLoadingStateView | Method | Sets loading state view |
+| setLoadingIconTintColor | Method | Sets loading icon tint |
+| disableUsersPresence | Method | Disables user presence |
+| disableReceipt | Method | Disables receipts |
+| hideReceipt | Method | Hides receipts |
+| disableTyping | Method | Disables typing indicators |
+| setProtectedGroupIcon | Method | Sets protected group icon |
+| setPrivateGroupIcon | Method | Sets private group icon |
+| setReadIcon | Method | Sets read status icon |
+| setDeliveredIcon | Method | Sets delivered status icon |
+| setSentIcon | Method | Sets sent status icon |
+| hideSeparator | Method | Hides item separators |
+
+
+### Users
+
+#### New Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| toolbarVisibility | int | Controls visibility of the toolbar in users view |
+| loadingStateVisibility | int | Controls visibility of loading state view |
+| searchBoxVisibility | int | Controls visibility of search box |
+| backIconVisibility | int | Controls visibility of back icon in toolbar |
+| stickyHeaderVisibility | int | Controls visibility of sticky header |
+| emptyStateVisibility | int | Controls visibility of empty state view |
+| errorStateVisibility | int | Controls visibility of error state view |
+| separatorVisibility | int | Controls visibility of separator between items |
+| titleVisibility | int | Controls visibility of title |
+| userStatusVisibility | int | Controls visibility of user status indicators |
+| showShimmer | boolean | Flag to control shimmer loading animation |
+| isUserListEmpty | boolean | Flag indicating if user list is empty |
+| isFurtherSelectionEnabled | boolean | Flag to control further selection capability |
+| searchPlaceholderText | String | Placeholder text for search input |
+| customLoadingView | View | Custom view for loading state |
+| overflowMenu | View | Custom overflow menu view |
+| onLoad | OnLoad< User > | Callback when users are loaded |
+| onEmpty | OnEmpty | Callback when user list is empty |
+| onBackPress | OnBackPress | Callback for back button press |
+| backgroundColor | @ColorInt int | Background color for the view |
+| titleTextColor | @ColorInt int | Text color for title |
+| titleTextAppearance | @StyleRes int | Text appearance for title |
+| strokeWidth | @Dimension int | Stroke width for card border |
+| strokeColor | @ColorInt int | Stroke color for card border |
+| cornerRadius | @Dimension int | Corner radius for card |
+| backIcon | Drawable | Back icon drawable |
+| backIconTint | @ColorInt int | Tint color for back icon |
+| separatorColor | @ColorInt int | Color of separator between items |
+| discardSelectionIcon | Drawable | Icon for discarding selection |
+| discardSelectionIconTint | @ColorInt int | Tint color for discard selection icon |
+| submitSelectionIcon | Drawable | Icon for submitting selection |
+| submitSelectionIconTint | @ColorInt int | Tint color for submit selection icon |
+| searchInputEndIcon | Drawable | End icon for search input |
+| searchInputEndIconTint | @ColorInt int | Tint color for search input end icon |
+| searchInputStrokeWidth | @Dimension int | Stroke width for search input |
+| searchInputStrokeColor | @ColorInt int | Stroke color for search input |
+| searchInputCornerRadius | @Dimension int | Corner radius for search input |
+| searchInputBackgroundColor | @ColorInt int | Background color for search input |
+| searchInputTextAppearance | @StyleRes int | Text appearance for search input |
+| searchInputTextColor | @ColorInt int | Text color for search input |
+| searchInputPlaceHolderTextAppearance | @StyleRes int | Placeholder text appearance for search input |
+| searchInputPlaceHolderTextColor | @ColorInt int | Placeholder text color for search input |
+| searchInputIconTint | @ColorInt int | Tint color for search input icon |
+| searchInputIcon | Drawable | Icon for search input |
+| stickyTitleColor | @ColorInt int | Color for sticky title |
+| stickyTitleAppearance | @StyleRes int | Text appearance for sticky title |
+| stickyTitleBackgroundColor | @ColorInt int | Background color for sticky title |
+| avatar | @StyleRes int | Style resource for avatar |
+| itemTitleTextAppearance | @StyleRes int | Text appearance for item title |
+| itemTitleTextColor | @ColorInt int | Text color for item title |
+| itemBackgroundColor | @ColorInt int | Background color for items |
+| statusIndicatorStyle | @StyleRes int | Style for status indicators |
+| itemSelectedBackgroundColor | @ColorInt int | Background color for selected items |
+| checkBoxStrokeWidth | @Dimension int | Stroke width for selection checkboxes |
+| checkBoxCornerRadius | @Dimension int | Corner radius for selection checkboxes |
+| checkBoxStrokeColor | @ColorInt int | Stroke color for selection checkboxes |
+| checkBoxBackgroundColor | @ColorInt int | Background color for selection checkboxes |
+| checkBoxCheckedBackgroundColor | @ColorInt int | Background color for checked checkboxes |
+| checkBoxSelectIconTint | @ColorInt int | Tint color for checkbox select icon |
+| checkBoxSelectIcon | Drawable | Icon for selected checkboxes |
+| emptyStateTextAppearance | @StyleRes int | Text appearance for empty state |
+| emptyStateTextColor | @ColorInt int | Text color for empty state |
+| emptyStateSubTitleTextAppearance | @StyleRes int | Subtitle text appearance for empty state |
+| emptyStateSubtitleTextColor | @ColorInt int | Subtitle text color for empty state |
+| errorStateTextAppearance | @StyleRes int | Text appearance for error state |
+| errorStateTextColor | @ColorInt int | Text color for error state |
+| errorStateSubtitleTextAppearance | @StyleRes int | Subtitle text appearance for error state |
+| errorStateSubtitleColor | @ColorInt int | Subtitle text color for error state |
+| retryButtonTextColor | @ColorInt int | Text color for retry button |
+| retryButtonTextAppearance | @StyleRes int | Text appearance for retry button |
+| retryButtonBackgroundColor | @ColorInt int | Background color for retry button |
+| retryButtonStrokeColor | @ColorInt int | Stroke color for retry button |
+| retryButtonStrokeWidth | @Dimension int | Stroke width for retry button |
+| retryButtonCornerRadius | @Dimension int | Corner radius for retry button |
+| emptyViewId | @LayoutRes int | Layout resource for empty view |
+| errorViewId | @LayoutRes int | Layout resource for error view |
+| loadingViewId | @LayoutRes int | Layout resource for loading view |
+| submitSelectionIconVisibility | int | Controls visibility of submit selection icon |
+| addOptions | Function2< Context, User, List< CometChatPopupMenu.MenuItem >> | Function to add options to popup menu |
+| options | Function2< Context, User, List< CometChatPopupMenu.MenuItem >> | Function to replace popup menu options |
+| cometchatPopUpMenu | CometChatPopupMenu | Popup menu for user actions |
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setItemClickListener | setOnItemClick | Method | Sets click listener for user items |
+| setOnSelection | setOnSelect | Method | Sets selection listener for users |
+| setSubtitle | setSubtitleView | Method | Sets custom subtitle view |
+| setTail | setTailView | Method | Sets custom tail view (renamed to setTrailingView) |
+| setListItemView | setItemView | Method | Sets custom item view |
+| getConversationsAdapter | getUsersAdapter | Method | Gets the users adapter |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| hideError | boolean | Flag to hide error messages |
+| emptyStateText | TextView | TextView for empty state message |
+| errorStateTextAppearance | int | Text appearance for error state |
+| errorMessageColor | int | Color for error messages |
+| errorText | String | Custom error message text |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| swipeHelper | RecyclerViewSwipeListener | Swipe gesture helper |
+| loadingIcon | ImageView | Loading icon view |
+| submitIcon | @DrawableRes int | Submit icon resource |
+| icon | ImageView | Icon view for submit |
+| setStyle(UsersStyle) | Method | Sets users style using UsersStyle object |
+| emptyStateText(String) | Method | Sets empty state text |
+| emptyStateTextColor(int) | Method | Sets empty state text color |
+| emptyStateTextFont(String) | Method | Sets empty state text font |
+| emptyStateTextAppearance(int) | Method | Sets empty state text appearance |
+| errorStateTextAppearance(int) | Method | Sets error state text appearance |
+| errorStateTextColor(int) | Method | Sets error state text color |
+| errorStateText(String) | Method | Sets error state text |
+| setEmptyStateView(@LayoutRes int) | Method | Sets empty state view layout |
+| setLoadingIconTintColor(@ColorInt int) | Method | Sets loading icon tint color |
+| setErrorStateView(@LayoutRes int) | Method | Sets error state view layout |
+| setLoadingStateView(@LayoutRes int) | Method | Sets loading state view layout |
+| setBackground(int[], GradientDrawable.Orientation) | Method | Sets gradient background |
+| disableUsersPresence(boolean) | Method | Disables user presence indicators |
+| setSubmitIcon(@DrawableRes int) | Method | Sets submit icon |
+| setSelectionIcon(@DrawableRes int) | Method | Sets selection icon |
+| setFurtherSelectionEnabled(boolean) | Method | Sets further selection capability |
+| hideError(boolean) | Method | Hides error messages |
+| hideSeparator(boolean) | Method | Hides separators (replaced with setStickyHeaderVisibility) |
+
+
+### Groups
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setItemClickListener | setOnItemClick | Method | Sets click listener for group items |
+| setOnSelection | setOnSelection | Method | Sets selection listener for groups (signature changed) |
+| setSubtitle | setSubtitleView | Method | Sets custom subtitle view |
+| setTail | setTailView | Method | Sets custom tail view (renamed to setTrailingView) |
+| setListItemView | setItemView | Method | Sets custom item view |
+| setPasswordGroupIcon | N/A | Method | Method for password group icon (removed) |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| swipeHelper | RecyclerViewSwipeListener | Swipe gesture helper |
+| setStyle(GroupsStyle) | Method | Sets groups style using GroupsStyle object |
+| setOverflowMenuOptions | Method | Sets overflow menu options (replaced with setOptions) |
+
+### GroupMembers
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setItemClickListener | setOnItemClick | Method | Sets click listener for group member items |
+| setTailView | setTrailingView | Method | Sets custom trailing view |
+| setListItemView | setItemView | Method | Sets custom item view |
+| disableUsersPresence | setUserStatusVisibility | Method | Controls user presence visibility |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| swipeHelper | RecyclerViewSwipeListener | Swipe gesture helper |
+| setStyle(GroupMembersStyle) | Method | Sets group members style using GroupMembersStyle object |
+
+### MessageHeader
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| subtitle | subtitleView | Function3< Context, User, Group, View > | Function to create custom subtitle view |
+| menu | trailingView | Function3< Context, User, Group, View > | Function to create custom menu/trailing view |
+| disableUsersPresence | setUserStatusVisibility | Method | Controls user presence visibility |
+| setOnBackButtonPressed | setOnBackPress | Method | Sets back button callback |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| disableTyping | boolean | Flag to disable typing indicator |
+| setStyle(MessageHeaderStyle) | Method | Sets header style using MessageHeaderStyle object |
+| setAvatarStyle(AvatarStyle) | Method | Sets avatar style using AvatarStyle object |
+| setListItemStyle(ListItemStyle) | Method | Sets list item style using ListItemStyle object |
+
+### MessageList
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setAlignment | setMessageAlignment | Method | Sets alignment of messages |
+| showAvatar | setAvatarVisibility | Method | Controls avatar visibility |
+| hideReceipt | setReceiptsVisibility | Method | Controls receipt visibility |
+| setDatePattern | setTimeFormat | Method | Sets time format for messages |
+| setDateSeparatorPattern | setDateFormat | Method | Sets date format for separators |
+| hideError | setErrorStateVisibility | Method | Controls error state visibility |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| palette | Palette | Color palette instance |
+| typography | Typography | Typography instance |
+| cometChatActionSheet | CometChatActionSheet | Action sheet component (replaced) |
+| setStyle(MessageListStyle) | Method | Sets style using MessageListStyle object |
+| setAvatarStyle(AvatarStyle) | Method | Sets avatar style using AvatarStyle object |
+| disableReactions(boolean) | Method | Disables reactions (removed) |
+
+### MessageComposer
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setParentMessageId(int) | setParentMessageId(long) | Method | Sets parent message ID (parameter type changed) |
+| setText(String) | setInitialComposerText(String) | Method | Sets initial composer text |
+| setVoiceRecordingVisibility(int) | setVoiceNoteButtonVisibility(int) | Method | Sets voice note button visibility |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| cometChatTheme | CometChatTheme | Theme instance |
+| liveReactionIcon | @DrawableRes int | Live reaction icon resource |
+| hideLiveReaction | boolean | Flag to hide live reaction |
+| setStyle(MessageComposerStyle) | Method | Sets style using MessageComposerStyle object |
+
+### IncomingCall
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| onDeclineCallClick | onRejectClick | OnClick | Click listener for decline/reject button |
+| disableSoundForCall | disableSoundForCalls | boolean | Flag to disable sound for calls |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| cometChatTheme | CometChatTheme | Theme instance |
+| cometChatCard | CometChatCard | Card component for displaying call info |
+| setStyle(IncomingCallStyle) | Method | Sets style using IncomingCallStyle object |
+| setAvatarStyle(AvatarStyle) | Method | Sets avatar style using AvatarStyle object |
+
+### OutgoingCall
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| onDeclineCallClick | onEndCallClick | OnClick | Click listener for decline/end call button |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| cometChatTheme | CometChatTheme | Theme instance for styling |
+| setStyle(OutgoingCallStyle) | Method | Sets style using OutgoingCallStyle object |
+| setAvatarStyle(AvatarStyle) | Method | Sets avatar style using AvatarStyle object |
+
+### CallButtons
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| hideVoiceCall(boolean) | setVoiceCallButtonVisibility(int) | Method | Controls voice call button visibility |
+| hideVideoCall(boolean) | setVideoCallButtonVisibility(int) | Method | Controls video call button visibility |
+| setVoiceCallIcon(@DrawableRes int) | setVoiceCallIcon(Drawable) | Method | Sets voice call icon (parameter type changed) |
+| setVideoCallIcon(@DrawableRes int) | setVideoCallIcon(Drawable) | Method | Sets video call icon (parameter type changed) |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| theme | CometChatTheme | Theme instance for styling |
+| setStyle(CallButtonsStyle) | Method | Sets style using CallButtonsStyle object |
+| setButtonStyle(ButtonStyle) | Method | Sets button style using ButtonStyle object |
+
+### CallLogs
+
+#### Renamed Properties
+
+| V5 Name | V6 Name | Type | Description |
+| ------- | ------- | ---- | ----------- |
+| setOnItemClickListener | setOnItemClick | Method | Sets item click listener |
+| setOnInfoIconClickListener | setOnCallIconClickListener | Method | Sets call icon click listener |
+| setEmptyStateView(@LayoutRes int) | setEmptyView(@LayoutRes int) | Method | Sets empty state view |
+| setErrorStateView(@LayoutRes int) | setErrorView(@LayoutRes int) | Method | Sets error state view |
+| setListItemView | setItemView | Method | Sets item view |
+
+#### Removed Properties
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| theme | CometChatTheme | Theme instance |
+| swipeHelper | RecyclerViewSwipeListener | Swipe gesture helper |
+| setStyle(CallLogsStyle) | Method | Sets style using CallLogsStyle object |
+| setAvatarStyle(AvatarStyle) | Method | Sets avatar style using AvatarStyle object |
+
+***
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Getting Started" href="/ui-kit/android/v6/getting-started">
+    Fresh V6 setup guide for Android.
+  </Card>
+  <Card title="Components Overview" href="/ui-kit/android/v6/components-overview">
+    Explore all V6 prebuilt UI components.
+  </Card>
+  <Card title="Theming" href="/ui-kit/android/v6/theme-introduction">
+    XML-based and Compose theming system.
+  </Card>
+  <Card title="Methods" href="/ui-kit/android/v6/methods">
+    Init, login, logout, and other UI Kit methods.
+  </Card>
+</CardGroup>
+
+***

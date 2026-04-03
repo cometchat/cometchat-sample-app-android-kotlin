@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/message_preview_flexbox"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:flexWrap="wrap">
+
+    <com.cometchat.uikit.kotlin.presentation.shared.messagepreview.CometChatMessagePreview
+        android:id="@+id/reply_message_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</com.google.android.flexbox.FlexboxLayout>

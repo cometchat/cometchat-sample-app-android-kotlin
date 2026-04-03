@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatCallLogs">
+        <attr name="cometchatCallLogsStyle" format="reference" />
+
+        <!-- Background, Stroke and Corner Radius -->
+        <attr name="cometchatCallLogsBackgroundColor" format="color" />
+        <attr name="cometchatCallLogsStrokeWidth" format="dimension" />
+        <attr name="cometchatCallLogsStrokeColor" format="color" />
+        <attr name="cometchatCallLogsCornerRadius" format="dimension" />
+
+        <!-- Back Icon and Tint -->
+        <attr name="cometchatCallLogsBackIcon" format="reference" />
+        <attr name="cometchatCallLogsBackIconTint" format="color" />
+
+        <!-- Title Appearance and Color -->
+        <attr name="cometchatCallLogsTitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsTitleTextColor" format="color" />
+
+        <!-- Empty State Appearance and Colors -->
+        <attr name="cometchatCallLogsEmptyStateTitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsEmptyStateTitleTextColor" format="color" />
+        <attr name="cometchatCallLogsEmptyStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsEmptyStateSubtitleTextColor" format="color" />
+
+        <!-- Error State Appearance and Colors -->
+        <attr name="cometchatCallLogsErrorTitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsErrorTitleTextColor" format="color" />
+        <attr name="cometchatCallLogsErrorSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsErrorSubtitleTextColor" format="color" />
+
+        <!-- Call Logs Item Text Appearance and Colors -->
+        <attr name="cometchatCallLogsItemTitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsItemTitleTextColor" format="color" />
+        <attr name="cometchatCallLogsItemSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatCallLogsItemSubtitleTextColor" format="color" />
+
+        <!-- Incoming Call Icons and Tints -->
+        <attr name="cometchatCallLogsItemIncomingCallIcon" format="reference" />
+        <attr name="cometchatCallLogsItemIncomingCallIconTint" format="color" />
+
+        <!-- Outgoing Call Icons and Tints -->
+        <attr name="cometchatCallLogsItemOutgoingCallIcon" format="reference" />
+        <attr name="cometchatCallLogsItemOutgoingCallIconTint" format="color" />
+
+        <!-- Missed Call Icons and Tints -->
+        <attr name="cometchatCallLogsItemMissedCallTitleColor" format="color" />
+        <attr name="cometchatCallLogsItemMissedCallIcon" format="reference" />
+        <attr name="cometchatCallLogsItemMissedCallIconTint" format="color" />
+
+        <!-- Audio and Video Call Icons and Tints -->
+        <attr name="cometchatCallLogsItemAudioCallIcon" format="reference" />
+        <attr name="cometchatCallLogsItemAudioCallIconTint" format="color" />
+        <attr name="cometchatCallLogsItemVideoCallIcon" format="reference" />
+        <attr name="cometchatCallLogsItemVideoCallIconTint" format="color" />
+
+        <!-- Avatar Style and Date Style -->
+        <attr name="cometchatCallLogsAvatarStyle" format="reference" />
+        <attr name="cometchatCallLogsDateStyle" format="reference" />
+        <attr name="cometchatCallLogsSeparatorColor" format="color" />
+    </declare-styleable>
+</resources>

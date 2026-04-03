@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Users Fragment Layout
+    
+    Contains CometChatUsers component for displaying user list.
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ui.fragments.UsersFragment">
+    tools:context=".ui.users.UsersFragment">
 
-    <com.cometchat.chatuikit.users.CometChatUsers
-        android:id="@+id/users"
+    <com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
+        android:id="@+id/users_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

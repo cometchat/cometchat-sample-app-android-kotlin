@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/voice_call_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:rippleColor="@android:color/transparent"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:id="@+id/voice_call_button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/voice_call_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:elevation="0dp"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone"
+                    app:elevation="0dp"
+                    app:strokeWidth="0dp"
+                    tools:visibility="visible" />
+
+                <ImageView
+                    android:id="@+id/voice_call_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:minWidth="@dimen/cometchat_24dp"
+                    android:minHeight="@dimen/cometchat_24dp"
+                    android:contentDescription="@string/cometchat_voice_call"
+                    android:src="@drawable/cometchat_ic_call_voice"
+                    tools:src="@drawable/cometchat_ic_call_voice" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/voice_call_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6.5dp"
+                android:visibility="gone"
+                tools:text="Voice Call"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="@dimen/cometchat_16dp"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/video_call_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:rippleColor="@android:color/transparent"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:id="@+id/video_call_button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/video_call_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:elevation="0dp"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone"
+                    app:elevation="0dp"
+                    app:strokeWidth="0dp"
+                    tools:visibility="visible" />
+
+                <ImageView
+                    android:id="@+id/video_call_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:minWidth="@dimen/cometchat_24dp"
+                    android:minHeight="@dimen/cometchat_24dp"
+                    android:contentDescription="@string/cometchat_video_call"
+                    android:src="@drawable/cometchat_ic_call_video"
+                    tools:src="@drawable/cometchat_ic_call_video" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/video_call_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6.5dp"
+                android:visibility="gone"
+                tools:text="Video Call"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

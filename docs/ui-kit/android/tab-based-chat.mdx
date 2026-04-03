@@ -1,0 +1,502 @@
+---
+title: "Building A Tab-Based Messaging UI"
+sidebarTitle: "Tab Based Chat Experience"
+description: "Create a tab-based messaging UI with bottom navigation for Chats, Calls, Users, and Groups."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Components | `CometChatConversations`, `CometChatCallLogs`, `CometChatUsers`, `CometChatGroups` |
+| Layout | Tabbed bottom navigation (Chats, Calls, Users, Groups) |
+| Prerequisite | Complete [Kotlin Integration](/ui-kit/android/v6/getting-started-kotlin) or [Jetpack Compose Integration](/ui-kit/android/v6/getting-started-jetpack) Steps 1–3 first |
+| Pattern | Full-featured messaging app with multiple sections |
+
+</Accordion>
+
+This guide builds a tabbed messaging UI — Chats, Calls, Users, and Groups tabs via bottom navigation, with each tab loading its CometChat component.
+
+This assumes you've already completed the integration guide for your chosen UI toolkit (project created, dependencies installed, init + login working).
+
+---
+
+## What You're Building
+
+<Frame>
+  <img src="/images/7e8b813d-chat_experience_full_tab_based-28115d603d38f5bbfbfe170739aa478c.png" />
+</Frame>
+
+Two sections working together:
+
+1. **Bottom navigation bar** — switches between Chats, Calls, Users, and Groups
+2. **Content area** — renders the CometChat component for the active tab
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+This uses Android's `BottomNavigationView` with Fragments: `TabbedActivity` hosts the navigation and fragment container, user taps a tab, the corresponding Fragment loads.
+</Tab>
+<Tab title="Jetpack Compose">
+This uses Material 3 `NavigationBar` with Compose state: a single composable manages the selected tab and renders the corresponding CometChat component.
+</Tab>
+</Tabs>
+
+---
+
+## Step 1: Set Up the Tabbed Screen
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Create a new Activity called `TabbedActivity` with `BottomNavigationView`.
+
+**Layout** — `activity_tabbed.xml`:
+
+```xml activity_tabbed.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_nav_menu"/>
+
+</LinearLayout>
+```
+
+**Menu** — `res/menu/bottom_nav_menu.xml`:
+
+```xml bottom_nav_menu.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_chats" android:icon="@drawable/ic_chats" android:title="Chats"/>
+    <item android:id="@+id/nav_call_logs" android:icon="@drawable/ic_calls" android:title="Calls"/>
+    <item android:id="@+id/nav_users" android:icon="@drawable/ic_user" android:title="Users"/>
+    <item android:id="@+id/nav_groups" android:icon="@drawable/ic_group" android:title="Groups"/>
+</menu>
+```
+
+**Activity** — `TabbedActivity.kt`:
+
+```kotlin TabbedActivity.kt lines
+import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+class TabbedActivity : AppCompatActivity() {
+
+    private lateinit var bottomNav: BottomNavigationView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_tabbed)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
+
+        bottomNav = findViewById(R.id.bottomNavigationView)
+
+        bottomNav.setOnItemSelectedListener { item ->
+            replaceFragment(
+                when (item.itemId) {
+                    R.id.nav_chats -> ChatsFragment()
+                    R.id.nav_call_logs -> CallLogsFragment()
+                    R.id.nav_users -> UsersFragment()
+                    R.id.nav_groups -> GroupsFragment()
+                    else -> ChatsFragment()
+                }
+            )
+            true
+        }
+
+        if (savedInstanceState == null) {
+            replaceFragment(ChatsFragment())
+        }
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Create a `TabbedScreen` composable with `NavigationBar`:
+
+```kotlin TabbedScreen.kt lines
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.compose.presentation.calllogs.ui.CometChatCallLogs
+import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConversations
+import com.cometchat.uikit.compose.presentation.groups.ui.CometChatGroups
+import com.cometchat.uikit.compose.presentation.users.ui.CometChatUsers
+
+enum class Tab(val label: String, val iconRes: Int) {
+    Chats("Chats", R.drawable.ic_chats),
+    Calls("Calls", R.drawable.ic_calls),
+    Users("Users", R.drawable.ic_users),
+    Groups("Groups", R.drawable.ic_groups)
+}
+
+@Composable
+fun TabbedScreen(
+    onUserClick: (User) -> Unit = {},
+    onGroupClick: (Group) -> Unit = {}
+) {
+    var selectedTab by rememberSaveable { mutableStateOf(Tab.Chats) }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                Tab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        icon = {
+                            Icon(
+                                painter = painterResource(tab.iconRes),
+                                contentDescription = tab.label,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        },
+                        label = { Text(tab.label) }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (selectedTab) {
+                Tab.Chats -> CometChatConversations(
+                    modifier = Modifier.fillMaxSize(),
+                    title = "Chats",
+                    onItemClick = { conversation ->
+                        when (val entity = conversation.conversationWith) {
+                            is User -> onUserClick(entity)
+                            is Group -> onGroupClick(entity)
+                        }
+                    }
+                )
+                Tab.Calls -> CometChatCallLogs(
+                    modifier = Modifier.fillMaxSize()
+                )
+                Tab.Users -> CometChatUsers(
+                    modifier = Modifier.fillMaxSize(),
+                    onItemClick = { user -> onUserClick(user) }
+                )
+                Tab.Groups -> CometChatGroups(
+                    modifier = Modifier.fillMaxSize(),
+                    onItemClick = { group -> onGroupClick(group) }
+                )
+            }
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 2: Create Tab Content
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Create a Fragment for each tab. Each Fragment inflates a layout containing the corresponding CometChat component.
+
+**ChatsFragment:**
+
+```kotlin ChatsFragment.kt lines
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class ChatsFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_chats, container, false)
+    }
+}
+```
+
+```xml fragment_chats.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.cometchat.uikit.kotlin.presentation.conversations.ui.CometChatConversations
+        android:id="@+id/conversations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
+```
+
+**CallLogsFragment:**
+
+```kotlin CallLogsFragment.kt lines
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class CallLogsFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_call_logs, container, false)
+    }
+}
+```
+
+```xml fragment_call_logs.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.cometchat.uikit.kotlin.presentation.calllogs.ui.CometChatCallLogs
+        android:id="@+id/call_logs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
+```
+
+**UsersFragment:**
+
+```kotlin UsersFragment.kt lines
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class UsersFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_users, container, false)
+    }
+}
+```
+
+```xml fragment_users.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
+        android:id="@+id/users"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
+```
+
+**GroupsFragment:**
+
+```kotlin GroupsFragment.kt lines
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class GroupsFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_groups, container, false)
+    }
+}
+```
+
+```xml fragment_groups.xml lines
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
+        android:id="@+id/groups"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
+```
+
+<Info>
+Download the navigation icons from the [CometChat UI Kit repository](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-java/src/main/res/drawable) and place them in your `res/drawable/` directory.
+</Info>
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+No separate files needed — the tab content is already defined inline in the `TabbedScreen` composable above. Each `when` branch renders the corresponding CometChat component directly.
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 3: Launch the Tabbed Screen
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Launch `TabbedActivity` from your `MainActivity` after successful login:
+
+```kotlin MainActivity.kt lines
+private fun loginUser() {
+    CometChatUIKit.login("cometchat-uid-1", object : CometChat.CallbackListener<User>() {
+        override fun onSuccess(user: User) {
+            Log.d(TAG, "Login successful: ${user.uid}")
+
+            // Launch Tab-Based Chat Experience
+            startActivity(Intent(this@MainActivity, TabbedActivity::class.java))
+        }
+
+        override fun onError(e: CometChatException) {
+            Log.e(TAG, "Login failed: ${e.message}")
+        }
+    })
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Render `TabbedScreen` from your `MainActivity` after successful login:
+
+```kotlin MainActivity.kt lines
+setContent {
+    when {
+        error != null -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(error ?: "Unknown error")
+            }
+        }
+        !isReady -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        else -> {
+            TabbedScreen(
+                onUserClick = { user ->
+                    // Navigate to message screen with user
+                },
+                onGroupClick = { group ->
+                    // Navigate to message screen with group
+                }
+            )
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Step 4: Register Activity & Permissions
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add the activity to your `AndroidManifest.xml`:
+
+```xml AndroidManifest.xml lines
+<application ...>
+    <activity android:name=".TabbedActivity" />
+</application>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+No additional activities needed — everything runs inside your existing `MainActivity`.
+
+</Tab>
+</Tabs>
+
+Ensure you've added the required permissions in your `AndroidManifest.xml`:
+
+```xml AndroidManifest.xml lines
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
+
+For call features, also add:
+
+```xml AndroidManifest.xml lines
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Explore all available UI Kit components and their customization options
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles to match your brand
+  </Card>
+  <Card title="Integration" icon="rocket" href="/ui-kit/android/v6/getting-started">
+    Back to the main integration guide
+  </Card>
+  <Card title="Feature Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Add capabilities like threaded messages, blocking, and group management
+  </Card>
+</CardGroup>

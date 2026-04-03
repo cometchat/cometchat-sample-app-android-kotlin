@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatMessageComposer">
+        <!-- Style reference -->
+        <attr name="cometchatMessageComposerStyle" format="reference" />
+
+        <!-- Container styling -->
+        <attr name="cometchatMessageComposerBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerStrokeColor" format="color" />
+        <attr name="cometchatMessageComposerStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageComposerCornerRadius" format="dimension" />
+
+        <!-- Compose box styling -->
+        <attr name="cometchatMessageComposerComposeBoxBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerComposeBoxStrokeColor" format="color" />
+        <attr name="cometchatMessageComposerComposeBoxStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageComposerComposeBoxCornerRadius" format="dimension" />
+
+        <!-- Separator styling -->
+        <attr name="cometchatMessageComposerSeparatorColor" format="color" />
+
+        <!-- Attachment button styling -->
+        <attr name="cometchatMessageComposerAttachmentIcon" format="reference" />
+        <attr name="cometchatMessageComposerAttachmentIconTint" format="color" />
+
+        <!-- Voice recording button styling -->
+        <attr name="cometchatMessageComposerVoiceRecordingIcon" format="reference" />
+        <attr name="cometchatMessageComposerVoiceRecordingIconTint" format="color" />
+
+        <!-- AI button styling -->
+        <attr name="cometchatMessageComposerAIIcon" format="reference" />
+        <attr name="cometchatMessageComposerAIIconTint" format="color" />
+
+        <!-- Sticker button styling -->
+        <attr name="cometchatMessageComposerStickerIcon" format="reference" />
+        <attr name="cometchatMessageComposerStickerIconTint" format="color" />
+        <attr name="cometchatMessageComposerInactiveStickerIcon" format="reference" />
+        <attr name="cometchatMessageComposerActiveStickerIcon" format="reference" />
+
+        <!-- Send button styling -->
+        <attr name="cometchatMessageComposerSendButtonActiveIcon" format="reference" />
+        <attr name="cometchatMessageComposerSendButtonInactiveIcon" format="reference" />
+        <attr name="cometchatMessageComposerSendButtonActiveBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerSendButtonInactiveBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerSendButtonStopIcon" format="reference" />
+
+        <!-- Edit preview styling -->
+        <attr name="cometchatMessageComposerEditPreviewTitleTextColor" format="color" />
+        <attr name="cometchatMessageComposerEditPreviewTitleTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerEditPreviewMessageTextColor" format="color" />
+        <attr name="cometchatMessageComposerEditPreviewMessageTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerEditPreviewBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerEditPreviewCornerRadius" format="dimension" />
+        <attr name="cometchatMessageComposerEditPreviewStrokeColor" format="color" />
+        <attr name="cometchatMessageComposerEditPreviewStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageComposerEditPreviewCloseIcon" format="reference" />
+        <attr name="cometchatMessageComposerEditPreviewCloseIconTint" format="color" />
+
+        <!-- Message preview styling (for reply/quote) -->
+        <attr name="cometchatMessageComposerMessagePreviewSeparatorColor" format="color" />
+        <attr name="cometchatMessageComposerMessagePreviewTitleTextColor" format="color" />
+        <attr name="cometchatMessageComposerMessagePreviewTitleTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerMessagePreviewSubtitleTextColor" format="color" />
+        <attr name="cometchatMessageComposerMessagePreviewSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerMessagePreviewBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerMessagePreviewCornerRadius" format="dimension" />
+        <attr name="cometchatMessageComposerMessagePreviewStrokeColor" format="color" />
+        <attr name="cometchatMessageComposerMessagePreviewStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageComposerMessagePreviewCloseIcon" format="reference" />
+        <attr name="cometchatMessageComposerMessagePreviewCloseIconTint" format="color" />
+
+        <!-- Info panel styling -->
+        <attr name="cometchatMessageComposerInfoIcon" format="reference" />
+        <attr name="cometchatMessageComposerInfoIconTint" format="color" />
+        <attr name="cometchatMessageComposerInfoTextColor" format="color" />
+        <attr name="cometchatMessageComposerInfoTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerInfoBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerInfoCornerRadius" format="dimension" />
+        <attr name="cometchatMessageComposerInfoStrokeColor" format="color" />
+        <attr name="cometchatMessageComposerInfoStrokeWidth" format="dimension" />
+
+        <!-- Input text styling -->
+        <attr name="cometchatMessageComposerInputTextColor" format="color" />
+        <attr name="cometchatMessageComposerInputTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerInputPlaceholderColor" format="color" />
+        <attr name="cometchatMessageComposerInputPlaceholderAppearance" format="reference" />
+
+        <!-- Rich text toolbar styling -->
+        <attr name="cometchatMessageComposerRichTextToolbarBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerRichTextToolbarIconTint" format="color" />
+        <attr name="cometchatMessageComposerRichTextToolbarActiveIconTint" format="color" />
+        <attr name="cometchatMessageComposerRichTextToolbarToggleIcon" format="reference" />
+        <attr name="cometchatMessageComposerRichTextToolbarToggleIconTint" format="color" />
+
+        <!-- Link edit dialog styling -->
+        <attr name="cometchatMessageComposerLinkDialogBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerLinkDialogTitleTextColor" format="color" />
+        <attr name="cometchatMessageComposerLinkDialogTitleTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerLinkDialogInputBackgroundColor" format="color" />
+        <attr name="cometchatMessageComposerLinkDialogInputTextColor" format="color" />
+        <attr name="cometchatMessageComposerLinkDialogInputTextAppearance" format="reference" />
+        <attr name="cometchatMessageComposerLinkDialogButtonTextColor" format="color" />
+        <attr name="cometchatMessageComposerLinkDialogButtonTextAppearance" format="reference" />
+
+        <!-- Message input style -->
+        <attr name="cometchatMessageInputStyle" />
+
+        <!-- Message preview style -->
+        <attr name="cometChatMessagePreviewStyle" />
+
+        <!-- Mentions style -->
+        <attr name="cometchatMessageComposerMentionsStyle" format="reference" />
+
+        <!-- Attachment option sheet style -->
+        <attr name="cometchatMessageComposerAttachmentOptionSheetStyle" format="reference" />
+
+        <!-- AI option sheet style -->
+        <attr name="cometchatMessageComposerAIOptionSheetStyle" format="reference" />
+    </declare-styleable>
+</resources>

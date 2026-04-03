@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Bottom Navigation Menu for Home Screen
+    
+    Contains four tabs: Chats, Calls, Users, and Groups.
+    
+    Validates: Requirements 5.1
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_chats"
-        android:icon="@drawable/ic_chats"
-        android:title="@string/app_bottom_nav_chats" />
+        android:icon="@drawable/ic_nav_chats"
+        android:title="@string/tab_chats" />
 
     <item
         android:id="@+id/nav_calls"
-        android:icon="@drawable/ic_calls"
-        android:title="@string/app_bottom_nav_calls" />
+        android:icon="@drawable/ic_nav_calls"
+        android:title="@string/tab_calls" />
 
     <item
         android:id="@+id/nav_users"
-        android:icon="@drawable/ic_users"
-        android:title="@string/app_bottom_nav_users" />
+        android:icon="@drawable/ic_nav_users"
+        android:title="@string/tab_users" />
 
     <item
         android:id="@+id/nav_groups"
-        android:icon="@drawable/ic_bottom_bar_groups"
-        android:title="@string/app_bottom_nav_groups" />
+        android:icon="@drawable/ic_nav_groups"
+        android:title="@string/tab_groups" />
 
 </menu>

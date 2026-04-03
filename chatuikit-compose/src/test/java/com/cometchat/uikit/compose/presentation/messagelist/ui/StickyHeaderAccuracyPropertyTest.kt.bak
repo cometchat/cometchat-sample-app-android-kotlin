@@ -1,0 +1,452 @@
+package com.cometchat.uikit.compose.presentation.messagelist.ui
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.longs.shouldBeGreaterThan
+import io.kotest.matchers.longs.shouldBeLessThan
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.long
+import io.kotest.property.checkAll
+import java.util.Calendar
+import java.util.Locale
+
+/**
+ * Property-based tests for verifying sticky header date accuracy.
+ *
+ * **Feature: message-list-sticky-date-fixes**
+ * **Property 2: Sticky Header Date Accuracy**
+ *
+ * **Validates: Requirements 2.1, 2.2, 2.3**
+ *
+ * For any scroll position where messages are visible, the sticky date header SHALL display
+ * the date that matches the `sentAt` timestamp of the topmost visible message.
+ *
+ * The `getDateId()` function is the core logic that converts message timestamps to date IDs
+ * for sticky header display. These tests verify:
+ * 1. Date ID calculation is consistent (same timestamp always produces same date ID)
+ * 2. Different times on the same day produce the same date ID
+ * 3. Different days produce different date IDs
+ * 4. The date ID format is valid (YYYYMMDD)
+ */
+class StickyHeaderAccuracyPropertyTest : StringSpec({
+
+    // ============================================================================
+    // Arbitrary generators for property-based testing
+    // ============================================================================
+
+    /**
+     * Generates random timestamps in seconds within a reasonable range.
+     * Range: January 1, 2020 to December 31, 2030 (Unix timestamps in seconds)
+     */
+    val timestampSecondsArb = Arb.long(1577836800L..1924991999L)
+
+    /**
+     * Generates random hours (0-23) for same-day testing.
+     */
+    val hourArb = Arb.int(0..23)
+
+    /**
+     * Generates random minutes (0-59) for same-day testing.
+     */
+    val minuteArb = Arb.int(0..59)
+
+    /**
+     * Generates random seconds (0-59) for same-day testing.
+     */
+    val secondArb = Arb.int(0..59)
+
+    /**
+     * Generates random years (2020-2030) for date testing.
+     */
+    val yearArb = Arb.int(2020..2030)
+
+    /**
+     * Generates random months (1-12) for date testing.
+     */
+    val monthArb = Arb.int(1..12)
+
+    /**
+     * Generates random days (1-28) for date testing.
+     * Using 1-28 to avoid month-specific day limits.
+     */
+    val dayArb = Arb.int(1..28)
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Consistency
+    // ============================================================================
+
+    /**
+     * Property test: Date ID calculation is deterministic - same timestamp always produces same date ID.
+     *
+     * This ensures the sticky header will always show the same date for a given message timestamp,
+     * regardless of when or how many times the calculation is performed.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1, 2.2**
+     */
+    "Property 2: Same timestamp should always produce same date ID (consistency)" {
+        checkAll(100, timestampSecondsArb) { timestamp ->
+            val result1 = getDateId(timestamp)
+            val result2 = getDateId(timestamp)
+            val result3 = getDateId(timestamp)
+
+            result1 shouldBe result2
+            result2 shouldBe result3
+        }
+    }
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Same Day Invariant
+    // ============================================================================
+
+    /**
+     * Property test: Different times on the same day produce the same date ID.
+     *
+     * This ensures that all messages sent on the same day will be grouped under
+     * the same sticky header date, regardless of the time they were sent.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1, 2.3**
+     */
+    "Property 2: Different times on same day should produce same date ID" {
+        checkAll(100, yearArb, monthArb, dayArb, hourArb, minuteArb, secondArb, hourArb, minuteArb, secondArb) { 
+            year, month, day, hour1, minute1, second1, hour2, minute2, second2 ->
+            
+            // Create two timestamps on the same day but different times
+            val calendar1 = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, hour1, minute1, second1) // month is 0-indexed
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp1 = calendar1.timeInMillis / 1000
+
+            val calendar2 = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, hour2, minute2, second2)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp2 = calendar2.timeInMillis / 1000
+
+            val dateId1 = getDateId(timestamp1)
+            val dateId2 = getDateId(timestamp2)
+
+            // Both should produce the same date ID
+            dateId1 shouldBe dateId2
+        }
+    }
+
+    /**
+     * Property test: Midnight (00:00:00) and end of day (23:59:59) produce the same date ID.
+     *
+     * This is a critical edge case ensuring the sticky header correctly handles
+     * messages at day boundaries.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1, 2.3**
+     */
+    "Property 2: Midnight and end of day should produce same date ID" {
+        checkAll(100, yearArb, monthArb, dayArb) { year, month, day ->
+            // Midnight: 00:00:00
+            val midnightCalendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val midnightTimestamp = midnightCalendar.timeInMillis / 1000
+
+            // End of day: 23:59:59
+            val endOfDayCalendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, 23, 59, 59)
+                set(Calendar.MILLISECOND, 999)
+            }
+            val endOfDayTimestamp = endOfDayCalendar.timeInMillis / 1000
+
+            val midnightDateId = getDateId(midnightTimestamp)
+            val endOfDayDateId = getDateId(endOfDayTimestamp)
+
+            midnightDateId shouldBe endOfDayDateId
+        }
+    }
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Different Days Invariant
+    // ============================================================================
+
+    /**
+     * Property test: Different days produce different date IDs.
+     *
+     * This ensures the sticky header will correctly distinguish between messages
+     * from different days, updating the displayed date when scrolling across day boundaries.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2: Different days should produce different date IDs" {
+        checkAll(100, yearArb, monthArb, dayArb, dayArb) { year, month, day1, day2 ->
+            // Skip if days are the same
+            if (day1 != day2) {
+                val calendar1 = Calendar.getInstance(Locale.ENGLISH).apply {
+                    set(year, month - 1, day1, 12, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val timestamp1 = calendar1.timeInMillis / 1000
+
+                val calendar2 = Calendar.getInstance(Locale.ENGLISH).apply {
+                    set(year, month - 1, day2, 12, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val timestamp2 = calendar2.timeInMillis / 1000
+
+                val dateId1 = getDateId(timestamp1)
+                val dateId2 = getDateId(timestamp2)
+
+                // Different days should produce different date IDs
+                dateId1 shouldBe (dateId1) // Sanity check
+                dateId2 shouldBe (dateId2) // Sanity check
+                (dateId1 == dateId2) shouldBe false
+            }
+        }
+    }
+
+    /**
+     * Property test: Consecutive days produce consecutive date IDs (when day < 28).
+     *
+     * This verifies the YYYYMMDD format produces chronologically ordered values.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2: Consecutive days should produce date IDs that differ by 1" {
+        checkAll(100, yearArb, monthArb, Arb.int(1..27)) { year, month, day ->
+            val calendar1 = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, 12, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp1 = calendar1.timeInMillis / 1000
+
+            val calendar2 = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day + 1, 12, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp2 = calendar2.timeInMillis / 1000
+
+            val dateId1 = getDateId(timestamp1)
+            val dateId2 = getDateId(timestamp2)
+
+            // Consecutive days should have date IDs that differ by 1
+            (dateId2 - dateId1) shouldBe 1L
+        }
+    }
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Valid Format
+    // ============================================================================
+
+    /**
+     * Property test: Date ID is always in valid YYYYMMDD format.
+     *
+     * This ensures the date ID can be reliably used for comparison and display.
+     * Valid range: 20200101 to 20301231 (based on our test range)
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "Property 2: Date ID should be in valid YYYYMMDD format" {
+        checkAll(100, timestampSecondsArb) { timestamp ->
+            val dateId = getDateId(timestamp)
+
+            // Extract components from YYYYMMDD format
+            val year = (dateId / 10000).toInt()
+            val month = ((dateId % 10000) / 100).toInt()
+            val day = (dateId % 100).toInt()
+
+            // Validate year range (2020-2030 based on our timestamp range)
+            year shouldBeGreaterThan 2019
+            year shouldBeLessThan 2031
+
+            // Validate month range (1-12)
+            month shouldBeGreaterThan 0
+            month shouldBeLessThan 13
+
+            // Validate day range (1-31)
+            day shouldBeGreaterThan 0
+            day shouldBeLessThan 32
+        }
+    }
+
+    /**
+     * Property test: Date ID components match the original timestamp's date.
+     *
+     * This verifies the date ID accurately represents the timestamp's date,
+     * ensuring the sticky header displays the correct date.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1, 2.2**
+     */
+    "Property 2: Date ID components should match timestamp date" {
+        checkAll(100, yearArb, monthArb, dayArb, hourArb, minuteArb) { year, month, day, hour, minute ->
+            val calendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, day, hour, minute, 0) // month is 0-indexed in Calendar
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp = calendar.timeInMillis / 1000
+
+            val dateId = getDateId(timestamp)
+
+            // Extract components from YYYYMMDD format
+            val extractedYear = (dateId / 10000).toInt()
+            val extractedMonth = ((dateId % 10000) / 100).toInt()
+            val extractedDay = (dateId % 100).toInt()
+
+            // Components should match the input date
+            extractedYear shouldBe year
+            extractedMonth shouldBe month
+            extractedDay shouldBe day
+        }
+    }
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Chronological Ordering
+    // ============================================================================
+
+    /**
+     * Property test: Later timestamps produce greater or equal date IDs.
+     *
+     * This ensures the YYYYMMDD format maintains chronological ordering,
+     * which is important for comparing dates in the sticky header logic.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2: Later timestamps should produce greater or equal date IDs" {
+        checkAll(100, timestampSecondsArb, timestampSecondsArb) { timestamp1, timestamp2 ->
+            val dateId1 = getDateId(timestamp1)
+            val dateId2 = getDateId(timestamp2)
+
+            when {
+                timestamp1 < timestamp2 -> dateId1 shouldBeLessThan (dateId2 + 1) // dateId1 <= dateId2
+                timestamp1 > timestamp2 -> dateId2 shouldBeLessThan (dateId1 + 1) // dateId2 <= dateId1
+                else -> dateId1 shouldBe dateId2
+            }
+        }
+    }
+
+    // ============================================================================
+    // Property 2: Sticky Header Date Accuracy - Edge Cases
+    // ============================================================================
+
+    /**
+     * Property test: Year boundary handling (December 31 to January 1).
+     *
+     * This verifies the sticky header correctly handles the transition
+     * from one year to the next.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2: Year boundary should produce different date IDs" {
+        checkAll(100, Arb.int(2020..2029)) { year ->
+            // December 31 at 23:59:59
+            val dec31Calendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, Calendar.DECEMBER, 31, 23, 59, 59)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val dec31Timestamp = dec31Calendar.timeInMillis / 1000
+
+            // January 1 at 00:00:00 of next year
+            val jan1Calendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year + 1, Calendar.JANUARY, 1, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val jan1Timestamp = jan1Calendar.timeInMillis / 1000
+
+            val dec31DateId = getDateId(dec31Timestamp)
+            val jan1DateId = getDateId(jan1Timestamp)
+
+            // Year boundary should produce different date IDs
+            dec31DateId shouldBe (year * 10000L + 1231L)
+            jan1DateId shouldBe ((year + 1) * 10000L + 101L)
+            (dec31DateId == jan1DateId) shouldBe false
+        }
+    }
+
+    /**
+     * Property test: Month boundary handling.
+     *
+     * This verifies the sticky header correctly handles the transition
+     * from one month to the next.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2: Month boundary should produce different date IDs" {
+        checkAll(100, yearArb, Arb.int(1..11)) { year, month ->
+            // Last day of month (using 28 to be safe for all months)
+            val lastDayCalendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month - 1, 28, 23, 59, 59)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val lastDayTimestamp = lastDayCalendar.timeInMillis / 1000
+
+            // First day of next month
+            val firstDayCalendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, month, 1, 0, 0, 0) // month is already 0-indexed for next month
+                set(Calendar.MILLISECOND, 0)
+            }
+            val firstDayTimestamp = firstDayCalendar.timeInMillis / 1000
+
+            val lastDayDateId = getDateId(lastDayTimestamp)
+            val firstDayDateId = getDateId(firstDayTimestamp)
+
+            // Month boundary should produce different date IDs
+            (lastDayDateId == firstDayDateId) shouldBe false
+            firstDayDateId shouldBeGreaterThan lastDayDateId
+        }
+    }
+
+    /**
+     * Property test: Leap year February 29 handling.
+     *
+     * This verifies the sticky header correctly handles leap year dates.
+     *
+     * **Feature: message-list-sticky-date-fixes**
+     * **Property 2: Sticky Header Date Accuracy**
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "Property 2: Leap year February 29 should produce valid date ID" {
+        // Test leap years: 2020, 2024, 2028
+        val leapYears = listOf(2020, 2024, 2028)
+        
+        leapYears.forEach { year ->
+            val calendar = Calendar.getInstance(Locale.ENGLISH).apply {
+                set(year, Calendar.FEBRUARY, 29, 12, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val timestamp = calendar.timeInMillis / 1000
+
+            val dateId = getDateId(timestamp)
+
+            // Should produce YYYY0229 format
+            dateId shouldBe (year * 10000L + 229L)
+        }
+    }
+})

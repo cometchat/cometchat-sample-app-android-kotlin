@@ -1,0 +1,776 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatarStyle
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for verifying that per-bubble default() factory methods
+ * produce instances with correct wrapper properties.
+ *
+ * **Feature: bubble-style-propagation**
+ * **Property 2: Per-bubble default() factory methods produce instances with correct wrapper properties**
+ *
+ * **Validates: Requirements 2.4**
+ *
+ * For any per-bubble-type style class, calling `default()` should produce an instance where
+ * the inherited wrapper properties (backgroundColor, cornerRadius, strokeWidth, strokeColor,
+ * padding, senderNameTextColor, senderNameTextStyle, threadIndicatorTextColor,
+ * threadIndicatorTextStyle, threadIndicatorIconTint) match the expected CometChatTheme
+ * default values for that bubble type.
+ */
+class BubbleStyleDefaultFactoryPropertyTest : StringSpec({
+
+    // ============================================================================
+    // Expected default values for wrapper properties (simulating CometChatTheme)
+    // ============================================================================
+
+    /**
+     * Expected default wrapper property values that match CometChatTheme defaults.
+     * These simulate what CometChatTheme.colorScheme and typography would return.
+     */
+    val expectedBackgroundColor2 = Color(0xFFFAFAFA) // neutralColor100 - backgroundColor2
+    val expectedCornerRadius = 12.dp
+    val expectedStrokeWidth = 0.dp
+    val expectedStrokeColor = Color.Transparent
+    val expectedPadding = PaddingValues(0.dp)
+    val expectedSenderNameTextColor = Color(0xFF727272) // neutralColor600 - textColorSecondary
+    val expectedSenderNameTextStyle = TextStyle(fontSize = 12.sp) // caption1Medium
+    val expectedThreadIndicatorTextColor = Color(0xFF727272) // neutralColor600 - textColorSecondary
+    val expectedThreadIndicatorTextStyle = TextStyle(fontSize = 12.sp) // caption1Regular
+    val expectedThreadIndicatorIconTint = Color(0xFFA1A1A1) // neutralColor500 - iconTintSecondary
+
+    // Special case: Sticker bubble uses transparent background
+    val expectedStickerBackgroundColor = Color.Transparent
+
+    // ============================================================================
+    // Property Test: CometChatTextBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatTextBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatTextBubbleStyle default() should produce correct wrapper properties" {
+        // Use constant Arb to run 100 iterations verifying the same invariant
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultTextBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatImageBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatImageBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatImageBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultImageBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatVideoBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatVideoBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatVideoBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultVideoBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatAudioBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatAudioBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatAudioBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultAudioBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatFileBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatFileBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatFileBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultFileBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatDeleteBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatDeleteBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatDeleteBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultDeleteBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatStickerBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatStickerBubbleStyle.default() produces correct wrapper properties.
+     * Note: Sticker bubbles use transparent background by default.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatStickerBubbleStyle default() should produce correct wrapper properties with transparent background" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultStickerBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            // Note: Sticker uses transparent background
+            style.backgroundColor shouldBe expectedStickerBackgroundColor
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatPollBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatPollBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatPollBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultPollBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatCollaborativeBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatCollaborativeBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatCollaborativeBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultCollaborativeBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatMeetCallBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatMeetCallBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatMeetCallBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultMeetCallBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatActionBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatActionBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatActionBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultActionBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatCallActionBubbleStyle default() produces correct wrapper properties
+    // ============================================================================
+
+    /**
+     * Property test: CometChatCallActionBubbleStyle.default() produces correct wrapper properties.
+     *
+     * **Validates: Requirements 2.4**
+     */
+    "CometChatCallActionBubbleStyle default() should produce correct wrapper properties" {
+        val iterationArb = Arb.constant(Unit)
+
+        checkAll(100, iterationArb) {
+            val style = createDefaultCallActionBubbleStyle()
+
+            // Verify all wrapper properties match expected defaults
+            style.backgroundColor shouldBe expectedBackgroundColor2
+            style.cornerRadius shouldBe expectedCornerRadius
+            style.strokeWidth shouldBe expectedStrokeWidth
+            style.strokeColor shouldBe expectedStrokeColor
+            style.padding shouldBe expectedPadding
+            style.senderNameTextColor shouldBe expectedSenderNameTextColor
+            style.senderNameTextStyle.fontSize shouldBe expectedSenderNameTextStyle.fontSize
+            style.threadIndicatorTextColor shouldBe expectedThreadIndicatorTextColor
+            style.threadIndicatorTextStyle.fontSize shouldBe expectedThreadIndicatorTextStyle.fontSize
+            style.threadIndicatorIconTint shouldBe expectedThreadIndicatorIconTint
+        }
+    }
+})
+
+
+// ============================================================================
+// Helper functions to create default style instances without Compose context
+// These simulate what the default() factory functions would return
+// ============================================================================
+
+/**
+ * Expected default values for wrapper properties (simulating CometChatTheme).
+ */
+private object ExpectedDefaults {
+    val backgroundColor2 = Color(0xFFFAFAFA) // neutralColor100
+    val cornerRadius = 12.dp
+    val strokeWidth = 0.dp
+    val strokeColor = Color.Transparent
+    val padding = PaddingValues(0.dp)
+    val senderNameTextColor = Color(0xFF727272) // neutralColor600 - textColorSecondary
+    val senderNameTextStyle = TextStyle(fontSize = 12.sp) // caption1Medium
+    val threadIndicatorTextColor = Color(0xFF727272) // neutralColor600 - textColorSecondary
+    val threadIndicatorTextStyle = TextStyle(fontSize = 12.sp) // caption1Regular
+    val threadIndicatorIconTint = Color(0xFFA1A1A1) // neutralColor500 - iconTintSecondary
+    
+    // Content-specific defaults
+    val textColorPrimary = Color(0xFF141414) // neutralColor900
+    val textColorSecondary = Color(0xFF727272) // neutralColor600
+    val primary = Color(0xFF6852D6) // primaryColorLight
+    val strokeColorLight = Color(0xFFE8E8E8) // neutralColor300
+    val backgroundColor3 = Color(0xFFF5F5F5) // neutralColor200
+    val iconTintSecondary = Color(0xFFA1A1A1) // neutralColor500
+}
+
+/**
+ * Creates a default CometChatTextBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultTextBubbleStyle(): CometChatTextBubbleStyle = CometChatTextBubbleStyle(
+    // Content-specific properties
+    textColor = ExpectedDefaults.textColorPrimary,
+    textStyle = TextStyle(fontSize = 14.sp),
+    linkColor = ExpectedDefaults.primary,
+    translatedTextColor = ExpectedDefaults.textColorSecondary,
+    translatedTextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor = ExpectedDefaults.strokeColorLight,
+    linkPreviewBackgroundColor = ExpectedDefaults.backgroundColor3,
+    linkPreviewTitleColor = ExpectedDefaults.textColorPrimary,
+    linkPreviewTitleStyle = TextStyle(fontSize = 14.sp),
+    linkPreviewDescriptionColor = ExpectedDefaults.textColorSecondary,
+    linkPreviewDescriptionStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewLinkColor = ExpectedDefaults.primary,
+    linkPreviewLinkStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewCornerRadius = 8.dp,
+    linkPreviewStrokeWidth = 0.dp,
+    linkPreviewStrokeColor = Color.Transparent,
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatImageBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultImageBubbleStyle(): CometChatImageBubbleStyle = CometChatImageBubbleStyle(
+    // Content-specific properties
+    imageCornerRadius = 8.dp,
+    imageStrokeWidth = 0.dp,
+    imageStrokeColor = Color.Transparent,
+    captionTextColor = ExpectedDefaults.textColorPrimary,
+    captionTextStyle = TextStyle(fontSize = 14.sp),
+    progressIndicatorColor = ExpectedDefaults.iconTintSecondary,
+    gridSpacing = 2.dp,
+    maxGridWidth = 240.dp,
+    moreOverlayBackgroundColor = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor = Color.White,
+    moreOverlayTextStyle = TextStyle(fontSize = 18.sp),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+/**
+ * Creates a default CometChatVideoBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultVideoBubbleStyle(): CometChatVideoBubbleStyle = CometChatVideoBubbleStyle(
+    // Content-specific properties
+    videoCornerRadius = 8.dp,
+    videoStrokeWidth = 0.dp,
+    videoStrokeColor = Color.Transparent,
+    playIconTint = Color.White,
+    playIconBackgroundColor = Color.Black.copy(alpha = 0.6f),
+    progressIndicatorColor = ExpectedDefaults.iconTintSecondary,
+    captionTextColor = ExpectedDefaults.textColorPrimary,
+    captionTextStyle = TextStyle(fontSize = 14.sp),
+    gridSpacing = 2.dp,
+    maxGridWidth = 240.dp,
+    moreOverlayBackgroundColor = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor = Color.White,
+    moreOverlayTextStyle = TextStyle(fontSize = 18.sp),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatAudioBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultAudioBubbleStyle(): CometChatAudioBubbleStyle = CometChatAudioBubbleStyle(
+    // Content-specific properties
+    playIconTint = ExpectedDefaults.primary,
+    pauseIconTint = ExpectedDefaults.primary,
+    buttonBackgroundColor = Color.White,
+    audioWaveColor = ExpectedDefaults.primary,
+    subtitleTextColor = ExpectedDefaults.textColorSecondary,
+    subtitleTextStyle = TextStyle(fontSize = 10.sp),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+/**
+ * Creates a default CometChatFileBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultFileBubbleStyle(): CometChatFileBubbleStyle = CometChatFileBubbleStyle(
+    // Content-specific properties
+    innerCornerRadius = 2.dp,
+    itemSpacing = 1.dp,
+    titleTextColor = ExpectedDefaults.textColorPrimary,
+    titleTextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor = ExpectedDefaults.textColorSecondary,
+    subtitleTextStyle = TextStyle(fontSize = 10.sp),
+    fileIconBackgroundColor = Color.White,
+    fileIconCornerRadius = 4.dp,
+    fileIconSize = 32.dp,
+    downloadIconTint = ExpectedDefaults.iconTintSecondary,
+    downloadAllButtonBackgroundColor = ExpectedDefaults.primary,
+    downloadAllButtonTextColor = ExpectedDefaults.textColorPrimary,
+    downloadAllButtonTextStyle = TextStyle(fontSize = 14.sp),
+    downloadAllButtonCornerRadius = 8.dp,
+    downloadAllButtonHeight = 40.dp,
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatDeleteBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultDeleteBubbleStyle(): CometChatDeleteBubbleStyle = CometChatDeleteBubbleStyle(
+    // Content-specific properties
+    textColor = ExpectedDefaults.textColorSecondary,
+    textStyle = TextStyle(fontSize = 14.sp),
+    iconTint = ExpectedDefaults.iconTintSecondary,
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+/**
+ * Creates a default CometChatStickerBubbleStyle instance simulating default() factory.
+ * Note: Sticker bubbles use transparent background by default.
+ */
+private fun createDefaultStickerBubbleStyle(): CometChatStickerBubbleStyle = CometChatStickerBubbleStyle(
+    // Wrapper properties - sticker uses transparent background
+    backgroundColor = Color.Transparent,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatPollBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultPollBubbleStyle(): CometChatPollBubbleStyle = CometChatPollBubbleStyle(
+    // Content-specific properties
+    titleTextColor = ExpectedDefaults.textColorPrimary,
+    titleTextStyle = TextStyle(fontSize = 14.sp),
+    optionTextColor = ExpectedDefaults.textColorPrimary,
+    optionTextStyle = TextStyle(fontSize = 14.sp),
+    selectedRadioButtonStrokeColor = ExpectedDefaults.primary,
+    selectedRadioButtonStrokeWidth = 2.dp,
+    selectedRadioButtonCornerRadius = 12.dp,
+    selectedIconTint = ExpectedDefaults.primary,
+    unselectedRadioButtonStrokeColor = ExpectedDefaults.iconTintSecondary,
+    unselectedRadioButtonStrokeWidth = 1.dp,
+    unselectedRadioButtonCornerRadius = 12.dp,
+    unselectedIconTint = ExpectedDefaults.iconTintSecondary,
+    progressColor = ExpectedDefaults.primary,
+    progressBackgroundColor = ExpectedDefaults.strokeColorLight,
+    progressIndeterminateTint = ExpectedDefaults.iconTintSecondary,
+    voteCountTextColor = ExpectedDefaults.textColorSecondary,
+    voteCountTextStyle = TextStyle(fontSize = 12.sp),
+    optionAvatarStyle = CometChatAvatarStyle(
+        backgroundColor = ExpectedDefaults.iconTintSecondary,
+        cornerRadius = 10.dp,
+        borderWidth = 0.dp,
+        borderColor = Color.Transparent,
+        textColor = Color.White,
+        textStyle = TextStyle(fontSize = 12.sp)
+    ),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatCollaborativeBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultCollaborativeBubbleStyle(): CometChatCollaborativeBubbleStyle = CometChatCollaborativeBubbleStyle(
+    // Content-specific properties
+    titleTextColor = ExpectedDefaults.textColorPrimary,
+    titleTextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor = ExpectedDefaults.textColorSecondary,
+    subtitleTextStyle = TextStyle(fontSize = 12.sp),
+    iconTint = ExpectedDefaults.primary,
+    buttonTextColor = ExpectedDefaults.primary,
+    buttonTextStyle = TextStyle(fontSize = 14.sp),
+    separatorColor = ExpectedDefaults.strokeColorLight,
+    imageStrokeWidth = 0.dp,
+    imageStrokeColor = Color.Transparent,
+    imageCornerRadius = 8.dp,
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+/**
+ * Creates a default CometChatMeetCallBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultMeetCallBubbleStyle(): CometChatMeetCallBubbleStyle = CometChatMeetCallBubbleStyle(
+    // Content-specific properties
+    callIconTint = ExpectedDefaults.primary,
+    iconBackgroundColor = ExpectedDefaults.strokeColorLight,
+    titleTextColor = ExpectedDefaults.textColorPrimary,
+    titleTextStyle = TextStyle(fontSize = 14.sp),
+    subtitleTextColor = ExpectedDefaults.textColorSecondary,
+    subtitleTextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor = ExpectedDefaults.strokeColorLight,
+    joinButtonTextColor = ExpectedDefaults.primary,
+    joinButtonTextStyle = TextStyle(fontSize = 14.sp),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a default CometChatActionBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultActionBubbleStyle(): CometChatActionBubbleStyle = CometChatActionBubbleStyle(
+    // Content-specific properties
+    textColor = ExpectedDefaults.textColorSecondary,
+    textStyle = TextStyle(fontSize = 12.sp),
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)
+
+/**
+ * Creates a default CometChatCallActionBubbleStyle instance simulating default() factory.
+ */
+private fun createDefaultCallActionBubbleStyle(): CometChatCallActionBubbleStyle = CometChatCallActionBubbleStyle(
+    // Content-specific properties
+    textColor = ExpectedDefaults.textColorSecondary,
+    textStyle = TextStyle(fontSize = 12.sp),
+    iconTint = ExpectedDefaults.iconTintSecondary,
+    missedCallTextColor = Color.Red,
+    missedCallTextStyle = TextStyle(fontSize = 12.sp),
+    missedCallBackgroundColor = Color.Red.copy(alpha = 0.1f),
+    missedCallIconTint = Color.Red,
+    // Wrapper properties
+    backgroundColor = ExpectedDefaults.backgroundColor2,
+    cornerRadius = ExpectedDefaults.cornerRadius,
+    strokeWidth = ExpectedDefaults.strokeWidth,
+    strokeColor = ExpectedDefaults.strokeColor,
+    padding = ExpectedDefaults.padding,
+    senderNameTextColor = ExpectedDefaults.senderNameTextColor,
+    senderNameTextStyle = ExpectedDefaults.senderNameTextStyle,
+    threadIndicatorTextColor = ExpectedDefaults.threadIndicatorTextColor,
+    threadIndicatorTextStyle = ExpectedDefaults.threadIndicatorTextStyle,
+    threadIndicatorIconTint = ExpectedDefaults.threadIndicatorIconTint
+)

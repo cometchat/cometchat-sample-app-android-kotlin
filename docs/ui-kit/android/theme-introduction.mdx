@@ -1,0 +1,339 @@
+---
+title: "Introduction"
+description: "Create and apply a global CometChat UI Kit theme to match your brand across light and dark modes."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin XML Views | Override XML theme attributes in `themes.xml` extending `CometChatTheme.DayNight`, or use `CometChatTheme.setPrimaryColor()` programmatically |
+| Jetpack Compose | Wrap content in `CometChatTheme {}` composable, customize via `CometChatColorScheme`, `CometChatTypography`, and `Shapes` |
+| Key color tokens | `primary`, `backgroundColor1`, `backgroundColor2`, `textColorPrimary`, `textColorSecondary`, `strokeColorDefault` |
+| Dark mode | Kotlin: `values-night/themes.xml` overrides. Compose: provide a different `CometChatColorScheme` based on `isSystemInDarkTheme()` |
+
+</Accordion>
+
+Create and apply a global CometChat UI Kit theme that matches your brand across light and dark modes.
+
+## When to use this
+- You want a single UI Kit theme that matches your app branding.
+- You need light and dark mode support with consistent colors.
+- You want to customize primary, background, or text colors across all UI Kit components.
+
+## Prerequisites
+- CometChat UI Kit is installed and initialized.
+- You've completed the [Kotlin Integration](/ui-kit/android/v6/getting-started-kotlin) or [Jetpack Compose Integration](/ui-kit/android/v6/getting-started-jetpack).
+
+---
+
+## Core Concepts
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+The Kotlin XML UI Kit uses Android's theme attribute system. All components read colors, typography, and fonts from XML theme attributes prefixed with `cometchat`.
+
+- `CometChatTheme.DayNight` — base theme built on `Theme.MaterialComponents.DayNight.NoActionBar`
+- Theme attributes like `cometchatPrimaryColor`, `cometchatBackgroundColor1`, etc. are defined in your `themes.xml`
+- Programmatic access via `CometChatTheme.getPrimaryColor(context)` and `CometChatTheme.setPrimaryColor(color)`
+- Dark mode via `values-night/themes.xml` overrides
+
+**Precedence:**
+1. Programmatic overrides via `CometChatTheme.set*()` (highest)
+2. Activity-level theme
+3. Application-level theme
+4. `CometChatTheme.DayNight` defaults (lowest)
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+The Compose UI Kit uses a `CometChatTheme` composable that provides colors, typography, and shapes via `CompositionLocalProvider`.
+
+- `CometChatTheme {}` — wraps your content and provides theme values
+- `CometChatTheme.colorScheme` — access colors like `CometChatTheme.colorScheme.primary`
+- `CometChatTheme.typography` — access text styles like `CometChatTheme.typography.titleMedium`
+- `CometChatTheme.shapes` — access shape definitions
+- Dark mode by providing a different `CometChatColorScheme` based on system theme
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+<Steps>
+<Step title="Create your theme">
+
+In `app/src/main/res/values/themes.xml`, extend `CometChatTheme.DayNight`:
+
+```xml themes.xml lines
+<resources>
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <!-- Your customizations go here -->
+    </style>
+</resources>
+```
+
+</Step>
+<Step title="Apply the theme">
+
+In `AndroidManifest.xml`, set the theme on your application:
+
+```xml AndroidManifest.xml lines
+<application
+    android:theme="@style/AppTheme"
+    ...>
+</application>
+```
+
+</Step>
+<Step title="Build and verify">
+Run the app and confirm UI Kit screens use your theme in both light and dark mode.
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+<Steps>
+<Step title="Wrap your content">
+
+Wrap your composable content with `CometChatTheme`:
+
+```kotlin lines
+import com.cometchat.uikit.compose.theme.CometChatTheme
+
+CometChatTheme {
+    // Your CometChat UI Kit composables here
+    CometChatConversations(...)
+}
+```
+
+</Step>
+<Step title="Build and verify">
+Run the app and confirm UI Kit screens render with the default CometChat theme.
+</Step>
+</Steps>
+
+</Tab>
+</Tabs>
+
+---
+
+## Change the Primary Color
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Override `cometchatPrimaryColor` in your theme:
+
+```xml themes.xml lines
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatPrimaryColor">#F76808</item>
+</style>
+```
+
+Or set it programmatically:
+
+```kotlin lines
+CometChatTheme.setPrimaryColor(Color.parseColor("#F76808"))
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Provide a custom `CometChatColorScheme`:
+
+```kotlin lines
+val customColors = CometChatColorScheme.light().copy(
+    primary = Color(0xFFF76808)
+)
+
+CometChatTheme(colorScheme = customColors) {
+    // Your content
+}
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/e6e0caaf-introduction_theming_primary_change-b6047b7a97046c3abf385ff1fec54e5a.png" />
+</Frame>
+
+---
+
+## Customize Common Theme Attributes
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <!-- Primary brand color -->
+    <item name="cometchatPrimaryColor">#6851D6</item>
+
+    <!-- Background colors -->
+    <item name="cometchatBackgroundColor1">#FFFFFF</item>
+    <item name="cometchatBackgroundColor2">#F5F5F5</item>
+
+    <!-- Text colors -->
+    <item name="cometchatTextColorPrimary">#000000</item>
+    <item name="cometchatTextColorSecondary">#666666</item>
+
+    <!-- Border and divider colors -->
+    <item name="cometchatStrokeColorDefault">#E0E0E0</item>
+</style>
+```
+
+Or programmatically:
+
+```kotlin lines
+CometChatTheme.setPrimaryColor(Color.parseColor("#6851D6"))
+CometChatTheme.setBackgroundColor1(Color.parseColor("#FFFFFF"))
+CometChatTheme.setBackgroundColor2(Color.parseColor("#F5F5F5"))
+CometChatTheme.setTextColorPrimary(Color.parseColor("#000000"))
+CometChatTheme.setTextColorSecondary(Color.parseColor("#666666"))
+CometChatTheme.setStrokeColorDefault(Color.parseColor("#E0E0E0"))
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val customColors = CometChatColorScheme.light().copy(
+    primary = Color(0xFF6851D6),
+    backgroundColor1 = Color(0xFFFFFFFF),
+    backgroundColor2 = Color(0xFFF5F5F5),
+    textColorPrimary = Color(0xFF000000),
+    textColorSecondary = Color(0xFF666666),
+    strokeColorDefault = Color(0xFFE0E0E0)
+)
+
+CometChatTheme(colorScheme = customColors) {
+    // Your content
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Add Dark Mode Support
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Create `app/src/main/res/values-night/themes.xml` and override attributes for dark mode:
+
+```xml values-night/themes.xml lines
+<resources>
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatPrimaryColor">#8B7FFF</item>
+        <item name="cometchatBackgroundColor1">#1A1A1A</item>
+        <item name="cometchatTextColorPrimary">#FFFFFF</item>
+    </style>
+</resources>
+```
+
+Android automatically applies `values-night` overrides when the system uses dark mode.
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Provide different color schemes based on system theme:
+
+```kotlin lines
+val isDark = isSystemInDarkTheme()
+
+val colorScheme = if (isDark) {
+    CometChatColorScheme.dark().copy(
+        primary = Color(0xFF8B7FFF),
+        backgroundColor1 = Color(0xFF1A1A1A),
+        textColorPrimary = Color(0xFFFFFFFF)
+    )
+} else {
+    CometChatColorScheme.light().copy(
+        primary = Color(0xFF6851D6)
+    )
+}
+
+CometChatTheme(colorScheme = colorScheme) {
+    // Your content
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Apply a Theme to a Specific Activity
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Set `android:theme` on a specific `<activity>` in `AndroidManifest.xml`:
+
+```xml AndroidManifest.xml lines
+<application android:theme="@style/AppTheme" ...>
+    <activity
+        android:name=".ChatActivity"
+        android:theme="@style/ChatTheme" />
+</application>
+```
+
+Activity-level themes override the application-level theme.
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Wrap a specific screen with a different `CometChatTheme`:
+
+```kotlin lines
+// Default theme for most screens
+CometChatTheme {
+    MainScreen()
+}
+
+// Custom theme for a specific screen
+CometChatTheme(colorScheme = chatScreenColors) {
+    MessageScreen(user = user, onBack = { })
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Color Token Reference
+
+| Token | Description |
+| --- | --- |
+| `primary` | Buttons, highlights, interactive elements |
+| `backgroundColor1` | Main surface/panel background |
+| `backgroundColor2` | Secondary surface background |
+| `backgroundColor3` | Tertiary surface background |
+| `backgroundColor4` | Quaternary surface background |
+| `textColorPrimary` | Primary text |
+| `textColorSecondary` | Secondary/subtitle text |
+| `textColorTertiary` | Tertiary/hint text |
+| `textColorHighlight` | Highlighted/linked text |
+| `strokeColorDefault` | Default borders and dividers |
+| `strokeColorLight` | Light borders |
+| `strokeColorDark` | Dark borders |
+| `successColor` | Success indicators |
+| `errorColor` | Error indicators |
+| `warningColor` | Warning indicators |
+| `infoColor` | Info indicators |
+
+<Frame>
+  <img src="/images/42da9194-introduction_theming_default-b29d82f803cd9092f10d0a72a35f4f62.png" />
+</Frame>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_parent_bubble_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/cometchat_margin_4"
+        android:layout_marginBottom="@dimen/cometchat_margin_2"
+        android:nestedScrollingEnabled="false" />
+
+    <LinearLayout
+        android:id="@+id/replies_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_replies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/cometchat_padding_5"
+            android:paddingTop="@dimen/cometchat_padding_1"
+            android:paddingEnd="@dimen/cometchat_padding_5"
+            android:paddingBottom="@dimen/cometchat_padding_1" />
+
+    </LinearLayout>
+
+</LinearLayout>

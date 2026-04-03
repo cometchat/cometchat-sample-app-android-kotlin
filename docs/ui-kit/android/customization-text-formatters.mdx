@@ -1,0 +1,176 @@
+---
+title: "Text Formatters"
+description: "Create custom text processors for hashtags, mentions, links, or any pattern using the CometChatTextFormatter API."
+---
+
+Text formatters let you process message text with tracking characters, suggestion lists, and spannable transformations. Use them to add hashtag detection, custom mentions, link previews, or any text pattern processing.
+
+Both modules have their own `CometChatTextFormatter` class with the same API pattern:
+- Kotlin XML: `com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter`
+- Jetpack Compose: `com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter`
+
+---
+
+## CometChatTextFormatter API
+
+The abstract class takes a `trackingCharacter` that triggers the formatter when typed in the composer (e.g., `@` for mentions, `#` for hashtags).
+
+### Key Override Methods
+
+| Method | Purpose |
+| --- | --- |
+| `search(context, queryString)` | Called when the user types after the tracking character. Fetch and display suggestions. |
+| `onScrollToBottom()` | Called when the user scrolls to the bottom of the suggestion list. Use for pagination. |
+| `prepareLeftMessageBubbleSpan(context, message, spannable)` | Apply spans to text in incoming message bubbles. |
+| `prepareRightMessageBubbleSpan(context, message, spannable)` | Apply spans to text in outgoing message bubbles. |
+| `prepareComposerSpan(context, message, spannable)` | Apply spans to text in the message composer. |
+| `prepareConversationSpan(context, message, spannable)` | Apply spans to the last message preview in the conversation list. |
+| `handlePreMessageSend(context, message)` | Modify a message before it's sent (attach metadata, transform text). |
+| `onItemClick(context, suggestionItem, user, group)` | Called when the user selects a suggestion item. |
+
+### Suggestion System
+
+| Method | Description |
+| --- | --- |
+| `setSuggestionItemList(items)` | Set the list of suggestions to display |
+| `setShowLoadingIndicator(show)` | Show/hide a loading spinner in the suggestion dropdown |
+| `setDisableSuggestions(disable)` | Disable the suggestion dropdown entirely |
+
+---
+
+## Example: Custom Hashtag Formatter
+
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
+import com.cometchat.uikit.kotlin.shared.formatters.SuggestionItem
+
+class HashtagFormatter : CometChatTextFormatter('#') {
+
+    override fun search(context: Context, queryString: String?) {
+        val suggestions = fetchHashtags(queryString)
+        setSuggestionItemList(suggestions)
+    }
+
+    override fun onScrollToBottom() {
+        // Load more suggestions
+    }
+
+    override fun prepareLeftMessageBubbleSpan(
+        context: Context,
+        baseMessage: BaseMessage,
+        spannable: SpannableStringBuilder
+    ): SpannableStringBuilder? {
+        applyHashtagSpans(spannable, context)
+        return spannable
+    }
+
+    override fun prepareRightMessageBubbleSpan(
+        context: Context,
+        baseMessage: BaseMessage,
+        spannable: SpannableStringBuilder
+    ): SpannableStringBuilder? {
+        applyHashtagSpans(spannable, context)
+        return spannable
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
+import com.cometchat.uikit.compose.presentation.shared.formatters.SuggestionItem
+
+class HashtagFormatter : CometChatTextFormatter('#') {
+
+    override fun search(context: Context, queryString: String?) {
+        val suggestions = fetchHashtags(queryString)
+        setSuggestionItemList(suggestions)
+    }
+
+    override fun onScrollToBottom() {
+        // Load more suggestions
+    }
+
+    override fun prepareLeftMessageBubbleSpan(
+        context: Context,
+        baseMessage: BaseMessage,
+        spannable: SpannableStringBuilder
+    ): SpannableStringBuilder? {
+        applyHashtagSpans(spannable, context)
+        return spannable
+    }
+
+    override fun prepareRightMessageBubbleSpan(
+        context: Context,
+        baseMessage: BaseMessage,
+        spannable: SpannableStringBuilder
+    ): SpannableStringBuilder? {
+        applyHashtagSpans(spannable, context)
+        return spannable
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Registering Formatters
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val hashtagFormatter = HashtagFormatter()
+conversations.setTextFormatters(listOf(hashtagFormatter))
+
+// Or on message composer / message list
+messageComposer.setTextFormatters(listOf(hashtagFormatter))
+messageList.setTextFormatters(listOf(hashtagFormatter))
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    textFormatters = listOf(HashtagFormatter())
+)
+
+CometChatMessageComposer(
+    textFormatters = listOf(HashtagFormatter())
+)
+
+CometChatMessageList(
+    textFormatters = listOf(HashtagFormatter())
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Built-in Formatter: CometChatMentionsFormatter
+
+The UI Kit includes `CometChatMentionsFormatter` as a built-in formatter that handles `@mention` detection, user suggestion lists, and spannable highlighting. It's automatically added to components when mentions are enabled.
+
+Each module has its own implementation:
+- Kotlin XML: `com.cometchat.uikit.kotlin.shared.formatters.CometChatMentionsFormatter`
+- Jetpack Compose: `com.cometchat.uikit.compose.presentation.shared.formatters.CometChatMentionsFormatter`
+
+See the [Mentions Formatter Guide](/ui-kit/android/v6/mentions-formatter-guide) for details.
+
+---
+
+## Related
+
+- [Mentions Formatter Guide](/ui-kit/android/v6/mentions-formatter-guide) — Built-in mentions formatter reference.
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — See all customization categories.

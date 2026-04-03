@@ -1,0 +1,531 @@
+---
+title: "Message Bubble Styling"
+description: "Configure and style incoming, outgoing, and specific message bubbles in your Android UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin XML Views | Override XML styles extending `CometChatIncomingMessageBubbleStyle` / `CometChatOutgoingMessageBubbleStyle` in `themes.xml` |
+| Jetpack Compose | Pass `CometChatMessageListStyle.default().copy()` with nested bubble styles to `CometChatMessageList` |
+| Hub styles | Incoming and Outgoing bubble styles act as central hubs for per-type bubble customization |
+| Per-type styles | Text, Image, Audio, Video, File, Sticker, Poll, Collaborative, Meet Call, Delete, Action, Call Action |
+| Related | [Theme Introduction](/ui-kit/android/v6/theme-introduction) · [Component Styling](/ui-kit/android/v6/component-styling) · [Message List](/ui-kit/android/v6/message-list) |
+
+</Accordion>
+
+Configure and style incoming, outgoing, and specific message bubbles.
+
+---
+
+## Styling Architecture
+
+Message bubbles follow a hub-and-spoke pattern:
+
+1. **Hub styles** — `IncomingMessageBubbleStyle` and `OutgoingMessageBubbleStyle` control the base bubble appearance
+2. **Per-type styles** — Text, Image, Audio, etc. are nested inside the hub styles
+
+<Frame>
+  <img src="/images/90e70e8b-incoming_outgoing_bubble-534f3104b6c087d0b2db810b9e69e216.png" />
+</Frame>
+
+### Global Setup
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<!-- Hub for Incoming Messages -->
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatMessageBubbleBackgroundColor">#FEEDE1</item>
+</style>
+
+<!-- Hub for Outgoing Messages -->
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+</style>
+
+<!-- Connect to AppTheme -->
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatIncomingMessageBubbleStyle">@style/CustomIncomingBubble</item>
+    <item name="cometchatOutgoingMessageBubbleStyle">@style/CustomOutgoingBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    style = CometChatMessageListStyle.default().copy(
+        incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+            backgroundColor = Color(0xFFFEEDE1)
+        ),
+        outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+            backgroundColor = Color(0xFFF76808)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/68dfc288-incoming_bubble_styling-41b09e86811d02c5b9c62cd135e23188.png" />
+</Frame>
+<Frame>
+  <img src="/images/40b99d2c-outgoing_bubble_styling-3762ae90255a5e762e4d5efad2465cf6.png" />
+</Frame>
+
+---
+
+## Core Message Bubbles
+
+### Text Bubble
+
+<Frame>
+  <img src="/images/94f47151-custom_text_bubble-31254c676ff87f3e25ecb4f89f5f5ffc.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomIncomingTextBubble" parent="CometChatIncomingTextMessageBubbleStyle">
+    <item name="cometchatTextBubbleBackgroundColor">#FEEDE1</item>
+</style>
+
+<style name="CustomOutgoingTextBubble" parent="CometChatOutgoingTextBubbleStyle">
+    <item name="cometchatTextBubbleBackgroundColor">#F76808</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatTextBubbleStyle">@style/CustomIncomingTextBubble</item>
+</style>
+
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatTextBubbleStyle">@style/CustomOutgoingTextBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+// Inside CometChatMessageListStyle
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    textBubbleStyle = CometChatTextBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1)
+    )
+),
+outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+    textBubbleStyle = CometChatTextBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Image Bubble
+
+<Frame>
+  <img src="/images/050d471a-custom_image_bubble-cbf84ceb47eb0f7b6a0c27689fc911b9.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomIncomingImageBubble" parent="CometChatIncomingImageMessageBubbleStyle">
+    <item name="cometchatImageBubbleBackgroundColor">#FEEDE1</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatImageBubbleStyle">@style/CustomIncomingImageBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    imageBubbleStyle = CometChatImageBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Audio Bubble
+
+<Frame>
+  <img src="/images/a1a5851e-custom_audio_bubble-7435f7e797b4c409156bc0df3c0bc077.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomIncomingAudioBubble" parent="CometChatIncomingAudioBubbleStyle">
+    <item name="cometchatAudioBubbleAudioWaveColor">#F76808</item>
+    <item name="cometchatAudioBubblePlayIconTint">#F76808</item>
+    <item name="cometchatAudioBubbleBackgroundColor">#FEEDE1</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatAudioBubbleStyle">@style/CustomIncomingAudioBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    audioBubbleStyle = CometChatAudioBubbleStyle.default().copy(
+        playIconTint = Color(0xFFF76808),
+        backgroundColor = Color(0xFFFEEDE1)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Video Bubble
+
+<Frame>
+  <img src="/images/b4e3e6a4-custom_video_bubble-105a5b18f4021eafdf4266bedce930d7.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomIncomingVideoBubble" parent="CometChatIncomingVideoBubbleStyle">
+    <item name="cometchatVideoBubbleBackgroundColor">#FEEDE1</item>
+    <item name="cometchatVideoBubblePlayIconTint">#F76808</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatVideoBubbleStyle">@style/CustomIncomingVideoBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    videoBubbleStyle = CometChatVideoBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        playIconTint = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### File Bubble
+
+<Frame>
+  <img src="/images/3dffd2e7-custom_file_bubble-08f741eb4ad1e4a5098a5b65431f895b.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomIncomingFileBubble" parent="CometChatIncomingFileBubbleStyle">
+    <item name="cometchatFileBubbleBackgroundColor">#FEEDE1</item>
+    <item name="cometchatFileBubbleFileDownloadIconTint">#F76808</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatFileBubbleStyle">@style/CustomIncomingFileBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    fileBubbleStyle = CometChatFileBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        downloadIconTint = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Sticker Bubble
+
+<Frame>
+  <img src="/images/8d48d80f-custom_sticker_bubble-5fac9a1c34cbecfeb3b4015755805309.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomStickerBubble" parent="CometChatStickerBubbleStyle">
+    <item name="cometchatStickerBubbleBackgroundColor">#FEEDE1</item>
+</style>
+
+<style name="CustomIncomingBubble" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatStickerBubbleStyle">@style/CustomStickerBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+    stickerBubbleStyle = CometChatStickerBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Poll Bubble
+
+<Frame>
+  <img src="/images/6c80d571-custom_poll_bubble-02042749c5c6030498163b51be103658.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomOutgoingPollBubble" parent="CometChatOutgoingPollBubbleStyle">
+    <item name="cometchatPollBubbleBackgroundColor">#F76808</item>
+    <item name="cometchatPollBubbleProgressBackgroundColor">#FBAA75</item>
+</style>
+
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatPollBubbleStyle">@style/CustomOutgoingPollBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+    pollBubbleStyle = CometChatPollBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFF76808),
+        progressBackgroundColor = Color(0xFFFBAA75)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Collaborative Bubble
+
+<Frame>
+  <img src="/images/4a4f308c-custom_collaborative_bubble-882924e176c97b69879fc4a4db812be4.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomCollaborativeBubble" parent="CometChatOutgoingCollaborativeBubbleStyle">
+    <item name="cometchatCollaborativeBubbleBackgroundColor">#F76808</item>
+    <item name="cometchatCollaborativeBubbleSeparatorColor">#FBAA75</item>
+</style>
+
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatCollaborativeBubbleStyle">@style/CustomCollaborativeBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+    collaborativeBubbleStyle = CometChatCollaborativeBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFF76808),
+        separatorColor = Color(0xFFFBAA75)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Meet Call Bubble
+
+<Frame>
+  <img src="/images/2c71f1e5-custom_meet_call_bubble-ea1e86f24d9572d4f32e9d07df84c004.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomMeetCallBubble" parent="CometChatOutgoingMeetCallBubbleStyle">
+    <item name="cometchatMeetCallBubbleBackgroundColor">#F76808</item>
+    <item name="cometchatMeetCallBubbleCallIconTint">#F76808</item>
+</style>
+
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatMeetCallBubbleStyle">@style/CustomMeetCallBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+    meetCallBubbleStyle = CometChatMeetCallBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFF76808),
+        callIconTint = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Delete Bubble
+
+<Frame>
+  <img src="/images/d323f495-custom_delete_bubble-9504ef572fcf69ada7c0ae9c1025f468.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomDeleteBubble" parent="CometChatOutgoingDeleteBubbleStyle">
+    <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+</style>
+
+<style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatDeleteBubbleStyle">@style/CustomDeleteBubble</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+    deleteBubbleStyle = CometChatDeleteBubbleStyle.default().copy(
+        backgroundColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## List-Level Bubbles
+
+These bubbles are tied to the Message List style, not the Incoming/Outgoing hubs.
+
+### Call Action Bubble
+
+<Frame>
+  <img src="/images/2680816a-custom_call_action_bubble-273452145034c0846b211e2ed53bc6df.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomCallActionBubble" parent="CometChatCallActionBubbleStyle">
+    <item name="cometchatCallActionBubbleBackgroundColor">#FEEDE1</item>
+    <item name="cometchatCallActionBubbleTextColor">#F76808</item>
+    <item name="cometchatCallActionBubbleIconTint">#F76808</item>
+</style>
+
+<style name="CustomMessageListStyle" parent="CometChatMessageListStyle">
+    <item name="cometchatMessageListCallActionBubbleStyle">@style/CustomCallActionBubble</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatMessageListStyle">@style/CustomMessageListStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    style = CometChatMessageListStyle.default().copy(
+        callActionBubbleStyle = CometChatCallActionBubbleStyle.default().copy(
+            backgroundColor = Color(0xFFFEEDE1),
+            textColor = Color(0xFFF76808),
+            iconTint = Color(0xFFF76808)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Action Bubble
+
+<Frame>
+  <img src="/images/5ef64cf9-custom_action_bubble-c026ed34c02477f513b78475818781bc.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<style name="CustomActionBubble" parent="CometChatActionBubbleStyle">
+    <item name="cometchatActionBubbleBackgroundColor">#FEEDE1</item>
+    <item name="cometchatActionBubbleTextColor">#F76808</item>
+</style>
+
+<style name="CustomMessageListStyle" parent="CometChatMessageListStyle">
+    <item name="cometchatMessageListActionBubbleStyle">@style/CustomActionBubble</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatMessageListStyle">@style/CustomMessageListStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    style = CometChatMessageListStyle.default().copy(
+        actionBubbleStyle = CometChatActionBubbleStyle.default().copy(
+            backgroundColor = Color(0xFFFEEDE1),
+            textColor = Color(0xFFF76808)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>

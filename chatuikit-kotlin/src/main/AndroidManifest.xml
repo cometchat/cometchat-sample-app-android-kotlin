@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT" />
+            <data android:mimeType="image/* video/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="image/* video/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.CHOOSER" />
+        </intent>
+    </queries>
+
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        tools:node="merge"
+        tools:targetApi="m">
+
+        <!-- Transparent activity for handling permission requests -->
+        <activity
+            android:name=".presentation.shared.permission.CometChatPermissionActivity"
+            android:exported="false"
+            android:theme="@style/UiKit.Internal.Theme.Transparent" />
+        
+        <!-- Call activity for outgoing and ongoing calls -->
+        <activity
+            android:name=".calls.CometChatCallActivity"
+            android:exported="false"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:launchMode="singleTop" />
+        
+        <!-- Ongoing call activity with PIP support -->
+        <!-- Validates: Requirement 9.6 -->
+        <activity
+            android:name=".presentation.ongoingcall.ui.CometChatOngoingCallActivity"
+            android:exported="false"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:excludeFromRecents="true" />
+
+        <!-- Image viewer activity for full-screen image display -->
+        <activity
+            android:name=".presentation.shared.mediaviewer.CometChatImageViewerActivity"
+            android:exported="false"
+            android:theme="@style/UiKit.Internal.Theme.Transparent2" />
+
+        <!-- FileProvider for camera capture and file sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_path" />
+        </provider>
+    </application>
+
+</manifest>

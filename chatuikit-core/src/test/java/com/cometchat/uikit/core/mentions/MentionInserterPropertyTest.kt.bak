@@ -1,0 +1,290 @@
+package com.cometchat.uikit.core.mentions
+
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.string.shouldNotContain
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for MentionInserter.
+ * Uses Kotest property testing to verify correctness properties.
+ * 
+ * Feature: cometchat-message-composer
+ */
+class MentionInserterPropertyTest : FunSpec({
+
+    // ==================== Generators ====================
+
+    /**
+     * Generator for mention queries (alphanumeric strings).
+     */
+    val mentionQueryArb = Arb.string(0..20).map { it.filter { c -> c.isLetterOrDigit() } }
+
+    /**
+     * Generator for user names.
+     */
+    val userNameArb = Arb.string(1..20).map { it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(20).ifEmpty { "User" } }
+
+    /**
+     * Generator for user IDs.
+     */
+    val userIdArb = Arb.string(5..20).map { it.filter { c -> c.isLetterOrDigit() }.take(20).ifEmpty { "user123" } }
+
+    // ==================== Property Tests ====================
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text
+     * 
+     * For any suggestion selection, the mention inserter SHALL replace the trigger
+     * and query with the formatted prompt text.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Basic Insertion").config(invocations = 100) {
+        checkAll(mentionQueryArb, userNameArb, userIdArb) { query, userName, userId ->
+            val currentText = "@$query"
+            val triggerIndex = 0
+            val cursorPosition = currentText.length
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // New text should contain the prompt text
+            result.newText shouldContain promptText
+            
+            // New text should NOT contain the original query (unless it's part of the name)
+            if (query.isNotEmpty() && !userName.contains(query)) {
+                result.newText shouldNotContain "@$query"
+            }
+            
+            // Cursor should be after the inserted mention
+            result.newCursorPosition shouldBeGreaterThan promptText.length - 1
+            
+            // Span positions should be valid
+            result.spanStart shouldBeGreaterThanOrEqual 0
+            result.spanEnd shouldBeGreaterThan result.spanStart
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - With Prefix
+     * 
+     * For any text with content before the mention, the prefix SHALL be preserved.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Preserves Prefix").config(invocations = 100) {
+        checkAll(
+            Arb.string(1..20).map { it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(20).ifEmpty { "Hello" } },
+            mentionQueryArb,
+            userNameArb,
+            userIdArb
+        ) { prefix, query, userName, userId ->
+            val currentText = "$prefix @$query"
+            val triggerIndex = prefix.length + 1 // After space
+            val cursorPosition = currentText.length
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // Prefix should be preserved
+            result.newText.startsWith(prefix).shouldBe(true)
+            
+            // Prompt text should be in the result
+            result.newText shouldContain promptText
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - With Suffix
+     * 
+     * For any text with content after the cursor, the suffix SHALL be preserved.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Preserves Suffix").config(invocations = 100) {
+        checkAll(
+            mentionQueryArb,
+            Arb.string(1..20).map { it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(20).ifEmpty { "world" } },
+            userNameArb,
+            userIdArb
+        ) { query, suffix, userName, userId ->
+            val currentText = "@$query $suffix"
+            val triggerIndex = 0
+            val cursorPosition = query.length + 1 // Just after the query, before space
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // Suffix should be preserved (after the space)
+            result.newText shouldContain suffix
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - Adds Space
+     * 
+     * For any mention insertion, a space SHALL be added after the mention
+     * if not already present.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Adds Trailing Space").config(invocations = 100) {
+        checkAll(mentionQueryArb, userNameArb, userIdArb) { query, userName, userId ->
+            val currentText = "@$query"
+            val triggerIndex = 0
+            val cursorPosition = currentText.length
+            val promptText = "@$userName" // No trailing space
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // New text should end with space (for easy continuation)
+            result.newText.trimEnd() shouldBe result.newText.dropLast(1)
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - Span Bounds
+     * 
+     * For any mention insertion, the span bounds SHALL correctly identify
+     * the mention text position.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Valid Span Bounds").config(invocations = 100) {
+        checkAll(
+            Arb.string(0..10).map { it.filter { c -> c.isLetterOrDigit() || c == ' ' } },
+            mentionQueryArb,
+            userNameArb,
+            userIdArb
+        ) { prefix, query, userName, userId ->
+            val prefixWithSpace = if (prefix.isEmpty()) "" else "$prefix "
+            val currentText = "$prefixWithSpace@$query"
+            val triggerIndex = prefixWithSpace.length
+            val cursorPosition = currentText.length
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // Span should be within text bounds
+            result.spanStart shouldBeGreaterThanOrEqual 0
+            result.spanEnd shouldBeLessThanOrEqual result.newText.length
+            result.spanStart shouldBeLessThanOrEqual result.spanEnd
+            
+            // Span should cover the prompt text (without trailing space)
+            val spanLength = result.spanEnd - result.spanStart
+            spanLength shouldBe promptText.trimEnd().length
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - Stores Underlying
+     * 
+     * For any mention insertion, the underlying text SHALL be stored for
+     * later processing.
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Stores Underlying Text").config(invocations = 100) {
+        checkAll(userNameArb, userIdArb) { userName, userId ->
+            val currentText = "@"
+            val triggerIndex = 0
+            val cursorPosition = 1
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // Result should contain the underlying text for later use
+            result.underlyingText shouldBe underlyingText
+            result.promptText shouldBe promptText
+        }
+    }
+
+    /**
+     * Feature: cometchat-message-composer, Property 11: Suggestion Selection Inserts Formatted Text - Cursor Position
+     * 
+     * For any mention insertion, the cursor SHALL be positioned after the
+     * inserted mention (including trailing space).
+     * 
+     * **Validates: Requirements 7.5**
+     */
+    test("Property 11: Suggestion Selection Inserts Formatted Text - Cursor After Mention").config(invocations = 100) {
+        checkAll(
+            Arb.string(0..10).map { it.filter { c -> c.isLetterOrDigit() || c == ' ' } },
+            mentionQueryArb,
+            userNameArb,
+            userIdArb
+        ) { prefix, query, userName, userId ->
+            val prefixWithSpace = if (prefix.isEmpty()) "" else "$prefix "
+            val currentText = "$prefixWithSpace@$query"
+            val triggerIndex = prefixWithSpace.length
+            val cursorPosition = currentText.length
+            val promptText = "@$userName"
+            val underlyingText = "<@uid:$userId>"
+            
+            val result = MentionInserter.calculateInsertion(
+                currentText = currentText,
+                triggerIndex = triggerIndex,
+                cursorPosition = cursorPosition,
+                promptText = promptText,
+                underlyingText = underlyingText
+            )
+            
+            // Cursor should be after the mention and space
+            result.newCursorPosition shouldBe (prefixWithSpace.length + promptText.length + 1)
+            
+            // Cursor should be within text bounds
+            result.newCursorPosition shouldBeLessThanOrEqual result.newText.length
+        }
+    }
+})

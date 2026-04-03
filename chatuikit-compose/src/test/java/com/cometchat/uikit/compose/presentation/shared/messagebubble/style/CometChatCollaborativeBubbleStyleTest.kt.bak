@@ -1,0 +1,327 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Unit tests for [CometChatCollaborativeBubbleStyle].
+ *
+ * Validates:
+ * - Style extends CometChatMessageBubbleStyle (inheritance)
+ * - default(), incoming(), outgoing() factory functions return valid styles
+ * - All properties are accessible
+ * - Incoming and outgoing styles have different colors
+ */
+class CometChatCollaborativeBubbleStyleTest {
+
+    @Test
+    fun `style extends CometChatMessageBubbleStyle`() {
+        val style = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify inheritance - style should be assignable to CometChatMessageBubbleStyle
+        assertTrue(style is CometChatMessageBubbleStyle)
+    }
+
+    @Test
+    fun `default style has valid properties`() {
+        val style = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertNotNull(style)
+        assertEquals(Color.White, style.backgroundColor)
+        assertEquals(12.dp, style.cornerRadius)
+        assertEquals(Color.Black, style.titleTextColor)
+        assertEquals(Color.Gray, style.subtitleTextColor)
+        assertEquals(Color.Blue, style.iconTint)
+        assertEquals(Color.Blue, style.buttonTextColor)
+    }
+
+    @Test
+    fun `all properties are accessible`() {
+        val style = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Green,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Yellow,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Cyan,
+            buttonTextColor = Color.Magenta,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.DarkGray,
+            imageStrokeWidth = 2.dp,
+            imageStrokeColor = Color.Black,
+            imageCornerRadius = 4.dp,
+            backgroundColor = Color.Red,
+            cornerRadius = 16.dp,
+            strokeWidth = 1.dp,
+            strokeColor = Color.Blue,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.LightGray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.White,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify content-specific properties
+        assertEquals(Color.Green, style.titleTextColor)
+        assertNotNull(style.titleTextStyle)
+        assertEquals(Color.Yellow, style.subtitleTextColor)
+        assertNotNull(style.subtitleTextStyle)
+        assertEquals(Color.Cyan, style.iconTint)
+        assertEquals(Color.Magenta, style.buttonTextColor)
+        assertNotNull(style.buttonTextStyle)
+        assertEquals(Color.DarkGray, style.separatorColor)
+        assertEquals(2.dp, style.imageStrokeWidth)
+        assertEquals(Color.Black, style.imageStrokeColor)
+        assertEquals(4.dp, style.imageCornerRadius)
+
+        // Verify inherited wrapper properties
+        assertEquals(Color.Red, style.backgroundColor)
+        assertEquals(16.dp, style.cornerRadius)
+        assertEquals(1.dp, style.strokeWidth)
+        assertEquals(Color.Blue, style.strokeColor)
+        assertEquals(PaddingValues(8.dp), style.padding)
+        assertEquals(Color.LightGray, style.senderNameTextColor)
+        assertNotNull(style.senderNameTextStyle)
+        assertEquals(Color.White, style.threadIndicatorTextColor)
+        assertNotNull(style.threadIndicatorTextStyle)
+        assertEquals(Color.Gray, style.threadIndicatorIconTint)
+    }
+
+    @Test
+    fun `style is immutable data class`() {
+        val style1 = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        val style2 = style1.copy(backgroundColor = Color.Black)
+
+        // Original should be unchanged
+        assertEquals(Color.White, style1.backgroundColor)
+        // Copy should have new value
+        assertEquals(Color.Black, style2.backgroundColor)
+        // Other properties should be same
+        assertEquals(style1.cornerRadius, style2.cornerRadius)
+        assertEquals(style1.titleTextColor, style2.titleTextColor)
+    }
+
+    @Test
+    fun `incoming and outgoing styles have different backgrounds`() {
+        val incomingBg = Color(0xFFF5F5F5)
+        val outgoingBg = Color(0xFF6852D6)
+
+        val incomingStyle = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = incomingBg,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        val outgoingStyle = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.White,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.White,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.White,
+            buttonTextColor = Color.White,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = outgoingBg,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertTrue(incomingStyle.backgroundColor != outgoingStyle.backgroundColor)
+        assertTrue(incomingStyle.titleTextColor != outgoingStyle.titleTextColor)
+    }
+
+    @Test
+    fun `cornerRadius defaults to 12dp`() {
+        val style = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(12.dp, style.cornerRadius)
+    }
+
+    @Test
+    fun `imageCornerRadius defaults to 8dp`() {
+        val style = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(8.dp, style.imageCornerRadius)
+    }
+
+    @Test
+    fun `wrapper properties are accessible via parent type`() {
+        val style: CometChatMessageBubbleStyle = CometChatCollaborativeBubbleStyle(
+            titleTextColor = Color.Black,
+            titleTextStyle = androidx.compose.ui.text.TextStyle(),
+            subtitleTextColor = Color.Gray,
+            subtitleTextStyle = androidx.compose.ui.text.TextStyle(),
+            iconTint = Color.Blue,
+            buttonTextColor = Color.Blue,
+            buttonTextStyle = androidx.compose.ui.text.TextStyle(),
+            separatorColor = Color.LightGray,
+            imageStrokeWidth = 0.dp,
+            imageStrokeColor = Color.Transparent,
+            imageCornerRadius = 8.dp,
+            backgroundColor = Color.Red,
+            cornerRadius = 16.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Blue,
+            padding = PaddingValues(4.dp),
+            senderNameTextColor = Color.Green,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Yellow,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Cyan
+        )
+
+        // Verify wrapper properties are accessible via parent type
+        assertEquals(Color.Red, style.backgroundColor)
+        assertEquals(16.dp, style.cornerRadius)
+        assertEquals(2.dp, style.strokeWidth)
+        assertEquals(Color.Blue, style.strokeColor)
+        assertEquals(PaddingValues(4.dp), style.padding)
+        assertEquals(Color.Green, style.senderNameTextColor)
+        assertEquals(Color.Yellow, style.threadIndicatorTextColor)
+        assertEquals(Color.Cyan, style.threadIndicatorIconTint)
+    }
+}

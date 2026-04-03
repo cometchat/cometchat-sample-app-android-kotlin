@@ -1,0 +1,862 @@
+---
+title: "Call Logs"
+description: "Scrollable list of call logs for the logged-in user with caller names, avatars, call status, and timestamps."
+---
+
+`CometChatCallLogs` renders a scrollable list of call logs for the logged-in user with caller names, avatars, call status indicators, and timestamps.
+
+<Frame>
+  <img src="/images/7fe2a6db-call_logs-7b4f502153923374898f3887441ab8d2.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatCallLogs` is a list component. It renders the user's call history and emits the selected `CallLog` via `onItemClick`. Use it as a standalone call history screen or as a tab in a tabbed layout alongside conversations and contacts.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_call_logs.xml lines
+<com.cometchat.uikit.kotlin.presentation.calllogs.ui.CometChatCallLogs
+    android:id="@+id/call_logs"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val callLogs = findViewById<CometChatCallLogs>(R.id.call_logs)
+
+callLogs.setOnItemClick { callLog ->
+    // Navigate to call detail or initiate call
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    modifier = Modifier.fillMaxSize(),
+    onItemClick = { callLog ->
+        // Navigate to call detail or initiate call
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.calllogs.ui.CometChatCallLogs
+    android:id="@+id/call_logs"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Or programmatically:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(CometChatCallLogs(this))
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun CallLogsScreen() {
+    CometChatCallLogs(
+        modifier = Modifier.fillMaxSize()
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, the UI Kit dependency added, and the CometChat Calls SDK configured.
+
+Or in a Fragment:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return CometChatCallLogs(requireContext())
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return ComposeView(requireContext()).apply {
+        setContent { CometChatCallLogs() }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Filtering Call Logs
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Pass a `CallLogRequest.CallLogRequestBuilder` to control what loads:
+
+```kotlin lines
+callLogs.setCallLogRequestBuilder(
+    CallLogRequest.CallLogRequestBuilder()
+        .setLimit(20)
+        .setCallCategory(CometChatConstants.CALL_CATEGORY_CALL)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    callLogRequestBuilder = CallLogRequest.CallLogRequestBuilder()
+        .setLimit(20)
+        .setCallCategory(CometChatConstants.CALL_CATEGORY_CALL)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Filter Recipes
+
+| Recipe | Builder method |
+| --- | --- |
+| Limit per page | `.setLimit(10)` |
+| Audio calls only | `.setCallType(CometChatConstants.CALL_TYPE_AUDIO)` |
+| Video calls only | `.setCallType(CometChatConstants.CALL_TYPE_VIDEO)` |
+| Call category | `.setCallCategory(CometChatConstants.CALL_CATEGORY_CALL)` |
+
+<Warning>
+Pass the builder object, not the result of `.build()`. The component calls `.build()` internally. Default page size is 30 with infinite scroll.
+</Warning>
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onItemClick`
+
+Fires when a call log row is tapped. Primary navigation hook.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnItemClick { callLog ->
+    // Navigate to call detail
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onItemClick = { callLog ->
+        // Navigate to call detail
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+> Replaces the default item-click behavior. Your custom lambda executes instead of the built-in navigation.
+
+#### `onItemLongClick`
+
+Fires when a call log row is long-pressed.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnItemLongClick { callLog ->
+    // Show context menu
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onItemLongClick = { callLog ->
+        // Show context menu
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onBackPress`
+
+Fires when the user presses the back button in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnBackPress {
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onBackPress = { /* navigate back */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnError { exception ->
+    Log.e("CallLogs", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onError = { exception ->
+        Log.e("CallLogs", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onLoad`
+
+Fires when the list is successfully fetched and loaded.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnLoad { callLogList ->
+    Log.d("CallLogs", "Loaded ${callLogList.size}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onLoad = { callLogList ->
+        Log.d("CallLogs", "Loaded ${callLogList.size}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onEmpty`
+
+Fires when the list is empty after loading.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOnEmpty {
+    Log.d("CallLogs", "No call logs")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    onEmpty = { /* no call logs */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setBackIconVisibility(View.VISIBLE)` | `hideBackIcon = false` | Toggle back button |
+| `setToolbarVisibility(View.GONE)` | `hideToolbar = true` | Toggle toolbar |
+| `setSeparatorVisibility(View.GONE)` | `hideSeparator = true` | Toggle list separators |
+| `setTitle("Call History")` | `title = "Call History"` | Custom toolbar title |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Frame>
+  <img src="/images/2d1b8f1f-calls_leading_view-f16178cad5831b68b69386bddd17ac97.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setLeadingView(object : CallLogsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, callLog: CallLog,
+        holder: RecyclerView.ViewHolder, callLogList: List<CallLog>, position: Int
+    ) {
+        val imageView = createdView as ImageView
+        // Load caller avatar
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    leadingView = { callLog ->
+        CometChatAvatar(
+            imageUrl = callLog.initiator?.avatar,
+            name = callLog.initiator?.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Title View
+
+Replace the name / title text.
+
+<Frame>
+  <img src="/images/70338d8e-calls_title_view-284a29cf898ed446cd6b56b480dba55e.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setTitleView(object : CallLogsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, callLog: CallLog,
+        holder: RecyclerView.ViewHolder, callLogList: List<CallLog>, position: Int
+    ) {
+        (createdView as TextView).text = callLog.initiator?.name ?: ""
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    titleView = { callLog ->
+        Text(
+            text = callLog.initiator?.name ?: "",
+            style = CometChatTheme.typography.heading4Medium
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Subtitle View
+
+Replace the subtitle text below the caller's name.
+
+<Frame>
+  <img src="/images/c0c5e53a-calls_subtitle_view-23dbb0f58400e2d8e4b4b1112eb75757.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setSubtitleView(object : CallLogsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, callLog: CallLog,
+        holder: RecyclerView.ViewHolder, callLogList: List<CallLog>, position: Int
+    ) {
+        (createdView as TextView).text = callLog.status ?: "Unknown"
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    subtitleView = { callLog ->
+        Text(
+            text = callLog.status ?: "Unknown",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the right section of each call log item.
+
+<Frame>
+  <img src="/images/b471a86b-calls_tail_view-c2c6951de1fd0e56ac3a8b3038fea648.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setTrailingView(object : CallLogsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, callLog: CallLog,
+        holder: RecyclerView.ViewHolder, callLogList: List<CallLog>, position: Int
+    ) {
+        (createdView as TextView).text = SimpleDateFormat("h:mm a", Locale.getDefault())
+            .format(Date(callLog.initiatedAt * 1000))
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    trailingView = { callLog ->
+        Text(
+            text = SimpleDateFormat("h:mm a", Locale.getDefault())
+                .format(Date(callLog.initiatedAt * 1000))
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Item View
+
+Replace the entire list item row.
+
+<Frame>
+  <img src="/images/26e76652-calls_list_item_view-6ab3eea9c5769eac919d78b5a358ae7a.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setItemView(object : CallLogsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return LayoutInflater.from(context).inflate(R.layout.custom_call_log_item, null)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, callLog: CallLog,
+        holder: RecyclerView.ViewHolder, callLogList: List<CallLog>, position: Int
+    ) {
+        val avatar = createdView.findViewById<CometChatAvatar>(R.id.custom_avatar)
+        val title = createdView.findViewById<TextView>(R.id.tvName)
+        title.text = callLog.initiator?.name
+        avatar.setAvatar(callLog.initiator?.name, callLog.initiator?.avatar)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    itemView = { callLog ->
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CometChatAvatar(imageUrl = callLog.initiator?.avatar, name = callLog.initiator?.name)
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(callLog.initiator?.name ?: "", style = CometChatTheme.typography.heading4Medium)
+                Text(callLog.status ?: "", style = CometChatTheme.typography.body3Regular)
+            }
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setEmptyView(R.layout.custom_empty_view)
+callLogs.setErrorView(R.layout.custom_error_view)
+callLogs.setLoadingView(R.layout.custom_loading_view)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    emptyView = { Text("No call logs") },
+    errorView = { onRetry -> Button(onClick = onRetry) { Text("Retry") } },
+    loadingView = { CircularProgressIndicator() }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Overflow Menu
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setOverflowMenu(ImageButton(context).apply {
+    setImageResource(R.drawable.ic_filter)
+    setOnClickListener { /* show filter */ }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    overflowMenu = {
+        IconButton(onClick = { /* show filter */ }) {
+            Icon(painterResource(R.drawable.ic_filter), "Filter")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Menu Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Replace all options
+callLogs.setOptions { context, callLog ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "delete", name = "Delete", onClick = { /* ... */ }),
+        CometChatPopupMenu.MenuItem(id = "callback", name = "Call Back", onClick = { /* ... */ })
+    )
+}
+
+// Append to defaults
+callLogs.setAddOptions { context, callLog ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "info", name = "Info", onClick = { /* ... */ })
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    options = { context, callLog ->
+        listOf(
+            MenuItem(id = "delete", name = "Delete", onClick = { /* ... */ }),
+            MenuItem(id = "callback", name = "Call Back", onClick = { /* ... */ })
+        )
+    },
+    addOptions = { context, callLog ->
+        listOf(MenuItem(id = "info", name = "Info", onClick = { /* ... */ }))
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Common Patterns
+
+### Minimal list — hide all chrome
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setToolbarVisibility(View.GONE)
+callLogs.setSeparatorVisibility(View.GONE)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    hideToolbar = true,
+    hideSeparator = true
+)
+```
+
+</Tab>
+</Tabs>
+
+### Audio calls only
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setCallLogRequestBuilder(
+    CallLogRequest.CallLogRequestBuilder()
+        .setCallType(CometChatConstants.CALL_TYPE_AUDIO)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    callLogRequestBuilder = CallLogRequest.CallLogRequestBuilder()
+        .setCallType(CometChatConstants.CALL_TYPE_AUDIO)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Video calls only
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setCallLogRequestBuilder(
+    CallLogRequest.CallLogRequestBuilder()
+        .setCallType(CometChatConstants.CALL_TYPE_VIDEO)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    callLogRequestBuilder = CallLogRequest.CallLogRequestBuilder()
+        .setCallType(CometChatConstants.CALL_TYPE_VIDEO)
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Advanced Methods
+
+### ViewModel Access
+
+```kotlin lines
+val factory = CometChatCallLogsViewModelFactory()
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatCallLogsViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+callLogs.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    callLogsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for ListOperations, state observation, and custom repositories.
+
+---
+
+## Style
+
+<Frame>
+  <img src="/images/d0eb378f-calls_styling-72e5f287e16313403492a56094660446.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomCallLogsAvatarStyle" parent="CometChatAvatarStyle">
+    <item name="cometchatAvatarStrokeRadius">8dp</item>
+    <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+</style>
+
+<style name="CustomCallLogsStyle" parent="CometChatCallLogsStyle">
+    <item name="cometchatCallLogsAvatarStyle">@style/CustomCallLogsAvatarStyle</item>
+    <item name="cometchatCallLogsSeparatorColor">#F76808</item>
+    <item name="cometchatCallLogsTitleTextColor">#F76808</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatCallLogsStyle">@style/CustomCallLogsStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    style = CometChatCallLogsStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5),
+        titleTextColor = Color(0xFF141414),
+        itemStyle = CometChatCallLogsItemStyle.default().copy(
+            backgroundColor = Color.White,
+            titleTextColor = Color(0xFF141414),
+            subtitleTextColor = Color(0xFF727272),
+            avatarStyle = CometChatAvatarStyle.default().copy(cornerRadius = 12.dp)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Style Properties
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background color |
+| `titleTextColor` | Toolbar title color |
+| `itemStyle.backgroundColor` | Row background |
+| `itemStyle.titleTextColor` | Caller name color |
+| `itemStyle.subtitleTextColor` | Call status text color |
+| `itemStyle.separatorColor` | Row separator color |
+| `itemStyle.avatarStyle` | Avatar appearance |
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Call Features" icon="phone" href="/ui-kit/android/v6/call-features">
+    Voice and video calling overview
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference with screenshots
+  </Card>
+  <Card title="ViewModel & Data" icon="database" href="/ui-kit/android/v6/customization-viewmodel-data">
+    Custom ViewModels, repositories, and ListOperations
+  </Card>
+</CardGroup>

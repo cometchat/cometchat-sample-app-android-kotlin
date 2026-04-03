@@ -1,0 +1,636 @@
+---
+title: "Message Template"
+description: "Define and customize message bubble structure, layout, and behavior using MessageTemplate."
+---
+
+A `MessageTemplate` defines and customizes both the structure and the behavior of the MessageBubble. It acts as a schema for creating message bubble components, allowing you to manage the appearance and interactions of message bubbles within your application.
+
+## When to Use This
+
+- Customize the header, content, footer, bottom, or status info view of a message bubble
+- Replace the default bubble layout with a completely custom view
+- Add or modify the long-press options on a message bubble
+- Create a new template for a custom message type (e.g., a contact card)
+- Change how a specific message type (text, image, etc.) renders in the [MessageList](/ui-kit/android/v6/message-list)
+
+## Prerequisites
+
+- CometChat Android UI Kit dependency added
+- `CometChatUIKit.init()` called and completed
+- A logged-in CometChat user
+- Familiarity with the [MessageList](/ui-kit/android/v6/message-list) component
+
+---
+
+## Quick Start
+
+1. Get the list of existing message templates from the data source:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val messageTemplates = CometChatUIKit.getDataSource()
+    .getMessageTemplates(messageList.additionParameter)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val messageTemplates = CometChatUIKit.getDataSource()
+    .getMessageTemplates(additionParameter)
+```
+
+</Tab>
+</Tabs>
+
+2. Find the template for the message type you want to customize:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+for (template in messageTemplates) {
+    if (template.type == UIKitConstants.MessageType.TEXT) {
+        // Customize text message template
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+for (template in messageTemplates) {
+    if (template.type == UIKitConstants.MessageType.TEXT) {
+        // Customize text message template
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+3. Customize a view on the matched template:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setContentView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.your_custom_layout, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        // Bind your custom view data here
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setContentView { baseMessage, alignment ->
+    // Return your custom composable content
+    Text(text = (baseMessage as? TextMessage)?.text ?: "")
+}
+```
+
+</Tab>
+</Tabs>
+
+4. Apply the modified templates to the MessageList:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageList.setTemplates(messageTemplates)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    user = user,
+    templates = messageTemplates
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Core Concepts
+
+### MessageBubble Structure
+
+<Frame>
+  <img src="/images/070de054-message_template_structure-561b99bafb3bb04d30c0f1f14b55652b.png" />
+</Frame>
+
+The `MessageBubble` structure is broken down into these views:
+
+1. **Leading view** — Sender's avatar. Left for incoming, right for outgoing.
+2. **Header view** — Sender's name. Useful in group chats.
+3. **Content view** — Core message content (text, images, videos, etc.).
+4. **Bottom view** — Additional elements like link previews or "load more" buttons.
+5. **Footer view** — Timestamp and delivery/read status.
+
+### Template Properties
+
+- **Type**: `setType()` maps the template to a `CometChatMessage` type.
+- **Category**: `setCategory()` links the template with a message category.
+
+```kotlin lines
+messageTemplate.setType(UIKitConstants.MessageType.CUSTOM)
+messageTemplate.setCategory(UIKitConstants.MessageCategory.CUSTOM)
+```
+
+---
+
+## Implementation
+
+### Header View
+
+Customize the header area above the content view.
+
+<Frame>
+  <img src="/images/d3a14638-message_template_header_view-0b5ee1df58f62095e86fdf63539895bb.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setHeaderView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return layoutInflater.inflate(R.layout.message_template_header_view, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        val textView = view.findViewById<TextView>(R.id.name_with_status)
+        textView.text = baseMessage.sender.name + " • 🗓️ In meeting"
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setHeaderView { baseMessage, alignment ->
+    Text(
+        text = "${baseMessage.sender.name} • 🗓️ In meeting",
+        style = CometChatTheme.typography.caption2Regular,
+        color = CometChatTheme.colors.primary
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+### Content View
+
+Customize the main content area of the message bubble.
+
+<Frame>
+  <img src="/images/dbbc06fc-message_template_content_view-02cbc7a58ad8c27b5fc7281c1c9f2dd0.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setContentView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.image_bubble_content_view, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        val imageBubble = view.findViewById<CometChatImageBubble>(R.id.imageBubble)
+        val mediaMessage = baseMessage as MediaMessage
+        val attachment = mediaMessage.attachment
+        imageBubble.setImageUrl(
+            Utils.getFileFromLocalPath(mediaMessage),
+            attachment?.fileUrl ?: "",
+            attachment?.fileExtension?.equals("gif", ignoreCase = true) ?: false
+        )
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setContentView { baseMessage, alignment ->
+    val mediaMessage = baseMessage as? MediaMessage
+    Column {
+        CometChatImageBubble(
+            imageUrl = mediaMessage?.attachment?.fileUrl ?: ""
+        )
+        Text(
+            text = "Buy Now",
+            textAlign = TextAlign.Center,
+            color = CometChatTheme.colors.primary
+        )
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+### Status Info View
+
+Customize the status info area (delivery/read status indicators).
+
+<Frame>
+  <img src="/images/735f05c0-message_template_status_info_view-ad9bbb8f70d1b9d3d0b3f3cc55af181c.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Replace status info with a minimal spacer
+template.setStatusInfoView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        val view = View(context)
+        view.layoutParams = LinearLayout.LayoutParams(1.dp, 12.dp)
+        return view
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) { }
+})
+
+// Move status content to footer
+template.setFooterView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.status_info_layout, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        val tvTime = view.findViewById<TextView>(R.id.time)
+        val receipt = view.findViewById<CometChatMessageReceipt>(R.id.receipt)
+        if (messageBubbleAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT) {
+            receipt.visibility = View.VISIBLE
+            receipt.setMessageReceipt(MessageReceiptUtils.MessageReceipt(baseMessage))
+        } else {
+            receipt.visibility = View.GONE
+        }
+        tvTime.text = SimpleDateFormat("hh:mm a").format(baseMessage.sentAt * 1000)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setStatusInfoView { _, _ ->
+    Spacer(Modifier.height(12.dp))
+}
+
+template.setFooterView { baseMessage, alignment ->
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = SimpleDateFormat("hh:mm a").format(baseMessage.sentAt * 1000),
+            style = CometChatTheme.typography.caption2Regular
+        )
+        if (alignment == UIKitConstants.MessageBubbleAlignment.RIGHT) {
+            CometChatMessageReceipt(message = baseMessage)
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+### Bottom View
+
+Extend the bubble with additional elements beneath the content view.
+
+<Frame>
+  <img src="/images/184fbdae-message_template_bottom_view-0818935a822135ec1c41e5305bb3a622.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setBottomView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.message_template_bottom_view, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        // Bind bottom view data
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setBottomView { baseMessage, alignment ->
+    // Custom bottom content
+    Text("Link preview or additional info")
+}
+```
+
+</Tab>
+</Tabs>
+
+### Footer View
+
+Customize the footer area (timestamp and delivery status).
+
+<Frame>
+  <img src="/images/a2ef15f2-message_template_footer_view-3f96a6ec5bc4052878c542878eb7be38.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setFooterView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.message_template_footer_view, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        val tvTime = view.findViewById<TextView>(R.id.time)
+        tvTime.text = SimpleDateFormat("hh:mm a").format(baseMessage.sentAt * 1000)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setFooterView { baseMessage, alignment ->
+    Text(
+        text = SimpleDateFormat("hh:mm a").format(baseMessage.sentAt * 1000),
+        style = CometChatTheme.typography.caption2Regular
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+### Bubble View
+
+Replace the entire message bubble with a fully custom layout.
+
+<Frame>
+  <img src="/images/4f785973-message_template_bubble_view-c5e6b431a6d80a8c7d05aacf979ed62a.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setBubbleView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.custom_bubble_view, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        // Bind entire custom bubble
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setBubbleView { baseMessage, alignment ->
+    Card {
+        Column(Modifier.padding(12.dp)) {
+            Text(baseMessage.sender.name)
+            Text((baseMessage as? TextMessage)?.text ?: "")
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Options
+
+Customize the long-press action menu for a message type.
+
+<Frame>
+  <img src="/images/70ab0003-message_template_options-ed17195e1c7ad0414b54e9526cf9ac15.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+template.setOptions { context, baseMessage, isLeftAligned ->
+    listOf(
+        CometChatPopupMenu.MenuItem(
+            id = "bookmark",
+            name = "Bookmark",
+            onClick = { /* handle */ }
+        )
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+template.setOptions { context, baseMessage, isLeftAligned ->
+    listOf(
+        MenuItem(id = "bookmark", name = "Bookmark", onClick = { /* handle */ })
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Creating a New Template
+
+Create a template for a custom message type (e.g., a contact card):
+
+<Frame>
+  <img src="/images/8bc22c7a-message_template_new_template-10e7dfdee3c4221e3ab2c8b244b03449.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val contactTemplate = CometChatMessageTemplate()
+contactTemplate.setType("contact")
+contactTemplate.setCategory(UIKitConstants.MessageCategory.CUSTOM)
+
+contactTemplate.setContentView(object : MessagesViewHolderListener() {
+    override fun createView(
+        context: Context,
+        cometChatMessageBubble: CometChatMessageBubble,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment
+    ): View {
+        return LayoutInflater.from(context).inflate(R.layout.contact_card_bubble, null)
+    }
+
+    override fun bindView(
+        context: Context, view: View, baseMessage: BaseMessage,
+        messageBubbleAlignment: UIKitConstants.MessageBubbleAlignment,
+        viewHolder: RecyclerView.ViewHolder, list: List<BaseMessage>, i: Int
+    ) {
+        val customMessage = baseMessage as CustomMessage
+        val name = view.findViewById<TextView>(R.id.contact_name)
+        name.text = customMessage.customData?.getString("name") ?: ""
+    }
+})
+
+// Add to existing templates
+val templates = CometChatUIKit.getDataSource()
+    .getMessageTemplates(messageList.additionParameter)
+templates.add(contactTemplate)
+messageList.setTemplates(templates)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val contactTemplate = CometChatMessageTemplate()
+contactTemplate.setType("contact")
+contactTemplate.setCategory(UIKitConstants.MessageCategory.CUSTOM)
+
+contactTemplate.setContentView { baseMessage, alignment ->
+    val customMessage = baseMessage as? CustomMessage
+    val name = customMessage?.customData?.optString("name") ?: ""
+    Card {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            CometChatAvatar(name = name)
+            Spacer(Modifier.width(8.dp))
+            Text(name)
+        }
+    }
+}
+
+val templates = CometChatUIKit.getDataSource()
+    .getMessageTemplates(additionParameter)
+    .toMutableList()
+templates.add(contactTemplate)
+
+CometChatMessageList(
+    user = user,
+    templates = templates
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="Message Bubble Styling" icon="paintbrush" href="/ui-kit/android/v6/message-bubble-styling">
+    Style individual bubble types
+  </Card>
+  <Card title="Component Styling" icon="palette" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference
+  </Card>
+  <Card title="View Slots" icon="puzzle-piece" href="/ui-kit/android/v6/customization-view-slots">
+    Replace specific UI regions
+  </Card>
+</CardGroup>

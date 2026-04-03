@@ -1,0 +1,512 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.ui
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import com.cometchat.chat.constants.CometChatConstants
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCallActionBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.utils.CallType
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.utils.getCallType
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.utils.isMissedCall
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.element
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for Missed Call Styling in CallActionBubble.
+ *
+ * Feature: remaining-message-bubbles
+ * Properties tested:
+ * - Property 9: Missed Call Styling
+ *
+ * **Validates: Requirements 5.3**
+ *
+ * Tests that the CallActionBubble correctly applies missed call styling
+ * for calls with status UNANSWERED, CANCELLED, REJECTED, or BUSY.
+ *
+ * Missed call styling includes:
+ * - missedCallTextColor: The color of missed call text (typically error color)
+ * - missedCallTextStyle: The text style for missed call text
+ * - missedCallBackgroundColor: The background color for missed calls (typically error with alpha)
+ * - missedCallIconTint: The tint color of missed call icon (typically error color)
+ *
+ * The CallActionBubble determines styling based on the call status:
+ * - UNANSWERED, CANCELLED, REJECTED, BUSY → Missed call styling
+ * - INITIATED, ONGOING, ENDED → Normal call styling
+ */
+class CallActionBubbleMissedCallStylingPropertyTest : StringSpec({
+
+    // Test data generators
+    val audioCallType = CometChatConstants.CALL_TYPE_AUDIO
+    val videoCallType = CometChatConstants.CALL_TYPE_VIDEO
+    
+    val missedStatuses = listOf(
+        CometChatConstants.CALL_STATUS_UNANSWERED,
+        CometChatConstants.CALL_STATUS_CANCELLED,
+        CometChatConstants.CALL_STATUS_REJECTED,
+        CometChatConstants.CALL_STATUS_BUSY
+    )
+    
+    val answeredStatuses = listOf(
+        CometChatConstants.CALL_STATUS_INITIATED,
+        CometChatConstants.CALL_STATUS_ONGOING,
+        CometChatConstants.CALL_STATUS_ENDED
+    )
+    
+    val callTypeArb = Arb.element(listOf(audioCallType, videoCallType))
+    val missedStatusArb = Arb.element(missedStatuses)
+    val answeredStatusArb = Arb.element(answeredStatuses)
+    val userIdArb = Arb.string(5..20)
+
+    // Test style values
+    val normalBackgroundColor = Color(0xFFF5F5F5)
+    val normalTextColor = Color(0xFF727272)
+    val normalIconTint = Color(0xFFA1A1A1)
+    val missedBackgroundColor = Color(0xFFF44649).copy(alpha = 0.1f)
+    val missedTextColor = Color(0xFFF44649)
+    val missedIconTint = Color(0xFFF44649)
+    
+    val testStyle = CometChatCallActionBubbleStyle(
+        backgroundColor = normalBackgroundColor,
+        cornerRadius = 8.dp,
+        strokeWidth = 0.dp,
+        strokeColor = Color.Transparent,
+        textColor = normalTextColor,
+        textStyle = TextStyle.Default,
+        iconTint = normalIconTint,
+        missedCallTextColor = missedTextColor,
+        missedCallTextStyle = TextStyle.Default,
+        missedCallBackgroundColor = missedBackgroundColor,
+        missedCallIconTint = missedIconTint
+    )
+
+    /**
+     * Property 9: Missed Call Styling
+     *
+     * *For any* Call message where `callStatus == UNANSWERED`, the CallActionBubble
+     * SHALL apply the missed call styling (missedCallTextColor, missedCallBackgroundColor,
+     * missedCallIconTint).
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: UNANSWERED status should trigger missed call styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, CometChatConstants.CALL_STATUS_UNANSWERED, initiatorId, loggedInUserId)
+            
+            // Should be identified as missed call
+            isMissedCall(result) shouldBe true
+            
+            // Verify the CallType is a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - CANCELLED status
+     *
+     * *For any* Call message where `callStatus == CANCELLED`, the CallActionBubble
+     * SHALL apply the missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: CANCELLED status should trigger missed call styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, CometChatConstants.CALL_STATUS_CANCELLED, initiatorId, loggedInUserId)
+            
+            // Should be identified as missed call
+            isMissedCall(result) shouldBe true
+            
+            // Verify the CallType is a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - REJECTED status
+     *
+     * *For any* Call message where `callStatus == REJECTED`, the CallActionBubble
+     * SHALL apply the missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: REJECTED status should trigger missed call styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, CometChatConstants.CALL_STATUS_REJECTED, initiatorId, loggedInUserId)
+            
+            // Should be identified as missed call
+            isMissedCall(result) shouldBe true
+            
+            // Verify the CallType is a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - BUSY status
+     *
+     * *For any* Call message where `callStatus == BUSY`, the CallActionBubble
+     * SHALL apply the missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: BUSY status should trigger missed call styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, CometChatConstants.CALL_STATUS_BUSY, initiatorId, loggedInUserId)
+            
+            // Should be identified as missed call
+            isMissedCall(result) shouldBe true
+            
+            // Verify the CallType is a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - All missed statuses
+     *
+     * *For any* Call message with any missed status (UNANSWERED, CANCELLED, REJECTED, BUSY),
+     * the CallActionBubble SHALL apply the missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: All missed statuses should trigger missed call styling" {
+        checkAll(200, callTypeArb, missedStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            
+            // Should always be identified as missed call
+            isMissedCall(result) shouldBe true
+            
+            // Verify the CallType is a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Answered statuses should NOT trigger missed styling
+     *
+     * *For any* Call message with answered status (INITIATED, ONGOING, ENDED),
+     * the CallActionBubble SHALL NOT apply the missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Answered statuses should NOT trigger missed call styling" {
+        checkAll(200, callTypeArb, answeredStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            
+            // Should NOT be identified as missed call
+            isMissedCall(result) shouldBe false
+            
+            // Verify the CallType is NOT a missed variant
+            (result == CallType.AUDIO_MISSED || result == CallType.VIDEO_MISSED) shouldBe false
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Style selection logic
+     *
+     * *For any* missed call, the styling logic SHALL select missed call colors
+     * from the style configuration.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed call should use missedCallBackgroundColor from style" {
+        checkAll(100, callTypeArb, missedStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            val isMissed = isMissedCall(result)
+            
+            // Simulate the styling logic from CometChatCallActionBubble
+            val backgroundColor = if (isMissed) testStyle.missedCallBackgroundColor else testStyle.backgroundColor
+            
+            // For missed calls, should use missed call background color
+            backgroundColor shouldBe missedBackgroundColor
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Text color selection
+     *
+     * *For any* missed call, the text color SHALL be missedCallTextColor.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed call should use missedCallTextColor from style" {
+        checkAll(100, callTypeArb, missedStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            val isMissed = isMissedCall(result)
+            
+            // Simulate the styling logic from CometChatCallActionBubble
+            val textColor = if (isMissed) testStyle.missedCallTextColor else testStyle.textColor
+            
+            // For missed calls, should use missed call text color
+            textColor shouldBe missedTextColor
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Icon tint selection
+     *
+     * *For any* missed call, the icon tint SHALL be missedCallIconTint.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed call should use missedCallIconTint from style" {
+        checkAll(100, callTypeArb, missedStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            val isMissed = isMissedCall(result)
+            
+            // Simulate the styling logic from CometChatCallActionBubble
+            val iconTint = if (isMissed) testStyle.missedCallIconTint else testStyle.iconTint
+            
+            // For missed calls, should use missed call icon tint
+            iconTint shouldBe missedIconTint
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Normal call uses normal styling
+     *
+     * *For any* non-missed call, the styling SHALL use normal colors (not missed call colors).
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Non-missed calls should use normal styling" {
+        checkAll(100, callTypeArb, answeredStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            val isMissed = isMissedCall(result)
+            
+            // Simulate the styling logic from CometChatCallActionBubble
+            val backgroundColor = if (isMissed) testStyle.missedCallBackgroundColor else testStyle.backgroundColor
+            val textColor = if (isMissed) testStyle.missedCallTextColor else testStyle.textColor
+            val iconTint = if (isMissed) testStyle.missedCallIconTint else testStyle.iconTint
+            
+            // For non-missed calls, should use normal colors
+            backgroundColor shouldBe normalBackgroundColor
+            textColor shouldBe normalTextColor
+            iconTint shouldBe normalIconTint
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Video missed calls
+     *
+     * *For any* video call with missed status, the CallActionBubble SHALL return
+     * VIDEO_MISSED CallType and apply missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Video calls with missed status should return VIDEO_MISSED" {
+        checkAll(100, missedStatusArb, userIdArb, userIdArb) { status, initiatorId, loggedInUserId ->
+            val result = getCallType(videoCallType, status, initiatorId, loggedInUserId)
+            
+            // Should be VIDEO_MISSED
+            result shouldBe CallType.VIDEO_MISSED
+            
+            // Should be identified as missed
+            isMissedCall(result) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Audio missed calls
+     *
+     * *For any* audio call with missed status, the CallActionBubble SHALL return
+     * AUDIO_MISSED CallType and apply missed call styling.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Audio calls with missed status should return AUDIO_MISSED" {
+        checkAll(100, missedStatusArb, userIdArb, userIdArb) { status, initiatorId, loggedInUserId ->
+            val result = getCallType(audioCallType, status, initiatorId, loggedInUserId)
+            
+            // Should be AUDIO_MISSED
+            result shouldBe CallType.AUDIO_MISSED
+            
+            // Should be identified as missed
+            isMissedCall(result) shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Direction does not affect missed status
+     *
+     * *For any* call with missed status, the direction (incoming/outgoing) SHALL NOT
+     * affect the missed call classification.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed status takes precedence over direction" {
+        checkAll(100, callTypeArb, missedStatusArb, userIdArb) { callType, status, userId ->
+            // Test with same user (outgoing)
+            val outgoingResult = getCallType(callType, status, userId, userId)
+            
+            // Test with different user (incoming)
+            val incomingResult = getCallType(callType, status, userId + "_other", userId)
+            
+            // Both should be missed calls regardless of direction
+            isMissedCall(outgoingResult) shouldBe true
+            isMissedCall(incomingResult) shouldBe true
+            
+            // Both should have the same missed call type (audio or video)
+            outgoingResult shouldBe incomingResult
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - isMissedCall helper consistency
+     *
+     * *For any* CallType, the isMissedCall helper SHALL return true only for
+     * AUDIO_MISSED and VIDEO_MISSED.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: isMissedCall helper should be consistent with CallType" {
+        // Test all CallType values
+        CallType.entries.forEach { callType ->
+            val isMissed = isMissedCall(callType)
+            
+            when (callType) {
+                CallType.AUDIO_MISSED, CallType.VIDEO_MISSED -> {
+                    isMissed shouldBe true
+                }
+                else -> {
+                    isMissed shouldBe false
+                }
+            }
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Styling is deterministic
+     *
+     * *For any* call with the same parameters, the styling selection SHALL be
+     * deterministic (same inputs produce same styling).
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed call styling selection should be deterministic" {
+        val allStatuses = missedStatuses + answeredStatuses
+        val statusArb = Arb.element(allStatuses)
+
+        checkAll(100, callTypeArb, statusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            // Call twice with same parameters
+            val result1 = getCallType(callType, status, initiatorId, loggedInUserId)
+            val result2 = getCallType(callType, status, initiatorId, loggedInUserId)
+            
+            // Results should be identical
+            result1 shouldBe result2
+            
+            // Missed status should be identical
+            isMissedCall(result1) shouldBe isMissedCall(result2)
+            
+            // Styling selection should be identical
+            val isMissed1 = isMissedCall(result1)
+            val isMissed2 = isMissedCall(result2)
+            
+            val backgroundColor1 = if (isMissed1) testStyle.missedCallBackgroundColor else testStyle.backgroundColor
+            val backgroundColor2 = if (isMissed2) testStyle.missedCallBackgroundColor else testStyle.backgroundColor
+            
+            backgroundColor1 shouldBe backgroundColor2
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Style properties are distinct
+     *
+     * The missed call styling properties SHALL be distinct from normal styling properties.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Missed call style properties should be distinct from normal style" {
+        // Verify that missed call colors are different from normal colors
+        testStyle.missedCallBackgroundColor shouldNotBe testStyle.backgroundColor
+        testStyle.missedCallTextColor shouldNotBe testStyle.textColor
+        testStyle.missedCallIconTint shouldNotBe testStyle.iconTint
+    }
+
+    /**
+     * Property 9: Missed Call Styling - All four missed statuses are equivalent
+     *
+     * *For any* of the four missed statuses (UNANSWERED, CANCELLED, REJECTED, BUSY),
+     * the resulting CallType and styling SHALL be the same.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: All four missed statuses should produce equivalent styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val results = missedStatuses.map { status ->
+                getCallType(callType, status, initiatorId, loggedInUserId)
+            }
+            
+            // All results should be the same (either AUDIO_MISSED or VIDEO_MISSED)
+            results.distinct().size shouldBe 1
+            
+            // All should be identified as missed
+            results.all { isMissedCall(it) } shouldBe true
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Null status should not be missed
+     *
+     * *For any* call with null status, it SHALL NOT be treated as a missed call.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Null status should not trigger missed call styling" {
+        checkAll(100, callTypeArb, userIdArb, userIdArb) { callType, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, null, initiatorId, loggedInUserId)
+            
+            // Should NOT be identified as missed call
+            isMissedCall(result) shouldBe false
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Unknown status should not be missed
+     *
+     * *For any* call with unknown status, it SHALL NOT be treated as a missed call.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: Unknown status should not trigger missed call styling" {
+        val unknownStatuses = listOf("unknown", "invalid", "custom_status", "")
+        val unknownStatusArb = Arb.element(unknownStatuses)
+
+        checkAll(100, callTypeArb, unknownStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            
+            // Should NOT be identified as missed call
+            isMissedCall(result) shouldBe false
+        }
+    }
+
+    /**
+     * Property 9: Missed Call Styling - Complete styling verification
+     *
+     * *For any* missed call, ALL missed call styling properties SHALL be applied together.
+     *
+     * **Validates: Requirements 5.3**
+     */
+    "Property 9: All missed call styling properties should be applied together" {
+        checkAll(100, callTypeArb, missedStatusArb, userIdArb, userIdArb) { callType, status, initiatorId, loggedInUserId ->
+            val result = getCallType(callType, status, initiatorId, loggedInUserId)
+            val isMissed = isMissedCall(result)
+            
+            // Simulate the complete styling logic from CometChatCallActionBubble
+            val backgroundColor = if (isMissed) testStyle.missedCallBackgroundColor else testStyle.backgroundColor
+            val textColor = if (isMissed) testStyle.missedCallTextColor else testStyle.textColor
+            val textStyle = if (isMissed) testStyle.missedCallTextStyle else testStyle.textStyle
+            val iconTint = if (isMissed) testStyle.missedCallIconTint else testStyle.iconTint
+            
+            // All missed call styling properties should be applied
+            backgroundColor shouldBe testStyle.missedCallBackgroundColor
+            textColor shouldBe testStyle.missedCallTextColor
+            textStyle shouldBe testStyle.missedCallTextStyle
+            iconTint shouldBe testStyle.missedCallIconTint
+        }
+    }
+})

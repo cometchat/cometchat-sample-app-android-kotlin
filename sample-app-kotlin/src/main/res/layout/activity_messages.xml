@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Messages Activity Layout
+    
+    This layout contains the complete chat interface using CometChat UI Kit components:
+    - CometChatMessageHeader: Shows user/group info, typing indicators, and navigation
+    - CometChatMessageList: Displays message history with real-time updates
+    - CometChatMessageComposer: Allows composing and sending messages
+    
+    Validates: Requirements 6.1, 6.2, 6.3, 2.27, 2.28
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,24 +19,32 @@
     android:background="?attr/cometchatBackgroundColor1"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context="ui.activity.MessagesActivity">
+    tools:context=".ui.messages.MessagesActivity">
 
-    <com.cometchat.chatuikit.messageheader.CometChatMessageHeader
-        android:id="@+id/message_header"
+    <!-- Message Header - shows user/group info, typing indicators -->
+    <!-- Validates: Requirements 6.3, 7.3 -->
+    <com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
+        android:id="@+id/messageHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.cometchat.chatuikit.messagelist.CometChatMessageList
-        android:id="@+id/message_list"
+    <!-- Message List - displays message history -->
+    <!-- Validates: Requirements 6.1, 6.4, 6.5, 6.7, 6.8, 7.1, 7.2 -->
+    <com.cometchat.uikit.kotlin.presentation.messagelist.ui.CometChatMessageList
+        android:id="@+id/messageList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <com.cometchat.chatuikit.compactmessagecomposer.CometChatCompactMessageComposer
-        android:id="@+id/single_line_composer"
+    <!-- Message Composer - for composing and sending messages -->
+    <!-- Validates: Requirements 6.2, 6.6 -->
+    <com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+        android:id="@+id/messageComposer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!-- Info Layout - for blocked user message (group no longer member) -->
+    <!-- Validates: Requirement 2.27 -->
     <LinearLayout
         android:id="@+id/info_layout"
         android:layout_width="match_parent"
@@ -56,7 +74,8 @@
 
     </LinearLayout>
 
-
+    <!-- Unblock Layout - for unblocking blocked users -->
+    <!-- Validates: Requirement 2.28 -->
     <LinearLayout
         android:id="@+id/unblock_layout"
         android:layout_width="match_parent"
@@ -69,7 +88,7 @@
             android:id="@+id/unblock_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_unblock_message"
+            android:text="@string/unblock_message"
             android:textAlignment="center"
             android:textColor="?attr/cometchatTextColorSecondary"
             android:textSize="14sp" />

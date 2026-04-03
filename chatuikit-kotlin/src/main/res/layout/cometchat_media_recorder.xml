@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- RECORDING State Container - Horizontal inline layout -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/recording_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+        app:cardCornerRadius="@dimen/cometchat_corner_radius_max"
+        app:cardElevation="0dp"
+        app:strokeColor="?attr/cometchatStrokeColorLight"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/cometchat_padding_2"
+            android:paddingEnd="@dimen/cometchat_padding_1">
+
+            <!-- Delete Button -->
+            <ImageView
+                android:id="@+id/delete_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_delete"
+                android:visibility="gone"
+                app:tint="?attr/cometchatIconTintSecondary"
+                tools:visibility="visible" />
+
+            <!-- Record Button (Initial State - red dot) -->
+            <ImageView
+                android:id="@+id/record_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_start"
+                android:visibility="gone"
+                app:tint="?attr/cometchatErrorColor"
+                tools:visibility="visible" />
+
+            <!-- Recording Indicator (red dot shown during recording) -->
+            <View
+                android:id="@+id/recording_indicator"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="@dimen/cometchat_margin_1"
+                android:background="@drawable/cometchat_recording_indicator_dot"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Audio Visualizer - takes remaining space -->
+            <com.cometchat.uikit.kotlin.presentation.shared.mediarecorder.CometChatAudioVisualizer
+                android:id="@+id/audio_recording_view"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="@dimen/cometchat_margin_2"
+                android:layout_marginEnd="@dimen/cometchat_margin_2"
+                android:layout_weight="1" />
+
+            <!-- Recording Timer -->
+            <Chronometer
+                android:id="@+id/recording_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cometchat_margin_2"
+                android:format="0:00"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                android:textColor="?attr/cometchatTextColorSecondary"
+                tools:text="0:32" />
+
+            <!-- Pause Button (shown during recording) -->
+            <ImageView
+                android:id="@+id/pause_recording_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_pause"
+                android:visibility="gone"
+                app:tint="?attr/cometchatIconTintSecondary"
+                tools:visibility="visible" />
+
+            <!-- Stop Button (shown during recording) -->
+            <ImageView
+                android:id="@+id/stop_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_stop"
+                android:visibility="gone"
+                app:tint="?attr/cometchatIconTintSecondary"
+                tools:visibility="visible" />
+
+            <!-- Submit/Send Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/submit_button_container"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="@dimen/cometchat_margin_1"
+                app:cardBackgroundColor="?attr/cometchatIconTintHighlight"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <ImageView
+                    android:id="@+id/submit_button"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/cometchat_ic_media_recorder_send"
+                    app:tint="@android:color/white" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- RECORDED State Container (Playback Ready) - Horizontal inline layout -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/recorded_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:cardBackgroundColor="?attr/cometchatBackgroundColor1"
+        app:cardCornerRadius="@dimen/cometchat_corner_radius_max"
+        app:cardElevation="0dp"
+        app:strokeColor="?attr/cometchatStrokeColorLight"
+        app:strokeWidth="1dp"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/cometchat_padding_2"
+            android:paddingEnd="@dimen/cometchat_padding_1">
+
+            <!-- Delete Button -->
+            <ImageView
+                android:id="@+id/recorded_delete_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_delete"
+                app:tint="?attr/cometchatIconTintSecondary" />
+
+            <!-- Play Button -->
+            <ImageView
+                android:id="@+id/play_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_play"
+                app:tint="?attr/cometchatIconTintHighlight" />
+
+            <!-- Pause Button (hidden by default, shown during playback) -->
+            <ImageView
+                android:id="@+id/pause_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_media_recorder_pause"
+                android:visibility="gone"
+                app:tint="?attr/cometchatIconTintHighlight" />
+
+            <!-- Waveform visualization with progress (matches Figma design) -->
+            <com.cometchat.uikit.kotlin.presentation.shared.mediarecorder.CometChatAudioVisualizer
+                android:id="@+id/recorded_waveform"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="@dimen/cometchat_margin_1"
+                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                android:layout_weight="1" />
+
+            <!-- Hidden SeekBar for touch interaction (overlays waveform) -->
+            <SeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="@dimen/cometchat_margin_1"
+                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                android:layout_weight="1"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@android:color/transparent"
+                android:thumb="@null"
+                android:visibility="gone" />
+
+            <!-- Duration -->
+            <Chronometer
+                android:id="@+id/recorded_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cometchat_margin_2"
+                android:format="0:00"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                android:textColor="?attr/cometchatTextColorSecondary"
+                tools:text="0:00" />
+
+            <!-- Mic/Re-record Button -->
+            <ImageView
+                android:id="@+id/rerecord_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/cometchat_padding_2"
+                android:scaleType="centerInside"
+                android:src="@drawable/cometchat_ic_mic"
+                app:tint="?attr/cometchatIconTintSecondary" />
+
+            <!-- Submit/Send Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/recorded_submit_button_container"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="@dimen/cometchat_margin_1"
+                app:cardBackgroundColor="?attr/cometchatIconTintHighlight"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <ImageView
+                    android:id="@+id/recorded_submit_button"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/cometchat_ic_media_recorder_send"
+                    app:tint="@android:color/white" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</merge>

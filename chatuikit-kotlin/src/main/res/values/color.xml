@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color: Primary -->
+    <color name="cometchat_color_primary">#6852D6</color>
+    <!-- Color: Neutral -->
+    <color name="cometchat_color_neutral_50">#FFFFFF</color>
+    <color name="cometchat_color_neutral_100">#FAFAFA</color>
+    <color name="cometchat_color_neutral_200">#F5F5F5</color>
+    <color name="cometchat_color_neutral_300">#E8E8E8</color>
+    <color name="cometchat_color_neutral_400">#DCDCDC</color>
+    <color name="cometchat_color_neutral_500">#A1A1A1</color>
+    <color name="cometchat_color_neutral_600">#727272</color>
+    <color name="cometchat_color_neutral_700">#5B5B5B</color>
+    <color name="cometchat_color_neutral_800">#434343</color>
+    <color name="cometchat_color_neutral_900">#141414</color>
+    <!-- Color: Alert -->
+    <color name="cometchat_color_info">#0B7BEA</color>
+    <color name="cometchat_color_success">#09C26F</color>
+    <color name="cometchat_color_warning">#FFAB00</color>
+    <color name="cometchat_color_error">#F44649</color>
+    <color name="cometchat_color_error_100">#F9EAEF</color>
+    <color name="cometchat_color_message_read">#56E8A7</color>
+    <!-- Color: Background -->
+    <color name="cometchat_color_background1">@color/cometchat_color_neutral_50</color>
+    <color name="cometchat_color_background2">@color/cometchat_color_neutral_100</color>
+    <color name="cometchat_color_background3">@color/cometchat_color_neutral_200</color>
+    <color name="cometchat_color_background4">@color/cometchat_color_neutral_300</color>
+    <!-- Color: Stroke -->
+    <color name="cometchat_color_stroke_default">@color/cometchat_color_neutral_200</color>
+    <color name="cometchat_color_stroke_light">@color/cometchat_color_neutral_300</color>
+    <color name="cometchat_color_stroke_dark">@color/cometchat_color_neutral_400</color>
+    <color name="cometchat_color_stroke_highlight">@color/cometchat_color_primary</color>
+    <!-- Color: Text -->
+    <color name="cometchat_color_text_primary">@color/cometchat_color_neutral_900</color>
+    <color name="cometchat_color_text_secondary">@color/cometchat_color_neutral_600</color>
+    <color name="cometchat_color_text_tertiary">@color/cometchat_color_neutral_500</color>
+    <color name="cometchat_color_text_disabled">@color/cometchat_color_neutral_400</color>
+    <color name="cometchat_color_text_white">@color/cometchat_color_neutral_50</color>
+    <color name="cometchat_color_text_highlight">@color/cometchat_color_primary</color>
+    <!-- Color: Icons -->
+    <color name="cometchat_color_icon_primary">@color/cometchat_color_neutral_900</color>
+    <color name="cometchat_color_icon_secondary">@color/cometchat_color_neutral_500</color>
+    <color name="cometchat_color_icon_tertiary">@color/cometchat_color_neutral_400</color>
+    <color name="cometchat_color_icon_white">@color/cometchat_color_neutral_50</color>
+    <color name="cometchat_color_icon_highlight">@color/cometchat_color_primary</color>
+    <!-- Color: Buttons -->
+    <color name="cometchat_color_button_background">@color/cometchat_color_primary</color>
+    <color name="cometchat_color_button_icon">@color/cometchat_color_white</color>
+    <color name="cometchat_color_button_text">@color/cometchat_color_white</color>
+    <color name="cometchat_color_secondary_button_background">@color/cometchat_color_neutral_900</color>
+    <color name="cometchat_color_secondary_button_icon">@color/cometchat_color_neutral_900</color>
+    <color name="cometchat_color_secondary_button_text">@color/cometchat_color_neutral_900</color>
+    <color name="cometchat_color_link_button">@color/cometchat_color_info</color>
+    <color name="cometchat_color_white_pressed">@color/cometchat_color_neutral_300</color>
+    <!-- Color: Other -->
+    <color name="cometchat_color_white">#FFFFFF</color>
+    <color name="cometchat_color_black">#000000</color>
+    <color name="cometchat_color_transparent">#00000000</color>
+    <color name="cometchat_shimmer_base_color">#E8E8E8</color>
+    <color name="cometchat_shimmer_base_highlight_color">#F5F5F5</color>
+    <!--  Color: Calling ongoing background  -->
+    <color name="cometchat_calling_background">#333333</color>
+    <!-- Color: Overlay -->
+    <color name="cometchat_color_overlay_dark">#99000000</color>
+
+</resources>

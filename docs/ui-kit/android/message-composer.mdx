@@ -1,0 +1,475 @@
+---
+title: "Message Composer"
+description: "Message input area with send, attachment, voice note, sticker, and AI buttons. Supports text, media, mentions, and message editing."
+---
+
+`CometChatMessageComposer` renders the message input area and sends messages to the active conversation. It supports text, media, mentions, voice notes, stickers, and AI-powered features.
+
+<Frame>
+  <img src="/images/8becc772-message_composer-0cc03defaf535f332f7f8bb1ebd65392.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatMessageComposer` is an input component. Wire it with `CometChatMessageHeader` and `CometChatMessageList` to build a complete messaging layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+    android:id="@+id/message_composer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+```
+
+```kotlin lines
+val messageComposer = findViewById<CometChatMessageComposer>(R.id.message_composer)
+messageComposer.setUser(user)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+    android:id="@+id/composer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+```
+
+Set a `User` or `Group`:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.your_layout)
+
+    val composer = findViewById<CometChatMessageComposer>(R.id.composer)
+    composer.setUser(user)
+    // or composer.setGroup(group)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun ComposerScreen() {
+    CometChatMessageComposer(
+        user = user
+        // or group = group
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+<Warning>
+The MessageComposer manages runtime permissions. To ensure the **ActivityResultLauncher** is properly initialized, create the composer in the **onCreate** state of an activity. If using a fragment, load it in the activity's `onCreate`.
+</Warning>
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onSendButtonClick`
+
+Fires when the send button is tapped. Override to intercept or replace the default message-sending logic.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageComposer.setOnSendButtonClick { context, baseMessage ->
+    // Custom send logic
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    onSendButtonClick = { context, baseMessage ->
+        // Custom send logic
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageComposer.setOnError { context, exception ->
+    Log.e("Composer", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    onError = { context, exception ->
+        Log.e("Composer", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### SDK Events
+
+The MessageComposer does not attach SDK listeners directly. Typing indicators are managed internally when `disableTypingEvents` is `false` (default).
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setUser(user)` | `user = user` | Set target user for 1-on-1 conversations |
+| `setGroup(group)` | `group = group` | Set target group for group conversations |
+| `setOnSendButtonClick { }` | `onSendButtonClick = { }` | Override send button behavior |
+| `setParentMessageId(id)` | `parentMessageId = id` | Set parent message ID for threaded replies |
+| `setTextFormatters(list)` | `textFormatters = list` | Custom text formatters (mentions, etc.) |
+| `setEnableRichTextFormatting(true)` | `enableRichTextFormatting = true` | Enable rich text formatting |
+
+---
+
+## Custom View Slots
+
+### Header View
+
+Custom view above the text input area.
+
+<Frame>
+  <img src="/images/dbb04a8b-message_composer_header_view-11ddf1d50aa74a8868351007037451f9.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val view = LayoutInflater.from(context).inflate(R.layout.custom_header_layout, null)
+messageComposer.setHeaderView(view)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    headerView = {
+        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFEDEAFA))) {
+            Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(R.drawable.ic_notes), "Notes")
+                Spacer(Modifier.width(4.dp))
+                Text("Notes")
+            }
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Send Button View
+
+Replace the default send button.
+
+<Frame>
+  <img src="/images/3a7932a2-message_composer_send_button_view-f2e27a65301a5ced00e5854fa3b4ee6f.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val imageView = ImageView(this)
+imageView.setImageResource(R.drawable.custom_send_button)
+imageView.setOnClickListener {
+    Toast.makeText(this, "Custom Send Button Clicked!", Toast.LENGTH_SHORT).show()
+}
+messageComposer.setSendButtonView(imageView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    sendButtonView = {
+        IconButton(onClick = { /* custom send */ }) {
+            Icon(painterResource(R.drawable.custom_send_button), "Send")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Auxiliary Button View
+
+Replace the auxiliary button area (stickers, AI).
+
+<Frame>
+  <img src="/images/673c7c47-message_composer_auxiliary_button_view-d7be5a9bcabce2d9260e8338658c8fc7.png" />
+</Frame>
+
+<Note>
+If you override the auxiliary button with `setAuxiliaryButtonView()`, retrieve the default auxiliary buttons via `CometChatUIKit.getDataSource().getAuxiliaryOption()` and include them in your custom layout to preserve sticker/AI buttons.
+</Note>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val linearLayout = LinearLayout(this)
+linearLayout.orientation = LinearLayout.HORIZONTAL
+
+// Preserve default auxiliary buttons
+val defaultView = CometChatUIKit.getDataSource().getAuxiliaryOption(
+    this, user, group,
+    messageComposer.composerViewModel.getIdMap(),
+    messageComposer.additionParameter
+)
+linearLayout.addView(defaultView)
+
+// Add custom button
+val customButton = ImageView(this)
+customButton.setImageResource(R.drawable.save_icon)
+linearLayout.addView(customButton)
+
+messageComposer.setAuxiliaryButtonView(linearLayout)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    auxiliaryButtonView = {
+        Row {
+            // Custom button alongside defaults
+            IconButton(onClick = { /* action */ }) {
+                Icon(painterResource(R.drawable.save_icon), "Save")
+            }
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Attachment Options
+
+Replace the default attachment options.
+
+<Frame>
+  <img src="/images/927b388b-message_composer_attachment_options-7fab1d4e46f7ec14b998d555d3d26968.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val actionList = ArrayList<CometChatMessageComposerAction>()
+
+val action1 = CometChatMessageComposerAction()
+action1.title = "Custom Option 1"
+action1.icon = R.drawable.ic_cp_1
+action1.onClick = {
+    Toast.makeText(context, "Custom Option 1", Toast.LENGTH_SHORT).show()
+}
+actionList.add(action1)
+
+messageComposer.setAttachmentOptions(actionList)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    attachmentOptions = listOf(
+        CometChatMessageComposerAction(
+            title = "Custom Option 1",
+            icon = R.drawable.ic_cp_1,
+            onClick = { /* handle */ }
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Text Formatters (Mentions)
+
+<Frame>
+  <img src="/images/b2f00911-mentions_message_composer-b1d1dd7961bc3c2953e7439bb516200b.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+mentionFormatter.setMessageComposerMentionTextStyle(context, R.style.CustomMentionsStyle)
+
+val textFormatters: MutableList<CometChatTextFormatter> = ArrayList()
+textFormatters.add(mentionFormatter)
+messageComposer.setTextFormatters(textFormatters)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val mentionFormatter = CometChatMentionsFormatter(context)
+
+CometChatMessageComposer(
+    user = user,
+    textFormatters = listOf(mentionFormatter)
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomMessageComposerStyle" parent="CometChatMessageComposerStyle">
+    <item name="cometchatMessageComposerBackgroundColor">#FEEDE1</item>
+    <item name="cometchatMessageComposerInputBackgroundColor">#FFFFFF</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatMessageComposerStyle">@style/CustomMessageComposerStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    style = CometChatMessageComposerStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        inputBackgroundColor = Color.White
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/482915e0-message_composer_styling-db627f8855f376a0287e9d2d7f0be603.png" />
+</Frame>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## ViewModel
+
+```kotlin lines
+val viewModel = ViewModelProvider(this)
+    .get(CometChatMessageComposerViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageComposer.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    user = user,
+    messageComposerViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for state observation and custom repositories.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="Message Header" icon="heading" href="/ui-kit/android/v6/message-header">
+    Display user/group info in the toolbar
+  </Card>
+  <Card title="Message Template" icon="puzzle-piece" href="/ui-kit/android/v6/message-template">
+    Customize message bubble structure
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference
+  </Card>
+</CardGroup>

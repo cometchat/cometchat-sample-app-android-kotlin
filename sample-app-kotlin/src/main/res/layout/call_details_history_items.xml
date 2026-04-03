@@ -29,7 +29,7 @@
             android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
             android:textColor="?attr/cometchatTextColorPrimary" />
 
-        <com.cometchat.chatuikit.shared.views.date.CometChatDate
+        <com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
             android:id="@+id/tv_info_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,6 +48,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/cometchat_margin_3"
         android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
-        android:textColor="?attr/cometchatTextColorPrimary" />
+        android:textColor="?attr/cometchatTextColorSecondary" />
 
 </LinearLayout>

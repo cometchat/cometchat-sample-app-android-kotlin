@@ -1,0 +1,290 @@
+package com.cometchat.uikit.compose.conversationlist.presentation.viewmodel
+
+import com.cometchat.chat.core.ConversationsRequest
+import com.cometchat.chat.models.Conversation
+import com.cometchat.uikit.compose.domain.repository.ConversationListRepository
+import com.cometchat.uikit.compose.domain.usecase.DeleteConversationUseCase
+import com.cometchat.uikit.compose.domain.usecase.GetConversationListUseCase
+import com.cometchat.uikit.compose.domain.usecase.RefreshConversationListUseCase
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
+import com.cometchat.uikit.compose.shared.constants.UIKitConstants
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.mockito.Mockito
+
+/**
+ * Property-based tests for CometChatConversationsViewModel.
+ *
+ * Feature: conversations-compose
+ * Properties tested:
+ * - Property 3: Selection Mode Behavior - Single
+ * - Property 4: Selection Mode Behavior - Multiple
+ * - Property 6: Selection Callback Invocation (clearSelection)
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class CometChatConversationsViewModelPropertyTest : StringSpec({
+
+    val testDispatcher = StandardTestDispatcher()
+
+    beforeSpec {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    afterSpec {
+        Dispatchers.resetMain()
+    }
+
+    /**
+     * Property 3: Selection Mode Behavior - Single
+     *
+     * For any sequence of conversation selections when selectionMode is SINGLE,
+     * only the most recently selected conversation SHALL be in the selected set,
+     * and all previously selected conversations SHALL be deselected.
+     *
+     * Feature: conversations-compose, Property 3: Selection Mode Behavior - Single
+     * Validates: Requirements 8.2
+     */
+    "Property 3: Single selection mode should only keep the most recently selected conversation" {
+        // Generator for random conversation IDs
+        val conversationIdsArb = Arb.list(
+            Arb.string(5..10),
+            1..10
+        )
+
+        checkAll(100, conversationIdsArb) { conversationIds ->
+            runTest {
+                // Arrange
+                val mockRepository = createMockRepository()
+                val viewModel = createViewModel(mockRepository)
+                advanceUntilIdle()
+
+                // Create mock conversations from IDs
+                val conversations = conversationIds.map { id ->
+                    createMockConversation(id, UIKitConstants.ConversationType.USERS)
+                }
+
+                // Act - Select each conversation in sequence
+                conversations.forEach { conversation ->
+                    viewModel.selectConversation(conversation, UIKitConstants.SelectionMode.SINGLE)
+                }
+
+                // Assert - Only the last conversation should be selected
+                viewModel.selectedConversations.value.size shouldBe 1
+                viewModel.selectedConversations.value.first().conversationId shouldBe conversations.last().conversationId
+            }
+        }
+    }
+
+    /**
+     * Property 4: Selection Mode Behavior - Multiple
+     *
+     * For any sequence of conversation selections when selectionMode is MULTIPLE,
+     * toggling a conversation's selection SHALL add it to the selected set if not present,
+     * or remove it if already present, without affecting other selections.
+     *
+     * Feature: conversations-compose, Property 4: Selection Mode Behavior - Multiple
+     * Validates: Requirements 8.3
+     */
+    "Property 4: Multiple selection mode should toggle conversations independently" {
+        // Generator for number of conversations and toggle operations
+        val operationsArb = Arb.bind(
+            Arb.int(1..5),  // number of unique conversations
+            Arb.list(Arb.int(0..4), 1..20)  // sequence of toggle operations (indices)
+        ) { numConversations, toggleIndices ->
+            Pair(numConversations, toggleIndices.map { it % numConversations })
+        }
+
+        checkAll(100, operationsArb) { (numConversations, toggleIndices) ->
+            runTest {
+                // Arrange
+                val mockRepository = createMockRepository()
+                val viewModel = createViewModel(mockRepository)
+                advanceUntilIdle()
+
+                // Create mock conversations
+                val conversations = (0 until numConversations).map { index ->
+                    createMockConversation("conv_$index", UIKitConstants.ConversationType.USERS)
+                }
+
+                // Track expected selection state
+                val expectedSelected = mutableSetOf<String>()
+
+                // Act - Perform toggle operations
+                toggleIndices.forEach { index ->
+                    val conversation = conversations[index]
+                    viewModel.selectConversation(conversation, UIKitConstants.SelectionMode.MULTIPLE)
+                    
+                    // Update expected state
+                    if (expectedSelected.contains(conversation.conversationId)) {
+                        expectedSelected.remove(conversation.conversationId)
+                    } else {
+                        expectedSelected.add(conversation.conversationId)
+                    }
+                }
+
+                // Assert - Selection should match expected state
+                val actualSelectedIds = viewModel.selectedConversations.value.map { it.conversationId }.toSet()
+                actualSelectedIds shouldBe expectedSelected
+            }
+        }
+    }
+
+    /**
+     * Property 6: Selection Callback Invocation (clearSelection part)
+     *
+     * For any click on the discard selection button, the selection SHALL be cleared
+     * and the selected set SHALL be empty.
+     *
+     * Feature: conversations-compose, Property 6: Selection Callback Invocation
+     * Validates: Requirements 8.5, 8.6
+     */
+    "Property 6: clearSelection should always result in empty selection regardless of initial state" {
+        // Generator for random number of selected conversations
+        val numSelectedArb = Arb.int(0..20)
+
+        checkAll(100, numSelectedArb) { numSelected ->
+            runTest {
+                // Arrange
+                val mockRepository = createMockRepository()
+                val viewModel = createViewModel(mockRepository)
+                advanceUntilIdle()
+
+                // Select random number of conversations
+                repeat(numSelected) { index ->
+                    val conversation = createMockConversation("conv_$index", UIKitConstants.ConversationType.USERS)
+                    viewModel.selectConversation(conversation, UIKitConstants.SelectionMode.MULTIPLE)
+                }
+
+                // Act
+                viewModel.clearSelection()
+
+                // Assert - Selection should always be empty after clearSelection
+                viewModel.selectedConversations.value.size shouldBe 0
+                viewModel.getSelectedConversations().size shouldBe 0
+            }
+        }
+    }
+
+    "Property 3: Single selection with same conversation should keep it selected" {
+        val timesArb = Arb.int(1..10)
+
+        checkAll(100, timesArb) { times ->
+            runTest {
+                // Arrange
+                val mockRepository = createMockRepository()
+                val viewModel = createViewModel(mockRepository)
+                advanceUntilIdle()
+
+                val conversation = createMockConversation("same_conv", UIKitConstants.ConversationType.USERS)
+
+                // Act - Select same conversation multiple times
+                repeat(times) {
+                    viewModel.selectConversation(conversation, UIKitConstants.SelectionMode.SINGLE)
+                }
+
+                // Assert - Should still have exactly one selected
+                viewModel.selectedConversations.value.size shouldBe 1
+                viewModel.selectedConversations.value.first().conversationId shouldBe "same_conv"
+            }
+        }
+    }
+
+    "Property 4: Multiple selection toggle twice should return to original state" {
+        val conversationIdsArb = Arb.list(Arb.string(5..10), 1..10)
+
+        checkAll(100, conversationIdsArb) { conversationIds ->
+            runTest {
+                // Arrange
+                val mockRepository = createMockRepository()
+                val viewModel = createViewModel(mockRepository)
+                advanceUntilIdle()
+
+                val conversations = conversationIds.map { id ->
+                    createMockConversation(id, UIKitConstants.ConversationType.USERS)
+                }
+
+                // Act - Select all, then toggle all twice (should return to all selected)
+                conversations.forEach { conv ->
+                    viewModel.selectConversation(conv, UIKitConstants.SelectionMode.MULTIPLE)
+                }
+                val afterFirstSelect = viewModel.selectedConversations.value.size
+
+                // Toggle all off
+                conversations.forEach { conv ->
+                    viewModel.selectConversation(conv, UIKitConstants.SelectionMode.MULTIPLE)
+                }
+                val afterToggleOff = viewModel.selectedConversations.value.size
+
+                // Toggle all back on
+                conversations.forEach { conv ->
+                    viewModel.selectConversation(conv, UIKitConstants.SelectionMode.MULTIPLE)
+                }
+                val afterToggleOn = viewModel.selectedConversations.value.size
+
+                // Assert
+                afterFirstSelect shouldBe conversations.size
+                afterToggleOff shouldBe 0
+                afterToggleOn shouldBe conversations.size
+            }
+        }
+    }
+})
+
+/**
+ * Helper function to create a mock Conversation using Mockito.
+ * The Conversation class has a private constructor, so we must use mocks.
+ */
+private fun createMockConversation(id: String, type: String): Conversation {
+    val mockConversation = Mockito.mock(Conversation::class.java)
+    Mockito.`when`(mockConversation.conversationId).thenReturn(id)
+    Mockito.`when`(mockConversation.conversationType).thenReturn(type)
+    return mockConversation
+}
+
+/**
+ * Helper function to create a mock repository.
+ */
+private fun createMockRepository(): ConversationListRepository {
+    return object : ConversationListRepository {
+        override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+            return Result.success(emptyList())
+        }
+        override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override fun hasMoreConversations(): Boolean = false
+    }
+}
+
+/**
+ * Helper function to create ViewModel with mock repository.
+ * Disables CometChat listeners for unit testing.
+ */
+private fun createViewModel(repository: ConversationListRepository): CometChatConversationsViewModel {
+    val getConversationListUseCase = GetConversationListUseCase(repository)
+    val deleteConversationUseCase = DeleteConversationUseCase(repository)
+    val refreshConversationListUseCase = RefreshConversationListUseCase(repository)
+    
+    return CometChatConversationsViewModel(
+        getConversationListUseCase = getConversationListUseCase,
+        deleteConversationUseCase = deleteConversationUseCase,
+        refreshConversationListUseCase = refreshConversationListUseCase,
+        enableListeners = false
+    )
+}

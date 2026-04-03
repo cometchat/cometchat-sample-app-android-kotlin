@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Header View Container -->
+    <FrameLayout
+        android:id="@+id/header_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Loading State View -->
+        <LinearLayout
+            android:id="@+id/loading_state_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout
+                android:id="@+id/shimmer_effect_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/shimmer_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            </com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout>
+
+        </LinearLayout>
+
+        <!-- Empty State View -->
+        <LinearLayout
+            android:id="@+id/empty_state_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+                android:id="@+id/iv_empty_avatar"
+                android:layout_width="@dimen/cometchat_60dp"
+                android:layout_height="@dimen/cometchat_60dp"
+                android:layout_marginBottom="@dimen/cometchat_margin_5"
+                android:visibility="gone"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/tv_empty_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/cometchat_padding_1"
+                android:textAlignment="center"
+                tools:text="@string/cometchat_empty_conversations_title" />
+
+            <TextView
+                android:id="@+id/tv_empty_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/cometchat_margin_5"
+                android:textAlignment="center"
+                tools:text="@string/cometchat_empty_conversations_subtitle" />
+
+            <!-- AI Assistant Suggested Messages Container -->
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/ai_suggested_messages_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginHorizontal="@dimen/cometchat_margin_4"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    app:flexWrap="wrap"
+                    app:justifyContent="center" />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <!-- Error State View -->
+        <LinearLayout
+            android:id="@+id/error_state_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_error"
+                android:layout_width="@dimen/cometchat_162dp"
+                android:layout_height="@dimen/cometchat_121dp"
+                android:layout_marginBottom="@dimen/cometchat_margin_5"
+                android:importantForAccessibility="no"
+                android:src="@drawable/cometchat_ic_conversations_error" />
+
+            <TextView
+                android:id="@+id/tv_error_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/cometchat_margin_1"
+                android:text="@string/cometchat_error_conversations_title"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/tv_error_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/cometchat_error_conversations_subtitle"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <!-- Custom View Container -->
+        <FrameLayout
+            android:id="@+id/custom_view_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- Message List Layout -->
+        <RelativeLayout
+            android:id="@+id/message_list_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:orientation="vertical">
+
+                <!-- Top Pagination Loading Indicator -->
+                <ProgressBar
+                    android:id="@+id/top_pagination_indicator"
+                    android:layout_width="@dimen/cometchat_24dp"
+                    android:layout_height="@dimen/cometchat_24dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="@dimen/cometchat_margin_2"
+                    android:visibility="gone" />
+
+                <!-- Message RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerview_message_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:layout_marginStart="@dimen/cometchat_margin_2"
+                    android:layout_marginEnd="@dimen/cometchat_margin_2"
+                    android:paddingTop="@dimen/cometchat_padding_2"
+                    android:paddingBottom="@dimen/cometchat_padding_2" />
+
+                <!-- Bottom Pagination Loading Indicator -->
+                <ProgressBar
+                    android:id="@+id/bottom_pagination_indicator"
+                    android:layout_width="@dimen/cometchat_24dp"
+                    android:layout_height="@dimen/cometchat_24dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="@dimen/cometchat_margin_2"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- New Message Indicator -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/new_message_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="@dimen/cometchat_margin_2"
+                android:layout_marginBottom="@dimen/cometchat_margin_2"
+                android:visibility="gone"
+                app:cardCornerRadius="@dimen/cometchat_radius_max"
+                app:cardElevation="@dimen/cometchat_8dp"
+                app:strokeColor="?attr/cometchatStrokeColorLight"
+                app:strokeWidth="@dimen/cometchat_1dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/cometchat_padding_3"
+                    android:paddingVertical="@dimen/cometchat_padding_3">
+
+                    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCount
+                        android:id="@+id/new_message_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/cometchat_4dp"
+                        android:minWidth="@dimen/cometchat_20dp" />
+
+                    <ImageView
+                        android:id="@+id/new_message_arrow"
+                        android:layout_width="@dimen/cometchat_24dp"
+                        android:layout_height="@dimen/cometchat_24dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/cometchat_ic_arrow_down"
+                        app:tint="?attr/cometchatIconTintSecondary" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <!-- Footer View Container -->
+    <FrameLayout
+        android:id="@+id/footer_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+</LinearLayout>

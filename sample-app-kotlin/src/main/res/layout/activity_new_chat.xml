@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    New Chat Activity Layout
+    
+    Displays a tabbed interface with Users and Groups tabs for starting new conversations.
+    
+    Validates: Requirements 7.1, 7.2, 7.3
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/new_chat_main"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.newchat.NewChatActivity">
 
+    <!-- Toolbar -->
     <LinearLayout
         android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
@@ -31,15 +42,15 @@
                 android:layout_marginEnd="@dimen/cometchat_margin_2"
                 android:clickable="true"
                 android:focusable="true"
+                android:contentDescription="@string/content_desc_back"
                 android:src="@drawable/cometchat_ic_back"
-                android:visibility="visible"
                 app:tint="?attr/cometchatIconTintPrimary" />
 
             <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/app_new_chat"
+                android:text="@string/new_chat"
                 android:textAppearance="?attr/cometchatTextAppearanceHeading2Bold"
                 android:textColor="?attr/cometchatTextColorPrimary" />
 
@@ -53,6 +64,7 @@
 
     </LinearLayout>
 
+    <!-- Tab Layout Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,18 +100,22 @@
                 app:tabSelectedTextColor="?attr/cometchatPrimaryColor"
                 app:tabTextAppearance="@style/CometChatTextAppearanceHeading4.Medium"
                 app:tabTextColor="?attr/cometchatTextColorSecondary" />
+
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-    <com.cometchat.chatuikit.users.CometChatUsers
+    <!-- Users List -->
+    <com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
         android:id="@+id/users"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.cometchat.chatuikit.groups.CometChatGroups
+    <!-- Groups List (initially hidden) -->
+    <com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
         android:id="@+id/groups"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
+
 </LinearLayout>

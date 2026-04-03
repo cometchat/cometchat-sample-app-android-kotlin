@@ -1,0 +1,335 @@
+package com.cometchat.uikit.core.domain.usecase
+
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.GroupMember
+import com.cometchat.uikit.core.domain.repository.GroupMembersRepository
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.test.runTest
+
+/**
+ * Unit tests for ChangeMemberScopeUseCase.
+ * 
+ * Feature: group-members-component
+ * Tests verify use case invocation calls repository methods correctly.
+ */
+class ChangeMemberScopeUseCaseTest : StringSpec({
+
+    "invoke should return success when repository succeeds" {
+        runTest {
+            // Arrange
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "admin")
+
+            // Assert
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe Unit
+        }
+    }
+
+    "invoke should return failure when repository fails" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("PERMISSION_DENIED", "Permission denied", "User not authorized")
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    return Result.failure(exception)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "admin")
+
+            // Assert
+            result.isFailure shouldBe true
+            result.exceptionOrNull().shouldBeInstanceOf<CometChatException>()
+        }
+    }
+
+    "invoke should pass correct parameters to repository" {
+        runTest {
+            // Arrange
+            var capturedGuid: String? = null
+            var capturedUid: String? = null
+            var capturedScope: String? = null
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    capturedGuid = guid
+                    capturedUid = uid
+                    capturedScope = scope
+                    return Result.success(Unit)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            useCase(guid = "group-456", uid = "user-789", scope = "moderator")
+
+            // Assert
+            capturedGuid shouldBe "group-456"
+            capturedUid shouldBe "user-789"
+            capturedScope shouldBe "moderator"
+        }
+    }
+
+    "invoke should handle network errors" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("NETWORK_ERROR", "Network error", "Connection timeout")
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    return Result.failure(exception)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "admin")
+
+            // Assert
+            result.isFailure shouldBe true
+            val error = result.exceptionOrNull() as CometChatException
+            error.code shouldBe "NETWORK_ERROR"
+        }
+    }
+
+    "invoke should handle member not found errors" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("MEMBER_NOT_FOUND", "Member not found", "User is not a member")
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    return Result.failure(exception)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "nonexistent-user", scope = "admin")
+
+            // Assert
+            result.isFailure shouldBe true
+            val error = result.exceptionOrNull() as CometChatException
+            error.code shouldBe "MEMBER_NOT_FOUND"
+        }
+    }
+
+    "invoke should handle permission errors for non-admin users" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("INSUFFICIENT_PRIVILEGES", "Insufficient privileges", "Only admins can change member scope")
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    return Result.failure(exception)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "admin")
+
+            // Assert
+            result.isFailure shouldBe true
+            val error = result.exceptionOrNull() as CometChatException
+            error.code shouldBe "INSUFFICIENT_PRIVILEGES"
+        }
+    }
+
+    "invoke should handle changing scope to admin" {
+        runTest {
+            // Arrange
+            var capturedScope: String? = null
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    capturedScope = scope
+                    return Result.success(Unit)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "admin")
+
+            // Assert
+            result.isSuccess shouldBe true
+            capturedScope shouldBe "admin"
+        }
+    }
+
+    "invoke should handle changing scope to moderator" {
+        runTest {
+            // Arrange
+            var capturedScope: String? = null
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    capturedScope = scope
+                    return Result.success(Unit)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "moderator")
+
+            // Assert
+            result.isSuccess shouldBe true
+            capturedScope shouldBe "moderator"
+        }
+    }
+
+    "invoke should handle changing scope to participant" {
+        runTest {
+            // Arrange
+            var capturedScope: String? = null
+            val mockRepository = object : GroupMembersRepository {
+                override suspend fun fetchGroupMembers(
+                    guid: String,
+                    limit: Int,
+                    searchKeyword: String?
+                ): Result<List<GroupMember>> {
+                    return Result.success(emptyList())
+                }
+                override suspend fun kickMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun banMember(guid: String, uid: String): Result<Unit> {
+                    return Result.success(Unit)
+                }
+                override suspend fun changeMemberScope(guid: String, uid: String, scope: String): Result<Unit> {
+                    capturedScope = scope
+                    return Result.success(Unit)
+                }
+                override fun hasMore(): Boolean = false
+            }
+            val useCase = ChangeMemberScopeUseCase(mockRepository)
+
+            // Act
+            val result = useCase(guid = "test-group", uid = "user123", scope = "participant")
+
+            // Assert
+            result.isSuccess shouldBe true
+            capturedScope shouldBe "participant"
+        }
+    }
+})

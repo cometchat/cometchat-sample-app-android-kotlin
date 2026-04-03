@@ -1,0 +1,484 @@
+package com.cometchat.uikit.compose.presentation.messagelist.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.BubbleStyles
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatTextBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImageBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMessageBubbleStyle
+import com.cometchat.uikit.core.constants.UIKitConstants
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.element
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for verifying alignment-based style resolution.
+ *
+ * **Feature: message-bubble-internal-rendering**
+ * **Property 6: Alignment-Based Style Resolution**
+ *
+ * **Validates: Requirements 5.1, 5.2, 5.3**
+ *
+ * For any message using internal rendering, the style applied to the content bubble
+ * SHALL match the alignment:
+ * - incoming() for LEFT alignment
+ * - outgoing() for RIGHT alignment
+ * - default() for CENTER alignment
+ */
+class AlignmentBasedStyleResolutionPropertyTest : StringSpec({
+
+    // ============================================================================
+    // Arbitrary generators
+    // ============================================================================
+
+    /**
+     * Generates random Color values for testing.
+     */
+    val colorArb = Arb.bind(
+        Arb.int(0, 255),
+        Arb.int(0, 255),
+        Arb.int(0, 255),
+        Arb.int(0, 255)
+    ) { r, g, b, a -> Color(r / 255f, g / 255f, b / 255f, a / 255f) }
+
+
+    /**
+     * Generates random Dp values for testing.
+     */
+    val dpArb: Arb<Dp> = Arb.float(0f, 24f).map { value -> value.dp }
+
+    /**
+     * Generates random TextStyle values for testing.
+     */
+    val textStyleArb: Arb<TextStyle> = Arb.float(10f, 24f).map { fontSize -> TextStyle(fontSize = fontSize.sp) }
+
+    /**
+     * Generates random PaddingValues for testing.
+     */
+    val paddingArb: Arb<PaddingValues> = Arb.float(0f, 16f).map { padding -> PaddingValues(padding.dp) }
+
+    /**
+     * Generates random MessageBubbleAlignment values for testing.
+     */
+    val alignmentArb: Arb<UIKitConstants.MessageBubbleAlignment> = Arb.element(
+        UIKitConstants.MessageBubbleAlignment.LEFT,
+        UIKitConstants.MessageBubbleAlignment.RIGHT,
+        UIKitConstants.MessageBubbleAlignment.CENTER
+    )
+
+    // ============================================================================
+    // Property Test: Style propagation from MessageListStyle to BubbleStyles
+    // ============================================================================
+
+    /**
+     * Property test: BubbleStyles correctly holds all per-bubble-type styles.
+     *
+     * For any set of bubble styles passed to BubbleStyles, the container
+     * SHALL preserve all style references without modification.
+     *
+     * **Validates: Requirements 5.1, 5.2, 5.3**
+     */
+    "BubbleStyles should preserve all per-bubble-type style references" {
+        val textBubbleStyleArb = Arb.bind(
+            colorArb,
+            dpArb
+        ) { textColor, cornerRadius ->
+            createTestTextBubbleStyle(textColor = textColor, cornerRadius = cornerRadius)
+        }
+
+        checkAll(100, textBubbleStyleArb) { textStyle ->
+            val bubbleStyles = BubbleStyles(
+                textBubbleStyle = textStyle
+            )
+
+            // Verify the style is preserved
+            bubbleStyles.textBubbleStyle shouldBe textStyle
+            bubbleStyles.textBubbleStyle?.textColor shouldBe textStyle.textColor
+            bubbleStyles.textBubbleStyle?.cornerRadius shouldBe textStyle.cornerRadius
+        }
+    }
+
+    // ============================================================================
+    // Property Test: Null styles in BubbleStyles trigger alignment-based defaults
+    // ============================================================================
+
+    /**
+     * Property test: When BubbleStyles has null for a bubble type, alignment-based
+     * defaults should be used.
+     *
+     * For any alignment, when no explicit style is provided in BubbleStyles,
+     * the InternalContentRenderer SHALL use alignment-based defaults:
+     * - LEFT alignment → incoming() style
+     * - RIGHT alignment → outgoing() style
+     * - CENTER alignment → default() style
+     *
+     * **Validates: Requirements 5.1, 5.2, 5.3**
+     */
+    "null styles in BubbleStyles should allow alignment-based default resolution" {
+        checkAll(100, alignmentArb) { alignment ->
+            val bubbleStyles = BubbleStyles(
+                textBubbleStyle = null,
+                imageBubbleStyle = null
+            )
+
+            // Verify all styles are null (allowing defaults to be used)
+            bubbleStyles.textBubbleStyle shouldBe null
+            bubbleStyles.imageBubbleStyle shouldBe null
+            bubbleStyles.videoBubbleStyle shouldBe null
+            bubbleStyles.audioBubbleStyle shouldBe null
+            bubbleStyles.fileBubbleStyle shouldBe null
+            bubbleStyles.deleteBubbleStyle shouldBe null
+            bubbleStyles.actionBubbleStyle shouldBe null
+            bubbleStyles.callActionBubbleStyle shouldBe null
+            bubbleStyles.meetCallBubbleStyle shouldBe null
+            bubbleStyles.pollBubbleStyle shouldBe null
+            bubbleStyles.stickerBubbleStyle shouldBe null
+            bubbleStyles.collaborativeBubbleStyle shouldBe null
+        }
+    }
+
+
+    // ============================================================================
+    // Property Test: Explicit styles override alignment-based defaults
+    // ============================================================================
+
+    /**
+     * Property test: When explicit styles are provided in BubbleStyles, they
+     * SHALL be used instead of alignment-based defaults.
+     *
+     * For any alignment and any explicit style, the explicit style SHALL take
+     * precedence over the alignment-based default.
+     *
+     * **Validates: Requirements 5.1, 5.2, 5.3**
+     */
+    "explicit styles in BubbleStyles should override alignment-based defaults" {
+        val styleArb = Arb.bind(
+            alignmentArb,
+            colorArb,
+            dpArb
+        ) { alignment, backgroundColor, cornerRadius ->
+            Triple(alignment, backgroundColor, cornerRadius)
+        }
+
+        checkAll(100, styleArb) { (alignment, backgroundColor, cornerRadius) ->
+            val customTextStyle = createTestTextBubbleStyle(
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius
+            )
+
+            val bubbleStyles = BubbleStyles(
+                textBubbleStyle = customTextStyle
+            )
+
+            // Verify the explicit style is preserved regardless of alignment
+            bubbleStyles.textBubbleStyle shouldNotBe null
+            bubbleStyles.textBubbleStyle?.backgroundColor shouldBe backgroundColor
+            bubbleStyles.textBubbleStyle?.cornerRadius shouldBe cornerRadius
+        }
+    }
+
+    // ============================================================================
+    // Property Test: CometChatMessageListStyle propagates styles to BubbleStyles
+    // ============================================================================
+
+    /**
+     * Property test: CometChatMessageListStyle correctly holds per-bubble-type styles
+     * that can be extracted and passed to BubbleStyles.
+     *
+     * For any CometChatMessageListStyle with per-bubble-type styles set,
+     * those styles SHALL be accessible and can be used to construct BubbleStyles.
+     *
+     * **Validates: Requirements 5.1, 5.2, 5.3**
+     */
+    "CometChatMessageListStyle should hold per-bubble-type styles for propagation" {
+        val styleArb = Arb.bind(
+            colorArb,
+            dpArb
+        ) { textColor, cornerRadius ->
+            Pair(textColor, cornerRadius)
+        }
+
+        checkAll(100, styleArb) { (textColor, cornerRadius) ->
+            val customTextStyle = createTestTextBubbleStyle(
+                textColor = textColor,
+                cornerRadius = cornerRadius
+            )
+
+            val messageListStyle = createTestMessageListStyle(
+                textBubbleStyle = customTextStyle
+            )
+
+            // Verify the style is accessible from MessageListStyle
+            messageListStyle.textBubbleStyle shouldNotBe null
+            messageListStyle.textBubbleStyle?.textColor shouldBe textColor
+            messageListStyle.textBubbleStyle?.cornerRadius shouldBe cornerRadius
+
+            // Verify it can be used to construct BubbleStyles
+            val bubbleStyles = BubbleStyles(
+                textBubbleStyle = messageListStyle.textBubbleStyle
+            )
+            bubbleStyles.textBubbleStyle shouldBe customTextStyle
+        }
+    }
+
+    // ============================================================================
+    // Property Test: All bubble style types can be propagated
+    // ============================================================================
+
+    /**
+     * Property test: All 12 bubble style types can be set and propagated through
+     * CometChatMessageListStyle to BubbleStyles.
+     *
+     * **Validates: Requirements 5.1, 5.2, 5.3**
+     */
+    "all bubble style types should be propagatable through MessageListStyle" {
+        val textStyle = createTestTextBubbleStyle()
+        val imageStyle = createTestImageBubbleStyle()
+
+        val messageListStyle = createTestMessageListStyle(
+            textBubbleStyle = textStyle,
+            imageBubbleStyle = imageStyle
+        )
+
+        // Verify all styles are accessible
+        messageListStyle.textBubbleStyle shouldBe textStyle
+        messageListStyle.imageBubbleStyle shouldBe imageStyle
+
+        // Verify they can be propagated to BubbleStyles
+        val bubbleStyles = BubbleStyles(
+            textBubbleStyle = messageListStyle.textBubbleStyle,
+            imageBubbleStyle = messageListStyle.imageBubbleStyle
+        )
+
+        bubbleStyles.textBubbleStyle shouldBe textStyle
+        bubbleStyles.imageBubbleStyle shouldBe imageStyle
+    }
+})
+
+
+// ============================================================================
+// Helper functions to create test style instances without Compose context
+// ============================================================================
+
+/**
+ * Creates a test CometChatTextBubbleStyle instance with customizable values.
+ */
+private fun createTestTextBubbleStyle(
+    textColor: Color = Color.Black,
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkColor: Color = Color.Blue,
+    translatedTextColor: Color = Color.Gray,
+    translatedTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    separatorColor: Color = Color.LightGray,
+    linkPreviewBackgroundColor: Color = Color(0xFFE8E8E8),
+    linkPreviewTitleColor: Color = Color.Black,
+    linkPreviewTitleStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    linkPreviewDescriptionColor: Color = Color.Gray,
+    linkPreviewDescriptionStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewLinkColor: Color = Color.Blue,
+    linkPreviewLinkStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    linkPreviewCornerRadius: Dp = 8.dp,
+    linkPreviewStrokeWidth: Dp = 0.dp,
+    linkPreviewStrokeColor: Color = Color.Transparent,
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatTextBubbleStyle = CometChatTextBubbleStyle(
+    textColor = textColor,
+    textStyle = textStyle,
+    linkColor = linkColor,
+    translatedTextColor = translatedTextColor,
+    translatedTextStyle = translatedTextStyle,
+    separatorColor = separatorColor,
+    linkPreviewBackgroundColor = linkPreviewBackgroundColor,
+    linkPreviewTitleColor = linkPreviewTitleColor,
+    linkPreviewTitleStyle = linkPreviewTitleStyle,
+    linkPreviewDescriptionColor = linkPreviewDescriptionColor,
+    linkPreviewDescriptionStyle = linkPreviewDescriptionStyle,
+    linkPreviewLinkColor = linkPreviewLinkColor,
+    linkPreviewLinkStyle = linkPreviewLinkStyle,
+    linkPreviewCornerRadius = linkPreviewCornerRadius,
+    linkPreviewStrokeWidth = linkPreviewStrokeWidth,
+    linkPreviewStrokeColor = linkPreviewStrokeColor,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatImageBubbleStyle instance with customizable values.
+ */
+private fun createTestImageBubbleStyle(
+    imageCornerRadius: Dp = 8.dp,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    captionTextColor: Color = Color.Black,
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    progressIndicatorColor: Color = Color.Gray,
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatImageBubbleStyle = CometChatImageBubbleStyle(
+    imageCornerRadius = imageCornerRadius,
+    imageStrokeWidth = imageStrokeWidth,
+    imageStrokeColor = imageStrokeColor,
+    captionTextColor = captionTextColor,
+    captionTextStyle = captionTextStyle,
+    progressIndicatorColor = progressIndicatorColor,
+    gridSpacing = gridSpacing,
+    maxGridWidth = maxGridWidth,
+    moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+    moreOverlayTextColor = moreOverlayTextColor,
+    moreOverlayTextStyle = moreOverlayTextStyle,
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+/**
+ * Creates a test CometChatMessageBubbleStyle instance with customizable values.
+ */
+private fun createTestMessageBubbleStyle(
+    backgroundColor: Color = Color(0xFFF5F5F5),
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatMessageBubbleStyle = CometChatMessageBubbleStyle(
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    padding = padding,
+    senderNameTextColor = senderNameTextColor,
+    senderNameTextStyle = senderNameTextStyle,
+    threadIndicatorTextColor = threadIndicatorTextColor,
+    threadIndicatorTextStyle = threadIndicatorTextStyle,
+    threadIndicatorIconTint = threadIndicatorIconTint
+)
+
+
+/**
+ * Creates a test CometChatMessageListStyle instance with customizable values.
+ */
+private fun createTestMessageListStyle(
+    backgroundColor: Color = Color.White,
+    cornerRadius: Dp = 0.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    errorStateTitleTextColor: Color = Color.Black,
+    errorStateTitleTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    errorStateSubtitleTextColor: Color = Color.Gray,
+    errorStateSubtitleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    emptyChatGreetingTitleTextColor: Color = Color.Black,
+    emptyChatGreetingTitleTextStyle: TextStyle = TextStyle(fontSize = 20.sp),
+    emptyChatGreetingSubtitleTextColor: Color = Color.Gray,
+    emptyChatGreetingSubtitleTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    dateSeparatorTextColor: Color = Color.Gray,
+    dateSeparatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    dateSeparatorBackgroundColor: Color = Color.LightGray,
+    dateSeparatorCornerRadius: Dp = 8.dp,
+    newMessageIndicatorBackgroundColor: Color = Color.Blue,
+    newMessageIndicatorTextColor: Color = Color.White,
+    newMessageIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    newMessageIndicatorCornerRadius: Dp = 28.dp,
+    newMessageIndicatorElevation: Dp = 8.dp,
+    newMessageIndicatorStrokeColor: Color = Color.LightGray,
+    newMessageIndicatorStrokeWidth: Dp = 1.dp,
+    newMessageIndicatorIconTint: Color = Color.Gray,
+    newMessageIndicatorIconSize: Dp = 24.dp,
+    newMessageIndicatorPadding: Dp = 12.dp,
+    newMessagesSeparatorTextColor: Color = Color.Red,
+    newMessagesSeparatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    newMessagesSeparatorLineColor: Color = Color.Red,
+    newMessagesSeparatorLineHeight: Dp = 1.dp,
+    newMessagesSeparatorVerticalPadding: Dp = 8.dp,
+    messageBubbleStyle: CometChatMessageBubbleStyle = createTestMessageBubbleStyle(),
+    textBubbleStyle: CometChatTextBubbleStyle? = null,
+    imageBubbleStyle: CometChatImageBubbleStyle? = null
+): CometChatMessageListStyle = CometChatMessageListStyle(
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeWidth = strokeWidth,
+    strokeColor = strokeColor,
+    errorStateTitleTextColor = errorStateTitleTextColor,
+    errorStateTitleTextStyle = errorStateTitleTextStyle,
+    errorStateSubtitleTextColor = errorStateSubtitleTextColor,
+    errorStateSubtitleTextStyle = errorStateSubtitleTextStyle,
+    emptyChatGreetingTitleTextColor = emptyChatGreetingTitleTextColor,
+    emptyChatGreetingTitleTextStyle = emptyChatGreetingTitleTextStyle,
+    emptyChatGreetingSubtitleTextColor = emptyChatGreetingSubtitleTextColor,
+    emptyChatGreetingSubtitleTextStyle = emptyChatGreetingSubtitleTextStyle,
+    dateSeparatorTextColor = dateSeparatorTextColor,
+    dateSeparatorTextStyle = dateSeparatorTextStyle,
+    dateSeparatorBackgroundColor = dateSeparatorBackgroundColor,
+    dateSeparatorCornerRadius = dateSeparatorCornerRadius,
+    newMessageIndicatorBackgroundColor = newMessageIndicatorBackgroundColor,
+    newMessageIndicatorTextColor = newMessageIndicatorTextColor,
+    newMessageIndicatorTextStyle = newMessageIndicatorTextStyle,
+    newMessageIndicatorCornerRadius = newMessageIndicatorCornerRadius,
+    newMessageIndicatorElevation = newMessageIndicatorElevation,
+    newMessageIndicatorStrokeColor = newMessageIndicatorStrokeColor,
+    newMessageIndicatorStrokeWidth = newMessageIndicatorStrokeWidth,
+    newMessageIndicatorIconTint = newMessageIndicatorIconTint,
+    newMessageIndicatorIconSize = newMessageIndicatorIconSize,
+    newMessageIndicatorPadding = newMessageIndicatorPadding,
+    newMessagesSeparatorTextColor = newMessagesSeparatorTextColor,
+    newMessagesSeparatorTextStyle = newMessagesSeparatorTextStyle,
+    newMessagesSeparatorLineColor = newMessagesSeparatorLineColor,
+    newMessagesSeparatorLineHeight = newMessagesSeparatorLineHeight,
+    newMessagesSeparatorVerticalPadding = newMessagesSeparatorVerticalPadding,
+    messageBubbleStyle = messageBubbleStyle,
+    textBubbleStyle = textBubbleStyle,
+    imageBubbleStyle = imageBubbleStyle
+)

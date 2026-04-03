@@ -1,0 +1,546 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatVideoBubbleStyle.
+ *
+ * Feature: video-audio-bubbles
+ * Tests:
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ * - Style extends CometChatMessageBubbleStyle
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 6.2, 6.3, 6.4, 6.5
+ */
+class CometChatVideoBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatVideoBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatVideoBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestVideoBubbleStyle()
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4, 6.2, 6.5
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestVideoBubbleStyle()
+
+        // Verify content-specific properties are accessible
+        style.videoCornerRadius shouldBe 8.dp
+        style.videoStrokeWidth shouldBe 0.dp
+        style.videoStrokeColor shouldBe Color.Transparent
+        style.playIconTint shouldBe Color.White
+        style.playIconBackgroundColor shouldBe Color.Black.copy(alpha = 0.6f)
+        style.progressIndicatorColor shouldBe Color.Gray
+        style.captionTextColor shouldBe Color.Black
+        style.captionTextStyle shouldNotBe null
+        style.gridSpacing shouldBe 2.dp
+        style.maxGridWidth shouldBe 240.dp
+        style.moreOverlayBackgroundColor shouldBe Color.Black.copy(alpha = 0.6f)
+        style.moreOverlayTextColor shouldBe Color.White
+        style.moreOverlayTextStyle shouldNotBe null
+
+        // Verify inherited wrapper properties are accessible
+        style.backgroundColor shouldBe Color.Transparent
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3, 6.3
+     */
+    "incoming factory function should return valid style" {
+        val style = createTestVideoBubbleStyle()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color.Transparent
+        style.cornerRadius shouldBe 12.dp
+        style.videoCornerRadius shouldBe 8.dp
+        style.playIconTint shouldBe Color.White
+        style.gridSpacing shouldBe 2.dp
+        style.maxGridWidth shouldBe 240.dp
+    }
+
+    /**
+     * Test that outgoing() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3, 6.4
+     */
+    "outgoing factory function should return valid style" {
+        val style = createTestVideoBubbleStyle()
+
+        // Verify outgoing style has expected values
+        style.backgroundColor shouldBe Color.Transparent
+        style.cornerRadius shouldBe 12.dp
+        style.videoCornerRadius shouldBe 8.dp
+        style.playIconTint shouldBe Color.White
+        style.gridSpacing shouldBe 2.dp
+        style.maxGridWidth shouldBe 240.dp
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 6.2, 6.5
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.float(4f, 16f),   // videoCornerRadius
+            Arb.int(0, 255),      // playIconTint alpha
+            Arb.float(0f, 8f)     // gridSpacing
+        ) { bgAlpha, cornerRadius, videoCornerRadius, playIconAlpha, gridSpacing ->
+            createTestVideoBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                videoCornerRadius = videoCornerRadius.dp,
+                playIconTint = Color(1f, 1f, 1f, playIconAlpha / 255f),
+                gridSpacing = gridSpacing.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalVideoCornerRadius = originalStyle.videoCornerRadius
+            val originalStrokeWidth = originalStyle.strokeWidth
+            val originalStrokeColor = originalStyle.strokeColor
+            val originalPlayIconTint = originalStyle.playIconTint
+            val originalPlayIconBackgroundColor = originalStyle.playIconBackgroundColor
+            val originalProgressIndicatorColor = originalStyle.progressIndicatorColor
+            val originalCaptionTextColor = originalStyle.captionTextColor
+            val originalGridSpacing = originalStyle.gridSpacing
+            val originalMaxGridWidth = originalStyle.maxGridWidth
+            val originalMoreOverlayBackgroundColor = originalStyle.moreOverlayBackgroundColor
+            val originalMoreOverlayTextColor = originalStyle.moreOverlayTextColor
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.videoCornerRadius shouldBe originalVideoCornerRadius
+            originalStyle.strokeWidth shouldBe originalStrokeWidth
+            originalStyle.strokeColor shouldBe originalStrokeColor
+            originalStyle.playIconTint shouldBe originalPlayIconTint
+            originalStyle.playIconBackgroundColor shouldBe originalPlayIconBackgroundColor
+            originalStyle.progressIndicatorColor shouldBe originalProgressIndicatorColor
+            originalStyle.captionTextColor shouldBe originalCaptionTextColor
+            originalStyle.gridSpacing shouldBe originalGridSpacing
+            originalStyle.maxGridWidth shouldBe originalMaxGridWidth
+            originalStyle.moreOverlayBackgroundColor shouldBe originalMoreOverlayBackgroundColor
+            originalStyle.moreOverlayTextColor shouldBe originalMoreOverlayTextColor
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.videoCornerRadius shouldBe originalVideoCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+            copiedStyle.strokeColor shouldBe originalStrokeColor
+            copiedStyle.playIconTint shouldBe originalPlayIconTint
+            copiedStyle.playIconBackgroundColor shouldBe originalPlayIconBackgroundColor
+            copiedStyle.progressIndicatorColor shouldBe originalProgressIndicatorColor
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+            copiedStyle.gridSpacing shouldBe originalGridSpacing
+            copiedStyle.maxGridWidth shouldBe originalMaxGridWidth
+            copiedStyle.moreOverlayBackgroundColor shouldBe originalMoreOverlayBackgroundColor
+            copiedStyle.moreOverlayTextColor shouldBe originalMoreOverlayTextColor
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with multiple modified video-related properties.
+     *
+     * Validates: Requirements 6.5
+     */
+    "copy with modified video properties should preserve unmodified values" {
+        val styleArb = Arb.bind(
+            Arb.float(4f, 16f),   // videoCornerRadius
+            Arb.int(0, 255)       // playIconBackgroundColor alpha
+        ) { videoCornerRadius, playIconBgAlpha ->
+            createTestVideoBubbleStyle(
+                videoCornerRadius = videoCornerRadius.dp,
+                playIconBackgroundColor = Color(0f, 0f, 0f, playIconBgAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCaptionTextColor = originalStyle.captionTextColor
+            val originalGridSpacing = originalStyle.gridSpacing
+
+            // Create a copy with modified video values
+            val newVideoCornerRadius = 16.dp
+            val newPlayIconTint = Color.Yellow
+            val newPlayIconBackgroundColor = Color.Blue.copy(alpha = 0.8f)
+            val newProgressIndicatorColor = Color.Cyan
+            val copiedStyle = originalStyle.copy(
+                videoCornerRadius = newVideoCornerRadius,
+                playIconTint = newPlayIconTint,
+                playIconBackgroundColor = newPlayIconBackgroundColor,
+                progressIndicatorColor = newProgressIndicatorColor
+            )
+
+            // Verify modified values
+            copiedStyle.videoCornerRadius shouldBe newVideoCornerRadius
+            copiedStyle.playIconTint shouldBe newPlayIconTint
+            copiedStyle.playIconBackgroundColor shouldBe newPlayIconBackgroundColor
+            copiedStyle.progressIndicatorColor shouldBe newProgressIndicatorColor
+
+            // Verify unmodified values are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+            copiedStyle.gridSpacing shouldBe originalGridSpacing
+        }
+    }
+
+    /**
+     * Test style copy with modified caption properties.
+     *
+     * Validates: Requirements 6.5
+     */
+    "copy with modified caption properties should preserve video properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // captionTextColor alpha
+            Arb.float(12f, 18f)   // captionTextStyle fontSize
+        ) { captionAlpha, fontSize ->
+            createTestVideoBubbleStyle(
+                captionTextColor = Color(0f, 0f, 0f, captionAlpha / 255f),
+                captionTextStyle = TextStyle(fontSize = fontSize.sp)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalVideoCornerRadius = originalStyle.videoCornerRadius
+            val originalPlayIconTint = originalStyle.playIconTint
+            val originalPlayIconBackgroundColor = originalStyle.playIconBackgroundColor
+
+            // Create a copy with modified caption values
+            val newCaptionTextColor = Color.DarkGray
+            val newCaptionTextStyle = TextStyle(fontSize = 16.sp)
+            val copiedStyle = originalStyle.copy(
+                captionTextColor = newCaptionTextColor,
+                captionTextStyle = newCaptionTextStyle
+            )
+
+            // Verify modified values
+            copiedStyle.captionTextColor shouldBe newCaptionTextColor
+            copiedStyle.captionTextStyle shouldBe newCaptionTextStyle
+
+            // Verify video properties are preserved
+            copiedStyle.videoCornerRadius shouldBe originalVideoCornerRadius
+            copiedStyle.playIconTint shouldBe originalPlayIconTint
+            copiedStyle.playIconBackgroundColor shouldBe originalPlayIconBackgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified grid properties.
+     *
+     * Validates: Requirements 6.5
+     */
+    "copy with modified grid properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 8f),    // gridSpacing
+            Arb.float(200f, 320f) // maxGridWidth
+        ) { gridSpacing, maxGridWidth ->
+            createTestVideoBubbleStyle(
+                gridSpacing = gridSpacing.dp,
+                maxGridWidth = maxGridWidth.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalVideoCornerRadius = originalStyle.videoCornerRadius
+            val originalCaptionTextColor = originalStyle.captionTextColor
+            val originalMoreOverlayBackgroundColor = originalStyle.moreOverlayBackgroundColor
+
+            // Create a copy with modified grid values
+            val newGridSpacing = 4.dp
+            val newMaxGridWidth = 280.dp
+            val copiedStyle = originalStyle.copy(
+                gridSpacing = newGridSpacing,
+                maxGridWidth = newMaxGridWidth
+            )
+
+            // Verify modified values
+            copiedStyle.gridSpacing shouldBe newGridSpacing
+            copiedStyle.maxGridWidth shouldBe newMaxGridWidth
+
+            // Verify other properties are preserved
+            copiedStyle.videoCornerRadius shouldBe originalVideoCornerRadius
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+            copiedStyle.moreOverlayBackgroundColor shouldBe originalMoreOverlayBackgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified more overlay properties.
+     *
+     * Validates: Requirements 6.5
+     */
+    "copy with modified more overlay properties should preserve grid properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // moreOverlayBackgroundColor alpha
+            Arb.int(0, 255)       // moreOverlayTextColor alpha
+        ) { bgAlpha, textAlpha ->
+            createTestVideoBubbleStyle(
+                moreOverlayBackgroundColor = Color(0f, 0f, 0f, bgAlpha / 255f),
+                moreOverlayTextColor = Color(1f, 1f, 1f, textAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalGridSpacing = originalStyle.gridSpacing
+            val originalMaxGridWidth = originalStyle.maxGridWidth
+            val originalVideoCornerRadius = originalStyle.videoCornerRadius
+
+            // Create a copy with modified more overlay values
+            val newMoreOverlayBackgroundColor = Color.DarkGray.copy(alpha = 0.7f)
+            val newMoreOverlayTextColor = Color.Yellow
+            val newMoreOverlayTextStyle = TextStyle(fontSize = 20.sp)
+            val copiedStyle = originalStyle.copy(
+                moreOverlayBackgroundColor = newMoreOverlayBackgroundColor,
+                moreOverlayTextColor = newMoreOverlayTextColor,
+                moreOverlayTextStyle = newMoreOverlayTextStyle
+            )
+
+            // Verify modified values
+            copiedStyle.moreOverlayBackgroundColor shouldBe newMoreOverlayBackgroundColor
+            copiedStyle.moreOverlayTextColor shouldBe newMoreOverlayTextColor
+            copiedStyle.moreOverlayTextStyle shouldBe newMoreOverlayTextStyle
+
+            // Verify grid properties are preserved
+            copiedStyle.gridSpacing shouldBe originalGridSpacing
+            copiedStyle.maxGridWidth shouldBe originalMaxGridWidth
+            copiedStyle.videoCornerRadius shouldBe originalVideoCornerRadius
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 6.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestVideoBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.videoCornerRadius shouldBe originalStyle.videoCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.playIconTint shouldBe originalStyle.playIconTint
+            copiedStyle.playIconBackgroundColor shouldBe originalStyle.playIconBackgroundColor
+            copiedStyle.progressIndicatorColor shouldBe originalStyle.progressIndicatorColor
+            copiedStyle.captionTextColor shouldBe originalStyle.captionTextColor
+            copiedStyle.captionTextStyle shouldBe originalStyle.captionTextStyle
+            copiedStyle.gridSpacing shouldBe originalStyle.gridSpacing
+            copiedStyle.maxGridWidth shouldBe originalStyle.maxGridWidth
+            copiedStyle.moreOverlayBackgroundColor shouldBe originalStyle.moreOverlayBackgroundColor
+            copiedStyle.moreOverlayTextColor shouldBe originalStyle.moreOverlayTextColor
+            copiedStyle.moreOverlayTextStyle shouldBe originalStyle.moreOverlayTextStyle
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2, 6.5
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatVideoBubbleStyle(
+            // Content-specific properties
+            videoCornerRadius = 12.dp,
+            videoStrokeWidth = 1.dp,
+            videoStrokeColor = Color.Gray,
+            playIconTint = Color.Yellow,
+            playIconBackgroundColor = Color.Green,
+            progressIndicatorColor = Color.Cyan,
+            captionTextColor = Color.Magenta,
+            captionTextStyle = TextStyle(fontSize = 18.sp),
+            gridSpacing = 6.dp,
+            maxGridWidth = 300.dp,
+            moreOverlayBackgroundColor = Color.DarkGray,
+            moreOverlayTextColor = Color.LightGray,
+            moreOverlayTextStyle = TextStyle(fontSize = 22.sp),
+            // Inherited wrapper properties
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 12.sp),
+            threadIndicatorTextColor = Color.DarkGray,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify content-specific properties
+        customStyle.videoCornerRadius shouldBe 12.dp
+        customStyle.videoStrokeWidth shouldBe 1.dp
+        customStyle.videoStrokeColor shouldBe Color.Gray
+        customStyle.playIconTint shouldBe Color.Yellow
+        customStyle.playIconBackgroundColor shouldBe Color.Green
+        customStyle.progressIndicatorColor shouldBe Color.Cyan
+        customStyle.captionTextColor shouldBe Color.Magenta
+        customStyle.captionTextStyle shouldBe TextStyle(fontSize = 18.sp)
+        customStyle.gridSpacing shouldBe 6.dp
+        customStyle.maxGridWidth shouldBe 300.dp
+        customStyle.moreOverlayBackgroundColor shouldBe Color.DarkGray
+        customStyle.moreOverlayTextColor shouldBe Color.LightGray
+        customStyle.moreOverlayTextStyle shouldBe TextStyle(fontSize = 22.sp)
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 12.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.DarkGray
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that inherited wrapper properties can be accessed via parent type.
+     *
+     * Validates: Requirements 2.1
+     */
+    "inherited wrapper properties should be accessible via parent type" {
+        val style: CometChatMessageBubbleStyle = createTestVideoBubbleStyle(
+            backgroundColor = Color.Blue,
+            cornerRadius = 16.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red
+        )
+
+        // Verify wrapper properties are accessible via parent type
+        style.backgroundColor shouldBe Color.Blue
+        style.cornerRadius shouldBe 16.dp
+        style.strokeWidth shouldBe 2.dp
+        style.strokeColor shouldBe Color.Red
+    }
+})
+
+/**
+ * Helper function to create a test video bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestVideoBubbleStyle(
+    // Content-specific properties
+    videoCornerRadius: Dp = 8.dp,
+    videoStrokeWidth: Dp = 0.dp,
+    videoStrokeColor: Color = Color.Transparent,
+    playIconTint: Color = Color.White,
+    playIconBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    progressIndicatorColor: Color = Color.Gray,
+    captionTextColor: Color = Color.Black,
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    // Inherited wrapper properties (non-nullable)
+    backgroundColor: Color = Color.Transparent,
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatVideoBubbleStyle {
+    return CometChatVideoBubbleStyle(
+        videoCornerRadius = videoCornerRadius,
+        videoStrokeWidth = videoStrokeWidth,
+        videoStrokeColor = videoStrokeColor,
+        playIconTint = playIconTint,
+        playIconBackgroundColor = playIconBackgroundColor,
+        progressIndicatorColor = progressIndicatorColor,
+        captionTextColor = captionTextColor,
+        captionTextStyle = captionTextStyle,
+        gridSpacing = gridSpacing,
+        maxGridWidth = maxGridWidth,
+        moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+        moreOverlayTextColor = moreOverlayTextColor,
+        moreOverlayTextStyle = moreOverlayTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}

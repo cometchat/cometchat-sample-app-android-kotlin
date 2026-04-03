@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tab Layout Background
+    
+    Rounded rectangle background for the TabLayout container.
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <!-- radius should be half of the desired TabLayout height -->

@@ -1,0 +1,422 @@
+---
+title: "Incoming Call"
+description: "Full-screen incoming call banner with caller avatar, name, call type indicator, and accept/reject buttons."
+---
+
+`CometChatIncomingCall` renders when the logged-in user receives an incoming voice or video call, displaying the caller's information and providing accept/reject controls.
+
+<Frame>
+  <img src="/images/ef9ae7b8-Incoming_call-060686ee2b9aa89ad7c163fc8290d390.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatIncomingCall` is a call-handling component. It renders the incoming call screen and transitions to the ongoing call screen when the user accepts. Wire it to `CometChatOngoingCallActivity` after the user accepts the call.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_call.xml lines
+<com.cometchat.uikit.kotlin.presentation.incomingcall.CometChatIncomingCall
+    android:id="@+id/incoming_call"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val incomingCall = findViewById<CometChatIncomingCall>(R.id.incoming_call)
+incomingCall.setCall(call)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.incomingcall.CometChatIncomingCall
+    android:id="@+id/incoming_call"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Set the `Call` object — this is required:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.layout_activity)
+
+    val incomingCall = findViewById<CometChatIncomingCall>(R.id.incoming_call)
+    incomingCall.setCall(call)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun IncomingCallScreen() {
+    CometChatIncomingCall(
+        call = call
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onAcceptClick`
+
+Fires when the user taps the accept button.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+incomingCall.setOnAcceptClick {
+    // Custom accept logic
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    onAcceptClick = { /* custom accept logic */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onRejectClick`
+
+Fires when the user taps the reject button.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+incomingCall.setOnRejectClick {
+    // Custom reject logic
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    onRejectClick = { /* custom reject logic */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, call failure, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+incomingCall.setOnError { exception ->
+    Log.e("IncomingCall", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    onError = { exception ->
+        Log.e("IncomingCall", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Global UI Events (CometChatCallEvents)
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `ccCallAccepted` | A call is accepted | `Call` |
+| `ccCallRejected` | A call is rejected | `Call` |
+
+### SDK Events (Real-Time, Automatic)
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onIncomingCallReceived` | Triggers the incoming call screen display |
+| `onIncomingCallCancelled` | Dismisses the incoming call screen |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setCall(call)` | `call = call` | Set the Call object (required) |
+| `setOnAcceptClick { }` | `onAcceptClick = { }` | Override accept button behavior |
+| `setOnRejectClick { }` | `onRejectClick = { }` | Override reject button behavior |
+| `setOnError { }` | `onError = { }` | Error callback |
+| `setDisableSoundForCalls(true)` | `disableSoundForCalls = true` | Disable incoming call ringtone |
+| `setCustomSoundForCalls(R.raw.tone)` | `customSoundForCalls = R.raw.tone` | Custom ringtone |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Frame>
+  <img src="/images/d6565a37-incoming_call_leading_view-1a7b3012972e5f6e17f433a02a49d8c5.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val leadingView = LayoutInflater.from(this).inflate(R.layout.leading_view, null)
+val avatar = leadingView.findViewById<CometChatAvatar>(R.id.avatar)
+val callUser = call.callInitiator as User
+avatar.setAvatar(callUser.name, callUser.avatar)
+leadingView.layoutParams = LinearLayout.LayoutParams(
+    Utils.convertDpToPx(this, 45),
+    Utils.convertDpToPx(this, 45)
+)
+incomingCall.setLeadingView(leadingView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    leadingView = { c ->
+        val caller = c.callInitiator as? User
+        CometChatAvatar(
+            imageUrl = caller?.avatar,
+            name = caller?.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Title View
+
+Replace the caller name / title text.
+
+<Frame>
+  <img src="/images/41950607-incoming_call_title_view-198db15285a220503d51f46ea45948ba.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val titleView = LayoutInflater.from(this).inflate(R.layout.custom_title_view, null)
+val title = titleView.findViewById<TextView>(R.id.title)
+title.text = "George Allen"
+incomingCall.setTitleView(titleView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    titleView = { c ->
+        val caller = c.callInitiator as? User
+        Text(
+            text = caller?.name ?: "",
+            style = CometChatTheme.typography.heading4Medium
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the right section of the incoming call card.
+
+<Frame>
+  <img src="/images/3cff00d3-incoming_call_trailing_view-ac387445c4c331cad3b5c3d571cc4f9a.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val trailingView = LayoutInflater.from(this).inflate(R.layout.trailing_view, null)
+val avatar = trailingView.findViewById<CometChatAvatar>(R.id.avatar)
+val callUser = call.callInitiator as User
+avatar.setAvatar(callUser.name, callUser.avatar)
+trailingView.layoutParams = LinearLayout.LayoutParams(
+    Utils.convertDpToPx(this, 45),
+    Utils.convertDpToPx(this, 45)
+)
+incomingCall.setTrailingView(trailingView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    trailingView = { c ->
+        val caller = c.callInitiator as? User
+        CometChatAvatar(
+            imageUrl = caller?.avatar,
+            name = caller?.name,
+            modifier = Modifier.size(45.dp)
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Item View
+
+Replace the entire incoming call card.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+incomingCall.setItemView(customView)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    itemView = { c ->
+        // Fully custom incoming call card
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomIncomingCallStyle" parent="CometChatIncomingCallStyle">
+    <item name="cometchatIncomingCallBackgroundColor">#AA9EE8</item>
+    <item name="cometchatIncomingCallIconTint">?attr/cometchatPrimaryColor</item>
+    <item name="cometchatIncomingCallRejectButtonBackgroundColor">?attr/cometchatColorWhite</item>
+    <item name="cometchatIncomingCallAcceptButtonBackgroundColor">?attr/cometchatPrimaryColor</item>
+    <item name="cometchatIncomingCallRejectButtonTextColor">?attr/cometchatErrorColor</item>
+    <item name="cometchatIncomingCallAcceptButtonTextColor">?attr/cometchatColorWhite</item>
+</style>
+```
+
+```kotlin lines
+incomingCall.setStyle(R.style.CustomIncomingCallStyle)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    style = CometChatIncomingCallStyle.default().copy(
+        backgroundColor = Color(0xFFAA9EE8),
+        acceptButtonBackgroundColor = CometChatTheme.colors.primary,
+        rejectButtonBackgroundColor = Color.White,
+        rejectButtonTextColor = CometChatTheme.colors.error,
+        acceptButtonTextColor = Color.White
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/d771544a-incoming_call_styled-4a37ea9ee6fd91529ac0dc12725739a7.png" />
+</Frame>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Outgoing Call" icon="phone-arrow-up-right" href="/ui-kit/android/v6/outgoing-call">
+    Outgoing call screen with end-call button
+  </Card>
+  <Card title="Call Buttons" icon="phone" href="/ui-kit/android/v6/call-buttons">
+    Voice and video call buttons
+  </Card>
+  <Card title="Call Logs" icon="clock-rotate-left" href="/ui-kit/android/v6/call-logs">
+    View call history
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+</CardGroup>

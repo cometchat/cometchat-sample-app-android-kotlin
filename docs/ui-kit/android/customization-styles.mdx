@@ -1,0 +1,231 @@
+---
+title: "Styles"
+description: "Customize component appearance using XML theme attributes, programmatic setters, or Compose style data classes."
+---
+
+The UI Kit supports multiple approaches to styling depending on your module.
+
+---
+
+## Styling Approaches
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Two ways to style components:
+
+1. **XML theme attributes** — declarative, app-wide theming via `themes.xml`
+2. **Programmatic `CometChatTheme` setters** — runtime color/font overrides
+
+Programmatic setters take precedence over XML theme attributes.
+
+### XML Theme Hierarchy
+
+```xml themes.xml lines
+<!-- Level 1: Theme-level colors and fonts -->
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatPrimaryColor">#6851D6</item>
+    <item name="cometchatBackgroundColor1">#FFFFFF</item>
+    <item name="cometchatFontRegular">@font/my_regular_font</item>
+    <item name="cometchatFontMedium">@font/my_medium_font</item>
+    <item name="cometchatFontBold">@font/my_bold_font</item>
+
+    <!-- Level 2: Component-level style -->
+    <item name="cometchatConversationsStyle">@style/CustomConversationsStyle</item>
+</style>
+
+<!-- Level 2: Component style with nested sub-component styles -->
+<style name="CustomConversationsStyle" parent="CometChatConversationsStyle">
+    <item name="cometchatConversationsAvatarStyle">@style/CustomAvatarStyle</item>
+    <item name="cometchatConversationsBadgeStyle">@style/CustomBadgeStyle</item>
+</style>
+
+<!-- Level 3: Sub-component style -->
+<style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+    <item name="cometchatAvatarStrokeRadius">12dp</item>
+    <item name="cometchatAvatarBackgroundColor">#E8E0FF</item>
+</style>
+```
+
+### Programmatic Overrides
+
+```kotlin lines
+// Override theme colors at runtime
+CometChatTheme.setPrimaryColor(Color.parseColor("#6851D6"))
+CometChatTheme.setBackgroundColor1(Color.parseColor("#FFFFFF"))
+CometChatTheme.setTextColorPrimary(Color.parseColor("#141414"))
+CometChatTheme.setTextColorSecondary(Color.parseColor("#727272"))
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Components accept a `style` parameter — a data class with `.default()` factory and `.copy()` for overrides:
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5),
+        titleTextColor = Color(0xFF6851D6),
+        itemStyle = CometChatConversationsItemStyle.default().copy(
+            avatarStyle = CometChatAvatarStyle.default().copy(
+                cornerRadius = 12.dp,
+                backgroundColor = Color(0xFFE8E0FF)
+            ),
+            badgeStyle = CometChatBadgeStyle.default().copy(
+                backgroundColor = Color(0xFFF76808)
+            )
+        )
+    )
+)
+```
+
+Global theme colors are provided via `CometChatTheme`:
+
+```kotlin lines
+CometChatTheme(
+    colorScheme = lightColorScheme().copy(
+        primary = Color(0xFF6851D6),
+        backgroundColor1 = Color(0xFFFFFFFF),
+        textColorPrimary = Color(0xFF141414)
+    )
+) {
+    // All components inside use these colors as defaults
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Font Customization
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Override fonts at the theme level:
+
+```xml themes.xml lines
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatFontBold">@font/my_bold_font</item>
+    <item name="cometchatFontMedium">@font/my_medium_font</item>
+    <item name="cometchatFontRegular">@font/my_regular_font</item>
+</style>
+```
+
+| Attribute | Usage |
+| --- | --- |
+| `cometchatFontBold` | Headings, titles, emphasized text |
+| `cometchatFontMedium` | Subtitles, secondary headings |
+| `cometchatFontRegular` | Body text, descriptions, input fields |
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Provide custom typography via `CometChatTheme`:
+
+```kotlin lines
+CometChatTheme(
+    typography = CometChatTypography(
+        titleBold = TextStyle(fontFamily = myFontFamily, fontWeight = FontWeight.Bold, fontSize = 20.sp),
+        bodyRegular = TextStyle(fontFamily = myFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp),
+        caption1Regular = TextStyle(fontFamily = myFontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp)
+    )
+) {
+    // All components use custom typography
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## CometChatTheme Color Tokens
+
+These tokens are available for programmatic override (Kotlin XML) or via `CometChatColorScheme` (Compose):
+
+### Colors
+
+| Token | Description |
+| --- | --- |
+| `primaryColor` | Brand color for buttons, links, highlights |
+| `backgroundColor1` – `backgroundColor4` | Background levels |
+| `textColorPrimary` / `Secondary` / `Tertiary` | Text colors |
+| `textColorDisabled` / `White` / `Highlight` | Special text colors |
+| `errorColor` / `successColor` / `warningColor` / `infoColor` | Alert colors |
+| `strokeColorDefault` / `Light` / `Dark` / `Highlight` | Border colors |
+
+### Icon Tints
+
+| Token | Description |
+| --- | --- |
+| `iconTintPrimary` / `Secondary` / `Tertiary` | Icon tints |
+| `iconTintWhite` / `Highlight` | Special icon tints |
+
+### Button Colors
+
+| Token | Description |
+| --- | --- |
+| `primaryButtonBackgroundColor` / `TextColor` / `IconTint` | Primary button |
+| `secondaryButtonBackgroundColor` / `TextColor` / `IconTint` | Secondary button |
+
+---
+
+## Per-Component Style Properties
+
+Each component has its own style data class with nested sub-component styles. Here's the pattern for key components:
+
+### CometChatConversations
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background |
+| `titleTextColor` | Toolbar title color |
+| `searchBoxStyle` | Search box styling |
+| `itemStyle.avatarStyle` | Avatar in each row |
+| `itemStyle.badgeStyle` | Unread badge |
+| `itemStyle.dateStyle` | Timestamp |
+| `itemStyle.receiptStyle` | Read receipts |
+| `itemStyle.statusIndicatorStyle` | Online/offline indicator |
+| `itemStyle.typingIndicatorStyle` | Typing indicator |
+
+### CometChatMessageList
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background |
+| `incomingMessageBubbleStyle` | Incoming bubble appearance |
+| `outgoingMessageBubbleStyle` | Outgoing bubble appearance |
+| `actionBubbleStyle` | Group action bubbles |
+| `callActionBubbleStyle` | Call action bubbles |
+
+### CometChatMessageComposer
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | Composer background |
+| `attachmentIconTint` | Attachment button tint |
+| `voiceRecordingIconTint` | Voice recording button tint |
+| `aiIconTint` | AI button tint |
+| `sendButtonStyle` | Send button appearance |
+
+### CometChatMessageHeader
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | Header background |
+| `titleTextColor` | User/group name color |
+| `subtitleTextColor` | Status/typing text color |
+| `avatarStyle` | Avatar appearance |
+| `callButtonsStyle` | Call button appearance |
+
+---
+
+## Related
+
+- [Theme Introduction](/ui-kit/android/v6/theme-introduction) — Global theming reference.
+- [Component Styling](/ui-kit/android/v6/component-styling) — Detailed per-component style examples with screenshots.
+- [Color Resources](/ui-kit/android/v6/color-resources) — Default color palette reference.
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — All customization categories.

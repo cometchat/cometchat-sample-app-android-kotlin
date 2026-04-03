@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Global Spacing -->
+    <dimen name="cometchat_spacing">2dp</dimen>
+    <dimen name="cometchat_spacing_1">4dp</dimen>
+    <dimen name="cometchat_spacing_2">8dp</dimen>
+    <dimen name="cometchat_spacing_3">12dp</dimen>
+    <dimen name="cometchat_spacing_4">16dp</dimen>
+    <dimen name="cometchat_spacing_5">20dp</dimen>
+    <dimen name="cometchat_spacing_6">24dp</dimen>
+    <dimen name="cometchat_spacing_7">28dp</dimen>
+    <dimen name="cometchat_spacing_8">32dp</dimen>
+    <dimen name="cometchat_spacing_9">36dp</dimen>
+    <dimen name="cometchat_spacing_10">40dp</dimen>
+    <dimen name="cometchat_spacing_11">44dp</dimen>
+    <dimen name="cometchat_spacing_12">48dp</dimen>
+    <dimen name="cometchat_spacing_13">52dp</dimen>
+    <dimen name="cometchat_spacing_14">56dp</dimen>
+    <dimen name="cometchat_spacing_15">60dp</dimen>
+    <dimen name="cometchat_spacing_16">64dp</dimen>
+    <dimen name="cometchat_spacing_17">68dp</dimen>
+    <dimen name="cometchat_spacing_18">72dp</dimen>
+    <dimen name="cometchat_spacing_19">76dp</dimen>
+    <dimen name="cometchat_spacing_20">80dp</dimen>
+    <dimen name="cometchat_spacing_max">1000dp</dimen>
+
+    <!-- Padding -->
+    <dimen name="cometchat_padding">@dimen/cometchat_spacing</dimen>
+    <dimen name="cometchat_padding_1">@dimen/cometchat_spacing_1</dimen>
+    <dimen name="cometchat_padding_2">@dimen/cometchat_spacing_2</dimen>
+    <dimen name="cometchat_padding_3">@dimen/cometchat_spacing_3</dimen>
+    <dimen name="cometchat_padding_4">@dimen/cometchat_spacing_4</dimen>
+    <dimen name="cometchat_padding_5">@dimen/cometchat_spacing_5</dimen>
+    <dimen name="cometchat_padding_6">@dimen/cometchat_spacing_6</dimen>
+    <dimen name="cometchat_padding_7">@dimen/cometchat_spacing_7</dimen>
+    <dimen name="cometchat_padding_8">@dimen/cometchat_spacing_8</dimen>
+    <dimen name="cometchat_padding_9">@dimen/cometchat_spacing_9</dimen>
+    <dimen name="cometchat_padding_10">@dimen/cometchat_spacing_10</dimen>
+    <dimen name="cometchat_padding_11">@dimen/cometchat_spacing_11</dimen>
+    <dimen name="cometchat_padding_12">@dimen/cometchat_spacing_12</dimen>
+    <dimen name="cometchat_padding_13">@dimen/cometchat_spacing_13</dimen>
+    <dimen name="cometchat_padding_14">@dimen/cometchat_spacing_14</dimen>
+    <dimen name="cometchat_padding_15">@dimen/cometchat_spacing_15</dimen>
+    <dimen name="cometchat_padding_16">@dimen/cometchat_spacing_16</dimen>
+    <dimen name="cometchat_padding_17">@dimen/cometchat_spacing_17</dimen>
+    <dimen name="cometchat_padding_18">@dimen/cometchat_spacing_18</dimen>
+    <dimen name="cometchat_padding_19">@dimen/cometchat_spacing_19</dimen>
+    <dimen name="cometchat_padding_20">@dimen/cometchat_spacing_20</dimen>
+    <dimen name="cometchat_padding_max">@dimen/cometchat_spacing_max</dimen>
+
+    <!-- Margin -->
+    <dimen name="cometchat_margin">@dimen/cometchat_spacing</dimen>
+    <dimen name="cometchat_margin_1">@dimen/cometchat_spacing_1</dimen>
+    <dimen name="cometchat_margin_2">@dimen/cometchat_spacing_2</dimen>
+    <dimen name="cometchat_margin_3">@dimen/cometchat_spacing_3</dimen>
+    <dimen name="cometchat_margin_4">@dimen/cometchat_spacing_4</dimen>
+    <dimen name="cometchat_margin_5">@dimen/cometchat_spacing_5</dimen>
+    <dimen name="cometchat_margin_6">@dimen/cometchat_spacing_6</dimen>
+    <dimen name="cometchat_margin_7">@dimen/cometchat_spacing_7</dimen>
+    <dimen name="cometchat_margin_8">@dimen/cometchat_spacing_8</dimen>
+    <dimen name="cometchat_margin_9">@dimen/cometchat_spacing_9</dimen>
+    <dimen name="cometchat_margin_10">@dimen/cometchat_spacing_10</dimen>
+    <dimen name="cometchat_margin_11">@dimen/cometchat_spacing_11</dimen>
+    <dimen name="cometchat_margin_12">@dimen/cometchat_spacing_12</dimen>
+    <dimen name="cometchat_margin_13">@dimen/cometchat_spacing_13</dimen>
+    <dimen name="cometchat_margin_14">@dimen/cometchat_spacing_14</dimen>
+    <dimen name="cometchat_margin_15">@dimen/cometchat_spacing_15</dimen>
+    <dimen name="cometchat_margin_16">@dimen/cometchat_spacing_16</dimen>
+    <dimen name="cometchat_margin_17">@dimen/cometchat_spacing_17</dimen>
+    <dimen name="cometchat_margin_18">@dimen/cometchat_spacing_18</dimen>
+    <dimen name="cometchat_margin_19">@dimen/cometchat_spacing_19</dimen>
+    <dimen name="cometchat_margin_20">@dimen/cometchat_spacing_20</dimen>
+    <dimen name="cometchat_margin_max">@dimen/cometchat_spacing_max</dimen>
+
+    <!-- Icon Sizes -->
+    <dimen name="cometchat_icon_size_6">24dp</dimen>
+    <dimen name="cometchat_icon_size_8">32dp</dimen>
+    <dimen name="cometchat_icon_size_10">40dp</dimen>
+
+    <!-- Avatar Sizes -->
+    <dimen name="cometchat_avatar_size_small">32dp</dimen>
+    <dimen name="cometchat_avatar_size_medium">40dp</dimen>
+    <dimen name="cometchat_avatar_size_large">48dp</dimen>
+
+    <!-- Status Indicator -->
+    <dimen name="cometchat_status_indicator_size">12dp</dimen>
+
+    <!-- Radius -->
+    <dimen name="cometchat_radius">@dimen/cometchat_spacing</dimen>
+    <dimen name="cometchat_radius_1">@dimen/cometchat_spacing_1</dimen>
+    <dimen name="cometchat_radius_2">@dimen/cometchat_spacing_2</dimen>
+    <dimen name="cometchat_radius_3">@dimen/cometchat_spacing_3</dimen>
+    <dimen name="cometchat_radius_4">@dimen/cometchat_spacing_4</dimen>
+    <dimen name="cometchat_radius_5">@dimen/cometchat_spacing_5</dimen>
+    <dimen name="cometchat_radius_6">@dimen/cometchat_spacing_6</dimen>
+    <dimen name="cometchat_radius_max">@dimen/cometchat_spacing_max</dimen>
+
+    <!-- Corner Radius (aliases for compatibility) -->
+    <dimen name="cometchat_corner_radius_2">@dimen/cometchat_radius_2</dimen>
+    <dimen name="cometchat_corner_radius_3">@dimen/cometchat_radius_3</dimen>
+    <dimen name="cometchat_corner_radius_4">@dimen/cometchat_radius_4</dimen>
+    <dimen name="cometchat_corner_radius_6">@dimen/cometchat_radius_6</dimen>
+    <dimen name="cometchat_corner_radius_max">@dimen/cometchat_radius_max</dimen>
+
+    <!-- Additional Icon Sizes -->
+    <dimen name="cometchat_icon_size_5">20dp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="cometchat_elevation_1">4dp</dimen>
+    <dimen name="cometchat_elevation_2">8dp</dimen>
+
+</resources>

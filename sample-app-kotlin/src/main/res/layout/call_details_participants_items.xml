@@ -9,7 +9,7 @@
     android:paddingEnd="@dimen/cometchat_padding_4"
     android:paddingBottom="@dimen/cometchat_padding_3">
 
-    <com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
+    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
         android:id="@+id/avatar"
         android:layout_width="@dimen/cometchat_48dp"
         android:layout_height="@dimen/cometchat_48dp"
@@ -31,7 +31,7 @@
             android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
             android:textColor="?attr/cometchatTextColorPrimary" />
 
-        <com.cometchat.chatuikit.shared.views.date.CometChatDate
+        <com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
             android:id="@+id/date_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

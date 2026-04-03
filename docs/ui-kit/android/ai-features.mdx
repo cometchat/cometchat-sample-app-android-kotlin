@@ -1,0 +1,59 @@
+---
+title: "Smart Chat Features"
+description: "Integrate AI-powered conversation starters, smart replies, and conversation summaries into your Android chat app."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chat-uikit-android` (Java), `com.cometchat:chat-uikit-kotlin` (Kotlin XML), `com.cometchat:chat-uikit-compose` (Jetpack Compose) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` + AI features enabled in [CometChat Dashboard](/fundamentals/ai-user-copilot/overview) |
+| AI features | Conversation Starter, Smart Replies, Conversation Summary |
+| Key components | [Message List](/ui-kit/android/v6/message-list) (Conversation Starter), [Message Composer](/ui-kit/android/v6/message-composer) (Smart Replies, Summary) |
+| Activation | Enable each AI feature from the CometChat Dashboard — UI Kit auto-integrates them, no additional code required |
+| Related | [Core Features](/ui-kit/android/v6/core-features), [Extensions](/ui-kit/android/v6/extensions), [AI Agent Guide](/ui-kit/android/v6/guide-ai-agent) |
+
+</Accordion>
+
+CometChat's AI capabilities greatly enhance user interaction and engagement in your application. Here's how the Android UI Kit integrates these features.
+
+<Frame>
+  <img src="/images/dc468902-AI_Overview-0c7eccf3adcb1327d6a428bb2201419e.png" />
+</Frame>
+
+## Conversation Starter
+
+When a user initiates a new chat, the UI kit displays a list of suggested opening lines that users can select, making it easier for them to start a conversation. These suggestions are powered by CometChat's AI, which predicts contextually relevant conversation starter options.
+
+For a comprehensive understanding and guide on implementing and using the Conversation Starter, refer to our specific guide on the [Conversation Starter](/fundamentals/ai-user-copilot/conversation-starter).
+
+Once you have successfully activated the [Conversation Starter](/fundamentals/ai-user-copilot/conversation-starter) from your CometChat Dashboard, the feature will automatically be incorporated into the [MessageList](/ui-kit/android/v6/message-list) Component of UI Kits.
+
+<Frame>
+  <img src="/images/108f16f1-Conversation_Strater-0862a8398d19c4c886038595181016b2.png" />
+</Frame>
+
+## Smart Replies
+
+Smart Replies are AI-generated responses to messages. They can predict what a user might want to say next by analyzing the context of the conversation. This allows for quicker and more convenient responses, especially on mobile devices.
+
+For a comprehensive understanding and guide on implementing and using the Smart Replies, refer to our specific guide on the [Smart Replies](/fundamentals/ai-user-copilot/smart-replies).
+
+Once you have successfully activated the [Smart Replies](/fundamentals/ai-user-copilot/smart-replies) from your CometChat Dashboard, the feature will automatically be incorporated into the Action sheet of [MessageComposer](/ui-kit/android/v6/message-composer) Component of UI Kits.
+
+<Frame>
+  <img src="/images/c44db2a1-Smart_Reply-0a237e7f9625690ea90063914531b7ed.png" />
+</Frame>
+
+## Conversation Summary
+
+The Conversation Summary feature provides concise summaries of long conversations, allowing users to catch up quickly on missed chats. This feature uses natural language processing to determine the main points in a conversation.
+
+For a comprehensive understanding and guide on implementing and using the Conversation Summary, refer to our specific guide on the [Conversation Summary](/fundamentals/ai-user-copilot/conversation-summary).
+
+Once you have successfully activated the [Conversation Summary](/fundamentals/ai-user-copilot/conversation-summary) from your CometChat Dashboard, the feature will automatically be incorporated into the Action sheet of [MessageComposer](/ui-kit/android/v6/message-composer) Component of UI Kits.
+
+<Frame>
+  <img src="/images/25921821-Conversation_Summary-5b64b3eb0655bc79903ca520d40a1e15.png" />
+</Frame>

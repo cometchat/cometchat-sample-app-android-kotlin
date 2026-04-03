@@ -1,0 +1,7 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="0"
+        android:endColor="#E8E8E8"
+        android:startColor="#F5F5F5" />
+    <corners android:radius="@dimen/cometchat_radius_2" />
+</shape>

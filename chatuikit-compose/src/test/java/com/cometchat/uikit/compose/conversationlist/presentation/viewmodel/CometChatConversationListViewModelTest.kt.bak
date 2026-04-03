@@ -1,0 +1,299 @@
+package com.cometchat.uikit.compose.conversationlist.presentation.viewmodel
+
+import com.cometchat.chat.core.ConversationsRequest
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.Conversation
+import com.cometchat.uikit.compose.domain.repository.ConversationListRepository
+import com.cometchat.uikit.compose.domain.usecase.DeleteConversationUseCase
+import com.cometchat.uikit.compose.domain.usecase.GetConversationListUseCase
+import com.cometchat.uikit.compose.domain.usecase.RefreshConversationListUseCase
+import com.cometchat.uikit.core.state.DeleteState
+import com.cometchat.uikit.core.state.UIState
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
+import com.cometchat.uikit.compose.shared.constants.UIKitConstants
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+
+/**
+ * Unit tests for CometChatConversationsViewModel.
+ * 
+ * Feature: conversations-compose
+ * Tests verify state transitions and selection mode behavior.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class CometChatConversationsViewModelTest : StringSpec({
+
+    val testDispatcher = StandardTestDispatcher()
+
+    beforeSpec {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    afterSpec {
+        Dispatchers.resetMain()
+    }
+
+    "selectConversation with SINGLE mode should select only one conversation" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            val conv1 = createMockConversation("conv1")
+            val conv2 = createMockConversation("conv2")
+
+            // Act - Select first conversation
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.SINGLE)
+            
+            // Assert
+            viewModel.selectedConversations.value.size shouldBe 1
+            viewModel.selectedConversations.value.contains(conv1) shouldBe true
+
+            // Act - Select second conversation (should replace first)
+            viewModel.selectConversation(conv2, UIKitConstants.SelectionMode.SINGLE)
+            
+            // Assert - Only second conversation should be selected
+            viewModel.selectedConversations.value.size shouldBe 1
+            viewModel.selectedConversations.value.contains(conv1) shouldBe false
+            viewModel.selectedConversations.value.contains(conv2) shouldBe true
+        }
+    }
+
+    "selectConversation with MULTIPLE mode should toggle selection" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            val conv1 = createMockConversation("conv1")
+            val conv2 = createMockConversation("conv2")
+
+            // Act - Select first conversation
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.MULTIPLE)
+            
+            // Assert
+            viewModel.selectedConversations.value.size shouldBe 1
+            viewModel.selectedConversations.value.contains(conv1) shouldBe true
+
+            // Act - Select second conversation (should add to selection)
+            viewModel.selectConversation(conv2, UIKitConstants.SelectionMode.MULTIPLE)
+            
+            // Assert - Both should be selected
+            viewModel.selectedConversations.value.size shouldBe 2
+            viewModel.selectedConversations.value.contains(conv1) shouldBe true
+            viewModel.selectedConversations.value.contains(conv2) shouldBe true
+
+            // Act - Toggle first conversation (should remove it)
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.MULTIPLE)
+            
+            // Assert - Only second should be selected
+            viewModel.selectedConversations.value.size shouldBe 1
+            viewModel.selectedConversations.value.contains(conv1) shouldBe false
+            viewModel.selectedConversations.value.contains(conv2) shouldBe true
+        }
+    }
+
+    "selectConversation with NONE mode should not change selection" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            val conv1 = createMockConversation("conv1")
+
+            // Act
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.NONE)
+            
+            // Assert - Selection should remain empty
+            viewModel.selectedConversations.value.size shouldBe 0
+        }
+    }
+
+    "clearSelection should empty the selected set" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            val conv1 = createMockConversation("conv1")
+            val conv2 = createMockConversation("conv2")
+            
+            // Select some conversations
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.MULTIPLE)
+            viewModel.selectConversation(conv2, UIKitConstants.SelectionMode.MULTIPLE)
+            viewModel.selectedConversations.value.size shouldBe 2
+
+            // Act
+            viewModel.clearSelection()
+            
+            // Assert
+            viewModel.selectedConversations.value.size shouldBe 0
+        }
+    }
+
+    "getSelectedConversations should return list of selected conversations" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            val conv1 = createMockConversation("conv1")
+            val conv2 = createMockConversation("conv2")
+            
+            viewModel.selectConversation(conv1, UIKitConstants.SelectionMode.MULTIPLE)
+            viewModel.selectConversation(conv2, UIKitConstants.SelectionMode.MULTIPLE)
+
+            // Act
+            val selected = viewModel.getSelectedConversations()
+            
+            // Assert
+            selected.size shouldBe 2
+        }
+    }
+
+    "resetDeleteState should set delete state to Idle" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+
+            // Act
+            viewModel.resetDeleteState()
+            
+            // Assert
+            viewModel.deleteState.value shouldBe DeleteState.Idle
+        }
+    }
+
+    "initial state should be Loading then transition based on fetch result" {
+        runTest {
+            // Arrange
+            val conv1 = mock(Conversation::class.java)
+            val conv2 = mock(Conversation::class.java)
+            val conversations = listOf(conv1, conv2)
+            val mockRepository = createMockRepository(conversations)
+            
+            // Act
+            val viewModel = createViewModel(mockRepository)
+            
+            // Initial state should be Loading
+            viewModel.uiState.value.shouldBeInstanceOf<UIState.Loading>()
+            
+            // Advance coroutines
+            advanceUntilIdle()
+            
+            // Assert - Should transition to Content
+            viewModel.uiState.value.shouldBeInstanceOf<UIState.Content>()
+            (viewModel.uiState.value as UIState.Content).conversations.size shouldBe 2
+        }
+    }
+
+    "fetchConversations with empty result should transition to Empty state" {
+        runTest {
+            // Arrange
+            val mockRepository = createMockRepository(emptyList())
+            
+            // Act
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            // Assert
+            viewModel.uiState.value.shouldBeInstanceOf<UIState.Empty>()
+        }
+    }
+
+    "fetchConversations with error should transition to Error state" {
+        runTest {
+            // Arrange
+            val exception = CometChatException("FETCH_ERROR", "Fetch failed", "Network error")
+            val mockRepository = createMockRepositoryWithError(exception)
+            
+            // Act
+            val viewModel = createViewModel(mockRepository)
+            advanceUntilIdle()
+            
+            // Assert
+            viewModel.uiState.value.shouldBeInstanceOf<UIState.Error>()
+            (viewModel.uiState.value as UIState.Error).exception shouldBe exception
+        }
+    }
+})
+
+/**
+ * Helper function to create a mock repository.
+ */
+private fun createMockRepository(conversations: List<Conversation>): ConversationListRepository {
+    return object : ConversationListRepository {
+        override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+            return Result.success(conversations)
+        }
+        override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override fun hasMoreConversations(): Boolean = false
+    }
+}
+
+/**
+ * Helper function to create a mock repository that returns an error.
+ */
+private fun createMockRepositoryWithError(exception: CometChatException): ConversationListRepository {
+    return object : ConversationListRepository {
+        override suspend fun getConversations(request: ConversationsRequest): Result<List<Conversation>> {
+            return Result.failure(exception)
+        }
+        override suspend fun deleteConversation(conversationWith: String, conversationType: String): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override suspend fun markAsDelivered(conversation: Conversation): Result<Unit> {
+            return Result.success(Unit)
+        }
+        override fun hasMoreConversations(): Boolean = false
+    }
+}
+
+/**
+ * Helper function to create ViewModel with mock repository.
+ * Disables CometChat listeners for unit testing.
+ */
+private fun createViewModel(repository: ConversationListRepository): CometChatConversationsViewModel {
+    val getConversationListUseCase = GetConversationListUseCase(repository)
+    val deleteConversationUseCase = DeleteConversationUseCase(repository)
+    val refreshConversationListUseCase = RefreshConversationListUseCase(repository)
+    
+    return CometChatConversationsViewModel(
+        getConversationListUseCase = getConversationListUseCase,
+        deleteConversationUseCase = deleteConversationUseCase,
+        refreshConversationListUseCase = refreshConversationListUseCase,
+        enableListeners = false
+    )
+}
+
+/**
+ * Helper function to create mock Conversation objects for testing.
+ */
+private fun createMockConversation(id: String): Conversation {
+    val mockConversation = mock(Conversation::class.java)
+    `when`(mockConversation.conversationId).thenReturn(id)
+    `when`(mockConversation.conversationType).thenReturn(UIKitConstants.ConversationType.USERS)
+    return mockConversation
+}

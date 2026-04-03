@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatMessageHeader">
+        <!-- Style reference -->
+        <attr name="cometchatMessageHeaderStyle" format="reference" />
+
+        <!-- Container styling -->
+        <attr name="cometchatMessageHeaderBackgroundColor" format="color" />
+        <attr name="cometchatMessageHeaderStrokeColor" format="color" />
+        <attr name="cometchatMessageHeaderStrokeWidth" format="dimension" />
+        <attr name="cometchatMessageHeaderCornerRadius" format="dimension" />
+
+        <!-- Title styling -->
+        <attr name="cometchatMessageHeaderTitleTextColor" format="color" />
+        <attr name="cometchatMessageHeaderTitleTextAppearance" format="reference" />
+
+        <!-- Subtitle styling -->
+        <attr name="cometchatMessageHeaderSubtitleTextColor" format="color" />
+        <attr name="cometchatMessageHeaderSubtitleTextAppearance" format="reference" />
+
+        <!-- Back icon styling -->
+        <attr name="cometchatMessageHeaderBackIcon" format="reference" />
+        <attr name="cometchatMessageHeaderBackIconTint" format="color" />
+
+        <!-- Menu icon styling -->
+        <attr name="cometchatMessageHeaderMenuIcon" format="reference" />
+        <attr name="cometchatMessageHeaderMenuIconTint" format="color" />
+
+        <!-- Typing indicator styling -->
+        <attr name="cometchatMessageHeaderTypingIndicatorTextColor" format="color" />
+        <attr name="cometchatMessageHeaderTypingIndicatorTextAppearance" format="reference" />
+
+        <!-- Component styles -->
+        <attr name="cometchatMessageHeaderAvatarStyle" format="reference" />
+        <attr name="cometchatMessageHeaderStatusIndicatorStyle" format="reference" />
+
+        <!-- AI button styling -->
+        <attr name="cometchatMessageHeaderNewChatIcon" format="reference" />
+        <attr name="cometchatMessageHeaderNewChatIconTint" format="color" />
+        <attr name="cometchatMessageHeaderChatHistoryIcon" format="reference" />
+        <attr name="cometchatMessageHeaderChatHistoryIconTint" format="color" />
+
+        <!-- Call button styling -->
+        <attr name="cometchatMessageHeaderVideoCallIcon" format="reference" />
+        <attr name="cometchatMessageHeaderVideoCallIconTint" format="color" />
+        <attr name="cometchatMessageHeaderVoiceCallIcon" format="reference" />
+        <attr name="cometchatMessageHeaderVoiceCallIconTint" format="color" />
+    </declare-styleable>
+</resources>

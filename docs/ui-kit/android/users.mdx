@@ -1,0 +1,967 @@
+---
+title: "Users"
+description: "Scrollable list of all available users with search, avatars, names, and online/offline status indicators."
+---
+
+`CometChatUsers` renders a scrollable list of all available users with real-time presence updates, search, avatars, and online/offline status indicators.
+
+<Frame>
+  <img src="/images/358a0b21-users-4e1d9c895a8ae47d23ac0d6646db160b.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatUsers` is a list component. It renders all available users and emits the selected `User` via `onItemClick`. Wire it to `CometChatMessageHeader`, `CometChatMessageList`, and `CometChatMessageComposer` to build a direct messaging layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
+    android:id="@+id/users"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val users = findViewById<CometChatUsers>(R.id.users)
+
+users.setOnItemClick { user ->
+    messageHeader.setUser(user)
+    messageList.setUser(user)
+    messageComposer.setUser(user)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    modifier = Modifier.fillMaxSize(),
+    onItemClick = { user ->
+        messageHeader.setUser(user)
+        messageList.setUser(user)
+        messageComposer.setUser(user)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.users.ui.CometChatUsers
+    android:id="@+id/users"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Or programmatically:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(CometChatUsers(this))
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun UsersScreen() {
+    CometChatUsers(
+        modifier = Modifier.fillMaxSize()
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+Or in a Fragment:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return CometChatUsers(requireContext())
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return ComposeView(requireContext()).apply {
+        setContent { CometChatUsers() }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Filtering Users
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Pass a `UsersRequest.UsersRequestBuilder` to control what loads:
+
+```kotlin lines
+users.setUsersRequestBuilder(
+    UsersRequest.UsersRequestBuilder()
+        .friendsOnly(true)
+        .setLimit(20)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    usersRequestBuilder = UsersRequest.UsersRequestBuilder()
+        .friendsOnly(true)
+        .setLimit(20)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Filter Recipes
+
+| Recipe | Builder method |
+| --- | --- |
+| Friends only | `.friendsOnly(true)` |
+| Limit per page | `.setLimit(10)` |
+| Search by keyword | `.setSearchKeyword("john")` |
+| Hide blocked users | `.hideBlockedUsers(true)` |
+| Filter by roles | `.setRoles(listOf("admin", "moderator"))` |
+| Filter by tags | `.setTags(listOf("vip"))` |
+| Online users only | `.setUserStatus(CometChatConstants.USER_STATUS_ONLINE)` |
+| Filter by UIDs | `.setUIDs(listOf("uid1", "uid2"))` |
+
+<Warning>
+Pass the builder object, not the result of `.build()`. The component calls `.build()` internally. Default page size is 30 with infinite scroll.
+</Warning>
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onItemClick`
+
+Fires when a user row is tapped. Primary navigation hook.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnItemClick { user ->
+    // Navigate to chat screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onItemClick = { user ->
+        // Navigate to chat screen
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+> Replaces the default item-click behavior. Your custom lambda executes instead of the built-in navigation.
+
+#### `onItemLongClick`
+
+Fires when a user row is long-pressed. Use for additional actions like block or mute.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnItemLongClick { user ->
+    // Show context menu
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onItemLongClick = { user ->
+        // Show context menu
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onBackPress`
+
+Fires when the user presses the back button in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnBackPress {
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onBackPress = { /* navigate back */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSearchClick`
+
+Fires when the user taps the search icon in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnSearchClick {
+    // Open search screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onSearchClick = { /* open search */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSelection`
+
+Fires when users are selected/deselected in multi-select mode.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+users.setOnSelection { selectedUsers ->
+    updateToolbar(selectedUsers.size)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    selectionMode = UIKitConstants.SelectionMode.MULTIPLE,
+    onSelection = { selectedUsers ->
+        updateToolbar(selectedUsers.size)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnError { exception ->
+    Log.e("Users", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onError = { exception ->
+        Log.e("Users", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onLoad`
+
+Fires when the list is successfully fetched and loaded.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnLoad { userList ->
+    Log.d("Users", "Loaded ${userList.size}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onLoad = { userList ->
+        Log.d("Users", "Loaded ${userList.size}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onEmpty`
+
+Fires when the list is empty after loading.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOnEmpty {
+    Log.d("Users", "No users found")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    onEmpty = { /* no users */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+### SDK Events (Real-Time, Automatic)
+
+The component listens to these SDK events internally. No manual setup needed.
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onUserOnline` | Updates online status indicator for the user |
+| `onUserOffline` | Updates offline status indicator for the user |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setBackIconVisibility(View.VISIBLE)` | `hideBackIcon = false` | Toggle back button |
+| `setToolbarVisibility(View.GONE)` | `hideToolbar = true` | Toggle toolbar |
+| `setSearchBoxVisibility(View.GONE)` | `hideSearchBox = true` | Toggle search box |
+| `setStickyHeaderVisibility(View.GONE)` | `hideStickyHeader = true` | Toggle alphabetical sticky header |
+| `setUserStatusVisibility(View.GONE)` | `hideUserStatus = true` | Toggle online status indicator |
+| `setSeparatorVisibility(View.GONE)` | `hideSeparator = true` | Toggle list separators |
+| `setSelectionMode(MULTIPLE)` | `selectionMode = MULTIPLE` | Enable selection mode |
+| `setTitle("Contacts")` | `title = "Contacts"` | Custom toolbar title |
+| `setSearchPlaceholderText("Find...")` | `searchPlaceholderText = "Find..."` | Search placeholder |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setLeadingView(object : UsersViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, user: User,
+        holder: RecyclerView.ViewHolder, userList: List<User>, position: Int
+    ) {
+        val imageView = createdView as ImageView
+        // Load avatar image
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    leadingView = { user ->
+        CometChatAvatar(
+            imageUrl = user.avatar,
+            name = user.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Title View
+
+Replace the name / title text.
+
+<Frame>
+  <img src="/images/868214e2-users_title_view-fffdf84d79897281f81e88aa67701656.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setTitleView(object : UsersViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, user: User,
+        holder: RecyclerView.ViewHolder, userList: List<User>, position: Int
+    ) {
+        (createdView as TextView).text = user.name ?: ""
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    titleView = { user ->
+        Text(
+            text = user.name ?: "",
+            style = CometChatTheme.typography.heading4Medium
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Subtitle View
+
+Replace the subtitle text below the user's name.
+
+<Frame>
+  <img src="/images/6e16192f-users_subtitle_view-51f448114408521010b6feb4a5bba41d.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setSubtitleView(object : UsersViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, user: User,
+        holder: RecyclerView.ViewHolder, userList: List<User>, position: Int
+    ) {
+        val tvSubtitle = createdView as TextView
+        tvSubtitle.text = "Last Active: " + SimpleDateFormat("dd/MM/yyyy, HH:mm:ss").format(user.lastActiveAt * 1000)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    subtitleView = { user ->
+        Text(
+            text = "Last Active: ${SimpleDateFormat("dd/MM/yyyy").format(user.lastActiveAt * 1000)}",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the right section of each user item.
+
+<Frame>
+  <img src="/images/2456c417-users_trailing_view-9bb40a8246e8ebdaf081ac7b26f4fa01.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setTrailingView(object : UsersViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, user: User,
+        holder: RecyclerView.ViewHolder, userList: List<User>, position: Int
+    ) {
+        (createdView as TextView).text = user.role ?: ""
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    trailingView = { user ->
+        Text(text = user.role ?: "")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Item View
+
+Replace the entire list item row.
+
+<Frame>
+  <img src="/images/de656dc8-users_list_item_view-e66a444aac7edcb18dec787a42b646c3.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setItemView(object : UsersViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return LayoutInflater.from(context).inflate(R.layout.custom_user_item, null)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, user: User,
+        holder: RecyclerView.ViewHolder, userList: List<User>, position: Int
+    ) {
+        val avatar = createdView.findViewById<CometChatAvatar>(R.id.custom_avatar)
+        val title = createdView.findViewById<TextView>(R.id.tvName)
+        title.text = user.name
+        avatar.setAvatar(user.name, user.avatar)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    itemView = { user ->
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CometChatAvatar(imageUrl = user.avatar, name = user.name)
+            Spacer(Modifier.width(12.dp))
+            Text(user.name ?: "", style = CometChatTheme.typography.heading4Medium)
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setEmptyView(R.layout.custom_empty_view)
+users.setErrorView(R.layout.custom_error_view)
+users.setLoadingView(R.layout.custom_loading_view)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    emptyView = { Text("No users found") },
+    errorView = { onRetry -> Button(onClick = onRetry) { Text("Retry") } },
+    loadingView = { CircularProgressIndicator() }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Overflow Menu
+
+<Frame>
+  <img src="/images/50473531-user_menu-5b7eb7088d966ada9e751e591dbee212.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setOverflowMenu(ImageButton(context).apply {
+    setImageResource(R.drawable.ic_filter)
+    setOnClickListener { /* show filter */ }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    overflowMenu = {
+        IconButton(onClick = { /* show filter */ }) {
+            Icon(painterResource(R.drawable.ic_filter), "Filter")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Menu Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Replace all options
+users.setOptions { context, user ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "block", name = "Block", onClick = { /* ... */ }),
+        CometChatPopupMenu.MenuItem(id = "mute", name = "Mute", onClick = { /* ... */ })
+    )
+}
+
+// Append to defaults
+users.setAddOptions { context, user ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ })
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    options = { context, user ->
+        listOf(
+            MenuItem(id = "block", name = "Block", onClick = { /* ... */ }),
+            MenuItem(id = "mute", name = "Mute", onClick = { /* ... */ })
+        )
+    },
+    addOptions = { context, user ->
+        listOf(MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ }))
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Common Patterns
+
+### Minimal list — hide all chrome
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setToolbarVisibility(View.GONE)
+users.setSearchBoxVisibility(View.GONE)
+users.setStickyHeaderVisibility(View.GONE)
+users.setUserStatusVisibility(View.GONE)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    hideToolbar = true,
+    hideSearchBox = true,
+    hideStickyHeader = true,
+    hideUserStatus = true
+)
+```
+
+</Tab>
+</Tabs>
+
+### Friends-only list
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setUsersRequestBuilder(
+    UsersRequest.UsersRequestBuilder()
+        .friendsOnly(true)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    usersRequestBuilder = UsersRequest.UsersRequestBuilder()
+        .friendsOnly(true)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Online users only
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setUsersRequestBuilder(
+    UsersRequest.UsersRequestBuilder()
+        .setUserStatus(CometChatConstants.USER_STATUS_ONLINE)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    usersRequestBuilder = UsersRequest.UsersRequestBuilder()
+        .setUserStatus(CometChatConstants.USER_STATUS_ONLINE)
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Advanced Methods
+
+### Programmatic Selection
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Enable selection
+users.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+
+// Select a user
+users.selectUser(user, UIKitConstants.SelectionMode.MULTIPLE)
+
+// Get selected
+val selected = users.getSelectedUsers()
+
+// Clear
+users.clearSelection()
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Selection is managed via the `selectionMode` and `onSelection` parameters. The component handles selection state internally.
+
+</Tab>
+</Tabs>
+
+### ViewModel Access
+
+```kotlin lines
+val factory = CometChatUsersViewModelFactory()
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatUsersViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+users.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    usersViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for ListOperations, state observation, and custom repositories.
+
+---
+
+## Style
+
+<Frame>
+  <img src="/images/c8909b74-users_styling-3acb1ffef7870b6903a070fd83b5103f.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+    <item name="cometchatAvatarStrokeRadius">8dp</item>
+    <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+</style>
+
+<style name="CustomUsersStyle" parent="CometChatUsersStyle">
+    <item name="cometchatUsersAvatarStyle">@style/CustomAvatarStyle</item>
+    <item name="cometchatUsersSeparatorColor">#F76808</item>
+    <item name="cometchatUsersTitleTextColor">#F76808</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatUsersStyle">@style/CustomUsersStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    style = CometChatUsersStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5),
+        titleTextColor = Color(0xFF141414),
+        itemStyle = CometChatUsersItemStyle.default().copy(
+            backgroundColor = Color.White,
+            titleTextColor = Color(0xFF141414),
+            subtitleTextColor = Color(0xFF727272),
+            avatarStyle = CometChatAvatarStyle.default().copy(cornerRadius = 12.dp),
+            statusIndicatorStyle = CometChatStatusIndicatorStyle.default().copy()
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Style Properties
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background color |
+| `titleTextColor` | Toolbar title color |
+| `searchBoxStyle` | Search box appearance |
+| `itemStyle.backgroundColor` | Row background |
+| `itemStyle.selectedBackgroundColor` | Selected row background |
+| `itemStyle.titleTextColor` | User name color |
+| `itemStyle.subtitleTextColor` | Subtitle text color |
+| `itemStyle.separatorColor` | Row separator color |
+| `itemStyle.avatarStyle` | Avatar appearance |
+| `itemStyle.statusIndicatorStyle` | Online/offline indicator |
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+  <Card title="Groups" icon="users" href="/ui-kit/android/v6/groups">
+    Browse and search available groups
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference with screenshots
+  </Card>
+  <Card title="ViewModel & Data" icon="database" href="/ui-kit/android/v6/customization-viewmodel-data">
+    Custom ViewModels, repositories, and ListOperations
+  </Card>
+</CardGroup>

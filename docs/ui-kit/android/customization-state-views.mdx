@@ -1,0 +1,189 @@
+---
+title: "State Views"
+description: "Replace the default empty, error, and loading state views with custom layouts."
+---
+
+Components display state views when the list is empty, an error occurs, or data is loading. You can replace these with your own custom views.
+
+---
+
+## State Types
+
+| State | When it shows |
+| --- | --- |
+| Loading | Data is being fetched |
+| Empty | No data to display |
+| Error | An error occurred during data fetching |
+
+---
+
+## Replacing State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Each component accepts a `View?` for each state:
+
+```kotlin lines
+// Custom empty view
+val emptyView = LayoutInflater.from(context)
+    .inflate(R.layout.custom_empty_state, null)
+conversations.setEmptyView(emptyView)
+
+// Custom error view
+val errorView = LayoutInflater.from(context)
+    .inflate(R.layout.custom_error_state, null)
+conversations.setErrorView(errorView)
+
+// Custom loading view
+val loadingView = LayoutInflater.from(context)
+    .inflate(R.layout.custom_loading_state, null)
+conversations.setLoadingView(loadingView)
+```
+
+Example custom empty layout:
+
+```xml res/layout/custom_empty_state.xml lines
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/ic_empty_conversations"
+        android:contentDescription="No conversations" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="No conversations yet"
+        android:textSize="18sp" />
+</LinearLayout>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Each component accepts `@Composable` lambdas for each state:
+
+```kotlin lines
+CometChatConversations(
+    emptyView = {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_empty_conversations),
+                contentDescription = "No conversations",
+                modifier = Modifier.size(120.dp),
+                tint = CometChatTheme.colorScheme.iconTintSecondary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No conversations yet",
+                style = CometChatTheme.typography.heading2Medium,
+                color = CometChatTheme.colorScheme.textColorPrimary
+            )
+        }
+    },
+    errorView = { onRetry ->
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Something went wrong")
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
+        }
+    },
+    loadingView = {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+)
+```
+
+Note: the `errorView` lambda receives an `onRetry` callback you can wire to a retry button.
+
+</Tab>
+</Tabs>
+
+---
+
+## Hiding State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Components like `CometChatMessageList` provide explicit hide methods:
+
+```kotlin lines
+messageList.setHideLoadingState(true)
+messageList.setHideEmptyState(true)
+messageList.setHideErrorState(true)
+```
+
+For components that don't have dedicated hide methods (e.g., `CometChatConversations`), pass `null` to remove a custom state view:
+
+```kotlin lines
+conversations.setEmptyView(null)
+conversations.setErrorView(null)
+conversations.setLoadingView(null)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    hideEmptyState = true,
+    hideErrorState = true,
+    hideLoadingState = true
+)
+
+CometChatMessageList(
+    hideEmptyState = true,
+    hideErrorState = true,
+    hideLoadingState = true
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Components with State Views
+
+State views are available on all list-based components:
+
+| Component | States supported |
+| --- | --- |
+| `CometChatConversations` | Loading, Empty, Error |
+| `CometChatUsers` | Loading, Empty, Error |
+| `CometChatGroups` | Loading, Empty, Error |
+| `CometChatGroupMembers` | Loading, Empty, Error |
+| `CometChatCallLogs` | Loading, Empty, Error |
+| `CometChatMessageList` | Loading, Empty, Error |
+
+---
+
+## Related
+
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — See all customization categories.
+- [View Slots](/ui-kit/android/v6/customization-view-slots) — Replace specific regions of list items.

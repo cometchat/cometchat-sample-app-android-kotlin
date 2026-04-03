@@ -1,0 +1,679 @@
+---
+title: "Component Styling"
+description: "Style CometChat UI Kit components using XML theme attributes or Compose style data classes."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin XML Views | Override XML styles in `themes.xml` extending component parent styles (e.g., `CometChatConversationsStyle`), assign via theme attributes |
+| Jetpack Compose | Pass style data classes as parameters (e.g., `CometChatConversationsStyle`, `CometChatMessageListStyle`) with `.default()` and `.copy()` |
+| Pattern (XML) | Create custom style → extend parent → assign to `AppTheme` via theme attribute |
+| Pattern (Compose) | Call `ComponentStyle.default().copy(property = value)` → pass as `style` parameter |
+| Related | [Theme Introduction](/ui-kit/android/v6/theme-introduction) · [Color Resources](/ui-kit/android/v6/color-resources) · [Message Bubble Styling](/ui-kit/android/v6/message-bubble-styling) |
+
+</Accordion>
+
+This page shows how to style CometChat UI Kit components. Each component supports customization of colors, typography, and icons.
+
+---
+
+## Styling Pattern
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Components read styles from XML theme attributes. The pattern is:
+
+1. Create a custom style extending the component's parent style
+2. Override the attributes you want to change
+3. Assign your custom style to `AppTheme` via the component's theme attribute
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomConversationsStyle" parent="CometChatConversationsStyle">
+        <item name="cometchatConversationsAvatarStyle">@style/CustomAvatarStyle</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatConversationsStyle">@style/CustomConversationsStyle</item>
+    </style>
+</resources>
+```
+
+You can also set fonts globally:
+
+```xml themes.xml lines
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatFontBold">@font/your_font_bold</item>
+    <item name="cometchatFontMedium">@font/your_font_medium</item>
+    <item name="cometchatFontRegular">@font/your_font_regular</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Components accept a `style` parameter — a data class with `.default()` factory and `.copy()` for overrides:
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        backgroundColor = Color(0xFFFFF9F5),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+Nested styles (e.g., avatar inside conversations) are overridden the same way:
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        avatarStyle = CometChatAvatarStyle.default().copy(
+            backgroundColor = Color(0xFFFBAA75),
+            cornerRadius = 8.dp
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Chat Lists & Messaging
+
+### Conversation List
+
+<Frame>
+  <img src="/images/433c987e-Conversation_Styling-1e5686a26eb349d5cbc40262b9b6df0e.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
+    <style name="CustomBadgeCountStyle" parent="CometChatBadgeStyle">
+        <item name="cometchatBadgeBackgroundColor">#F76808</item>
+        <item name="cometchatBadgeTextColor">#FFFFFF</item>
+    </style>
+
+    <style name="CustomConversationsStyle" parent="CometChatConversationsStyle">
+        <item name="cometchatConversationsAvatarStyle">@style/CustomAvatarStyle</item>
+        <item name="cometchatConversationsBadgeStyle">@style/CustomBadgeCountStyle</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatConversationsStyle">@style/CustomConversationsStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        avatarStyle = CometChatAvatarStyle.default().copy(
+            backgroundColor = Color(0xFFFBAA75),
+            cornerRadius = 8.dp
+        ),
+        badgeStyle = CometChatBadgeStyle.default().copy(
+            backgroundColor = Color(0xFFF76808),
+            textColor = Color.White
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Users
+
+<Frame>
+  <img src="/images/c8909b74-users_styling-3acb1ffef7870b6903a070fd83b5103f.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomUsersStyle" parent="CometChatUsersStyle">
+        <item name="cometchatUsersAvatarStyle">@style/CustomAvatarStyle</item>
+        <item name="cometchatUsersSeparatorColor">#F76808</item>
+        <item name="cometchatUsersTitleTextColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatUsersStyle">@style/CustomUsersStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatUsers(
+    style = CometChatUsersStyle.default().copy(
+        separatorColor = Color(0xFFF76808),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Groups
+
+<Frame>
+  <img src="/images/5b3c1825-groups_styling-f8164f3a9b1247ad1db859328c199051.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomGroupsStyle" parent="CometChatGroupsStyle">
+        <item name="cometchatGroupsAvatarStyle">@style/CustomAvatarStyle</item>
+        <item name="cometchatGroupsSeparatorColor">#F76808</item>
+        <item name="cometchatGroupsTitleTextColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatGroupsStyle">@style/CustomGroupsStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    style = CometChatGroupsStyle.default().copy(
+        separatorColor = Color(0xFFF76808),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Message Header
+
+<Frame>
+  <img src="/images/c761803d-message_header_styling-ae4670a5a130374818f37e2144246748.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomMessageHeaderStyle" parent="CometChatMessageHeaderStyle">
+        <item name="cometchatMessageHeaderTitleTextColor">#F76808</item>
+        <item name="cometchatMessageHeaderAvatarStyle">@style/CustomAvatarStyle</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageHeaderStyle">@style/CustomMessageHeaderStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(
+    style = CometChatMessageHeaderStyle.default().copy(
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Message List
+
+<Frame>
+  <img src="/images/03a08ce8-message_list_styling-ebbb6bea74da1c21078f037fb50d8bff.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+    </style>
+
+    <style name="CustomMessageListStyle" parent="CometChatMessageListStyle">
+        <item name="cometchatMessageListBackgroundColor">#FEEDE1</item>
+        <item name="cometchatMessageListOutgoingMessageBubbleStyle">@style/CustomOutgoingBubble</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageListStyle">@style/CustomMessageListStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    style = CometChatMessageListStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+            backgroundColor = Color(0xFFF76808)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Message Composer
+
+<Frame>
+  <img src="/images/482915e0-message_composer_styling-db627f8855f376a0287e9d2d7f0be603.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomMessageComposerStyle" parent="CometChatMessageComposerStyle">
+        <item name="cometchatMessageComposerAttachmentIconTint">#F76808</item>
+        <item name="cometchatMessageComposerVoiceRecordingIconTint">#F76808</item>
+        <item name="cometchatMessageComposerAIIconTint">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageComposerStyle">@style/CustomMessageComposerStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageComposer(
+    style = CometChatMessageComposerStyle.default().copy(
+        attachmentIconTint = Color(0xFFF76808),
+        voiceRecordingIconTint = Color(0xFFF76808),
+        aiIconTint = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Group Members
+
+<Frame>
+  <img src="/images/1bd5a982-group_members_styling-ee7427e23be4ccf40776d8b1df1342f4.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomGroupMembersStyle" parent="CometChatGroupMembersStyle">
+        <item name="cometchatGroupMembersAvatarStyle">@style/CustomAvatarStyle</item>
+        <item name="cometchatGroupMembersSeparatorColor">#F76808</item>
+        <item name="cometchatGroupMembersTitleTextColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatGroupMembersStyle">@style/CustomGroupMembersStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroupMembers(
+    style = CometChatGroupMembersStyle.default().copy(
+        separatorColor = Color(0xFFF76808),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Thread Header
+
+<Frame>
+  <img src="/images/76d4d00d-thread_header_styling-447011f9a5da276b357ce91cafa04e94.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomThreadHeaderStyle" parent="CometChatThreadHeaderStyle">
+        <item name="cometchatThreadHeaderBackgroundColor">#FEEDE1</item>
+        <item name="cometchatThreadHeaderReplyCountTextColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatThreadHeaderStyle">@style/CustomThreadHeaderStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatThreadHeader(
+    style = CometChatThreadHeaderStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        replyCountTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Calling UI
+
+### Call Logs
+
+<Frame>
+  <img src="/images/d0eb378f-calls_styling-72e5f287e16313403492a56094660446.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomCallLogStyle" parent="CometChatCallLogsStyle">
+        <item name="cometchatCallLogsSeparatorColor">#F76808</item>
+        <item name="cometchatCallLogsTitleTextColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatCallLogsStyle">@style/CustomCallLogStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatCallLogs(
+    style = CometChatCallLogsStyle.default().copy(
+        separatorColor = Color(0xFFF76808),
+        titleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Incoming Call
+
+<Frame>
+  <img src="/images/d771544a-incoming_call_styled-4a37ea9ee6fd91529ac0dc12725739a7.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomIncomingCallStyle" parent="CometChatIncomingCallStyle">
+        <item name="cometchatIncomingCallBackgroundColor">#AA9EE8</item>
+        <item name="cometchatIncomingCallAcceptButtonBackgroundColor">?attr/cometchatPrimaryColor</item>
+        <item name="cometchatIncomingCallRejectButtonTextColor">?attr/cometchatErrorColor</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatIncomingCallStyle">@style/CustomIncomingCallStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatIncomingCall(
+    call = call,
+    style = CometChatIncomingCallStyle.default().copy(
+        backgroundColor = Color(0xFFAA9EE8)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Outgoing Call
+
+<Frame>
+  <img src="/images/430add9e-outgoing_call_styling-4478d162278403121a8f89d481625c9e.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomOutgoingCall" parent="CometChatOutgoingCallStyle">
+        <item name="cometchatOutgoingCallAvatarStyle">@style/CustomAvatarStyle</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatOutgoingCallStyle">@style/CustomOutgoingCall</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    style = CometChatOutgoingCallStyle.default().copy(
+        avatarStyle = CometChatAvatarStyle.default().copy(
+            backgroundColor = Color(0xFFFBAA75)
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Base Components
+
+### Avatar
+
+<Frame>
+  <img src="/images/b7ff2aa0-base_component_avatar_styling-c10c14904152585dcf4c46f3a1c0a875.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAvatarStyle">@style/CustomAvatarStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+// Globally via CometChatConversations, CometChatUsers, etc.
+style = ComponentStyle.default().copy(
+    avatarStyle = CometChatAvatarStyle.default().copy(
+        backgroundColor = Color(0xFFFBAA75),
+        cornerRadius = 8.dp
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Badge
+
+<Frame>
+  <img src="/images/c2a0c8d5-base_component_badge_styling-fccd7bebd68b92a1bbcebe7db68b4136.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomBadgeStyle" parent="CometChatBadgeStyle">
+        <item name="cometchatBadgeBackgroundColor">#F44649</item>
+        <item name="cometchatBadgeTextColor">#FFFFFF</item>
+        <item name="cometchatBadgeCornerRadius">4dp</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatBadgeStyle">@style/CustomBadgeStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+// Via parent component style
+style = CometChatConversationsStyle.default().copy(
+    badgeStyle = CometChatBadgeStyle.default().copy(
+        backgroundColor = Color(0xFFF44649),
+        textColor = Color.White,
+        cornerRadius = 4.dp
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Status Indicator
+
+<Frame>
+  <img src="/images/3ad97c61-base_component_status_indicator_styling-b6a26bc571a79184023e5b40950bbb53.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomStatusIndicatorStyle" parent="CometChatStatusIndicatorStyle">
+        <item name="cometchatStatusIndicatorCornerRadius">8dp</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatStatusIndicatorStyle">@style/CustomStatusIndicatorStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+// Via parent component style
+style = ComponentStyle.default().copy(
+    statusIndicatorStyle = CometChatStatusIndicatorStyle.default().copy(
+        cornerRadius = 8.dp
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Reaction List
+
+<Frame>
+  <img src="/images/fcaa0634-base_component_reaction_list_styling-16aceef74885c475b8dc129f3114456d.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomReactionListStyle" parent="CometChatReactionListStyle">
+        <item name="cometchatReactionListTabTextActiveColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatReactionListStyle">@style/CustomReactionListStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatReactionList(
+    style = CometChatReactionListStyle.default().copy(
+        tabTextActiveColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>

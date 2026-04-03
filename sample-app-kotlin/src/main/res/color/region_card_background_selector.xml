@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected state - use primary color with transparency -->
+    <item android:color="?attr/cometchatExtendedPrimaryColor100" android:state_selected="true" />
+    <!-- Default state - transparent/surface color -->
+    <item android:color="?attr/cometchatBackgroundColor1" />
+</selector>

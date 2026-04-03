@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected state - use primary color -->
+    <item android:color="?attr/cometchatPrimaryColor" android:state_selected="true" />
+    <!-- Default state - use default stroke color -->
+    <item android:color="?attr/cometchatStrokeColorDefault" />
+</selector>

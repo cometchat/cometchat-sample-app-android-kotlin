@@ -1,0 +1,374 @@
+---
+title: "Outgoing Call"
+description: "Full-screen outgoing call UI with recipient avatar, name, call status, and end-call button."
+---
+
+`CometChatOutgoingCall` renders the outgoing call screen and transitions to the ongoing call screen when the receiver accepts. It displays the recipient's avatar, name, call status, and an end-call button.
+
+<Frame>
+  <img src="/images/703120eb-outgoing_call-c24eb1936c04bb40ea873ac19b973b56.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatOutgoingCall` is a call-initiation component. Wire it to `CometChatCallEvents` to handle call-accepted and call-rejected transitions.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_call.xml lines
+<com.cometchat.uikit.kotlin.presentation.outgoingcall.CometChatOutgoingCall
+    android:id="@+id/outgoing_call"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val outgoingCall = findViewById<CometChatOutgoingCall>(R.id.outgoing_call)
+outgoingCall.setCall(call)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.outgoingcall.CometChatOutgoingCall
+    android:id="@+id/outgoing_call"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Set the `Call` object — this is required:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_call)
+
+    val outgoingCall = findViewById<CometChatOutgoingCall>(R.id.outgoing_call)
+    outgoingCall.setCall(call)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun OutgoingCallScreen() {
+    CometChatOutgoingCall(
+        call = call
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onEndCallClick`
+
+Fires when the end-call button is tapped. Default: cancels the outgoing call via the SDK.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+outgoingCall.setOnEndCallClick {
+    // Custom end-call logic
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    onEndCallClick = { /* custom end-call logic */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+outgoingCall.setOnError { context, exception ->
+    Log.e("OutgoingCall", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    onError = { context, exception ->
+        Log.e("OutgoingCall", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Global UI Events (CometChatCallEvents)
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `ccCallAccepted` | Outgoing call accepted by receiver | `Call` |
+| `ccCallRejected` | Outgoing call rejected by receiver | `Call` |
+
+### SDK Events (Real-Time, Automatic)
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onOutgoingCallAccepted` | Transitions to the ongoing call screen |
+| `onOutgoingCallRejected` | Finishes the activity or invokes back-press handler |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setCall(call)` | `call = call` | Set the Call object (required) |
+| `setOnEndCallClick { }` | `onEndCallClick = { }` | Override end-call button behavior |
+| `setOnError { }` | `onError = { }` | Error callback |
+| `setDisableSoundForCalls(true)` | `disableSoundForCalls = true` | Disable outgoing call ringtone |
+| `setCustomSoundForCalls(R.raw.tone)` | `customSoundForCalls = R.raw.tone` | Custom ringtone |
+
+---
+
+## Custom View Slots
+
+### Title View
+
+Replace the name / title text area.
+
+<Frame>
+  <img src="/images/7e3e0d88-outgoing_call_title_view-0fd6e88ca01f03ba95560faa430c4a44.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+outgoingCall.setTitleView { context, call ->
+    val titleView = LayoutInflater.from(context).inflate(R.layout.custom_title_view, null)
+    val tvTitle = titleView.findViewById<TextView>(R.id.title_text)
+    val user = call?.callReceiver as User
+    tvTitle.text = user.name + " <> " + call.sender.uid
+    titleView
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    titleView = { c ->
+        val receiver = c.callReceiver as? User
+        Text(
+            text = "${receiver?.name} <> ${c.sender.uid}",
+            style = CometChatTheme.typography.caption1Regular
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Avatar View
+
+Replace the avatar / profile picture area.
+
+<Frame>
+  <img src="/images/8d7cb75f-outgoing_call_avatar_view-e10a7fa5b1aadf63858f836108b11776.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+outgoingCall.setAvatarView { context, call ->
+    val avatarView = LayoutInflater.from(context).inflate(R.layout.custom_avatar_view, null)
+    val avatar = avatarView.findViewById<CometChatAvatar>(R.id.avatar)
+    val user = call?.receiver as User
+    avatar.setAvatar(user.uid, user.avatar)
+    avatarView
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    avatarView = { c ->
+        val receiver = c.callReceiver as? User
+        CometChatAvatar(
+            imageUrl = receiver?.avatar,
+            name = receiver?.name,
+            modifier = Modifier.size(100.dp)
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Cancel Button View
+
+Replace the end-call button.
+
+<Frame>
+  <img src="/images/04c02293-outgoing_call_cancel_button_view-8a8ca9780eea5fbc9c07e4ca6da8e28c.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+outgoingCall.setEndCallView { context, call ->
+    val endCallView = LayoutInflater.from(context).inflate(R.layout.end_call_button, null)
+    endCallView.setOnClickListener {
+        Toast.makeText(context, "End call clicked", Toast.LENGTH_SHORT).show()
+    }
+    val layoutParams = LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT
+    )
+    layoutParams.bottomMargin = Utils.convertDpToPx(context, 40)
+    endCallView.layoutParams = layoutParams
+    endCallView
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    cancelButtonView = { c ->
+        Button(
+            onClick = { /* end call */ },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 40.dp)
+        ) {
+            Icon(painterResource(R.drawable.cometchat_ic_end_call), "End Call")
+            Spacer(Modifier.width(16.dp))
+            Text("End Call")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomOutgoingCallStyle" parent="CometChatOutgoingCallStyle">
+    <item name="cometchatOutgoingCallBackgroundColor">#FEEDE1</item>
+    <item name="cometchatOutgoingCallTitleTextColor">#F76808</item>
+    <item name="cometchatOutgoingCallSubtitleTextColor">#F76808</item>
+</style>
+```
+
+```kotlin lines
+outgoingCall.setStyle(R.style.CustomOutgoingCallStyle)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatOutgoingCall(
+    call = call,
+    style = CometChatOutgoingCallStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        titleTextColor = Color(0xFFF76808),
+        subtitleTextColor = Color(0xFFF76808)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/430add9e-outgoing_call_styling-4478d162278403121a8f89d481625c9e.png" />
+</Frame>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Incoming Call" icon="phone-arrow-down-left" href="/ui-kit/android/v6/incoming-call">
+    Incoming call notification with accept/reject
+  </Card>
+  <Card title="Call Buttons" icon="phone" href="/ui-kit/android/v6/call-buttons">
+    Voice and video call buttons
+  </Card>
+  <Card title="Call Logs" icon="clock-rotate-left" href="/ui-kit/android/v6/call-logs">
+    View call history
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+</CardGroup>

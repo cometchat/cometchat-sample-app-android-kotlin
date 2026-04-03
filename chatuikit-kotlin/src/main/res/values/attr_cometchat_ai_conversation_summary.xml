@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CometChatAIConversationSummary">
+
+        <!-- Title styles -->
+        <attr name="cometchatAIConversationSummaryTitleTextColor" format="color" />
+        <attr name="cometchatAIConversationSummaryTitleTextAppearance" format="reference" />
+
+        <!-- Close icon styles -->
+        <attr name="cometchatAIConversationSummaryCloseIconTint" format="color" />
+        <attr name="cometchatAIConversationSummaryCloseIconDrawable" format="reference" />
+
+        <!-- Container styles -->
+        <attr name="cometchatAIConversationSummaryBackgroundColor" format="color" />
+        <attr name="cometchatAIConversationSummaryBackgroundDrawable" format="reference" />
+        <attr name="cometchatAIConversationSummaryCornerRadius" format="dimension" />
+        <attr name="cometchatAIConversationSummaryStrokeWidth" format="dimension" />
+        <attr name="cometchatAIConversationSummaryStrokeColor" format="color" />
+
+        <!-- Item styles -->
+        <attr name="cometchatAIConversationSummaryItemBackgroundColor" format="color" />
+        <attr name="cometchatAIConversationSummaryItemBackgroundDrawable" format="reference" />
+        <attr name="cometchatAIConversationSummaryItemCornerRadius" format="dimension" />
+        <attr name="cometchatAIConversationSummaryItemStrokeWidth" format="dimension" />
+        <attr name="cometchatAIConversationSummaryItemStrokeColor" format="color" />
+        <attr name="cometchatAIConversationSummaryItemTextColor" format="color" />
+        <attr name="cometchatAIConversationSummaryItemTextAppearance" format="reference" />
+
+        <!-- Error state styles -->
+        <attr name="cometchatAIConversationSummaryErrorStateTextColor" format="color" />
+        <attr name="cometchatAIConversationSummaryErrorStateTextAppearance" format="reference" />
+
+        <!-- Style reference -->
+        <attr name="cometchatAIConversationSummaryStyle" format="reference" />
+
+    </declare-styleable>
+
+</resources>

@@ -1,0 +1,224 @@
+---
+title: "Threaded Messages Header"
+description: "Displays the parent message bubble and reply count for a threaded conversation."
+---
+
+`CometChatThreadHeader` renders the parent message bubble and reply count for a threaded conversation. It requires a parent message to display.
+
+<Frame>
+  <img src="/images/ccfded5e-thread_header-02deacd1056bec41b2d4862bc713a4df.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatThreadHeader` is a header component for threaded message views. Wire it above a `CometChatMessageList` and `CometChatMessageComposer` to build a complete threaded conversation layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_thread.xml lines
+<com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+    android:id="@+id/thread_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+```
+
+```kotlin lines
+val threadHeader = findViewById<CometChatThreadHeader>(R.id.thread_header)
+threadHeader.setParentMessage(parentMessage)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatThreadHeader(
+    parentMessage = parentMessage
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+    android:id="@+id/thread_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+```
+
+Set the parent message — this is required:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_thread)
+
+    val threadHeader = findViewById<CometChatThreadHeader>(R.id.thread_header)
+    threadHeader.setParentMessage(baseMessage)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun ThreadScreen() {
+    CometChatThreadHeader(
+        parentMessage = baseMessage
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+`CometChatThreadHeader` is a display-only header. It does not expose component-specific callbacks like `setOnItemClick` or `setOnError`.
+
+### SDK Events (Real-Time, Automatic)
+
+The component listens to SDK events internally via its ViewModel. No manual setup needed.
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| Message edited | Updates the parent message bubble |
+| Message deleted | Updates the parent message bubble |
+| Reply count changed | Updates the reply count indicator |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setParentMessage(message)` | `parentMessage = message` | Set the parent message (required) |
+| `setUser(user)` | `user = user` | Set the user context |
+| `setGroup(group)` | `group = group` | Set the group context |
+| `setReactionVisibility(View.GONE)` | `hideReactions = true` | Toggle reactions on parent bubble |
+| `setAvatarVisibility(View.GONE)` | `hideAvatar = true` | Toggle avatar visibility |
+| `setReceiptsVisibility(View.GONE)` | `hideReceipts = true` | Toggle read receipts |
+| `setReplyCountVisibility(View.GONE)` | `hideReplyCount = true` | Toggle reply count text |
+
+---
+
+## Style
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomOutgoingMessageBubbleStyle" parent="CometChatOutgoingMessageBubbleStyle">
+    <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+</style>
+
+<style name="CustomIncomingMessageBubbleStyle" parent="CometChatIncomingMessageBubbleStyle">
+    <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+</style>
+
+<style name="CustomThreadHeaderStyle" parent="CometChatThreadHeaderStyle">
+    <item name="cometchatThreadHeaderOutgoingMessageBubbleStyle">@style/CustomOutgoingMessageBubbleStyle</item>
+    <item name="cometchatThreadHeaderIncomingMessageBubbleStyle">@style/CustomIncomingMessageBubbleStyle</item>
+    <item name="cometchatThreadHeaderBackgroundColor">#FEEDE1</item>
+    <item name="cometchatThreadHeaderReplyCountTextColor">#F76808</item>
+    <item name="cometchatThreadHeaderReplyCountBackgroundColor">#FEEDE1</item>
+</style>
+```
+
+```kotlin lines
+threadHeader.setStyle(R.style.CustomThreadHeaderStyle)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatThreadHeader(
+    parentMessage = baseMessage,
+    style = CometChatThreadHeaderStyle.default().copy(
+        backgroundColor = Color(0xFFFEEDE1),
+        replyCountTextColor = Color(0xFFF76808),
+        replyCountBackgroundColor = Color(0xFFFEEDE1)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+<Frame>
+  <img src="/images/76d4d00d-thread_header_styling-447011f9a5da276b357ce91cafa04e94.png" />
+</Frame>
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## ViewModel
+
+```kotlin lines
+val viewModel = ViewModelProvider(this)
+    .get(CometChatThreadHeaderViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+threadHeader.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatThreadHeader(
+    parentMessage = baseMessage,
+    threadHeaderViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for state observation and custom repositories.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="Message Header" icon="heading" href="/ui-kit/android/v6/message-header">
+    Display user/group info in the toolbar
+  </Card>
+  <Card title="Message Composer" icon="pen-to-square" href="/ui-kit/android/v6/message-composer">
+    Rich input for sending messages
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+</CardGroup>

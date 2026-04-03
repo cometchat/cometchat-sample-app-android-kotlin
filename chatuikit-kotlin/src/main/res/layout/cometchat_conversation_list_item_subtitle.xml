@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <!-- Receipt view for message status (sent/delivered/read) -->
+    <com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceipt
+        android:id="@+id/receipt_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/cometchat_margin_1"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Sender prefix text (e.g., "You: " or "John: ") -->
+    <TextView
+        android:id="@+id/tv_sender_prefix"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="You: "
+        tools:visibility="visible" />
+
+    <!-- Message type icon (photo, video, audio, document) -->
+    <ImageView
+        android:id="@+id/iv_message_type_icon"
+        android:layout_width="@dimen/cometchat_16dp"
+        android:layout_height="@dimen/cometchat_16dp"
+        android:layout_gravity="bottom"
+        android:layout_marginEnd="@dimen/cometchat_margin_1"
+        android:contentDescription="@string/cometchat_message_type_icon"
+        android:visibility="gone"
+        tools:src="@drawable/cometchat_ic_conversations_photo"
+        tools:visibility="visible" />
+
+    <!-- Subtitle text (message preview) -->
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Hello, how are you?" />
+
+    <!-- Typing indicator text -->
+    <TextView
+        android:id="@+id/tv_typing_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:text="@string/cometchat_typing" />
+
+</LinearLayout>

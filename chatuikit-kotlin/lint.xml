@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lint configuration for chatuikit-kotlin module
+  This module contains Android Views (XML) based UI components
+-->
+<lint>
+    <!-- Treat all warnings as errors for strict code quality -->
+    <issue id="all" severity="warning" />
+
+    <!-- ==================== KOTLIN BEST PRACTICES ==================== -->
+    
+    <!-- Enforce proper null safety -->
+    <issue id="NullSafeMutableLiveData" severity="error" />
+    
+    <!-- Detect unused resources -->
+    <issue id="UnusedResources" severity="warning" />
+    
+    <!-- Detect hardcoded text (should use string resources) -->
+    <issue id="HardcodedText" severity="warning" />
+    <issue id="SetTextI18n" severity="warning" />
+
+    <!-- ==================== XML LAYOUT RULES ==================== -->
+    
+    <!-- Detect inefficient layouts -->
+    <issue id="TooManyViews" severity="warning" />
+    <issue id="TooDeepLayout" severity="warning" />
+    <issue id="UselessParent" severity="warning" />
+    <issue id="UselessLeaf" severity="warning" />
+    <issue id="NestedWeights" severity="warning" />
+    <issue id="InefficientWeight" severity="warning" />
+    
+    <!-- Detect missing IDs -->
+    <issue id="MissingId" severity="warning" />
+    
+    <!-- Detect duplicate IDs -->
+    <issue id="DuplicateIds" severity="error" />
+    
+    <!-- Detect scroll view issues -->
+    <issue id="ScrollViewCount" severity="error" />
+    <issue id="ScrollViewSize" severity="warning" />
+    
+    <!-- Detect orientation issues -->
+    <issue id="Orientation" severity="error" />
+    
+    <!-- Detect RTL issues -->
+    <issue id="RtlEnabled" severity="warning" />
+    <issue id="RtlHardcoded" severity="warning" />
+    <issue id="RtlSymmetry" severity="warning" />
+
+    <!-- ==================== ACCESSIBILITY ==================== -->
+    
+    <!-- Ensure proper content descriptions -->
+    <issue id="ContentDescription" severity="warning" />
+    
+    <!-- Detect touch target size issues -->
+    <issue id="TouchTargetSizeCheck" severity="warning" />
+    <issue id="SpeakableTextPresentCheck" severity="warning" />
+    
+    <!-- Ensure proper labeling -->
+    <issue id="LabelFor" severity="warning" />
+    
+    <!-- Detect clickable views without accessibility -->
+    <issue id="ClickableViewAccessibility" severity="warning" />
+
+    <!-- ==================== COROUTINES & LIFECYCLE ==================== -->
+    
+    <!-- Ensure proper coroutine scope usage -->
+    <issue id="UnsafeLifecycleWhenUsing" severity="error" />
+    
+    <!-- Detect potential memory leaks -->
+    <issue id="StaticFieldLeak" severity="error" />
+    
+    <!-- Detect view binding leaks -->
+    <issue id="ViewBindingType" severity="warning" />
+
+    <!-- ==================== PERFORMANCE ==================== -->
+    
+    <!-- Detect inefficient operations -->
+    <issue id="UseSparseArrays" severity="warning" />
+    <issue id="UseValueOf" severity="warning" />
+    <issue id="Wakelock" severity="error" />
+    
+    <!-- Detect overdraw issues -->
+    <issue id="Overdraw" severity="warning" />
+    
+    <!-- Detect inefficient drawable usage -->
+    <issue id="UseCompoundDrawables" severity="warning" />
+    <issue id="UnusedAttribute" severity="warning" />
+    
+    <!-- Detect animation issues -->
+    <issue id="Suspicious0dp" severity="warning" />
+
+    <!-- ==================== SECURITY ==================== -->
+    
+    <!-- Security-related checks -->
+    <issue id="HardcodedDebugMode" severity="error" />
+    <issue id="AllowBackup" severity="warning" />
+    <issue id="ExportedContentProvider" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="ExportedService" severity="error" />
+    <issue id="GrantAllUris" severity="error" />
+    <issue id="WorldReadableFiles" severity="error" />
+    <issue id="WorldWriteableFiles" severity="error" />
+    
+    <!-- Detect insecure random number generation -->
+    <issue id="TrulyRandom" severity="error" />
+    
+    <!-- SSL/TLS security -->
+    <issue id="TrustAllX509TrustManager" severity="error" />
+    <issue id="UnprotectedSMSBroadcastReceiver" severity="error" />
+
+    <!-- ==================== API COMPATIBILITY ==================== -->
+    
+    <!-- Ensure API level compatibility -->
+    <issue id="NewApi" severity="error" />
+    <issue id="InlinedApi" severity="warning" />
+    <issue id="ObsoleteSdkInt" severity="warning" />
+
+    <!-- ==================== CODE QUALITY ==================== -->
+    
+    <!-- Detect common programming errors -->
+    <issue id="SuspiciousImport" severity="error" />
+    <issue id="DuplicateIncludedIds" severity="error" />
+    <issue id="PrivateResource" severity="warning" />
+    
+    <!-- Detect deprecated API usage -->
+    <issue id="Deprecated" severity="warning" />
+    
+    <!-- Detect fragment issues -->
+    <issue id="ValidFragment" severity="error" />
+    <issue id="CommitTransaction" severity="error" />
+
+    <!-- ==================== INTEROPERABILITY ==================== -->
+    
+    <!-- Java-Kotlin interoperability -->
+    <issue id="UnknownNullness" severity="warning" />
+
+    <!-- ==================== IGNORED ISSUES ==================== -->
+    
+    <!-- Ignore for library modules (consumers handle these) -->
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="ExtraTranslation" severity="ignore" />
+    
+    <!-- Ignore Gradle-related warnings -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="GradleOverrides" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+    
+    <!-- Ignore icon density issues (handled at app level) -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+</lint>

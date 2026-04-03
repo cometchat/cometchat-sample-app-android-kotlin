@@ -1,0 +1,258 @@
+<resources>
+    <!-- Keep official product names (like "UI KIT") in English if needed -->
+    <string name="cometchat_app_name" translatable="true">UI KIT</string>
+
+    <string name="cometchat_user" translatable="true">felhasználó</string>
+    <string name="cometchat_group" translatable="true">csoport</string>
+    <string name="cometchat_conversation" translatable="true">beszélgetés</string>
+    <string name="cometchat_reply_lowercase" translatable="true">válasz</string>
+    <string name="cometchat_call" translatable="true">Hívás</string>
+    <string name="cometchat_sticker_lowercase" translatable="true">matrica</string>
+    <string name="cometchat_message" translatable="true">Írjon üzenetet</string>
+    <string name="cometchat_start_conv_hint" translatable="true">Érintse meg a beszélgetés indításához</string>
+    <string name="cometchat_admin" translatable="true">Admin</string>
+    <string name="cometchat_moderator" translatable="true">Moderátor</string>
+    <string name="cometchat_member" translatable="true">Tag</string>
+    <string name="cometchat_join" translatable="true">Csatlakozás</string>
+    <string name="cometchat_camera_perm" translatable="true">Kérjük, adjon engedélyt a kamera használatához az alkalmazás beállításaiban</string>
+    <string name="cometchat_storage_perm" translatable="true">Kérjük, adjon engedélyt a tárhely használatához az alkalmazás beállításaiban</string>
+    <string name="cometchat_file_not_exist" translatable="true">A fájl nem létezik</string>
+    <string name="cometchat_ended" translatable="true">Befejezve</string>
+    <string name="cometchat_outgoing" translatable="true">Kimenő</string>
+    <string name="cometchat_incoming" translatable="true">Bejövő</string>
+    <string name="cometchat_missed_call" translatable="true">Nem fogadott</string>
+    <string name="cometchat_cancel_call" translatable="true">Megszakítva</string>
+    <string name="cometchat_rejected_call" translatable="true">Elutasítva</string>
+    <string name="cometchat_busy_call" translatable="true">Foglalt</string>
+    <string name="cometchat_you" translatable="true">Ön</string>
+    <string name="cometchat_edit" translatable="true">Szerkesztés</string>
+    <string name="cometchat_delete" translatable="true">Törlés</string>
+    <string name="cometchat_share" translatable="true">Megosztás</string>
+    <string name="cometchat_copy" translatable="true">Másolás</string>
+    <string name="cometchat_translate" translatable="true">Fordítás</string>
+    <string name="cometchat_message_privately" translatable="true">Üzenet küldése privátban</string>
+    <string name="cometchat_reply_uppercase" translatable="true">Válasz</string>
+    <string name="cometchat_info" translatable="true">Info</string>
+    <string name="cometchat_online" translatable="true">Elérhető</string>
+    <string name="cometchat_offline" translatable="true">Offline</string>
+    <string name="cometchat_attach_image" translatable="true">Kép csatolása</string>
+    <string name="cometchat_attach_video" translatable="true">Videó csatolása</string>
+    <string name="cometchat_poll" translatable="true">Szavazás</string>
+    <string name="cometchat_camera" translatable="true">Kamera</string>
+    <string name="cometchat_yes" translatable="true">Igen</string>
+    <string name="cometchat_shared_sticker" translatable="true">Egy matricát osztott meg</string>
+    <string name="cometchat_attach_audio" translatable="true">Hangfájl csatolása</string>
+    <string name="cometchat_attach_document" translatable="true">Dokumentum csatolása</string>
+    <string name="cometchat_no" translatable="true">Nem</string>
+    <string name="cometchat_question" translatable="true">Kérdés</string>
+    <string name="cometchat_collaborative_whiteboard" translatable="true">Együttműködési rajztábla</string>
+    <string name="cometchat_collaborative_doc" translatable="true">Együttműködési dokumentum</string>
+    <string name="cometchat_yesterday" translatable="true">Tegnap</string>
+    <string name="cometchat_ban" translatable="true">Kitiltás</string>
+    <string name="cometchat_document" translatable="true">Dokumentum</string>
+    <string name="cometchat_polls" translatable="true">Szavazások</string>
+    <string name="cometchat_sticker_uppercase" translatable="true">Matrica</string>
+    <string name="cometchat_custom_message_whiteboard" translatable="true">Rajztábla</string>
+    <string name="cometchat_error" translatable="true">Hiba</string>
+    <string name="cometchat_added" translatable="true">hozzáadta</string>
+    <string name="cometchat_kicked_by" translatable="true">kirúgta</string>
+    <string name="cometchat_left" translatable="true">kilépett</string>
+    <string name="cometchat_joined" translatable="true">csatlakozott</string>
+    <string name="cometchat_unban" translatable="true">Tiltás feloldása</string>
+    <string name="cometchat_made" translatable="true">létrehozta</string>
+    <string name="cometchat_participant" translatable="true">Résztvevő</string>
+    <string name="cometchat_translation_error" translatable="true">A fordításhoz kiválasztott nyelv megegyezik az eredeti üzenet nyelvével</string>
+    <string name="cometchat_group_call" translatable="true">Csoporthívás</string>
+    <string name="cometchat_updating" translatable="true">Frissítés folyamatban</string>
+    <string name="cometchat_chats" translatable="true">Beszélgetések</string>
+    <string name="cometchat_downloading" translatable="true">Letöltés folyamatban</string>
+    <string name="cometchat_today" translatable="true">Ma</string>
+    <string name="cometchat_replies" translatable="true">Válaszok</string>
+    <string name="cometchat_new_message" translatable="true">új üzenet</string>
+    <string name="cometchat_new_messages" translatable="true"> új üzenetek</string>
+    <string name="cometchat_channel_description" translatable="true">Csatornaleírás</string>
+    <string name="cometchat_action_item" translatable="true">művelet_elem</string>
+    <string name="cometchat_try_again" translatable="true">Próbálja újra</string>
+    <string name="cometchat_something_went_wrong" translatable="true">Hiba történt.</string>
+    <string name="cometchat_transfer_ownership" translatable="true">Tulajdonjog átadása</string>
+    <string name="cometchat_add_members" translatable="true">Tagok hozzáadása</string>
+    <string name="cometchat_owner" translatable="true">Tulajdonos</string>
+    <string name="cometchat_banned" translatable="true">Kitiltva</string>
+    <string name="cometchat_calling" translatable="true">hívás folyamatban</string>
+    <string name="cometchat_accepted" translatable="true">elfogadva</string>
+    <string name="cometchat_unanswered" translatable="true">megválaszolatlan</string>
+    <string name="cometchat_message_receipt" translatable="true">Üzenet fogadása</string>
+    <string name="cometchat_file_download_failed" translatable="true">A fájl letöltése sikertelen.</string>
+    <string name="cometchat_suggest_a_reply" translatable="true">Javasoljon választ</string>
+    <string name="cometchat_enter_a_text" translatable="true">Írjon be egy szöveget</string>
+    <string name="cometchat_form_completion_message" translatable="true">Köszönjük, hogy kitöltötte az űrlapot.</string>
+    <string name="cometchat_conversation_summary" translatable="true">Beszélgetés összegzése</string>
+    <string name="cometchat_generate_summary" translatable="true">Összegzés létrehozása</string>
+    <string name="cometchat_more_times" translatable="true">További időpontok</string>
+    <string name="cometchat_select_a_day" translatable="true">Válasszon egy napot</string>
+    <string name="cometchat_meeting_scheduled" translatable="true">A találkozója ütemezve lett.</string>
+    <string name="cometchat_meet_with" translatable="true">"Találkozás ezzel: "</string>
+    <string name="cometchat_min_meeting" translatable="true">perces találkozó</string>
+    <string name="cometchat_select_a_time" translatable="true">Válasszon egy időpontot</string>
+    <string name="cometchat_no_time_slots_available" translatable="true">Ehhez a dátumhoz nincs szabad időpont. Kérjük, próbáljon meg másik dátumot.</string>
+    <string name="cometchat_book_new_slot" translatable="true">Új időpont lefoglalása</string>
+    <string name="cometchat_something_went_wrong_please_try_again" translatable="true">Hiba történt. Kérjük, próbálja újra.</string>
+    <string name="cometchat_time_slot_no_longer_available_please_choose_another" translatable="true">Ez az időpont már nem elérhető. Válasszon másikat.</string>
+    <string name="cometchat_no_quick_time_slots_available" translatable="true">Nincs elérhető időpont.</string>
+    <string name="cometchat_tag_item" translatable="true">Elem megjelölése</string>
+    <string name="cometchat_you_can_mention_up_to" translatable="true">Legfeljebb</string>
+    <string name="cometchat_time_at_a_time" translatable="true">alkalommal említhető egyszerre</string>
+    <string name="cometchat_reply" translatable="true">Válasz</string>
+    <string name="cometchat_all" translatable="true">Összes</string>
+    <string name="cometchat_tap_to_remove" translatable="true">Érintse meg az eltávolításhoz</string>
+    <string name="cometchat_avatar" translatable="true">CometChat Avatar</string>
+    <string name="cometchat_unread_message_count_max" translatable="true">999+</string>
+    <string name="cometchat_empty_conversations_title" translatable="true">Még nincsenek beszélgetések</string>
+    <string name="cometchat_empty_conversations_subtitle" translatable="true">Indítson új beszélgetést, vagy hívjon meg másokat a
+beszélgetésbe.</string>
+    <string name="cometchat_error_conversations_title" translatable="true">Hoppá!</string>
+    <string name="cometchat_error_conversations_subtitle" translatable="true">Úgy tűnik, valami hiba történt.
+Kérjük, próbálja újra.</string>
+    <string name="cometchat_typing" translatable="true">Gépel…</string>
+    <string name="cometchat_is_typing" translatable="true">éppen gépel…</string>
+    <string name="cometchat_message_image" translatable="true">Fénykép</string>
+    <string name="cometchat_message_video" translatable="true">Videó</string>
+    <string name="cometchat_message_audio" translatable="true">Hang</string>
+    <string name="cometchat_message_sticker" translatable="true">Matrica</string>
+    <string name="cometchat_message_gif" translatable="true">GIF</string>
+    <string name="cometchat_message_poll" translatable="true">Szavazás</string>
+    <string name="cometchat_message_document" translatable="true">Dokumentum</string>
+    <string name="cometchat_message_location" translatable="true">Hely</string>
+    <string name="cometchat_message_collaborative_whiteboard" translatable="true">Együttműködési rajztábla</string>
+    <string name="cometchat_message_collaborative_document" translatable="true">Együttműködési dokumentum</string>
+    <string name="cometchat_conversation_delete_message_title" translatable="true">Törli ezt a beszélgetést?</string>
+    <string name="cometchat_delete_message_title" translatable="true">Törli ezt az üzenetet?</string>
+    <string name="cometchat_conversation_delete_message_subtitle" translatable="true">Biztosan törli ezt a beszélgetést? Ez a művelet nem vonható vissza.</string>
+    <string name="cometchat_delete_message_subtitle" translatable="true">Biztosan törli ezt az üzenetet? Ez a művelet nem vonható vissza.</string>
+    <string name="cometchat_cancel" translatable="true">Mégse</string>
+    <string name="cometchat_reaction_list_error" translatable="true">Úgy tűnik, hiba történt.
+Kérjük, próbálja újra.</string>
+    <string name="cometchat_text_translated" translatable="true">A szöveg lefordítva</string>
+    <string name="cometchat_composer_place_holder_text" translatable="true">Írja be üzenetét…</string>
+    <string name="cometchat_last_seen" translatable="true">Legutóbbi aktivitás</string>
+    <string name="cometchat_conversation_delete_error" translatable="true">Nem sikerült törölni a beszélgetést</string>
+    <string name="cometchat_message_info" translatable="true">Üzenet adatai</string>
+    <string name="cometchat_read" translatable="true">Elolvasva</string>
+    <string name="cometchat_deliver" translatable="true">Kézbesítve</string>
+    <string name="cometchat_message_receipt_time_stamp_placeholder" translatable="true">----</string>
+    <string name="cometchat_message_delete_error" translatable="true">Nem sikerült törölni az üzenetet</string>
+    <string name="cometchat_no_stickers_available" translatable="true">Nincsenek elérhető matricák</string>
+    <string name="cometchat_you_don_t_have_any_stickers_yet" translatable="true">Még nincsenek matricái.</string>
+    <string name="cometchat_looks_like_something_went_wrong_n_please_try_again" translatable="true">Úgy tűnik, hiba történt.
+ Kérjük, próbálja újra.</string>
+    <string name="cometchat_retry" translatable="true">Újrapróbálkozás</string>
+    <string name="cometchat_group_members_empty_title" translatable="true">Nincsenek tagok</string>
+    <string name="cometchat_group_member_empty_subtitle" translatable="true">Adjon hozzá tagokat a csoporthoz, és itt jelennek majd meg.</string>
+    <string name="cometchat_remove" translatable="true">Eltávolítás</string>
+    <string name="cometchat_scope_change" translatable="true">Jogosultság módosítása</string>
+    <string name="cometchat_change_scope_subtitle" translatable="true">Módosíthatja a szerepköröket a csoport jogosultságainak és felelősségeinek kezeléséhez.</string>
+    <string name="cometchat_save" translatable="true">Mentés</string>
+    <string name="cometchat_users" translatable="true">Felhasználók</string>
+    <string name="cometchat_user_list_empty_state_title" translatable="true">Nem állnak rendelkezésre felhasználók</string>
+    <string name="cometchat_user_list_empty_state_subtitle" translatable="true">Adjon hozzá kapcsolatokat a beszélgetések indításához, és itt jelennek meg.</string>
+    <string name="cometchat_user_list_error_state_title" translatable="true">Hoppá!</string>
+    <string name="cometchat_user_list_error_state_subtitle" translatable="true">Úgy tűnik, hiba történt. Kérjük, próbálja újra.</string>
+    <string name="cometchat_search" translatable="true">Keresés</string>
+    <string name="cometchat_groups" translatable="true">Csoportok</string>
+    <string name="cometchat_group_list_empty_state_title" translatable="true">Nem találhatók csoportok</string>
+    <string name="cometchat_group_list_empty_state_subtitle" translatable="true">Hozzon létre vagy csatlakozzon csoportokhoz, hogy itt lássa őket, és kezdjen együttműködni.</string>
+    <string name="cometchat_group_list_error_state_title" translatable="true">Hoppá!</string>
+    <string name="cometchat_group_list_error_state_subtitle" translatable="true">Úgy tűnik, hiba történt. Kérjük, próbálja újra.</string>
+    <string name="cometchat_members" translatable="true">Tagok</string>
+    <string name="cometchat_call_logs_title" translatable="true">Hívások</string>
+    <string name="cometchat_call_logs_empty_title" translatable="true">Még nincsenek hívásnaplók</string>
+    <string name="cometchat_call_logs_empty_subtitle" translatable="true">Indítson vagy fogadjon hívásokat, hogy itt lássa a híváselőzményeket</string>
+    <string name="cometchat_call_logs_error_title" translatable="true">Hoppá!</string>
+    <string name="cometchat_call_logs_error_subtitle" translatable="true">Úgy tűnik, hiba történt. Kérjük, próbálja újra.</string>
+    <string name="cometchat_this_message_deleted" translatable="true">Ez az üzenet törölve lett</string>
+    <string name="cometchat_this_message_type_is_not_supported" translatable="true">Ez az üzenettípus nem támogatott</string>
+    <string name="cometchat_message_form" translatable="true">Űrlap</string>
+    <string name="cometchat_message_card" translatable="true">Kártya</string>
+    <string name="cometchat_message_scheduler" translatable="true">Ütemező</string>
+    <string name="cometchat_message_mention_max_limit" translatable="true">Legfeljebb 10 alkalommal említhető egyszerre</string>
+    <string name="cometchat_ask_question" translatable="true">Kérdés feltevése</string>
+    <string name="cometchat_options" translatable="true">Beállítások</string>
+    <string name="cometchat_send" translatable="true">Küldés</string>
+    <string name="cometchat_submit" translatable="true">beküldés</string>
+    <string name="cometchat_add" translatable="true">Hozzáadás</string>
+    <string name="cometchat_last_seen_a_min_ago" translatable="true">egy perce</string>
+
+    <!-- Plurals -->
+    <plurals name="cometchat_last_seen_minutes_ago" translatable="true">
+        <item quantity="one" translatable="true">%d perce</item>
+        <item quantity="other" translatable="true">%d perce</item>
+    </plurals>
+    <plurals name="cometchat_last_seen_hours_ago" translatable="true">
+        <item quantity="one" translatable="true">%d órája</item>
+        <item quantity="other" translatable="true">%d órája</item>
+    </plurals>
+
+    <string name="cometchat_meeting_initiated_by_you" translatable="true">%s csoporthívást indított</string>
+    <string name="cometchat_meeting_initiated_by_others" translatable="true">%s csoporthívást indított</string>
+    <string name="cometchat_edited" translatable="true">Szerkesztve</string>
+    <string name="cometchat_incoming_call_accept" translatable="true">Elfogadás</string>
+    <string name="cometchat_incoming_call_decline" translatable="true">Elutasítás</string>
+    <string name="cometchat_incoming_call_type" translatable="true">Bejövő %s hívás</string>
+    <string name="cometchat_kick">Kirúg</string>
+    <string name="cometchat_open_document_to_edit_content_together">Dokumentum megnyitása a tartalom közös szerkesztéséhez</string>
+    <string name="cometchat_open_document">Dokumentum megnyitása</string>
+    <string name="cometchat_open_whiteboard_to_edit_content_together">Fehértábla megnyitása a tartalom közös szerkesztéséhez</string>
+    <string name="cometchat_open_whiteboard">Fehértábla megnyitása</string>
+    <string name="cometchat_video_call">Videóhívás</string>
+    <string name="cometchat_audio_call">Hanghívás</string>
+    <string name="cometchat_incoming_call_audio">hang</string>
+    <string name="cometchat_incoming_call_video">videó</string>
+    <string name="cometchat_permission_required">Engedély Szükséges</string>
+    <string name="cometchat_microphone_permission_warning">A mikrofon engedélye szükséges a hangrögzítéshez.</string>
+    <string name="cometchat_camera_permission_warning">A kamera engedélye szükséges a fényképezéshez.</string>
+    <string name="cometchat_storage_permission_warning">A tárhely engedélye szükséges a fájlok eléréséhez.</string>
+    <string name="cometchat_cancel_button">Mégse</string>
+    <string name="cometchat_settings_button">Beállítások</string>
+    <string name="cometchat_moderation_block_message">Üzenetét moderálási irányelvek miatt blokkolták.</string>
+    <string name="cometchat_no_conversations_history_title">Nincs beszélgetési előzmény</string>
+    <string name="cometchat_ask_anything">Kérdezz bármit</string>
+    <string name="cometchat_something_went_wrong_try_again">Valami hiba történt nálunk. Kérjük, próbálja újra</string>
+    <string name="cometchat_no_conversations_history_subtitle">Kezdje el a csevegést a \'Új csevegés\' gombra kattintva</string>
+    <string name="cometchat_new_chat">Új csevegés</string>
+    <string name="cometchat_chat_history">Chat előzményei</string>
+    <string name="cometchat_messages">Üzenetek</string>
+    <string name="cometchat_menu">Menü</string>
+    <string name="cometchat_menu_search">Keresés</string>
+    <string name="cometchat_menu_conversation_summary">Beszélgetés összefoglalója</string>
+    <string name="cometchat_see_more">Tovább</string>
+    <string name="cometchat_no_results">Nincsenek eredmények</string>
+    <string name="cometchat_no_matches_found">Nem találtunk egyezéseket. Kérjük, próbáljon meg más keresőszót.</string>
+    <string name="cometchat_start_your_search">Kezdje el a keresést</string>
+    <string name="cometchat_search_for_conversations_or_messages">Keresés beszélgetések vagy üzenetek között a fenti kulcsszó beírásával.</string>
+    <string name="cometchat_unread" translatable="true">Olvasatlan</string>
+    <string name="cometchat_photos" translatable="true">Fotók</string>
+    <string name="cometchat_videos" translatable="true">Videók</string>
+    <string name="cometchat_audio" translatable="true">Audió</string>
+    <string name="cometchat_documents" translatable="true">Dokumentumok</string>
+    <string name="cometchat_links" translatable="true">Hivatkozások</string>
+    <string name="cometchat_details" translatable="true">Részletek</string>
+    <string name="cometchat_report">Jelentés</string>
+    <string name="cometchat_report_a_message">Üzenet jelentése</string>
+    <string name="cometchat_report_message_title">Üzenet jelentése</string>
+    <string name="cometchat_report_message_description">Jelentse ezt a csevegést, ha az sérti a közösségi irányelveinket. Nem értesítjük azt a fiókot, amelyet bejelentett.</string>
+    <string name="cometchat_report_reason_label">Indok</string>
+    <string name="cometchat_report_optional_label">(Nem kötelező)</string>
+    <string name="cometchat_report_remark_hint">Adjon meg további információt a jelentéséhez…</string>
+    <string name="cometchat_report_button_report">Jelentés</string>
+    <string name="cometchat_report_success_message">Üzenet jelentve</string>
+    <string name="cometchat_report_error_message">A jelentés sikertelen</string>
+    <string name="cometchat_something_went_wrong_please_check_and_try_again">Hiba történt. Kérjük, ellenőrizze és próbálja újra.</string>
+    <string name="cometchat_unable_to_flag_message">Nem sikerült megjelölni az üzenetet</string>
+    <string name="cometchat_flag_message_success">Üzenet jelentve</string>
+    <string name="cometchat_flag_reason_spam" translatable="true">Spam / Nem kívánt tartalom</string>
+    <string name="cometchat_flag_reason_sexual" translatable="true">Szexuális tartalom</string>
+    <string name="cometchat_flag_reason_harassment" translatable="true">Zaklatás / Zaklatás</string>
+    <string name="cometchat_notify_everyone_in_this_group">Mindenkit értesíteni ebben a csoportban</string>
+    <string name="cometchat_notify_all" translatable="true">mindenkit</string>
+
+</resources>

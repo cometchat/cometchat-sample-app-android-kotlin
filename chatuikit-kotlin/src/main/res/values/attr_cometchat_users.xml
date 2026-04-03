@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatUsers">
+        <attr name="cometchatUsersStyle" format="reference" />
+        <attr name="cometchatUsersBackgroundColor" format="color" />
+        <attr name="cometchatUsersTitleTextColor" format="color" />
+        <attr name="cometchatUsersTitleTextAppearance" format="reference" />
+
+        <attr name="cometchatUsersStrokeWidth" format="dimension" />
+        <attr name="cometchatUsersStrokeColor" format="color" />
+        <attr name="cometchatUsersCornerRadius" format="dimension" />
+
+        <attr name="cometchatUsersBackIcon" format="reference" />
+        <attr name="cometchatUsersBackIconTint" format="color" />
+        <attr name="cometchatUsersSeparatorColor" format="color" />
+
+        <attr name="cometchatUsersDiscardSelectionIcon" format="reference" />
+        <attr name="cometchatUsersDiscardSelectionIconTint" format="color" />
+        <attr name="cometchatUsersSubmitSelectionIcon" format="reference" />
+        <attr name="cometchatUsersSubmitSelectionIconTint" format="color" />
+
+        <attr name="cometchatUsersSearchInputEndIcon" format="reference" />
+        <attr name="cometchatUsersSearchInputEndIconTint" format="color" />
+
+        <attr name="cometchatUsersSearchInputStrokeWidth" format="dimension" />
+        <attr name="cometchatUsersSearchInputStrokeColor" format="color" />
+        <attr name="cometchatUsersSearchInputCornerRadius" format="dimension" />
+        <attr name="cometchatUsersSearchInputBackgroundColor" format="color" />
+        <attr name="cometchatUsersSearchInputTextAppearance" format="reference" />
+        <attr name="cometchatUsersSearchInputTextColor" format="color" />
+        <attr name="cometchatUsersSearchInputPlaceHolderTextAppearance" format="reference" />
+        <attr name="cometchatUsersSearchInputPlaceHolderTextColor" format="color" />
+        <attr name="cometchatUsersSearchInputIcon" format="reference" />
+        <attr name="cometchatUsersSearchInputIconTint" format="color" />
+
+        <attr name="cometchatUsersStickyTitleColor" format="color" />
+        <attr name="cometchatUsersStickyTitleAppearance" format="reference" />
+        <attr name="cometchatUsersStickyTitleBackgroundColor" format="color" />
+
+        <attr name="cometchatUsersAvatarStyle" format="reference" />
+        <attr name="cometchatUsersItemTitleTextAppearance" format="reference" />
+        <attr name="cometchatUsersItemTitleTextColor" format="color" />
+        <attr name="cometchatUsersItemBackgroundColor" format="color" />
+        <attr name="cometchatUsersStatusIndicator" format="reference" />
+        <attr name="cometchatUsersItemSelectedBackgroundColor" format="color" />
+
+        <attr name="cometchatUsersCheckBoxStrokeWidth" format="dimension" />
+        <attr name="cometchatUsersCheckBoxCornerRadius" format="dimension" />
+        <attr name="cometchatUsersCheckBoxStrokeColor" format="color" />
+        <attr name="cometchatUsersCheckBoxBackgroundColor" format="color" />
+        <attr name="cometchatUsersCheckBoxCheckedBackgroundColor" format="color" />
+        <attr name="cometchatUsersCheckBoxSelectIcon" format="reference" />
+        <attr name="cometchatUsersCheckBoxSelectIconTint" format="color" />
+
+        <attr name="cometchatUsersEmptyStateTextAppearance" format="reference" />
+        <attr name="cometchatUsersEmptyStateTextColor" format="color" />
+        <attr name="cometchatUsersEmptyStateSubTitleTextAppearance" format="reference" />
+        <attr name="cometchatUsersEmptyStateSubtitleTextColor" format="color" />
+
+        <attr name="cometchatUsersErrorStateTextAppearance" format="reference" />
+        <attr name="cometchatUsersErrorStateTextColor" format="color" />
+        <attr name="cometchatUsersErrorStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatUsersErrorStateSubtitleColor" format="color" />
+
+        <attr name="cometchatUsersRetryButtonTextColor" format="color" />
+        <attr name="cometchatUsersRetryButtonTextAppearance" format="reference" />
+        <attr name="cometchatUsersRetryButtonBackgroundColor" format="color" />
+        <attr name="cometchatUsersRetryButtonStrokeColor" format="color" />
+        <attr name="cometchatUsersRetryButtonStrokeWidth" format="dimension" />
+        <attr name="cometchatUsersRetryButtonCornerRadius" format="dimension" />
+
+    </declare-styleable>
+</resources>

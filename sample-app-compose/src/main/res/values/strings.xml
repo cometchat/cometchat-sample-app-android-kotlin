@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CometChat Sample</string>
+    
+    <!-- Common -->
+    <string name="error_title">Error</string>
+    <string name="error_sdk_init_failed">Failed to initialize CometChat SDK</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="app_ok">OK</string>
+    
+    <!-- Login Screen -->
+    <string name="app_login">Login</string>
+    <string name="app_choose_sample_user">Choose a Sample User</string>
+    <string name="app_or">Or</string>
+    <string name="app_enter_your_uid">Enter Your UID</string>
+    <string name="app_enter_uid">Enter UID</string>
+    <string name="app_continue">Continue</string>
+    <string name="app_change">Change</string>
+    <string name="app_app_credentials">App Credentials</string>
+    
+    <!-- App Credentials Screen -->
+    <string name="app_credentials_title">App Credentials</string>
+    <string name="app_credentials_subtitle">Enter your CometChat credentials</string>
+    <string name="app_select_region">Select Region</string>
+    <string name="app_app_id">App ID</string>
+    <string name="app_enter_app_id">Enter App ID</string>
+    <string name="app_auth_key">Auth Key</string>
+    <string name="app_enter_auth_key">Enter Auth Key</string>
+
+    <!-- Create Group -->
+    <string name="app_new_group">New Group</string>
+    <string name="app_group_type">Type</string>
+    <string name="app_group_name">Name</string>
+    <string name="app_group_hint_name">Enter the group name</string>
+    <string name="app_password">Password</string>
+    <string name="app_hint_enter_the_password">Enter the Password</string>
+    <string name="app_btn_create_group">Create Group</string>
+    <string name="app_type_public">Public</string>
+    <string name="app_type_private">Private</string>
+    <string name="app_type_protected">Protected</string>
+    <string name="app_something_went_wrong">Something went wrong. Please try again.</string>
+
+    <!-- Join Group -->
+    <string name="app_join_group">Join group</string>
+    <string name="app_enter_the_password">Enter the Password</string>
+    <string name="app_member">Member</string>
+    <string name="app_members">Members</string>
+    
+    <!-- User Menu -->
+    <string name="app_create_conversation">Create conversation</string>
+    <string name="app_logout">Logout</string>
+    
+    <!-- Home Screen -->
+    <string name="tab_chats">Chats</string>
+    <string name="tab_calls">Calls</string>
+    <string name="tab_users">Users</string>
+    <string name="tab_groups">Groups</string>
+    
+    <!-- New Chat Screen -->
+    <string name="new_chat">New Chat</string>
+    <string name="content_desc_back">Back</string>
+    <string name="back">Back</string>
+    
+    <!-- Logout -->
+    <string name="logout_confirmation_title">Logout</string>
+    <string name="logout_confirmation_message">Are you sure you want to logout?</string>
+    
+    <!-- Messages Screen -->
+    <string name="thread">Thread</string>
+    <string name="messages">Messages</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">You can\'t send message to this group because you\'re no longer a member.</string>
+    <string name="unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
+    <string name="app_unblock_user" translatable="true">Unblock User</string>
+    
+    <!-- Group Details -->
+    <string name="group_details">Group Details</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="leave_group_confirmation">Are you sure you want to leave this group?</string>
+    <string name="leave">Leave</string>
+    <string name="members">Members</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="delete_group_confirmation">Are you sure you want to delete this group? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_and_exit">Delete and Exit</string>
+    <string name="add_members">Add Members</string>
+    
+    <!-- User Details -->
+    <string name="user_details">User Info</string>
+    <string name="message">Message</string>
+    <string name="block_user">Block</string>
+    <string name="unblock_user">Unblock</string>
+    <string name="block_user_title">Block User</string>
+    <string name="block_user_message">Are you sure you want to block this user?</string>
+    <string name="unblock_user_title">Unblock User</string>
+    <string name="unblock_user_message">Are you sure you want to unblock this user?</string>
+    <string name="block">Block</string>
+    <string name="unblock">Unblock</string>
+    <string name="blocked">Blocked</string>
+    <string name="you_have_blocked_this_user">You have blocked this user</string>
+    <string name="has_blocked_you">has blocked you</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    
+    <!-- Details Screens -->
+    <string name="voice">Voice</string>
+    <string name="video">Video</string>
+    <string name="delete_chat">Delete Chat</string>
+    <string name="delete_chat_title">Delete Chat</string>
+    <string name="delete_chat_message">Are you sure you want to delete this chat? This action cannot be undone.</string>
+    <string name="view_members">View Members</string>
+    <string name="banned_members">Banned Members</string>
+    <string name="no_banned_members">No Banned Members</string>
+    <string name="no_banned_members_subtitle">There are no banned members in this group</string>
+    <string name="selected">Selected</string>
+    <string name="no_longer_part_of_group">You are no longer part of this group</string>
+    
+    <!-- Call Details Screen -->
+    <string name="call_details">Call Details</string>
+    <string name="call_outgoing">Outgoing</string>
+    <string name="call_incoming">Incoming</string>
+    <string name="call_missed">Missed</string>
+    <string name="no_recordings_found">No Recordings Found</string>
+    <string name="tab_history">History</string>
+    <string name="tab_participants">Participants</string>
+    <string name="tab_recordings">Recordings</string>
+</resources>

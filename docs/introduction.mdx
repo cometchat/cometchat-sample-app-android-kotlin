@@ -1,0 +1,108 @@
+---
+title: Introduction
+description: "CometChat Android UI Kit - Pre-built chat components for Android applications"
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="CometChat UI Kit"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="CometChat UI Kit"
+/>
+
+## What is CometChat UI Kit?
+
+CometChat Android UI Kit provides ready-to-use chat UI components for integrating messaging functionality into Android applications. Built on top of the CometChat SDK, it offers a complete set of customizable components for conversations, messages, users, groups, and calls.
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running with CometChat UI Kit in minutes
+  </Card>
+  <Card
+    title="Components"
+    icon="puzzle-piece"
+    href="/components/overview"
+  >
+    Explore all available UI components
+  </Card>
+  <Card
+    title="Customization"
+    icon="paintbrush"
+    href="/components/conversations/conversations#style"
+  >
+    Learn how to style and customize components
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference"
+  >
+    Detailed API documentation
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<AccordionGroup>
+  <Accordion title="One-to-one and Group Messaging">
+    Full support for private conversations and group chats with real-time message delivery.
+  </Accordion>
+  <Accordion title="Voice and Video Calling">
+    Integrated calling components for seamless audio and video communication.
+  </Accordion>
+  <Accordion title="Typing Indicators & Read Receipts">
+    Real-time feedback showing when users are typing and when messages are read.
+  </Accordion>
+  <Accordion title="User Presence">
+    Online/offline status indicators for all users.
+  </Accordion>
+  <Accordion title="AI-Powered Features">
+    Smart replies, conversation summaries, and AI-assisted messaging.
+  </Accordion>
+  <Accordion title="Multi-language Support">
+    Localization support for 18+ languages out of the box.
+  </Accordion>
+</AccordionGroup>
+
+## Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| Min SDK | 24 (Android 7.0) |
+| Target SDK | 34 (Android 14) |
+| Java | 8+ |
+| Kotlin | 1.9+ |
+
+## Architecture
+
+The UI Kit follows the MVVM (Model-View-ViewModel) architecture pattern:
+
+- **View Components** - Custom Views extending `MaterialCardView`
+- **ViewModels** - Android ViewModel with LiveData for state management
+- **Adapters** - RecyclerView adapters for list-based components
+- **Event System** - Listener patterns for component communication
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    UI Components                     │
+│  (CometChatConversations, CometChatMessageList...)  │
+└─────────────────────┬───────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────┐
+│                    ViewModels                        │
+│         (LiveData, State Management)                 │
+└─────────────────────┬───────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────┐
+│                  CometChat SDK                       │
+│            (Real-time Messaging)                     │
+└─────────────────────────────────────────────────────┘
+```

@@ -1,0 +1,219 @@
+---
+title: "Getting Started With CometChat Android UI Kit"
+sidebarTitle: "Integration"
+description: "Install, configure, and launch the CometChat Android UI Kit in your app — choose Kotlin (XML Views) or Jetpack Compose."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` v5.x |
+| Jetpack Compose | `com.cometchat:chat-uikit-compose` v5.x |
+| Init | `CometChatUIKit.init(context, UIKitSettings, callback)` — must resolve before `login()` |
+| Login | `CometChatUIKit.login("UID", callback)` — must resolve before rendering components |
+| Order | `init()` → `login()` → render. Breaking this order = blank screen |
+| Auth Key | Dev/testing only. Use Auth Token in production |
+| Theme | Set `CometChatTheme.DayNight` as parent theme in `themes.xml` |
+| Calling | Optional. Add `com.cometchat:calls-sdk-android` to enable voice/video |
+| Min SDK | Android 7.0 (API 24) |
+
+</Accordion>
+
+This guide walks you through adding CometChat to an Android app. By the end you'll have a working chat UI.
+
+<Frame>
+  <img src="/images/d2559907-intro_android_screens-3e86359342605c94dc912604de8f6617.png" />
+</Frame>
+
+---
+
+## Prerequisites
+
+You need three things from the [CometChat Dashboard](https://app.cometchat.com/):
+
+| Credential | Where to find it |
+| --- | --- |
+| App ID | Dashboard → Your App → Credentials |
+| Auth Key | Dashboard → Your App → Credentials |
+| Region | Dashboard → Your App → Credentials (e.g. `us`, `eu`, `in`) |
+
+You also need:
+- Android Studio installed
+- An Android emulator or physical device running Android 7.0 (API 24) or higher
+- Java 8 or higher
+- Gradle plugin 4.0.1 or later
+
+<Warning>
+Auth Key is for development only. In production, generate Auth Tokens server-side via the [REST API](https://api-explorer.cometchat.com/) and use [`loginWithAuthToken()`](/ui-kit/android/v6/methods#login-using-auth-token). Never ship Auth Keys in client code.
+</Warning>
+
+---
+
+## Step 1 — Create an Android Project
+
+1. Open Android Studio and start a new project.
+2. Choose Empty Activity as the project template.
+3. Enter a project name and choose Kotlin as the language.
+4. Set minimum API level to 24 or higher.
+
+---
+
+## Step 2 — Install Dependencies
+
+Add the CometChat repository and dependencies to your Gradle configuration.
+
+### Add the CometChat Repository
+
+Add the CometChat Maven repository to your project-level `settings.gradle.kts` file:
+
+```kotlin settings.gradle.kts
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://dl.cloudsmith.io/public/cometchat/cometchat/maven/")
+    }
+}
+```
+
+### Add the CometChat Dependency
+
+Choose the module that matches your UI toolkit:
+
+<Tabs>
+<Tab title="Version Catalog (libs.versions.toml)">
+Inside `libs.versions.toml`, add the versions:
+
+```toml libs.versions.toml
+[versions]
+cometchat-ui-kit = "5.2.9"
+cometchat-calls-sdk = "4.3.3"
+```
+
+Define the libraries — pick the module for your UI toolkit:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```toml libs.versions.toml
+[libraries]
+cometchat-ui-kit = { module = "com.cometchat:chat-uikit-kotlin", version.ref = "cometchat-ui-kit" }
+cometchat-calls-sdk = { module = "com.cometchat:calls-sdk-android", version.ref = "cometchat-calls-sdk" }
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```toml libs.versions.toml
+[libraries]
+cometchat-ui-kit = { module = "com.cometchat:chat-uikit-compose", version.ref = "cometchat-ui-kit" }
+cometchat-calls-sdk = { module = "com.cometchat:calls-sdk-android", version.ref = "cometchat-calls-sdk" }
+```
+</Tab>
+</Tabs>
+
+Now, in your app-level `build.gradle.kts` file:
+
+```kotlin build.gradle.kts
+dependencies {
+    implementation(libs.cometchat.ui.kit)
+
+    // (Optional) Include if using voice/video calling features
+    implementation(libs.cometchat.calls.sdk)
+}
+```
+
+</Tab>
+
+<Tab title="Gradle (build.gradle.kts)">
+Open the app-level `build.gradle.kts` file and add the dependency for your chosen UI toolkit:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-kotlin:5.2.9")
+
+    // (Optional) Include if using voice/video calling features
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin build.gradle.kts
+dependencies {
+    implementation("com.cometchat:chat-uikit-compose:5.2.9")
+
+    // (Optional) Include if using voice/video calling features
+    implementation("com.cometchat:calls-sdk-android:4.3.3")
+}
+```
+</Tab>
+</Tabs>
+
+</Tab>
+</Tabs>
+
+### Add AndroidX Support
+
+The Jetifier tool helps migrate legacy support libraries to AndroidX. Open `gradle.properties` and verify this line is present:
+
+```properties gradle.properties
+android.enableJetifier=true
+```
+
+---
+
+## Choose Your UI Toolkit
+
+The remaining integration steps (initialization, login, theming, and rendering components) differ depending on your chosen UI toolkit. Follow the guide that matches your project:
+
+<CardGroup cols={2}>
+  <Card title="Kotlin (XML Views)" icon="code" href="/ui-kit/android/v6/getting-started-kotlin">
+    Step-by-step integration using `chatuikit-kotlin` with XML layouts and ViewBinding
+  </Card>
+  <Card title="Jetpack Compose" icon="wand-magic-sparkles" href="/ui-kit/android/v6/getting-started-jetpack">
+    Step-by-step integration using `chatuikit-jetpack` with Composables
+  </Card>
+</CardGroup>
+
+---
+
+## Build Your Own Chat Experience
+
+Need full control over the UI? Use individual components, customize themes, and wire up your own layouts.
+
+<CardGroup cols={2}>
+  <Card title="Sample App" icon="code" href="https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin">
+    Working reference app to compare against
+  </Card>
+  <Card title="Components" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    All prebuilt UI elements with customization options
+  </Card>
+  <Card title="Core Features" icon="comments" href="/ui-kit/android/v6/core-features">
+    Messaging, real-time updates, and other capabilities
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Colors, fonts, dark mode, and custom styling
+  </Card>
+</CardGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Browse all prebuilt UI components
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles
+  </Card>
+  <Card title="Core Features" icon="comments" href="/ui-kit/android/v6/core-features">
+    Chat features included out of the box
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/ui-kit/android/v6/troubleshooting">
+    Common issues and fixes
+  </Card>
+</CardGroup>

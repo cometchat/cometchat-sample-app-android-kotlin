@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    User Details Activity Layout
+    
+    This layout displays user profile information and actions:
+    - Custom toolbar with back icon and title
+    - User avatar, name, and online/offline status
+    - Voice and Video call cards
+    - Block/unblock user option
+    - Delete chat option
+    
+    Matches master-app-java UI parity.
+    Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.6, 10.7
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/cometchatBackgroundColor1"
     android:orientation="vertical"
-    tools:context="ui.activity.UserDetailsActivity">
+    android:fitsSystemWindows="true"
+    android:background="?attr/cometchatBackgroundColor1"
+    tools:context=".ui.users.UserDetailsActivity">
 
+    <!-- Custom Toolbar Layout -->
     <LinearLayout
         android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
@@ -36,17 +51,16 @@
                 android:focusable="true"
                 android:src="@drawable/cometchat_ic_back"
                 android:visibility="visible"
-                app:tint="?attr/cometchatIconTintPrimary"
-                tools:ignore="ContentDescription" />
+                android:contentDescription="@string/back"
+                app:tint="?attr/cometchatIconTintPrimary" />
 
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/app_user_info"
+                android:text="@string/user_details"
                 android:textAppearance="?attr/cometchatTextAppearanceHeading2Bold"
-                android:textColor="?attr/cometchatTextColorPrimary"
-                tools:visibility="visible" />
+                android:textColor="?attr/cometchatTextColorPrimary" />
 
         </LinearLayout>
 
@@ -58,6 +72,7 @@
 
     </LinearLayout>
 
+    <!-- Info Message Banner (for blocked user warning) -->
     <LinearLayout
         android:id="@+id/info_message"
         android:layout_width="match_parent"
@@ -65,14 +80,16 @@
         android:background="?attr/cometchatWarningColor"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/cometchat_padding_1">
+        android:padding="@dimen/cometchat_padding_1"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <ImageView
             android:layout_width="@dimen/cometchat_24dp"
             android:layout_height="@dimen/cometchat_24dp"
             android:layout_marginStart="@dimen/cometchat_margin_2"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_info"
+            android:src="@drawable/cometchat_ic_info"
             app:tint="?attr/cometchatTextColorPrimary" />
 
         <TextView
@@ -80,11 +97,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/cometchat_margin_4"
+            android:text="@string/you_have_blocked_this_user"
             android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
             android:textColor="?attr/cometchatTextColorPrimary" />
 
     </LinearLayout>
 
+    <!-- User Info Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -93,33 +112,38 @@
         android:paddingStart="@dimen/cometchat_padding_4"
         android:paddingEnd="@dimen/cometchat_padding_4">
 
-        <com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
-            android:id="@+id/avatar"
-            style="@style/DetailsAvatarStyle"
+        <!-- User Avatar -->
+        <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+            android:id="@+id/userAvatar"
             android:layout_width="@dimen/cometchat_120dp"
             android:layout_height="@dimen/cometchat_120dp"
             android:layout_gravity="center"
             app:cardCornerRadius="@dimen/cometchat_radius_max" />
 
+        <!-- User Name -->
         <TextView
-            android:id="@+id/tv_title"
+            android:id="@+id/userName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/cometchat_margin_3"
             android:textAlignment="center"
             android:textAppearance="?attr/cometchatTextAppearanceHeading2Medium"
-            android:textColor="?attr/cometchatTextColorPrimary" />
+            android:textColor="?attr/cometchatTextColorPrimary"
+            tools:text="John Doe" />
 
+        <!-- User Status (Online/Offline) -->
         <TextView
-            android:id="@+id/tv_subtitle"
+            android:id="@+id/userStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textAlignment="center"
             android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
-            android:textColor="?attr/cometchatTextColorSecondary" />
+            android:textColor="?attr/cometchatTextColorSecondary"
+            tools:text="Online" />
 
+        <!-- Voice/Video Call Cards -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -127,6 +151,7 @@
             android:gravity="center"
             android:orientation="horizontal">
 
+            <!-- Voice Call Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_voice_call"
                 android:layout_width="0dp"
@@ -142,7 +167,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="@string/app_voice"
+                    android:text="@string/voice"
                     android:textAppearance="?attr/cometchatTextAppearanceButtonRegular"
                     android:textColor="?attr/cometchatTextColorSecondary"
                     app:drawableTint="?attr/cometchatIconTintHighlight"
@@ -150,6 +175,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Video Call Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_video_call"
                 android:layout_width="0dp"
@@ -165,7 +191,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="@string/app_video"
+                    android:text="@string/video"
                     android:textAppearance="?attr/cometchatTextAppearanceButtonRegular"
                     android:textColor="?attr/cometchatTextColorSecondary"
                     app:drawableTint="?attr/cometchatIconTintHighlight"
@@ -177,12 +203,14 @@
 
     </LinearLayout>
 
+    <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/cometchat_1dp"
         android:layout_marginTop="@dimen/cometchat_margin_5"
         android:background="?attr/cometchatStrokeColorLight" />
 
+    <!-- Block User Option -->
     <TextView
         android:id="@+id/tv_block"
         android:layout_width="wrap_content"
@@ -193,11 +221,13 @@
         android:paddingTop="@dimen/cometchat_margin_3"
         android:paddingEnd="@dimen/cometchat_margin_5"
         android:paddingBottom="@dimen/cometchat_margin_3"
-        android:text="@string/app_block"
+        android:text="@string/block_user"
         android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
         android:textColor="?attr/cometchatErrorColor"
-        app:drawableLeftCompat="@drawable/ic_leave_group" />
+        app:drawableLeftCompat="@drawable/cometchat_ic_block"
+        app:drawableTint="?attr/cometchatErrorColor" />
 
+    <!-- Delete Chat Option -->
     <TextView
         android:id="@+id/tv_delete_chat"
         android:layout_width="wrap_content"
@@ -208,9 +238,10 @@
         android:paddingTop="@dimen/cometchat_margin_3"
         android:paddingEnd="@dimen/cometchat_margin_5"
         android:paddingBottom="@dimen/cometchat_margin_3"
-        android:text="@string/app_delete"
+        android:text="@string/delete_chat"
         android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
         android:textColor="?attr/cometchatErrorColor"
-        app:drawableLeftCompat="@drawable/ic_delete" />
+        app:drawableLeftCompat="@drawable/cometchat_ic_delete"
+        app:drawableTint="?attr/cometchatErrorColor" />
 
 </LinearLayout>

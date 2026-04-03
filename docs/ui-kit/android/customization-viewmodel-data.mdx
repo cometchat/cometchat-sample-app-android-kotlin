@@ -1,0 +1,339 @@
+---
+title: "ViewModel & Data"
+description: "Access and configure the ViewModel layer to customize data fetching, state management, and list operations."
+---
+
+Each component's ViewModel lives in `chatuikit-core` and manages data fetching, state transitions, real-time listeners, and list operations via `StateFlow`. The same ViewModel is shared by both Kotlin XML Views and Jetpack Compose modules.
+
+---
+
+## Creating and Providing a ViewModel
+
+By default, each component creates its own ViewModel internally. To customize behavior, create the ViewModel externally using the factory and pass it to the component.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// 1. Create the factory (optionally with a custom repository)
+val factory = CometChatConversationsViewModelFactory()
+
+// 2. Create the ViewModel using ViewModelProvider
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatConversationsViewModel::class.java)
+
+// 3. Configure the ViewModel before passing it
+viewModel.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder()
+        .setLimit(20)
+        .withTags(true)
+)
+
+// 4. Pass it to the component
+val conversations = findViewById<CometChatConversations>(R.id.conversations)
+conversations.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+// 1. Create the factory (optionally with a custom repository)
+val factory = CometChatConversationsViewModelFactory()
+
+// 2. Create the ViewModel using Compose's viewModel()
+val viewModel: CometChatConversationsViewModel = viewModel(factory = factory)
+
+// 3. Pass it to the component
+CometChatConversations(
+    conversationsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+This pattern applies to all components — `CometChatUsers`, `CometChatGroups`, `CometChatMessageList`, `CometChatCallLogs`, etc. Each has a corresponding factory class.
+
+---
+
+## State Observation
+
+ViewModels expose state via Kotlin `StateFlow` (not LiveData). The key state flows are:
+
+| StateFlow | Type | Description |
+| --- | --- | --- |
+| `uiState` | `StateFlow<UIState>` | Current screen state: `Loading`, `Empty`, `Error(exception)`, `Content(list)` |
+| `conversations` | `StateFlow<List<Conversation>>` | The current list of conversations |
+| `typingIndicators` | `StateFlow<Map<String, TypingIndicator>>` | Active typing indicators by conversation ID |
+| `deleteState` | `StateFlow<DeleteState>` | Delete operation state: `Idle`, `InProgress`, `Success`, `Failure(exception)` |
+| `playSoundEvent` | `SharedFlow<Boolean>` | Emits when a message sound should play |
+| `scrollToTopEvent` | `SharedFlow<Unit>` | Emits when the list should scroll to top |
+
+### UIState
+
+```kotlin lines
+sealed class UIState {
+    object Loading : UIState()
+    object Empty : UIState()
+    data class Error(val exception: CometChatException) : UIState()
+    data class Content(val conversations: List<Conversation>) : UIState()
+}
+```
+
+### Observing State
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Collect in a lifecycle-aware scope
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.uiState.collect { state ->
+            when (state) {
+                is UIState.Loading -> { /* show loading */ }
+                is UIState.Empty -> { /* show empty */ }
+                is UIState.Error -> { /* show error: state.exception */ }
+                is UIState.Content -> { /* data ready: state.conversations */ }
+            }
+        }
+    }
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val uiState by viewModel.uiState.collectAsState()
+
+when (uiState) {
+    is UIState.Loading -> CircularProgressIndicator()
+    is UIState.Empty -> Text("No conversations")
+    is UIState.Error -> Text("Error: ${(uiState as UIState.Error).exception.message}")
+    is UIState.Content -> { /* render list */ }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Configuring Data Fetching
+
+Pass a custom `ConversationsRequestBuilder` to control what data the component fetches. You can set it during ViewModel creation or directly on the component:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Option 1: Set on the component directly
+conversations.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder()
+        .setLimit(20)
+        .setTags(listOf("important", "pinned"))
+        .withTags(true)
+)
+
+// Option 2: Set on the ViewModel after creation
+viewModel.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder()
+        .setLimit(20)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    conversationsRequestBuilder = ConversationsRequest.ConversationsRequestBuilder()
+        .setLimit(20)
+        .setTags(listOf("important", "pinned"))
+        .withTags(true)
+)
+```
+
+</Tab>
+</Tabs>
+
+<Warning>
+Pass the builder object, not the result of `.build()`. The component calls `.build()` internally.
+</Warning>
+
+---
+
+## ListOperations API
+
+All list-based ViewModels implement `ListOperations<T>`, giving you a consistent API to manipulate list data:
+
+```kotlin lines
+// Add items
+viewModel.addItem(conversation)
+viewModel.addItems(conversations)
+
+// Remove items
+viewModel.removeItem(conversation)
+viewModel.removeItemAt(0)
+
+// Update items
+viewModel.updateItem(updatedConversation) { 
+    it.conversationId == updatedConversation.conversationId 
+}
+
+// Move to top
+viewModel.moveItemToTop(importantConversation)
+
+// Query
+val items = viewModel.getItems()
+val count = viewModel.getItemCount()
+val first = viewModel.getItemAt(0)
+
+// Clear
+viewModel.clearItems()
+```
+
+### Batch Operations
+
+Perform multiple operations in a single emission — critical for performance with rapid updates:
+
+```kotlin lines
+viewModel.batch {
+    add(newConversation1)
+    add(newConversation2)
+    remove(oldConversation)
+    moveToTop(pinnedConversation)
+}
+// Only one StateFlow emission for all four operations
+```
+
+---
+
+## ViewModel Methods
+
+| Method | Description |
+| --- | --- |
+| `fetchConversations()` | Fetch the next page (pagination) |
+| `refreshList()` | Clear and re-fetch from the server (silent refresh) |
+| `deleteConversation(conversation)` | Delete a conversation via the SDK |
+| `resetDeleteState()` | Reset delete state to `Idle` |
+| `setConversationsRequestBuilder(builder)` | Set a custom request builder for filtering |
+| `setDisableReceipt(disable)` | Disable read receipts |
+| `setDisableSoundForMessages(disable)` | Disable message sounds |
+| `setCustomSoundForMessage(rawRes)` | Set a custom sound resource |
+
+---
+
+## Providing a Custom ViewModel
+
+Subclass the ViewModel to override behavior, then inject it:
+
+```kotlin lines
+class MyConversationsViewModel(
+    getConversationsUseCase: GetConversationsUseCase,
+    deleteConversationUseCase: DeleteConversationUseCase,
+    refreshConversationsUseCase: RefreshConversationsUseCase
+) : CometChatConversationsViewModel(
+    getConversationsUseCase,
+    deleteConversationUseCase,
+    refreshConversationsUseCase
+) {
+    // Override list operations to add custom behavior
+    override fun addItem(item: Conversation) {
+        // Example: filter out blocked users before adding
+        val blockedUser = item.conversationWith as? User
+        if (blockedUser?.isBlockedByMe == true) return
+        super.addItem(item)
+    }
+
+    override fun moveItemToTop(item: Conversation) {
+        // Example: log when a conversation is moved to top
+        Log.d("MyVM", "Moving ${item.conversationId} to top")
+        super.moveItemToTop(item)
+    }
+}
+```
+
+Create it via the factory with a custom repository if needed:
+
+```kotlin lines
+val factory = CometChatConversationsViewModelFactory(
+    repository = MyCustomRepository()
+)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatConversationsViewModel::class.java)
+
+conversations.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+val viewModel = viewModel<CometChatConversationsViewModel>(factory = factory)
+
+CometChatConversations(
+    conversationsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Lifecycle Callbacks
+
+Intercept data loading events on the View:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnLoad { list ->
+    Log.d("Conversations", "Loaded ${list.size} conversations")
+}
+
+conversations.setOnEmpty {
+    Log.d("Conversations", "No conversations found")
+}
+
+conversations.setOnError { exception ->
+    Log.e("Conversations", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onLoad = { list ->
+        Log.d("Conversations", "Loaded ${list.size} conversations")
+    },
+    onEmpty = {
+        Log.d("Conversations", "No conversations found")
+    },
+    onError = { exception ->
+        Log.e("Conversations", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Related
+
+- [Customization Overview](/ui-kit/android/v6/customization-overview) — Architecture overview with repository and ListOperations details.
+- [Events & Callbacks](/ui-kit/android/v6/customization-events) — Handle click events and global UI Kit events.

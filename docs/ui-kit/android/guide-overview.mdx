@@ -1,0 +1,67 @@
+---
+title: "Overview"
+sidebarTitle: "Overview"
+description: "Index of task-oriented feature guides for the CometChat Android UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Purpose | Index of task-oriented feature guides for the Android UI Kit |
+| Sample app | [GitHub](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin) |
+| Components | [Components Overview](/ui-kit/android/v6/components-overview) |
+| Guides | [Block/Unblock](/ui-kit/android/v6/guide-block-unblock-user) · [Call Log Details](/ui-kit/android/v6/guide-call-log-details) · [Group Chat](/ui-kit/android/v6/guide-group-chat) · [Message Privately](/ui-kit/android/v6/guide-message-privately) · [New Chat](/ui-kit/android/v6/guide-new-chat) · [Search Messages](/ui-kit/android/v6/guide-search-messages) · [Threaded Messages](/ui-kit/android/v6/guide-threaded-messages) · [AI Agent](/ui-kit/android/v6/guide-ai-agent) · [Custom Text Formatter](/ui-kit/android/v6/custom-text-formatter-guide) · [Mentions Formatter](/ui-kit/android/v6/mentions-formatter-guide) · [ShortCut Formatter](/ui-kit/android/v6/shortcut-formatter-guide) |
+
+</Accordion>
+
+> This page indexes focused, task‑oriented feature guides for the Android UI Kit. Each guide shows how to implement a specific capability end‑to‑end using UIKit components. Guides include both **Kotlin (XML Views)** and **Jetpack Compose** examples where applicable.
+
+## When to Use These Guides
+
+Use these guides after completing the base [Getting Started](/ui-kit/android/v6/getting-started) setup. They help you layer additional UX without rewriting core chat flows.
+
+The CometChat Android UI Kit is available in two modules:
+
+| Module | Description |
+|:-------|:------------|
+| `chatuikit-kotlin` | Traditional XML-based Views for use with Activities and Fragments. |
+| `chatuikit-jetpack` | Jetpack Compose components for declarative UI. |
+
+## Guide Directory
+
+| Guide | Description |
+|:------|:------------|
+| [Block / Unblock User](/ui-kit/android/v6/guide-block-unblock-user) | Let users block or unblock others in 1:1 chats; hides composer and shows unblock prompt while preventing outgoing/incoming messages. |
+| [Call Log Details](/ui-kit/android/v6/guide-call-log-details) | Detailed call insights screen: metadata, participants, join/leave history, and recordings. |
+| [Group Management](/ui-kit/android/v6/guide-group-chat) | Create/join groups, view members, add / ban users, change scopes, transfer ownership. |
+| [Message Privately](/ui-kit/android/v6/guide-message-privately) | Launch a direct 1:1 chat from a profile/list; optionally send initial message to surface conversation. |
+| [New Chat](/ui-kit/android/v6/guide-new-chat) | Unified entry for starting new 1:1 or group chats with tabbed Users / Groups search + navigation. |
+| [Threaded Messages](/ui-kit/android/v6/guide-threaded-messages) | Threaded replies: open parent message context, list replies, compose with parent linkage. |
+| [Search Messages](/ui-kit/android/v6/guide-search-messages) | Full-text message search across conversations with result routing and navigation. |
+| [AI Agent](/ui-kit/android/v6/guide-ai-agent) | Build an AI-powered agent that responds to user messages using CometChat's AI features. |
+| [Custom Text Formatter](/ui-kit/android/v6/custom-text-formatter-guide) | Extend `CometChatTextFormatter` to build custom inline text patterns with tracking characters and suggestion lists. |
+| [Mentions Formatter](/ui-kit/android/v6/mentions-formatter-guide) | Format @mentions with styled tokens, suggestion lists, and click handling. |
+| [ShortCut Formatter](/ui-kit/android/v6/shortcut-formatter-guide) | Add shortcut text expansion to the message composer via the message-shortcuts extension. |
+
+Need another guide? Open a request via our [Support Portal](https://help.cometchat.com/hc/en-us/requests/new).
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Getting Started" icon="rocket" href="/ui-kit/android/v6/getting-started">
+    Set up the Android UI Kit
+  </Card>
+  <Card title="Components Overview" icon="puzzle-piece" href="/ui-kit/android/v6/components-overview">
+    Explore all UI components
+  </Card>
+  <Card title="Customization" icon="palette" href="/ui-kit/android/v6/theme-introduction">
+    Customize themes and styling
+  </Card>
+  <Card title="Events" icon="bolt" href="/ui-kit/android/v6/events">
+    Handle UI Kit events
+  </Card>
+</CardGroup>

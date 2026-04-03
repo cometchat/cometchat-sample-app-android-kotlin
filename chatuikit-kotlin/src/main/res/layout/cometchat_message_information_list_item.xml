@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/cometchat_padding_4"
+    android:paddingTop="@dimen/cometchat_padding_3"
+    android:paddingEnd="@dimen/cometchat_padding_4"
+    android:paddingBottom="@dimen/cometchat_padding_3">
+
+    <!-- Avatar -->
+    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+        android:id="@+id/ivAvatar"
+        android:layout_width="@dimen/cometchat_40dp"
+        android:layout_height="@dimen/cometchat_40dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/cometchat_margin_3"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- User Name -->
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
+            tools:text="John Doe" />
+
+        <!-- Read Section -->
+        <LinearLayout
+            android:id="@+id/readLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tvReadLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cometchat_read"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvReadTimestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                tools:text="12/3/2024, 10:30 AM" />
+
+        </LinearLayout>
+
+        <!-- Delivered Section -->
+        <LinearLayout
+            android:id="@+id/deliveredLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tvDeliveredLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cometchat_deliver"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvDeliveredTimestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+                tools:text="12/3/2024, 10:28 AM" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

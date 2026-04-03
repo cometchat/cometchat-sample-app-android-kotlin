@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/cometchat_padding_4"
+    android:paddingTop="@dimen/cometchat_padding_3"
+    android:paddingEnd="@dimen/cometchat_padding_4"
+    android:paddingBottom="@dimen/cometchat_padding_3"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Avatar -->
+    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+        android:id="@+id/suggestionItemAvatar"
+        android:layout_width="@dimen/cometchat_40dp"
+        android:layout_height="@dimen/cometchat_40dp"
+        android:layout_marginEnd="@dimen/cometchat_margin_3" />
+
+    <!-- Text content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Name/Title -->
+        <TextView
+            android:id="@+id/tvSuggestionItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="John Doe" />
+
+        <!-- Info text (optional) -->
+        <TextView
+            android:id="@+id/tvSuggestionItemInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
+            tools:text="Notify everyone in this group"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

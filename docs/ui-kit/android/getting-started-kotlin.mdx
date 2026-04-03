@@ -1,0 +1,231 @@
+---
+title: "Getting Started With Kotlin UI Kit"
+sidebarTitle: "Kotlin (XML Views)"
+description: "Step-by-step guide to integrate the CometChat Kotlin UI Kit with XML Views into your Android app."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Package | `com.cometchat:chat-uikit-kotlin` |
+| UI Layer | Kotlin + XML Views (View Binding) |
+| Init | `CometChatUIKit.init(context, UIKitSettings, callback)` — must resolve before `login()` |
+| Login | `CometChatUIKit.login("UID", callback)` — must resolve before rendering components |
+| Order | `init()` → `login()` → render. Breaking this order = blank screen |
+| Auth Key | Dev/testing only. Use Auth Token in production |
+| Calling | Optional. Add `com.cometchat:calls-sdk-android` to enable voice/video |
+| Min SDK | Android 9.0 (API 28) |
+
+</Accordion>
+
+This guide walks you through integrating the CometChat Kotlin UI Kit into an Android app using XML Views and View Binding. By the end you'll have a working chat UI.
+
+---
+
+## Prerequisites
+
+You need three things from the [CometChat Dashboard](https://app.cometchat.com/):
+
+| Credential | Where to find it |
+| --- | --- |
+| App ID | Dashboard → Your App → Credentials |
+| Auth Key | Dashboard → Your App → Credentials |
+| Region | Dashboard → Your App → Credentials (e.g. `us`, `eu`, `in`) |
+
+You also need:
+- Android Studio installed
+- An Android emulator or physical device running Android 9.0 (API 28) or higher
+- Kotlin configured in your project
+- Gradle plugin 8.0+ with Kotlin DSL
+
+<Warning>
+Auth Key is for development only. In production, generate Auth Tokens server-side via the [REST API](https://api-explorer.cometchat.com/) and use `loginWithAuthToken()`. Never ship Auth Keys in client code.
+</Warning>
+
+---
+
+## Step 1 — Create an Android Project
+
+1. Open Android Studio and start a new project.
+2. Choose Empty Activity as the project template.
+3. Select Kotlin as the language.
+4. Set minimum API level to 28 or higher.
+
+---
+
+## Step 2 — Install Dependencies
+
+### Add the CometChat Repository
+
+Add the CometChat Maven repository to your `settings.gradle.kts`:
+
+```kotlin settings.gradle.kts lines
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://dl.cloudsmith.io/public/cometchat/cometchat/maven/")
+    }
+}
+```
+
+### Add Dependencies
+
+
+Open your app-level `build.gradle.kts` and enable View Binding, then add the dependencies:
+
+```kotlin build.gradle.kts lines
+android {
+    // ...
+    buildFeatures {
+        viewBinding = true
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+    // CometChat Kotlin UI Kit
+    implementation("com.cometchat:chat-uikit-kotlin:latest")
+
+    // (Optional) Voice/video calling
+    implementation("com.cometchat:calls-sdk-android:latest")
+}
+```
+
+### Add AndroidX Support
+
+Verify this line is present in `gradle.properties`:
+
+```properties gradle.properties lines
+android.enableJetifier=true
+```
+
+---
+
+## Step 3 — Initialize and Login
+
+Create your `MainActivity.kt` with the CometChat initialization and login flow:
+
+```kotlin MainActivity.kt lines
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.UIKitSettings
+
+class MainActivity : AppCompatActivity() {
+
+    private val TAG = "MainActivity"
+
+    private val appID = "APP_ID"       // Replace with your App ID
+    private val region = "REGION"      // Replace with your App Region
+    private val authKey = "AUTH_KEY"   // Replace with your Auth Key
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        val uiKitSettings = UIKitSettings.UIKitSettingsBuilder()
+            .setRegion(region)
+            .setAppId(appID)
+            .setAuthKey(authKey)
+            .subscribePresenceForAllUsers()
+            .build()
+
+        CometChatUIKit.init(this, uiKitSettings, object : CometChat.CallbackListener<String?>() {
+            override fun onSuccess(s: String?) {
+                Log.d(TAG, "Initialization completed successfully")
+                loginUser()
+            }
+
+            override fun onError(e: CometChatException?) {
+                Log.e(TAG, "Initialization failed: ${e?.message}")
+            }
+        })
+    }
+
+    private fun loginUser() {
+        CometChatUIKit.login("cometchat-uid-1", object : CometChat.CallbackListener<User>() {
+            override fun onSuccess(user: User) {
+                Log.d(TAG, "Login successful: ${user.uid}")
+
+                // Navigate to your chat screen after login
+                // startActivity(Intent(this@MainActivity, ConversationActivity::class.java))
+            }
+
+            override fun onError(e: CometChatException) {
+                Log.e(TAG, "Login failed: ${e.message}")
+            }
+        })
+    }
+}
+```
+
+<Warning>
+`init()` must resolve before you call `login()`. Calling `login()` before init completes will fail silently.
+</Warning>
+
+---
+
+## Step 4 — Choose a Chat Experience
+
+Integrate a conversation view that suits your app's UX. Each option below includes a step-by-step guide.
+
+### Conversation List + Message View
+
+Sequential navigation — conversation list as the entry point, tap a conversation to open a full-screen message view.
+
+<Card title="Build Conversation List + Message View" href="/ui-kit/android/v6/conversation-message-view" icon="comments">
+  Step-by-step guide to build this layout with Kotlin XML Views
+</Card>
+
+---
+
+### One-to-One / Group Chat
+
+Single chat window — no sidebar. Loads a specific user or group chat directly. Ideal for support chat, direct messages, or notification-driven flows.
+
+<Card title="Build One-to-One / Group Chat" href="/ui-kit/android/v6/one-to-one-chat" icon="message">
+  Step-by-step guide to build this layout
+</Card>
+
+---
+
+### Tab-Based Chat
+
+Bottom navigation with tabs for Chats, Calls, Users, and Settings.
+
+<Card title="Build Tab-Based Chat" href="/ui-kit/android/v6/tab-based-chat" icon="table-columns">
+  Step-by-step guide to build this layout
+</Card>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components Overview" icon="grid-2" href="/ui-kit/android/v6/components-overview">
+    Browse all available UI Kit components
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles
+  </Card>
+  <Card title="Core Features" icon="comments" href="/ui-kit/android/v6/core-features">
+    Chat features included out of the box
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/ui-kit/android/v6/troubleshooting">
+    Common issues and fixes
+  </Card>
+</CardGroup>

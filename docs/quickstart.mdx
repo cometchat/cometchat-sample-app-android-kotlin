@@ -1,0 +1,137 @@
+---
+title: Quick Start
+description: "Get started with CometChat Android UI Kit"
+---
+
+## Installation
+
+<Steps>
+  <Step title="Add the dependency">
+    Add the CometChat UI Kit dependency to your app's `build.gradle`:
+
+    ```groovy
+    dependencies {
+        implementation 'com.cometchat:chat-uikit-android:5.2.9'
+    }
+    ```
+  </Step>
+  
+  <Step title="Initialize CometChat">
+    Initialize the SDK in your Application class:
+
+    <CodeGroup>
+    ```kotlin Kotlin
+    class MyApplication : Application() {
+        override fun onCreate() {
+            super.onCreate()
+            
+            val uiKitSettings = UIKitSettings.UIKitSettingsBuilder()
+                .setAppId("YOUR_APP_ID")
+                .setRegion("YOUR_REGION")
+                .setAuthKey("YOUR_AUTH_KEY")
+                .build()
+            
+            CometChatUIKit.init(this, uiKitSettings, object : CometChat.CallbackListener<String>() {
+                override fun onSuccess(s: String) {
+                    Log.d("UIKit", "Initialization successful")
+                }
+                
+                override fun onError(e: CometChatException) {
+                    Log.e("UIKit", "Initialization failed: ${e.message}")
+                }
+            })
+        }
+    }
+    ```
+
+    ```java Java
+    public class MyApplication extends Application {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            
+            UIKitSettings uiKitSettings = new UIKitSettings.UIKitSettingsBuilder()
+                .setAppId("YOUR_APP_ID")
+                .setRegion("YOUR_REGION")
+                .setAuthKey("YOUR_AUTH_KEY")
+                .build();
+            
+            CometChatUIKit.init(this, uiKitSettings, new CometChat.CallbackListener<String>() {
+                @Override
+                public void onSuccess(String s) {
+                    Log.d("UIKit", "Initialization successful");
+                }
+                
+                @Override
+                public void onError(CometChatException e) {
+                    Log.e("UIKit", "Initialization failed: " + e.getMessage());
+                }
+            });
+        }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Login a user">
+    Login a user before displaying any UI components:
+
+    <CodeGroup>
+    ```kotlin Kotlin
+    CometChatUIKit.login("USER_ID", object : CometChat.CallbackListener<User>() {
+        override fun onSuccess(user: User) {
+            Log.d("UIKit", "Login successful: ${user.name}")
+        }
+        
+        override fun onError(e: CometChatException) {
+            Log.e("UIKit", "Login failed: ${e.message}")
+        }
+    })
+    ```
+
+    ```java Java
+    CometChatUIKit.login("USER_ID", new CometChat.CallbackListener<User>() {
+        @Override
+        public void onSuccess(User user) {
+            Log.d("UIKit", "Login successful: " + user.getName());
+        }
+        
+        @Override
+        public void onError(CometChatException e) {
+            Log.e("UIKit", "Login failed: " + e.getMessage());
+        }
+    });
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Add a component">
+    Add a UI component to your layout:
+
+    ```xml
+    <com.cometchat.chatuikit.conversations.CometChatConversations
+        android:id="@+id/conversations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    ```
+  </Step>
+</Steps>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Conversations"
+    icon="comments"
+    href="/components/conversations/conversations"
+  >
+    Display a list of recent conversations
+  </Card>
+  <Card
+    title="Message List"
+    icon="message"
+    href="/components/messages/message-list"
+  >
+    Show messages in a conversation
+  </Card>
+</CardGroup>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/cometchat_padding_2"
+        android:paddingTop="@dimen/cometchat_padding_2"
+        android:paddingEnd="@dimen/cometchat_padding_2"
+        android:paddingBottom="@dimen/cometchat_padding_2">
+
+        <!-- Back Icon -->
+        <FrameLayout
+            android:id="@+id/messageHeaderBackIconLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivMessageHeaderBack"
+                android:layout_width="@dimen/cometchat_icon_size_10"
+                android:layout_height="@dimen/cometchat_icon_size_10"
+                android:padding="@dimen/cometchat_padding_2"
+                android:src="@drawable/cometchat_ic_back"
+                android:visibility="gone"
+                android:contentDescription="@string/cometchat_back"
+                tools:visibility="visible" />
+        </FrameLayout>
+
+        <!-- Avatar Layout -->
+        <FrameLayout
+            android:id="@+id/messageHeaderAvatarLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/messageHeaderBackIconLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+                android:id="@+id/messageHeaderAvatarView"
+                android:layout_width="@dimen/cometchat_avatar_size_medium"
+                android:layout_height="@dimen/cometchat_avatar_size_medium" />
+
+            <com.cometchat.uikit.kotlin.presentation.shared.statusindicator.CometChatStatusIndicator
+                android:id="@+id/messageHeaderStatusIndicatorView"
+                android:layout_width="@dimen/cometchat_status_indicator_size"
+                android:layout_height="@dimen/cometchat_status_indicator_size"
+                android:layout_gravity="bottom|end" />
+        </FrameLayout>
+
+        <!-- Title and Subtitle -->
+        <LinearLayout
+            android:id="@+id/messageHeaderContentLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/cometchat_margin_3"
+            android:layout_marginEnd="@dimen/cometchat_margin_2"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/messageHeaderAuxiliaryView"
+            app:layout_constraintStart_toEndOf="@id/messageHeaderAvatarLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Title View -->
+            <FrameLayout
+                android:id="@+id/titleView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tvMessageHeaderName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="John Doe" />
+            </FrameLayout>
+
+            <!-- Subtitle Layout -->
+            <FrameLayout
+                android:id="@+id/messageHeaderSubtitleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/cometchat_margin_1">
+
+                <TextView
+                    android:id="@+id/tvMessageHeaderSubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="Online" />
+
+                <TextView
+                    android:id="@+id/tvMessageHeaderTypingIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:visibility="gone"
+                    tools:text="typing..." />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Auxiliary View (Call buttons, AI buttons) -->
+        <LinearLayout
+            android:id="@+id/messageHeaderAuxiliaryView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/messageHeaderTailView"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.cometchat.uikit.kotlin.presentation.callbuttons.CometChatCallButtons
+                android:id="@+id/callButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/ivNewChat"
+                android:layout_width="@dimen/cometchat_icon_size_10"
+                android:layout_height="@dimen/cometchat_icon_size_10"
+                android:src="@drawable/cometchat_ic_new_chat"
+                android:visibility="gone"
+                android:contentDescription="@string/cometchat_new_chat"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/ivChatHistory"
+                android:layout_width="@dimen/cometchat_icon_size_10"
+                android:layout_height="@dimen/cometchat_icon_size_10"
+                android:src="@drawable/cometchat_ic_chat_history"
+                android:visibility="gone"
+                android:contentDescription="@string/cometchat_chat_history"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- Tail View -->
+        <FrameLayout
+            android:id="@+id/messageHeaderTailView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/messageHeaderMenuIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Menu Icon -->
+        <ImageView
+            android:id="@+id/messageHeaderMenuIcon"
+            android:layout_width="@dimen/cometchat_icon_size_10"
+            android:layout_height="@dimen/cometchat_icon_size_10"
+            android:padding="@dimen/cometchat_padding_2"
+            android:src="@drawable/cometchat_ic_menu_dots"
+            android:visibility="gone"
+            android:contentDescription="@string/cometchat_menu"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</merge>

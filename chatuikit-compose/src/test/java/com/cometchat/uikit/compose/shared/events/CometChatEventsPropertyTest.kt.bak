@@ -1,0 +1,290 @@
+package com.cometchat.uikit.compose.shared.events
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.enum
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
+
+/**
+ * Property-based tests for CometChatEvents singleton.
+ *
+ * Feature: compose-events-system
+ * Properties tested:
+ * - Property 1: Multiple Subscribers Receive All Emitted Events
+ * - Property 2: Event Type Isolation
+ * - Property 3: Event Emission Round-Trip
+ *
+ * Validates: Requirements 1.1-1.5, 2.1-2.13, 3.1-3.2, 4.1-4.10, 5.1-5.4, 6.1, 7.1-7.5, 10.1-10.3
+ */
+class CometChatEventsPropertyTest : StringSpec({
+
+    /**
+     * Property 1: Multiple Subscribers Receive All Emitted Events
+     *
+     * For any event emitted to the Event_Bus and for any number of active subscribers (≥1),
+     * all subscribers SHALL receive the exact same event instance.
+     *
+     * Feature: compose-events-system, Property 1: Multiple Subscribers Receive All Emitted Events
+     * Validates: Requirements 1.1, 1.4
+     */
+    "Property 1: Multiple subscribers should receive all emitted message events" {
+        val eventIdArb = Arb.int(1, 10000)
+
+        checkAll(10, eventIdArb, Arb.int(2, 4)) { eventId, subscriberCount ->
+            val testEvent = CometChatMessageEvent.LiveReaction(eventId)
+            val receivedEvents = List(subscriberCount) { CopyOnWriteArrayList<CometChatMessageEvent>() }
+
+            coroutineScope {
+                // Start subscribers using async to collect events
+                val deferreds = receivedEvents.map { list ->
+                    async {
+                        withTimeoutOrNull(500) {
+                            CometChatEvents.messageEvents.first().also { list.add(it) }
+                        }
+                    }
+                }
+
+                // Small delay to ensure collectors are active
+                kotlinx.coroutines.delay(30)
+
+                // Emit the event
+                CometChatEvents.emitMessageEvent(testEvent)
+
+                // Wait for all to complete
+                deferreds.awaitAll()
+            }
+
+            // Verify all subscribers received the event
+            receivedEvents.forEach { list ->
+                list.size shouldBe 1
+                list.first() shouldBe testEvent
+            }
+        }
+    }
+
+
+    /**
+     * Property 2: Event Type Isolation
+     *
+     * For any event emitted to a specific event flow (e.g., messageEvents),
+     * the event SHALL NOT appear in any other event flow (e.g., userEvents, groupEvents).
+     *
+     * Feature: compose-events-system, Property 2: Event Type Isolation
+     * Validates: Requirements 1.2
+     */
+    "Property 2: Message events should not appear in UI events flow" {
+        val eventIdArb = Arb.int(1, 10000)
+
+        checkAll(10, eventIdArb) { eventId ->
+            val messageEvent = CometChatMessageEvent.LiveReaction(eventId)
+            var messageReceived: CometChatMessageEvent? = null
+            var uiReceived: CometChatUIEvent? = null
+
+            coroutineScope {
+                // Start collectors
+                val messageDeferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.messageEvents.first().also { messageReceived = it }
+                    }
+                }
+
+                val uiDeferred = async {
+                    withTimeoutOrNull(200) {
+                        CometChatEvents.uiEvents.first().also { uiReceived = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+
+                // Emit message event only
+                CometChatEvents.emitMessageEvent(messageEvent)
+
+                // Wait for results
+                messageDeferred.await()
+                uiDeferred.await()
+            }
+
+            // Verify isolation
+            messageReceived shouldBe messageEvent
+            uiReceived shouldBe null
+        }
+    }
+
+    "Property 2: UI events should not appear in message events flow" {
+        val eventIdArb = Arb.string(1, 20)
+
+        checkAll(10, eventIdArb) { eventId ->
+            val uiEvent = CometChatUIEvent.ComposeMessage(eventId, "test text")
+            var messageReceived: CometChatMessageEvent? = null
+            var uiReceived: CometChatUIEvent? = null
+
+            coroutineScope {
+                // Start collectors
+                val messageDeferred = async {
+                    withTimeoutOrNull(200) {
+                        CometChatEvents.messageEvents.first().also { messageReceived = it }
+                    }
+                }
+
+                val uiDeferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { uiReceived = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+
+                // Emit UI event only
+                CometChatEvents.emitUIEvent(uiEvent)
+
+                // Wait for results
+                messageDeferred.await()
+                uiDeferred.await()
+            }
+
+            // Verify isolation
+            uiReceived shouldBe uiEvent
+            messageReceived shouldBe null
+        }
+    }
+
+
+    /**
+     * Property 3: Event Emission Round-Trip
+     *
+     * For any valid event data class instance, emitting it through the Event_Bus
+     * and collecting from the corresponding flow SHALL yield an equivalent event object.
+     *
+     * Feature: compose-events-system, Property 3: Event Emission Round-Trip
+     * Validates: Requirements 2.1-2.13, 3.1-3.2, 4.1-4.10, 5.1-5.4, 6.1, 7.1-7.5
+     */
+    "Property 3: Event emission round-trip should preserve event data for LiveReaction events" {
+        val iconIdArb = Arb.int(0, Int.MAX_VALUE)
+
+        checkAll(10, iconIdArb) { iconId ->
+            val originalEvent = CometChatMessageEvent.LiveReaction(iconId)
+            var receivedEvent: CometChatMessageEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.messageEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                CometChatEvents.emitMessageEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify round-trip preserves data
+            receivedEvent shouldBe originalEvent
+            (receivedEvent as CometChatMessageEvent.LiveReaction).icon shouldBe iconId
+        }
+    }
+
+    "Property 3: Event emission round-trip should preserve event data for ComposeMessage events" {
+        val composeMessageArb = Arb.bind(
+            Arb.string(1, 50),
+            Arb.string(0, 200)
+        ) { id, text ->
+            CometChatUIEvent.ComposeMessage(id, text)
+        }
+
+        checkAll(10, composeMessageArb) { originalEvent ->
+            var receivedEvent: CometChatUIEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                CometChatEvents.emitUIEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify round-trip preserves data
+            receivedEvent shouldBe originalEvent
+            val received = receivedEvent as CometChatUIEvent.ComposeMessage
+            received.id shouldBe originalEvent.id
+            received.text shouldBe originalEvent.text
+        }
+    }
+
+    "Property 3: Event emission round-trip should preserve event data for HidePanel events" {
+        val hidePanelArb = Arb.bind(
+            Arb.string(1, 20),
+            Arb.string(1, 20),
+            Arb.enum<CustomUIPosition>()
+        ) { key, value, position ->
+            CometChatUIEvent.HidePanel(mapOf(key to value), position)
+        }
+
+        checkAll(10, hidePanelArb) { originalEvent ->
+            var receivedEvent: CometChatUIEvent? = null
+
+            coroutineScope {
+                val deferred = async {
+                    withTimeoutOrNull(500) {
+                        CometChatEvents.uiEvents.first().also { receivedEvent = it }
+                    }
+                }
+
+                kotlinx.coroutines.delay(30)
+                CometChatEvents.emitUIEvent(originalEvent)
+                deferred.await()
+            }
+
+            // Verify round-trip preserves data
+            receivedEvent shouldBe originalEvent
+            val received = receivedEvent as CometChatUIEvent.HidePanel
+            received.id shouldBe originalEvent.id
+            received.position shouldBe originalEvent.position
+        }
+    }
+
+    /**
+     * Additional test for MessageStatus enum round-trip
+     */
+    "Property 3: MessageStatus enum should correctly convert from int values" {
+        val statusArb = Arb.enum<MessageStatus>()
+
+        checkAll(10, statusArb) { status ->
+            // Round-trip through int conversion
+            val intValue = status.value
+            val convertedStatus = MessageStatus.fromInt(intValue)
+
+            convertedStatus shouldBe status
+        }
+    }
+
+    "Property 3: MessageStatus.fromInt should handle unknown values gracefully" {
+        // Generator for invalid int values
+        val invalidIntArb = Arb.int().filter { it !in listOf(-1, 0, 1) }
+
+        checkAll(10, invalidIntArb) { invalidValue ->
+            // Unknown values should default to IN_PROGRESS
+            val status = MessageStatus.fromInt(invalidValue)
+            status shouldBe MessageStatus.IN_PROGRESS
+        }
+    }
+})

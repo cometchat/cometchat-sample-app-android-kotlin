@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatConversations">
+        <attr name="cometchatConversationsStyle" format="reference" />
+        <!-- Color Attributes -->
+        <attr name="cometchatConversationsBackIconTint" format="color" />
+        <attr name="cometchatConversationsStrokeColor" format="color" />
+        <attr name="cometchatConversationsBackgroundColor" format="color" />
+        <attr name="cometchatConversationsTitleTextColor" format="color" />
+        <attr name="cometchatConversationsEmptyStateTitleTextColor" format="color" />
+        <attr name="cometchatConversationsEmptyStateSubtitleTextColor" format="color" />
+        <attr name="cometchatConversationsErrorStateTitleTextColor" format="color" />
+        <attr name="cometchatConversationsErrorStateSubtitleTextColor" format="color" />
+        <attr name="cometchatConversationsItemTitleTextColor" format="color" />
+        <attr name="cometchatConversationsItemSubtitleTextColor" format="color" />
+        <attr name="cometchatConversationsItemMessageTypeIconTint" format="color" />
+        <attr name="cometchatConversationsDeleteOptionTextColor" format="color" />
+        <attr name="cometchatConversationsDeleteOptionIcon" format="reference" />
+        <attr name="cometchatConversationsDeleteOptionIconTint" format="color" />
+        <attr name="cometchatConversationsItemSelectedBackgroundColor" format="color" />
+        <attr name="cometchatConversationsItemBackgroundColor" format="color" />
+
+        <attr name="cometchatConversationsDiscardSelectionIcon" format="reference" />
+        <attr name="cometchatConversationsDiscardSelectionIconTint" format="color" />
+        <attr name="cometchatConversationsSubmitSelectionIcon" format="reference" />
+        <attr name="cometchatConversationsSubmitSelectionIconTint" format="color" />
+
+        <attr name="cometchatConversationsCheckBoxStrokeWidth" format="dimension" />
+        <attr name="cometchatConversationsCheckBoxCornerRadius" format="dimension" />
+        <attr name="cometchatConversationsCheckBoxStrokeColor" format="color" />
+        <attr name="cometchatConversationsCheckBoxBackgroundColor" format="color" />
+        <attr name="cometchatConversationsCheckBoxCheckedBackgroundColor" format="color" />
+        <attr name="cometchatConversationsCheckBoxSelectIcon" format="reference" />
+        <attr name="cometchatConversationsCheckBoxSelectIconTint" format="color" />
+
+        <!-- Dimension Attributes -->
+        <attr name="cometchatConversationsStrokeWidth" format="dimension" />
+        <attr name="cometchatConversationsCornerRadius" format="dimension" />
+
+        <!-- Style Attributes -->
+        <attr name="cometchatConversationsTitleTextAppearance" format="reference" />
+        <attr name="cometchatConversationsEmptyStateTextTitleAppearance" format="reference" />
+        <attr name="cometchatConversationsEmptyStateTextSubtitleAppearance" format="reference" />
+        <attr name="cometchatConversationsErrorStateTextTitleAppearance" format="reference" />
+        <attr name="cometchatConversationsErrorStateTextSubtitleAppearance" format="reference" />
+        <attr name="cometchatConversationsItemTitleTextAppearance" format="reference" />
+        <attr name="cometchatConversationsItemSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatConversationsDeleteOptionTextAppearance" format="reference" />
+        <attr name="cometchatConversationsAvatarStyle" format="reference" />
+        <attr name="cometchatConversationsStatusIndicatorStyle" format="reference" />
+        <attr name="cometchatConversationsDateStyle" format="reference" />
+        <attr name="cometchatConversationsBadgeStyle" format="reference" />
+        <attr name="cometchatConversationsReceiptStyle" format="reference" />
+        <attr name="cometchatConversationsTypingIndicatorStyle" format="reference" />
+        <attr name="cometchatConversationsMentionsStyle" format="reference" />
+        <attr name="cometchatConversationsOptionListStyle" format="reference" />
+
+        <!-- Drawable Attributes -->
+        <attr name="cometchatConversationsBackIcon" format="reference" />
+        <attr name="cometchatConversationsSeparatorHeight" format="dimension" />
+        <attr name="cometchatConversationsSeparatorColor" format="reference" />
+
+        <!-- Search Attributes -->
+        <attr name="cometchatConversationsSearchInputBackgroundColor" format="color" />
+        <attr name="cometchatConversationsSearchInputTextColor" format="color" />
+        <attr name="cometchatConversationsSearchInputTextAppearance" format="reference" />
+        <attr name="cometchatConversationsSearchInputPlaceHolderTextAppearance" format="reference" />
+        <attr name="cometchatConversationsSearchInputPlaceHolderTextColor" format="color" />
+        <attr name="cometchatConversationsSearchInputEndIcon" format="reference" />
+        <attr name="cometchatConversationsSearchInputEndIconTint" format="color" />
+        <attr name="cometchatConversationsSearchInputStartIcon" format="reference" />
+        <attr name="cometchatConversationsSearchInputStartIconTint" format="color" />
+        <attr name="cometchatConversationsSearchInputCornerRadius" format="dimension" />
+        <attr name="cometchatConversationsSearchInputStrokeWidth" format="dimension" />
+        <attr name="cometchatConversationsSearchInputStrokeColor" format="color" />
+    </declare-styleable>
+</resources>

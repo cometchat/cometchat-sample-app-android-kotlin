@@ -1,0 +1,277 @@
+---
+title: "Block/Unblock User"
+sidebarTitle: "Block/Unblock User"
+description: "Let users block and unblock others directly within chat to control unwanted communication."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key components | `CometChatMessageComposer`, `CometChat.blockUsers()`, `CometChat.unblockUsers()`, `User.isBlockedByMe()` |
+| Purpose | Let users block and unblock others directly within chat to control unwanted communication. |
+| Related | [Message Composer](/ui-kit/android/v6/message-composer), [Message List](/ui-kit/android/v6/message-list), [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+Enable users to block and unblock others directly within chat using CometChat's Android UI Kit v5+, preventing unwanted communication and giving users more control.
+
+## Overview
+
+Blocking a user stops them from sending messages to the blocker. The CometChat UIKit handles most behaviors internally:
+
+- **Composer Hidden:** The message composer is hidden when chatting with a blocked user.
+- **Unblock Prompt:** An "Unblock" button is displayed to reverse the block.
+- **Message Restrictions:** Blocked users cannot send messages to the blocker.
+
+## Prerequisites
+
+- Android Studio project with CometChat Android UI Kit v5 added to `build.gradle`.  
+- CometChat **App ID**, **Auth Key**, and **Region** configured and initialized.  
+- `<uses-permission android:name="android.permission.INTERNET"/>` in `AndroidManifest.xml`.  
+- Logged-in user via `CometChatUIKit.login()`.  
+- Existing one-on-one chat screen using `CometChatMessageList` and `CometChatMessageComposer`.
+
+## Components
+
+| Component / Class                    | Role                                                        |
+|:-------------------------------------|:------------------------------------------------------------|
+| `UserDetailActivity`                 | Displays user profile and provides block/unblock options.   |
+| `MessagesActivity`                   | Hosts the chat screen and toggles UI based on block state.  |
+| `CometChat.blockUsers()`             | SDK API to block one or more users by UID.                  |
+| `CometChat.unblockUsers()`           | SDK API to unblock one or more users by UID.                |
+| `User.isBlockedByMe()`               | Checks if the current user has blocked this user.           |
+| `unblockLayout` (View)              | Layout shown when a user is blocked, containing unblock.    |
+| `CometChatMessageComposer`           | Hidden when chatting with a blocked user.                   |
+
+## Integration Steps
+
+### 1. Detect Block Status
+
+Update UI when block state changes.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In MessagesActivity.kt
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+
+private fun updateUserBlockStatus(user: User) {
+    val blocked = user.isBlockedByMe
+    binding.messageComposer.visibility = if (blocked) View.GONE else View.VISIBLE
+    binding.unblockLayout.visibility = if (blocked) View.VISIBLE else View.GONE
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In MessagesScreen.kt
+import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
+
+@Composable
+fun MessagesScreen(user: User) {
+    val blocked = user.isBlockedByMe
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Message list...
+
+        if (blocked) {
+            UnblockPrompt(onUnblock = { /* unblock logic */ })
+        } else {
+            CometChatMessageComposer(user = user)
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+**File reference:**  
+[`MessagesActivity.kt`](https://github.com/cometchat/cometchat-uikit-android/blob/v5/sample-app-kotlin)
+
+Ensures the composer and unblock UI reflect the current block state.
+
+### 2. Hide Composer & Show Unblock UI
+
+Define layout elements and their visibility toggles.
+
+```xml activity_messages.xml lines
+<!-- In activity_messages.xml (chatuikit-kotlin) -->
+<com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+    android:id="@+id/messageComposer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+
+<LinearLayout
+    android:id="@+id/unblockLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:padding="12dp"
+    android:visibility="gone">
+
+    <Button
+        android:id="@+id/unblockBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unblock" />
+</LinearLayout>
+```
+
+Prepares the UI containers for dynamic show/hide operations.
+
+### 3. Trigger Unblock Action
+
+Call the unblock API and observe status updates.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In MessagesActivity.kt
+binding.unblockBtn.setOnClickListener { viewModel.unblockUser() }
+
+// In MessagesViewModel.kt
+fun unblockUser() {
+    CometChat.unblockUsers(listOf(currentUser.uid), object : CometChat.CallbackListener<HashMap<String, String>>() {
+        override fun onSuccess(resultMap: HashMap<String, String>) {
+            _unblockButtonState.value = false
+        }
+        override fun onError(e: CometChatException?) {
+            // Handle error
+        }
+    })
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In MessagesViewModel.kt
+private val _isBlocked = MutableStateFlow(false)
+val isBlocked: StateFlow<Boolean> = _isBlocked.asStateFlow()
+
+fun unblockUser() {
+    CometChat.unblockUsers(listOf(currentUser.uid), object : CometChat.CallbackListener<HashMap<String, String>>() {
+        override fun onSuccess(resultMap: HashMap<String, String>) {
+            _isBlocked.value = false
+        }
+        override fun onError(e: CometChatException?) {
+            // Handle error
+        }
+    })
+}
+
+// In MessagesScreen.kt
+@Composable
+fun MessagesScreen(viewModel: MessagesViewModel = viewModel()) {
+    val isBlocked by viewModel.isBlocked.collectAsState()
+
+    if (isBlocked) {
+        Button(onClick = { viewModel.unblockUser() }) {
+            Text("Unblock")
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+Executes unblock logic and updates state to refresh UI.
+
+### 4. Trigger Block from Detail Screen
+
+Allow blocking directly from a user's profile.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// In UserDetailActivity.kt
+binding.blockMenuItem.setOnClickListener {
+    CometChat.blockUsers(listOf(user.uid), object : CometChat.CallbackListener<HashMap<String, String>>() {
+        override fun onSuccess(resultMap: HashMap<String, String>) {
+            viewModel.refreshUser()
+        }
+        override fun onError(e: CometChatException?) {
+            // Handle error
+        }
+    })
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// In UserDetailScreen.kt
+@Composable
+fun BlockButton(user: User, onBlocked: () -> Unit) {
+    Button(onClick = {
+        CometChat.blockUsers(listOf(user.uid), object : CometChat.CallbackListener<HashMap<String, String>>() {
+            override fun onSuccess(resultMap: HashMap<String, String>) {
+                onBlocked()
+            }
+            override fun onError(e: CometChatException?) { /* Handle error */ }
+        })
+    }) {
+        Text("Block User")
+    }
+}
+```
+</Tab>
+</Tabs>
+
+## Implementation Flow
+
+| Step | Action                                     | Location              |
+|:-----|:-------------------------------------------|:----------------------|
+| 1    | Check block status                         | `updateUserBlockStatus()` in `MessagesActivity` |
+| 2    | Show/hide composer and unblock layout      | `activity_messages.xml` or Compose conditional |
+| 3    | Unblock API call and state update          | `MessagesViewModel.unblockUser()` |
+| 4    | Block API call from profile                | `UserDetailActivity.blockMenuItem` |
+
+## Customization Options
+
+- **Feedback UI:** Show a Toast or Snackbar upon success/failure.  
+- **Menu Icons/Text:** Toggle icon and text dynamically after block/unblock.  
+- **Disable History:** Optionally gray out or hide past messages when blocked.
+
+## Filtering & Edge Cases
+
+| Case                   | Behavior                                                      |
+|:-----------------------|:--------------------------------------------------------------|
+| Blocked User          | Composer hidden; unblock layout shown.                        |
+| Block Self            | SDK ignores request; ensure menu is disabled.                 |
+| Group Chat            | Blocking affects only 1:1 communication.                      |
+| Network Failure       | Observe error callbacks and retry as needed.                  |
+
+## Error Handling
+
+- Handle errors from `blockUsers` and `unblockUsers` callbacks by showing alerts or retry prompts.  
+- Ensure UI state reverts on failure.
+
+## Group vs. User-Level Differences
+
+| Scenario               | UI Behavior                                   |
+|:-----------------------|:----------------------------------------------|
+| `ReceiverType.USER`    | Block/unblock enabled.                        |
+| `ReceiverType.GROUP`   | Block option ignored; chat continues.         |
+
+## Summary / Feature Matrix
+
+| Feature            | Component / Method                        |
+|:-------------------|:------------------------------------------|
+| Check block state  | `User.isBlockedByMe()`                    |
+| Block user         | `CometChat.blockUsers()`                  |
+| Unblock user       | `CometChat.unblockUsers()`                |
+| Update UI          | `updateUserBlockStatus()`                 |
+| Profile block menu | `UserDetailActivity.blockMenuItem`        |
+
+## Next Steps & Further Reading
+
+<CardGroup>
+  <Card title="Android Sample App (Kotlin)">
+    Explore this feature in the CometChat SampleApp:
+    [GitHub → SampleApp](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin)
+  </Card>
+</CardGroup>

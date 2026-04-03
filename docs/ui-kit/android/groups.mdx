@@ -1,0 +1,974 @@
+---
+title: "Groups"
+description: "Scrollable list of all available groups with search, avatars, names, and group type indicators."
+---
+
+`CometChatGroups` renders a scrollable list of all available groups with real-time updates for membership changes, search, avatars, and group type indicators (public, private, password-protected).
+
+<Frame>
+  <img src="/images/8f0fe074-groups-876f11ccd26289efd7bd12d29a1bc205.png" />
+</Frame>
+
+---
+
+## Where It Fits
+
+`CometChatGroups` is a list component. It renders all available groups and emits the selected `Group` via `onItemClick`. Wire it to `CometChatMessageHeader`, `CometChatMessageList`, and `CometChatMessageComposer` to build a group messaging layout.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml activity_chat.xml lines
+<com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
+    android:id="@+id/groups"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin lines
+val groups = findViewById<CometChatGroups>(R.id.groups)
+
+groups.setOnItemClick { group ->
+    messageHeader.setGroup(group)
+    messageList.setGroup(group)
+    messageComposer.setGroup(group)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    modifier = Modifier.fillMaxSize(),
+    onItemClick = { group ->
+        messageHeader.setGroup(group)
+        messageList.setGroup(group)
+        messageComposer.setGroup(group)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add to your layout XML:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
+    android:id="@+id/groups"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Or programmatically:
+
+```kotlin lines
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(CometChatGroups(this))
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+@Composable
+fun GroupsScreen() {
+    CometChatGroups(
+        modifier = Modifier.fillMaxSize()
+    )
+}
+```
+
+</Tab>
+</Tabs>
+
+Prerequisites: CometChat SDK initialized with `CometChatUIKit.init()`, a user logged in, and the UI Kit dependency added.
+
+Or in a Fragment:
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return CometChatGroups(requireContext())
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    return ComposeView(requireContext()).apply {
+        setContent { CometChatGroups() }
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Filtering Groups
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Pass a `GroupsRequest.GroupsRequestBuilder` to control what loads:
+
+```kotlin lines
+groups.setGroupsRequestBuilder(
+    GroupsRequest.GroupsRequestBuilder()
+        .joinedOnly(true)
+        .setLimit(20)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    groupsRequestBuilder = GroupsRequest.GroupsRequestBuilder()
+        .joinedOnly(true)
+        .setLimit(20)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Filter Recipes
+
+| Recipe | Builder method |
+| --- | --- |
+| Joined only | `.joinedOnly(true)` |
+| Limit per page | `.setLimit(10)` |
+| Search by keyword | `.setSearchKeyWord("design")` |
+| Filter by tags | `.setTags(listOf("vip"))` |
+| With tags | `.withTags(true)` |
+
+<Warning>
+Pass the builder object, not the result of `.build()`. The component calls `.build()` internally. Default page size is 30 with infinite scroll.
+</Warning>
+
+---
+
+## Actions and Events
+
+### Callback Methods
+
+#### `onItemClick`
+
+Fires when a group row is tapped. Primary navigation hook.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnItemClick { group ->
+    // Navigate to group chat screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onItemClick = { group ->
+        // Navigate to group chat screen
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+> Replaces the default item-click behavior. Your custom lambda executes instead of the built-in navigation.
+
+#### `onItemLongClick`
+
+Fires when a group row is long-pressed. Use for additional actions like delete or leave.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnItemLongClick { group ->
+    // Show context menu
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onItemLongClick = { group ->
+        // Show context menu
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onBackPress`
+
+Fires when the user presses the back button in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnBackPress {
+    finish()
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onBackPress = { /* navigate back */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSearchClick`
+
+Fires when the user taps the search icon in the toolbar.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnSearchClick {
+    // Open search screen
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onSearchClick = { /* open search */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onSelection`
+
+Fires when groups are selected/deselected in multi-select mode.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+groups.setOnSelection { selectedGroups ->
+    updateToolbar(selectedGroups.size)
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    selectionMode = UIKitConstants.SelectionMode.MULTIPLE,
+    onSelection = { selectedGroups ->
+        updateToolbar(selectedGroups.size)
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onError`
+
+Fires on internal errors (network failure, auth issue, SDK exception).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnError { exception ->
+    Log.e("Groups", "Error: ${exception.message}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onError = { exception ->
+        Log.e("Groups", "Error: ${exception.message}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onLoad`
+
+Fires when the list is successfully fetched and loaded.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnLoad { groupList ->
+    Log.d("Groups", "Loaded ${groupList.size}")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onLoad = { groupList ->
+        Log.d("Groups", "Loaded ${groupList.size}")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+#### `onEmpty`
+
+Fires when the list is empty after loading.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOnEmpty {
+    Log.d("Groups", "No groups found")
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    onEmpty = { /* no groups */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+### SDK Events (Real-Time, Automatic)
+
+The component listens to these SDK events internally. No manual setup needed.
+
+| SDK Listener | Internal behavior |
+| --- | --- |
+| `onGroupMemberJoined` | Updates the group list when a member joins |
+| `onGroupMemberLeft` | Updates the group list when a member leaves |
+| `onGroupMemberKicked` | Updates the group list when a member is kicked |
+| `onGroupMemberBanned` | Updates the group list when a member is banned |
+| `onGroupMemberUnbanned` | Updates the group list when a member is unbanned |
+| `onGroupMemberScopeChanged` | Updates the group list when a member's scope changes |
+| `onMemberAddedToGroup` | Updates the group list when members are added |
+
+---
+
+## Functionality
+
+| Method (Kotlin XML) | Compose Parameter | Description |
+| --- | --- | --- |
+| `setBackIconVisibility(View.VISIBLE)` | `hideBackIcon = false` | Toggle back button |
+| `setToolbarVisibility(View.GONE)` | `hideToolbar = true` | Toggle toolbar |
+| `setSearchBoxVisibility(View.GONE)` | `hideSearchBox = true` | Toggle search box |
+| `setGroupTypeVisibility(View.GONE)` | `hideGroupType = true` | Toggle group type indicator |
+| `setSeparatorVisibility(View.GONE)` | `hideSeparator = true` | Toggle list separators |
+| `setSelectionMode(MULTIPLE)` | `selectionMode = MULTIPLE` | Enable selection mode |
+| `setTitle("My Groups")` | `title = "My Groups"` | Custom toolbar title |
+| `setSearchPlaceholderText("Find...")` | `searchPlaceholderText = "Find..."` | Search placeholder |
+
+---
+
+## Custom View Slots
+
+### Leading View
+
+Replace the avatar / left section.
+
+<Frame>
+  <img src="/images/a3c2553d-groups_leading_view-b4442c04297d7f34a5a8b00990686dc8.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setLeadingView(object : GroupsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(48.dp, 48.dp)
+        }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, group: Group,
+        holder: RecyclerView.ViewHolder, groupList: List<Group>, position: Int
+    ) {
+        val imageView = createdView as ImageView
+        // Load group avatar
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    leadingView = { group ->
+        CometChatAvatar(
+            imageUrl = group.icon,
+            name = group.name
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Title View
+
+Replace the name / title text.
+
+<Frame>
+  <img src="/images/5dab68a2-groups_title_view-8dd32ec5bab08ae58164bd47b6a863af.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setTitleView(object : GroupsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, group: Group,
+        holder: RecyclerView.ViewHolder, groupList: List<Group>, position: Int
+    ) {
+        (createdView as TextView).text = group.name ?: ""
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    titleView = { group ->
+        Text(
+            text = group.name ?: "",
+            style = CometChatTheme.typography.heading4Medium
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Subtitle View
+
+Replace the subtitle text below the group name.
+
+<Frame>
+  <img src="/images/9d2dd1ec-groups_subtitle_view-4257df0157253a4dca4cb83299b966a7.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setSubtitleView(object : GroupsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, group: Group,
+        holder: RecyclerView.ViewHolder, groupList: List<Group>, position: Int
+    ) {
+        (createdView as TextView).text = "${group.membersCount} members"
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    subtitleView = { group ->
+        Text(
+            text = "${group.membersCount} members",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Trailing View
+
+Replace the right section of each group item.
+
+<Frame>
+  <img src="/images/0974e5e0-groups_trailing_view-ab39b3abd09b63c46d7e95c2e6d21b4d.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setTrailingView(object : GroupsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return TextView(context)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, group: Group,
+        holder: RecyclerView.ViewHolder, groupList: List<Group>, position: Int
+    ) {
+        (createdView as TextView).text = if (group.isJoined) "Joined" else "Join"
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    trailingView = { group ->
+        Text(text = if (group.isJoined) "Joined" else "Join")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Item View
+
+Replace the entire list item row.
+
+<Frame>
+  <img src="/images/6c5fc063-groups_list_item_view-2567373b1b5f9faf6c29be8d07a1a274.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setItemView(object : GroupsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatListBaseItemsBinding): View {
+        return LayoutInflater.from(context).inflate(R.layout.custom_group_item, null)
+    }
+
+    override fun bindView(
+        context: Context, createdView: View, group: Group,
+        holder: RecyclerView.ViewHolder, groupList: List<Group>, position: Int
+    ) {
+        val avatar = createdView.findViewById<CometChatAvatar>(R.id.custom_avatar)
+        val title = createdView.findViewById<TextView>(R.id.tvName)
+        title.text = group.name
+        avatar.setAvatar(group.name, group.icon)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    itemView = { group ->
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CometChatAvatar(imageUrl = group.icon, name = group.name)
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(group.name ?: "", style = CometChatTheme.typography.heading4Medium)
+                Text("${group.membersCount} members", style = CometChatTheme.typography.body3Regular)
+            }
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### State Views
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setEmptyView(R.layout.custom_empty_view)
+groups.setErrorView(R.layout.custom_error_view)
+groups.setLoadingView(R.layout.custom_loading_view)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    emptyView = { Text("No groups found") },
+    errorView = { onRetry -> Button(onClick = onRetry) { Text("Retry") } },
+    loadingView = { CircularProgressIndicator() }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Overflow Menu
+
+<Frame>
+  <img src="/images/6f8b7200-groups_menu-abd299ecf561c71932941257525ea004.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setOverflowMenu(ImageButton(context).apply {
+    setImageResource(R.drawable.ic_create_group)
+    setOnClickListener { /* create group */ }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    overflowMenu = {
+        IconButton(onClick = { /* create group */ }) {
+            Icon(painterResource(R.drawable.ic_create_group), "Create Group")
+        }
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Menu Options
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Replace all options
+groups.setOptions { context, group ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "leave", name = "Leave", onClick = { /* ... */ }),
+        CometChatPopupMenu.MenuItem(id = "delete", name = "Delete", onClick = { /* ... */ })
+    )
+}
+
+// Append to defaults
+groups.setAddOptions { context, group ->
+    listOf(
+        CometChatPopupMenu.MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ })
+    )
+}
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    options = { context, group ->
+        listOf(
+            MenuItem(id = "leave", name = "Leave", onClick = { /* ... */ }),
+            MenuItem(id = "delete", name = "Delete", onClick = { /* ... */ })
+        )
+    },
+    addOptions = { context, group ->
+        listOf(MenuItem(id = "pin", name = "Pin", onClick = { /* ... */ }))
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Common Patterns
+
+### Minimal list — hide all chrome
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setToolbarVisibility(View.GONE)
+groups.setSearchBoxVisibility(View.GONE)
+groups.setGroupTypeVisibility(View.GONE)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    hideToolbar = true,
+    hideSearchBox = true,
+    hideGroupType = true
+)
+```
+
+</Tab>
+</Tabs>
+
+### Joined groups only
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setGroupsRequestBuilder(
+    GroupsRequest.GroupsRequestBuilder()
+        .joinedOnly(true)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    groupsRequestBuilder = GroupsRequest.GroupsRequestBuilder()
+        .joinedOnly(true)
+)
+```
+
+</Tab>
+</Tabs>
+
+### Tagged groups
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setGroupsRequestBuilder(
+    GroupsRequest.GroupsRequestBuilder()
+        .setTags(listOf("support"))
+        .withTags(true)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    groupsRequestBuilder = GroupsRequest.GroupsRequestBuilder()
+        .setTags(listOf("support"))
+        .withTags(true)
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Advanced Methods
+
+### Programmatic Selection
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+// Enable selection
+groups.setSelectionMode(UIKitConstants.SelectionMode.MULTIPLE)
+
+// Select a group
+groups.selectGroup(group, UIKitConstants.SelectionMode.MULTIPLE)
+
+// Get selected
+val selected = groups.getSelectedGroups()
+
+// Clear
+groups.clearSelection()
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Selection is managed via the `selectionMode` and `onSelection` parameters. The component handles selection state internally.
+
+</Tab>
+</Tabs>
+
+### ViewModel Access
+
+```kotlin lines
+val factory = CometChatGroupsViewModelFactory()
+val viewModel = ViewModelProvider(this, factory)
+    .get(CometChatGroupsViewModel::class.java)
+```
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+groups.setViewModel(viewModel)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    groupsViewModel = viewModel
+)
+```
+
+</Tab>
+</Tabs>
+
+See [ViewModel & Data](/ui-kit/android/v6/customization-viewmodel-data) for ListOperations, state observation, and custom repositories.
+
+---
+
+## Style
+
+<Frame>
+  <img src="/images/5b3c1825-groups_styling-f8164f3a9b1247ad1db859328c199051.png" />
+</Frame>
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Define a custom style in `themes.xml`:
+
+```xml themes.xml lines
+<style name="CustomGroupsAvatarStyle" parent="CometChatAvatarStyle">
+    <item name="cometchatAvatarStrokeRadius">8dp</item>
+    <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+</style>
+
+<style name="CustomGroupsStyle" parent="CometChatGroupsStyle">
+    <item name="cometchatGroupsAvatarStyle">@style/CustomGroupsAvatarStyle</item>
+    <item name="cometchatGroupsSeparatorColor">#F76808</item>
+    <item name="cometchatGroupsTitleTextColor">#F76808</item>
+</style>
+
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatGroupsStyle">@style/CustomGroupsStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatGroups(
+    style = CometChatGroupsStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5),
+        titleTextColor = Color(0xFF141414),
+        itemStyle = CometChatGroupsItemStyle.default().copy(
+            backgroundColor = Color.White,
+            titleTextColor = Color(0xFF141414),
+            subtitleTextColor = Color(0xFF727272),
+            avatarStyle = CometChatAvatarStyle.default().copy(cornerRadius = 12.dp),
+            statusIndicatorStyle = CometChatStatusIndicatorStyle.default().copy()
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Style Properties
+
+| Property | Description |
+| --- | --- |
+| `backgroundColor` | List background color |
+| `titleTextColor` | Toolbar title color |
+| `searchBoxStyle` | Search box appearance |
+| `itemStyle.backgroundColor` | Row background |
+| `itemStyle.selectedBackgroundColor` | Selected row background |
+| `itemStyle.titleTextColor` | Group name color |
+| `itemStyle.subtitleTextColor` | Subtitle text color |
+| `itemStyle.separatorColor` | Row separator color |
+| `itemStyle.avatarStyle` | Avatar appearance |
+| `itemStyle.statusIndicatorStyle` | Group type indicator |
+
+See [Component Styling](/ui-kit/android/v6/component-styling) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Group Members" icon="user-group" href="/ui-kit/android/v6/group-members">
+    View and manage group members
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+  <Card title="Component Styling" icon="paintbrush" href="/ui-kit/android/v6/component-styling">
+    Detailed styling reference with screenshots
+  </Card>
+  <Card title="ViewModel & Data" icon="database" href="/ui-kit/android/v6/customization-viewmodel-data">
+    Custom ViewModels, repositories, and ListOperations
+  </Card>
+</CardGroup>

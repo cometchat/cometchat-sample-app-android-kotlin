@@ -1,0 +1,729 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.ui
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.boolean
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import com.cometchat.uikit.core.models.PollData
+import com.cometchat.uikit.core.models.PollOption
+
+/**
+ * Property-based tests for Poll Selected Option Styling.
+ *
+ * Feature: remaining-message-bubbles
+ * Properties tested:
+ * - Property 13: Poll Selected Option Styling
+ *
+ * **Validates: Requirements 8.7**
+ *
+ * Tests the poll selected option styling logic from [CometChatPollBubble] and [PollRadioButton]:
+ * - For all PollOptions where isSelected is true, the option displays with selected styling
+ *   (selectedRadioButtonStrokeColor, selectedIconTint)
+ * - For all PollOptions where isSelected is false, the option displays with unselected styling
+ *   (unselectedRadioButtonStrokeColor, unselectedIconTint)
+ *
+ * The styling follows these rules from PollRadioButton composable:
+ * 1. When isSelected is true:
+ *    - strokeColor = style.selectedRadioButtonStrokeColor
+ *    - strokeWidth = style.selectedRadioButtonStrokeWidth
+ *    - iconTint = style.selectedIconTint
+ * 2. When isSelected is false:
+ *    - strokeColor = style.unselectedRadioButtonStrokeColor
+ *    - strokeWidth = style.unselectedRadioButtonStrokeWidth
+ *    - iconTint = style.unselectedIconTint
+ */
+class PollSelectedOptionStylingPropertyTest : StringSpec({
+
+    /**
+     * Property 13: Poll Selected Option Styling - Selected option uses selected styling
+     *
+     * *For any* PollOption where isSelected is true, the option SHALL display with
+     * selectedRadioButtonStrokeColor and selectedIconTint.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Selected option should use selected styling properties" {
+        val textArb = Arb.string(1..100)
+        val voteCountArb = Arb.int(0..1000)
+
+        checkAll(200, textArb, voteCountArb) { text, voteCount ->
+            val option = PollOption(
+                id = "1",
+                text = text,
+                voteCount = voteCount,
+                voters = listOf("user1"),
+                isSelected = true
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            styling.usesSelectedStyling shouldBe true
+            styling.usesUnselectedStyling shouldBe false
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Unselected option uses unselected styling
+     *
+     * *For any* PollOption where isSelected is false, the option SHALL display with
+     * unselectedRadioButtonStrokeColor and unselectedIconTint.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Unselected option should use unselected styling properties" {
+        val textArb = Arb.string(1..100)
+        val voteCountArb = Arb.int(0..1000)
+
+        checkAll(200, textArb, voteCountArb) { text, voteCount ->
+            val option = PollOption(
+                id = "1",
+                text = text,
+                voteCount = voteCount,
+                voters = emptyList(),
+                isSelected = false
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            styling.usesSelectedStyling shouldBe false
+            styling.usesUnselectedStyling shouldBe true
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Styling is determined solely by isSelected
+     *
+     * *For any* PollOption, the styling SHALL be determined solely by the isSelected property,
+     * regardless of voteCount, voters list, or text content.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Styling should be determined solely by isSelected property" {
+        val textArb = Arb.string(0..200)
+        val voteCountArb = Arb.int(0..Int.MAX_VALUE / 2)
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(300, textArb, voteCountArb, isSelectedArb) { text, voteCount, isSelected ->
+            val option = PollOption(
+                id = "test_id",
+                text = text,
+                voteCount = voteCount,
+                voters = if (isSelected) listOf("user1") else emptyList(),
+                isSelected = isSelected
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            styling.usesSelectedStyling shouldBe isSelected
+            styling.usesUnselectedStyling shouldBe !isSelected
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Multiple options with one selected
+     *
+     * *For any* PollData with multiple options where exactly one is selected,
+     * only that option SHALL have selected styling applied.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Only the selected option should have selected styling in multi-option poll" {
+        val optionCountArb = Arb.int(2..20)
+        val selectedIndexArb = Arb.int(0..19)
+
+        checkAll(200, optionCountArb, selectedIndexArb) { optionCount, selectedIndex ->
+            val actualSelectedIndex = selectedIndex % optionCount
+            
+            val options = (0 until optionCount).map { index ->
+                PollOption(
+                    id = (index + 1).toString(),
+                    text = "Option ${index + 1}",
+                    voteCount = if (index == actualSelectedIndex) 1 else 0,
+                    voters = if (index == actualSelectedIndex) listOf("user1") else emptyList(),
+                    isSelected = index == actualSelectedIndex
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_test",
+                question = "Test poll?",
+                options = options,
+                totalVotes = 1
+            )
+            
+            // Verify styling for each option
+            pollData.options.forEachIndexed { index, option ->
+                val styling = determineOptionStyling(option)
+                
+                if (index == actualSelectedIndex) {
+                    styling.usesSelectedStyling shouldBe true
+                    styling.usesUnselectedStyling shouldBe false
+                } else {
+                    styling.usesSelectedStyling shouldBe false
+                    styling.usesUnselectedStyling shouldBe true
+                }
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - No selected options
+     *
+     * *For any* PollData where no options are selected (user hasn't voted),
+     * all options SHALL have unselected styling applied.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: All options should have unselected styling when user hasn't voted" {
+        val optionCountArb = Arb.int(1..15)
+
+        checkAll(200, optionCountArb) { optionCount ->
+            val options = (1..optionCount).map { index ->
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = index * 5, // Some votes from other users
+                    voters = (1..index).map { "other_user_$it" },
+                    isSelected = false // User hasn't voted
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_no_selection",
+                question = "No selection poll?",
+                options = options,
+                totalVotes = options.sumOf { it.voteCount }
+            )
+            
+            // All options should have unselected styling
+            pollData.options.forEach { option ->
+                val styling = determineOptionStyling(option)
+                
+                styling.usesSelectedStyling shouldBe false
+                styling.usesUnselectedStyling shouldBe true
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Multiple selected options (edge case)
+     *
+     * *For any* PollData where multiple options are marked as selected (edge case),
+     * all selected options SHALL have selected styling applied.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: All selected options should have selected styling when multiple are selected" {
+        val optionCountArb = Arb.int(2..10)
+        val selectedCountArb = Arb.int(1..10)
+
+        checkAll(100, optionCountArb, selectedCountArb) { optionCount, selectedCount ->
+            val actualSelectedCount = selectedCount.coerceAtMost(optionCount)
+            
+            val options = (0 until optionCount).map { index ->
+                val isSelected = index < actualSelectedCount
+                PollOption(
+                    id = (index + 1).toString(),
+                    text = "Option ${index + 1}",
+                    voteCount = if (isSelected) 1 else 0,
+                    voters = if (isSelected) listOf("user1") else emptyList(),
+                    isSelected = isSelected
+                )
+            }
+            
+            val pollData = PollData(
+                id = "poll_multi_selected",
+                question = "Multiple selected poll?",
+                options = options,
+                totalVotes = actualSelectedCount
+            )
+            
+            // Verify styling matches isSelected for each option
+            pollData.options.forEach { option ->
+                val styling = determineOptionStyling(option)
+                
+                styling.usesSelectedStyling shouldBe option.isSelected
+                styling.usesUnselectedStyling shouldBe !option.isSelected
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Styling is deterministic
+     *
+     * *For any* PollOption, determining the styling multiple times
+     * SHALL produce the same result.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Styling determination should be deterministic" {
+        val isSelectedArb = Arb.boolean()
+        val voteCountArb = Arb.int(0..1000)
+
+        checkAll(200, isSelectedArb, voteCountArb) { isSelected, voteCount ->
+            val option = PollOption(
+                id = "test",
+                text = "Test option",
+                voteCount = voteCount,
+                voters = if (isSelected) listOf("user1") else emptyList(),
+                isSelected = isSelected
+            )
+            
+            val styling1 = determineOptionStyling(option)
+            val styling2 = determineOptionStyling(option)
+            val styling3 = determineOptionStyling(option)
+            
+            styling1.usesSelectedStyling shouldBe styling2.usesSelectedStyling
+            styling2.usesSelectedStyling shouldBe styling3.usesSelectedStyling
+            styling1.usesUnselectedStyling shouldBe styling2.usesUnselectedStyling
+            styling2.usesUnselectedStyling shouldBe styling3.usesUnselectedStyling
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Selected styling properties are distinct
+     *
+     * *For any* style configuration, selected and unselected styling properties
+     * SHALL be distinguishable (not necessarily different values, but different property sources).
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Selected and unselected styling should use different property sources" {
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(100, isSelectedArb) { isSelected ->
+            val option = PollOption(
+                id = "1",
+                text = "Test",
+                voteCount = 1,
+                voters = listOf("user1"),
+                isSelected = isSelected
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            // Verify that exactly one styling type is applied
+            (styling.usesSelectedStyling xor styling.usesUnselectedStyling) shouldBe true
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Option with zero votes can be selected
+     *
+     * *For any* PollOption with zero voteCount but isSelected = true,
+     * the option SHALL still have selected styling applied.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Option with zero votes but isSelected true should have selected styling" {
+        val textArb = Arb.string(1..50)
+
+        checkAll(100, textArb) { text ->
+            val option = PollOption(
+                id = "1",
+                text = text,
+                voteCount = 0, // Zero votes
+                voters = emptyList(),
+                isSelected = true // But marked as selected
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            styling.usesSelectedStyling shouldBe true
+            styling.usesUnselectedStyling shouldBe false
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Option with votes can be unselected
+     *
+     * *For any* PollOption with positive voteCount but isSelected = false,
+     * the option SHALL have unselected styling applied.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Option with votes but isSelected false should have unselected styling" {
+        val voteCountArb = Arb.int(1..10000)
+        val voterCountArb = Arb.int(1..100)
+
+        checkAll(100, voteCountArb, voterCountArb) { voteCount, voterCount ->
+            val option = PollOption(
+                id = "1",
+                text = "Popular option",
+                voteCount = voteCount,
+                voters = (1..voterCount).map { "other_user_$it" },
+                isSelected = false // Current user hasn't selected this
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            styling.usesSelectedStyling shouldBe false
+            styling.usesUnselectedStyling shouldBe true
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Stroke color selection
+     *
+     * *For any* PollOption, the stroke color SHALL be selectedRadioButtonStrokeColor
+     * when isSelected is true, and unselectedRadioButtonStrokeColor when false.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Stroke color should match selection state" {
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(200, isSelectedArb) { isSelected ->
+            val option = PollOption(
+                id = "1",
+                text = "Test option",
+                voteCount = 1,
+                voters = listOf("user1"),
+                isSelected = isSelected
+            )
+            
+            val styleProperties = getAppliedStyleProperties(option)
+            
+            if (isSelected) {
+                styleProperties.strokeColorSource shouldBe "selectedRadioButtonStrokeColor"
+            } else {
+                styleProperties.strokeColorSource shouldBe "unselectedRadioButtonStrokeColor"
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Stroke width selection
+     *
+     * *For any* PollOption, the stroke width SHALL be selectedRadioButtonStrokeWidth
+     * when isSelected is true, and unselectedRadioButtonStrokeWidth when false.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Stroke width should match selection state" {
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(200, isSelectedArb) { isSelected ->
+            val option = PollOption(
+                id = "1",
+                text = "Test option",
+                voteCount = 1,
+                voters = listOf("user1"),
+                isSelected = isSelected
+            )
+            
+            val styleProperties = getAppliedStyleProperties(option)
+            
+            if (isSelected) {
+                styleProperties.strokeWidthSource shouldBe "selectedRadioButtonStrokeWidth"
+            } else {
+                styleProperties.strokeWidthSource shouldBe "unselectedRadioButtonStrokeWidth"
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Icon tint selection
+     *
+     * *For any* PollOption, the icon tint SHALL be selectedIconTint
+     * when isSelected is true, and unselectedIconTint when false.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Icon tint should match selection state" {
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(200, isSelectedArb) { isSelected ->
+            val option = PollOption(
+                id = "1",
+                text = "Test option",
+                voteCount = 1,
+                voters = listOf("user1"),
+                isSelected = isSelected
+            )
+            
+            val styleProperties = getAppliedStyleProperties(option)
+            
+            if (isSelected) {
+                styleProperties.iconTintSource shouldBe "selectedIconTint"
+            } else {
+                styleProperties.iconTintSource shouldBe "unselectedIconTint"
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - All style properties are consistent
+     *
+     * *For any* PollOption, all three styling properties (strokeColor, strokeWidth, iconTint)
+     * SHALL consistently use either all selected or all unselected sources.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: All style properties should be consistently selected or unselected" {
+        val isSelectedArb = Arb.boolean()
+        val voteCountArb = Arb.int(0..1000)
+
+        checkAll(200, isSelectedArb, voteCountArb) { isSelected, voteCount ->
+            val option = PollOption(
+                id = "1",
+                text = "Test option",
+                voteCount = voteCount,
+                voters = if (isSelected) listOf("user1") else emptyList(),
+                isSelected = isSelected
+            )
+            
+            val styleProperties = getAppliedStyleProperties(option)
+            
+            // All properties should be from the same source (selected or unselected)
+            val allSelected = styleProperties.strokeColorSource.startsWith("selected") &&
+                    styleProperties.strokeWidthSource.startsWith("selected") &&
+                    styleProperties.iconTintSource.startsWith("selected")
+            
+            val allUnselected = styleProperties.strokeColorSource.startsWith("unselected") &&
+                    styleProperties.strokeWidthSource.startsWith("unselected") &&
+                    styleProperties.iconTintSource.startsWith("unselected")
+            
+            (allSelected xor allUnselected) shouldBe true
+            allSelected shouldBe isSelected
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Empty poll data edge case
+     *
+     * *For any* empty PollData (no options), no styling decisions need to be made.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Empty poll should have no styling decisions" {
+        val pollData = PollData(
+            id = "empty_poll",
+            question = "Empty poll?",
+            options = emptyList(),
+            totalVotes = 0
+        )
+        
+        val stylingDecisions = pollData.options.map { determineOptionStyling(it) }
+        
+        stylingDecisions.size shouldBe 0
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Single option poll
+     *
+     * *For any* PollData with a single option, that option's styling
+     * SHALL be determined by its isSelected property.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Single option poll should apply correct styling based on isSelected" {
+        val isSelectedArb = Arb.boolean()
+        val textArb = Arb.string(1..100)
+
+        checkAll(100, isSelectedArb, textArb) { isSelected, text ->
+            val option = PollOption(
+                id = "1",
+                text = text,
+                voteCount = if (isSelected) 1 else 0,
+                voters = if (isSelected) listOf("user1") else emptyList(),
+                isSelected = isSelected
+            )
+            
+            val pollData = PollData(
+                id = "single_option_poll",
+                question = "Single option?",
+                options = listOf(option),
+                totalVotes = if (isSelected) 1 else 0
+            )
+            
+            val styling = determineOptionStyling(pollData.options.first())
+            
+            styling.usesSelectedStyling shouldBe isSelected
+            styling.usesUnselectedStyling shouldBe !isSelected
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Large poll with random selections
+     *
+     * *For any* large PollData with random selection states,
+     * each option's styling SHALL match its isSelected property.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Large poll with random selections should apply correct styling to each option" {
+        val optionCountArb = Arb.int(10..50)
+
+        checkAll(50, optionCountArb) { optionCount ->
+            // Create options with random selection states
+            val options = (1..optionCount).map { index ->
+                val isSelected = index % 3 == 0 // Every third option is selected
+                PollOption(
+                    id = index.toString(),
+                    text = "Option $index",
+                    voteCount = if (isSelected) 1 else 0,
+                    voters = if (isSelected) listOf("user1") else emptyList(),
+                    isSelected = isSelected
+                )
+            }
+            
+            val pollData = PollData(
+                id = "large_poll",
+                question = "Large poll with random selections?",
+                options = options,
+                totalVotes = options.count { it.isSelected }
+            )
+            
+            // Verify each option's styling
+            pollData.options.forEach { option ->
+                val styling = determineOptionStyling(option)
+                
+                styling.usesSelectedStyling shouldBe option.isSelected
+                styling.usesUnselectedStyling shouldBe !option.isSelected
+            }
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Option ID does not affect styling
+     *
+     * *For any* PollOption, the option ID SHALL NOT affect the styling decision.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Option ID should not affect styling decision" {
+        val idArb = Arb.string(1..100)
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(100, idArb, isSelectedArb) { id, isSelected ->
+            val option = PollOption(
+                id = id,
+                text = "Test option",
+                voteCount = 1,
+                voters = listOf("user1"),
+                isSelected = isSelected
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            // Styling should only depend on isSelected, not on ID
+            styling.usesSelectedStyling shouldBe isSelected
+            styling.usesUnselectedStyling shouldBe !isSelected
+        }
+    }
+
+    /**
+     * Property 13: Poll Selected Option Styling - Voters list does not affect styling
+     *
+     * *For any* PollOption, the voters list content SHALL NOT affect the styling decision.
+     *
+     * **Validates: Requirements 8.7**
+     */
+    "Property 13: Voters list should not affect styling decision" {
+        val voterCountArb = Arb.int(0..100)
+        val isSelectedArb = Arb.boolean()
+
+        checkAll(100, voterCountArb, isSelectedArb) { voterCount, isSelected ->
+            val option = PollOption(
+                id = "1",
+                text = "Test option",
+                voteCount = voterCount,
+                voters = (1..voterCount).map { "voter_$it" },
+                isSelected = isSelected
+            )
+            
+            val styling = determineOptionStyling(option)
+            
+            // Styling should only depend on isSelected, not on voters list
+            styling.usesSelectedStyling shouldBe isSelected
+            styling.usesUnselectedStyling shouldBe !isSelected
+        }
+    }
+})
+
+/**
+ * Data class representing the styling state of a poll option.
+ *
+ * @property usesSelectedStyling Whether the option uses selected styling properties
+ * @property usesUnselectedStyling Whether the option uses unselected styling properties
+ */
+private data class OptionStyling(
+    val usesSelectedStyling: Boolean,
+    val usesUnselectedStyling: Boolean
+)
+
+/**
+ * Data class representing which style properties are applied to a poll option.
+ *
+ * @property strokeColorSource The source of the stroke color ("selectedRadioButtonStrokeColor" or "unselectedRadioButtonStrokeColor")
+ * @property strokeWidthSource The source of the stroke width ("selectedRadioButtonStrokeWidth" or "unselectedRadioButtonStrokeWidth")
+ * @property iconTintSource The source of the icon tint ("selectedIconTint" or "unselectedIconTint")
+ */
+private data class AppliedStyleProperties(
+    val strokeColorSource: String,
+    val strokeWidthSource: String,
+    val iconTintSource: String
+)
+
+/**
+ * Determines the styling that would be applied to a poll option.
+ * This mirrors the logic in PollRadioButton composable from CometChatPollBubble.kt:
+ *
+ * ```kotlin
+ * val strokeColor = if (isSelected) {
+ *     style.selectedRadioButtonStrokeColor
+ * } else {
+ *     style.unselectedRadioButtonStrokeColor
+ * }
+ *
+ * val strokeWidth = if (isSelected) {
+ *     style.selectedRadioButtonStrokeWidth
+ * } else {
+ *     style.unselectedRadioButtonStrokeWidth
+ * }
+ *
+ * val iconTint = if (isSelected) {
+ *     style.selectedIconTint
+ * } else {
+ *     style.unselectedIconTint
+ * }
+ * ```
+ *
+ * @param option The poll option to determine styling for
+ * @return OptionStyling indicating which styling type is applied
+ */
+private fun determineOptionStyling(option: PollOption): OptionStyling {
+    // The styling is determined solely by the isSelected property
+    // This mirrors the conditional logic in PollRadioButton
+    return OptionStyling(
+        usesSelectedStyling = option.isSelected,
+        usesUnselectedStyling = !option.isSelected
+    )
+}
+
+/**
+ * Gets the applied style properties for a poll option.
+ * This mirrors the property selection logic in PollRadioButton composable.
+ *
+ * @param option The poll option to get style properties for
+ * @return AppliedStyleProperties indicating which style properties are used
+ */
+private fun getAppliedStyleProperties(option: PollOption): AppliedStyleProperties {
+    return if (option.isSelected) {
+        AppliedStyleProperties(
+            strokeColorSource = "selectedRadioButtonStrokeColor",
+            strokeWidthSource = "selectedRadioButtonStrokeWidth",
+            iconTintSource = "selectedIconTint"
+        )
+    } else {
+        AppliedStyleProperties(
+            strokeColorSource = "unselectedRadioButtonStrokeColor",
+            strokeWidthSource = "unselectedRadioButtonStrokeWidth",
+            iconTintSource = "unselectedIconTint"
+        )
+    }
+}

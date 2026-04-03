@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatMediaRecorder">
+        <attr name="cometchatMediaRecorderStyle" format="reference" />
+        <attr name="cometchatMediaRecorderBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderCornerRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderRecordingIcon" format="reference" />
+        <attr name="cometchatMediaRecorderRecordingIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderRecordingIconTint" format="color" />
+        <attr name="cometchatMediaRecorderTextAppearance" format="reference" />
+        <attr name="cometchatMediaRecorderTextColor" format="color" />
+        <attr name="cometchatMediaRecorderDeleteIcon" format="reference" />
+        <attr name="cometchatMediaRecorderDeleteIconTint" format="color" />
+        <attr name="cometchatMediaRecorderDeleteIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderDeleteIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderDeleteIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderDeleteIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderDeleteIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderStartIcon" format="reference" />
+        <attr name="cometchatMediaRecorderStartIconTint" format="color" />
+        <attr name="cometchatMediaRecorderStartIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderStartIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderStartIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderStartIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderStartIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderPauseIcon" format="reference" />
+        <attr name="cometchatMediaRecorderPauseIconTint" format="color" />
+        <attr name="cometchatMediaRecorderPauseIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderPauseIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderPauseIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderPauseIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderPauseIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderStopIcon" format="reference" />
+        <attr name="cometchatMediaRecorderStopIconTint" format="color" />
+        <attr name="cometchatMediaRecorderStopIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderStopIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderStopIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderStopIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderStopIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderPlayIconTint" format="color" />
+        <attr name="cometchatMediaRecorderVisualizerColor" format="color" />
+        <attr name="cometchatMediaRecorderSendIcon" format="reference" />
+        <attr name="cometchatMediaRecorderSendIconTint" format="color" />
+        <attr name="cometchatMediaRecorderSendIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderSendIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderSendIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderSendIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderSendIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderRestartIcon" format="reference" />
+        <attr name="cometchatMediaRecorderRestartIconTint" format="color" />
+        <attr name="cometchatMediaRecorderRestartIconBackgroundColor" format="color" />
+        <attr name="cometchatMediaRecorderRestartIconRadius" format="dimension" />
+        <attr name="cometchatMediaRecorderRestartIconStrokeWidth" format="dimension" />
+        <attr name="cometchatMediaRecorderRestartIconStrokeColor" format="color" />
+        <attr name="cometchatMediaRecorderRestartIconElevation" format="dimension" />
+        <attr name="cometchatMediaRecorderOutgoingMessageBubbleStyle" format="reference" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,173 @@
+---
+title: "Localize"
+description: "Set the UI Kit language and override text labels to match your users' locale."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Import | `com.cometchat.uikit.core.resources.localise.CometChatLocalize` |
+| Set language | `CometChatLocalize.setLocale(context, Language.FRENCH)` |
+| Get language | `CometChatLocalize.getLocale(context)` |
+| Supported languages | 19: ar, de, en, es, fr, hi, hu, it, ja, ko, lt, ms, nl, pl, pt, ru, sv, tr, zh |
+| Override labels | `res/values/strings.xml` — override UI Kit string resource keys |
+| Related | [Theme Introduction](/ui-kit/android/v6/theme-introduction) · [Sound Manager](/ui-kit/android/v6/sound-manager) |
+
+</Accordion>
+
+Set the CometChat UI Kit language and override UI text so your app matches your users' locale.
+
+---
+
+## Core Concepts
+
+- `CometChatLocalize` — utility object in `chatuikit-core` to set and read the UI Kit locale. Shared by both Kotlin XML and Jetpack Compose modules.
+- `Language` — constants for supported language codes (`Language.ENGLISH`, `Language.FRENCH`, etc.)
+- `strings.xml` — Android string resources that control visible text in UI Kit components. Override keys in your app's `strings.xml`.
+
+### Supported Languages
+
+| Language | Code | Language | Code |
+| --- | --- | --- | --- |
+| Arabic | `ar` | Korean | `ko` |
+| Chinese | `zh` | Lithuanian | `lt` |
+| Dutch | `nl` | Malay | `ms` |
+| English | `en` | Polish | `pl` |
+| French | `fr` | Portuguese | `pt` |
+| German | `de` | Russian | `ru` |
+| Hindi | `hi` | Spanish | `es` |
+| Hungarian | `hu` | Swedish | `sv` |
+| Italian | `it` | Turkish | `tr` |
+| Japanese | `ja` | | |
+
+---
+
+## Set the UI Kit Locale
+
+Call `CometChatLocalize.setLocale()` before rendering any UI Kit components.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+import com.cometchat.uikit.core.resources.localise.CometChatLocalize
+import com.cometchat.uikit.core.resources.localise.Language
+
+// Set language to Hindi
+CometChatLocalize.setLocale(this, Language.HINDI)
+
+// Read current locale
+val currentLocale = CometChatLocalize.getLocale(this)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+import com.cometchat.uikit.core.resources.localise.CometChatLocalize
+import com.cometchat.uikit.core.resources.localise.Language
+
+// Set language before setContent {}
+CometChatLocalize.setLocale(this, Language.HINDI)
+
+setContent {
+    CometChatTheme {
+        // UI Kit composables will use Hindi strings
+        CometChatConversations(...)
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Override UI Kit Labels
+
+Override any UI Kit string by adding the same key to your app's `res/values/strings.xml`. No source code changes needed — Android's resource merging handles it.
+
+```xml res/values/strings.xml lines
+<resources>
+    <!-- Override the conversations list title -->
+    <string name="cometchat_chats" translatable="true">Conversations</string>
+
+    <!-- Override the "typing" indicator text -->
+    <string name="cometchat_typing" translatable="true">writing...</string>
+</resources>
+```
+
+<Frame>
+  <img src="/images/09c92298-conversation_string_customization-4bd4560358557075106f65db69aa231c.png" />
+</Frame>
+
+This works identically for both Kotlin XML Views and Jetpack Compose — both modules read from the same Android string resources.
+
+---
+
+## Customize Date & Time Labels
+
+Override how timestamps like "Today", "Yesterday", and "X mins ago" are displayed.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Set a `DateTimeFormatterCallback` on individual components:
+
+```kotlin lines
+import com.cometchat.uikit.kotlin.shared.interfaces.DateTimeFormatterCallback
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+val messageList = findViewById<CometChatMessageList>(R.id.message_list)
+
+messageList.setDateTimeFormatter(object : DateTimeFormatterCallback {
+    private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+    override fun time(timestamp: Long): String = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(timestamp))
+    override fun today(timestamp: Long): String = "Today"
+    override fun yesterday(timestamp: Long): String = "Yesterday"
+    override fun lastWeek(timestamp: Long): String = "Last Week"
+    override fun otherDays(timestamp: Long): String = dateFormatter.format(Date(timestamp))
+    override fun minutes(diffInMinutesFromNow: Long, timestamp: Long): String = "$diffInMinutesFromNow mins ago"
+    override fun hours(diffInHourFromNow: Long, timestamp: Long): String = "$diffInHourFromNow hrs ago"
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Pass a `dateTimeFormatter` parameter to the component:
+
+```kotlin lines
+CometChatMessageList(
+    user = user,
+    dateTimeFormatter = object : DateTimeFormatterCallback {
+        override fun time(timestamp: Long): String = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(timestamp))
+        override fun today(timestamp: Long): String = "Today"
+        override fun yesterday(timestamp: Long): String = "Yesterday"
+        override fun lastWeek(timestamp: Long): String = "Last Week"
+        override fun otherDays(timestamp: Long): String = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(timestamp))
+        override fun minutes(diffInMinutesFromNow: Long, timestamp: Long): String = "$diffInMinutesFromNow mins ago"
+        override fun hours(diffInHourFromNow: Long, timestamp: Long): String = "$diffInHourFromNow hrs ago"
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Additional API
+
+| Method | Description |
+| --- | --- |
+| `CometChatLocalize.setLocale(context, language)` | Sets the UI Kit language |
+| `CometChatLocalize.getLocale(context)` | Returns the current locale country code |
+| `CometChatLocalize.getLanguage(context)` | Returns the current locale language code |
+| `CometChatLocalize.isRtl(context)` | Checks if the current locale is right-to-left |
+| `CometChatLocalize.resetToDefault()` | Resets locale to system default |
+| `CometChatLocalize.createLocalizedContext(context, language)` | Creates a context with a specific locale without affecting the app globally |

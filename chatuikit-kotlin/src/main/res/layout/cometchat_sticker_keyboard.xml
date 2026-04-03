@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/empty_sticker_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_empty_sticker"
+            android:layout_width="@dimen/cometchat_60dp"
+            android:layout_height="@dimen/cometchat_60dp"
+            android:layout_marginBottom="@dimen/cometchat_margin_5"
+            android:src="@drawable/cometchat_ic_filled_sticker"
+            app:tint="?attr/cometchatIconTintTertiary"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/tv_empty_sticker_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/cometchat_margin_1"
+            android:text="@string/cometchat_no_stickers_available"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/tv_empty_sticker_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/cometchat_you_don_t_have_any_stickers_yet"
+            android:textAlignment="center" />
+
+    </LinearLayout>
+
+    <!-- Error State -->
+    <LinearLayout
+        android:id="@+id/error_sticker_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_error_sticker_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/cometchat_margin_1"
+            android:text="@string/cometchat_looks_like_something_went_wrong_n_please_try_again"
+            android:textAlignment="center" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/retry_btn"
+            android:layout_width="@dimen/cometchat_120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_5"
+            android:backgroundTint="?attr/cometchatPrimaryColor"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/cometchat_padding_2"
+            android:text="@string/cometchat_retry"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
+    <!-- Loading State (Shimmer) -->
+    <com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout
+        android:id="@+id/shimmer_effect_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cometchatShimmerDropOff="1"
+        app:cometchatShimmerHighlightAlpha="0.9">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_shimmer_effect"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout>
+
+    <!-- Custom State Container -->
+    <LinearLayout
+        android:id="@+id/sticker_custom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" />
+
+    <!-- Content State -->
+    <LinearLayout
+        android:id="@+id/stickers_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- ViewPager2 for swipeable sticker pages (NO Fragment dependency) -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Separator -->
+        <View
+            android:id="@+id/separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
+
+        <!-- Tab bar using RecyclerView (horizontal scroll) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_tab_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/cometchat_padding_2"
+            android:paddingVertical="@dimen/cometchat_padding_2"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    </LinearLayout>
+
+</RelativeLayout>

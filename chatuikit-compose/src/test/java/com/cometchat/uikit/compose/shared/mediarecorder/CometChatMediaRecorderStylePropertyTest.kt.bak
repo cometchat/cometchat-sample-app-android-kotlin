@@ -1,0 +1,504 @@
+package com.cometchat.uikit.compose.shared.mediarecorder
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.cometchat.uikit.compose.presentation.shared.mediarecorder.style.CometChatAudioVisualizerStyle
+import com.cometchat.uikit.compose.presentation.shared.mediarecorder.style.CometChatMediaRecorderStyle
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Property-based tests for [CometChatMediaRecorderStyle] and [CometChatAudioVisualizerStyle].
+ * 
+ * These tests validate the style classes follow the design document specifications
+ * and that all properties are properly defined and accessible.
+ *
+ * Feature: media-recorder-redesign
+ * **Property 10: Style Application**
+ * **Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8**
+ */
+class CometChatMediaRecorderStylePropertyTest : FunSpec({
+
+    // Feature: media-recorder-redesign, Property 10: Style Application
+    // *For any* CometChatMediaRecorderStyle instance, all style properties SHALL be applied
+    // to the corresponding UI elements, and the default() function SHALL return a valid style
+    // with all properties set from CometChatTheme.
+    // **Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8**
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has all required container properties
+     * 
+     * The style SHALL include backgroundColor, cornerRadius, strokeColor, and strokeWidth
+     * for container customization.
+     * 
+     * **Validates: Requirements 6.1**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has all container properties") {
+        val style = CometChatMediaRecorderStyle(
+            backgroundColor = Color.White,
+            cornerRadius = 12.dp,
+            strokeColor = Color.Gray,
+            strokeWidth = 1.dp,
+            recordingChunkColor = Color.Blue,
+            seekBarColor = Color.Blue,
+            seekBarTrackColor = Color.LightGray,
+            recordedContainerColor = Color.White,
+            playIconTint = Color.Blue,
+            pauseIconTint = Color.Blue,
+            stopIconTint = Color.Gray,
+            startIconTint = Color.Red,
+            submitIconTint = Color.Blue,
+            deleteIconColor = Color.Gray,
+            timerTextColor = Color.Black,
+            timerTextStyle = TextStyle.Default,
+            recordButtonBackgroundColor = Color.White,
+            stopButtonBackgroundColor = Color.White,
+            deleteButtonBackgroundColor = Color.White,
+            submitButtonBackgroundColor = Color.White,
+            playButtonBackgroundColor = Color.White,
+            visualizerStyle = CometChatAudioVisualizerStyle(
+                chunkColor = Color.Blue,
+                chunkWidth = 4.dp,
+                chunkSpacing = 3.dp,
+                chunkMinHeight = 4.dp,
+                chunkMaxHeight = 32.dp,
+                chunkCornerRadius = 2.dp,
+                chunkCount = 20
+            )
+        )
+        
+        // Verify container properties exist and are accessible
+        style.backgroundColor shouldBe Color.White
+        style.cornerRadius shouldBe 12.dp
+        style.strokeColor shouldBe Color.Gray
+        style.strokeWidth shouldBe 1.dp
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has recordingChunkColor property
+     * 
+     * The style SHALL include recordingChunkColor for Audio_Visualizer bar color.
+     * 
+     * **Validates: Requirements 6.2**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has recordingChunkColor property") {
+        val testColor = Color.Magenta
+        val style = createTestStyle(recordingChunkColor = testColor)
+        
+        style.recordingChunkColor shouldBe testColor
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has seekBar properties
+     * 
+     * The style SHALL include seekBarColor for playback SeekBar color.
+     * 
+     * **Validates: Requirements 6.3**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has seekBar properties") {
+        val seekBarColor = Color.Cyan
+        val seekBarTrackColor = Color.LightGray
+        val style = createTestStyle(
+            seekBarColor = seekBarColor,
+            seekBarTrackColor = seekBarTrackColor
+        )
+        
+        style.seekBarColor shouldBe seekBarColor
+        style.seekBarTrackColor shouldBe seekBarTrackColor
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has all icon tint properties
+     * 
+     * The style SHALL include playIconTint, pauseIconTint, stopIconTint, 
+     * startIconTint, submitIconTint, and deleteIconColor.
+     * 
+     * **Validates: Requirements 6.4**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has all icon tint properties") {
+        val playTint = Color(0xFF1111FF)
+        val pauseTint = Color(0xFF2222FF)
+        val stopTint = Color(0xFF3333FF)
+        val startTint = Color(0xFF4444FF)
+        val submitTint = Color(0xFF5555FF)
+        val deleteTint = Color(0xFF6666FF)
+        
+        val style = createTestStyle(
+            playIconTint = playTint,
+            pauseIconTint = pauseTint,
+            stopIconTint = stopTint,
+            startIconTint = startTint,
+            submitIconTint = submitTint,
+            deleteIconColor = deleteTint
+        )
+        
+        style.playIconTint shouldBe playTint
+        style.pauseIconTint shouldBe pauseTint
+        style.stopIconTint shouldBe stopTint
+        style.startIconTint shouldBe startTint
+        style.submitIconTint shouldBe submitTint
+        style.deleteIconColor shouldBe deleteTint
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has timer text properties
+     * 
+     * The style SHALL include timerTextColor for Chronometer text color.
+     * 
+     * **Validates: Requirements 6.5**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has timer text properties") {
+        val timerColor = Color.DarkGray
+        val timerStyle = TextStyle.Default
+        
+        val style = createTestStyle(
+            timerTextColor = timerColor,
+            timerTextStyle = timerStyle
+        )
+        
+        style.timerTextColor shouldBe timerColor
+        style.timerTextStyle shouldBe timerStyle
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has recordedContainerColor property
+     * 
+     * The style SHALL include recordedContainerColor for the Recorded_Container background.
+     * 
+     * **Validates: Requirements 6.6**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has recordedContainerColor property") {
+        val containerColor = Color(0xFFEEEEEE)
+        val style = createTestStyle(recordedContainerColor = containerColor)
+        
+        style.recordedContainerColor shouldBe containerColor
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle has all button background properties
+     * 
+     * The style SHALL include background colors for all control buttons.
+     * 
+     * **Validates: Requirements 6.1, 6.8**
+     */
+    test("Property 10: CometChatMediaRecorderStyle has all button background properties") {
+        val recordBg = Color(0xFFAA0000)
+        val stopBg = Color(0xFF00AA00)
+        val deleteBg = Color(0xFF0000AA)
+        val submitBg = Color(0xFFAAAA00)
+        val playBg = Color(0xFF00AAAA)
+        
+        val style = createTestStyle(
+            recordButtonBackgroundColor = recordBg,
+            stopButtonBackgroundColor = stopBg,
+            deleteButtonBackgroundColor = deleteBg,
+            submitButtonBackgroundColor = submitBg,
+            playButtonBackgroundColor = playBg
+        )
+        
+        style.recordButtonBackgroundColor shouldBe recordBg
+        style.stopButtonBackgroundColor shouldBe stopBg
+        style.deleteButtonBackgroundColor shouldBe deleteBg
+        style.submitButtonBackgroundColor shouldBe submitBg
+        style.playButtonBackgroundColor shouldBe playBg
+    }
+
+    /**
+     * Property 10: CometChatMediaRecorderStyle includes nested visualizer style
+     * 
+     * The style SHALL include a nested CometChatAudioVisualizerStyle for
+     * audio visualizer customization.
+     * 
+     * **Validates: Requirements 6.2, 6.8**
+     */
+    test("Property 10: CometChatMediaRecorderStyle includes nested visualizer style") {
+        val visualizerStyle = CometChatAudioVisualizerStyle(
+            chunkColor = Color.Green,
+            chunkWidth = 5.dp,
+            chunkSpacing = 4.dp,
+            chunkMinHeight = 6.dp,
+            chunkMaxHeight = 40.dp,
+            chunkCornerRadius = 3.dp,
+            chunkCount = 25
+        )
+        
+        val style = createTestStyle(visualizerStyle = visualizerStyle)
+        
+        style.visualizerStyle shouldBe visualizerStyle
+        style.visualizerStyle.chunkColor shouldBe Color.Green
+        style.visualizerStyle.chunkCount shouldBe 25
+    }
+
+    /**
+     * Property 10: CometChatAudioVisualizerStyle has all required properties
+     * 
+     * The visualizer style SHALL include chunkColor, chunkWidth, chunkSpacing,
+     * chunkMinHeight, chunkMaxHeight, chunkCornerRadius, and chunkCount.
+     * 
+     * **Validates: Requirements 2.5**
+     */
+    test("Property 10: CometChatAudioVisualizerStyle has all required properties") {
+        val style = CometChatAudioVisualizerStyle(
+            chunkColor = Color.Blue,
+            chunkWidth = 4.dp,
+            chunkSpacing = 3.dp,
+            chunkMinHeight = 4.dp,
+            chunkMaxHeight = 32.dp,
+            chunkCornerRadius = 2.dp,
+            chunkCount = 20
+        )
+        
+        style.chunkColor shouldBe Color.Blue
+        style.chunkWidth shouldBe 4.dp
+        style.chunkSpacing shouldBe 3.dp
+        style.chunkMinHeight shouldBe 4.dp
+        style.chunkMaxHeight shouldBe 32.dp
+        style.chunkCornerRadius shouldBe 2.dp
+        style.chunkCount shouldBe 20
+    }
+
+    /**
+     * Property 10: CometChatAudioVisualizerStyle chunk dimensions are valid
+     * 
+     * For any valid chunk dimensions, minHeight SHALL be less than or equal to maxHeight.
+     * 
+     * **Validates: Requirements 2.5**
+     */
+    test("Property 10: CometChatAudioVisualizerStyle chunk dimensions property") {
+        checkAll(100, Arb.float(1f, 10f), Arb.float(20f, 50f)) { minHeight, maxHeight ->
+            val style = CometChatAudioVisualizerStyle(
+                chunkColor = Color.Blue,
+                chunkWidth = 4.dp,
+                chunkSpacing = 3.dp,
+                chunkMinHeight = minHeight.dp,
+                chunkMaxHeight = maxHeight.dp,
+                chunkCornerRadius = 2.dp,
+                chunkCount = 20
+            )
+            
+            // Min height should be less than max height
+            (style.chunkMinHeight.value <= style.chunkMaxHeight.value) shouldBe true
+        }
+    }
+
+    /**
+     * Property 10: CometChatAudioVisualizerStyle chunk count is positive
+     * 
+     * For any valid chunk count, the value SHALL be positive.
+     * 
+     * **Validates: Requirements 2.5**
+     */
+    test("Property 10: CometChatAudioVisualizerStyle chunk count is positive") {
+        checkAll(100, Arb.int(1, 100)) { count ->
+            val style = CometChatAudioVisualizerStyle(
+                chunkColor = Color.Blue,
+                chunkWidth = 4.dp,
+                chunkSpacing = 3.dp,
+                chunkMinHeight = 4.dp,
+                chunkMaxHeight = 32.dp,
+                chunkCornerRadius = 2.dp,
+                chunkCount = count
+            )
+            
+            (style.chunkCount > 0) shouldBe true
+        }
+    }
+
+    /**
+     * Property 10: Style is immutable
+     * 
+     * Both style classes are marked with @Immutable annotation,
+     * ensuring they are safe for Compose recomposition.
+     * 
+     * **Validates: Requirements 6.8**
+     */
+    test("Property 10: Style classes are data classes with copy functionality") {
+        val originalStyle = createTestStyle()
+        val modifiedStyle = originalStyle.copy(backgroundColor = Color.Red)
+        
+        // Original should be unchanged
+        originalStyle.backgroundColor shouldNotBe Color.Red
+        
+        // Modified should have new value
+        modifiedStyle.backgroundColor shouldBe Color.Red
+        
+        // Other properties should be preserved
+        modifiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+        modifiedStyle.recordingChunkColor shouldBe originalStyle.recordingChunkColor
+    }
+
+    /**
+     * Property 10: CometChatAudioVisualizerStyle is immutable with copy
+     * 
+     * The visualizer style class supports copy functionality for modifications.
+     * 
+     * **Validates: Requirements 6.8**
+     */
+    test("Property 10: CometChatAudioVisualizerStyle supports copy functionality") {
+        val originalStyle = CometChatAudioVisualizerStyle(
+            chunkColor = Color.Blue,
+            chunkWidth = 4.dp,
+            chunkSpacing = 3.dp,
+            chunkMinHeight = 4.dp,
+            chunkMaxHeight = 32.dp,
+            chunkCornerRadius = 2.dp,
+            chunkCount = 20
+        )
+        
+        val modifiedStyle = originalStyle.copy(chunkColor = Color.Green, chunkCount = 30)
+        
+        // Original should be unchanged
+        originalStyle.chunkColor shouldBe Color.Blue
+        originalStyle.chunkCount shouldBe 20
+        
+        // Modified should have new values
+        modifiedStyle.chunkColor shouldBe Color.Green
+        modifiedStyle.chunkCount shouldBe 30
+        
+        // Other properties should be preserved
+        modifiedStyle.chunkWidth shouldBe originalStyle.chunkWidth
+        modifiedStyle.chunkMaxHeight shouldBe originalStyle.chunkMaxHeight
+    }
+
+    /**
+     * Property 10: All style properties are non-null
+     * 
+     * All properties in the style classes SHALL be non-null,
+     * ensuring consistent styling without null checks.
+     * 
+     * **Validates: Requirements 6.7, 6.8**
+     */
+    test("Property 10: All style properties are non-null") {
+        val style = createTestStyle()
+        
+        // Container properties
+        style.backgroundColor shouldNotBe null
+        style.cornerRadius shouldNotBe null
+        style.strokeColor shouldNotBe null
+        style.strokeWidth shouldNotBe null
+        
+        // Visualizer
+        style.recordingChunkColor shouldNotBe null
+        
+        // Playback
+        style.seekBarColor shouldNotBe null
+        style.seekBarTrackColor shouldNotBe null
+        style.recordedContainerColor shouldNotBe null
+        
+        // Icon tints
+        style.playIconTint shouldNotBe null
+        style.pauseIconTint shouldNotBe null
+        style.stopIconTint shouldNotBe null
+        style.startIconTint shouldNotBe null
+        style.submitIconTint shouldNotBe null
+        style.deleteIconColor shouldNotBe null
+        
+        // Text
+        style.timerTextColor shouldNotBe null
+        style.timerTextStyle shouldNotBe null
+        
+        // Button backgrounds
+        style.recordButtonBackgroundColor shouldNotBe null
+        style.stopButtonBackgroundColor shouldNotBe null
+        style.deleteButtonBackgroundColor shouldNotBe null
+        style.submitButtonBackgroundColor shouldNotBe null
+        style.playButtonBackgroundColor shouldNotBe null
+        
+        // Nested style
+        style.visualizerStyle shouldNotBe null
+    }
+
+    /**
+     * Property 10: CometChatAudioVisualizerStyle all properties are non-null
+     * 
+     * All properties in the visualizer style SHALL be non-null.
+     * 
+     * **Validates: Requirements 2.5**
+     */
+    test("Property 10: CometChatAudioVisualizerStyle all properties are non-null") {
+        val style = CometChatAudioVisualizerStyle(
+            chunkColor = Color.Blue,
+            chunkWidth = 4.dp,
+            chunkSpacing = 3.dp,
+            chunkMinHeight = 4.dp,
+            chunkMaxHeight = 32.dp,
+            chunkCornerRadius = 2.dp,
+            chunkCount = 20
+        )
+        
+        style.chunkColor shouldNotBe null
+        style.chunkWidth shouldNotBe null
+        style.chunkSpacing shouldNotBe null
+        style.chunkMinHeight shouldNotBe null
+        style.chunkMaxHeight shouldNotBe null
+        style.chunkCornerRadius shouldNotBe null
+        style.chunkCount shouldNotBe null
+    }
+})
+
+/**
+ * Helper function to create a test style with default values.
+ * Allows overriding specific properties for testing.
+ */
+private fun createTestStyle(
+    backgroundColor: Color = Color.White,
+    cornerRadius: Dp = 12.dp,
+    strokeColor: Color = Color.Gray,
+    strokeWidth: Dp = 1.dp,
+    recordingChunkColor: Color = Color.Blue,
+    seekBarColor: Color = Color.Blue,
+    seekBarTrackColor: Color = Color.LightGray,
+    recordedContainerColor: Color = Color.White,
+    playIconTint: Color = Color.Blue,
+    pauseIconTint: Color = Color.Blue,
+    stopIconTint: Color = Color.Gray,
+    startIconTint: Color = Color.Red,
+    submitIconTint: Color = Color.Blue,
+    deleteIconColor: Color = Color.Gray,
+    timerTextColor: Color = Color.Black,
+    timerTextStyle: TextStyle = TextStyle.Default,
+    recordButtonBackgroundColor: Color = Color.White,
+    stopButtonBackgroundColor: Color = Color.White,
+    deleteButtonBackgroundColor: Color = Color.White,
+    submitButtonBackgroundColor: Color = Color.White,
+    playButtonBackgroundColor: Color = Color.White,
+    visualizerStyle: CometChatAudioVisualizerStyle = CometChatAudioVisualizerStyle(
+        chunkColor = Color.Blue,
+        chunkWidth = 4.dp,
+        chunkSpacing = 3.dp,
+        chunkMinHeight = 4.dp,
+        chunkMaxHeight = 32.dp,
+        chunkCornerRadius = 2.dp,
+        chunkCount = 20
+    )
+): CometChatMediaRecorderStyle = CometChatMediaRecorderStyle(
+    backgroundColor = backgroundColor,
+    cornerRadius = cornerRadius,
+    strokeColor = strokeColor,
+    strokeWidth = strokeWidth,
+    recordingChunkColor = recordingChunkColor,
+    seekBarColor = seekBarColor,
+    seekBarTrackColor = seekBarTrackColor,
+    recordedContainerColor = recordedContainerColor,
+    playIconTint = playIconTint,
+    pauseIconTint = pauseIconTint,
+    stopIconTint = stopIconTint,
+    startIconTint = startIconTint,
+    submitIconTint = submitIconTint,
+    deleteIconColor = deleteIconColor,
+    timerTextColor = timerTextColor,
+    timerTextStyle = timerTextStyle,
+    recordButtonBackgroundColor = recordButtonBackgroundColor,
+    stopButtonBackgroundColor = stopButtonBackgroundColor,
+    deleteButtonBackgroundColor = deleteButtonBackgroundColor,
+    submitButtonBackgroundColor = submitButtonBackgroundColor,
+    playButtonBackgroundColor = playButtonBackgroundColor,
+    visualizerStyle = visualizerStyle
+)

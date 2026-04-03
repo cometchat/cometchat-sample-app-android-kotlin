@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Groups Fragment Layout
+    
+    Contains CometChatGroups component for displaying group list.
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ui.fragments.GroupsFragment">
+    tools:context=".ui.groups.GroupsFragment">
 
-    <com.cometchat.chatuikit.groups.CometChatGroups
-        android:id="@+id/group"
+    <com.cometchat.uikit.kotlin.presentation.groups.ui.CometChatGroups
+        android:id="@+id/groups_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

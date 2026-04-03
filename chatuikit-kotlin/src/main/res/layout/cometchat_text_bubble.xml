@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/text_bubble_parent_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/link_Message_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/cometchat_padding_1"
+            android:paddingTop="@dimen/cometchat_padding_1"
+            android:paddingEnd="@dimen/cometchat_padding_1"
+            android:visibility="gone">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/link_message_card_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/preview_banner"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cometchat_160dp"
+                        android:importantForAccessibility="no"
+                        android:scaleType="center" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/cometchat_padding_2">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/link_heading"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content" />
+
+                                <TextView
+                                    android:id="@+id/link_description"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/cometchat_margin_1" />
+
+                                <TextView
+                                    android:id="@+id/link"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/cometchat_margin_1"
+                                    android:alpha="0.6" />
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/fab_icon_image"
+                                android:layout_width="@dimen/cometchat_40dp"
+                                android:layout_height="@dimen/cometchat_40dp"
+                                android:importantForAccessibility="no"
+                                android:scaleType="center"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Container for markdown-rendered segments -->
+            <LinearLayout
+                android:id="@+id/markdown_content_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:minWidth="@dimen/cometchat_100dp"
+                android:paddingStart="@dimen/cometchat_padding_3"
+                android:paddingTop="@dimen/cometchat_padding_3"
+                android:paddingEnd="@dimen/cometchat_padding_3" />
+
+            <!-- Fallback TextView for non-markdown text (hidden when markdown is used) -->
+            <TextView
+                android:id="@+id/cometchat_text_bubble_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:gravity="center_vertical"
+                android:minWidth="@dimen/cometchat_100dp"
+                android:paddingStart="@dimen/cometchat_padding_3"
+                android:paddingTop="@dimen/cometchat_padding_3"
+                android:paddingEnd="@dimen/cometchat_padding_3"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/translation_message_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/cometchat_padding_3"
+                android:paddingEnd="@dimen/cometchat_padding_3"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/cometchat_margin_2" />
+
+                <TextView
+                    android:id="@+id/translate_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/cometchat_margin_2" />
+
+                <TextView
+                    android:id="@+id/text_translated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/cometchat_margin_1"
+                    android:text="@string/cometchat_text_translated"
+                    android:textAppearance="?attr/cometchatTextAppearanceCaption2Regular" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/text_edited"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/cometchat_margin_3"
+                android:layout_marginEnd="@dimen/cometchat_margin_3"
+                android:layout_marginTop="@dimen/cometchat_margin_1"
+                android:text="@string/cometchat_edited"
+                android:textAppearance="?attr/cometchatTextAppearanceCaption2Regular" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,248 @@
+---
+title: "Overview"
+description: "Browse all prebuilt UI components in the CometChat Android UI Kit."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chat-uikit-kotlin` (Kotlin XML Views), `com.cometchat:chat-uikit-compose` (Jetpack Compose) |
+| Required setup | `CometChatUIKit.init()` + `CometChatUIKit.login()` before rendering any component |
+| Shared core | `chatuikit-core` — ViewModels, repositories, use cases, events (shared by both modules) |
+| Calling | Requires separate `com.cometchat:calls-sdk-android` package |
+
+</Accordion>
+
+## Architecture
+
+The UI Kit is a set of independent components that compose into chat layouts. A typical chat layout uses four core components:
+
+- `CometChatConversations` — list of recent conversations
+- `CometChatMessageHeader` — toolbar with avatar, name, status, typing indicator
+- `CometChatMessageList` — scrollable message feed with reactions, receipts, threads
+- `CometChatMessageComposer` — rich input with attachments, mentions, voice notes
+
+Selecting a conversation yields a `User` or `Group` object. Pass it to the message components to load the chat.
+
+Components communicate via `CometChatEvents` — a SharedFlow-based event bus. See [Events](/ui-kit/android/v6/events).
+
+---
+
+## Component Catalog
+
+### Conversations and Lists
+
+| Component | Purpose | Page |
+| --- | --- | --- |
+| `CometChatConversations` | Scrollable list of recent conversations | [Conversations](/ui-kit/android/v6/conversations) |
+| `CometChatUsers` | Scrollable list of users | [Users](/ui-kit/android/v6/users) |
+| `CometChatGroups` | Scrollable list of groups | [Groups](/ui-kit/android/v6/groups) |
+| `CometChatGroupMembers` | Scrollable list of group members | [Group Members](/ui-kit/android/v6/group-members) |
+
+### Messages
+
+| Component | Purpose | Page |
+| --- | --- | --- |
+| `CometChatMessageHeader` | Toolbar with avatar, name, status, typing | [Message Header](/ui-kit/android/v6/message-header) |
+| `CometChatMessageList` | Message feed with reactions, receipts, threads | [Message List](/ui-kit/android/v6/message-list) |
+| `CometChatMessageComposer` | Rich input with attachments, mentions, voice | [Message Composer](/ui-kit/android/v6/message-composer) |
+| `CometChatThreadHeader` | Parent message bubble and reply count | [Thread Header](/ui-kit/android/v6/threaded-messages-header) |
+
+### Calling
+
+| Component | Purpose | Page |
+| --- | --- | --- |
+| `CometChatCallButtons` | Voice and video call buttons | [Call Buttons](/ui-kit/android/v6/call-buttons) |
+| `CometChatIncomingCall` | Incoming call notification | [Incoming Call](/ui-kit/android/v6/incoming-call) |
+| `CometChatOutgoingCall` | Outgoing call screen | [Outgoing Call](/ui-kit/android/v6/outgoing-call) |
+| `CometChatCallLogs` | Call history list | [Call Logs](/ui-kit/android/v6/call-logs) |
+
+---
+
+## Component API Pattern
+
+All components share a consistent API surface across both modules.
+
+### Setting User or Group
+
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+messageHeader.setUser(user)
+messageList.setUser(user)
+messageComposer.setUser(user)
+
+// Or for group chat
+messageHeader.setGroup(group)
+messageList.setGroup(group)
+messageComposer.setGroup(group)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageHeader(user = user)
+CometChatMessageList(user = user)
+CometChatMessageComposer(user = user)
+
+// Or for group chat
+CometChatMessageHeader(group = group)
+CometChatMessageList(group = group)
+CometChatMessageComposer(group = group)
+```
+
+</Tab>
+</Tabs>
+
+### Callbacks
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setOnItemClick { conversation -> /* navigate */ }
+conversations.setOnError { exception -> /* handle error */ }
+conversations.setOnLoad { list -> /* data loaded */ }
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    onItemClick = { conversation -> /* navigate */ },
+    onError = { exception -> /* handle error */ },
+    onLoad = { list -> /* data loaded */ }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Data Filtering
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setConversationsRequestBuilder(
+    ConversationsRequest.ConversationsRequestBuilder().setLimit(20)
+)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    conversationsRequestBuilder = ConversationsRequest.ConversationsRequestBuilder().setLimit(20)
+)
+```
+
+</Tab>
+</Tabs>
+
+### View Slots
+
+Replace specific regions of a component's UI. See [View Slots](/ui-kit/android/v6/customization-view-slots).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```kotlin lines
+conversations.setSubtitleView(object : ConversationsViewHolderListener() {
+    override fun createView(context: Context, binding: CometchatConversationsListItemsBinding): View {
+        return CustomSubtitleView(context)
+    }
+    override fun bindView(context: Context, createdView: View, conversation: Conversation, ...) {
+        (createdView as CustomSubtitleView).bind(conversation)
+    }
+})
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatConversations(
+    subtitleView = { conversation, typingIndicator ->
+        Text(conversation.lastMessage?.text ?: "")
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+### Styles
+
+See [Component Styling](/ui-kit/android/v6/component-styling).
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+XML theme attributes in `themes.xml`:
+
+```xml lines
+<style name="AppTheme" parent="CometChatTheme.DayNight">
+    <item name="cometchatConversationsStyle">@style/CustomConversationsStyle</item>
+</style>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+Style data classes via parameters:
+
+```kotlin lines
+CometChatConversations(
+    style = CometChatConversationsStyle.default().copy(
+        backgroundColor = Color(0xFFF5F5F5)
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+### Events
+
+Global inter-component communication via `CometChatEvents`:
+
+```kotlin lines
+// Subscribe to message events
+viewModelScope.launch {
+    CometChatEvents.messageEvents.collect { event ->
+        when (event) {
+            is CometChatMessageEvent.MessageSent -> { /* handle */ }
+            is CometChatMessageEvent.MessageDeleted -> { /* handle */ }
+            else -> {}
+        }
+    }
+}
+```
+
+See [Events](/ui-kit/android/v6/events) for the full reference.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Core Features" icon="comments" href="/ui-kit/android/v6/core-features">
+    Chat features included out of the box
+  </Card>
+  <Card title="Theming" icon="paintbrush" href="/ui-kit/android/v6/theme-introduction">
+    Customize colors, fonts, and styles
+  </Card>
+  <Card title="Customization" icon="sliders" href="/ui-kit/android/v6/customization-overview">
+    Deep customization via ViewModels, styles, and view slots
+  </Card>
+  <Card title="Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Task-oriented tutorials for common patterns
+  </Card>
+</CardGroup>

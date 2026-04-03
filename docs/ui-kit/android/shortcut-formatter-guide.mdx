@@ -1,0 +1,158 @@
+---
+title: "ShortCut Formatter"
+description: "Add shortcut text expansion to the message composer using CometChatTextFormatter and the message-shortcuts extension."
+---
+
+<Accordion title="AI Integration Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin` · `com.cometchat:chatuikit-jetpack` |
+| Key class | `ShortCutFormatter` (extends `CometChatTextFormatter`) |
+| Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login("UID")` |
+| Track character | `!` — triggers shortcut expansion in the message composer |
+| Extension | `message-shortcuts` CometChat extension must be enabled |
+| Sample app | [GitHub](https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin) |
+| Related | [Mentions Formatter](/ui-kit/android/v6/mentions-formatter-guide) \| [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+`ShortCutFormatter` extends `CometChatTextFormatter` to expand shortcodes (like `!hi`) into full text via the Message Shortcuts extension. When a user types a shortcut trigger in the composer, a suggestion appears with the expansion — selecting it inserts the text.
+
+<Frame>
+  <img src="/images/d86e764a-shortcut_extension_guide-e21ce89a7fbb141a897f907b13dcc3c3.png" />
+</Frame>
+
+---
+
+## Steps
+
+### 1. Create the ShortCutFormatter class
+
+Extend `CometChatTextFormatter` with `'!'` as the tracking character:
+
+```kotlin lines
+class ShortCutFormatter : CometChatTextFormatter('!') {
+    private val messageShortcuts: HashMap<String, String> = HashMap()
+    private val shortcuts: MutableList<SuggestionItem> = ArrayList()
+
+    init {
+        prepareShortCuts()
+    }
+}
+```
+
+### 2. Fetch shortcuts from the extension
+
+```kotlin lines
+private fun prepareShortCuts() {
+    CometChat.callExtension(
+        "message-shortcuts", "GET", "/v1/fetch", null,
+        object : CometChat.CallbackListener<JSONObject>() {
+            override fun onSuccess(responseObject: JSONObject) {
+                try {
+                    val shortcutObject = responseObject
+                        .getJSONObject("data").getJSONObject("shortcuts")
+                    val keysItr = shortcutObject.keys()
+                    while (keysItr.hasNext()) {
+                        val key = keysItr.next()
+                        messageShortcuts[key] = shortcutObject.getString(key)
+                    }
+                } catch (e: JSONException) { e.printStackTrace() }
+            }
+            override fun onError(e: CometChatException) {}
+        })
+}
+```
+
+### 3. Override the search method
+
+Match user input against stored shortcuts and update the suggestion list:
+
+```kotlin lines
+override fun search(context: Context, queryString: String?) {
+    val query = trackingCharacter.toString() + queryString
+    shortcuts.clear()
+    if (messageShortcuts.containsKey(query)) {
+        val suggestionItem = SuggestionItem(
+            "", "$query  =>  ${messageShortcuts[query]}",
+            null, null, messageShortcuts[query], null, null
+        )
+        suggestionItem.isHideLeadingIcon = true
+        shortcuts.add(suggestionItem)
+    }
+    setSuggestionItemList(shortcuts)
+}
+```
+
+### 4. Override onScrollToBottom
+
+```kotlin
+override fun onScrollToBottom() {
+    // No pagination needed for shortcuts
+}
+```
+
+### 5. Integrate with MessageComposer
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+Add the XML element to your layout:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.messagecomposer.ui.CometChatMessageComposer
+    android:id="@+id/composer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+Then add the formatter to the composer:
+
+```kotlin lines
+import com.cometchat.uikit.core.CometChatUIKit
+
+val cometChatMessageComposer: CometChatMessageComposer = findViewById(R.id.composer)
+
+val cometChatTextFormatters = CometChatUIKit.getDataSource().getTextFormatters(this, cometChatMessageComposer.additionParameter)
+cometChatTextFormatters.add(ShortCutFormatter())
+cometChatMessageComposer.setTextFormatters(cometChatTextFormatters)
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.core.CometChatUIKit
+
+// In your composable or ViewModel setup
+val textFormatters = CometChatUIKit.getDataSource().getTextFormatters(context, additionParameter)
+textFormatters.add(ShortCutFormatter())
+
+CometChatMessageComposer(
+    user = user,
+    textFormatters = textFormatters
+)
+```
+</Tab>
+</Tabs>
+
+Typing `!` followed by a valid shortcut key (e.g., `!hi`) displays a suggestion with the expanded text. Selecting it inserts the expansion into the composer.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message Composer" icon="keyboard" href="/ui-kit/android/v6/message-composer">
+    Configure the composer where ShortCutFormatter is integrated
+  </Card>
+  <Card title="Mentions Formatter" icon="at" href="/ui-kit/android/v6/mentions-formatter-guide">
+    Format @mentions with styled tokens and click handling
+  </Card>
+  <Card title="All Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Browse all feature and formatter guides
+  </Card>
+  <Card title="Sample App" icon="github" href="https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin">
+    Full working sample application on GitHub
+  </Card>
+</CardGroup>

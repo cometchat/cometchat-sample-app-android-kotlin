@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/cometchat_margin_5"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/check_button"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            app:cardCornerRadius="@dimen/cometchat_radius_max"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/cometchat_color_neutral_600" />
+
+        <ProgressBar
+            android:id="@+id/progress_indicator"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/option_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/cometchat_margin_2"
+            android:layout_weight="1" />
+
+        <com.cometchat.uikit.kotlin.presentation.shared.messagebubble.pollbubble.ImageAndCountView
+            android:id="@+id/image_and_count_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_marginStart="@dimen/cometchat_margin_7"
+        android:layout_marginTop="@dimen/cometchat_margin_1"
+        android:progressDrawable="@drawable/cometchat_custom_progress_bar" />
+</LinearLayout>

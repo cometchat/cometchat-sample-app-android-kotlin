@@ -1,0 +1,643 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatImageBubbleStyle.
+ *
+ * Feature: bubble-style-propagation
+ * Tests:
+ * - CometChatImageBubbleStyle extends CometChatMessageBubbleStyle
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 7.3, 7.5
+ */
+class CometChatImageBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatImageBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatImageBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestImageBubbleStyle()
+
+        // Verify inheritance relationship
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestImageBubbleStyle()
+
+        // Verify content-specific properties
+        style.imageCornerRadius shouldBe 8.dp
+        style.imageStrokeWidth shouldBe 0.dp
+        style.imageStrokeColor shouldBe Color.Transparent
+        style.captionTextColor shouldBe Color.Black
+        style.captionTextStyle shouldNotBe null
+        style.progressIndicatorColor shouldBe Color.Gray
+        style.gridSpacing shouldBe 2.dp
+        style.maxGridWidth shouldBe 240.dp
+        style.moreOverlayBackgroundColor shouldBe Color.Black.copy(alpha = 0.6f)
+        style.moreOverlayTextColor shouldBe Color.White
+        style.moreOverlayTextStyle shouldNotBe null
+
+        // Verify inherited wrapper properties
+        style.backgroundColor shouldBe Color(0xFFF5F5F5) // Simulating backgroundColor2
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming factory function should return valid style with backgroundColor3" {
+        val style = createTestImageBubbleStyleIncoming()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color(0xFFE8E8E8) // Simulating backgroundColor3
+        style.cornerRadius shouldBe 12.dp
+        style.imageCornerRadius shouldBe 8.dp
+        style.captionTextColor shouldBe Color.Black
+        style.gridSpacing shouldBe 2.dp
+        style.maxGridWidth shouldBe 240.dp
+    }
+
+    /**
+     * Test that outgoing() factory function returns a valid style with different colors.
+     *
+     * Validates: Requirements 2.3
+     */
+    "outgoing factory function should return valid style with primary background and white caption" {
+        val style = createTestImageBubbleStyleOutgoing()
+
+        // Verify outgoing style has primary background and white caption
+        style.backgroundColor shouldBe Color.Blue // Simulating primary
+        style.cornerRadius shouldBe 12.dp
+        style.captionTextColor shouldBe Color.White
+        style.imageCornerRadius shouldBe 8.dp
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.float(4f, 16f),   // imageCornerRadius
+            Arb.int(0, 255)       // captionTextColor alpha
+        ) { bgAlpha, cornerRadius, imageCornerRadius, captionAlpha ->
+            createTestImageBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                imageCornerRadius = imageCornerRadius.dp,
+                captionTextColor = Color(0f, 0f, 0f, captionAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalImageCornerRadius = originalStyle.imageCornerRadius
+            val originalCaptionTextColor = originalStyle.captionTextColor
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.imageCornerRadius shouldBe originalImageCornerRadius
+            originalStyle.captionTextColor shouldBe originalCaptionTextColor
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.imageCornerRadius shouldBe originalImageCornerRadius
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified image properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified image properties should preserve wrapper properties" {
+        val styleArb = Arb.bind(
+            Arb.float(4f, 16f),   // imageCornerRadius
+            Arb.float(0f, 4f)    // imageStrokeWidth
+        ) { imageCornerRadius, imageStrokeWidth ->
+            createTestImageBubbleStyle(
+                imageCornerRadius = imageCornerRadius.dp,
+                imageStrokeWidth = imageStrokeWidth.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalStrokeWidth = originalStyle.strokeWidth
+
+            // Create a copy with modified image values
+            val newImageCornerRadius = 16.dp
+            val newImageStrokeWidth = 2.dp
+            val newImageStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                imageCornerRadius = newImageCornerRadius,
+                imageStrokeWidth = newImageStrokeWidth,
+                imageStrokeColor = newImageStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.imageCornerRadius shouldBe newImageCornerRadius
+            copiedStyle.imageStrokeWidth shouldBe newImageStrokeWidth
+            copiedStyle.imageStrokeColor shouldBe newImageStrokeColor
+
+            // Verify wrapper properties are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+        }
+    }
+
+    /**
+     * Test style copy with modified grid properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified grid properties should preserve image properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 8f),    // gridSpacing
+            Arb.float(200f, 320f) // maxGridWidth
+        ) { gridSpacing, maxGridWidth ->
+            createTestImageBubbleStyle(
+                gridSpacing = gridSpacing.dp,
+                maxGridWidth = maxGridWidth.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalImageCornerRadius = originalStyle.imageCornerRadius
+            val originalCaptionTextColor = originalStyle.captionTextColor
+            val originalProgressIndicatorColor = originalStyle.progressIndicatorColor
+
+            // Create a copy with modified grid values
+            val newGridSpacing = 4.dp
+            val newMaxGridWidth = 280.dp
+            val copiedStyle = originalStyle.copy(
+                gridSpacing = newGridSpacing,
+                maxGridWidth = newMaxGridWidth
+            )
+
+            // Verify modified values
+            copiedStyle.gridSpacing shouldBe newGridSpacing
+            copiedStyle.maxGridWidth shouldBe newMaxGridWidth
+
+            // Verify image properties are preserved
+            copiedStyle.imageCornerRadius shouldBe originalImageCornerRadius
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+            copiedStyle.progressIndicatorColor shouldBe originalProgressIndicatorColor
+        }
+    }
+
+    /**
+     * Test style copy with modified more overlay properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified more overlay properties should preserve grid properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // moreOverlayBackgroundColor alpha
+            Arb.int(0, 255)       // moreOverlayTextColor alpha
+        ) { bgAlpha, textAlpha ->
+            createTestImageBubbleStyle(
+                moreOverlayBackgroundColor = Color(0f, 0f, 0f, bgAlpha / 255f),
+                moreOverlayTextColor = Color(1f, 1f, 1f, textAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalGridSpacing = originalStyle.gridSpacing
+            val originalMaxGridWidth = originalStyle.maxGridWidth
+            val originalImageCornerRadius = originalStyle.imageCornerRadius
+
+            // Create a copy with modified more overlay values
+            val newMoreOverlayBackgroundColor = Color.DarkGray.copy(alpha = 0.7f)
+            val newMoreOverlayTextColor = Color.Yellow
+            val newMoreOverlayTextStyle = TextStyle(fontSize = 20.sp)
+            val copiedStyle = originalStyle.copy(
+                moreOverlayBackgroundColor = newMoreOverlayBackgroundColor,
+                moreOverlayTextColor = newMoreOverlayTextColor,
+                moreOverlayTextStyle = newMoreOverlayTextStyle
+            )
+
+            // Verify modified values
+            copiedStyle.moreOverlayBackgroundColor shouldBe newMoreOverlayBackgroundColor
+            copiedStyle.moreOverlayTextColor shouldBe newMoreOverlayTextColor
+            copiedStyle.moreOverlayTextStyle shouldBe newMoreOverlayTextStyle
+
+            // Verify grid properties are preserved
+            copiedStyle.gridSpacing shouldBe originalGridSpacing
+            copiedStyle.maxGridWidth shouldBe originalMaxGridWidth
+            copiedStyle.imageCornerRadius shouldBe originalImageCornerRadius
+        }
+    }
+
+    /**
+     * Test style copy with modified stroke properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified stroke properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 4f),    // strokeWidth
+            Arb.int(0, 255)       // strokeColor alpha
+        ) { strokeWidth, strokeAlpha ->
+            createTestImageBubbleStyle(
+                strokeWidth = strokeWidth.dp,
+                strokeColor = Color(0f, 0f, 0f, strokeAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalImageCornerRadius = originalStyle.imageCornerRadius
+            val originalCaptionTextColor = originalStyle.captionTextColor
+            val originalGridSpacing = originalStyle.gridSpacing
+
+            // Create a copy with modified stroke values
+            val newStrokeWidth = 2.dp
+            val newStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                strokeWidth = newStrokeWidth,
+                strokeColor = newStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.strokeColor shouldBe newStrokeColor
+
+            // Verify other properties are preserved
+            copiedStyle.imageCornerRadius shouldBe originalImageCornerRadius
+            copiedStyle.captionTextColor shouldBe originalCaptionTextColor
+            copiedStyle.gridSpacing shouldBe originalGridSpacing
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestImageBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.padding shouldBe originalStyle.padding
+            copiedStyle.imageCornerRadius shouldBe originalStyle.imageCornerRadius
+            copiedStyle.imageStrokeWidth shouldBe originalStyle.imageStrokeWidth
+            copiedStyle.imageStrokeColor shouldBe originalStyle.imageStrokeColor
+            copiedStyle.captionTextColor shouldBe originalStyle.captionTextColor
+            copiedStyle.captionTextStyle shouldBe originalStyle.captionTextStyle
+            copiedStyle.progressIndicatorColor shouldBe originalStyle.progressIndicatorColor
+            copiedStyle.gridSpacing shouldBe originalStyle.gridSpacing
+            copiedStyle.maxGridWidth shouldBe originalStyle.maxGridWidth
+            copiedStyle.moreOverlayBackgroundColor shouldBe originalStyle.moreOverlayBackgroundColor
+            copiedStyle.moreOverlayTextColor shouldBe originalStyle.moreOverlayTextColor
+            copiedStyle.moreOverlayTextStyle shouldBe originalStyle.moreOverlayTextStyle
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatImageBubbleStyle(
+            imageCornerRadius = 16.dp,
+            imageStrokeWidth = 2.dp,
+            imageStrokeColor = Color.Yellow,
+            captionTextColor = Color.Green,
+            captionTextStyle = TextStyle(fontSize = 16.sp),
+            progressIndicatorColor = Color.Cyan,
+            gridSpacing = 4.dp,
+            maxGridWidth = 300.dp,
+            moreOverlayBackgroundColor = Color.DarkGray,
+            moreOverlayTextColor = Color.LightGray,
+            moreOverlayTextStyle = TextStyle(fontSize = 22.sp),
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 11.sp),
+            threadIndicatorTextColor = Color.White,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.Magenta
+        )
+
+        // Verify content-specific properties
+        customStyle.imageCornerRadius shouldBe 16.dp
+        customStyle.imageStrokeWidth shouldBe 2.dp
+        customStyle.imageStrokeColor shouldBe Color.Yellow
+        customStyle.captionTextColor shouldBe Color.Green
+        customStyle.captionTextStyle shouldBe TextStyle(fontSize = 16.sp)
+        customStyle.progressIndicatorColor shouldBe Color.Cyan
+        customStyle.gridSpacing shouldBe 4.dp
+        customStyle.maxGridWidth shouldBe 300.dp
+        customStyle.moreOverlayBackgroundColor shouldBe Color.DarkGray
+        customStyle.moreOverlayTextColor shouldBe Color.LightGray
+        customStyle.moreOverlayTextStyle shouldBe TextStyle(fontSize = 22.sp)
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 11.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.White
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.Magenta
+    }
+
+    /**
+     * Test that incoming and outgoing styles differ in expected properties.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming and outgoing styles should differ in background and caption colors" {
+        val incomingStyle = createTestImageBubbleStyleIncoming()
+        val outgoingStyle = createTestImageBubbleStyleOutgoing()
+
+        // Verify common properties are the same
+        incomingStyle.cornerRadius shouldBe outgoingStyle.cornerRadius
+        incomingStyle.strokeWidth shouldBe outgoingStyle.strokeWidth
+        incomingStyle.strokeColor shouldBe outgoingStyle.strokeColor
+        incomingStyle.imageCornerRadius shouldBe outgoingStyle.imageCornerRadius
+        incomingStyle.gridSpacing shouldBe outgoingStyle.gridSpacing
+        incomingStyle.maxGridWidth shouldBe outgoingStyle.maxGridWidth
+
+        // Verify differing properties
+        incomingStyle.backgroundColor shouldNotBe outgoingStyle.backgroundColor
+        incomingStyle.captionTextColor shouldNotBe outgoingStyle.captionTextColor
+
+        // Verify outgoing uses primary background and white caption
+        outgoingStyle.backgroundColor shouldBe Color.Blue // Simulating primary
+        outgoingStyle.captionTextColor shouldBe Color.White
+    }
+
+    /**
+     * Test that style can be assigned to CometChatMessageBubbleStyle variable.
+     *
+     * Validates: Requirements 2.1
+     */
+    "style should be assignable to CometChatMessageBubbleStyle variable" {
+        val imageStyle: CometChatImageBubbleStyle = createTestImageBubbleStyle()
+
+        // Verify it can be assigned to parent type
+        val messageBubbleStyle: CometChatMessageBubbleStyle = imageStyle
+
+        // Verify inherited properties are accessible through parent type
+        messageBubbleStyle.backgroundColor shouldBe imageStyle.backgroundColor
+        messageBubbleStyle.cornerRadius shouldBe imageStyle.cornerRadius
+        messageBubbleStyle.strokeWidth shouldBe imageStyle.strokeWidth
+        messageBubbleStyle.strokeColor shouldBe imageStyle.strokeColor
+        messageBubbleStyle.padding shouldBe imageStyle.padding
+        messageBubbleStyle.senderNameTextColor shouldBe imageStyle.senderNameTextColor
+        messageBubbleStyle.senderNameTextStyle shouldBe imageStyle.senderNameTextStyle
+        messageBubbleStyle.threadIndicatorTextColor shouldBe imageStyle.threadIndicatorTextColor
+        messageBubbleStyle.threadIndicatorTextStyle shouldBe imageStyle.threadIndicatorTextStyle
+        messageBubbleStyle.threadIndicatorIconTint shouldBe imageStyle.threadIndicatorIconTint
+    }
+})
+
+/**
+ * Helper function to create a test image bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestImageBubbleStyle(
+    // Content-specific properties
+    imageCornerRadius: Dp = 8.dp,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    captionTextColor: Color = Color.Black, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyRegular
+    progressIndicatorColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.iconTintSecondary
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp), // Simulating heading3Bold
+    // Inherited wrapper properties
+    backgroundColor: Color = Color(0xFFF5F5F5), // Simulating backgroundColor2
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatImageBubbleStyle {
+    return CometChatImageBubbleStyle(
+        imageCornerRadius = imageCornerRadius,
+        imageStrokeWidth = imageStrokeWidth,
+        imageStrokeColor = imageStrokeColor,
+        captionTextColor = captionTextColor,
+        captionTextStyle = captionTextStyle,
+        progressIndicatorColor = progressIndicatorColor,
+        gridSpacing = gridSpacing,
+        maxGridWidth = maxGridWidth,
+        moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+        moreOverlayTextColor = moreOverlayTextColor,
+        moreOverlayTextStyle = moreOverlayTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test image bubble style for incoming messages.
+ * This simulates what the incoming() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestImageBubbleStyleIncoming(
+    // Content-specific properties
+    imageCornerRadius: Dp = 8.dp,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    captionTextColor: Color = Color.Black,
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    progressIndicatorColor: Color = Color.Gray,
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    // Inherited wrapper properties - incoming uses backgroundColor3
+    backgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatImageBubbleStyle {
+    return CometChatImageBubbleStyle(
+        imageCornerRadius = imageCornerRadius,
+        imageStrokeWidth = imageStrokeWidth,
+        imageStrokeColor = imageStrokeColor,
+        captionTextColor = captionTextColor,
+        captionTextStyle = captionTextStyle,
+        progressIndicatorColor = progressIndicatorColor,
+        gridSpacing = gridSpacing,
+        maxGridWidth = maxGridWidth,
+        moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+        moreOverlayTextColor = moreOverlayTextColor,
+        moreOverlayTextStyle = moreOverlayTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test image bubble style for outgoing messages.
+ * This simulates what the outgoing() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestImageBubbleStyleOutgoing(
+    // Content-specific properties - outgoing uses white caption
+    imageCornerRadius: Dp = 8.dp,
+    imageStrokeWidth: Dp = 0.dp,
+    imageStrokeColor: Color = Color.Transparent,
+    captionTextColor: Color = Color.White, // Outgoing uses white
+    captionTextStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    progressIndicatorColor: Color = Color.Gray,
+    gridSpacing: Dp = 2.dp,
+    maxGridWidth: Dp = 240.dp,
+    moreOverlayBackgroundColor: Color = Color.Black.copy(alpha = 0.6f),
+    moreOverlayTextColor: Color = Color.White,
+    moreOverlayTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    // Inherited wrapper properties - outgoing uses primary background
+    backgroundColor: Color = Color.Blue, // Simulating primary
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatImageBubbleStyle {
+    return CometChatImageBubbleStyle(
+        imageCornerRadius = imageCornerRadius,
+        imageStrokeWidth = imageStrokeWidth,
+        imageStrokeColor = imageStrokeColor,
+        captionTextColor = captionTextColor,
+        captionTextStyle = captionTextStyle,
+        progressIndicatorColor = progressIndicatorColor,
+        gridSpacing = gridSpacing,
+        maxGridWidth = maxGridWidth,
+        moreOverlayBackgroundColor = moreOverlayBackgroundColor,
+        moreOverlayTextColor = moreOverlayTextColor,
+        moreOverlayTextStyle = moreOverlayTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}

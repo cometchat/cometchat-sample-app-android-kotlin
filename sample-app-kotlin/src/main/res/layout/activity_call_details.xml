@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Call Details Activity Layout
+    
+    Displays call log details including:
+    - Toolbar with back button and title
+    - Message header showing the call recipient
+    - Call info section with type, date, and duration
+    
+    Validates: Requirements 9.2
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,8 +17,10 @@
     android:layout_height="match_parent"
     android:background="?attr/cometchatBackgroundColor1"
     android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.calls.CallDetailsActivity">
 
+    <!-- Toolbar -->
     <LinearLayout
         android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
@@ -32,6 +44,7 @@
                 android:layout_gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
+                android:padding="@dimen/cometchat_padding_2"
                 android:src="@drawable/cometchat_ic_back"
                 app:tint="?attr/cometchatIconTintPrimary"
                 tools:ignore="ContentDescription" />
@@ -40,8 +53,8 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="@string/app_call_details"
+                android:layout_marginStart="@dimen/cometchat_margin_2"
+                android:text="@string/call_details"
                 android:textAppearance="?attr/cometchatTextAppearanceHeading1Bold"
                 android:textColor="?attr/cometchatTextColorPrimary" />
 
@@ -55,6 +68,7 @@
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />
 
+    <!-- Message Header showing call recipient -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -63,7 +77,7 @@
         android:paddingTop="@dimen/cometchat_padding_3"
         android:paddingBottom="@dimen/cometchat_padding_3">
 
-        <com.cometchat.chatuikit.messageheader.CometChatMessageHeader
+        <com.cometchat.uikit.kotlin.presentation.messageheader.ui.CometChatMessageHeader
             android:id="@+id/message_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -76,6 +90,7 @@
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />
 
+    <!-- Call Info Section -->
     <LinearLayout
         android:id="@+id/info_layout"
         android:layout_width="match_parent"
@@ -108,7 +123,7 @@
                 android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
                 android:textColor="?attr/cometchatTextColorPrimary" />
 
-            <com.cometchat.chatuikit.shared.views.date.CometChatDate
+            <com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
                 android:id="@+id/tv_info_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,7 +142,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/cometchat_margin_3"
             android:textAppearance="?attr/cometchatTextAppearanceHeading4Medium"
-            android:textColor="?attr/cometchatTextColorPrimary" />
+            android:textColor="?attr/cometchatTextColorSecondary" />
 
     </LinearLayout>
 
@@ -137,12 +152,20 @@
         android:layout_height="@dimen/cometchat_1dp"
         android:background="?attr/cometchatStrokeColorLight" />
 
+    <!-- TabLayout for History/Participants/Recordings tabs (matching master-app-java) -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabMode="fixed" />
+        android:background="?attr/cometchatBackgroundColor1"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="?attr/cometchatPrimaryColor"
+        app:tabSelectedTextColor="?attr/cometchatPrimaryColor"
+        app:tabTextColor="?attr/cometchatTextColorSecondary"
+        app:tabTextAppearance="?attr/cometchatTextAppearanceBodyMedium" />
 
+    <!-- ViewPager2 for tab content (matching master-app-java) -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CometChatGroups">
+        <!-- Style reference -->
+        <attr name="cometchatGroupsStyle" format="reference" />
+        
+        <!-- Container styling -->
+        <attr name="cometchatGroupsBackgroundColor" format="color" />
+        <attr name="cometchatGroupsStrokeWidth" format="dimension" />
+        <attr name="cometchatGroupsStrokeColor" format="color" />
+        <attr name="cometchatGroupsCornerRadius" format="dimension" />
+
+        <!-- Toolbar styling -->
+        <attr name="cometchatGroupsTitleTextColor" format="color" />
+        <attr name="cometchatGroupsTitleTextAppearance" format="reference" />
+        <attr name="cometchatGroupsBackIcon" format="reference" />
+        <attr name="cometchatGroupsBackIconTint" format="color" />
+        <attr name="cometchatGroupsSeparatorColor" format="color" />
+        <attr name="cometchatGroupsSeparatorHeight" format="dimension" />
+
+        <!-- Selection icons -->
+        <attr name="cometchatGroupsDiscardSelectionIcon" format="reference" />
+        <attr name="cometchatGroupsDiscardSelectionIconTint" format="color" />
+        <attr name="cometchatGroupsSubmitSelectionIcon" format="reference" />
+        <attr name="cometchatGroupsSubmitSelectionIconTint" format="color" />
+
+        <!-- Search box styling -->
+        <attr name="cometchatGroupsSearchInputBackgroundColor" format="color" />
+        <attr name="cometchatGroupsSearchInputTextColor" format="color" />
+        <attr name="cometchatGroupsSearchInputTextAppearance" format="reference" />
+        <attr name="cometchatGroupsSearchInputPlaceHolderTextColor" format="color" />
+        <attr name="cometchatGroupsSearchInputPlaceHolderTextAppearance" format="reference" />
+        <attr name="cometchatGroupsSearchInputStartIcon" format="reference" />
+        <attr name="cometchatGroupsSearchInputStartIconTint" format="color" />
+        <attr name="cometchatGroupsSearchInputEndIcon" format="reference" />
+        <attr name="cometchatGroupsSearchInputEndIconTint" format="color" />
+        <attr name="cometchatGroupsSearchInputCornerRadius" format="dimension" />
+        <attr name="cometchatGroupsSearchInputStrokeWidth" format="dimension" />
+        <attr name="cometchatGroupsSearchInputStrokeColor" format="color" />
+        <!-- Legacy search icon attributes for backward compatibility -->
+        <attr name="cometchatGroupsSearchInputIcon" format="reference" />
+        <attr name="cometchatGroupsSearchInputIconTint" format="color" />
+
+        <!-- Item styling -->
+        <attr name="cometchatGroupsItemBackgroundColor" format="color" />
+        <attr name="cometchatGroupsItemSelectedBackgroundColor" format="color" />
+        <attr name="cometchatGroupsItemTitleTextColor" format="color" />
+        <attr name="cometchatGroupsItemTitleTextAppearance" format="reference" />
+        <attr name="cometchatGroupsSubtitleColor" format="color" />
+        <attr name="cometchatGroupsSubtitleTextAppearance" format="reference" />
+
+        <!-- Checkbox styling -->
+        <attr name="cometchatGroupsCheckBoxStrokeWidth" format="dimension" />
+        <attr name="cometchatGroupsCheckBoxCornerRadius" format="dimension" />
+        <attr name="cometchatGroupsCheckBoxStrokeColor" format="color" />
+        <attr name="cometchatGroupsCheckBoxBackgroundColor" format="color" />
+        <attr name="cometchatGroupsCheckBoxCheckedBackgroundColor" format="color" />
+        <attr name="cometchatGroupsCheckBoxSelectIcon" format="reference" />
+        <attr name="cometchatGroupsCheckBoxSelectIconTint" format="color" />
+
+        <!-- Empty state styling -->
+        <attr name="cometchatGroupsEmptyStateTitleTextColor" format="color" />
+        <attr name="cometchatGroupsEmptyStateSubtitleTextColor" format="color" />
+        <attr name="cometchatGroupsEmptyStateTextTitleAppearance" format="reference" />
+        <attr name="cometchatGroupsEmptyStateTextSubtitleAppearance" format="reference" />
+        <!-- Legacy empty state attributes for backward compatibility -->
+        <attr name="cometchatGroupsEmptyStateTextAppearance" format="reference" />
+        <attr name="cometchatGroupsEmptyStateTextColor" format="color" />
+        <attr name="cometchatGroupsEmptyStateSubTitleTextAppearance" format="reference" />
+
+        <!-- Error state styling -->
+        <attr name="cometchatGroupsErrorStateTitleTextColor" format="color" />
+        <attr name="cometchatGroupsErrorStateSubtitleTextColor" format="color" />
+        <attr name="cometchatGroupsErrorStateTextTitleAppearance" format="reference" />
+        <attr name="cometchatGroupsErrorStateTextSubtitleAppearance" format="reference" />
+        <!-- Legacy error state attributes for backward compatibility -->
+        <attr name="cometchatGroupsErrorStateTextAppearance" format="reference" />
+        <attr name="cometchatGroupsErrorStateTextColor" format="color" />
+        <attr name="cometchatGroupsErrorStateSubtitleTextAppearance" format="reference" />
+        <attr name="cometchatGroupsErrorStateSubtitleColor" format="color" />
+
+        <!-- Retry button styling -->
+        <attr name="cometchatGroupsRetryButtonTextColor" format="color" />
+        <attr name="cometchatGroupsRetryButtonTextAppearance" format="reference" />
+        <attr name="cometchatGroupsRetryButtonBackgroundColor" format="color" />
+        <attr name="cometchatGroupsRetryButtonStrokeColor" format="color" />
+        <attr name="cometchatGroupsRetryButtonStrokeWidth" format="dimension" />
+        <attr name="cometchatGroupsRetryButtonCornerRadius" format="dimension" />
+
+        <!-- Nested component styles -->
+        <attr name="cometchatGroupsAvatarStyle" format="reference" />
+        <attr name="cometchatGroupsStatusIndicatorStyle" format="reference" />
+        <attr name="cometchatGroupsOptionListStyle" format="reference" />
+        <!-- Legacy status indicator attribute for backward compatibility -->
+        <attr name="cometchatGroupsStatusIndicator" format="reference" />
+
+    </declare-styleable>
+</resources>

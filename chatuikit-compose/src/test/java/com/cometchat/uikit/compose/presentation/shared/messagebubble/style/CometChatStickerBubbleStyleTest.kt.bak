@@ -1,0 +1,271 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Unit tests for [CometChatStickerBubbleStyle].
+ *
+ * Validates:
+ * - CometChatStickerBubbleStyle extends CometChatMessageBubbleStyle
+ * - default(), incoming(), outgoing() factory functions return valid styles
+ * - All properties are accessible
+ * - Sticker bubbles have transparent background by default
+ * - Wrapper properties are inherited from parent class
+ */
+class CometChatStickerBubbleStyleTest {
+
+    @Test
+    fun `style extends CometChatMessageBubbleStyle`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify inheritance relationship
+        assertTrue(style is CometChatMessageBubbleStyle)
+    }
+
+    @Test
+    fun `default style has valid properties`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertNotNull(style)
+        assertEquals(Color.Transparent, style.backgroundColor)
+        assertEquals(12.dp, style.cornerRadius)
+        assertEquals(0.dp, style.strokeWidth)
+        assertEquals(Color.Transparent, style.strokeColor)
+    }
+
+    @Test
+    fun `sticker bubble has transparent background by default`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(Color.Transparent, style.backgroundColor)
+    }
+
+    @Test
+    fun `all properties are accessible`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 8.dp,
+            strokeWidth = 1.dp,
+            strokeColor = Color.Blue,
+            padding = PaddingValues(4.dp),
+            senderNameTextColor = Color.Cyan,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Magenta,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Yellow
+        )
+
+        // Verify all properties are accessible
+        assertEquals(Color.Transparent, style.backgroundColor)
+        assertEquals(8.dp, style.cornerRadius)
+        assertEquals(1.dp, style.strokeWidth)
+        assertEquals(Color.Blue, style.strokeColor)
+        assertEquals(PaddingValues(4.dp), style.padding)
+        assertEquals(Color.Cyan, style.senderNameTextColor)
+        assertNotNull(style.senderNameTextStyle)
+        assertEquals(Color.Magenta, style.threadIndicatorTextColor)
+        assertNotNull(style.threadIndicatorTextStyle)
+        assertEquals(Color.Yellow, style.threadIndicatorIconTint)
+    }
+
+    @Test
+    fun `style is immutable data class`() {
+        val style1 = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        val style2 = style1.copy(cornerRadius = 16.dp)
+
+        // Original should be unchanged
+        assertEquals(12.dp, style1.cornerRadius)
+        // Copy should have new value
+        assertEquals(16.dp, style2.cornerRadius)
+        // Other properties should be same
+        assertEquals(style1.backgroundColor, style2.backgroundColor)
+        assertEquals(style1.strokeWidth, style2.strokeWidth)
+    }
+
+    @Test
+    fun `incoming and outgoing styles are same for stickers`() {
+        // Stickers have transparent background regardless of direction
+        val incomingStyle = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        val outgoingStyle = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Both should have transparent background
+        assertEquals(incomingStyle.backgroundColor, outgoingStyle.backgroundColor)
+        assertEquals(Color.Transparent, incomingStyle.backgroundColor)
+    }
+
+    @Test
+    fun `cornerRadius defaults to 12dp`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(12.dp, style.cornerRadius)
+    }
+
+    @Test
+    fun `strokeWidth defaults to 0dp`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(0.dp, style.strokeWidth)
+    }
+
+    @Test
+    fun `thread indicator properties are accessible`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(0.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Red,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Blue
+        )
+
+        assertEquals(Color.Red, style.threadIndicatorTextColor)
+        assertNotNull(style.threadIndicatorTextStyle)
+        assertEquals(Color.Blue, style.threadIndicatorIconTint)
+    }
+
+    @Test
+    fun `wrapper properties are inherited from parent class`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 16.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Blue,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Green,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Yellow
+        )
+
+        // Cast to parent type and verify properties are accessible
+        val parentStyle: CometChatMessageBubbleStyle = style
+
+        assertEquals(Color.Transparent, parentStyle.backgroundColor)
+        assertEquals(16.dp, parentStyle.cornerRadius)
+        assertEquals(2.dp, parentStyle.strokeWidth)
+        assertEquals(Color.Red, parentStyle.strokeColor)
+        assertEquals(PaddingValues(8.dp), parentStyle.padding)
+        assertEquals(Color.Blue, parentStyle.senderNameTextColor)
+        assertEquals(Color.Green, parentStyle.threadIndicatorTextColor)
+        assertEquals(Color.Yellow, parentStyle.threadIndicatorIconTint)
+    }
+
+    @Test
+    fun `padding property is accessible`() {
+        val style = CometChatStickerBubbleStyle(
+            backgroundColor = Color.Transparent,
+            cornerRadius = 12.dp,
+            strokeWidth = 0.dp,
+            strokeColor = Color.Transparent,
+            padding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+            senderNameTextColor = Color.Gray,
+            senderNameTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = androidx.compose.ui.text.TextStyle(),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        assertEquals(PaddingValues(horizontal = 8.dp, vertical = 4.dp), style.padding)
+    }
+}

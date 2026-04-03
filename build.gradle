@@ -7,31 +7,130 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
 }
 
-tasks.register('generateFileList') {
+tasks.register('applyPatch-sampleapp+notification+voip-java') {
+    group = 'Custom Tasks'
+    description = 'Applies the sampleapp+notification+voip-java patch'
+
     doLast {
-        // List all Java files in the 'src' directory
-        def javaFiles = fileTree('chatuikit/src/main/java/com/cometchat/chatuikit').include('**/*.java').files
-        def xmlFiles = fileTree('chatuikit/src/main/res').include('**/*.xml').files
+        def projectDir = file('.')
 
-        // Print out the files for debugging purposes
-        println "Java files found: " + javaFiles.size()
-        javaFiles.each { println it }
+        // Execute git reset --hard to discard any changes
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'reset', '--hard'
+        }
 
-        println "XML files found: " + xmlFiles.size()
-        xmlFiles.each { println it }
+        def targetDir = file('sample-app-java')  // Directory to delete (same as above)
+        if (targetDir.exists()) {
+            println "Deleting existing folder: ${targetDir}"
+            targetDir.deleteDir()  // Deletes the folder and all of its contents
+        }
 
-        // Combine Java and XML files into one list
-        def allFiles = javaFiles + xmlFiles
-        //def allFiles = javaFiles
-        //def allFiles = xmlFiles
+        def patchFile = file('patches/sampleapp+notification+voip-java.patch')
+        if (!patchFile.exists()) {
+            throw new GradleException("Patch file does not exist: ${patchFile}")
+        }
 
-        // Write the list of file paths to a text file
-        def fileListPath = file('scripts/fileList.txt')
-        fileListPath.text = allFiles.collect { it.absolutePath }.join("\n")
+        println "Applying patch: ${patchFile}"
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'apply', patchFile.absolutePath
+        }
     }
 }
 
-tasks.register('formatCode', Exec) {
-    //dependsOn generateFileList
-    //commandLine 'osascript', 'scripts/formatCode.applescript'
+tasks.register('applyPatch-sampleapp-java') {
+    group = 'Custom Tasks'
+    description = 'Applies the sampleapp-java patch'
+
+    doLast {
+        def projectDir = file('.')
+
+        // Execute git reset --hard to discard any changes
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'reset', '--hard'
+        }
+
+        def targetDir = file('sample-app-java')  // Directory to delete (same as above)
+        if (targetDir.exists()) {
+            println "Deleting existing folder: ${targetDir}"
+            targetDir.deleteDir()  // Deletes the folder and all of its contents
+        }
+
+        def patchFile = file('patches/sample-app-java.patch')
+        if (!patchFile.exists()) {
+            throw new GradleException("Patch file does not exist: ${patchFile}")
+        }
+
+        println "Applying patch: ${patchFile}"
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'apply', patchFile.absolutePath
+        }
+    }
+}
+
+tasks.register('applyPatch-sampleapp+notification+voip-kotlin') {
+    group = 'Custom Tasks'
+    description = 'Applies the sampleapp+notification+voip-kotlin patch'
+
+    doLast {
+        def projectDir = file('.')
+
+        // Execute git reset --hard to discard any changes
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'reset', '--hard'
+        }
+
+        def targetDir = file('sample-app-kotlin')  // Directory to delete (same as above)
+        if (targetDir.exists()) {
+            println "Deleting existing folder: ${targetDir}"
+            targetDir.deleteDir()  // Deletes the folder and all of its contents
+        }
+
+        def patchFile = file('patches/sampleapp+notification+voip-kotlin.patch')
+        if (!patchFile.exists()) {
+            throw new GradleException("Patch file does not exist: ${patchFile}")
+        }
+
+        println "Applying patch: ${patchFile}"
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'apply', patchFile.absolutePath
+        }
+    }
+}
+
+tasks.register('applyPatch-sampleapp-kotlin') {
+    group = 'Custom Tasks'
+    description = 'Applies the sampleapp-kotlin patch'
+
+    doLast {
+        def projectDir = file('.')
+
+        // Execute git reset --hard to discard any changes
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'reset', '--hard'
+        }
+
+        def targetDir = file('sample-app-kotlin')  // Directory to delete (same as above)
+        if (targetDir.exists()) {
+            println "Deleting existing folder: ${targetDir}"
+            targetDir.deleteDir()  // Deletes the folder and all of its contents
+        }
+
+        def patchFile = file('patches/sample-app-kotlin.patch')
+        if (!patchFile.exists()) {
+            throw new GradleException("Patch file does not exist: ${patchFile}")
+        }
+
+        println "Applying patch: ${patchFile}"
+        exec {
+            workingDir = projectDir
+            commandLine 'git', 'apply', patchFile.absolutePath
+        }
+    }
 }

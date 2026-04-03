@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cometchat_leading_view_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/cometchat_32dp"
+        android:layout_height="@dimen/cometchat_32dp" />
+
+</LinearLayout>

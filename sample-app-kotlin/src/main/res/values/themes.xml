@@ -1,19 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Theme Customization for CometChat Sample App (XML Views)
+    
+    This file demonstrates how to customize the app theme using Material 3.
+    The CometChat UI Kit components automatically inherit these theme colors.
+    
+    ## Theme Customization Guide:
+    
+    ### Step 1: Customize Colors
+    Modify the colors in colors.xml to match your brand palette.
+    
+    ### Step 2: Apply Theme
+    The theme is automatically applied to all activities via AndroidManifest.xml.
+    
+    ### Step 3: CometChat Theme Integration
+    CometChat UI Kit components use CometChatTheme which can be customized
+    programmatically in your Application class or Activity.
+    
+    ## CometChat Theme Customization (Programmatic):
+    
+    ```kotlin
+    // In your Activity or Application
+    CometChatTheme.setColorScheme(
+        CometChatColorScheme(
+            primaryColor = ContextCompat.getColor(this, R.color.primary),
+            backgroundColor1 = ContextCompat.getColor(this, R.color.background),
+            textColorPrimary = ContextCompat.getColor(this, R.color.on_background),
+            // ... other colors
+        )
+    )
+    ```
+    
+    ## Light/Dark Mode Support:
+    
+    This theme uses Theme.Material3.DayNight which automatically switches
+    between light and dark modes based on system settings.
+    
+    To customize dark mode colors, create a values-night/colors.xml file
+    with the same color names but darker values.
+    
+    Validates: Requirements 13.1, 13.3, 13.4, 13.5, 13.6
+-->
 <resources>
+    
+    <!-- ================================================================== -->
+    <!-- BASE APPLICATION THEME                                              -->
+    <!-- Inherits from CometChatTheme.DayNight for UIKit component support  -->
+    <!-- ================================================================== -->
 
-    <style name="KotlinSampleApp.v5" parent="CometChatTheme.DayNight" />
-    <style name="CustomHeaderPopUpMenuStyle" parent="CometChatPopupMenuStyle">
-        <item name="cometchatPopupMenuItemTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
-        <item name="cometchatPopupMenuItemTextColor">?attr/cometchatTextColorPrimary</item>
-        <item name="cometchatPopupMenuStrokeColor">?attr/cometchatNeutralColor300</item>
-        <item name="cometchatPopupMenuItemStartIconTint">?attr/cometchatIconTintSecondary</item>
+    <style name="Theme.SampleApp" parent="CometChatTheme.DayNight">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
-    <style name="ConfirmationDialogStyle" parent="CometChatConfirmDialogStyle" />
-
-    <style name="DetailsAvatarStyle" parent="CometChatAvatarStyle">
-        <item name="cometchatAvatarPlaceHolderTextAppearance">
-            @style/AvatarPlaceHolderTextAppearance
-        </item>
+    
+    <!-- ================================================================== -->
+    <!-- ALTERNATIVE THEME EXAMPLES                                          -->
+    <!-- Uncomment to use different theme variants                          -->
+    <!-- ================================================================== -->
+    
+    <!-- Blue Theme Example
+    <style name="Theme.SampleApp.Blue" parent="Theme.SampleApp">
+        <item name="colorPrimary">#2196F3</item>
+        <item name="colorPrimaryVariant">#1976D2</item>
+        <item name="android:statusBarColor">#1976D2</item>
     </style>
+    -->
+    
+    <!-- Green Theme Example
+    <style name="Theme.SampleApp.Green" parent="Theme.SampleApp">
+        <item name="colorPrimary">#4CAF50</item>
+        <item name="colorPrimaryVariant">#388E3C</item>
+        <item name="android:statusBarColor">#388E3C</item>
+    </style>
+    -->
+    
+    <!-- Orange Theme Example
+    <style name="Theme.SampleApp.Orange" parent="Theme.SampleApp">
+        <item name="colorPrimary">#FF9800</item>
+        <item name="colorPrimaryVariant">#F57C00</item>
+        <item name="android:statusBarColor">#F57C00</item>
+    </style>
+    -->
 
     <style name="DialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">true</item>
@@ -21,8 +94,15 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="AvatarPlaceHolderTextAppearance" parent="CometChatTextAppearanceHeading2.Bold">
-        <item name="android:textSize">@dimen/cometchat_48sp</item>
+    <!-- Transparent dialog theme for floating sticker keyboard -->
+    <style name="Theme.App.Dialog.Transparent" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowMinWidthMajor">0%</item>
+        <item name="android:windowMinWidthMinor">0%</item>
     </style>
-
+    
 </resources>
+

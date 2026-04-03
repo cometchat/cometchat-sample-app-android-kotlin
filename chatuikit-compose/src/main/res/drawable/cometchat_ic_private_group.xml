@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:autoMirrored="true"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+
+    <path
+        android:fillColor="@color/cometchat_color_warning"
+        android:pathData="M8,8m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0"
+        android:strokeWidth="2"
+        android:strokeColor="@color/cometchat_color_neutral_100" />
+
+    <path
+        android:fillColor="@color/cometchat_color_white"
+        android:pathData="M8,11.125C7.965,11.125 7.931,11.122 7.898,11.116C7.865,11.111 7.832,11.102 7.801,11.091C7.098,10.841 6.539,10.398 6.123,9.761C5.708,9.125 5.5,8.438 5.5,7.701V6.2C5.5,6.074 5.537,5.96 5.61,5.858C5.683,5.757 5.777,5.683 5.892,5.637L7.789,4.929C7.86,4.903 7.931,4.891 8,4.891C8.069,4.891 8.14,4.903 8.211,4.929L10.108,5.637C10.223,5.683 10.317,5.757 10.39,5.858C10.463,5.96 10.5,6.074 10.5,6.2V7.701C10.5,8.438 10.292,9.125 9.877,9.761C9.461,10.398 8.902,10.841 8.199,11.091C8.168,11.102 8.135,11.111 8.102,11.116C8.069,11.122 8.035,11.125 8,11.125Z" />
+
+</vector>

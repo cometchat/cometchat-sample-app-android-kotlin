@@ -1,0 +1,672 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatFileBubbleStyle.
+ *
+ * Feature: bubble-style-propagation
+ * Tests:
+ * - CometChatFileBubbleStyle extends CometChatMessageBubbleStyle
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 7.3, 7.5
+ */
+class CometChatFileBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatFileBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatFileBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestFileBubbleStyle()
+
+        // Verify inheritance relationship
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestFileBubbleStyle()
+
+        // Verify content-specific properties
+        style.innerCornerRadius shouldBe 2.dp
+        style.itemSpacing shouldBe 1.dp
+        style.titleTextColor shouldBe Color.Black
+        style.titleTextStyle shouldNotBe null
+        style.subtitleTextColor shouldBe Color.Gray
+        style.subtitleTextStyle shouldNotBe null
+        style.fileIconBackgroundColor shouldBe Color.White
+        style.fileIconCornerRadius shouldBe 4.dp
+        style.fileIconSize shouldBe 32.dp
+        style.downloadIconTint shouldBe Color.Gray
+        style.downloadAllButtonBackgroundColor shouldBe Color.Blue
+        style.downloadAllButtonTextColor shouldBe Color.White
+        style.downloadAllButtonTextStyle shouldNotBe null
+        style.downloadAllButtonCornerRadius shouldBe 8.dp
+        style.downloadAllButtonHeight shouldBe 40.dp
+
+        // Verify inherited wrapper properties
+        style.backgroundColor shouldBe Color(0xFFF5F5F5) // Simulating backgroundColor2
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming factory function should return valid style with backgroundColor3" {
+        val style = createTestFileBubbleStyleIncoming()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color(0xFFE8E8E8) // Simulating backgroundColor3
+        style.cornerRadius shouldBe 12.dp
+        style.innerCornerRadius shouldBe 2.dp
+        style.fileIconBackgroundColor shouldBe Color.White
+        style.fileIconSize shouldBe 32.dp
+        style.titleTextColor shouldBe Color.Black
+        style.subtitleTextColor shouldBe Color.Gray
+        style.downloadIconTint shouldBe Color.Gray
+    }
+
+
+    /**
+     * Test that outgoing() factory function returns a valid style with different colors.
+     *
+     * Validates: Requirements 2.3
+     */
+    "outgoing factory function should return valid style with primary background and white text and icons" {
+        val style = createTestFileBubbleStyleOutgoing()
+
+        // Verify outgoing style has primary background and white colors for text and icons
+        style.backgroundColor shouldBe Color.Blue // Simulating primary
+        style.cornerRadius shouldBe 12.dp
+        style.titleTextColor shouldBe Color.White
+        style.subtitleTextColor shouldBe Color.White.copy(alpha = 0.8f)
+        style.downloadIconTint shouldBe Color.White
+        style.fileIconBackgroundColor shouldBe Color.White
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.float(1f, 4f),    // innerCornerRadius
+            Arb.int(0, 255)       // titleTextColor alpha
+        ) { bgAlpha, cornerRadius, innerCornerRadius, titleAlpha ->
+            createTestFileBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                innerCornerRadius = innerCornerRadius.dp,
+                titleTextColor = Color(0f, 0f, 0f, titleAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalInnerCornerRadius = originalStyle.innerCornerRadius
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalItemSpacing = originalStyle.itemSpacing
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.innerCornerRadius shouldBe originalInnerCornerRadius
+            originalStyle.titleTextColor shouldBe originalTitleTextColor
+            originalStyle.itemSpacing shouldBe originalItemSpacing
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.innerCornerRadius shouldBe originalInnerCornerRadius
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.itemSpacing shouldBe originalItemSpacing
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+
+    /**
+     * Test style copy with modified file icon properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified file icon properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // fileIconBackgroundColor alpha
+            Arb.float(2f, 8f),    // fileIconCornerRadius
+            Arb.float(24f, 48f)   // fileIconSize
+        ) { bgAlpha, cornerRadius, size ->
+            createTestFileBubbleStyle(
+                fileIconBackgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                fileIconCornerRadius = cornerRadius.dp,
+                fileIconSize = size.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalDownloadIconTint = originalStyle.downloadIconTint
+
+            // Create a copy with modified file icon values
+            val newFileIconBackgroundColor = Color.Yellow
+            val newFileIconCornerRadius = 6.dp
+            val newFileIconSize = 40.dp
+            val copiedStyle = originalStyle.copy(
+                fileIconBackgroundColor = newFileIconBackgroundColor,
+                fileIconCornerRadius = newFileIconCornerRadius,
+                fileIconSize = newFileIconSize
+            )
+
+            // Verify modified values
+            copiedStyle.fileIconBackgroundColor shouldBe newFileIconBackgroundColor
+            copiedStyle.fileIconCornerRadius shouldBe newFileIconCornerRadius
+            copiedStyle.fileIconSize shouldBe newFileIconSize
+
+            // Verify other properties are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.downloadIconTint shouldBe originalDownloadIconTint
+        }
+    }
+
+    /**
+     * Test style copy with modified download all button properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified download all button properties should preserve file properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // downloadAllButtonBackgroundColor alpha
+            Arb.float(4f, 16f),   // downloadAllButtonCornerRadius
+            Arb.float(32f, 56f)   // downloadAllButtonHeight
+        ) { bgAlpha, cornerRadius, height ->
+            createTestFileBubbleStyle(
+                downloadAllButtonBackgroundColor = Color(0f, 0f, 1f, bgAlpha / 255f),
+                downloadAllButtonCornerRadius = cornerRadius.dp,
+                downloadAllButtonHeight = height.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalFileIconBackgroundColor = originalStyle.fileIconBackgroundColor
+            val originalFileIconSize = originalStyle.fileIconSize
+            val originalTitleTextColor = originalStyle.titleTextColor
+
+            // Create a copy with modified download all button values
+            val newDownloadAllButtonBackgroundColor = Color.Green
+            val newDownloadAllButtonTextColor = Color.Black
+            val newDownloadAllButtonCornerRadius = 12.dp
+            val newDownloadAllButtonHeight = 48.dp
+            val copiedStyle = originalStyle.copy(
+                downloadAllButtonBackgroundColor = newDownloadAllButtonBackgroundColor,
+                downloadAllButtonTextColor = newDownloadAllButtonTextColor,
+                downloadAllButtonCornerRadius = newDownloadAllButtonCornerRadius,
+                downloadAllButtonHeight = newDownloadAllButtonHeight
+            )
+
+            // Verify modified values
+            copiedStyle.downloadAllButtonBackgroundColor shouldBe newDownloadAllButtonBackgroundColor
+            copiedStyle.downloadAllButtonTextColor shouldBe newDownloadAllButtonTextColor
+            copiedStyle.downloadAllButtonCornerRadius shouldBe newDownloadAllButtonCornerRadius
+            copiedStyle.downloadAllButtonHeight shouldBe newDownloadAllButtonHeight
+
+            // Verify file properties are preserved
+            copiedStyle.fileIconBackgroundColor shouldBe originalFileIconBackgroundColor
+            copiedStyle.fileIconSize shouldBe originalFileIconSize
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+        }
+    }
+
+
+    /**
+     * Test style copy with modified stroke properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified stroke properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 4f),    // strokeWidth
+            Arb.int(0, 255)       // strokeColor alpha
+        ) { strokeWidth, strokeAlpha ->
+            createTestFileBubbleStyle(
+                strokeWidth = strokeWidth.dp,
+                strokeColor = Color(0f, 0f, 0f, strokeAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalFileIconBackgroundColor = originalStyle.fileIconBackgroundColor
+            val originalTitleTextColor = originalStyle.titleTextColor
+            val originalDownloadIconTint = originalStyle.downloadIconTint
+
+            // Create a copy with modified stroke values
+            val newStrokeWidth = 2.dp
+            val newStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                strokeWidth = newStrokeWidth,
+                strokeColor = newStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.strokeColor shouldBe newStrokeColor
+
+            // Verify other properties are preserved
+            copiedStyle.fileIconBackgroundColor shouldBe originalFileIconBackgroundColor
+            copiedStyle.titleTextColor shouldBe originalTitleTextColor
+            copiedStyle.downloadIconTint shouldBe originalDownloadIconTint
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestFileBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.innerCornerRadius shouldBe originalStyle.innerCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.padding shouldBe originalStyle.padding
+            copiedStyle.itemSpacing shouldBe originalStyle.itemSpacing
+            copiedStyle.titleTextColor shouldBe originalStyle.titleTextColor
+            copiedStyle.subtitleTextColor shouldBe originalStyle.subtitleTextColor
+            copiedStyle.fileIconBackgroundColor shouldBe originalStyle.fileIconBackgroundColor
+            copiedStyle.fileIconCornerRadius shouldBe originalStyle.fileIconCornerRadius
+            copiedStyle.fileIconSize shouldBe originalStyle.fileIconSize
+            copiedStyle.downloadIconTint shouldBe originalStyle.downloadIconTint
+            copiedStyle.downloadAllButtonBackgroundColor shouldBe originalStyle.downloadAllButtonBackgroundColor
+            copiedStyle.downloadAllButtonTextColor shouldBe originalStyle.downloadAllButtonTextColor
+            copiedStyle.downloadAllButtonCornerRadius shouldBe originalStyle.downloadAllButtonCornerRadius
+            copiedStyle.downloadAllButtonHeight shouldBe originalStyle.downloadAllButtonHeight
+            copiedStyle.senderNameTextColor shouldBe originalStyle.senderNameTextColor
+            copiedStyle.threadIndicatorTextColor shouldBe originalStyle.threadIndicatorTextColor
+            copiedStyle.threadIndicatorIconTint shouldBe originalStyle.threadIndicatorIconTint
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatFileBubbleStyle(
+            innerCornerRadius = 4.dp,
+            itemSpacing = 2.dp,
+            titleTextColor = Color.Yellow,
+            titleTextStyle = TextStyle(fontSize = 16.sp),
+            subtitleTextColor = Color.Cyan,
+            subtitleTextStyle = TextStyle(fontSize = 12.sp),
+            fileIconBackgroundColor = Color.Magenta,
+            fileIconCornerRadius = 8.dp,
+            fileIconSize = 40.dp,
+            downloadIconTint = Color.Green,
+            downloadAllButtonBackgroundColor = Color.DarkGray,
+            downloadAllButtonTextColor = Color.LightGray,
+            downloadAllButtonTextStyle = TextStyle(fontSize = 14.sp),
+            downloadAllButtonCornerRadius = 12.dp,
+            downloadAllButtonHeight = 48.dp,
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 11.sp),
+            threadIndicatorTextColor = Color.White,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.Gray
+        )
+
+        // Verify content-specific properties
+        customStyle.innerCornerRadius shouldBe 4.dp
+        customStyle.itemSpacing shouldBe 2.dp
+        customStyle.titleTextColor shouldBe Color.Yellow
+        customStyle.titleTextStyle shouldBe TextStyle(fontSize = 16.sp)
+        customStyle.subtitleTextColor shouldBe Color.Cyan
+        customStyle.subtitleTextStyle shouldBe TextStyle(fontSize = 12.sp)
+        customStyle.fileIconBackgroundColor shouldBe Color.Magenta
+        customStyle.fileIconCornerRadius shouldBe 8.dp
+        customStyle.fileIconSize shouldBe 40.dp
+        customStyle.downloadIconTint shouldBe Color.Green
+        customStyle.downloadAllButtonBackgroundColor shouldBe Color.DarkGray
+        customStyle.downloadAllButtonTextColor shouldBe Color.LightGray
+        customStyle.downloadAllButtonTextStyle shouldBe TextStyle(fontSize = 14.sp)
+        customStyle.downloadAllButtonCornerRadius shouldBe 12.dp
+        customStyle.downloadAllButtonHeight shouldBe 48.dp
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 11.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.White
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+
+    /**
+     * Test that incoming and outgoing styles differ in expected properties.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming and outgoing styles should differ in background, title, subtitle and download icon colors" {
+        val incomingStyle = createTestFileBubbleStyleIncoming()
+        val outgoingStyle = createTestFileBubbleStyleOutgoing()
+
+        // Verify common content properties are the same
+        incomingStyle.cornerRadius shouldBe outgoingStyle.cornerRadius
+        incomingStyle.strokeWidth shouldBe outgoingStyle.strokeWidth
+        incomingStyle.strokeColor shouldBe outgoingStyle.strokeColor
+        incomingStyle.innerCornerRadius shouldBe outgoingStyle.innerCornerRadius
+        incomingStyle.itemSpacing shouldBe outgoingStyle.itemSpacing
+        incomingStyle.fileIconBackgroundColor shouldBe outgoingStyle.fileIconBackgroundColor
+        incomingStyle.fileIconCornerRadius shouldBe outgoingStyle.fileIconCornerRadius
+        incomingStyle.fileIconSize shouldBe outgoingStyle.fileIconSize
+
+        // Verify differing properties
+        incomingStyle.backgroundColor shouldNotBe outgoingStyle.backgroundColor
+        incomingStyle.titleTextColor shouldNotBe outgoingStyle.titleTextColor
+        incomingStyle.subtitleTextColor shouldNotBe outgoingStyle.subtitleTextColor
+        incomingStyle.downloadIconTint shouldNotBe outgoingStyle.downloadIconTint
+
+        // Verify outgoing uses primary background and white colors
+        outgoingStyle.backgroundColor shouldBe Color.Blue // Simulating primary
+        outgoingStyle.titleTextColor shouldBe Color.White
+        outgoingStyle.subtitleTextColor shouldBe Color.White.copy(alpha = 0.8f)
+        outgoingStyle.downloadIconTint shouldBe Color.White
+    }
+
+    /**
+     * Test that style can be assigned to CometChatMessageBubbleStyle variable.
+     *
+     * Validates: Requirements 2.1
+     */
+    "style should be assignable to CometChatMessageBubbleStyle variable" {
+        val fileStyle: CometChatFileBubbleStyle = createTestFileBubbleStyle()
+
+        // Verify it can be assigned to parent type
+        val messageBubbleStyle: CometChatMessageBubbleStyle = fileStyle
+
+        // Verify inherited properties are accessible through parent type
+        messageBubbleStyle.backgroundColor shouldBe fileStyle.backgroundColor
+        messageBubbleStyle.cornerRadius shouldBe fileStyle.cornerRadius
+        messageBubbleStyle.strokeWidth shouldBe fileStyle.strokeWidth
+        messageBubbleStyle.strokeColor shouldBe fileStyle.strokeColor
+        messageBubbleStyle.padding shouldBe fileStyle.padding
+        messageBubbleStyle.senderNameTextColor shouldBe fileStyle.senderNameTextColor
+        messageBubbleStyle.senderNameTextStyle shouldBe fileStyle.senderNameTextStyle
+        messageBubbleStyle.threadIndicatorTextColor shouldBe fileStyle.threadIndicatorTextColor
+        messageBubbleStyle.threadIndicatorTextStyle shouldBe fileStyle.threadIndicatorTextStyle
+        messageBubbleStyle.threadIndicatorIconTint shouldBe fileStyle.threadIndicatorIconTint
+    }
+})
+
+
+/**
+ * Helper function to create a test file bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestFileBubbleStyle(
+    // Content-specific properties
+    innerCornerRadius: Dp = 2.dp,
+    itemSpacing: Dp = 1.dp,
+    titleTextColor: Color = Color.Black, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    subtitleTextColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorSecondary
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    fileIconBackgroundColor: Color = Color.White,
+    fileIconCornerRadius: Dp = 4.dp,
+    fileIconSize: Dp = 32.dp,
+    downloadIconTint: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.iconTintSecondary
+    downloadAllButtonBackgroundColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    downloadAllButtonTextColor: Color = Color.White, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    downloadAllButtonTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    downloadAllButtonCornerRadius: Dp = 8.dp,
+    downloadAllButtonHeight: Dp = 40.dp,
+    // Inherited wrapper properties
+    backgroundColor: Color = Color(0xFFF5F5F5), // Simulating backgroundColor2
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatFileBubbleStyle {
+    return CometChatFileBubbleStyle(
+        innerCornerRadius = innerCornerRadius,
+        itemSpacing = itemSpacing,
+        titleTextColor = titleTextColor,
+        titleTextStyle = titleTextStyle,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        fileIconBackgroundColor = fileIconBackgroundColor,
+        fileIconCornerRadius = fileIconCornerRadius,
+        fileIconSize = fileIconSize,
+        downloadIconTint = downloadIconTint,
+        downloadAllButtonBackgroundColor = downloadAllButtonBackgroundColor,
+        downloadAllButtonTextColor = downloadAllButtonTextColor,
+        downloadAllButtonTextStyle = downloadAllButtonTextStyle,
+        downloadAllButtonCornerRadius = downloadAllButtonCornerRadius,
+        downloadAllButtonHeight = downloadAllButtonHeight,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+
+/**
+ * Helper function to create a test file bubble style for incoming messages.
+ * This simulates what the incoming() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestFileBubbleStyleIncoming(
+    // Content-specific properties
+    innerCornerRadius: Dp = 2.dp,
+    itemSpacing: Dp = 1.dp,
+    titleTextColor: Color = Color.Black, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    subtitleTextColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorSecondary
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    fileIconBackgroundColor: Color = Color.White,
+    fileIconCornerRadius: Dp = 4.dp,
+    fileIconSize: Dp = 32.dp,
+    downloadIconTint: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.iconTintSecondary
+    downloadAllButtonBackgroundColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    downloadAllButtonTextColor: Color = Color.White, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    downloadAllButtonTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    downloadAllButtonCornerRadius: Dp = 8.dp,
+    downloadAllButtonHeight: Dp = 40.dp,
+    // Inherited wrapper properties - incoming uses backgroundColor3
+    backgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatFileBubbleStyle {
+    return CometChatFileBubbleStyle(
+        innerCornerRadius = innerCornerRadius,
+        itemSpacing = itemSpacing,
+        titleTextColor = titleTextColor,
+        titleTextStyle = titleTextStyle,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        fileIconBackgroundColor = fileIconBackgroundColor,
+        fileIconCornerRadius = fileIconCornerRadius,
+        fileIconSize = fileIconSize,
+        downloadIconTint = downloadIconTint,
+        downloadAllButtonBackgroundColor = downloadAllButtonBackgroundColor,
+        downloadAllButtonTextColor = downloadAllButtonTextColor,
+        downloadAllButtonTextStyle = downloadAllButtonTextStyle,
+        downloadAllButtonCornerRadius = downloadAllButtonCornerRadius,
+        downloadAllButtonHeight = downloadAllButtonHeight,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+
+/**
+ * Helper function to create a test file bubble style for outgoing messages.
+ * This simulates what the outgoing() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestFileBubbleStyleOutgoing(
+    // Content-specific properties - outgoing uses white for text and icons
+    innerCornerRadius: Dp = 2.dp,
+    itemSpacing: Dp = 1.dp,
+    titleTextColor: Color = Color.White, // Outgoing uses white
+    titleTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    subtitleTextColor: Color = Color.White.copy(alpha = 0.8f), // Outgoing uses white with alpha
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    fileIconBackgroundColor: Color = Color.White,
+    fileIconCornerRadius: Dp = 4.dp,
+    fileIconSize: Dp = 32.dp,
+    downloadIconTint: Color = Color.White, // Outgoing uses white
+    downloadAllButtonBackgroundColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    downloadAllButtonTextColor: Color = Color.White, // Simulating CometChatTheme.colorScheme.textColorPrimary
+    downloadAllButtonTextStyle: TextStyle = TextStyle(fontSize = 14.sp), // Simulating bodyMedium
+    downloadAllButtonCornerRadius: Dp = 8.dp,
+    downloadAllButtonHeight: Dp = 40.dp,
+    // Inherited wrapper properties - outgoing uses primary background
+    backgroundColor: Color = Color.Blue, // Simulating primary
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatFileBubbleStyle {
+    return CometChatFileBubbleStyle(
+        innerCornerRadius = innerCornerRadius,
+        itemSpacing = itemSpacing,
+        titleTextColor = titleTextColor,
+        titleTextStyle = titleTextStyle,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        fileIconBackgroundColor = fileIconBackgroundColor,
+        fileIconCornerRadius = fileIconCornerRadius,
+        fileIconSize = fileIconSize,
+        downloadIconTint = downloadIconTint,
+        downloadAllButtonBackgroundColor = downloadAllButtonBackgroundColor,
+        downloadAllButtonTextColor = downloadAllButtonTextColor,
+        downloadAllButtonTextStyle = downloadAllButtonTextStyle,
+        downloadAllButtonCornerRadius = downloadAllButtonCornerRadius,
+        downloadAllButtonHeight = downloadAllButtonHeight,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}

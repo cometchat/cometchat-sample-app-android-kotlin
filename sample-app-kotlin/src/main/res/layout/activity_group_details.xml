@@ -8,7 +8,7 @@
     android:background="?attr/cometchatBackgroundColor1"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context="ui.activity.GroupDetailsActivity">
+    tools:context=".ui.groups.GroupDetailsActivity">
 
     <LinearLayout
         android:id="@+id/toolbar_layout"
@@ -44,7 +44,7 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/app_group_info"
+                android:text="@string/group_details"
                 android:textAppearance="?attr/cometchatTextAppearanceHeading2Bold"
                 android:textColor="?attr/cometchatTextColorPrimary"
                 tools:visibility="visible" />
@@ -66,7 +66,8 @@
         android:background="?attr/cometchatWarningColor"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/cometchat_padding_1">
+        android:padding="@dimen/cometchat_padding_1"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/iv_info"
@@ -74,7 +75,7 @@
             android:layout_height="@dimen/cometchat_24dp"
             android:layout_marginStart="@dimen/cometchat_margin_2"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_info"
+            android:src="@drawable/cometchat_ic_info"
             app:tint="?attr/cometchatTextColorPrimary" />
 
         <TextView
@@ -82,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/cometchat_margin_4"
-            android:text="@string/app_no_longer_part_of_this_group"
+            android:text="@string/no_longer_part_of_group"
             android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
             android:textColor="?attr/cometchatTextColorPrimary" />
 
@@ -95,9 +96,8 @@
         android:paddingStart="@dimen/cometchat_padding_4"
         android:paddingEnd="@dimen/cometchat_padding_4">
 
-        <com.cometchat.chatuikit.shared.views.avatar.CometChatAvatar
-            android:id="@+id/avatar"
-            style="@style/DetailsAvatarStyle"
+        <com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatar
+            android:id="@+id/groupAvatar"
             android:layout_width="@dimen/cometchat_120dp"
             android:layout_height="@dimen/cometchat_120dp"
             android:layout_gravity="center"
@@ -105,7 +105,7 @@
             app:cardCornerRadius="@dimen/cometchat_radius_max" />
 
         <TextView
-            android:id="@+id/tv_group_name"
+            android:id="@+id/group_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -118,7 +118,7 @@
             android:textColor="?attr/cometchatTextColorPrimary" />
 
         <TextView
-            android:id="@+id/tv_member_count"
+            android:id="@+id/member_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -159,7 +159,7 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:drawablePadding="@dimen/cometchat_margin_2"
-                        android:text="@string/app_view_members_chip"
+                        android:text="@string/view_members"
                         android:textAlignment="center"
                         android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
                         android:textColor="?attr/cometchatTextColorSecondary"
@@ -195,7 +195,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:drawablePadding="@dimen/cometchat_margin_2"
-                        android:text="@string/app_add_members_chip"
+                        android:text="@string/add_members"
                         android:textAlignment="center"
                         android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
                         android:textColor="?attr/cometchatTextColorSecondary"
@@ -231,7 +231,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:drawablePadding="@dimen/cometchat_margin_2"
-                        android:text="@string/app_banned_members_chip"
+                        android:text="@string/banned_members"
                         android:textAlignment="center"
                         android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
                         android:textColor="?attr/cometchatTextColorSecondary"
@@ -253,25 +253,35 @@
         android:layout_marginTop="@dimen/cometchat_margin_5"
         android:background="?attr/cometchatStrokeColorLight" />
 
-
-    <TextView
-        android:id="@+id/tv_leave_group"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/leave_group_lay"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawablePadding="@dimen/cometchat_12dp"
         android:gravity="center_vertical"
-        android:paddingStart="@dimen/cometchat_margin_4"
-        android:paddingTop="@dimen/cometchat_margin_3"
-        android:paddingEnd="@dimen/cometchat_margin_5"
-        android:paddingBottom="@dimen/cometchat_margin_3"
-        android:text="@string/app_leave"
-        android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
-        android:textColor="?attr/cometchatErrorColor"
-        app:drawableLeftCompat="@drawable/ic_leave_group" />
+        android:orientation="horizontal"
+        android:padding="@dimen/cometchat_padding_4"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_leave_group"
+            android:layout_width="@dimen/cometchat_24dp"
+            android:layout_height="@dimen/cometchat_24dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_leave_group" />
+
+        <TextView
+            android:id="@+id/tv_leave_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/cometchat_margin_3"
+            android:text="@string/leave"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
+            android:textColor="?attr/cometchatErrorColor" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_delete_chat"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="@dimen/cometchat_padding_3"
         android:gravity="center_vertical"
@@ -279,25 +289,37 @@
         android:paddingTop="@dimen/cometchat_margin_3"
         android:paddingEnd="@dimen/cometchat_margin_5"
         android:paddingBottom="@dimen/cometchat_margin_3"
-        android:text="@string/app_delete"
+        android:text="@string/delete_chat"
         android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
         android:textColor="?attr/cometchatErrorColor"
+        android:visibility="gone"
         app:drawableLeftCompat="@drawable/ic_delete" />
 
-    <TextView
-        android:id="@+id/tv_delete_group"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/delete_group_lay"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawablePadding="@dimen/cometchat_padding_3"
         android:gravity="center_vertical"
-        android:paddingStart="@dimen/cometchat_margin_4"
-        android:paddingTop="@dimen/cometchat_margin_3"
-        android:paddingEnd="@dimen/cometchat_margin_5"
-        android:paddingBottom="@dimen/cometchat_margin_3"
-        android:text="@string/app_delete_and_exit"
-        android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
-        android:textColor="?attr/cometchatErrorColor"
-        app:drawableLeftCompat="@drawable/ic_delete" />
+        android:orientation="horizontal"
+        android:padding="@dimen/cometchat_padding_4"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_delete_group"
+            android:layout_width="@dimen/cometchat_24dp"
+            android:layout_height="@dimen/cometchat_24dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_delete" />
+
+        <TextView
+            android:id="@+id/tv_delete_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/cometchat_margin_3"
+            android:text="@string/delete_and_exit"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
+            android:textColor="?attr/cometchatErrorColor" />
+    </LinearLayout>
 
 
 </LinearLayout>

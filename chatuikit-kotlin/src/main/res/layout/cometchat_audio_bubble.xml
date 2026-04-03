@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/iv_button"
+        android:layout_width="@dimen/cometchat_32dp"
+        android:layout_height="@dimen/cometchat_32dp"
+        android:elevation="@dimen/cometchat_0dp"
+        app:cardCornerRadius="@dimen/cometchat_radius_max"
+        app:cardElevation="@dimen/cometchat_0dp">
+
+        <ImageView
+            android:id="@+id/iv_play"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/cometchat_play_icon" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="true"
+            android:padding="@dimen/cometchat_padding"
+            android:indeterminateTint="?attr/cometchatTextColorPrimary"
+            android:indeterminateTintMode="src_atop"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/iv_pause"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/cometchat_ic_pause"
+            android:visibility="gone" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/cometchat_margin_3"
+        android:orientation="vertical">
+
+        <com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.AudioWaveformBarsView
+            android:id="@+id/waveformView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cometchat_24dp" />
+
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin"
+            android:ellipsize="end"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:maxLines="1"
+            tools:text="Audio size" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,577 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.style
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.float
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+
+/**
+ * Unit tests for CometChatAudioBubbleStyle.
+ *
+ * Feature: bubble-style-propagation
+ * Tests:
+ * - CometChatAudioBubbleStyle extends CometChatMessageBubbleStyle
+ * - default() factory function returns valid style with theme defaults
+ * - incoming() factory function returns valid style
+ * - outgoing() factory function returns valid style
+ * - All properties are accessible
+ * - Style immutability (copy creates new instance)
+ *
+ * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 7.3, 7.5
+ */
+class CometChatAudioBubbleStyleTest : StringSpec({
+
+    /**
+     * Test that CometChatAudioBubbleStyle extends CometChatMessageBubbleStyle.
+     *
+     * Validates: Requirements 2.1
+     */
+    "CometChatAudioBubbleStyle should extend CometChatMessageBubbleStyle" {
+        val style = createTestAudioBubbleStyle()
+
+        // Verify inheritance relationship
+        style.shouldBeInstanceOf<CometChatMessageBubbleStyle>()
+    }
+
+    /**
+     * Test that all properties are accessible and have expected default values.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "all properties should be accessible with expected default values" {
+        val style = createTestAudioBubbleStyle()
+
+        // Verify content-specific properties
+        style.playIconTint shouldBe Color.Blue // Simulating CometChatTheme.colorScheme.primary
+        style.pauseIconTint shouldBe Color.Blue // Simulating CometChatTheme.colorScheme.primary
+        style.buttonBackgroundColor shouldBe Color.White
+        style.audioWaveColor shouldBe Color.Blue // Simulating CometChatTheme.colorScheme.primary
+        style.subtitleTextColor shouldBe Color.Gray // Simulating CometChatTheme.colorScheme.textColorSecondary
+        style.subtitleTextStyle shouldNotBe null
+
+        // Verify inherited wrapper properties
+        style.backgroundColor shouldBe Color(0xFFF5F5F5) // Simulating backgroundColor2
+        style.cornerRadius shouldBe 12.dp
+        style.strokeWidth shouldBe 0.dp
+        style.strokeColor shouldBe Color.Transparent
+        style.padding shouldBe PaddingValues(0.dp)
+        style.senderNameTextColor shouldBe Color.Gray
+        style.senderNameTextStyle shouldNotBe null
+        style.threadIndicatorTextColor shouldBe Color.Gray
+        style.threadIndicatorTextStyle shouldNotBe null
+        style.threadIndicatorIconTint shouldBe Color.Gray
+    }
+
+    /**
+     * Test that incoming() factory function returns a valid style.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming factory function should return valid style with backgroundColor3" {
+        val style = createTestAudioBubbleStyleIncoming()
+
+        // Verify incoming style has expected values
+        style.backgroundColor shouldBe Color(0xFFE8E8E8) // Simulating backgroundColor3
+        style.cornerRadius shouldBe 12.dp
+        style.playIconTint shouldBe Color.Blue
+        style.pauseIconTint shouldBe Color.Blue
+        style.buttonBackgroundColor shouldBe Color.White
+        style.audioWaveColor shouldBe Color.Blue
+        style.subtitleTextColor shouldBe Color.Gray
+    }
+
+    /**
+     * Test that outgoing() factory function returns a valid style with different colors.
+     *
+     * Validates: Requirements 2.3
+     */
+    "outgoing factory function should return valid style with primary background and white audio wave and subtitle" {
+        val style = createTestAudioBubbleStyleOutgoing()
+
+        // Verify outgoing style has primary background and white colors for audio wave and subtitle
+        style.backgroundColor shouldBe Color.Blue // Simulating primary
+        style.cornerRadius shouldBe 12.dp
+        style.playIconTint shouldBe Color.Blue
+        style.pauseIconTint shouldBe Color.Blue
+        style.buttonBackgroundColor shouldBe Color.White
+        style.audioWaveColor shouldBe Color.White
+        style.subtitleTextColor shouldBe Color.White
+    }
+
+    /**
+     * Test style immutability - copy should create new instance with modified values
+     * while original remains unchanged.
+     *
+     * Validates: Requirements 2.2, 2.4
+     */
+    "copy should create new instance with modified values while original remains unchanged" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // backgroundColor alpha
+            Arb.float(4f, 24f),   // cornerRadius
+            Arb.int(0, 255),      // playIconTint alpha
+            Arb.int(0, 255)       // audioWaveColor alpha
+        ) { bgAlpha, cornerRadius, playIconAlpha, waveAlpha ->
+            createTestAudioBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, bgAlpha / 255f),
+                cornerRadius = cornerRadius.dp,
+                playIconTint = Color(0f, 0f, 1f, playIconAlpha / 255f),
+                audioWaveColor = Color(0f, 0f, 1f, waveAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Store original values
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalCornerRadius = originalStyle.cornerRadius
+            val originalStrokeWidth = originalStyle.strokeWidth
+            val originalStrokeColor = originalStyle.strokeColor
+            val originalPadding = originalStyle.padding
+            val originalPlayIconTint = originalStyle.playIconTint
+            val originalPauseIconTint = originalStyle.pauseIconTint
+            val originalButtonBackgroundColor = originalStyle.buttonBackgroundColor
+            val originalAudioWaveColor = originalStyle.audioWaveColor
+            val originalSubtitleTextColor = originalStyle.subtitleTextColor
+
+            // Create a copy with modified backgroundColor
+            val newBackgroundColor = Color.Red
+            val copiedStyle = originalStyle.copy(backgroundColor = newBackgroundColor)
+
+            // Verify the copied style has the new value
+            copiedStyle.backgroundColor shouldBe newBackgroundColor
+
+            // Verify the original style is unchanged
+            originalStyle.backgroundColor shouldBe originalBackgroundColor
+            originalStyle.cornerRadius shouldBe originalCornerRadius
+            originalStyle.strokeWidth shouldBe originalStrokeWidth
+            originalStyle.strokeColor shouldBe originalStrokeColor
+            originalStyle.padding shouldBe originalPadding
+            originalStyle.playIconTint shouldBe originalPlayIconTint
+            originalStyle.pauseIconTint shouldBe originalPauseIconTint
+            originalStyle.buttonBackgroundColor shouldBe originalButtonBackgroundColor
+            originalStyle.audioWaveColor shouldBe originalAudioWaveColor
+            originalStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+
+            // Verify the copied style retained other values
+            copiedStyle.cornerRadius shouldBe originalCornerRadius
+            copiedStyle.strokeWidth shouldBe originalStrokeWidth
+            copiedStyle.strokeColor shouldBe originalStrokeColor
+            copiedStyle.padding shouldBe originalPadding
+            copiedStyle.playIconTint shouldBe originalPlayIconTint
+            copiedStyle.pauseIconTint shouldBe originalPauseIconTint
+            copiedStyle.buttonBackgroundColor shouldBe originalButtonBackgroundColor
+            copiedStyle.audioWaveColor shouldBe originalAudioWaveColor
+            copiedStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+
+            // Verify they are different instances (by value comparison after modification)
+            copiedStyle.backgroundColor shouldNotBe originalStyle.backgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified playback control properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified playback control properties should preserve unmodified values" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // playIconTint alpha
+            Arb.int(0, 255)       // pauseIconTint alpha
+        ) { playAlpha, pauseAlpha ->
+            createTestAudioBubbleStyle(
+                playIconTint = Color(0f, 0f, 1f, playAlpha / 255f),
+                pauseIconTint = Color(0f, 0f, 1f, pauseAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalBackgroundColor = originalStyle.backgroundColor
+            val originalAudioWaveColor = originalStyle.audioWaveColor
+            val originalSubtitleTextColor = originalStyle.subtitleTextColor
+
+            // Create a copy with modified playback control values
+            val newPlayIconTint = Color.Yellow
+            val newPauseIconTint = Color.Green
+            val newButtonBackgroundColor = Color.Cyan
+            val copiedStyle = originalStyle.copy(
+                playIconTint = newPlayIconTint,
+                pauseIconTint = newPauseIconTint,
+                buttonBackgroundColor = newButtonBackgroundColor
+            )
+
+            // Verify modified values
+            copiedStyle.playIconTint shouldBe newPlayIconTint
+            copiedStyle.pauseIconTint shouldBe newPauseIconTint
+            copiedStyle.buttonBackgroundColor shouldBe newButtonBackgroundColor
+
+            // Verify unmodified values are preserved
+            copiedStyle.backgroundColor shouldBe originalBackgroundColor
+            copiedStyle.audioWaveColor shouldBe originalAudioWaveColor
+            copiedStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+        }
+    }
+
+    /**
+     * Test style copy with modified audio wave properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified audio wave properties should preserve playback control properties" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),      // audioWaveColor alpha
+            Arb.float(12f, 18f)   // subtitleTextStyle fontSize
+        ) { waveAlpha, fontSize ->
+            createTestAudioBubbleStyle(
+                audioWaveColor = Color(0f, 0f, 1f, waveAlpha / 255f),
+                subtitleTextStyle = TextStyle(fontSize = fontSize.sp)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalPlayIconTint = originalStyle.playIconTint
+            val originalPauseIconTint = originalStyle.pauseIconTint
+            val originalButtonBackgroundColor = originalStyle.buttonBackgroundColor
+
+            // Create a copy with modified audio wave values
+            val newAudioWaveColor = Color.Magenta
+            val newSubtitleTextColor = Color.DarkGray
+            val newSubtitleTextStyle = TextStyle(fontSize = 16.sp)
+            val copiedStyle = originalStyle.copy(
+                audioWaveColor = newAudioWaveColor,
+                subtitleTextColor = newSubtitleTextColor,
+                subtitleTextStyle = newSubtitleTextStyle
+            )
+
+            // Verify modified values
+            copiedStyle.audioWaveColor shouldBe newAudioWaveColor
+            copiedStyle.subtitleTextColor shouldBe newSubtitleTextColor
+            copiedStyle.subtitleTextStyle shouldBe newSubtitleTextStyle
+
+            // Verify playback control properties are preserved
+            copiedStyle.playIconTint shouldBe originalPlayIconTint
+            copiedStyle.pauseIconTint shouldBe originalPauseIconTint
+            copiedStyle.buttonBackgroundColor shouldBe originalButtonBackgroundColor
+        }
+    }
+
+    /**
+     * Test style copy with modified stroke properties.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copy with modified stroke properties should preserve other properties" {
+        val styleArb = Arb.bind(
+            Arb.float(0f, 4f),    // strokeWidth
+            Arb.int(0, 255)       // strokeColor alpha
+        ) { strokeWidth, strokeAlpha ->
+            createTestAudioBubbleStyle(
+                strokeWidth = strokeWidth.dp,
+                strokeColor = Color(0f, 0f, 0f, strokeAlpha / 255f)
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            val originalPlayIconTint = originalStyle.playIconTint
+            val originalAudioWaveColor = originalStyle.audioWaveColor
+            val originalSubtitleTextColor = originalStyle.subtitleTextColor
+
+            // Create a copy with modified stroke values
+            val newStrokeWidth = 2.dp
+            val newStrokeColor = Color.Red
+            val copiedStyle = originalStyle.copy(
+                strokeWidth = newStrokeWidth,
+                strokeColor = newStrokeColor
+            )
+
+            // Verify modified values
+            copiedStyle.strokeWidth shouldBe newStrokeWidth
+            copiedStyle.strokeColor shouldBe newStrokeColor
+
+            // Verify other properties are preserved
+            copiedStyle.playIconTint shouldBe originalPlayIconTint
+            copiedStyle.audioWaveColor shouldBe originalAudioWaveColor
+            copiedStyle.subtitleTextColor shouldBe originalSubtitleTextColor
+        }
+    }
+
+    /**
+     * Test that copying style with same values creates equal instance.
+     *
+     * Validates: Requirements 2.2
+     */
+    "copying style with same values should create equal instance" {
+        val styleArb = Arb.bind(
+            Arb.int(0, 255),
+            Arb.float(4f, 16f)
+        ) { alpha, cornerRadius ->
+            createTestAudioBubbleStyle(
+                backgroundColor = Color(1f, 1f, 1f, alpha / 255f),
+                cornerRadius = cornerRadius.dp
+            )
+        }
+
+        checkAll(100, styleArb) { originalStyle ->
+            // Create a copy with no modifications
+            val copiedStyle = originalStyle.copy()
+
+            // Verify values are equal
+            copiedStyle.backgroundColor shouldBe originalStyle.backgroundColor
+            copiedStyle.cornerRadius shouldBe originalStyle.cornerRadius
+            copiedStyle.strokeWidth shouldBe originalStyle.strokeWidth
+            copiedStyle.strokeColor shouldBe originalStyle.strokeColor
+            copiedStyle.padding shouldBe originalStyle.padding
+            copiedStyle.playIconTint shouldBe originalStyle.playIconTint
+            copiedStyle.pauseIconTint shouldBe originalStyle.pauseIconTint
+            copiedStyle.buttonBackgroundColor shouldBe originalStyle.buttonBackgroundColor
+            copiedStyle.audioWaveColor shouldBe originalStyle.audioWaveColor
+            copiedStyle.subtitleTextColor shouldBe originalStyle.subtitleTextColor
+            copiedStyle.subtitleTextStyle shouldBe originalStyle.subtitleTextStyle
+
+            // Data classes with same values are equal
+            copiedStyle shouldBe originalStyle
+        }
+    }
+
+    /**
+     * Test that all style properties can be customized.
+     *
+     * Validates: Requirements 2.2
+     */
+    "all style properties should be customizable" {
+        val customStyle = CometChatAudioBubbleStyle(
+            playIconTint = Color.Yellow,
+            pauseIconTint = Color.Green,
+            buttonBackgroundColor = Color.Cyan,
+            audioWaveColor = Color.Magenta,
+            subtitleTextColor = Color.DarkGray,
+            subtitleTextStyle = TextStyle(fontSize = 14.sp),
+            backgroundColor = Color.Blue,
+            cornerRadius = 20.dp,
+            strokeWidth = 2.dp,
+            strokeColor = Color.Red,
+            padding = PaddingValues(8.dp),
+            senderNameTextColor = Color.Black,
+            senderNameTextStyle = TextStyle(fontSize = 12.sp),
+            threadIndicatorTextColor = Color.Gray,
+            threadIndicatorTextStyle = TextStyle(fontSize = 10.sp),
+            threadIndicatorIconTint = Color.LightGray
+        )
+
+        // Verify content-specific properties
+        customStyle.playIconTint shouldBe Color.Yellow
+        customStyle.pauseIconTint shouldBe Color.Green
+        customStyle.buttonBackgroundColor shouldBe Color.Cyan
+        customStyle.audioWaveColor shouldBe Color.Magenta
+        customStyle.subtitleTextColor shouldBe Color.DarkGray
+        customStyle.subtitleTextStyle shouldBe TextStyle(fontSize = 14.sp)
+
+        // Verify inherited wrapper properties
+        customStyle.backgroundColor shouldBe Color.Blue
+        customStyle.cornerRadius shouldBe 20.dp
+        customStyle.strokeWidth shouldBe 2.dp
+        customStyle.strokeColor shouldBe Color.Red
+        customStyle.padding shouldBe PaddingValues(8.dp)
+        customStyle.senderNameTextColor shouldBe Color.Black
+        customStyle.senderNameTextStyle shouldBe TextStyle(fontSize = 12.sp)
+        customStyle.threadIndicatorTextColor shouldBe Color.Gray
+        customStyle.threadIndicatorTextStyle shouldBe TextStyle(fontSize = 10.sp)
+        customStyle.threadIndicatorIconTint shouldBe Color.LightGray
+    }
+
+    /**
+     * Test that incoming and outgoing styles differ in expected properties.
+     *
+     * Validates: Requirements 2.3
+     */
+    "incoming and outgoing styles should differ in background, audio wave and subtitle colors" {
+        val incomingStyle = createTestAudioBubbleStyleIncoming()
+        val outgoingStyle = createTestAudioBubbleStyleOutgoing()
+
+        // Verify common content properties are the same
+        incomingStyle.cornerRadius shouldBe outgoingStyle.cornerRadius
+        incomingStyle.strokeWidth shouldBe outgoingStyle.strokeWidth
+        incomingStyle.strokeColor shouldBe outgoingStyle.strokeColor
+        incomingStyle.playIconTint shouldBe outgoingStyle.playIconTint
+        incomingStyle.pauseIconTint shouldBe outgoingStyle.pauseIconTint
+        incomingStyle.buttonBackgroundColor shouldBe outgoingStyle.buttonBackgroundColor
+
+        // Verify differing properties
+        incomingStyle.backgroundColor shouldNotBe outgoingStyle.backgroundColor
+        incomingStyle.audioWaveColor shouldNotBe outgoingStyle.audioWaveColor
+        incomingStyle.subtitleTextColor shouldNotBe outgoingStyle.subtitleTextColor
+
+        // Verify outgoing uses primary background and white colors
+        outgoingStyle.backgroundColor shouldBe Color.Blue // Simulating primary
+        outgoingStyle.audioWaveColor shouldBe Color.White
+        outgoingStyle.subtitleTextColor shouldBe Color.White
+    }
+
+    /**
+     * Test that style can be assigned to CometChatMessageBubbleStyle variable.
+     *
+     * Validates: Requirements 2.1
+     */
+    "style should be assignable to CometChatMessageBubbleStyle variable" {
+        val audioStyle: CometChatAudioBubbleStyle = createTestAudioBubbleStyle()
+
+        // Verify it can be assigned to parent type
+        val messageBubbleStyle: CometChatMessageBubbleStyle = audioStyle
+
+        // Verify inherited properties are accessible through parent type
+        messageBubbleStyle.backgroundColor shouldBe audioStyle.backgroundColor
+        messageBubbleStyle.cornerRadius shouldBe audioStyle.cornerRadius
+        messageBubbleStyle.strokeWidth shouldBe audioStyle.strokeWidth
+        messageBubbleStyle.strokeColor shouldBe audioStyle.strokeColor
+        messageBubbleStyle.padding shouldBe audioStyle.padding
+        messageBubbleStyle.senderNameTextColor shouldBe audioStyle.senderNameTextColor
+        messageBubbleStyle.senderNameTextStyle shouldBe audioStyle.senderNameTextStyle
+        messageBubbleStyle.threadIndicatorTextColor shouldBe audioStyle.threadIndicatorTextColor
+        messageBubbleStyle.threadIndicatorTextStyle shouldBe audioStyle.threadIndicatorTextStyle
+        messageBubbleStyle.threadIndicatorIconTint shouldBe audioStyle.threadIndicatorIconTint
+    }
+})
+
+/**
+ * Helper function to create a test audio bubble style with customizable values.
+ * This simulates what the default() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestAudioBubbleStyle(
+    // Content-specific properties
+    playIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    pauseIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    buttonBackgroundColor: Color = Color.White,
+    audioWaveColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    subtitleTextColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorSecondary
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    // Inherited wrapper properties
+    backgroundColor: Color = Color(0xFFF5F5F5), // Simulating backgroundColor2
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatAudioBubbleStyle {
+    return CometChatAudioBubbleStyle(
+        playIconTint = playIconTint,
+        pauseIconTint = pauseIconTint,
+        buttonBackgroundColor = buttonBackgroundColor,
+        audioWaveColor = audioWaveColor,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test audio bubble style for incoming messages.
+ * This simulates what the incoming() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestAudioBubbleStyleIncoming(
+    // Content-specific properties
+    playIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    pauseIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    buttonBackgroundColor: Color = Color.White,
+    audioWaveColor: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    subtitleTextColor: Color = Color.Gray, // Simulating CometChatTheme.colorScheme.textColorSecondary
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    // Inherited wrapper properties - incoming uses backgroundColor3
+    backgroundColor: Color = Color(0xFFE8E8E8), // Simulating backgroundColor3
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatAudioBubbleStyle {
+    return CometChatAudioBubbleStyle(
+        playIconTint = playIconTint,
+        pauseIconTint = pauseIconTint,
+        buttonBackgroundColor = buttonBackgroundColor,
+        audioWaveColor = audioWaveColor,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
+
+/**
+ * Helper function to create a test audio bubble style for outgoing messages.
+ * This simulates what the outgoing() factory function would return without requiring
+ * a Compose context.
+ */
+private fun createTestAudioBubbleStyleOutgoing(
+    // Content-specific properties - outgoing uses white for audio wave and subtitle
+    playIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    pauseIconTint: Color = Color.Blue, // Simulating CometChatTheme.colorScheme.primary
+    buttonBackgroundColor: Color = Color.White,
+    audioWaveColor: Color = Color.White, // Outgoing uses white
+    subtitleTextColor: Color = Color.White, // Outgoing uses white
+    subtitleTextStyle: TextStyle = TextStyle(fontSize = 10.sp), // Simulating caption2Regular
+    // Inherited wrapper properties - outgoing uses primary background
+    backgroundColor: Color = Color.Blue, // Simulating primary
+    cornerRadius: Dp = 12.dp,
+    strokeWidth: Dp = 0.dp,
+    strokeColor: Color = Color.Transparent,
+    padding: PaddingValues = PaddingValues(0.dp),
+    senderNameTextColor: Color = Color.Gray,
+    senderNameTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorTextColor: Color = Color.Gray,
+    threadIndicatorTextStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    threadIndicatorIconTint: Color = Color.Gray
+): CometChatAudioBubbleStyle {
+    return CometChatAudioBubbleStyle(
+        playIconTint = playIconTint,
+        pauseIconTint = pauseIconTint,
+        buttonBackgroundColor = buttonBackgroundColor,
+        audioWaveColor = audioWaveColor,
+        subtitleTextColor = subtitleTextColor,
+        subtitleTextStyle = subtitleTextStyle,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        strokeWidth = strokeWidth,
+        strokeColor = strokeColor,
+        padding = padding,
+        senderNameTextColor = senderNameTextColor,
+        senderNameTextStyle = senderNameTextStyle,
+        threadIndicatorTextColor = threadIndicatorTextColor,
+        threadIndicatorTextStyle = threadIndicatorTextStyle,
+        threadIndicatorIconTint = threadIndicatorIconTint
+    )
+}
