@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -23,7 +24,6 @@ import com.cometchat.ai.sampleapp.viewmodels.MessagesViewModel
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
-import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.google.gson.Gson
 import org.json.JSONException
@@ -233,7 +233,8 @@ class AIAssistantChatActivity : AppCompatActivity() {
             binding.messageHeader.user = user!!
             binding.messageList.user = user
             binding.compactMessageComposer.setUser(user)
-            binding.compactMessageComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
+            binding.compactMessageComposer.setEnableRichTextFormatting(false)
+            binding.compactMessageComposer.setRichTextFormattingOptionsVisibility(View.GONE)
             if (isAgentChat) {
                 binding.messageList.setStyle(R.style.CustomCometChatMessageListStyle)
             }

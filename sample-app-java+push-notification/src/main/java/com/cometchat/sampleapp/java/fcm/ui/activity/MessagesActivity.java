@@ -27,7 +27,6 @@ import com.cometchat.chatuikit.CometChatTheme;
 import com.cometchat.chatuikit.logger.CometChatLogger;
 import com.cometchat.chatuikit.shared.constants.UIKitConstants;
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu;
-import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior;
 import com.cometchat.chatuikit.shared.resources.utils.Utils;
 import com.cometchat.sampleapp.java.fcm.R;
 import com.cometchat.sampleapp.java.fcm.databinding.ActivityMessagesBinding;
@@ -386,12 +385,6 @@ public class MessagesActivity extends AppCompatActivity {
             binding.singleLineComposer.setGroup(group);
             updateGroupJoinedStatus(group);
         }
-
-        binding.singleLineComposer.setRichTextFormattingOptionsVisibility(View.VISIBLE);
-        binding.singleLineComposer.setShowTextSelectionMenuItems(true);
-        binding.singleLineComposer.setEnableRichTextFormatting(true);
-        binding.singleLineComposer.setUseInlineAudioRecorder(true);
-        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE);
 
         binding.messageList.setStartFromUnreadMessages(true);
         binding.messageList.setMarkAsUnreadOptionVisibility(View.VISIBLE);

@@ -21,7 +21,6 @@ import com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.resources.utils.Utils
-import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityThreadMessageBinding
 import com.cometchat.sampleapp.kotlin.viewmodels.ThreadMessageViewModel
@@ -179,15 +178,12 @@ class ThreadMessageActivity : AppCompatActivity() {
         binding.tvSubtitle.text = if (user != null) user!!.name else if (group != null) group!!.name else ""
         binding.tvSubtitle.visibility = if (binding.tvSubtitle.text.toString().isEmpty()) View.GONE else View.VISIBLE
         binding.messageList.setParentMessage(parentMessage.id)
-        binding.singleLineComposer.setParentMessageId(parentMessage.id)
-        binding.singleLineComposer.setRichTextFormattingOptionsVisibility(View.VISIBLE)
-        binding.singleLineComposer.isShowTextSelectionMenuItems = true
-        binding.singleLineComposer.isEnableRichTextFormatting = true
-        binding.singleLineComposer.isUseInlineAudioRecorder = false
-        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
         binding.threadHeader.parentMessage = parentMessage
         binding.threadHeader.reactionVisibility = View.GONE
 
+        binding.singleLineComposer.setParentMessageId(parentMessage.id)
+
+        // Set user or group data to the message list and composer
         if (user != null) {
             binding.messageList.user = user
             binding.singleLineComposer.setUser(user)

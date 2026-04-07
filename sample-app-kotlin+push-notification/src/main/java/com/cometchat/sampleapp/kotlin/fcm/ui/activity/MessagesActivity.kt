@@ -20,7 +20,6 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.chatuikit.CometChatTheme
 import com.cometchat.chatuikit.logger.CometChatLogger
-import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.chatuikit.shared.constants.UIKitConstants
 import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
@@ -396,12 +395,6 @@ class MessagesActivity : AppCompatActivity() {
             binding.singleLineComposer.setGroup(group)
             updateGroupJoinedStatus(group!!)
         }
-
-        binding.singleLineComposer.richTextFormattingOptionsVisibility = View.VISIBLE
-        binding.singleLineComposer.isShowTextSelectionMenuItems = true
-        binding.singleLineComposer.isEnableRichTextFormatting = true
-        binding.singleLineComposer.isUseInlineAudioRecorder = true
-        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
 
         binding.messageList.isStartFromUnreadMessages = true
         binding.messageList.markAsUnreadOptionVisibility = View.VISIBLE

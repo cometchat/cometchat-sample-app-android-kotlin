@@ -25,7 +25,6 @@ import com.cometchat.chatuikit.shared.constants.UIKitConstants.DialogState
 import com.cometchat.chatuikit.shared.models.CometChatMessageTemplate
 import com.cometchat.chatuikit.shared.resources.utils.Utils
 import com.cometchat.chatuikit.shared.views.popupmenu.CometChatPopupMenu
-import com.cometchat.chatuikit.compactmessagecomposer.EnterKeyBehavior
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.databinding.OverflowMenuLayoutBinding
@@ -394,6 +393,7 @@ class MessagesActivity : AppCompatActivity() {
 
     /** Initializes UI components */
     private fun addViews() {
+        // Set user or group data to the message header and composer
         if (goToMessage != null) binding.messageList.gotoMessage(goToMessage!!.id)
         if (user != null) {
             binding.messageHeader.user = user!!
@@ -407,15 +407,10 @@ class MessagesActivity : AppCompatActivity() {
             updateGroupJoinedStatus(group!!)
         }
 
-        binding.singleLineComposer.richTextFormattingOptionsVisibility = View.VISIBLE
-        binding.singleLineComposer.isShowTextSelectionMenuItems = true
-        binding.singleLineComposer.isEnableRichTextFormatting = true
-        binding.singleLineComposer.isUseInlineAudioRecorder = true
-        binding.singleLineComposer.setEnterKeyBehavior(EnterKeyBehavior.SEND_MESSAGE)
-
         binding.messageList.isStartFromUnreadMessages = true
         binding.messageList.markAsUnreadOptionVisibility = View.VISIBLE
 
+        // Set up back button behavior
         binding.messageHeader.setOnBackButtonPressed {
             Utils.hideKeyBoard(this, binding.root)
             finish()
