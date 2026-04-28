@@ -89,6 +89,7 @@
         <attr name="cometchatMessageComposerRichTextToolbarBackgroundColor" format="color" />
         <attr name="cometchatMessageComposerRichTextToolbarIconTint" format="color" />
         <attr name="cometchatMessageComposerRichTextToolbarActiveIconTint" format="color" />
+        <attr name="cometchatMessageComposerRichTextToolbarActiveIconBackgroundColor" format="color" />
         <attr name="cometchatMessageComposerRichTextToolbarToggleIcon" format="reference" />
         <attr name="cometchatMessageComposerRichTextToolbarToggleIconTint" format="color" />
 

@@ -1311,4 +1311,266 @@ class AvatarVisibilityPropertyTest : StringSpec({
             result shouldBe row.expectedShowAvatar
         }
     }
+
+    // ============================================================================
+    // Property 2 (Agent Chat): Avatar Visibility with isAgentChat
+    // ============================================================================
+    //
+    // These tests verify the updated shouldShowAvatar function that accepts an
+    // isAgentChat parameter. When isAgentChat is true, LEFT-aligned messages
+    // should show the avatar even in 1-on-1 conversations (matching group behavior).
+    //
+    // **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+    //
+    // Decision Table (with isAgentChat):
+    // | Alignment | hideAvatar | isGroupConversation | isAgentChat | Show Avatar? |
+    // |-----------|------------|---------------------|-------------|--------------|
+    // | RIGHT     | *          | *                   | *           | NO           |
+    // | CENTER    | *          | *                   | *           | NO           |
+    // | LEFT      | true       | *                   | *           | NO           |
+    // | LEFT      | false      | true                | *           | YES          |
+    // | LEFT      | false      | false               | true        | YES          |
+    // | LEFT      | false      | false               | false       | NO           |
+    // ============================================================================
+
+    /**
+     * Generates random boolean values for isAgentChat flag.
+     */
+    val isAgentChatArb = Arb.boolean()
+
+    /**
+     * Property test: For all combinations of (alignment, hideAvatar, isGroupConversation, isAgentChat),
+     * the shouldShowAvatar function SHALL return the correct result according to the decision table.
+     *
+     * The expected behavior is:
+     * - `false` when `hideAvatar` is `true`
+     * - `false` when alignment is `RIGHT` or `CENTER`
+     * - `true` when alignment is `LEFT` and (`isGroupConversation || isAgentChat`)
+     * - `false` when alignment is `LEFT` and both `isGroupConversation` and `isAgentChat` are `false`
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.1, 2.2, 2.3**
+     */
+    "Property 2 (Agent): All combinations of alignment, hideAvatar, isGroupConversation, isAgentChat" {
+        checkAll(100, alignmentArb, hideAvatarArb, isGroupConversationArb, isAgentChatArb) {
+            alignment, hideAvatar, isGroupConversation, isAgentChat ->
+
+            val result = shouldShowAvatar(
+                alignment = alignment,
+                hideAvatar = hideAvatar,
+                isGroupConversation = isGroupConversation,
+                isAgentChat = isAgentChat
+            )
+
+            val expected = !hideAvatar &&
+                    alignment == UIKitConstants.MessageBubbleAlignment.LEFT &&
+                    (isGroupConversation || isAgentChat)
+
+            result shouldBe expected
+        }
+    }
+
+    /**
+     * Property test: When hideAvatar is true, the avatar should never be shown
+     * regardless of alignment, isGroupConversation, or isAgentChat.
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.3**
+     */
+    "Property 2 (Agent): hideAvatar=true hides avatar regardless of isAgentChat" {
+        checkAll(100, alignmentArb, isGroupConversationArb, isAgentChatArb) {
+            alignment, isGroupConversation, isAgentChat ->
+
+            val result = shouldShowAvatar(
+                alignment = alignment,
+                hideAvatar = true,
+                isGroupConversation = isGroupConversation,
+                isAgentChat = isAgentChat
+            )
+
+            result shouldBe false
+        }
+    }
+
+    /**
+     * Property test: RIGHT and CENTER alignments should never show avatar,
+     * regardless of hideAvatar, isGroupConversation, or isAgentChat.
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.3**
+     */
+    "Property 2 (Agent): RIGHT and CENTER alignment never show avatar with isAgentChat" {
+        checkAll(100, hideAvatarArb, isGroupConversationArb, isAgentChatArb) {
+            hideAvatar, isGroupConversation, isAgentChat ->
+
+            val resultRight = shouldShowAvatar(
+                alignment = UIKitConstants.MessageBubbleAlignment.RIGHT,
+                hideAvatar = hideAvatar,
+                isGroupConversation = isGroupConversation,
+                isAgentChat = isAgentChat
+            )
+
+            val resultCenter = shouldShowAvatar(
+                alignment = UIKitConstants.MessageBubbleAlignment.CENTER,
+                hideAvatar = hideAvatar,
+                isGroupConversation = isGroupConversation,
+                isAgentChat = isAgentChat
+            )
+
+            resultRight shouldBe false
+            resultCenter shouldBe false
+        }
+    }
+
+    /**
+     * Property test: LEFT alignment with isAgentChat=true should show avatar
+     * even when isGroupConversation=false (1-on-1 agent chat).
+     *
+     * This is the key agent chat behavior: avatars are shown for incoming messages
+     * in agent chats, matching group conversation behavior.
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "Property 2 (Agent, specific): LEFT + isAgentChat=true should show avatar in 1-on-1" {
+        val result = shouldShowAvatar(
+            alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+            hideAvatar = false,
+            isGroupConversation = false,
+            isAgentChat = true
+        )
+
+        // Agent chat forces avatar visibility for incoming messages, even in 1-on-1
+        result shouldBe true
+    }
+
+    /**
+     * Property test: LEFT alignment with isAgentChat=false and isGroupConversation=false
+     * should hide avatar (standard 1-on-1 user conversation behavior).
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.2**
+     */
+    "Property 2 (Agent, specific): LEFT + isAgentChat=false + isGroupConversation=false should hide avatar" {
+        val result = shouldShowAvatar(
+            alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+            hideAvatar = false,
+            isGroupConversation = false,
+            isAgentChat = false
+        )
+
+        // Standard 1-on-1 user conversation: no avatar
+        result shouldBe false
+    }
+
+    /**
+     * Property test: LEFT alignment with both isGroupConversation=true and isAgentChat=true
+     * should still show avatar (OR condition, both true).
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.1**
+     */
+    "Property 2 (Agent, specific): LEFT + isGroupConversation=true + isAgentChat=true should show avatar" {
+        val result = shouldShowAvatar(
+            alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+            hideAvatar = false,
+            isGroupConversation = true,
+            isAgentChat = true
+        )
+
+        result shouldBe true
+    }
+
+    /**
+     * Property test: Exhaustive verification of all 24 rows in the complete decision table
+     * with the isAgentChat parameter.
+     *
+     * This test explicitly enumerates all combinations of
+     * (alignment, hideAvatar, isGroupConversation, isAgentChat) and verifies each one.
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.1, 2.2, 2.3**
+     */
+    "Property 2 (Agent, exhaustive): Complete 24-row decision table with isAgentChat" {
+        data class AgentDecisionTableRow(
+            val alignment: UIKitConstants.MessageBubbleAlignment,
+            val hideAvatar: Boolean,
+            val isGroupConversation: Boolean,
+            val isAgentChat: Boolean,
+            val expectedShowAvatar: Boolean
+        )
+
+        val decisionTable = listOf(
+            // RIGHT alignment: always false
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, false, true, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, false, true, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, false, false, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, false, false, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, true, true, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, true, true, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, true, false, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.RIGHT, true, false, false, false),
+            // CENTER alignment: always false
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, false, true, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, false, true, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, false, false, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, false, false, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, true, true, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, true, true, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, true, false, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.CENTER, true, false, false, false),
+            // LEFT alignment with hideAvatar=false: depends on isGroupConversation || isAgentChat
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, false, true, true, true),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, false, true, false, true),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, false, false, true, true),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, false, false, false, false),
+            // LEFT alignment with hideAvatar=true: always false
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, true, true, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, true, true, false, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, true, false, true, false),
+            AgentDecisionTableRow(UIKitConstants.MessageBubbleAlignment.LEFT, true, false, false, false)
+        )
+
+        decisionTable.forEach { row ->
+            val result = shouldShowAvatar(
+                alignment = row.alignment,
+                hideAvatar = row.hideAvatar,
+                isGroupConversation = row.isGroupConversation,
+                isAgentChat = row.isAgentChat
+            )
+
+            result shouldBe row.expectedShowAvatar
+        }
+    }
+
+    /**
+     * Property test: For LEFT alignment with hideAvatar=false, the avatar visibility
+     * should be the logical OR of isGroupConversation and isAgentChat.
+     *
+     * This property directly tests the core logic change: `isGroupConversation || isAgentChat`.
+     *
+     * **Feature: agent-user-message-list-compose, Property 2: Avatar Visibility with isAgentChat**
+     *
+     * **Validates: Requirements 2.1, 2.2**
+     */
+    "Property 2 (Agent): LEFT alignment avatar visibility is OR of isGroupConversation and isAgentChat" {
+        checkAll(100, isGroupConversationArb, isAgentChatArb) { isGroupConversation, isAgentChat ->
+            val result = shouldShowAvatar(
+                alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+                hideAvatar = false,
+                isGroupConversation = isGroupConversation,
+                isAgentChat = isAgentChat
+            )
+
+            // The core logic: avatar shown when either flag is true
+            result shouldBe (isGroupConversation || isAgentChat)
+        }
+    }
 })

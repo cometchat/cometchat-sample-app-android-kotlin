@@ -46,6 +46,16 @@ class SegmentComposerController {
 
     fun setFocusedSegment(segmentId: String) { focusedSegmentId = segmentId }
 
+    /**
+     * Requests focus on a segment by setting both [focusedSegmentId] and [pendingFocusSegmentId].
+     * The UI layer consumes [pendingFocusSegmentId] to actually move keyboard focus.
+     */
+    fun focusSegment(segmentId: String) {
+        focusedSegmentId = segmentId
+        pendingFocusSegmentId = segmentId
+        notifyChanged()
+    }
+
     /** Clears the pending focus after the UI has consumed it. */
     fun consumePendingFocus(): String? {
         val id = pendingFocusSegmentId
@@ -61,12 +71,316 @@ class SegmentComposerController {
 
     // ==================== Code Block Operations ====================
 
+    /**
+     * Checks if the focused Normal segment has a ``` pattern at line start.
+     * If detected, removes the backticks and inserts a Code segment.
+     * Should be called after text changes in a Normal segment.
+     * Returns true if a code block was inserted.
+     */
+    fun detectAndInsertCodeBlockShortcut(): Boolean {
+        val focused = focusedSegment as? ComposerSegment.Normal ?: return false
+        val controller = focused.controller
+        if (controller.detectTripleBacktickShortcut()) {
+            // The backticks have been removed from the text by the controller.
+            // Now insert a code block.
+            insertCodeBlock()
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Detects pasted fenced code blocks (```...```) in the focused Normal segment.
+     * If found, strips the backticks and places the code content into a Code segment.
+     * Returns true if a code block was detected and converted.
+     *
+     * Must be called BEFORE detectAndInsertCodeBlockShortcut() so that pasting
+     * ```code``` is handled as a full code block, not as a ``` shortcut.
+     */
+    fun detectAndConvertPastedCodeBlocks(): Boolean {
+        val focused = focusedSegment as? ComposerSegment.Normal ?: return false
+        val idx = _segments.indexOf(focused)
+        if (idx < 0) return false
+
+        val fullText = focused.controller.state.text
+        if (!fullText.contains("```")) return false
+
+        // Check if text contains both opening and closing ``` 
+        // Find first ``` and last ``` — they must be different positions
+        val firstBacktick = fullText.indexOf("```")
+        val lastBacktick = fullText.lastIndexOf("```")
+        if (firstBacktick == lastBacktick) return false // only one set of ```, not a complete fence
+        if (lastBacktick < firstBacktick + 3) return false // too close together
+
+        // Extract code content between the fences
+        val afterOpening = firstBacktick + 3
+        // Skip optional language identifier and newline after opening ```
+        var contentStart = afterOpening
+        // Skip word chars (language) then optional newline
+        while (contentStart < lastBacktick && fullText[contentStart].isLetterOrDigit()) contentStart++
+        if (contentStart < lastBacktick && fullText[contentStart] == '\n') contentStart++
+
+        val codeContent = fullText.substring(contentStart, lastBacktick).trimEnd('\n')
+
+        // Check if there's text before or after the fences
+        val textBefore = fullText.substring(0, firstBacktick).trim()
+        val textAfter = fullText.substring(lastBacktick + 3).trim()
+
+        // Build new segment list
+        val newSegments = mutableListOf<ComposerSegment>()
+        for (i in 0 until idx) newSegments.add(_segments[i])
+
+        // Normal segment before (with text if any, empty otherwise)
+        val beforeNormal = ComposerSegment.Normal(id = genId())
+        if (textBefore.isNotEmpty()) {
+            beforeNormal.controller.onTextChanged(textBefore, textBefore.length, textBefore.length)
+        }
+        newSegments.add(beforeNormal)
+
+        // Code segment with the extracted content
+        val codeSegment = ComposerSegment.Code(id = genId(), text = codeContent)
+        newSegments.add(codeSegment)
+
+        // Normal segment after
+        val afterNormal = ComposerSegment.Normal(id = genId())
+        if (textAfter.isNotEmpty()) {
+            afterNormal.controller.onTextChanged(textAfter, textAfter.length, textAfter.length)
+        }
+        newSegments.add(afterNormal)
+
+        for (i in (idx + 1) until _segments.size) newSegments.add(_segments[i])
+
+        _segments.clear()
+        _segments.addAll(newSegments)
+
+        // Focus the code segment so the user sees their pasted code
+        focusedSegmentId = codeSegment.id
+        pendingFocusSegmentId = codeSegment.id
+        notifyChanged()
+        return true
+    }
+
     fun toggleCodeBlock() {
         when (val focused = focusedSegment) {
             is ComposerSegment.Code -> removeCodeSegment(focused)
             is ComposerSegment.Normal -> insertCodeBlock()
             null -> insertCodeBlock()
         }
+    }
+
+    /**
+     * Converts ALL text from the focused Normal segment into a code block.
+     * Strips line format prefixes ("> ", "- ", "N. ") before inserting.
+     * The Normal segment is cleared completely — no text remains in it.
+     */
+    fun convertAllToCodeBlock() {
+        val focusedIdx = _segments.indexOfFirst { it.id == focusedSegmentId }
+        val idx = if (focusedIdx >= 0) focusedIdx else _segments.size - 1
+        val current = _segments.getOrNull(idx) as? ComposerSegment.Normal ?: return
+
+        val fullText = current.controller.state.text
+        android.util.Log.d("SegmentDebug", "convertAllToCodeBlock: focusedIdx=$focusedIdx, idx=$idx, segmentCount=${_segments.size}")
+        android.util.Log.d("SegmentDebug", "convertAllToCodeBlock: fullText='${fullText.take(100)}', length=${fullText.length}")
+        android.util.Log.d("SegmentDebug", "convertAllToCodeBlock: segments=${_segments.map { when(it) { is ComposerSegment.Normal -> "Normal(${it.id}, text='${it.controller.state.text.take(30)}')" ; is ComposerSegment.Code -> "Code(${it.id}, text='${it.text.take(30)}')" } }}")
+        
+        if (fullText.isEmpty()) {
+            android.util.Log.d("SegmentDebug", "convertAllToCodeBlock: fullText is empty, falling back to insertCodeBlock")
+            insertCodeBlock()
+            return
+        }
+
+        // Strip line format prefixes
+        val stripped = stripLineFormatPrefixes(fullText)
+
+        // Build new segment list with FRESH Normal segments (not reusing old ones
+        // to avoid BasicTextField tfv state holding stale text)
+        val newSegments = mutableListOf<ComposerSegment>()
+        for (i in 0 until idx) newSegments.add(_segments[i])
+
+        // Fresh empty Normal before code (new ID forces new remember key)
+        val beforeNormal = ComposerSegment.Normal(id = genId())
+        newSegments.add(beforeNormal)
+
+        val codeSegment = ComposerSegment.Code(id = genId(), text = stripped)
+        newSegments.add(codeSegment)
+
+        val afterSegment = ComposerSegment.Normal(id = genId())
+        newSegments.add(afterSegment)
+
+        for (i in (idx + 1) until _segments.size) newSegments.add(_segments[i])
+
+        _segments.clear()
+        _segments.addAll(newSegments)
+        focusedSegmentId = codeSegment.id
+        pendingFocusSegmentId = codeSegment.id
+        notifyChanged()
+    }
+
+    /**
+     * Converts only the cursor paragraph from a Normal segment into a code block.
+     * Strips line format prefixes from the extracted paragraph.
+     * Remaining text stays in the Normal segment(s).
+     */
+    fun convertCursorParagraphToCodeBlock() {
+        val focused = focusedSegment as? ComposerSegment.Normal ?: return
+        val idx = _segments.indexOf(focused)
+        if (idx < 0) return
+
+        val fullText = focused.controller.state.text
+        val cursorPos = focused.controller.state.selectionStart
+
+        android.util.Log.d("SegmentDebug", "convertCursorParagraph: cursorPos=$cursorPos, textLen=${fullText.length}")
+
+        // Check if text has any line format prefixes (blockquote/list)
+        val hasLineFormats = fullText.lines().any { line ->
+            line.startsWith("> ") || line.startsWith("- ") || line.startsWith("• ") ||
+                line.matches(Regex("^\\d+\\. .*"))
+        }
+
+        // If no line formats or single paragraph, convert ALL text to code block
+        if (!hasLineFormats || !fullText.contains('\n')) {
+            android.util.Log.d("SegmentDebug", "convertCursorParagraph: no line formats or single para, converting all")
+            convertAllToCodeBlock()
+            return
+        }
+
+        // Has line formats + multiple paragraphs → only convert cursor paragraph
+        val safeCursor = cursorPos.coerceIn(0, fullText.length)
+        val paraStart = if (safeCursor > 0) {
+            val nl = fullText.lastIndexOf('\n', (safeCursor - 1).coerceAtLeast(0))
+            if (nl < 0) 0 else nl + 1
+        } else 0
+        val paraEnd = fullText.indexOf('\n', safeCursor).let { if (it < 0) fullText.length else it }
+
+        var textBefore = if (paraStart > 0) fullText.substring(0, paraStart - 1) else ""
+        val paragraph = fullText.substring(paraStart, paraEnd)
+        val textAfter = if (paraEnd < fullText.length) fullText.substring(paraEnd + 1) else ""
+
+        // Trim trailing empty format-only lines from textBefore
+        // (e.g., a lone "> " or "- " line between paragraphs)
+        while (textBefore.isNotEmpty()) {
+            val lastLineStart = textBefore.lastIndexOf('\n') + 1
+            val lastLine = textBefore.substring(lastLineStart)
+            val strippedLine = lastLine.removePrefix("> ").removePrefix("- ").removePrefix("• ")
+                .let { it.replace(Regex("^\\d+\\. "), "") }
+            if (strippedLine.isBlank()) {
+                textBefore = if (lastLineStart > 0) textBefore.substring(0, lastLineStart - 1) else ""
+            } else {
+                break
+            }
+        }
+
+        val strippedParagraph = stripLineFormatPrefixes(paragraph)
+
+        android.util.Log.d("SegmentDebug", "convertCursorParagraph: before='${textBefore.take(30)}', para='${strippedParagraph.take(30)}', after='${textAfter.take(30)}'")
+
+        val newSegments = mutableListOf<ComposerSegment>()
+        for (i in 0 until idx) newSegments.add(_segments[i])
+
+        if (textBefore.isNotEmpty()) {
+            val beforeNormal = ComposerSegment.Normal(id = genId())
+            beforeNormal.controller.onTextChanged(textBefore, textBefore.length, textBefore.length)
+            newSegments.add(beforeNormal)
+        } else {
+            newSegments.add(ComposerSegment.Normal(id = genId()))
+        }
+
+        val codeSegment = ComposerSegment.Code(id = genId(), text = strippedParagraph)
+        newSegments.add(codeSegment)
+
+        if (textAfter.isNotEmpty()) {
+            val afterNormal = ComposerSegment.Normal(id = genId())
+            afterNormal.controller.onTextChanged(textAfter, textAfter.length, textAfter.length)
+            newSegments.add(afterNormal)
+        } else {
+            newSegments.add(ComposerSegment.Normal(id = genId()))
+        }
+
+        for (i in (idx + 1) until _segments.size) newSegments.add(_segments[i])
+
+        _segments.clear()
+        _segments.addAll(newSegments)
+        focusedSegmentId = codeSegment.id
+        pendingFocusSegmentId = codeSegment.id
+        notifyChanged()
+    }
+
+    /**
+     * Extracts the paragraph at the cursor position from a Code segment.
+     * The extracted paragraph becomes a Normal segment, optionally with a line format applied.
+     * Remaining text stays in code block(s).
+     *
+     * @param cursorPosition The cursor position within the code block text
+     * @param applyFormat Optional line format to apply to the extracted paragraph (null = plain text)
+     */
+    fun extractParagraphFromCodeBlock(cursorPosition: Int, applyFormat: RichTextFormat? = null) {
+        val focused = focusedSegment as? ComposerSegment.Code ?: return
+        val idx = _segments.indexOf(focused)
+        if (idx < 0) return
+
+        val fullText = focused.text
+        android.util.Log.d("SegmentDebug", "extractParagraph: cursorPos=$cursorPosition, textLen=${fullText.length}, applyFormat=$applyFormat")
+
+        // Find the paragraph boundaries at cursor position
+        val safeCursor = cursorPosition.coerceIn(0, fullText.length)
+        val paraStart = if (safeCursor > 0) {
+            val nl = fullText.lastIndexOf('\n', (safeCursor - 1).coerceAtLeast(0))
+            if (nl < 0) 0 else nl + 1
+        } else 0
+        val paraEnd = fullText.indexOf('\n', safeCursor).let { if (it < 0) fullText.length else it }
+
+        val textBefore = if (paraStart > 0) fullText.substring(0, paraStart - 1) else ""
+        val paragraph = fullText.substring(paraStart, paraEnd)
+        val textAfter = if (paraEnd < fullText.length) fullText.substring(paraEnd + 1) else ""
+
+        android.util.Log.d("SegmentDebug", "extractParagraph: before='${textBefore.take(30)}', para='${paragraph.take(30)}', after='${textAfter.take(30)}'")
+
+        // Apply line format prefix if requested
+        val formattedParagraph = when (applyFormat) {
+            RichTextFormat.BLOCKQUOTE -> "> $paragraph"
+            RichTextFormat.BULLET_LIST -> "- $paragraph"
+            RichTextFormat.ORDERED_LIST -> "1. $paragraph"
+            else -> paragraph
+        }
+
+        // Build new segment list
+        val newSegments = mutableListOf<ComposerSegment>()
+        for (i in 0 until idx) newSegments.add(_segments[i])
+
+        // Code block for text before cursor paragraph (if any)
+        if (textBefore.isNotEmpty()) {
+            // Ensure there's a Normal before the code block (invariant)
+            if (newSegments.isEmpty() || newSegments.last() !is ComposerSegment.Normal) {
+                newSegments.add(ComposerSegment.Normal(id = genId()))
+            }
+            newSegments.add(ComposerSegment.Code(id = genId(), text = textBefore))
+        }
+
+        // Normal segment for the extracted paragraph
+        val extractedNormal = ComposerSegment.Normal(id = genId())
+        if (formattedParagraph.isNotEmpty()) {
+            extractedNormal.controller.onTextChanged(formattedParagraph, formattedParagraph.length, formattedParagraph.length)
+        }
+        newSegments.add(extractedNormal)
+
+        // Code block for text after cursor paragraph (if any)
+        if (textAfter.isNotEmpty()) {
+            newSegments.add(ComposerSegment.Code(id = genId(), text = textAfter))
+            newSegments.add(ComposerSegment.Normal(id = genId()))
+        }
+
+        // Add remaining segments after the original code block
+        for (i in (idx + 1) until _segments.size) newSegments.add(_segments[i])
+
+        android.util.Log.d("SegmentDebug", "extractParagraph: result=${newSegments.size} segments")
+
+        _segments.clear()
+        _segments.addAll(newSegments)
+        focusedSegmentId = extractedNormal.id
+        pendingFocusSegmentId = extractedNormal.id
+        // Merge any adjacent Normal segments that resulted from the extraction
+        mergeAdjacentNormals()
+        notifyChanged()
     }
 
     /**
@@ -117,6 +431,12 @@ class SegmentComposerController {
                 textAfter = if (lineEnd < fullText.length) fullText.substring(lineEnd + 1) else ""
             }
             // Scenario C: empty text → codeContent stays ""
+
+            // Strip line format prefixes ("> ", "- ", "N. ") from code content
+            // since code blocks don't use line formatting
+            codeContent = stripLineFormatPrefixes(codeContent)
+            textBefore = stripLineFormatPrefixes(textBefore)
+            textAfter = stripLineFormatPrefixes(textAfter)
         }
 
         val newSegments = mutableListOf<ComposerSegment>()
@@ -153,6 +473,9 @@ class SegmentComposerController {
      * Removes a code segment and merges surrounding normal segments.
      * Separator logic: newlines only between non-empty parts.
      * Cursor at: prevText.length + sep1.length + codeText.length
+     *
+     * Also restores any consumed mention spans that were stored when the
+     * code block was originally created.
      */
     fun removeCodeSegment(segment: ComposerSegment.Code) {
         val idx = _segments.indexOf(segment)
@@ -169,6 +492,24 @@ class SegmentComposerController {
         val merged = "$prevText$sep1$codeText$sep2$nextText"
         val cursorPos = prevText.length + sep1.length + codeText.length
 
+        // Collect consumed mention spans from the previous normal segment
+        // and adjust their positions for the merged text offset
+        val consumedMentions = mutableMapOf<Int, ConsumedMentionSpan>()
+        if (prevNormal != null) {
+            val offset = prevText.length + sep1.length
+            for ((pos, consumed) in prevNormal.controller.state.consumedMentionSpans) {
+                // Mentions that were in the code range: adjust by the merge offset
+                consumedMentions[pos + offset] = consumed
+            }
+        }
+        // Also collect from the next normal segment (adjust by prevText + sep1 + codeText + sep2)
+        if (nextNormal != null) {
+            val offset = prevText.length + sep1.length + codeText.length + sep2.length
+            for ((pos, consumed) in nextNormal.controller.state.consumedMentionSpans) {
+                consumedMentions[pos + offset] = consumed
+            }
+        }
+
         if (nextNormal != null) _segments.remove(nextNormal)
         _segments.remove(segment)
 
@@ -177,12 +518,23 @@ class SegmentComposerController {
             if (merged.isNotEmpty()) {
                 prevNormal.controller.onTextChanged(merged, cursorPos, cursorPos)
             }
+            // Transfer adjusted consumed mentions to the merged normal segment
+            // and restore them via the provider
+            if (consumedMentions.isNotEmpty()) {
+                prevNormal.controller.state.consumedMentionSpans.putAll(consumedMentions)
+                prevNormal.controller.restoreMentionsInRange(0, merged.length)
+            }
             focusedSegmentId = prevNormal.id
             pendingFocusSegmentId = prevNormal.id
         } else {
             val newNormal = ComposerSegment.Normal(id = genId())
             if (merged.isNotEmpty()) {
                 newNormal.controller.onTextChanged(merged, cursorPos, cursorPos)
+            }
+            // Transfer adjusted consumed mentions and restore
+            if (consumedMentions.isNotEmpty()) {
+                newNormal.controller.state.consumedMentionSpans.putAll(consumedMentions)
+                newNormal.controller.restoreMentionsInRange(0, merged.length)
             }
             _segments.add(0, newNormal)
             focusedSegmentId = newNormal.id
@@ -238,10 +590,10 @@ class SegmentComposerController {
      */
     fun handleCodeTextChanged(segment: ComposerSegment.Code, newText: String): Boolean {
         segment.text = newText
-        if (!newText.endsWith("\n\n\n")) return false
+        if (!newText.endsWith("\n\n")) return false
 
-        // Trim the 3 trailing newlines
-        segment.text = newText.substring(0, newText.length - 3)
+        // Trim the 2 trailing newlines
+        segment.text = newText.substring(0, newText.length - 2)
 
         // Find or create the next normal segment to focus
         val idx = _segments.indexOf(segment)
@@ -269,10 +621,20 @@ class SegmentComposerController {
             else -> emptySet()
         }
 
-    /** Disabled formats. Code → all except CODE_BLOCK disabled. */
+    /** Disabled formats. Code → inline formats disabled, line formats stay enabled. */
     val toolbarDisabledFormats: Set<RichTextFormat>
         get() = if (isTypingInCode) {
-            RichTextFormat.entries.toSet() - setOf(RichTextFormat.CODE_BLOCK)
+            // Inside code block: disable inline formats but keep CODE_BLOCK (to deselect),
+            // and keep line formats (BULLET_LIST, ORDERED_LIST, BLOCKQUOTE) enabled
+            // so the user can switch from code block to a line format.
+            setOf(
+                RichTextFormat.BOLD,
+                RichTextFormat.ITALIC,
+                RichTextFormat.UNDERLINE,
+                RichTextFormat.STRIKETHROUGH,
+                RichTextFormat.INLINE_CODE,
+                RichTextFormat.LINK
+            )
         } else {
             when (val focused = focusedSegment) {
                 is ComposerSegment.Normal -> focused.controller.state.toolbarDisabledFormats
@@ -335,5 +697,78 @@ class SegmentComposerController {
         focusedSegmentId = newNormal.id
         pendingFocusSegmentId = newNormal.id
         notifyChanged()
+    }
+
+    // ==================== Helpers ====================
+
+    /**
+     * Strips line format prefixes from each line of the text.
+     * Removes "> " (blockquote), "- " (bullet), and "N. " (ordered list) prefixes.
+     */
+    private fun stripLineFormatPrefixes(text: String): String {
+        if (text.isEmpty()) return text
+        return text.lines().joinToString("\n") { line ->
+            line.removePrefix("> ")
+                .removePrefix("- ")
+                .removePrefix("• ")
+                .let { it.replace(Regex("^\\d+\\. "), "") }
+        }
+    }
+
+    /**
+     * Merges consecutive Normal segments into a single Normal segment.
+     * Joins their text with newlines. Preserves focus on the segment that
+     * was focused before the merge.
+     */
+    private fun mergeAdjacentNormals() {
+        if (_segments.size <= 1) return
+
+        val merged = mutableListOf<ComposerSegment>()
+        var focusInMergedId: String? = null
+
+        var i = 0
+        while (i < _segments.size) {
+            val seg = _segments[i]
+            if (seg is ComposerSegment.Normal) {
+                // Collect consecutive Normals
+                val normals = mutableListOf(seg)
+                var j = i + 1
+                while (j < _segments.size && _segments[j] is ComposerSegment.Normal) {
+                    normals.add(_segments[j] as ComposerSegment.Normal)
+                    j++
+                }
+                if (normals.size > 1) {
+                    // Merge into one
+                    val texts = normals.map { it.controller.state.text }
+                    val combinedText = texts.filter { it.isNotEmpty() }.joinToString("\n")
+                    val newNormal = ComposerSegment.Normal(id = genId())
+                    if (combinedText.isNotEmpty()) {
+                        newNormal.controller.onTextChanged(combinedText, combinedText.length, combinedText.length)
+                    }
+                    merged.add(newNormal)
+                    // If any of the merged normals was focused, focus the new one
+                    if (normals.any { it.id == focusedSegmentId }) {
+                        focusInMergedId = newNormal.id
+                    }
+                    i = j
+                } else {
+                    merged.add(seg)
+                    i++
+                }
+            } else {
+                merged.add(seg)
+                i++
+            }
+        }
+
+        if (merged.size != _segments.size) {
+            _segments.clear()
+            _segments.addAll(merged)
+            if (focusInMergedId != null) {
+                focusedSegmentId = focusInMergedId
+                pendingFocusSegmentId = focusInMergedId
+            }
+            notifyChanged()
+        }
     }
 }

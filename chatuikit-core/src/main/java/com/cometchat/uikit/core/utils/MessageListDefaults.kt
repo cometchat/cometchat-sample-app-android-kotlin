@@ -34,7 +34,8 @@ fun getDefaultMessagesTypes(): List<String> {
         UIKitConstants.MessageType.EXTENSION_POLL,
         UIKitConstants.MessageType.EXTENSION_STICKER,
         UIKitConstants.MessageType.EXTENSION_DOCUMENT,
-        UIKitConstants.MessageType.EXTENSION_WHITEBOARD
+        UIKitConstants.MessageType.EXTENSION_WHITEBOARD,
+        "assistant"
     )
 }
 
@@ -56,6 +57,7 @@ fun getDefaultMessagesCategories(): List<String> {
         CometChatConstants.CATEGORY_ACTION,
         CometChatConstants.CATEGORY_CALL,
         CometChatConstants.CATEGORY_CUSTOM,
-        CometChatConstants.CATEGORY_INTERACTIVE
+        CometChatConstants.CATEGORY_INTERACTIVE,
+        "agentic"
     )
 }

@@ -40,6 +40,7 @@ import com.cometchat.uikit.kotlin.presentation.shared.aiconversationstarter.Come
 import com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerFrameLayout
 import com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerAdapter
 import com.cometchat.uikit.kotlin.presentation.shared.shimmer.CometChatShimmerUtils
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.utils.MessageOptionsUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -249,6 +250,7 @@ class CometChatMessageList @JvmOverloads constructor(
     private var user: User? = null
     private var group: Group? = null
     private var parentMessageId: Long = -1
+    private var goToMessageId: Long = 0
     private var messagesRequestBuilder: MessagesRequest.MessagesRequestBuilder? = null
     private var messagesTypes: List<String>? = null
     private var messagesCategories: List<String>? = null
@@ -355,6 +357,8 @@ class CometChatMessageList @JvmOverloads constructor(
 
     // AI Streaming Configuration
     private var streamingSpeed: Int? = null
+
+    // Composer ViewModel for AI generating indicator wiring
 
     // Date/Time Formatting Configuration
     private var timeFormat: SimpleDateFormat? = null
@@ -853,7 +857,6 @@ class CometChatMessageList @JvmOverloads constructor(
             vm.messageUpdated.collect { updatedMessage ->
                 val position = messageAdapter.getMessages().indexOfFirst { it.id == updatedMessage.id }
                 if (position >= 0) {
-                    android.util.Log.d("ThreadReplyDebug", "messageUpdated: notifyItemChanged at position=$position for id=${updatedMessage.id}, replyCount=${updatedMessage.replyCount}")
                     messageAdapter.notifyItemChanged(position)
                 }
             }
@@ -1007,6 +1010,13 @@ class CometChatMessageList @JvmOverloads constructor(
     }
 
     private fun handleUIState(state: MessageListUIState) {
+        // For agent main conversations, skip Loading state to prevent shimmer
+        // from overriding the greeting view set up in setUser()
+        if (state is MessageListUIState.Loading
+            && messageAdapter.isAgentChat
+            && parentMessageId == -1L) {
+            return
+        }
         when (state) {
             is MessageListUIState.Loading -> showLoadingState()
             is MessageListUIState.Loaded -> showLoadedState()
@@ -1016,7 +1026,6 @@ class CometChatMessageList @JvmOverloads constructor(
     }
 
     private fun handleMessagesUpdate(messages: List<BaseMessage>) {
-        android.util.Log.d("ThreadReplyDebug", "handleMessagesUpdate: ${messages.size} messages")
         val previousCount = messageAdapter.itemCount
         val wasAtBottom = isUserAtBottom || previousCount == 0
         
@@ -1414,6 +1423,75 @@ class CometChatMessageList @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Sets up the AI assistant greeting view for agent chats.
+     *
+     * Reads the user's metadata for `greetingMessage`, `introductoryMessage`,
+     * and `suggestedMessages`, then configures the empty state to display the
+     * agent greeting with avatar, title, subtitle, and suggested message chips.
+     *
+     * This matches the Java reference `setUpAIAssistantGreetingView()` behaviour.
+     */
+    private fun setUpAIAssistantGreetingView() {
+        val metadata = user?.metadata
+        val greetingMessage = metadata?.optString("greetingMessage", "") ?: ""
+        val introductoryMessage = metadata?.optString("introductoryMessage", "") ?: ""
+
+        // Use externally-set suggested messages if available, otherwise extract from metadata
+        val suggestions = aiAssistantSuggestedMessages.ifEmpty {
+            extractSuggestedMessagesFromMetadata(metadata)
+        }
+
+        // Update suggested messages and render chips
+        if (suggestions.isNotEmpty()) {
+            aiAssistantSuggestedMessages = suggestions
+        }
+        updateAISuggestedMessagesView()
+
+        // Configure greeting view text
+        emptyTitle?.text = greetingMessage.ifEmpty {
+            context.getString(R.string.cometchat_empty_chat_title)
+        }
+        emptySubtitle?.text = introductoryMessage.ifEmpty {
+            context.getString(R.string.cometchat_empty_chat_subtitle)
+        }
+
+        // Show avatar for the agent user
+        user?.let { u ->
+            emptyAvatar?.setAvatar(u.name, u.avatar)
+            emptyAvatar?.visibility = View.VISIBLE
+        }
+
+        // Hide shimmer / loading state so the greeting view is visible
+        loadingStateView?.visibility = View.GONE
+        shimmerEffectFrame?.stopShimmer()
+        errorStateView?.visibility = View.GONE
+        customViewContainer?.visibility = View.GONE
+
+        // Show the empty state layout
+        emptyStateView?.visibility = View.VISIBLE
+        messageListLayout?.visibility = View.GONE
+    }
+
+    /**
+     * Extracts suggested messages from user metadata JSON.
+     *
+     * Looks for a `suggestedMessages` JSON array in the metadata and converts
+     * it to a list of strings.
+     *
+     * @param metadata The user's metadata JSONObject, or null.
+     * @return List of suggested message strings, or empty list if not found.
+     */
+    private fun extractSuggestedMessagesFromMetadata(metadata: org.json.JSONObject?): List<String> {
+        if (metadata == null) return emptyList()
+        return try {
+            val array = metadata.optJSONArray("suggestedMessages") ?: return emptyList()
+            (0 until array.length()).mapNotNull { array.optString(it, null) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     private fun updateNewMessageIndicator() {
         if (newMessageCount > 0 && !isUserAtBottom) {
             newMessageIndicator?.visibility = View.VISIBLE
@@ -1437,25 +1515,64 @@ class CometChatMessageList @JvmOverloads constructor(
         this.user = user
         this.group = null
         
+        // Detect agent chat and propagate to adapter before ViewModel/stream wiring
+        val isAgent = AgentChatDetector.isAgentChat(user)
+        messageAdapter.isAgentChat = isAgent
+        
+        // Disable swipe to reply for agent chats
+        if (isAgent) {
+            setSwipeToReplyEnabled(false)
+            // Disable all AI features for agent chats — the agent has its own
+            // greeting view with suggested messages from user metadata.
+            enableConversationStarter = false
+            viewModel?.setEnableConversationStarter(false)
+            viewModel?.setEnableSmartReplies(false)
+            viewModel?.setEnableConversationSummary(false)
+        }
+        
         viewModel?.setUser(
             user = user,
             parentMessageId = parentMessageId,
+            gotoMessageId = goToMessageId,
             messagesRequestBuilder = messagesRequestBuilder
         )
         
+        if (isAgent) {
+            // Hide sticky date headers for agent chats
+            setStickyDateVisibility(View.GONE)
+            
+            if (parentMessageId != -1L) {
+                // Thread conversation — fetch messages normally
+                if (goToMessageId > 0) {
+                    viewModel?.goToMessage(goToMessageId)
+                } else {
+                    viewModel?.fetchMessages()
+                }
+            } else {
+                // Main agent conversation — show empty/greeting state directly,
+                // do NOT fetch messages (matching Java reference behaviour)
+                showEmptyState()
+                setUpAIAssistantGreetingView()
+            }
+        } else {
+            if (autoFetch) {
+                if (goToMessageId > 0) {
+                    viewModel?.goToMessage(goToMessageId)
+                } else if (startFromUnreadMessages) {
+                    viewModel?.fetchMessagesWithUnreadCount()
+                } else {
+                    viewModel?.fetchMessages()
+                }
+            }
+        }
+        
+        // Wire stream service callbacks and pass to adapter (agent chat only)
+
         // Set UID for conversation starter view
         aiConversationStarterView?.setUid(user.uid)
         
         // Set UID for smart replies view
         aiSmartRepliesView?.setUid(user.uid)
-        
-        if (autoFetch) {
-            if (startFromUnreadMessages) {
-                viewModel?.fetchMessagesWithUnreadCount()
-            } else {
-                viewModel?.fetchMessages()
-            }
-        }
     }
 
     /**
@@ -1468,9 +1585,13 @@ class CometChatMessageList @JvmOverloads constructor(
         this.group = group
         this.user = null
         
+        // Groups are never agent chats
+        messageAdapter.isAgentChat = false
+        
         viewModel?.setGroup(
             group = group,
             parentMessageId = parentMessageId,
+            gotoMessageId = goToMessageId,
             messagesRequestBuilder = messagesRequestBuilder
         )
         
@@ -1481,7 +1602,9 @@ class CometChatMessageList @JvmOverloads constructor(
         aiSmartRepliesView?.setUid(group.guid)
         
         if (autoFetch) {
-            if (startFromUnreadMessages) {
+            if (goToMessageId > 0) {
+                viewModel?.goToMessage(goToMessageId)
+            } else if (startFromUnreadMessages) {
                 viewModel?.fetchMessagesWithUnreadCount()
             } else {
                 viewModel?.fetchMessages()
@@ -1635,7 +1758,9 @@ class CometChatMessageList @JvmOverloads constructor(
                     if (message != null) {
                         val category = message.category
                         if (category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
-                            category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
+                            category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true) ||
+                            category.equals("agentic", ignoreCase = true) ||
+                            category.equals(UIKitConstants.MessageCategory.STREAM, ignoreCase = true)) {
                             return makeMovementFlags(0, 0)
                         }
                         // Also disable for deleted messages and messages not yet sent
@@ -2249,6 +2374,10 @@ class CometChatMessageList @JvmOverloads constructor(
      */
     fun setStreamingSpeed(streamingSpeed: Int?) {
         this.streamingSpeed = streamingSpeed
+        // Apply immediately if stream service is already available
+        if (streamingSpeed != null) {
+            viewModel?.getAIStreamService()?.setStreamDelay(streamingSpeed.toLong())
+        }
     }
 
     /**
@@ -4094,7 +4223,9 @@ class CometChatMessageList @JvmOverloads constructor(
      * @param messageId The ID of the message to scroll to
      */
     fun gotoMessage(messageId: Long) {
-        viewModel?.goToMessage(messageId)
+        if (messageId != 0L) {
+            this.goToMessageId = messageId
+        }
     }
 
     /**
@@ -4122,30 +4253,35 @@ class CometChatMessageList @JvmOverloads constructor(
     }
 
     private fun scrollToMessage(messageId: Long) {
-        android.util.Log.d("MessagePreviewClick", "scrollToMessage called with messageId: $messageId")
+        if (messageId == 0L) return
         val position = messageAdapter.findMessagePosition(messageId)
-        android.util.Log.d("MessagePreviewClick", "scrollToMessage - position found: $position")
         if (position >= 0) {
+            // Stop any ongoing scroll (matches Java: if (isScrolling) rvChatListView.stopScroll())
+            if (isScrolling) recyclerViewMessageList?.stopScroll()
+            
             // Scroll to position with center offset
             val centerOffset = recyclerViewMessageList?.height?.div(2) ?: 0
-            android.util.Log.d("MessagePreviewClick", "scrollToMessage - scrolling to position $position with centerOffset $centerOffset")
             (recyclerViewMessageList?.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, centerOffset)
+            
+            // Notify adapter to ensure proper layout after scroll (matches Java)
+            messageAdapter.notifyDataSetChanged()
+            
             viewModel?.clearScrollToMessage()
+            
+            // Update unread message count after layout (matches Java)
+            recyclerViewMessageList?.post {
+                updateNewMessageIndicator()
+            }
             
             // Check if highlight is needed
             val shouldHighlight = viewModel?.highlightScroll?.value == true
-            android.util.Log.d("MessagePreviewClick", "scrollToMessage - shouldHighlight: $shouldHighlight")
             if (shouldHighlight) {
-                // Use post() to ensure highlight happens after scroll and layout are complete
-                // This prevents race conditions where notifyItemChanged is called before the view is visible
-                recyclerViewMessageList?.post {
-                    android.util.Log.d("MessagePreviewClick", "scrollToMessage - post() executing highlight")
+                // Use postDelayed to ensure highlight happens after scroll and layout are complete
+                recyclerViewMessageList?.postDelayed({
                     highlightMessageAtPosition(messageId, position)
-                }
+                }, 150)
                 viewModel?.clearHighlightScroll()
             }
-        } else {
-            android.util.Log.d("MessagePreviewClick", "scrollToMessage - position not found, message may not be in list")
         }
     }
     

@@ -46,18 +46,21 @@ class ThreadMessagesActivity : AppCompatActivity() {
         private const val EXTRA_PARENT_MESSAGE_ID = "extra_parent_message_id"
         private const val EXTRA_RECEIVER_ID = "extra_receiver_id"
         private const val EXTRA_RECEIVER_TYPE = "extra_receiver_type"
+        private const val EXTRA_GO_TO_MESSAGE_ID = "extra_go_to_message_id"
 
         /**
          * Starts ThreadMessagesActivity with a parent message.
          *
          * @param context The context to start the activity from
          * @param parentMessage The parent message to show thread for
+         * @param goToMessageId Optional message ID to scroll to within the thread
          */
-        fun start(context: Context, parentMessage: BaseMessage) {
+        fun start(context: Context, parentMessage: BaseMessage, goToMessageId: Long = 0) {
             val intent = Intent(context, ThreadMessagesActivity::class.java).apply {
                 putExtra(EXTRA_PARENT_MESSAGE_ID, parentMessage.id.toLong())
                 putExtra(EXTRA_RECEIVER_ID, parentMessage.receiverUid)
                 putExtra(EXTRA_RECEIVER_TYPE, parentMessage.receiverType)
+                if (goToMessageId > 0) putExtra(EXTRA_GO_TO_MESSAGE_ID, goToMessageId)
             }
             context.startActivity(intent)
         }
@@ -67,6 +70,7 @@ class ThreadMessagesActivity : AppCompatActivity() {
     private var parentMessageId: Long = -1
     private var receiverId: String? = null
     private var receiverType: String? = null
+    private var goToMessageId: Long = 0
     private var user: User? = null
     private var group: Group? = null
     private var parentMessage: BaseMessage? = null
@@ -102,6 +106,7 @@ class ThreadMessagesActivity : AppCompatActivity() {
         parentMessageId = intent.getLongExtra(EXTRA_PARENT_MESSAGE_ID, -1)
         receiverId = intent.getStringExtra(EXTRA_RECEIVER_ID)
         receiverType = intent.getStringExtra(EXTRA_RECEIVER_TYPE)
+        goToMessageId = intent.getLongExtra(EXTRA_GO_TO_MESSAGE_ID, 0)
     }
 
     /**
@@ -201,12 +206,17 @@ class ThreadMessagesActivity : AppCompatActivity() {
      */
     private fun setupMessageList() {
         binding.messageList.apply {
+            // Set parent message ID for thread context (must be before setUser/setGroup)
+            setParentMessageId(parentMessageId)
+
+            // Navigate to specific message if provided (e.g., from search)
+            if (goToMessageId > 0) {
+                gotoMessage(goToMessageId)
+            }
+
             // Set user or group
             user?.let { setUser(it) }
             group?.let { setGroup(it) }
-
-            // Set parent message ID for thread context
-            setParentMessageId(parentMessageId)
 
             // Enable real-time updates
             setScrollToBottomOnNewMessage(true)

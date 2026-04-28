@@ -135,9 +135,9 @@ data class CometChatMessageHeaderStyle(
             
             // AI assistant button styling
             newChatIcon: Painter? = painterResource(R.drawable.cometchat_ic_new_chat),
-            newChatIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
+            newChatIconTint: Color = CometChatTheme.colorScheme.iconTintPrimary,
             chatHistoryIcon: Painter? = painterResource(R.drawable.cometchat_ic_chat_history),
-            chatHistoryIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
+            chatHistoryIconTint: Color = CometChatTheme.colorScheme.iconTintPrimary,
             
             // Call button styling - use iconTintPrimary to match original Java chatuikit behavior
             videoCallIcon: Painter? = painterResource(R.drawable.cometchat_ic_call_video),

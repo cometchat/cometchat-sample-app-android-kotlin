@@ -89,8 +89,11 @@ import com.cometchat.uikit.core.state.MessageAlignment
 import com.cometchat.uikit.core.state.MessageFlagState
 import com.cometchat.uikit.core.state.MessageListUIState
 import com.cometchat.uikit.core.state.SmartRepliesUIState
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.utils.MessageOptionsUtils
 import com.cometchat.uikit.core.viewmodel.CometChatMessageListViewModel
+import com.cometchat.uikit.core.factory.CometChatMessageListViewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -615,7 +618,13 @@ fun CometChatMessageList(
      * The callback receives the fetched [User] object representing the message sender.
      * This allows integrators to navigate to a private conversation with the sender.
      */
-    onMessagePrivately: ((User) -> Unit)? = null
+    onMessagePrivately: ((User) -> Unit)? = null,
+
+    /**
+     * When provided, the message list will scroll to and highlight the message
+     * with this ID after loading. Used for search-to-message navigation.
+     */
+    goToMessageId: Long? = null
 ) {
     // ========================================
     // State Management (Task 39)
@@ -658,13 +667,28 @@ fun CometChatMessageList(
         )
     }
 
-    // Get or create ViewModel
-    val vm = viewModel ?: remember {
-        CometChatMessageListViewModel(
+    // Get or create ViewModel — scoped to the ViewModelStoreOwner (Activity or
+    // NavBackStackEntry) so only one instance exists per composition scope.
+    // Using remember{} previously caused duplicate VMs when the composable
+    // re-entered composition, leading to two CometChatAIStreamService instances
+    // fighting over the singleton and SDK listener tags.
+    val vm = viewModel ?: composeViewModel<CometChatMessageListViewModel>(
+        factory = CometChatMessageListViewModelFactory(
             repository = MessageListRepositoryImpl(),
             enableListeners = true
         )
+    )
+
+    // Detect agent chat directly from the user parameter so it's available
+    // immediately during composition (before LaunchedEffect calls setUser on the ViewModel).
+    // This matches the chatuikit-kotlin approach where isAgentChat is detected from the user
+    // before any ViewModel setup.
+    val isAgentChat = remember(user) {
+        user?.let { AgentChatDetector.isAgentChat(it) } ?: false
     }
+
+    // Swipe-to-reply is globally disabled in agent chat mode
+    val effectiveSwipeToReplyEnabled = swipeToReplyEnabled && !isAgentChat
 
     // Derive isThreadView from parentMessageId
     val isThreadView = parentMessageId > 0
@@ -861,8 +885,8 @@ fun CometChatMessageList(
     val unreadAnchorId = unreadMessageAnchor?.id
 
     // Force recomposition when a message is updated in-place (e.g., reply count change).
-    // StateFlow conflation suppresses emissions for same-reference mutations, so this
-    // SharedFlow-based counter ensures the LazyColumn re-reads the mutated message.
+    // StreamMessage updates use clone() and no longer need this mechanism.
+    // This remains for updateReplyCount() which mutates BaseMessage in-place.
     var messageUpdateTick by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         vm.messageUpdated.collect {
@@ -876,7 +900,7 @@ fun CometChatMessageList(
     // So we keep the order as-is: [oldest, ..., newest] so oldest appears at top, newest at bottom
     // Filter out duplicates by message ID to prevent LazyColumn key conflicts
     val messages = remember(messagesFromVm, messageUpdateTick) { 
-        messagesFromVm.distinctBy { it.id }
+        messagesFromVm.distinctBy { if (it.id == 0L) it.muid ?: it.hashCode() else it.id }
     }
     
     // LazyListState for scroll control
@@ -963,9 +987,8 @@ fun CometChatMessageList(
                 val index = messages.indexOfFirst { it.id == quotedMessage.id }
                 if (index >= 0) {
                     scope.launch {
-                        val viewportHeight = listState.layoutInfo.viewportSize.height
-                        val centerOffset = if (viewportHeight > 0) -(viewportHeight / 2) else 0
-                        listState.scrollToItem(index, centerOffset)
+                        // Scroll item to the top of the viewport (matching Java behavior)
+                        listState.scrollToItem(index)
                         // Trigger highlight animation - start at 1.0 alpha (matching Java implementation)
                         highlightedMessageId = quotedMessage.id
                         highlightAlpha = 1.0f
@@ -983,7 +1006,14 @@ fun CometChatMessageList(
     // ========================================
 
     // User/Group initialization effect
-    LaunchedEffect(user, group) {
+    // Navigation Compose can compose the destination multiple times during transitions,
+    // causing this effect to fire redundantly with the same keys.
+    // We track the last-initialized ID in the ViewModel to skip duplicate setup.
+    LaunchedEffect(user?.uid, group?.guid, goToMessageId) {
+        val currentId = user?.uid ?: group?.guid
+        if (currentId != null && currentId == vm.getInitializedId() && goToMessageId == null) {
+            return@LaunchedEffect
+        }
         vm.setDisableReceipt(disableReceipt)
         vm.setHideDeleteMessage(false)
         vm.setStartFromUnreadMessages(startFromUnreadMessages)
@@ -997,9 +1027,18 @@ fun CometChatMessageList(
         
         when {
             user != null -> {
+                // For agent chats, disable all AI features — the agent has its own
+                // greeting view with suggested messages from user metadata.
+                if (isAgentChat) {
+                    vm.setEnableConversationStarter(false)
+                    vm.setEnableSmartReplies(false)
+                    vm.setEnableConversationSummary(false)
+                }
+
                 vm.setUser(
                     user = user,
                     parentMessageId = parentMessageId,
+                    gotoMessageId = goToMessageId ?: 0,
                     messagesRequestBuilder = messagesRequestBuilder
                 )
             }
@@ -1007,13 +1046,21 @@ fun CometChatMessageList(
                 vm.setGroup(
                     group = group,
                     parentMessageId = parentMessageId,
+                    gotoMessageId = goToMessageId ?: 0,
                     messagesRequestBuilder = messagesRequestBuilder
                 )
             }
         }
         
-        if (autoFetch && (user != null || group != null)) {
-            if (startFromUnreadMessages) {
+        if (isAgentChat && parentMessageId <= 0) {
+            // Main agent conversation — show empty/greeting state directly,
+            // do NOT fetch messages (matching chatuikit-kotlin behaviour).
+            vm.setUIStateEmpty()
+        } else if (autoFetch && (user != null || group != null)) {
+            if (goToMessageId != null && goToMessageId > 0) {
+                // Navigate to specific message (e.g., from search)
+                vm.goToMessage(goToMessageId, highlight = true)
+            } else if (startFromUnreadMessages) {
                 vm.fetchMessagesWithUnreadCount()
             } else {
                 vm.fetchMessages()
@@ -1027,28 +1074,18 @@ fun CometChatMessageList(
     // 2. When messages arrive, we need to re-check if we can scroll to the target
     // Without messages dependency, the effect runs when scrollToMessageId is set but
     // messages is still empty, so indexOfFirst returns -1 and scroll never happens.
-    //
-    // Centering logic:
-    // With reverseLayout=false, the list renders from top to bottom.
-    // To center an item, we calculate the offset to position it in the middle of the viewport.
     LaunchedEffect(scrollToMessageId, messages, highlightScroll) {
         scrollToMessageId?.let { messageId ->
             val index = messages.indexOfFirst { it.id == messageId }
             if (index >= 0) {
-                // Get viewport height to calculate center offset
-                val viewportHeight = listState.layoutInfo.viewportSize.height
-                if (viewportHeight > 0) {
-                    // Calculate offset to center the item
-                    // With reverseLayout=false, a negative offset moves the item UP from its position
-                    // We want to position it roughly in the middle of the viewport
-                    val centerOffset = -(viewportHeight / 2)
-                    
-                    // Use scrollToItem with offset to center the message
-                    listState.scrollToItem(index, centerOffset)
-                } else {
-                    // Fallback: if viewport not measured yet, just scroll to item
-                    listState.scrollToItem(index)
-                }
+                // Mark initial scroll as done so the default scroll-to-bottom
+                // effect doesn't override this goToMessage scroll
+                hasCompletedDefaultInitialScroll = true
+
+                // Scroll the target item to the top of the viewport
+                // This matches Java's behavior where the message appears at the top
+                listState.scrollToItem(index)
+
                 vm.clearScrollToMessage()
 
                 // Trigger highlight animation if requested - start at 1.0 alpha (matching Java)
@@ -1094,9 +1131,12 @@ fun CometChatMessageList(
             snapshotFlow { listState.layoutInfo.viewportSize.height }
                 .first { it > 0 }
             
+            // Scroll item to top first, then center it
+            listState.scrollToItem(targetUnreadIndex)
             val viewportHeight = listState.layoutInfo.viewportSize.height
-            val centerOffset = -(viewportHeight / 2)
-            listState.scrollToItem(targetUnreadIndex, centerOffset)
+            if (viewportHeight > 0) {
+                listState.scroll { scrollBy(-viewportHeight.toFloat() / 2) }
+            }
             hasCompletedInitialScroll = true
         }
     }
@@ -1123,7 +1163,8 @@ fun CometChatMessageList(
                 if (!isInProgress && totalItems > 0) {
                     // Fetch older messages when scrolled near the top
                     // With reverseLayout=false: firstVisibleIndex approaches 0 when scrolling up
-                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages) {
+                    // Skip for main agent conversations — they don't paginate backwards
+                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages && !(isAgentChat && parentMessageId <= 0)) {
                         vm.fetchMessages()
                     }
                     // Fetch newer messages when scrolled near the bottom
@@ -1228,7 +1269,7 @@ fun CometChatMessageList(
     }
     
     // Reset showConversationStarter when conversation starter is re-enabled or user/group changes
-    LaunchedEffect(enableConversationStarter, user, group) {
+    LaunchedEffect(enableConversationStarter, user?.uid, group?.guid) {
         if (enableConversationStarter) {
             showConversationStarter = true
         }
@@ -1243,7 +1284,7 @@ fun CometChatMessageList(
     }
     
     // Reset showConversationSummary when conversation summary is re-enabled or user/group changes
-    LaunchedEffect(enableConversationSummary, user, group) {
+    LaunchedEffect(enableConversationSummary, user?.uid, group?.guid) {
         if (enableConversationSummary) {
             showConversationSummary = true
         }
@@ -1335,17 +1376,20 @@ fun CometChatMessageList(
             .semantics { contentDescription = "Message list" }
     ) {
         when (uiState) {
-            // Loading state
+            // Loading state — skip for main agent conversations (greeting view handles it)
             is MessageListUIState.Loading -> {
-                if (!hideLoadingState) {
+                if (isAgentChat && parentMessageId <= 0) {
+                    // Agent main conversation: skip loading shimmer, the Empty state
+                    // will show the greeting view once the ViewModel settles.
+                } else if (!hideLoadingState) {
                     loadingView?.invoke() ?: DefaultLoadingView()
                 }
             }
             
             // Empty state
             is MessageListUIState.Empty -> {
-                // Show conversation starter if enabled and should be shown
-                val shouldShowConversationStarter = enableConversationStarter && 
+                // Show conversation starter if enabled and starters have been fetched
+                val shouldShowConversationStarter = enableConversationStarter &&
                     showConversationStarter && 
                     conversationStarterUIState !is ConversationStarterUIState.Idle
                 
@@ -1393,7 +1437,16 @@ fun CometChatMessageList(
                     emptyView?.invoke() ?: DefaultEmptyView(
                         style = style,
                         user = user,
-                        group = group
+                        group = group,
+                        isAgentChat = isAgentChat,
+                        onSuggestedMessageClick = { suggestion ->
+                            CometChatEvents.emitUIEvent(
+                                CometChatUIEvent.ComposeMessage(
+                                    id = receiverId,
+                                    text = suggestion
+                                )
+                            )
+                        }
                     )
                 }
                 onEmpty?.invoke()
@@ -1475,7 +1528,15 @@ fun CometChatMessageList(
                         // - index-1 = older message (above current in visual order)
                         itemsIndexed(
                             items = messages,
-                            key = { _, message -> message.id }
+                            key = { _, message ->
+                                // StreamMessages have id=0 before server assignment;
+                                // use muid as a stable key so Compose can track them.
+                                if (message.id == 0L) {
+                                    message.muid ?: message.hashCode().toLong()
+                                } else {
+                                    message.id
+                                }
+                            }
                         ) { index, message ->
                             // With chronological list, index-1 is the OLDER message (visually above)
                             val previousMessage = messages.getOrNull(index - 1)
@@ -1554,7 +1615,7 @@ fun CometChatMessageList(
                                 // is positioned relative to the row edge (matching Kotlin XML)
                                 SwipeToReplyWrapper(
                                     message = message,
-                                    enabled = swipeToReplyEnabled,
+                                    enabled = effectiveSwipeToReplyEnabled,
                                     onReply = { msg -> vm.onMessageReply(msg) }
                                 ) {
                                     // MessageBubbleWrapper applies row-level spacing inside
@@ -1569,6 +1630,7 @@ fun CometChatMessageList(
                                             bubbleFactories = factoryMap,
                                             hideAvatar = hideAvatar,
                                             isGroupConversation = isGroupConversation,
+                                            isAgentChat = isAgentChat,
                                             hideReceipts = hideReceipts,
                                             hideGroupActionMessages = hideGroupActionMessages,
                                             hideModerationView = hideModerationView,

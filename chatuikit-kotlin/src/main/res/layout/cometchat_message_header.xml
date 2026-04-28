@@ -129,8 +129,10 @@
 
             <ImageView
                 android:id="@+id/ivNewChat"
-                android:layout_width="@dimen/cometchat_icon_size_10"
-                android:layout_height="@dimen/cometchat_icon_size_10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="@dimen/cometchat_24dp"
+                android:minHeight="@dimen/cometchat_24dp"
                 android:src="@drawable/cometchat_ic_new_chat"
                 android:visibility="gone"
                 android:contentDescription="@string/cometchat_new_chat"
@@ -138,8 +140,10 @@
 
             <ImageView
                 android:id="@+id/ivChatHistory"
-                android:layout_width="@dimen/cometchat_icon_size_10"
-                android:layout_height="@dimen/cometchat_icon_size_10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="@dimen/cometchat_24dp"
+                android:minHeight="@dimen/cometchat_24dp"
                 android:src="@drawable/cometchat_ic_chat_history"
                 android:visibility="gone"
                 android:contentDescription="@string/cometchat_chat_history"

@@ -3,6 +3,7 @@ package com.cometchat.uikit.compose.presentation.shared.messagebubble.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -32,6 +42,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -41,6 +52,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.Stroke
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cometchat.chat.models.TextMessage
@@ -61,6 +77,8 @@ import org.json.JSONObject
 
 // URL annotation tag for clickable links
 private const val URL_ANNOTATION_TAG = "URL"
+// Annotation tag for inline code spans (used to draw borders)
+private const val INLINE_CODE_ANNOTATION_TAG = "INLINE_CODE"
 
 /**
  * A composable that displays a text message bubble.
@@ -106,6 +124,7 @@ fun CometChatTextBubble(
     },
     textFormatters: List<CometChatTextFormatter> = emptyList(),
     onLinkClick: ((String) -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     onMentionClick: ((User) -> Unit)? = null,
     onMentionAllClick: (() -> Unit)? = null,
     mentionTextStyle: MentionTextStyle? = null
@@ -191,10 +210,70 @@ fun CometChatTextBubble(
         }
 
         // Render markdown segments with formatter spans overlaid
-        val accentColor = style.linkColor
+        
+        // Theme-aware inline code colors for receiver/sender differentiation
+        val isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT
+        val inlineCodeBgColor = if (isOutgoing) {
+            Color.White.copy(alpha = 0.2f)
+        } else {
+            CometChatTheme.colorScheme.backgroundColor3  // Figma: Color/Background Color/Background3
+        }
+        val inlineCodeTextColor = if (isOutgoing) {
+            Color.Unspecified
+        } else {
+            CometChatTheme.colorScheme.textColorHighlight  // Figma: text highlight
+        }
+        val inlineCodeBorderColor = if (isOutgoing) {
+            Color.White.copy(alpha = 0.3f)
+        } else {
+            CometChatTheme.colorScheme.strokeColorDark  // Figma: neutral400 (#DCDCDC)
+        }
+
+        // Merge consecutive Blockquote segments into single entries so the bar is continuous
+        val mergedSegments = remember(renderedSegments) {
+            val result = mutableListOf<MarkdownRenderer.RenderedSegment>()
+            var i = 0
+            while (i < renderedSegments.size) {
+                val seg = renderedSegments[i]
+                if (seg is MarkdownRenderer.RenderedSegment.Blockquote) {
+                    // Collect all consecutive blockquote segments
+                    val texts = mutableListOf(seg.text)
+                    val allSpans = mutableListOf<MarkdownRenderer.InlineSpan>()
+                    allSpans.addAll(seg.spans)
+                    var j = i + 1
+                    while (j < renderedSegments.size && renderedSegments[j] is MarkdownRenderer.RenderedSegment.Blockquote) {
+                        val next = renderedSegments[j] as MarkdownRenderer.RenderedSegment.Blockquote
+                        val offset = texts.joinToString("\n").length + 1 // +1 for the newline
+                        texts.add(next.text)
+                        allSpans.addAll(next.spans.map { it.copy(start = it.start + offset, end = it.end + offset) })
+                        j++
+                    }
+                    result.add(MarkdownRenderer.RenderedSegment.Blockquote(
+                        text = texts.joinToString("\n"),
+                        spans = allSpans
+                    ))
+                    i = j
+                } else {
+                    result.add(seg)
+                    i++
+                }
+            }
+            result
+        }
 
         Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp)) {
-            for (segment in renderedSegments) {
+            for ((segIndex, segment) in mergedSegments.withIndex()) {
+                // Add spacing between code block/blockquote and adjacent segments
+                if (segIndex > 0) {
+                    val prev = mergedSegments[segIndex - 1]
+                    val needsSpacing = prev is MarkdownRenderer.RenderedSegment.CodeBlock ||
+                        prev is MarkdownRenderer.RenderedSegment.Blockquote ||
+                        segment is MarkdownRenderer.RenderedSegment.CodeBlock ||
+                        segment is MarkdownRenderer.RenderedSegment.Blockquote
+                    if (needsSpacing) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                }
                 when (segment) {
                     is MarkdownRenderer.RenderedSegment.Text -> {
                         // Use MentionText for clickable mentions when message has mentions
@@ -222,12 +301,15 @@ fun CometChatTextBubble(
                         } else {
                             // Use ClickableText for messages without mentions to handle link clicks
                             val styledText = remember(segment.text, formattedText) {
-                                buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor)
+                                buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
                             }
                             ClickableLinkText(
                                 text = styledText,
                                 style = style.textStyle,
-                                onLinkClick = onLinkClick
+                                onLinkClick = onLinkClick,
+                                onLongClick = onLongClick,
+                                inlineCodeBorderColor = inlineCodeBorderColor,
+                                inlineCodeBgColor = inlineCodeBgColor
                             )
                         }
                     }
@@ -236,70 +318,69 @@ fun CometChatTextBubble(
                         CodeBlockBubble(
                             code = segment.code,
                             language = segment.language,
-                            isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT
+                            isOutgoing = isOutgoing
                         )
                     }
 
                     is MarkdownRenderer.RenderedSegment.BulletItem -> {
                         val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor)
+                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
                         }
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
+                        ) {
                             Text(
-                                text = "•  ",
-                                style = style.textStyle.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = accentColor
-                                )
+                                text = "• ",
+                                style = style.textStyle.copy(color = style.textColor)
                             )
                             ClickableLinkText(
                                 text = styledText,
                                 style = style.textStyle,
-                                onLinkClick = onLinkClick
+                                onLinkClick = onLinkClick,
+                                onLongClick = onLongClick,
+                                inlineCodeBorderColor = inlineCodeBorderColor,
+                                inlineCodeBgColor = inlineCodeBgColor
                             )
                         }
                     }
 
                     is MarkdownRenderer.RenderedSegment.OrderedItem -> {
                         val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor)
+                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
                         }
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
+                        ) {
                             Text(
                                 text = "${segment.number}. ",
-                                style = style.textStyle.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = accentColor
-                                )
+                                style = style.textStyle.copy(color = style.textColor)
                             )
                             ClickableLinkText(
                                 text = styledText,
                                 style = style.textStyle,
-                                onLinkClick = onLinkClick
+                                onLinkClick = onLinkClick,
+                                onLongClick = onLongClick,
+                                inlineCodeBorderColor = inlineCodeBorderColor,
+                                inlineCodeBgColor = inlineCodeBgColor
                             )
                         }
                     }
 
                     is MarkdownRenderer.RenderedSegment.Blockquote -> {
-                        val quoteTextColor = style.textColor.copy(alpha = 0.6f)
                         val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, quoteTextColor, style.linkColor)
+                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
                         }
-                        Row {
-                            Text(
-                                text = "┃  ",
-                                style = style.textStyle.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontStyle = FontStyle.Normal,
-                                    color = accentColor
-                                )
-                            )
-                            ClickableLinkText(
-                                text = styledText,
-                                style = style.textStyle,
-                                onLinkClick = onLinkClick
-                            )
-                        }
+                        BlockquoteBubble(
+                            text = styledText,
+                            textStyle = style.textStyle,
+                            isOutgoing = isOutgoing,
+                            onLinkClick = onLinkClick,
+                            onLongClick = onLongClick,
+                            inlineCodeBorderColor = inlineCodeBorderColor,
+                            inlineCodeBgColor = inlineCodeBgColor
+                        )
                     }
                 }
             }
@@ -528,37 +609,139 @@ private fun extractTranslatedText(message: TextMessage): String? {
 }
 
 /**
- * A composable that renders text with clickable links.
+ * A composable that renders text with clickable links and inline code borders.
  * Uses ClickableText to handle URL annotation clicks and opens links in browser.
+ * Draws rounded rect borders around inline code spans using onTextLayout + drawWithContent.
  */
 @Composable
 private fun ClickableLinkText(
     text: AnnotatedString,
     style: androidx.compose.ui.text.TextStyle,
-    onLinkClick: ((String) -> Unit)?
+    onLinkClick: ((String) -> Unit)?,
+    onLongClick: (() -> Unit)? = null,
+    inlineCodeBorderColor: Color = CometChatTheme.colorScheme.strokeColorDark,
+    inlineCodeBgColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+    inlineCodeCornerRadius: Float = 5f
 ) {
     val context = LocalContext.current
-    
-    ClickableText(
-        text = text,
-        style = style,
-        onClick = { offset ->
-            // Check if there's a URL annotation at the clicked position
-            text.getStringAnnotations(tag = URL_ANNOTATION_TAG, start = offset, end = offset)
-                .firstOrNull()?.let { annotation ->
-                    val url = annotation.item
-                    if (onLinkClick != null) {
-                        onLinkClick(url)
-                    } else {
-                        // Default behavior: open URL in browser
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            // Handle invalid URL or no browser available
-                        }
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val cornerRadiusPx = with(androidx.compose.ui.platform.LocalDensity.current) { inlineCodeCornerRadius.dp.toPx() }
+    val borderWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { 1.dp.toPx() }
+
+    // Get inline code annotations
+    val inlineCodeAnnotations = remember(text) {
+        text.getStringAnnotations(tag = INLINE_CODE_ANNOTATION_TAG, start = 0, end = text.length)
+    }
+
+    // Use BasicText + pointerInput instead of ClickableText so that long press
+    // propagates to the parent (MessageListItem's combinedClickable).
+    // ClickableText consumes ALL touch events, blocking long press.
+    val drawModifier = if (inlineCodeAnnotations.isNotEmpty()) {
+        Modifier.drawWithContent {
+            val layout = textLayoutResult
+            if (layout != null) {
+                val hPad = 4f
+                val vPad = 2f
+                for (annotation in inlineCodeAnnotations) {
+                    val startOffset = annotation.start
+                    val endOffset = annotation.end
+                    val pathBounds = layout.getPathForRange(startOffset, endOffset)
+                    val bounds = pathBounds.getBounds()
+                    if (bounds.width > 0f && bounds.height > 0f) {
+                        val lineIdx = layout.getLineForOffset(startOffset)
+                        val baseline = layout.getLineBaseline(lineIdx)
+                        val ascent = layout.getLineTop(lineIdx) - baseline  // negative
+                        val descent = layout.getLineBottom(lineIdx) - baseline // positive
+                        // Use font metrics for tight text bounds, not full line height
+                        val fontAscent = baseline + ascent  // = lineTop
+                        val fontDescent = baseline + descent // = lineBottom
+                        // But with increased lineHeight, lineTop/lineBottom include extra space.
+                        // Use multiParagraph line metrics: top of text = baseline - fontSize, bottom = baseline + descent
+                        val fontSize = layout.layoutInput.style.fontSize.value
+                        val density = layout.layoutInput.density.density
+                        val fontSizePx = fontSize * density
+                        val textTop = baseline - fontSizePx * 0.8f  // approximate ascent
+                        val textBottom = baseline + fontSizePx * 0.25f  // approximate descent
+                        drawRoundRect(
+                            color = inlineCodeBgColor,
+                            topLeft = Offset(bounds.left - hPad, textTop - vPad),
+                            size = Size(bounds.width + hPad * 2, textBottom - textTop + vPad * 2),
+                            cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                        )
                     }
                 }
+            }
+            drawContent()
+            if (layout != null) {
+                val hPad = 4f
+                val vPad = 2f
+                for (annotation in inlineCodeAnnotations) {
+                    val startOffset = annotation.start
+                    val endOffset = annotation.end
+                    val pathBounds = layout.getPathForRange(startOffset, endOffset)
+                    val bounds = pathBounds.getBounds()
+                    if (bounds.width > 0f && bounds.height > 0f) {
+                        val lineIdx = layout.getLineForOffset(startOffset)
+                        val baseline = layout.getLineBaseline(lineIdx)
+                        val fontSize = layout.layoutInput.style.fontSize.value
+                        val density = layout.layoutInput.density.density
+                        val fontSizePx = fontSize * density
+                        val textTop = baseline - fontSizePx * 0.8f
+                        val textBottom = baseline + fontSizePx * 0.25f
+                        drawRoundRect(
+                            color = inlineCodeBorderColor,
+                            topLeft = Offset(bounds.left - hPad, textTop - vPad),
+                            size = Size(bounds.width + hPad * 2, textBottom - textTop + vPad * 2),
+                            cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
+                            style = Stroke(width = borderWidthPx)
+                        )
+                    }
+                }
+            }
+        }
+    } else Modifier
+
+    // Increase line height when inline code is present so there's visible gap between lines
+    val effectiveStyle = if (inlineCodeAnnotations.isNotEmpty()) {
+        style.copy(lineHeight = (style.fontSize.value * 1.6f).sp)
+    } else {
+        style
+    }
+
+    BasicText(
+        text = text,
+        style = effectiveStyle,
+        onTextLayout = { layoutResult ->
+            textLayoutResult = layoutResult
+        },
+        modifier = drawModifier.pointerInput(text, onLinkClick) {
+            detectTapGestures(
+                onLongPress = { onLongClick?.invoke() },
+                onTap = { offset ->
+                    // Find which character was tapped
+                    val layout = textLayoutResult ?: return@detectTapGestures
+                    val charOffset = layout.getOffsetForPosition(offset)
+                    // Check for URL annotation at tapped position
+                    text.getStringAnnotations(tag = URL_ANNOTATION_TAG, start = charOffset, end = charOffset)
+                        .firstOrNull()?.let { annotation ->
+                            val url = annotation.item.let { rawUrl ->
+                                if (!rawUrl.contains("://")) "https://$rawUrl" else rawUrl
+                            }
+                            if (onLinkClick != null) {
+                                onLinkClick(url)
+                            } else {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    // Handle invalid URL or no browser available
+                                }
+                            }
+                        }
+                }
+                // Long press is NOT handled here — it propagates to the parent's
+                // combinedClickable modifier for message actions (reply, copy, etc.)
+            )
         }
     )
 }
@@ -574,11 +757,13 @@ private fun buildSegmentText(
     formattedText: AnnotatedString?,
     fullText: String,
     defaultColor: Color,
-    linkColor: Color
+    linkColor: Color,
+    inlineCodeBackgroundColor: Color = Color.LightGray.copy(alpha = 0.3f),
+    inlineCodeTextColor: Color = Color.Unspecified
 ): AnnotatedString {
     // First, apply markdown inline formatting
     val (plain, spans) = MarkdownRenderer.parseInline(segmentText)
-    val mdStyled = buildStyledText(plain, spans, defaultColor, linkColor)
+    val mdStyled = buildStyledText(plain, spans, defaultColor, linkColor, inlineCodeBackgroundColor, inlineCodeTextColor)
 
     if (formattedText == null) return mdStyled
 
@@ -682,12 +867,17 @@ private fun mapPositionUsingMap(pos: Int, map: IntArray, plainLength: Int): Int 
  *
  * For LINK format, adds a URL annotation that can be used with ClickableText
  * to open the link in a browser.
+ *
+ * For INLINE_CODE format, uses [inlineCodeBackgroundColor] and [inlineCodeTextColor]
+ * to apply theme-aware styling that differentiates receiver and sender bubbles.
  */
 private fun buildStyledText(
     text: String,
     spans: List<MarkdownRenderer.InlineSpan>,
     defaultColor: Color,
-    linkColor: Color
+    linkColor: Color,
+    inlineCodeBackgroundColor: Color = Color.LightGray.copy(alpha = 0.3f),
+    inlineCodeTextColor: Color = Color.Unspecified
 ): AnnotatedString = buildAnnotatedString {
     append(text)
     // Base color for the entire text
@@ -711,10 +901,19 @@ private fun buildStyledText(
             ), start, end)
             RichTextFormat.UNDERLINE -> decorations.add(TextDecoration.Underline)
             RichTextFormat.STRIKETHROUGH -> decorations.add(TextDecoration.LineThrough)
-            RichTextFormat.INLINE_CODE -> addStyle(SpanStyle(
-                fontFamily = FontFamily.Monospace,
-                background = Color.LightGray.copy(alpha = 0.3f)
-            ), start, end)
+            RichTextFormat.INLINE_CODE -> {
+                addStyle(SpanStyle(
+                    fontFamily = FontFamily.Monospace,
+                    color = inlineCodeTextColor
+                ), start, end)
+                // Add annotation so ClickableLinkText can draw background + borders
+                addStringAnnotation(
+                    tag = INLINE_CODE_ANNOTATION_TAG,
+                    annotation = "true",
+                    start = start,
+                    end = end
+                )
+            }
             RichTextFormat.LINK -> {
                 decorations.add(TextDecoration.Underline)
                 addStyle(SpanStyle(color = linkColor), start, end)
@@ -738,8 +937,11 @@ private fun buildStyledText(
 }
 
 /**
- * Renders a fenced code block with dark background, monospace font,
- * and optional language label.
+ * Renders a fenced code block with theme-aware styling for receiver/sender bubbles,
+ * monospace font, and optional language label.
+ *
+ * Receiver (left): BackgroundColor2 bg, StrokeColorDefault border, 16dp corners, 24dp/12dp padding
+ * Sender (right): ExtendedPrimaryColor700 bg, appropriate border, 16dp corners, 24dp/12dp padding
  */
 @Composable
 private fun CodeBlockBubble(
@@ -747,17 +949,39 @@ private fun CodeBlockBubble(
     language: String,
     isOutgoing: Boolean
 ) {
+    val backgroundColor = if (isOutgoing) {
+        CometChatTheme.colorScheme.extendedPrimaryColor700
+    } else {
+        CometChatTheme.colorScheme.backgroundColor2
+    }
+    val borderColor = if (isOutgoing) {
+        CometChatTheme.colorScheme.extendedPrimaryColor700
+    } else {
+        CometChatTheme.colorScheme.strokeColorDefault
+    }
+    val textColor = if (isOutgoing) {
+        Color.White
+    } else {
+        CometChatTheme.colorScheme.textColorPrimary
+    }
+    val languageLabelColor = if (isOutgoing) {
+        Color.White.copy(alpha = 0.6f)
+    } else {
+        Color(0xFF888888)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF1E1E1E))
+            .background(backgroundColor)
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
     ) {
         if (language.isNotEmpty()) {
             Text(
                 text = language,
-                color = Color(0xFF888888),
+                color = languageLabelColor,
                 style = androidx.compose.ui.text.TextStyle(
                     fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp
@@ -768,11 +992,10 @@ private fun CodeBlockBubble(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
         ) {
             Text(
                 text = code,
-                color = Color(0xFFD4D4D4),
+                color = textColor,
                 style = androidx.compose.ui.text.TextStyle(
                     fontFamily = FontFamily.Monospace,
                     fontSize = 13.sp
@@ -780,5 +1003,86 @@ private fun CodeBlockBubble(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
         }
+    }
+}
+
+/**
+ * Renders a blockquote with a left stripe, background fill, and indentation
+ * using Modifier.drawBehind for proper visual rendering.
+ *
+ * Receiver (left): StrokeColorHighlight stripe, BackgroundColor3 bg, 8dp corners
+ * Sender (right): White stripe, white at 20% opacity bg, 8dp corners
+ */
+@Composable
+private fun BlockquoteBubble(
+    text: AnnotatedString,
+    textStyle: androidx.compose.ui.text.TextStyle,
+    isOutgoing: Boolean,
+    onLinkClick: ((String) -> Unit)?,
+    onLongClick: (() -> Unit)? = null,
+    inlineCodeBorderColor: Color = CometChatTheme.colorScheme.strokeColorDark,
+    inlineCodeBgColor: Color = CometChatTheme.colorScheme.backgroundColor3
+) {
+    val stripeColor = if (isOutgoing) {
+        Color.White
+    } else {
+        CometChatTheme.colorScheme.strokeColorHighlight
+    }
+    val bgColor = if (isOutgoing) {
+        Color.White.copy(alpha = 0.2f)
+    } else {
+        CometChatTheme.colorScheme.backgroundColor3
+    }
+    val stripeWidthDp = 3.dp
+    val cornerRadiusDp = 8.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                val cornerRadiusPx = cornerRadiusDp.toPx()
+                val stripeWidthPx = stripeWidthDp.toPx()
+
+                // Draw background with rounded corners
+                drawRoundRect(
+                    color = bgColor,
+                    topLeft = Offset.Zero,
+                    size = size,
+                    cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                )
+
+                // Draw stripe flush with the left edge of the background,
+                // sharing the background's corner radius. The stripe occupies
+                // the leftmost 3px, clipped to the background's rounded shape.
+                val path = Path().apply {
+                    addRoundRect(
+                        RoundRect(
+                            left = 0f,
+                            top = 0f,
+                            right = size.width,
+                            bottom = size.height,
+                            cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                        )
+                    )
+                }
+                clipPath(path) {
+                    // Draw a plain rect for the stripe — clipping handles the corners
+                    drawRect(
+                        color = stripeColor,
+                        topLeft = Offset.Zero,
+                        size = Size(stripeWidthPx, size.height)
+                    )
+                }
+            }
+            .padding(start = 16.dp, top = 8.dp, end = 12.dp, bottom = 8.dp)
+    ) {
+        ClickableLinkText(
+            text = text,
+            style = textStyle,
+            onLinkClick = onLinkClick,
+            onLongClick = onLongClick,
+            inlineCodeBorderColor = inlineCodeBorderColor,
+            inlineCodeBgColor = inlineCodeBgColor
+        )
     }
 }

@@ -1,0 +1,157 @@
+package com.cometchat.uikit.compose.presentation.shared.messagebubble.ui
+
+import androidx.compose.ui.graphics.Color
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.arbitrary
+import io.kotest.property.arbitrary.choice
+import io.kotest.property.arbitrary.element
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import com.cometchat.uikit.core.formatter.MarkdownRenderer
+import com.cometchat.uikit.core.formatter.PlainTextStripper
+
+/**
+ * Property-based tests for [buildPreviewAnnotatedString].
+ *
+ * Feature: formatted-text-previews
+ * Covers Properties 3 and 6 from the design spec.
+ * Property 5 (SpanStyle mapping) is covered by example-based tests since it requires
+ * inspecting specific SpanStyle values which are better verified with known inputs.
+ *
+ * Note: These tests avoid calling buildPreviewAnnotatedString directly because it
+ * references cometchatFontBold which requires Android font resources. Instead, we
+ * verify the structural properties through PlainTextStripper (which shares the same
+ * segment extraction logic) and through segment counting.
+ */
+class MarkdownPreviewUtilsPropertyTest : FunSpec({
+
+    // ── Generators ──────────────────────────────────────────────────────
+
+    object Codepoint {
+        fun alphanumeric(): Arb<Char> = Arb.element(
+            ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        )
+    }
+
+    val plainWordArb: Arb<String> = Arb.string(1..15, Codepoint.alphanumeric())
+
+    val plainSentenceArb: Arb<String> = Arb.list(plainWordArb, 1..4)
+        .map { it.joinToString(" ") }
+
+    val boldArb: Arb<String> = plainWordArb.map { "**$it**" }
+    val italicArb: Arb<String> = plainWordArb.map { "_${it}_" }
+    val strikethroughArb: Arb<String> = plainWordArb.map { "~~$it~~" }
+    val inlineCodeArb: Arb<String> = plainWordArb.map { "`$it`" }
+
+    val linkArb: Arb<String> = arbitrary {
+        val display = plainWordArb.bind()
+        val url = plainWordArb.bind()
+        "[$display](https://$url.com)"
+    }
+
+    val markdownFragmentArb: Arb<String> = Arb.choice(
+        plainWordArb, boldArb, italicArb, strikethroughArb, inlineCodeArb, linkArb
+    )
+
+    val markdownLineArb: Arb<String> = Arb.list(markdownFragmentArb, 1..3)
+        .map { it.joinToString(" ") }
+
+    val codeBlockArb: Arb<String> = arbitrary {
+        val lang = Arb.element("", "kotlin", "java").bind()
+        val code = plainSentenceArb.bind()
+        "```$lang\n$code\n```"
+    }
+
+    val bulletItemArb: Arb<String> = markdownLineArb.map { "- $it" }
+    val orderedItemArb: Arb<String> = arbitrary {
+        val num = Arb.int(1..9).bind()
+        val text = markdownLineArb.bind()
+        "$num. $text"
+    }
+    val blockquoteArb: Arb<String> = markdownLineArb.map { "> $it" }
+
+    val markdownDocArb: Arb<String> = Arb.list(
+        Arb.choice(markdownLineArb, codeBlockArb, bulletItemArb, orderedItemArb, blockquoteArb),
+        1..5
+    ).map { it.joinToString("\n") }
+
+    // ── Helper ──────────────────────────────────────────────────────────
+
+    /**
+     * Extracts plain text from segments the same way buildPreviewAnnotatedString does,
+     * joining with spaces. This mirrors the utility's text extraction without needing
+     * Android font resources.
+     */
+    fun extractPreviewText(segments: List<MarkdownRenderer.RenderedSegment>): String {
+        return segments.joinToString(" ") { segment ->
+            when (segment) {
+                is MarkdownRenderer.RenderedSegment.CodeBlock -> segment.code
+                is MarkdownRenderer.RenderedSegment.Text ->
+                    MarkdownRenderer.parseInline(segment.text).first
+                is MarkdownRenderer.RenderedSegment.BulletItem ->
+                    MarkdownRenderer.parseInline(segment.text).first
+                is MarkdownRenderer.RenderedSegment.OrderedItem ->
+                    MarkdownRenderer.parseInline(segment.text).first
+                is MarkdownRenderer.RenderedSegment.Blockquote ->
+                    MarkdownRenderer.parseInline(segment.text).first
+            }
+        }
+    }
+
+    // ── Property Tests ──────────────────────────────────────────────────
+
+    test("Property 3: Preview text content equals PlainTextStripper output") {
+        checkAll(100, markdownDocArb) { markdown ->
+            val segments = MarkdownRenderer.parse(markdown)
+            val previewText = extractPreviewText(segments)
+            val strippedText = PlainTextStripper.strip(markdown)
+            previewText shouldBe strippedText
+        }
+    }
+
+    test("Property 6: N segments produce N-1 space separators in joined text") {
+        checkAll(100, markdownDocArb) { markdown ->
+            val segments = MarkdownRenderer.parse(markdown)
+            if (segments.size > 1) {
+                val previewText = extractPreviewText(segments)
+                // Count the segment texts
+                val segmentTexts = segments.map { segment ->
+                    when (segment) {
+                        is MarkdownRenderer.RenderedSegment.CodeBlock -> segment.code
+                        is MarkdownRenderer.RenderedSegment.Text ->
+                            MarkdownRenderer.parseInline(segment.text).first
+                        is MarkdownRenderer.RenderedSegment.BulletItem ->
+                            MarkdownRenderer.parseInline(segment.text).first
+                        is MarkdownRenderer.RenderedSegment.OrderedItem ->
+                            MarkdownRenderer.parseInline(segment.text).first
+                        is MarkdownRenderer.RenderedSegment.Blockquote ->
+                            MarkdownRenderer.parseInline(segment.text).first
+                    }
+                }
+                // The joined text should equal segments joined by single space
+                previewText shouldBe segmentTexts.joinToString(" ")
+            }
+        }
+    }
+
+    test("Single segment produces no separator spaces") {
+        checkAll(100, markdownLineArb) { markdown ->
+            val segments = MarkdownRenderer.parse(markdown)
+            if (segments.size == 1) {
+                val previewText = extractPreviewText(segments)
+                val segmentText = when (val seg = segments[0]) {
+                    is MarkdownRenderer.RenderedSegment.Text ->
+                        MarkdownRenderer.parseInline(seg.text).first
+                    else -> ""
+                }
+                previewText shouldBe segmentText
+            }
+        }
+    }
+})

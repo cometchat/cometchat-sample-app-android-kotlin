@@ -1,0 +1,357 @@
+---
+title: "AI Assistant Chat History"
+description: "Displays the conversation history between users and an AI assistant for easy review of past interactions."
+---
+<Accordion title="AI Integration Quick Reference">
+
+```json
+{
+  "component": "CometChatAIAssistantChatHistory",
+  "package": "com.cometchat.uikit.kotlin.presentation.aiassistantchathistory",
+  "xmlElement": "<com.cometchat.uikit.kotlin.presentation.aiassistantchathistory.ui.CometChatAIAssistantChatHistory />",
+  "description": "Displays the conversation history between users and an AI assistant for easy review of past interactions.",
+  "primaryOutput": {
+    "method": "setOnItemClickListener",
+    "type": "OnItemClickListener<BaseMessage>"
+  },
+  "methods": {
+    "data": {
+      "setUser": {
+        "type": "User",
+        "required": true,
+        "note": "User must have role set to @agentic"
+      }
+    },
+    "callbacks": {
+      "setOnItemClickListener": "OnItemClickListener<BaseMessage>",
+      "setOnItemLongClickListener": "OnItemLongClickListener<BaseMessage>",
+      "setOnNewChatClickListener": "OnClick",
+      "setOnCloseClickListener": "OnClick"
+    },
+    "visibility": {
+      "setErrorStateVisibility": { "type": "int (View.VISIBLE | View.GONE)", "default": "View.VISIBLE" },
+      "setEmptyStateVisibility": { "type": "int (View.VISIBLE | View.GONE)", "default": "View.VISIBLE" }
+    },
+    "style": {
+      "setStyle": {
+        "type": "@StyleRes int",
+        "parent": "CometChatAIAssistantChatHistoryStyle"
+      }
+    }
+  },
+  "events": [],
+  "sdkListeners": []
+}
+```
+
+</Accordion>
+
+## Quick Start
+
+1. Open your layout XML file.
+2. Add the `CometChatAIAssistantChatHistory` XML element:
+
+```xml lines
+<com.cometchat.uikit.kotlin.presentation.aiassistantchathistory.ui.CometChatAIAssistantChatHistory
+    android:id="@+id/cometchat_ai_assistant_chat_history"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+```
+
+> **What this does:** Adds the `CometChatAIAssistantChatHistory` component to your layout. It fills the available width and height and renders the AI assistant chat history list.
+
+3. In your Activity or Fragment, create a `User` object with the role set to `@agentic` and pass it to the component:
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+val user = User()
+user.uid = "userId"
+user.name = "User Name"
+user.role = "@agentic" // User role must be @agentic to use AI Assistant features
+
+binding.cometChatAiAssistantChatHistory.setUser(user)
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+import com.cometchat.uikit.compose.presentation.aiassistantchathistory.ui.CometChatAIAssistantChatHistory
+
+@Composable
+fun AIAssistantChatHistoryScreen() {
+    CometChatAIAssistantChatHistory(
+        modifier = Modifier.fillMaxSize(),
+        onCloseClick = { /* handle close */ },
+        onNewChatClick = { /* handle new chat */ },
+        onItemClick = { message -> /* handle item click */ }
+    )
+}
+```
+
+</Tab>
+
+</Tabs>
+
+> **What this does:** Creates a `User` object with the `@agentic` role and sets it on the `CometChatAIAssistantChatHistory` component. This is required for the component to fetch and display the AI assistant chat histories for that user.
+
+4. Build and run your app.
+5. Verify that the AI assistant chat history list appears with past conversation items.
+
+<Frame>
+  <img src="/images/ai_assistant_chat_history.png" />
+</Frame>
+
+## Core Concepts
+
+- **`CometChatAIAssistantChatHistory`**: The main component class that renders the AI assistant chat history list. It is a Composite Component that can be launched via button clicks or any user-triggered action.
+- **Actions**: Callbacks such as `setOnItemClickListener`, `setOnItemLongClickListener`, `setOnNewChatClickListener`, and `setOnCloseClickListener` that let you respond to user interactions.
+- **Style**: XML theme styles applied via `setStyle()` to customize colors, fonts, and visual appearance of the chat history.
+- **Functionality**: Methods like `setUser`, `setErrorStateVisibility`, and `setEmptyStateVisibility` that configure the component's behavior and state visibility.
+
+## Actions and Events
+
+### Callback Methods
+
+What you're changing: How the component responds to user interactions such as taps, long-presses, new chat clicks, and close clicks.
+
+- **Where**: Activity or Fragment where you hold a reference to `CometChatAIAssistantChatHistory`.
+- **Applies to**: `CometChatAIAssistantChatHistory`.
+- **Default behavior**: Predefined actions execute automatically when the user interacts with the component.
+- **Override**: Call the corresponding setter method to replace the default behavior with your own logic.
+
+#### `setOnItemClickListener`
+
+Function invoked when a chat history item is clicked, used to open an AI assistant chat screen.
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin YourActivity.kt lines
+binding.cometchatAiAssistantChatHistory.setOnItemClickListener { view, position, message ->
+
+        }
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.compose.presentation.aiassistantchathistory.ui.CometChatAIAssistantChatHistory
+
+CometChatAIAssistantChatHistory(
+    onItemClick = { message ->
+        Log.i(TAG, "Item clicked: ${message.id}")
+    }
+)
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Replaces the default item-click behavior. When a user taps a chat history item, your custom lambda executes instead of the built-in navigation.
+
+#### `setOnItemLongClickListener`
+
+Function executed when a chat history item is long-pressed, allowing additional actions like delete or block.
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin YourActivity.kt lines
+binding.cometchatAiAssistantChatHistory.setOnItemLongClickListener { view, position, message ->
+
+        }
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+CometChatAIAssistantChatHistory(
+    onItemLongClick = { message ->
+        Log.i(TAG, "Item long clicked: ${message.id}")
+    }
+)
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Replaces the default long-press behavior. When a user long-presses a chat history item, your custom lambda executes.
+
+#### `setOnNewChatClickListener`
+
+Function triggered when the new chat button is clicked, used to start a new conversation with the AI assistant.
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin YourActivity.kt lines
+binding.cometchatAiAssistantChatHistory.setOnNewChatClickListener {
+
+        }
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+CometChatAIAssistantChatHistory(
+    onNewChatClick = {
+        Log.i(TAG, "New chat clicked")
+    }
+)
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Replaces the default new-chat-click behavior. When the user taps the new chat button, your custom logic runs instead of the built-in action.
+
+#### `setOnCloseClickListener`
+
+Function activated when the close button is clicked, used to exit the chat history view.
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin YourActivity.kt lines
+binding.cometchatAiAssistantChatHistory.setOnCloseClickListener {
+
+        }
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+CometChatAIAssistantChatHistory(
+    onCloseClick = {
+        Log.i(TAG, "Close clicked")
+    }
+)
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Replaces the default close-click behavior. When the user taps the close button, your custom logic runs instead of the built-in exit action.
+
+- **Verify**: After setting an action callback, trigger the corresponding user interaction (tap, long-press, new chat, close) and confirm your custom logic executes instead of the default behavior.
+
+## Styling
+
+What you're changing: The visual appearance of the AI Assistant Chat History component using XML theme styles.
+
+- **Where**: `themes.xml` for style definitions, and your Activity/Fragment for applying the style.
+- **Applies to**: `CometChatAIAssistantChatHistory`.
+- **Default behavior**: The component uses its default style.
+- **Override**: Define a custom style in `themes.xml`, then call `setStyle()` on the component.
+
+<Frame>
+  <img src="/images/android-ai-assistant-chat-history-style.png" />
+</Frame>
+
+- **Code**:
+
+```xml themes.xml lines
+<style name="CustomAIAssistantChatHistoryStyle">
+    <item name="cometChatAIAssistantChatHistoryBackgroundColor">#FFFAF6</item>
+    <item name="cometChatAIAssistantChatHistoryHeaderBackgroundColor">#FFFAF6</item>
+    <item name="cometChatAIAssistantChatHistoryHeaderTextColor">?attr/cometchatTextColorPrimary</item>
+    <item name="cometChatAIAssistantChatHistoryHeaderTextAppearance">@style/textStyleTimesNewRoman</item>
+    <item name="cometChatAIAssistantChatHistoryNewChatBackgroundColor">#FFFAF6</item>
+    <item name="cometChatAIAssistantChatHistoryNewChatTextColor">?attr/cometchatTextColorPrimary</item>
+    <item name="cometChatAIAssistantChatHistoryNewChatTextAppearance">@style/textStyleTimesNewRoman</item>
+    <item name="cometChatAIAssistantChatHistoryDateSeparatorTextAppearance">@style/textStyleTimesNewRoman</item>
+    <item name="cometChatAIAssistantChatHistoryDateSeparatorTextColor">?attr/cometchatTextColorTertiary</item>
+    <item name="cometChatAIAssistantChatHistoryDateSeparatorBackgroundColor">#FFFAF6</item>
+    <item name="cometChatAIAssistantChatHistoryItemBackgroundColor">#FFFAF6</item>
+    <item name="cometChatAIAssistantChatHistoryItemTextAppearance">@style/textStyleTimesNewRoman</item>
+    <item name="cometChatAIAssistantChatHistoryItemTextColor">?attr/cometchatTextColorPrimary</item>
+</style>
+
+<style name="textStyleTimesNewRoman">
+    <item name="android:fontFamily">@font/times_new_roman_regular</item>
+</style>
+```
+
+> **What this does:** Defines a custom style `CustomAIAssistantChatHistoryStyle` that sets the background color to `#FFFAF6` for the component, header, new chat area, date separator, and items. It applies a Times New Roman font to the header, new chat text, date separator, and item text. A helper style `textStyleTimesNewRoman` defines the font family.
+
+<Tabs>
+
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+binding.cometchatAiAssistantChatHistory.setStyle(R.style.CustomAIAssistantChatHistoryStyle);
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.compose.presentation.aiassistantchathistory.style.CometChatAIAssistantChatHistoryStyle
+
+CometChatAIAssistantChatHistory(
+    style = CometChatAIAssistantChatHistoryStyle.default().copy(
+        chatHistoryBackgroundColor = Color(0xFFEDEAFA)
+    )
+)
+```
+</Tab>
+</Tabs>
+
+> **What this does:** Applies the `CustomAIAssistantChatHistoryStyle` theme to the `CometChatAIAssistantChatHistory` component, changing the background colors and fonts.
+
+To know more such attributes, visit the [attributes file](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_assistant_chat_history.xml).
+
+- **Verify**: The chat history component displays with the `#FFFAF6` background color and Times New Roman font for header text, new chat text, date separator text, and item text.
+
+## Functionality
+
+What you're changing: Small functional customizations such as setting the user and toggling visibility of UI states.
+
+- **Where**: Activity or Fragment where you hold a reference to `CometChatAIAssistantChatHistory`.
+- **Applies to**: `CometChatAIAssistantChatHistory`.
+- **Default behavior**: All UI states are visible with default settings.
+- **Override**: Call the corresponding method on the component instance.
+
+| Methods | Description | Code |
+| --- | --- | --- |
+| `setUser` | Sets the user whose chat histories with the AI assistant need to be fetched. This is a required property for the component to function. The user's role must be `@agentic`. | `.setUser(user);` |
+| `setErrorStateVisibility` | Toggles the visibility of the error state of the component | `.setErrorStateVisibility(View.GONE);` |
+| `setEmptyStateVisibility` | Toggles the visibility of the empty state of the component | `.setEmptyStateVisibility(View.GONE);` |
+
+- **Verify**: After calling `setUser(user)`, confirm the component fetches and displays the AI assistant chat histories for that user. After calling a visibility method, confirm the corresponding UI state is shown or hidden.
+
+## Customization Matrix
+
+| What you want to change | Where | Property/API | Example |
+| --- | --- | --- | --- |
+| Component background color | `themes.xml` | `cometChatAIAssistantChatHistoryBackgroundColor` | `<item name="cometChatAIAssistantChatHistoryBackgroundColor">#FFFAF6</item>` |
+| Header background color | `themes.xml` | `cometChatAIAssistantChatHistoryHeaderBackgroundColor` | `<item name="cometChatAIAssistantChatHistoryHeaderBackgroundColor">#FFFAF6</item>` |
+| Header text color | `themes.xml` | `cometChatAIAssistantChatHistoryHeaderTextColor` | `<item name="cometChatAIAssistantChatHistoryHeaderTextColor">?attr/cometchatTextColorPrimary</item>` |
+| Header text appearance | `themes.xml` | `cometChatAIAssistantChatHistoryHeaderTextAppearance` | `<item name="cometChatAIAssistantChatHistoryHeaderTextAppearance">@style/textStyleTimesNewRoman</item>` |
+| New chat background color | `themes.xml` | `cometChatAIAssistantChatHistoryNewChatBackgroundColor` | `<item name="cometChatAIAssistantChatHistoryNewChatBackgroundColor">#FFFAF6</item>` |
+| New chat text color | `themes.xml` | `cometChatAIAssistantChatHistoryNewChatTextColor` | `<item name="cometChatAIAssistantChatHistoryNewChatTextColor">?attr/cometchatTextColorPrimary</item>` |
+| New chat text appearance | `themes.xml` | `cometChatAIAssistantChatHistoryNewChatTextAppearance` | `<item name="cometChatAIAssistantChatHistoryNewChatTextAppearance">@style/textStyleTimesNewRoman</item>` |
+| Date separator text appearance | `themes.xml` | `cometChatAIAssistantChatHistoryDateSeparatorTextAppearance` | `<item name="cometChatAIAssistantChatHistoryDateSeparatorTextAppearance">@style/textStyleTimesNewRoman</item>` |
+| Date separator text color | `themes.xml` | `cometChatAIAssistantChatHistoryDateSeparatorTextColor` | `<item name="cometChatAIAssistantChatHistoryDateSeparatorTextColor">?attr/cometchatTextColorTertiary</item>` |
+| Date separator background color | `themes.xml` | `cometChatAIAssistantChatHistoryDateSeparatorBackgroundColor` | `<item name="cometChatAIAssistantChatHistoryDateSeparatorBackgroundColor">#FFFAF6</item>` |
+| Item background color | `themes.xml` | `cometChatAIAssistantChatHistoryItemBackgroundColor` | `<item name="cometChatAIAssistantChatHistoryItemBackgroundColor">#FFFAF6</item>` |
+| Item text appearance | `themes.xml` | `cometChatAIAssistantChatHistoryItemTextAppearance` | `<item name="cometChatAIAssistantChatHistoryItemTextAppearance">@style/textStyleTimesNewRoman</item>` |
+| Item text color | `themes.xml` | `cometChatAIAssistantChatHistoryItemTextColor` | `<item name="cometChatAIAssistantChatHistoryItemTextColor">?attr/cometchatTextColorPrimary</item>` |
+| Apply a custom style | Activity/Fragment | `setStyle(int styleRes)` | `binding.cometchatAiAssistantChatHistory.setStyle(R.style.CustomAIAssistantChatHistoryStyle);` |
+| Set the user for fetching history | Activity/Fragment | `setUser(User)` | `.setUser(user);` |
+| Error state visibility | Activity/Fragment | `setErrorStateVisibility(int)` | `.setErrorStateVisibility(View.GONE);` |
+| Empty state visibility | Activity/Fragment | `setEmptyStateVisibility(int)` | `.setEmptyStateVisibility(View.GONE);` |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="Conversations" icon="comments" href="/ui-kit/android/v6/conversations">
+    Browse recent conversations
+  </Card>
+  <Card title="Users" icon="user" href="/ui-kit/android/v6/users">
+    Browse and search available users
+  </Card>
+  <Card title="Search" icon="magnifying-glass" href="/ui-kit/android/v6/search">
+    Search across conversations and messages
+  </Card>
+</CardGroup>

@@ -158,7 +158,8 @@ open class CometChatConversationsViewModel(
             // Use client's builder if provided, otherwise create default
             if (conversationsRequest == null) {
                 val builder = conversationsRequestBuilder 
-                    ?: ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+                    ?: ConversationsRequest.ConversationsRequestBuilder()
+                        .setLimit(30)
                 conversationsRequest = builder.build()
             }
             
@@ -209,7 +210,8 @@ open class CometChatConversationsViewModel(
             
             // Use client's builder if provided, otherwise create default
             val builder = conversationsRequestBuilder 
-                ?: ConversationsRequest.ConversationsRequestBuilder().setLimit(30)
+                ?: ConversationsRequest.ConversationsRequestBuilder()
+                    .setLimit(30)
             
             refreshConversationListUseCase(builder)
                 .onSuccess { conversations ->

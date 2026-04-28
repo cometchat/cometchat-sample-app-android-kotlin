@@ -1,8 +1,8 @@
 [versions]
 agp = "8.6.0"
-chatuikitComposeAndroid = "6.0.0-beta.1"
-chatuikitCoreAndroid = "6.0.0-beta.1"
-chatuikitKotlinAndroid = "6.0.0-beta.1"
+chatuikitComposeAndroid = "6.0.0-beta2"
+chatuikitCoreAndroid = "6.0.0-beta2"
+chatuikitKotlinAndroid = "6.0.0-beta2"
 coreTesting = "2.2.0"
 kotest = "5.8.0"
 firebaseBom = "33.5.1"
@@ -37,6 +37,8 @@ activityCompose = "1.10.1"
 composeBom = "2024.09.00"
 coil = "2.7.0"
 rules = "1.7.0"
+markwon = "4.6.2"
+prism4j = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -89,6 +91,17 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
+
+# Markwon
+markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
+markwon-ext-strikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
+markwon-ext-tables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
+markwon-html = { module = "io.noties.markwon:html", version.ref = "markwon" }
+markwon-recycler = { module = "io.noties.markwon:recycler", version.ref = "markwon" }
+markwon-recycler-table = { module = "io.noties.markwon:recycler-table", version.ref = "markwon" }
+markwon-syntax-highlight = { module = "io.noties.markwon:syntax-highlight", version.ref = "markwon" }
+prism4j = { module = "io.noties:prism4j", version.ref = "prism4j" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

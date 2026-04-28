@@ -7,7 +7,10 @@ import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.ActionMode
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -29,12 +32,25 @@ import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.factory.CometChatMessageComposerViewModelFactory
 import com.cometchat.uikit.core.formatter.FormatCompatibility
 import com.cometchat.uikit.core.formatter.RichTextConfiguration
 import com.cometchat.uikit.core.formatter.RichTextEditorController
 import com.cometchat.uikit.core.formatter.RichTextFormat
 import com.cometchat.uikit.core.formatter.RichTextFormatterManager
+import com.cometchat.uikit.kotlin.shared.spans.BlockquoteFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.BulletListFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.CodeBlockFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.FormatSpanWatcher
+import com.cometchat.uikit.kotlin.shared.spans.InlineCodeFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.LinkFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.ListContinuationHandler
+import com.cometchat.uikit.kotlin.shared.spans.MarkdownConverter
+import com.cometchat.uikit.kotlin.shared.spans.MentionCodeBlockHandler
+import com.cometchat.uikit.kotlin.shared.spans.NumberedListFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.RichTextFormatSpan
+import com.cometchat.uikit.kotlin.shared.spans.RichTextSpanManager
 import com.cometchat.uikit.core.state.MessageComposerUIState
 import com.cometchat.uikit.core.viewmodel.CometChatMessageComposerViewModel
 import com.cometchat.uikit.core.domain.model.CometChatMessageComposerAction
@@ -141,9 +157,28 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private var richTextConfiguration: RichTextConfiguration = RichTextConfiguration()
     private var richTextToolbarVisibility: Int = View.GONE
     private var isApplyingRichTextStyling: Boolean = false
+
+    // Span-based WYSIWYG formatting engine (V5-style, replaces marker-based approach)
+    private var formatSpanWatcher: FormatSpanWatcher? = null
     
-    // Track active formats for toolbar state
+    // Track active and disabled formats for toolbar state
     private var activeFormats: Set<RichTextFormat> = emptySet()
+    private var disabledFormats: Set<RichTextFormat> = emptySet()
+
+    // Text selection menu and rich text formatting flags (Requirements 19.1–19.8)
+    private var enableRichTextFormatting: Boolean = true
+    private var showTextSelectionMenuItems: Boolean = true
+
+    // Mention suppression inside code blocks (Requirement 14.3)
+    private var suppressMentionDetection = false
+
+    // Flag to track when text is being modified by a TextWatcher cycle.
+    // Prevents the selection listener from clearing pending formats during typing.
+    private var isTextChanging = false
+
+    // Tracks the last cursor position set by a text change, so we can distinguish
+    // user-initiated cursor moves from typing-induced cursor moves in onSelectionChanged.
+    private var lastCursorAfterTextChange = -1
 
     // Callbacks
     private var onSendButtonClick: ((String) -> Unit)? = null
@@ -214,6 +249,12 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private var sendButtonViewListener: MessageComposerViewHolderListener? = null
     private var auxiliaryButtonViewListener: MessageComposerViewHolderListener? = null
 
+    // Agent chat detection
+    private var isAgentChat: Boolean = false
+
+    // Reply mode state
+    private var replyingToMessageId: Long? = null
+
     // Visibility controls
     private var hideAttachmentButton: Boolean = false
     private var hideVoiceRecordingButton: Boolean = false
@@ -276,6 +317,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         setupTextWatcher()
         initViewModel()
         initRichTextFormatter()
+        setupTextSelectionMenu()
         initSuggestionList()
         // Initialize default mentions formatter (like Java implementation)
         processMentionsFormatter()
@@ -478,6 +520,23 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private fun handleMentionDetection(result: MentionTextWatcher.MentionDetectionResult) {
         android.util.Log.d("MentionDebug", "[$TAG] handleMentionDetection() - isActive=${result.isActive}, query='${result.query}', formatter=${result.formatter?.javaClass?.simpleName}")
         
+        // Update mention suppression flag based on current cursor position
+        val editable = binding.etMessageInput.text
+        val cursorPos = binding.etMessageInput.selectionStart
+        suppressMentionDetection = if (editable != null && cursorPos >= 0) {
+            isInsideCodeFormat(editable, cursorPos)
+        } else {
+            false
+        }
+
+        // Suppress mention detection when cursor is inside a code block or inline code span
+        if (suppressMentionDetection && result.isActive) {
+            android.util.Log.d("MentionDebug", "[$TAG] handleMentionDetection() - SUPPRESSED (cursor inside code format)")
+            binding.suggestionListLayout.visibility = View.GONE
+            suggestionList?.setList(emptyList())
+            return
+        }
+
         if (result.isActive && result.formatter != null) {
             android.util.Log.d("MentionDebug", "[$TAG] handleMentionDetection() - ACTIVE mention, triggering search")
             // Set flag to ignore stale LiveData callbacks until fresh search completes
@@ -647,8 +706,6 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.separatorView.setBackgroundColor(style.separatorColor)
             binding.toolbarSeparator1.setBackgroundColor(style.separatorColor)
             binding.toolbarSeparator2.setBackgroundColor(style.separatorColor)
-            binding.toolbarSeparator3.setBackgroundColor(style.separatorColor)
-            binding.toolbarSeparator4.setBackgroundColor(style.separatorColor)
             binding.toolbarInputSeparator.setBackgroundColor(style.separatorColor)
         }
         
@@ -725,6 +782,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         val tint = style.richTextToolbarIconTint
         binding.ivFormatBold.setColorFilter(tint)
         binding.ivFormatItalic.setColorFilter(tint)
+        binding.ivFormatUnderline.setColorFilter(tint)
         binding.ivFormatStrikethrough.setColorFilter(tint)
         binding.ivFormatCode.setColorFilter(tint)
         binding.ivFormatCodeBlock.setColorFilter(tint)
@@ -896,8 +954,6 @@ class CometChatMessageComposer @JvmOverloads constructor(
         if (style.separatorColor != 0) {
             binding.toolbarSeparator1.setBackgroundColor(style.separatorColor)
             binding.toolbarSeparator2.setBackgroundColor(style.separatorColor)
-            binding.toolbarSeparator3.setBackgroundColor(style.separatorColor)
-            binding.toolbarSeparator4.setBackgroundColor(style.separatorColor)
             binding.toolbarInputSeparator.setBackgroundColor(style.separatorColor)
         }
     }
@@ -988,19 +1044,21 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
         // Edit preview close
         binding.ivEditPreviewClose.setOnClickListener {
-            viewModel?.clearEditMessage()
-            binding.etMessageInput.setText("")
+            exitEditMode()
         }
 
         // Message preview close
         binding.ivMessagePreviewClose.setOnClickListener {
-            viewModel?.clearReplyMessage()
+            exitReplyMode()
         }
 
         // Rich text toggle button removed - toolbar visibility is now automatic based on text presence
 
         // Rich text format buttons
         setupRichTextFormatClickListeners()
+
+        // Link click detection on EditText
+        setupLinkClickDetection()
     }
 
     /**
@@ -1009,6 +1067,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private fun setupRichTextFormatClickListeners() {
         binding.ivFormatBold.setOnClickListener { toggleFormat(RichTextFormat.BOLD) }
         binding.ivFormatItalic.setOnClickListener { toggleFormat(RichTextFormat.ITALIC) }
+        binding.ivFormatUnderline.setOnClickListener { toggleFormat(RichTextFormat.UNDERLINE) }
         binding.ivFormatStrikethrough.setOnClickListener { toggleFormat(RichTextFormat.STRIKETHROUGH) }
         binding.ivFormatCode.setOnClickListener { toggleFormat(RichTextFormat.INLINE_CODE) }
         binding.ivFormatCodeBlock.setOnClickListener { toggleFormat(RichTextFormat.CODE_BLOCK) }
@@ -1016,112 +1075,516 @@ class CometChatMessageComposer @JvmOverloads constructor(
         binding.ivFormatBulletList.setOnClickListener { toggleFormat(RichTextFormat.BULLET_LIST) }
         binding.ivFormatOrderedList.setOnClickListener { toggleFormat(RichTextFormat.ORDERED_LIST) }
         binding.ivFormatBlockquote.setOnClickListener { toggleFormat(RichTextFormat.BLOCKQUOTE) }
-        
-        // Set up listener for state changes from RichTextEditorController
-        richTextController.setListener(object : RichTextEditorController.Listener {
-            override fun onStateChanged() {
-                activeFormats = richTextController.state.activeFormats
-                updateToolbarButtonStates()
-            }
-        })
     }
 
     /**
-     * Toggles a rich text format using RichTextEditorController (same as Jetpack).
+     * Sets up the text selection context menu with formatting options.
+     *
+     * When the user long-presses and selects text, Bold, Italic, Strikethrough,
+     * and InlineCode options appear in the system ActionMode menu. Tapping an
+     * option applies the format to the selected range via [toggleFormat] and
+     * finishes the action mode.
+     *
+     * If [enableRichTextFormatting] is false or [showTextSelectionMenuItems] is
+     * false, the custom callback is removed (set to null) so the system default
+     * menu is restored.
+     *
+     * Requirements: 19.1–19.8
+     */
+    private fun setupTextSelectionMenu() {
+        if (!enableRichTextFormatting || !showTextSelectionMenuItems) {
+            binding.etMessageInput.customSelectionActionModeCallback = null
+            return
+        }
+
+        binding.etMessageInput.customSelectionActionModeCallback = object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                menu.add(0, R.id.action_bold, 0, R.string.cometchat_bold)
+                menu.add(0, R.id.action_italic, 1, R.string.cometchat_italic)
+                menu.add(0, R.id.action_strikethrough, 2, R.string.cometchat_strikethrough)
+                menu.add(0, R.id.action_inline_code, 3, R.string.cometchat_inline_code)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                val format = when (item.itemId) {
+                    R.id.action_bold -> RichTextFormat.BOLD
+                    R.id.action_italic -> RichTextFormat.ITALIC
+                    R.id.action_strikethrough -> RichTextFormat.STRIKETHROUGH
+                    R.id.action_inline_code -> RichTextFormat.INLINE_CODE
+                    else -> return false
+                }
+                toggleFormat(format)
+                mode.finish()
+                return true
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode) {
+                // No cleanup needed
+            }
+        }
+    }
+
+    /**
+     * Toggles a rich text format on toolbar button click.
+     *
+     * Uses the pure functions RichTextFormat.toggleFormat() and
+     * RichTextFormat.computeDisabledFormats() from chatuikit-core to manage
+     * toolbar state, then delegates to the span engine for visual formatting.
+     *
+     * @param format The format to toggle
      */
     private fun toggleFormat(format: RichTextFormat) {
         if (!richTextConfiguration.hasAnyEnabled()) return
-        
-        // Sync controller state with current EditText before toggling
-        val currentText = binding.etMessageInput.text?.toString() ?: ""
+
+        // Skip if format is currently disabled (incompatible with active formats)
+        if (format in disabledFormats) return
+
+        // Compute new active formats using pure function (handles auto-deselect rules)
+        activeFormats = RichTextFormat.toggleFormat(activeFormats, format)
+
+        // Compute new disabled formats based on updated active set
+        disabledFormats = RichTextFormat.computeDisabledFormats(activeFormats)
+
+        // Refresh all toolbar button visuals
+        updateToolbarButtonStates()
+
+        // Delegate to span engine for WYSIWYG formatting
+        val editable = binding.etMessageInput.text ?: return
         val selStart = binding.etMessageInput.selectionStart
         val selEnd = binding.etMessageInput.selectionEnd
-        
-        // Ensure controller has the latest text and selection
-        if (richTextController.state.text != currentText ||
-            richTextController.state.selectionStart != selStart ||
-            richTextController.state.selectionEnd != selEnd) {
-            richTextController.onTextChanged(currentText, selStart, selEnd)
-        }
-        
-        richTextController.toggleFormat(format)
-        
-        // Update the EditText with the new text from controller
-        val controllerText = richTextController.state.text
-        
-        if (controllerText != currentText) {
-            isApplyingRichTextStyling = true
-            try {
-                binding.etMessageInput.setText(controllerText)
-                binding.etMessageInput.setSelection(
-                    richTextController.state.selectionStart.coerceIn(0, controllerText.length),
-                    richTextController.state.selectionEnd.coerceIn(0, controllerText.length)
-                )
-            } finally {
-                isApplyingRichTextStyling = false
+
+        val isCodeFormat = format == RichTextFormat.CODE_BLOCK || format == RichTextFormat.INLINE_CODE
+        val isListFormat = format == RichTextFormat.BULLET_LIST || format == RichTextFormat.ORDERED_LIST
+        val isBlockFormat = isListFormat || format == RichTextFormat.BLOCKQUOTE
+        val isNowActive = format in activeFormats
+
+        if (selStart != selEnd) {
+            // Has selection → apply/remove span on the selected range
+            RichTextSpanManager.toggleFormat(editable, format, selStart, selEnd, context)
+
+            // Consume or restore mentions when code formatting is toggled
+            if (isCodeFormat) {
+                if (isNowActive) {
+                    MentionCodeBlockHandler.consumeMentionsInRange(editable, selStart, selEnd)
+                } else {
+                    MentionCodeBlockHandler.restoreMentionsInRange(editable, selStart, selEnd)
+                }
+            }
+        } else {
+            // Collapsed cursor → toggle pending format for next typed character
+            if (isNowActive) {
+                // When enabling a list format, clear the conflicting list format from pending
+                if (isListFormat) {
+                    val conflicting = if (format == RichTextFormat.BULLET_LIST)
+                        RichTextFormat.ORDERED_LIST else RichTextFormat.BULLET_LIST
+                    formatSpanWatcher?.disableFormat(conflicting)
+                    // Also remove any existing conflicting list spans on the current line
+                    removeConflictingListSpansOnCurrentLine(editable, selStart, conflicting)
+                }
+
+                formatSpanWatcher?.enableFormatWithSpanUpdate(editable, format, selStart)
+
+                // For block formats (list/blockquote), immediately insert a visual
+                // prefix on the current line so the user sees feedback right away
+                if (isBlockFormat) {
+                    insertBlockFormatOnCurrentLine(editable, selStart, format)
+                }
+            } else {
+                formatSpanWatcher?.disableFormatWithSpanUpdate(editable, format, selStart)
+
+                // When disabling a block format, remove the span from the current line
+                if (isBlockFormat) {
+                    removeBlockFormatFromCurrentLine(editable, selStart, format)
+                }
             }
         }
+    }
+
+    /**
+     * Inserts a block-level format span on the current line when the user
+     * toggles a list or blockquote format with a collapsed cursor.
+     * This gives immediate visual feedback (bullet/number/quote prefix).
+     */
+    private fun insertBlockFormatOnCurrentLine(editable: Editable, cursorPos: Int, format: RichTextFormat) {
+        val lineStart = findLineStart(editable, cursorPos)
+        var lineEnd = findLineEnd(editable, cursorPos)
         
-        // Always apply styling after toggling (whether text changed or not)
-        // Use post to ensure the EditText has been updated
-        binding.etMessageInput.post {
-            applyInlineRichTextStyling(binding.etMessageInput.text)
+        // Don't apply if already covered
+        val searchEnd = maxOf(lineEnd, lineStart + 1).coerceAtMost(editable.length)
+        val existing = editable.getSpans(lineStart, searchEnd, RichTextFormatSpan::class.java)
+        if (existing.any { it.getFormatType() == format }) return
+
+        isApplyingRichTextStyling = true
+        try {
+            // V5 approach: if the line is empty, insert a space placeholder so the
+            // LeadingMarginSpan can render the prefix (bullet/number) immediately.
+            if (lineStart >= lineEnd) {
+                editable.insert(lineStart, " ")
+                lineEnd = lineStart + 1
+            }
+
+            val span: RichTextFormatSpan = when (format) {
+                RichTextFormat.BULLET_LIST ->
+                    if (context != null) BulletListFormatSpan(context) else BulletListFormatSpan()
+                RichTextFormat.ORDERED_LIST -> {
+                    val num = calculateListNumber(editable, lineStart)
+                    if (context != null) NumberedListFormatSpan(num, context) else NumberedListFormatSpan(num)
+                }
+                RichTextFormat.BLOCKQUOTE ->
+                    if (context != null) BlockquoteFormatSpan(context) else BlockquoteFormatSpan()
+                else -> return
+            }
+            editable.setSpan(span, lineStart, maxOf(lineEnd, lineStart + 1), android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+            
+            // Move cursor to end of line
+            binding.etMessageInput.setSelection(maxOf(lineEnd, lineStart + 1))
+        } finally {
+            isApplyingRichTextStyling = false
         }
-        
+    }
+
+    /**
+     * Removes a block-level format span from the current line when the user
+     * toggles off a list or blockquote format.
+     */
+    private fun removeBlockFormatFromCurrentLine(editable: Editable, cursorPos: Int, format: RichTextFormat) {
+        val lineStart = findLineStart(editable, cursorPos)
+        val lineEnd = findLineEnd(editable, cursorPos)
+        RichTextSpanManager.removeFormat(editable, lineStart, maxOf(lineEnd, lineStart + 1), format, context)
+    }
+
+    /**
+     * Removes conflicting list spans from the current line.
+     * E.g., when enabling BULLET_LIST, removes any ORDERED_LIST spans on the same line.
+     */
+    private fun removeConflictingListSpansOnCurrentLine(editable: Editable, cursorPos: Int, conflicting: RichTextFormat) {
+        val lineStart = findLineStart(editable, cursorPos)
+        val lineEnd = findLineEnd(editable, cursorPos)
+        val spans = editable.getSpans(lineStart, maxOf(lineEnd, lineStart + 1), RichTextFormatSpan::class.java)
+        for (span in spans) {
+            if (span.getFormatType() == conflicting) {
+                editable.removeSpan(span)
+            }
+        }
+    }
+
+    /** Finds the start of the line containing [position]. */
+    private fun findLineStart(text: CharSequence, position: Int): Int {
+        if (position <= 0) return 0
+        var i = position - 1
+        while (i > 0 && text[i] != '\n') i--
+        return if (i == 0 && text[0] != '\n') 0 else i + 1
+    }
+
+    /** Finds the end of the line containing [position]. */
+    private fun findLineEnd(text: CharSequence, position: Int): Int {
+        val length = text.length
+        if (position >= length) return length
+        var i = position
+        while (i < length && text[i] != '\n') i++
+        return i
+    }
+
+    /** Calculates the list number for a numbered list item at the given line start.
+     *  Scans backwards through all preceding lines to find the last NumberedListFormatSpan
+     *  and continues from that number. This handles the case where bullet list items
+     *  appear between numbered list sections. */
+    private fun calculateListNumber(editable: Editable, lineStart: Int): Int {
+        if (lineStart <= 0) return 1
+        // Scan backwards through all lines to find the last numbered list span
+        var scanPos = lineStart - 1
+        while (scanPos >= 0) {
+            var scanLineStart = scanPos
+            while (scanLineStart > 0 && editable[scanLineStart - 1] != '\n') scanLineStart--
+            val spans = editable.getSpans(scanLineStart, scanPos + 1, NumberedListFormatSpan::class.java)
+            if (spans.isNotEmpty()) {
+                return spans.maxOf { it.number } + 1
+            }
+            // Move to previous line
+            scanPos = scanLineStart - 1
+            if (scanPos < 0) break
+        }
+        return 1
+    }
+
+    /**
+     * Handles Enter key for block formats (list, blockquote, code block).
+     * Ported from V5's inline newline handling.
+     *
+     * On a blank/empty line: exits the block format (removes empty line spans,
+     * deletes the empty line, disables the format in the watcher).
+     * On a non-empty line: does nothing (FormatSpanWatcher handles continuation).
+     */
+    private fun handleNewlineForBlockFormats(editable: Editable, newlinePosition: Int) {
+        if (newlinePosition <= 0) return
+
+        // ── Step 1: Check for double-enter (exit block format) ──────────
+        var isDoubleEnter = false
+
+        if (editable[newlinePosition - 1] == '\n') {
+            isDoubleEnter = true
+        } else {
+            var lineStart = newlinePosition - 1
+            while (lineStart > 0 && editable[lineStart - 1] != '\n') lineStart--
+
+            var lineIsEmpty = true
+            for (i in lineStart until newlinePosition) {
+                val c = editable[i]
+                if (c != ' ' && c != '\u200B' && c != '\t') {
+                    lineIsEmpty = false
+                    break
+                }
+            }
+            if (lineIsEmpty) {
+                val hasBlockFormat = formatSpanWatcher?.isPendingFormat(RichTextFormat.BULLET_LIST) == true ||
+                    formatSpanWatcher?.isPendingFormat(RichTextFormat.ORDERED_LIST) == true ||
+                    formatSpanWatcher?.isPendingFormat(RichTextFormat.CODE_BLOCK) == true ||
+                    formatSpanWatcher?.isPendingFormat(RichTextFormat.BLOCKQUOTE) == true
+                isDoubleEnter = hasBlockFormat
+            }
+        }
+
+        if (isDoubleEnter) {
+            val emptyLineStart: Int = if (newlinePosition > 0 && editable[newlinePosition - 1] == '\n') {
+                newlinePosition
+            } else {
+                var start = newlinePosition - 1
+                while (start > 0 && editable[start] != '\n') start--
+                if (start > 0 && editable[start] == '\n') start + 1
+                else if (start == 0 && editable[0] != '\n') 0
+                else start
+            }
+            val emptyLineEnd = newlinePosition
+            val watcher = formatSpanWatcher
+
+            if (watcher?.isPendingFormat(RichTextFormat.BULLET_LIST) == true) {
+                exitBlockOnEmptyLine(editable, emptyLineStart, emptyLineEnd, BulletListFormatSpan::class.java)
+                watcher.disableFormat(RichTextFormat.BULLET_LIST)
+                return
+            }
+            if (watcher?.isPendingFormat(RichTextFormat.ORDERED_LIST) == true) {
+                exitBlockOnEmptyLine(editable, emptyLineStart, emptyLineEnd, NumberedListFormatSpan::class.java)
+                watcher.disableFormat(RichTextFormat.ORDERED_LIST)
+                return
+            }
+            if (watcher?.isPendingFormat(RichTextFormat.CODE_BLOCK) == true) {
+                truncateBlockSpan(editable, newlinePosition, CodeBlockFormatSpan::class.java)
+                watcher.disableFormatWithSpanUpdate(editable, RichTextFormat.CODE_BLOCK, newlinePosition)
+                return
+            }
+            if (watcher?.isPendingFormat(RichTextFormat.BLOCKQUOTE) == true) {
+                truncateBlockSpan(editable, newlinePosition, BlockquoteFormatSpan::class.java)
+                watcher.disableFormatWithSpanUpdate(editable, RichTextFormat.BLOCKQUOTE, newlinePosition)
+                return
+            }
+            return
+        }
+
+        // ── Step 2: List continuation (V5 approach) ─────────────────────
+        // Check if the line BEFORE the newline had a list format.
+        // If so, insert a placeholder space with the list span on the new line
+        // so the prefix (bullet/number) is visible immediately.
+        val prevLineEnd = newlinePosition
+        val prevLineStart = findLineStart(editable, if (prevLineEnd > 0) prevLineEnd - 1 else 0)
+
+        // Bullet list continuation
+        val bulletSpans = editable.getSpans(prevLineStart, prevLineEnd, BulletListFormatSpan::class.java)
+        if (bulletSpans.isNotEmpty()) {
+            // Trim original span so it doesn't extend past the newline
+            for (span in bulletSpans) {
+                val spanEnd = editable.getSpanEnd(span)
+                if (spanEnd > newlinePosition) {
+                    val spanStart = editable.getSpanStart(span)
+                    editable.removeSpan(span)
+                    if (spanStart < newlinePosition) {
+                        editable.setSpan(span, spanStart, newlinePosition, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+            }
+            // Insert placeholder space with bullet span on new line
+            val newLineStart = newlinePosition + 1
+            editable.insert(newLineStart, " ")
+            val newSpan = if (context != null) BulletListFormatSpan(context) else BulletListFormatSpan()
+            editable.setSpan(newSpan, newLineStart, newLineStart + 1, android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+            formatSpanWatcher?.enableFormat(RichTextFormat.BULLET_LIST)
+            binding.etMessageInput.setSelection(newLineStart + 1)
+            return
+        }
+
+        // Numbered list continuation
+        val numberedSpans = editable.getSpans(prevLineStart, prevLineEnd, NumberedListFormatSpan::class.java)
+        if (numberedSpans.isNotEmpty()) {
+            // Trim original span
+            for (span in numberedSpans) {
+                val spanEnd = editable.getSpanEnd(span)
+                if (spanEnd > newlinePosition) {
+                    val spanStart = editable.getSpanStart(span)
+                    editable.removeSpan(span)
+                    if (spanStart < newlinePosition) {
+                        editable.setSpan(span, spanStart, newlinePosition, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+            }
+            // Calculate next number
+            val prevNumber = numberedSpans.maxOf { it.number }
+            val nextNumber = prevNumber + 1
+            // Insert placeholder space with numbered span on new line
+            val newLineStart = newlinePosition + 1
+            editable.insert(newLineStart, " ")
+            val newSpan = if (context != null) NumberedListFormatSpan(nextNumber, context) else NumberedListFormatSpan(nextNumber)
+            editable.setSpan(newSpan, newLineStart, newLineStart + 1, android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+            formatSpanWatcher?.enableFormat(RichTextFormat.ORDERED_LIST)
+            binding.etMessageInput.setSelection(newLineStart + 1)
+            return
+        }
+
+        // Code block / blockquote continuation — just enable pending format
+        val codeSpans = editable.getSpans(prevLineStart, prevLineEnd, CodeBlockFormatSpan::class.java)
+        if (codeSpans.isNotEmpty()) {
+            formatSpanWatcher?.enableFormat(RichTextFormat.CODE_BLOCK)
+        }
+        val quoteSpans = editable.getSpans(prevLineStart, prevLineEnd, BlockquoteFormatSpan::class.java)
+        if (quoteSpans.isNotEmpty()) {
+            formatSpanWatcher?.enableFormat(RichTextFormat.BLOCKQUOTE)
+        }
+    }
+
+    private fun <T> exitBlockOnEmptyLine(editable: Editable, start: Int, end: Int, cls: Class<T>) {
+        if (start < end) {
+            for (s in editable.getSpans(start, end, cls)) editable.removeSpan(s)
+            editable.delete(start, end)
+        }
+    }
+
+    private fun <T : RichTextFormatSpan> truncateBlockSpan(editable: Editable, pos: Int, cls: Class<T>) {
+        for (span in editable.getSpans(0, editable.length, cls)) {
+            val ss = editable.getSpanStart(span)
+            val se = editable.getSpanEnd(span)
+            if (se > pos && ss < pos) {
+                val flags = editable.getSpanFlags(span)
+                editable.removeSpan(span)
+                editable.setSpan(span, ss, pos, flags)
+            }
+        }
+    }
+    
+    /**
+     * Updates the active and disabled format sets based on the spans present
+     * at the current cursor position. Called after text changes to keep the
+     * toolbar state in sync with the WYSIWYG span state.
+     */
+    private fun updateActiveFormatsFromCursor() {
+        val editable = binding.etMessageInput.text ?: return
+        val selStart = binding.etMessageInput.selectionStart
+        val selEnd = binding.etMessageInput.selectionEnd
+
+        val formatsAtCursor = if (selStart == selEnd) {
+            val spanFormats = RichTextSpanManager.getFormatsAt(editable, selStart)
+            val pending = formatSpanWatcher?.getPendingFormats() ?: emptySet()
+            val disabled = formatSpanWatcher?.getExplicitlyDisabledFormats() ?: emptySet()
+            (spanFormats + pending) - disabled
+        } else {
+            RichTextSpanManager.getFormatsInRange(editable, selStart, selEnd)
+        }
+
+        activeFormats = formatsAtCursor
+        disabledFormats = RichTextFormat.computeDisabledFormats(activeFormats)
         updateToolbarButtonStates()
     }
-    
+
+    /**
+     * Checks whether the given cursor [position] is inside a CodeBlock or InlineCode span.
+     *
+     * @return `true` when the cursor sits inside code formatting, `false` otherwise.
+     */
+    private fun isInsideCodeFormat(editable: Editable, position: Int): Boolean {
+        val formats = RichTextSpanManager.getFormatsAt(editable, position)
+        return RichTextFormat.CODE_BLOCK in formats || RichTextFormat.INLINE_CODE in formats
+    }
+
     /**
      * Updates the toolbar button states based on active and disabled formats.
+     * Uses three-state visual feedback: active, normal, and disabled.
      */
     private fun updateToolbarButtonStates() {
-        val activeTint = style.richTextToolbarActiveIconTint.takeIf { it != 0 } 
-            ?: CometChatTheme.getPrimaryColor(context)
-        val inactiveTint = style.richTextToolbarIconTint.takeIf { it != 0 }
+        // Resolve colors for each state
+        val activeIconTint = style.richTextToolbarActiveIconTint.takeIf { it != 0 }
+            ?: CometChatTheme.getTextColorPrimary(context)
+        val activeIconBgColor = style.richTextToolbarActiveIconBackgroundColor.takeIf { it != 0 }
+            ?: CometChatTheme.getBackgroundColor4(context)
+        val normalIconTint = style.richTextToolbarIconTint.takeIf { it != 0 }
             ?: CometChatTheme.getIconTintSecondary(context)
-        val disabledTint = (style.richTextToolbarIconTint.takeIf { it != 0 }
-            ?: CometChatTheme.getIconTintSecondary(context)).let { 
-                android.graphics.Color.argb(
-                    (android.graphics.Color.alpha(it) * 0.3f).toInt(),
-                    android.graphics.Color.red(it),
-                    android.graphics.Color.green(it),
-                    android.graphics.Color.blue(it)
-                )
-            }
-        
-        val disabledFormats = richTextController.state.toolbarDisabledFormats
-        
-        // Update each button's tint based on active/disabled state
-        updateFormatButtonTint(binding.ivFormatBold, RichTextFormat.BOLD, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatItalic, RichTextFormat.ITALIC, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatStrikethrough, RichTextFormat.STRIKETHROUGH, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatCode, RichTextFormat.INLINE_CODE, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatCodeBlock, RichTextFormat.CODE_BLOCK, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatLink, RichTextFormat.LINK, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatBulletList, RichTextFormat.BULLET_LIST, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatOrderedList, RichTextFormat.ORDERED_LIST, activeTint, inactiveTint, disabledTint, disabledFormats)
-        updateFormatButtonTint(binding.ivFormatBlockquote, RichTextFormat.BLOCKQUOTE, activeTint, inactiveTint, disabledTint, disabledFormats)
+        val disabledIconTint = CometChatTheme.getIconTintTertiary(context)
+
+        // Update each button with its card wrapper
+        updateButtonState(binding.ivFormatBold, binding.cardBold, RichTextFormat.BOLD, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatItalic, binding.cardItalic, RichTextFormat.ITALIC, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatUnderline, binding.cardUnderline, RichTextFormat.UNDERLINE, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatStrikethrough, binding.cardStrikethrough, RichTextFormat.STRIKETHROUGH, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatCode, binding.cardInlineCode, RichTextFormat.INLINE_CODE, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatCodeBlock, binding.cardCodeBlock, RichTextFormat.CODE_BLOCK, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatLink, binding.cardLink, RichTextFormat.LINK, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatBulletList, binding.cardBulletList, RichTextFormat.BULLET_LIST, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatOrderedList, binding.cardOrderedList, RichTextFormat.ORDERED_LIST, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        updateButtonState(binding.ivFormatBlockquote, binding.cardBlockquote, RichTextFormat.BLOCKQUOTE, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
     }
-    
+
     /**
-     * Updates a single format button's tint based on its state.
+     * Updates the visual state of a single toolbar button with three-state feedback.
+     *
+     * - Active: BackgroundColor4 background on card wrapper, TextColorPrimary icon tint, full opacity
+     * - Normal: transparent background, IconTintSecondary icon tint, full opacity
+     * - Disabled: transparent background, IconTintTertiary icon tint, 0.4 alpha, rejects taps
+     *
+     * @param button The ImageButton to update
+     * @param cardWrapper The MaterialCardView wrapping the button
+     * @param format The RichTextFormat this button represents
+     * @param disabledFormats Set of currently disabled formats
+     * @param activeIconTint Tint color for active state icons
+     * @param activeIconBgColor Background color for active state card
+     * @param normalIconTint Tint color for normal state icons
+     * @param disabledIconTint Tint color for disabled state icons
      */
-    private fun updateFormatButtonTint(
+    private fun updateButtonState(
         button: View,
+        cardWrapper: MaterialCardView,
         format: RichTextFormat,
-        activeTint: Int,
-        inactiveTint: Int,
-        disabledTint: Int,
-        disabledFormats: Set<RichTextFormat>
+        disabledFormats: Set<RichTextFormat>,
+        @ColorInt activeIconTint: Int,
+        @ColorInt activeIconBgColor: Int,
+        @ColorInt normalIconTint: Int,
+        @ColorInt disabledIconTint: Int
     ) {
-        val imageView = button as? android.widget.ImageView ?: return
-        val tint = when {
-            format in disabledFormats -> disabledTint
-            format in activeFormats -> activeTint
-            else -> inactiveTint
+        val isActive = format in activeFormats
+        val isDisabled = format in disabledFormats
+        val imageButton = button as? android.widget.ImageView ?: return
+
+        imageButton.isSelected = isActive
+        imageButton.isEnabled = !isDisabled
+
+        when {
+            isDisabled -> {
+                // Disabled state: 0.4 alpha, IconTintTertiary tint, transparent bg, reject taps
+                imageButton.setColorFilter(disabledIconTint, android.graphics.PorterDuff.Mode.SRC_IN)
+                cardWrapper.setCardBackgroundColor(0)
+                imageButton.alpha = 0.4f
+            }
+            isActive -> {
+                // Active state: BackgroundColor4 bg, TextColorPrimary tint, full opacity
+                imageButton.setColorFilter(activeIconTint, android.graphics.PorterDuff.Mode.SRC_IN)
+                cardWrapper.setCardBackgroundColor(activeIconBgColor)
+                imageButton.alpha = 1.0f
+            }
+            else -> {
+                // Normal state: transparent bg, IconTintSecondary tint, full opacity
+                imageButton.setColorFilter(normalIconTint, android.graphics.PorterDuff.Mode.SRC_IN)
+                cardWrapper.setCardBackgroundColor(0)
+                imageButton.alpha = 1.0f
+            }
         }
-        imageView.setColorFilter(tint)
-        imageView.isEnabled = format !in disabledFormats
     }
 
     /**
@@ -1134,10 +1597,686 @@ class CometChatMessageComposer @JvmOverloads constructor(
     }
 
     /**
-     * Shows the link edit dialog.
+     * Scans pasted text for markdown link patterns `[text](url)` and converts
+     * them to [LinkFormatSpan] instances. The markdown markers are removed and
+     * replaced with just the display text, with the link span applied.
+     */
+    private fun convertPastedMarkdownLinks(editable: android.text.Editable, start: Int, end: Int) {
+        val linkPattern = Regex("\\[([^\\]]+)\\]\\(([^)]+)\\)")
+        val text = editable.subSequence(start, end).toString()
+        var offset = 0 // tracks cumulative shift from deletions
+
+        for (match in linkPattern.findAll(text)) {
+            val matchStart = start + match.range.first - offset
+            val matchEnd = start + match.range.last + 1 - offset
+            val displayText = match.groupValues[1]
+            val url = match.groupValues[2]
+
+            if (matchStart < 0 || matchEnd > editable.length) continue
+
+            isApplyingRichTextStyling = true
+            try {
+                // Replace [text](url) with just text
+                editable.replace(matchStart, matchEnd, displayText)
+                val spanEnd = matchStart + displayText.length
+                // Apply link span
+                RichTextSpanManager.applyLinkFormat(editable, matchStart, spanEnd, url, context)
+            } finally {
+                isApplyingRichTextStyling = false
+            }
+
+            // Track how many characters were removed
+            offset += (match.value.length - displayText.length)
+        }
+
+        if (offset > 0) {
+            // Sync compose text after modifying the editable
+            viewModel?.setComposeText(editable.toString())
+        }
+    }
+
+    // ── Markdown syntax auto-trigger handlers ───────────────────────────
+
+    /**
+     * Handles auto-triggering of code formats when a backtick is typed.
+     *
+     * - Triple backticks (```) at line start → removes markers, inserts ZWS placeholder,
+     *   applies [CodeBlockFormatSpan], enables CODE_BLOCK pending format.
+     * - Single backtick pair (`text`) → removes backticks, applies [InlineCodeFormatSpan].
+     */
+    private fun handleBacktickAutoTrigger(editable: Editable, backtickPosition: Int) {
+        if (formatSpanWatcher == null) return
+
+        val text = editable.toString()
+
+        // ── Triple backticks → CODE_BLOCK ──────────────────────────────
+        if (backtickPosition >= 2 &&
+            text[backtickPosition - 2] == '`' &&
+            text[backtickPosition - 1] == '`' &&
+            text[backtickPosition] == '`'
+        ) {
+            val isValidStart = backtickPosition == 2 ||
+                (backtickPosition >= 3 && (text[backtickPosition - 3] == '\n' || text[backtickPosition - 3] == ' '))
+
+            if (isValidStart) {
+                val markerStart = backtickPosition - 2
+                editable.delete(markerStart, backtickPosition + 1)
+
+                // Clean up the current line
+                val lineStart = findLineStart(editable, markerStart)
+                val lineEnd = findLineEnd(editable, markerStart)
+                val spanCheckEnd = maxOf(lineEnd, lineStart + 1)
+
+                // Remove list formats
+                RichTextSpanManager.removeFormat(editable, lineStart, spanCheckEnd, RichTextFormat.BULLET_LIST)
+                RichTextSpanManager.removeFormat(editable, lineStart, spanCheckEnd, RichTextFormat.ORDERED_LIST)
+
+                // Disable inline and list pending formats
+                formatSpanWatcher?.disableFormat(RichTextFormat.BULLET_LIST)
+                formatSpanWatcher?.disableFormat(RichTextFormat.ORDERED_LIST)
+                for (fmt in listOf(
+                    RichTextFormat.BOLD, RichTextFormat.ITALIC, RichTextFormat.UNDERLINE,
+                    RichTextFormat.STRIKETHROUGH, RichTextFormat.INLINE_CODE, RichTextFormat.LINK
+                )) {
+                    formatSpanWatcher?.disableFormatWithSpanUpdate(editable, fmt, markerStart)
+                    RichTextSpanManager.removeFormat(editable, lineStart, spanCheckEnd, fmt)
+                }
+
+                // Insert ZWS placeholder and apply code block span
+                val insertPos = markerStart
+                val placeholder = "\u200B"
+                editable.insert(insertPos, placeholder)
+
+                val span = CodeBlockFormatSpan(context)
+                editable.setSpan(span, insertPos, insertPos + placeholder.length, android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+                editable.setSpan(
+                    android.text.style.TypefaceSpan("monospace"),
+                    insertPos, insertPos + placeholder.length,
+                    android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
+                )
+
+                formatSpanWatcher?.enableFormat(RichTextFormat.CODE_BLOCK)
+                binding.etMessageInput.setSelection(insertPos + placeholder.length)
+                viewModel?.setComposeText(editable.toString())
+                updateActiveFormatsFromCursor()
+                return
+            }
+        }
+
+        // ── Inline code: `text` ────────────────────────────────────────
+        if (backtickPosition >= 2) {
+            var openingBacktickPos = -1
+            for (i in (backtickPosition - 1) downTo 0) {
+                val c = text[i]
+                if (c == '`') {
+                    if (i < backtickPosition - 1) openingBacktickPos = i
+                    break
+                }
+                if (c == '\n') break
+            }
+
+            if (openingBacktickPos >= 0) {
+                val contentStart = openingBacktickPos + 1
+                val contentEnd = backtickPosition
+                val content = text.substring(contentStart, contentEnd)
+
+                if (content.isNotBlank()) {
+                    // Remove closing backtick first (higher index)
+                    editable.delete(backtickPosition, backtickPosition + 1)
+                    // Remove opening backtick
+                    editable.delete(openingBacktickPos, openingBacktickPos + 1)
+
+                    val spanStart = openingBacktickPos
+                    val spanEnd = openingBacktickPos + content.length
+
+                    val span = InlineCodeFormatSpan(context)
+                    editable.setSpan(span, spanStart, spanEnd, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                    binding.etMessageInput.setSelection(spanEnd)
+                    viewModel?.setComposeText(editable.toString())
+                    updateActiveFormatsFromCursor()
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles auto-triggering of list and blockquote formats when a space is typed
+     * after a recognized line-start marker.
+     *
+     * - "- " → [BulletListFormatSpan]
+     * - "N. " → [NumberedListFormatSpan] with parsed number
+     * - "> " → [BlockquoteFormatSpan]
+     */
+    private fun handleListSyntaxAutoTrigger(editable: Editable, spacePosition: Int) {
+        if (formatSpanWatcher == null) return
+
+        val lineStart = findLineStart(editable, spacePosition)
+        val prefix = editable.subSequence(lineStart, spacePosition).toString()
+
+        // ── Bullet list: "-" ───────────────────────────────────────────
+        if (prefix == "-") {
+            val existing = editable.getSpans(lineStart, spacePosition + 1, BulletListFormatSpan::class.java)
+            if (existing.isNotEmpty()) return
+
+            editable.delete(lineStart, spacePosition + 1)
+
+            var lineEnd = findLineEnd(editable, lineStart)
+            if (lineEnd == lineStart) {
+                editable.insert(lineStart, "\u200B")
+                lineEnd = lineStart + 1
+            }
+
+            val span = BulletListFormatSpan(context)
+            editable.setSpan(span, lineStart, maxOf(lineEnd, lineStart + 1), android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+
+            formatSpanWatcher?.clearExplicitlyDisabled(RichTextFormat.BULLET_LIST)
+            formatSpanWatcher?.enableFormat(RichTextFormat.BULLET_LIST)
+
+            binding.etMessageInput.setSelection(maxOf(lineEnd, lineStart + 1))
+            viewModel?.setComposeText(editable.toString())
+            updateActiveFormatsFromCursor()
+            return
+        }
+
+        // ── Numbered list: "N." ────────────────────────────────────────
+        if (prefix.matches(Regex("\\d+\\."))) {
+            val existing = editable.getSpans(lineStart, spacePosition + 1, NumberedListFormatSpan::class.java)
+            if (existing.isNotEmpty()) return
+
+            val number = try {
+                prefix.substring(0, prefix.length - 1).toInt()
+            } catch (_: NumberFormatException) {
+                1
+            }
+
+            editable.delete(lineStart, spacePosition + 1)
+
+            var lineEnd = findLineEnd(editable, lineStart)
+            if (lineEnd == lineStart) {
+                editable.insert(lineStart, "\u200B")
+                lineEnd = lineStart + 1
+            }
+
+            val span = NumberedListFormatSpan(number, context)
+            editable.setSpan(span, lineStart, maxOf(lineEnd, lineStart + 1), android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+
+            formatSpanWatcher?.clearExplicitlyDisabled(RichTextFormat.ORDERED_LIST)
+            formatSpanWatcher?.enableFormat(RichTextFormat.ORDERED_LIST)
+
+            binding.etMessageInput.setSelection(maxOf(lineEnd, lineStart + 1))
+            viewModel?.setComposeText(editable.toString())
+            updateActiveFormatsFromCursor()
+            return
+        }
+
+        // ── Blockquote: ">" ────────────────────────────────────────────
+        if (prefix == ">") {
+            val existing = editable.getSpans(lineStart, spacePosition + 1, BlockquoteFormatSpan::class.java)
+            if (existing.isNotEmpty()) return
+
+            editable.delete(lineStart, spacePosition + 1)
+
+            var lineEnd = findLineEnd(editable, lineStart)
+            if (lineEnd == lineStart) {
+                editable.insert(lineStart, "\u200B")
+                lineEnd = lineStart + 1
+            }
+
+            val span = BlockquoteFormatSpan(context)
+            editable.setSpan(span, lineStart, maxOf(lineEnd, lineStart + 1), android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+
+            formatSpanWatcher?.enableFormat(RichTextFormat.BLOCKQUOTE)
+
+            binding.etMessageInput.setSelection(maxOf(lineEnd, lineStart + 1))
+            viewModel?.setComposeText(editable.toString())
+            updateActiveFormatsFromCursor()
+        }
+    }
+
+    /**
+     * Handles auto-triggering of bold and strikethrough when closing markers are typed.
+     *
+     * - **text** (closing ** typed) → removes markers, applies [BoldFormatSpan]
+     * - ~~text~~ (closing ~~ typed) → removes markers, applies [StrikethroughFormatSpan]
+     */
+    private fun handleInlineFormatAutoTrigger(editable: Editable, position: Int) {
+        if (formatSpanWatcher == null) return
+
+        val text = editable.toString()
+        val typedChar = text[position]
+
+        // ── Bold: **text** ─────────────────────────────────────────────
+        if (typedChar == '*' && position >= 4 && text[position - 1] == '*') {
+            val contentEnd = position - 1
+            var openingEnd = -1
+            for (i in (contentEnd - 1) downTo 1) {
+                if (text[i] == '*' && text[i - 1] == '*') {
+                    openingEnd = i
+                    break
+                }
+                if (text[i] == '\n') break
+            }
+            if (openingEnd >= 1) {
+                val openingStart = openingEnd - 1
+                val content = text.substring(openingEnd + 1, contentEnd)
+                if (content.isNotBlank()) {
+                    // Remove closing ** (2 chars)
+                    editable.delete(position - 1, position + 1)
+                    // Remove opening ** (2 chars)
+                    editable.delete(openingStart, openingStart + 2)
+                    val spanStart = openingStart
+                    val spanEnd = openingStart + content.length
+                    RichTextSpanManager.applyFormat(editable, spanStart, spanEnd, RichTextFormat.BOLD, context)
+                    binding.etMessageInput.setSelection(spanEnd)
+                    viewModel?.setComposeText(editable.toString())
+                    updateActiveFormatsFromCursor()
+                    return
+                }
+            }
+        }
+
+        // ── Strikethrough: ~~text~~ ────────────────────────────────────
+        if (typedChar == '~' && position >= 4 && text[position - 1] == '~') {
+            val contentEnd = position - 1
+            var openingEnd = -1
+            for (i in (contentEnd - 1) downTo 1) {
+                if (text[i] == '~' && text[i - 1] == '~') {
+                    openingEnd = i
+                    break
+                }
+                if (text[i] == '\n') break
+            }
+            if (openingEnd >= 1) {
+                val openingStart = openingEnd - 1
+                val content = text.substring(openingEnd + 1, contentEnd)
+                if (content.isNotBlank()) {
+                    editable.delete(position - 1, position + 1)
+                    editable.delete(openingStart, openingStart + 2)
+                    val spanStart = openingStart
+                    val spanEnd = openingStart + content.length
+                    RichTextSpanManager.applyFormat(editable, spanStart, spanEnd, RichTextFormat.STRIKETHROUGH, context)
+                    binding.etMessageInput.setSelection(spanEnd)
+                    viewModel?.setComposeText(editable.toString())
+                    updateActiveFormatsFromCursor()
+                    return
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles auto-triggering of italic when the closing _ is typed.
+     *
+     * Separated from [handleInlineFormatAutoTrigger] because _ is also used
+     * within words (e.g. variable_name).
+     *
+     * - _text_ (closing _ typed) → removes markers, applies [ItalicFormatSpan]
+     */
+    private fun handleItalicAutoTrigger(editable: Editable, position: Int) {
+        if (formatSpanWatcher == null) return
+        if (position < 2) return
+
+        val text = editable.toString()
+        val contentEnd = position
+        var openingPos = -1
+        for (i in (contentEnd - 1) downTo 0) {
+            if (text[i] == '_') {
+                openingPos = i
+                break
+            }
+            if (text[i] == '\n') break
+        }
+        if (openingPos >= 0 && openingPos < contentEnd) {
+            val content = text.substring(openingPos + 1, contentEnd)
+            if (content.isNotBlank()) {
+                // Remove closing _
+                editable.delete(contentEnd, contentEnd + 1)
+                // Remove opening _
+                editable.delete(openingPos, openingPos + 1)
+                val spanStart = openingPos
+                val spanEnd = openingPos + content.length
+                RichTextSpanManager.applyFormat(editable, spanStart, spanEnd, RichTextFormat.ITALIC, context)
+                binding.etMessageInput.setSelection(spanEnd)
+                viewModel?.setComposeText(editable.toString())
+                updateActiveFormatsFromCursor()
+            }
+        }
+    }
+
+    /**
+     * Handles auto-triggering of underline when the closing > completes </u>.
+     *
+     * - <u>text</u> (closing > typed completing </u>) → removes tags,
+     *   applies [UnderlineFormatSpan]
+     */
+    private fun handleUnderlineAutoTrigger(editable: Editable, position: Int) {
+        if (formatSpanWatcher == null) return
+        if (position < 3) return
+
+        val text = editable.toString()
+
+        // Check for closing </u> — 4 chars ending at position
+        val closingStart = position - 3
+        if (closingStart < 0) return
+        val possibleClose = text.substring(closingStart, position + 1)
+        if (possibleClose != "</u>") return
+
+        // Search backwards for opening <u>
+        val openingTag = "<u>"
+        val searchEnd = closingStart
+        val openingPos = text.lastIndexOf(openingTag, searchEnd - 1)
+        if (openingPos < 0) return
+
+        // Don't cross newlines
+        val between = text.substring(openingPos, closingStart)
+        if (between.contains('\n')) return
+
+        val contentStart = openingPos + openingTag.length
+        val contentEnd = closingStart
+        val content = text.substring(contentStart, contentEnd)
+        if (content.isBlank()) return
+
+        // Remove closing </u> (4 chars)
+        editable.delete(closingStart, position + 1)
+        // Remove opening <u> (3 chars)
+        editable.delete(openingPos, openingPos + openingTag.length)
+
+        val spanStart = openingPos
+        val spanEnd = openingPos + content.length
+        RichTextSpanManager.applyFormat(editable, spanStart, spanEnd, RichTextFormat.UNDERLINE, context)
+        binding.etMessageInput.setSelection(spanEnd)
+        viewModel?.setComposeText(editable.toString())
+        updateActiveFormatsFromCursor()
+    }
+
+    /**
+     * Handles auto-triggering of link format when closing ) is typed for [text](url) syntax.
+     *
+     * - [text](url) (closing ) typed) → removes markdown, applies [LinkFormatSpan] with URL
+     */
+    private fun handleLinkAutoTrigger(editable: Editable, position: Int) {
+        if (formatSpanWatcher == null) return
+        if (position < 4) return // minimum: [x](y) = 6 chars
+
+        val text = editable.toString()
+
+        // Find the opening ( for the URL
+        var urlOpenParen = -1
+        for (i in (position - 1) downTo 0) {
+            if (text[i] == '(') {
+                urlOpenParen = i
+                break
+            }
+            if (text[i] == '\n') return
+        }
+        if (urlOpenParen < 0) return
+
+        // Check that ]( is right before the URL
+        if (urlOpenParen < 1 || text[urlOpenParen - 1] != ']') return
+        val closeBracket = urlOpenParen - 1
+
+        // Find the opening [
+        var openBracket = -1
+        for (i in (closeBracket - 1) downTo 0) {
+            if (text[i] == '[') {
+                openBracket = i
+                break
+            }
+            if (text[i] == '\n') return
+        }
+        if (openBracket < 0) return
+
+        val linkText = text.substring(openBracket + 1, closeBracket)
+        val url = text.substring(urlOpenParen + 1, position)
+        if (linkText.isBlank() || url.isBlank()) return
+
+        // Remove entire [text](url) and replace with just the link text
+        editable.delete(openBracket, position + 1)
+        editable.insert(openBracket, linkText)
+
+        val spanStart = openBracket
+        val spanEnd = openBracket + linkText.length
+        RichTextSpanManager.applyLinkFormat(editable, spanStart, spanEnd, url, context)
+
+        binding.etMessageInput.setSelection(spanEnd)
+        viewModel?.setComposeText(editable.toString())
+        updateActiveFormatsFromCursor()
+    }
+
+    /**
+     * Shows a dialog prompting the user to enter a URL for link formatting.
+     *
+     * When the user confirms with a non-empty URL, a [LinkFormatSpan] is applied
+     * to the currently selected text range via [RichTextSpanManager]. The toolbar
+     * active/disabled state is updated accordingly.
+     *
+     * Handles the link toolbar button click. Determines the appropriate dialog
+     * to show based on the current selection state:
+     * - Selection with existing LinkFormatSpan → Edit Link dialog
+     * - Selection without a link → Add Link dialog (pre-filled with selected text)
+     * - No selection → Add Link dialog (empty text field)
+     *
+     * @see LinkFormatSpan
+     * @see RichTextSpanManager
      */
     private fun showLinkDialog() {
-        // TODO: Implement link dialog using CometChatDialog
+        if (RichTextFormat.LINK in disabledFormats) return
+
+        val editable = binding.etMessageInput.text ?: return
+        val selStart = binding.etMessageInput.selectionStart
+        val selEnd = binding.etMessageInput.selectionEnd
+
+        if (selStart != selEnd) {
+            // Has selection — check if it already has a LinkFormatSpan
+            val existingUrl = RichTextSpanManager.getLinkUrl(editable, selStart, selEnd)
+            if (existingUrl != null) {
+                // Selection has a link → show Edit Link dialog
+                val selectedText = editable.subSequence(selStart, selEnd).toString()
+                showEditLinkDialog(selectedText, existingUrl, selStart, selEnd)
+            } else {
+                // Selection without a link → show Add Link dialog pre-filled with selected text
+                val selectedText = editable.subSequence(selStart, selEnd).toString()
+                showAddLinkDialog(selectedText, "", selStart, selEnd)
+            }
+        } else {
+            // No selection → show Add Link dialog with empty fields
+            showAddLinkDialog("", "", selStart, selEnd)
+        }
+    }
+
+    /**
+     * Shows the Add Link dialog using the styled MaterialCardView layout.
+     * Allows the user to enter display text and a URL. On save, applies a
+     * [LinkFormatSpan] to the text range.
+     *
+     * @param initialText Pre-filled text for the text input field.
+     * @param initialUrl  Pre-filled URL for the link input field.
+     * @param selStart    The selection start index in the editable.
+     * @param selEnd      The selection end index in the editable.
+     */
+    private fun showAddLinkDialog(
+        initialText: String,
+        initialUrl: String,
+        selStart: Int,
+        selEnd: Int
+    ) {
+        showAddLinkDialog(
+            initialText = initialText,
+            initialUrl = initialUrl,
+            selStart = selStart,
+            selEnd = selEnd,
+            isEditMode = false
+        )
+    }
+
+    /**
+     * Internal implementation of the Add/Edit Link dialog. Uses the
+     * `cometchat_dialog_add_link.xml` layout with a transparent window
+     * background so the MaterialCardView shape is visible.
+     *
+     * @param initialText Pre-filled text for the text input field.
+     * @param initialUrl  Pre-filled URL for the link input field.
+     * @param selStart    The selection start index in the editable.
+     * @param selEnd      The selection end index in the editable.
+     * @param isEditMode  If true, the dialog title shows "Edit Link" instead of "Add Link".
+     */
+    private fun showAddLinkDialog(
+        initialText: String,
+        initialUrl: String,
+        selStart: Int,
+        selEnd: Int,
+        isEditMode: Boolean
+    ) {
+        val dialog = android.app.Dialog(context)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.cometchat_dialog_add_link)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val titleView = dialog.findViewById<android.widget.TextView>(R.id.cometchat_dialog_title)
+        val closeButton = dialog.findViewById<android.widget.ImageButton>(R.id.cometchat_close_button)
+        val textInput = dialog.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.cometchat_text_input)
+        val linkInput = dialog.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.cometchat_link_input)
+        val cancelButton = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.cometchat_cancel_button)
+        val saveButton = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.cometchat_save_button)
+
+        titleView.text = context.getString(
+            if (isEditMode) R.string.cometchat_edit_link else R.string.cometchat_add_link
+        )
+        textInput.setText(initialText)
+        linkInput.setText(initialUrl)
+
+        closeButton.setOnClickListener { dialog.dismiss() }
+        cancelButton.setOnClickListener { dialog.dismiss() }
+
+        saveButton.setOnClickListener {
+            val text = textInput.text?.toString()?.trim().orEmpty()
+            val url = linkInput.text?.toString()?.trim().orEmpty()
+            if (url.isNotEmpty()) {
+                val editable = binding.etMessageInput.text ?: return@setOnClickListener
+                if (text.isNotEmpty() && selStart != selEnd) {
+                    // Replace selected text with the new text and apply link
+                    editable.replace(selStart, selEnd, text)
+                    val newEnd = selStart + text.length
+                    RichTextSpanManager.applyLinkFormat(editable, selStart, newEnd, url, context)
+                } else if (text.isNotEmpty()) {
+                    // No selection — insert text at cursor and apply link
+                    editable.insert(selStart, text)
+                    val newEnd = selStart + text.length
+                    RichTextSpanManager.applyLinkFormat(editable, selStart, newEnd, url, context)
+                } else if (selStart != selEnd) {
+                    // Text field empty but has selection — apply link to existing selection
+                    RichTextSpanManager.applyLinkFormat(editable, selStart, selEnd, url, context)
+                }
+                updateActiveFormatsFromCursor()
+            }
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    /**
+     * Shows the Edit Link dialog when the user clicks on an existing link.
+     * Displays the URL and provides Edit and Remove buttons.
+     *
+     * @param text     The display text of the link.
+     * @param url      The URL of the existing link.
+     * @param selStart The start index of the link span.
+     * @param selEnd   The end index of the link span.
+     */
+    private fun showEditLinkDialog(
+        text: String,
+        url: String,
+        selStart: Int,
+        selEnd: Int
+    ) {
+        val dialog = android.app.Dialog(context)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.cometchat_dialog_edit_link)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val linkUrlView = dialog.findViewById<android.widget.TextView>(R.id.cometchat_link_url)
+        val editButton = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.cometchat_edit_button)
+        val removeButton = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.cometchat_remove_button)
+
+        linkUrlView.text = url
+        linkUrlView.setOnClickListener {
+            try {
+                var urlToOpen = url
+                if (!urlToOpen.startsWith("http://") && !urlToOpen.startsWith("https://")) {
+                    urlToOpen = "https://$urlToOpen"
+                }
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(urlToOpen))
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            } catch (_: Exception) {
+                // Silently fail if URL cannot be opened
+            }
+        }
+
+        editButton.setOnClickListener {
+            dialog.dismiss()
+            showAddLinkDialog(
+                initialText = text,
+                initialUrl = url,
+                selStart = selStart,
+                selEnd = selEnd,
+                isEditMode = true
+            )
+        }
+
+        removeButton.setOnClickListener {
+            val editable = binding.etMessageInput.text ?: return@setOnClickListener
+            // Remove the LinkFormatSpan but keep the text
+            RichTextSpanManager.removeFormat(editable, selStart, selEnd, RichTextFormat.LINK)
+            updateActiveFormatsFromCursor()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    /**
+     * Sets up touch-based link click detection on the EditText.
+     * When the user taps on text that has a [LinkFormatSpan], the Edit Link
+     * dialog is shown instead of the default click behavior.
+     */
+    private fun setupLinkClickDetection() {
+        binding.etMessageInput.setOnTouchListener { v, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP) {
+                val editText = v as android.widget.EditText
+                val editable = editText.text ?: return@setOnTouchListener false
+
+                val x = event.x.toInt() - editText.totalPaddingLeft + editText.scrollX
+                val y = event.y.toInt() - editText.totalPaddingTop + editText.scrollY
+
+                val layout = editText.layout ?: return@setOnTouchListener false
+                val line = layout.getLineForVertical(y)
+                val offset = layout.getOffsetForHorizontal(line, x.toFloat())
+
+                if (offset >= 0 && offset < editable.length) {
+                    val linkSpans = editable.getSpans(offset, offset, LinkFormatSpan::class.java)
+                    if (linkSpans.isNotEmpty()) {
+                        val span = linkSpans[0]
+                        val spanStart = editable.getSpanStart(span)
+                        val spanEnd = editable.getSpanEnd(span)
+                        val spanText = editable.subSequence(spanStart, spanEnd).toString()
+                        showEditLinkDialog(spanText, span.url, spanStart, spanEnd)
+                        return@setOnTouchListener true
+                    }
+                }
+            }
+            false
+        }
     }
 
     /**
@@ -1735,10 +2874,31 @@ class CometChatMessageComposer @JvmOverloads constructor(
     }
 
     /**
-     * Handles send button click.
-     * Uses RichTextEditorController.toMarkdown() for proper markdown conversion (same as Jetpack).
-     * Processes mentions before sending to replace spans with underlying text.
+     * Handles send button click with explicit routing for edit, reply, and normal modes.
+     *
+     * - Edit mode: calls [editMessage][CometChatMessageComposerViewModel.editMessage] with the
+     *   updated markdown, then exits edit mode (hides preview bar, clears state).
+     * - Reply mode: creates a text message that the ViewModel attaches as a quoted/parent reply,
+     *   then exits reply mode (hides preview bar, clears state).
+     * - Normal mode: creates and sends a standard text message.
+     *
+     * Requirements: 12.3, 13.3
      */
+
+    /**
+     * Attaches consumed mention metadata to a message's metadata JSONObject.
+     * If the message already has metadata, the consumed mentions array is added to it;
+     * otherwise a new JSONObject is created.
+     *
+     * Requirements: 17.1
+     */
+    private fun attachConsumedMentionMetadata(message: BaseMessage, consumedMentions: org.json.JSONArray?) {
+        if (consumedMentions == null || consumedMentions.length() == 0) return
+        val metadata = message.metadata ?: org.json.JSONObject()
+        metadata.put(MentionCodeBlockHandler.CONSUMED_MENTIONS_KEY, consumedMentions)
+        message.metadata = metadata
+    }
+
     private fun handleSendClick(text: String) {
         android.util.Log.d(TAG, "handleSendClick: input text='$text'")
         android.util.Log.d(TAG, "handleSendClick: mentionHelper=${mentionHelper != null}")
@@ -1749,45 +2909,91 @@ class CometChatMessageComposer @JvmOverloads constructor(
         android.util.Log.d(TAG, "handleSendClick: processedText='$processedText'")
         android.util.Log.d(TAG, "handleSendClick: text changed=${text != processedText}")
         
-        // Use RichTextEditorController to convert to markdown if rich text is enabled
+        // Use span-based MarkdownConverter to convert WYSIWYG spans to markdown
         val markdownText = if (richTextConfiguration.hasAnyEnabled()) {
-            // Apply markdown conversion to the processed text
-            richTextController.onTextChanged(processedText, processedText.length, processedText.length)
-            richTextController.toMarkdown()
+            val editable = binding.etMessageInput.text
+            if (editable != null && editable.isNotEmpty()) {
+                MarkdownConverter.toMarkdown(editable)
+            } else {
+                processedText
+            }
         } else {
-            // Fallback: Convert display formats back to markdown format
-            processedText.replace(Regex("^• ", RegexOption.MULTILINE), "- ")
+            processedText
         }
         
         android.util.Log.d(TAG, "handleSendClick: markdownText='$markdownText'")
+
+        // Extract consumed mention metadata from code blocks before sending (Req 17.1)
+        val consumedMentionMetadata: org.json.JSONArray? = if (richTextConfiguration.hasAnyEnabled()) {
+            binding.etMessageInput.text?.let { MentionCodeBlockHandler.extractConsumedMentionMetadata(it) }
+        } else null
         
-        val editMessage = viewModel?.editMessage?.value
-        if (editMessage != null) {
-            // Edit mode - call handlePreMessageSend on formatters
-            for (formatter in textFormatters) {
-                formatter.handlePreMessageSend(context, editMessage)
-            }
-            viewModel?.editMessage(markdownText)
-        } else {
-            // Send mode - use ViewModel's createTextMessage and set mentioned users
-            val message = viewModel?.createTextMessage(markdownText)
-            if (message != null) {
-                // Call handlePreMessageSend on all formatters (sets mentionedUsers)
+        val editMsg = viewModel?.editMessage?.value
+        when {
+            // ── Edit mode ──────────────────────────────────────────────
+            editMsg != null -> {
+                android.util.Log.d(TAG, "handleSendClick: EDIT mode, editingMessageId=${editMsg.id}")
+                // Call handlePreMessageSend on formatters before editing
                 for (formatter in textFormatters) {
-                    formatter.handlePreMessageSend(context, message)
+                    formatter.handlePreMessageSend(context, editMsg)
                 }
-                
-                // Send the message with mentioned users already set
-                viewModel?.sendTextMessageWithMentions(message)
+                // Attach consumed mention metadata to the edit message (Req 17.1)
+                attachConsumedMentionMetadata(editMsg, consumedMentionMetadata)
+                viewModel?.editMessage(markdownText)
+                // Exit edit mode: hides preview bar, clears input & editing state
+                exitEditMode()
             }
-            onSendButtonClick?.invoke(markdownText)
+
+            // ── Reply mode ─────────────────────────────────────────────
+            replyingToMessageId != null -> {
+                android.util.Log.d(TAG, "handleSendClick: REPLY mode, replyingToMessageId=$replyingToMessageId")
+                // Create message — ViewModel's createTextMessage already sets parentMessageId.
+                // The ViewModel's sendTextMessageWithMentions attaches the replyMessage
+                // as quotedMessage so the server treats it as a threaded reply.
+                val message = viewModel?.createTextMessage(markdownText)
+                if (message != null) {
+                    for (formatter in textFormatters) {
+                        formatter.handlePreMessageSend(context, message)
+                    }
+                    // Attach consumed mention metadata (Req 17.1)
+                    attachConsumedMentionMetadata(message, consumedMentionMetadata)
+                    viewModel?.sendTextMessageWithMentions(message)
+                }
+                onSendButtonClick?.invoke(markdownText)
+                // Exit reply mode: hides preview bar, clears reply state
+                exitReplyMode()
+            }
+
+            // ── Normal mode ────────────────────────────────────────────
+            else -> {
+                android.util.Log.d(TAG, "handleSendClick: NORMAL mode")
+                val message = viewModel?.createTextMessage(markdownText)
+                if (message != null) {
+                    for (formatter in textFormatters) {
+                        formatter.handlePreMessageSend(context, message)
+                    }
+                    // Attach consumed mention metadata (Req 17.1)
+                    attachConsumedMentionMetadata(message, consumedMentionMetadata)
+                    viewModel?.sendTextMessageWithMentions(message)
+                }
+                onSendButtonClick?.invoke(markdownText)
+            }
         }
         
-        // Clear input and rich text controller
+        // ── Shared cleanup ─────────────────────────────────────────────
+        // Clear input and reset span engine state
         binding.etMessageInput.setText("")
         if (richTextConfiguration.hasAnyEnabled()) {
             richTextController.clear()
+            // Re-attach FormatSpanWatcher to the fresh Editable after clearing
+            formatSpanWatcher?.clearPendingFormats()
+            formatSpanWatcher?.attachTo(binding.etMessageInput.text)
         }
+        
+        // Reset active/disabled formats
+        activeFormats = emptySet()
+        disabledFormats = emptySet()
+        updateToolbarButtonStates()
         
         // Clear mention helper state
         mentionHelper?.clear()
@@ -1800,19 +3006,49 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
     /**
      * Sets up text watcher for the input field.
-     * Syncs text changes with RichTextEditorController (same as Jetpack).
+     * Integrates the span-based WYSIWYG engine: FormatSpanWatcher handles span
+     * extension/pending formats, and ListContinuationHandler manages Enter key
+     * behavior for lists and blockquotes.
      */
     private fun setupTextWatcher() {
+        // Listen for cursor position changes to update mention suppression and toolbar state
+        binding.etMessageInput.setOnSelectionChangedListener { selStart, selEnd ->
+            val editable = binding.etMessageInput.text ?: return@setOnSelectionChangedListener
+            suppressMentionDetection = isInsideCodeFormat(editable, selStart)
+
+            // Skip toolbar updates during programmatic text modifications
+            // (e.g., list continuation inserting placeholder text)
+            if (isApplyingRichTextStyling) return@setOnSelectionChangedListener
+
+            if (richTextConfiguration.hasAnyEnabled()) {
+                val isTypingCursorMove = isTextChanging || selStart == lastCursorAfterTextChange
+                if (!isTypingCursorMove) {
+                    formatSpanWatcher?.clearPendingFormats()
+                }
+                updateActiveFormatsFromCursor()
+            }
+        }
+
         binding.etMessageInput.addTextChangedListener(object : TextWatcher {
             private var previousText: String = ""
+            private var changeStart: Int = 0
+            private var changeBefore: Int = 0
+            private var changeCount: Int = 0
             
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 previousText = s?.toString() ?: ""
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                isTextChanging = true
+
                 // Skip if we're applying rich text styling to avoid recursion
                 if (isApplyingRichTextStyling) return
+
+                // Store change params for afterTextChanged
+                changeStart = start
+                changeBefore = before
+                changeCount = count
                 
                 val text = s?.toString() ?: ""
                 viewModel?.setComposeText(text)
@@ -1831,43 +3067,74 @@ class CometChatMessageComposer @JvmOverloads constructor(
                 } else {
                     viewModel?.endTyping()
                 }
-                
-                // Sync with RichTextEditorController (same as Jetpack)
-                if (richTextConfiguration.hasAnyEnabled()) {
-                    val selStart = binding.etMessageInput.selectionStart
-                    val selEnd = binding.etMessageInput.selectionEnd
-                    richTextController.onTextChanged(text, selStart, selEnd)
-                    
-                    // Check if controller modified the text (e.g., list auto-continuation or exit)
-                    val controllerText = richTextController.state.text
-                    val controllerSelStart = richTextController.state.selectionStart
-                    val controllerSelEnd = richTextController.state.selectionEnd
-                    
-                    if (controllerText != text) {
-                        isApplyingRichTextStyling = true
-                        try {
-                            binding.etMessageInput.setText(controllerText)
-                            binding.etMessageInput.setSelection(
-                                controllerSelStart.coerceIn(0, controllerText.length),
-                                controllerSelEnd.coerceIn(0, controllerText.length)
-                            )
-                        } finally {
-                            isApplyingRichTextStyling = false
-                        }
-                    }
-                    
-                    // Update active formats and toolbar state
-                    activeFormats = richTextController.state.activeFormats
-                    updateToolbarButtonStates()
-                }
+
             }
 
             override fun afterTextChanged(s: Editable?) {
                 // Skip if we're already applying styling to avoid infinite loop
-                if (isApplyingRichTextStyling) return
-                
-                // Apply inline rich text styling for visual feedback
-                applyInlineRichTextStyling(s)
+                if (isApplyingRichTextStyling) {
+                    lastCursorAfterTextChange = binding.etMessageInput.selectionStart
+                    isTextChanging = false
+                    return
+                }
+                if (s == null) {
+                    lastCursorAfterTextChange = binding.etMessageInput.selectionStart
+                    isTextChanging = false
+                    return
+                }
+
+                // Delegate to FormatSpanWatcher for span extension and pending format application
+                if (richTextConfiguration.hasAnyEnabled()) {
+                    formatSpanWatcher?.handleTextChanged(s, changeStart, changeBefore, changeCount)
+
+                    // Detect Enter key: a single newline was inserted
+                    if (changeCount == 1 && changeBefore == 0) {
+                        val insertPos = changeStart
+                        if (insertPos < s.length && s[insertPos] == '\n') {
+                            isApplyingRichTextStyling = true
+                            try {
+                                handleNewlineForBlockFormats(s, insertPos)
+                            } finally {
+                                isApplyingRichTextStyling = false
+                            }
+                            // Sync compose text after list continuation modified the editable,
+                            // preventing the composeText flow from calling setText() with stale text
+                            viewModel?.setComposeText(s.toString())
+                        }
+                    }
+
+                    // Detect paste: multiple characters inserted at once — parse markdown links
+                    if (changeCount > 1 && changeBefore == 0) {
+                        convertPastedMarkdownLinks(s, changeStart, changeStart + changeCount)
+                    }
+
+                    // Markdown syntax auto-trigger: single character typed
+                    if (changeCount == 1 && changeBefore == 0 && changeStart < s.length) {
+                        val insertedChar = s[changeStart]
+                        isApplyingRichTextStyling = true
+                        try {
+                            when (insertedChar) {
+                                '`' -> handleBacktickAutoTrigger(s, changeStart)
+                                ' ' -> handleListSyntaxAutoTrigger(s, changeStart)
+                                '*', '~' -> handleInlineFormatAutoTrigger(s, changeStart)
+                                '_' -> handleItalicAutoTrigger(s, changeStart)
+                                '>' -> handleUnderlineAutoTrigger(s, changeStart)
+                                ')' -> handleLinkAutoTrigger(s, changeStart)
+                            }
+                        } finally {
+                            isApplyingRichTextStyling = false
+                        }
+                        viewModel?.setComposeText(s.toString())
+                    }
+
+                    // Update active formats based on current cursor position spans
+                    updateActiveFormatsFromCursor()
+                }
+
+                // Record cursor position so onSelectionChanged can distinguish
+                // typing-induced moves from user-initiated moves
+                lastCursorAfterTextChange = binding.etMessageInput.selectionStart
+                isTextChanging = false
             }
         })
     }
@@ -2478,31 +3745,55 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
     /**
      * Updates the send button state based on whether there is text.
+     * Matches the Java chatuikit reference behavior:
+     * - Agent active: arrow_narrow_up icon, secondaryButtonBackgroundColor, clickable
+     * - Agent inactive: arrow_narrow_up icon, backgroundColor4, NOT clickable
+     * - AI generating (stop): stop icon, secondaryButtonBackgroundColor, NOT clickable
+     * - Normal active: send_active icon, primaryColor, clickable
+     * - Normal inactive: send_active icon, inactiveBackgroundColor, NOT clickable
      */
     private fun updateSendButtonState(hasText: Boolean) {
         val isAIGenerating = viewModel?.isAIGenerating?.value ?: false
+        val secondaryBgColor = CometChatTheme.getSecondaryButtonBackgroundColor(context)
 
         when {
             isAIGenerating -> {
                 style.sendButtonStopIcon?.let { binding.ivSend.setImageDrawable(it) }
                     ?: binding.ivSend.setImageResource(R.drawable.cometchat_ic_stop)
                 applySendButtonBackground(style.sendButtonActiveBackgroundColor)
+                binding.ivSend.isClickable = false
+                binding.ivSend.isEnabled = false
+            }
+            isAgentChat && hasText -> {
+                binding.ivSend.setImageResource(R.drawable.cometchat_ic_arrow_narrow_up)
+                applySendButtonBackground(style.sendButtonActiveBackgroundColor)
+                binding.ivSend.isClickable = true
+                binding.ivSend.isEnabled = true
+            }
+            isAgentChat && !hasText -> {
+                binding.ivSend.setImageResource(R.drawable.cometchat_ic_arrow_narrow_up)
+                applySendButtonBackground(style.sendButtonInactiveBackgroundColor)
+                binding.ivSend.isClickable = false
+                binding.ivSend.isEnabled = false
             }
             hasText -> {
                 style.sendButtonActiveIcon?.let { binding.ivSend.setImageDrawable(it) }
                     ?: binding.ivSend.setImageResource(R.drawable.cometchat_ic_send_active)
                 applySendButtonBackground(style.sendButtonActiveBackgroundColor)
+                binding.ivSend.isClickable = true
+                binding.ivSend.isEnabled = true
             }
             else -> {
-                // Use active icon for inactive state too - only background color changes
                 style.sendButtonActiveIcon?.let { binding.ivSend.setImageDrawable(it) }
                     ?: binding.ivSend.setImageResource(R.drawable.cometchat_ic_send_active)
                 applySendButtonBackground(style.sendButtonInactiveBackgroundColor)
+                binding.ivSend.isClickable = false
+                binding.ivSend.isEnabled = false
             }
         }
         
-        // Apply icon tint (white for both states)
-        binding.ivSend.setColorFilter(CometChatTheme.getColorWhite(context))
+        // Apply icon tint — use theme-aware color for light/dark mode support
+        binding.ivSend.setColorFilter(style.sendButtonIconTint)
     }
     
     /**
@@ -2528,10 +3819,18 @@ class CometChatMessageComposer @JvmOverloads constructor(
     }
 
     /**
-     * Initializes the rich text formatter manager.
+     * Initializes the rich text formatter manager and attaches the span-based
+     * WYSIWYG formatting engine (FormatSpanWatcher) to the EditText's Editable.
      */
     private fun initRichTextFormatter() {
         richTextFormatterManager = RichTextFormatterManager(richTextConfiguration)
+
+        // Initialize and attach FormatSpanWatcher for span-based WYSIWYG formatting
+        if (richTextConfiguration.hasAnyEnabled()) {
+            formatSpanWatcher = FormatSpanWatcher(context)
+            val editable = binding.etMessageInput.text
+            formatSpanWatcher?.attachTo(editable)
+        }
     }
 
 
@@ -2571,6 +3870,19 @@ class CometChatMessageComposer @JvmOverloads constructor(
                 onError?.invoke(error)
             }
         }
+
+        viewScope?.launch {
+            viewModel?.composeText?.collectLatest { text ->
+                // Only set text programmatically if it differs from what's already in the EditText.
+                // This prevents a feedback loop where onTextChanged → setComposeText → collectLatest
+                // → setText destroys all spans and resets cursor position.
+                val currentText = binding.etMessageInput.text?.toString() ?: ""
+                if (text.isNotEmpty() && text != currentText) {
+                    binding.etMessageInput.setText(text)
+                    binding.etMessageInput.setSelection(text.length)
+                }
+            }
+        }
     }
 
     /**
@@ -2587,19 +3899,43 @@ class CometChatMessageComposer @JvmOverloads constructor(
             is MessageComposerUIState.Editing -> {
                 val textMessage = state.message as? TextMessage
                 textMessage?.let {
-                    // Run formatter pipeline to resolve mention tokens (e.g., <@uid:userId> -> @userName)
-                    var spannableBuilder = SpannableStringBuilder(it.text ?: "")
-                    for (formatter in textFormatters) {
-                        spannableBuilder = formatter.prepareMessageString(
-                            context,
-                            it,
-                            spannableBuilder,
-                            UIKitConstants.MessageBubbleAlignment.RIGHT,
-                            UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                        ) ?: spannableBuilder
+                    val markdown = it.text ?: ""
+                    if (richTextConfiguration.hasAnyEnabled() && markdown.isNotEmpty()) {
+                        // Use MarkdownConverter to parse markdown into WYSIWYG spans
+                        val spanEditable = MarkdownConverter.fromMarkdown(markdown, context)
+
+                        // Run formatter pipeline to resolve mention tokens
+                        var spannableBuilder = SpannableStringBuilder(spanEditable)
+                        for (formatter in textFormatters) {
+                            spannableBuilder = formatter.prepareMessageString(
+                                context,
+                                it,
+                                spannableBuilder,
+                                UIKitConstants.MessageBubbleAlignment.RIGHT,
+                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                            ) ?: spannableBuilder
+                        }
+                        binding.etMessageInput.setText(spannableBuilder)
+                        binding.etMessageInput.setSelection(spannableBuilder.length)
+
+                        // Re-attach FormatSpanWatcher to the new Editable content
+                        formatSpanWatcher?.clearPendingFormats()
+                        formatSpanWatcher?.attachTo(binding.etMessageInput.text)
+                    } else {
+                        // Fallback: plain text with formatter pipeline
+                        var spannableBuilder = SpannableStringBuilder(markdown)
+                        for (formatter in textFormatters) {
+                            spannableBuilder = formatter.prepareMessageString(
+                                context,
+                                it,
+                                spannableBuilder,
+                                UIKitConstants.MessageBubbleAlignment.RIGHT,
+                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                            ) ?: spannableBuilder
+                        }
+                        binding.etMessageInput.setText(spannableBuilder)
+                        binding.etMessageInput.setSelection(spannableBuilder.length)
                     }
-                    binding.etMessageInput.setText(spannableBuilder)
-                    binding.etMessageInput.setSelection(spannableBuilder.length)
                 }
             }
             is MessageComposerUIState.Replying -> {
@@ -2718,6 +4054,20 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun setUser(user: User) {
         this.user = user
         this.group = null
+        isAgentChat = AgentChatDetector.isAgentChat(user)
+        if (isAgentChat) {
+            hideAttachmentButton = true
+            hideVoiceRecordingButton = true
+            hideStickerButton = true
+            richTextToolbarVisibility = View.GONE
+            // Immediately hide buttons without animation to prevent flash on first load
+            binding.ivVoiceRecording.visibility = View.GONE
+            binding.ivSticker.visibility = View.GONE
+            binding.ivAttachment.visibility = View.GONE
+            binding.secondaryButtonLayout.visibility = View.GONE
+            binding.separatorView.visibility = View.GONE
+            updateButtonVisibility()
+        }
         viewModel?.setUser(user)
         
         // Update formatters with user context
@@ -2794,22 +4144,129 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Clears the edit message state.
      */
     fun clearEditMessage() {
+        exitEditMode()
+    }
+
+    /**
+     * Enters edit mode for the given message.
+     * Shows the edit preview bar, parses the message markdown into spans via
+     * [MarkdownConverter.fromMarkdown], populates the input field with the
+     * resulting span-formatted Editable, and stores the editing state in the ViewModel.
+     *
+     * Requirements: 12.1, 12.2
+     */
+    fun enterEditMode(message: TextMessage) {
+        // Store editing state in ViewModel (drives preview bar visibility via flow)
+        viewModel?.setEditMessage(message)
+
+        // Populate input field with span-formatted content
+        val markdown = message.text ?: ""
+        if (richTextConfiguration.hasAnyEnabled() && markdown.isNotEmpty()) {
+            // Use MarkdownConverter to parse markdown into WYSIWYG spans
+            val spanEditable = MarkdownConverter.fromMarkdown(markdown, context)
+
+            // Run formatter pipeline to resolve mention tokens on the span editable
+            var spannableBuilder = SpannableStringBuilder(spanEditable)
+            for (formatter in textFormatters) {
+                spannableBuilder = formatter.prepareMessageString(
+                    context,
+                    message,
+                    spannableBuilder,
+                    UIKitConstants.MessageBubbleAlignment.RIGHT,
+                    UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                ) ?: spannableBuilder
+            }
+
+            // Restore consumed mentions from message metadata (Req 17.2)
+            MentionCodeBlockHandler.restoreConsumedMentionsFromMetadata(
+                spannableBuilder, message.metadata
+            )
+
+            binding.etMessageInput.setText(spannableBuilder)
+            binding.etMessageInput.setSelection(spannableBuilder.length)
+
+            // Re-attach FormatSpanWatcher to the new Editable content
+            formatSpanWatcher?.clearPendingFormats()
+            formatSpanWatcher?.attachTo(binding.etMessageInput.text)
+        } else {
+            // Fallback: plain text with formatter pipeline (no rich text enabled)
+            var spannableBuilder = SpannableStringBuilder(markdown)
+            for (formatter in textFormatters) {
+                spannableBuilder = formatter.prepareMessageString(
+                    context,
+                    message,
+                    spannableBuilder,
+                    UIKitConstants.MessageBubbleAlignment.RIGHT,
+                    UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                ) ?: spannableBuilder
+            }
+            binding.etMessageInput.setText(spannableBuilder)
+            binding.etMessageInput.setSelection(spannableBuilder.length)
+        }
+    }
+
+    /**
+     * Exits edit mode: hides the edit preview bar, clears the input field,
+     * and clears the editing state from the ViewModel.
+     *
+     * Requirements: 12.4
+     */
+    fun exitEditMode() {
         viewModel?.clearEditMessage()
         binding.etMessageInput.setText("")
+
+        // Reset span engine state
+        if (richTextConfiguration.hasAnyEnabled()) {
+            formatSpanWatcher?.clearPendingFormats()
+            formatSpanWatcher?.attachTo(binding.etMessageInput.text)
+        }
+
+        // Reset active/disabled formats
+        activeFormats = emptySet()
+        disabledFormats = emptySet()
+        updateToolbarButtonStates()
     }
 
     /**
      * Sets the message to be replied to.
      */
     fun setReplyMessage(message: BaseMessage) {
-        viewModel?.setReplyMessage(message)
+        enterReplyMode(message)
     }
 
     /**
      * Clears the reply message state.
      */
     fun clearReplyMessage() {
+        exitReplyMode()
+    }
+
+    /**
+     * Enters reply mode for the given message.
+     * Shows the reply preview bar above the input field with the sender name
+     * and a type-dependent content summary, and stores the reply state.
+     *
+     * Content summary is determined by message type:
+     * - [TextMessage]: the message text (with formatter pipeline applied for mentions)
+     * - [MediaMessage]: attachment filename or localized type label (image, video, audio, file)
+     * - [CustomMessage]: localized label based on custom type (poll, sticker, location, etc.)
+     *
+     * Requirements: 13.1, 13.2
+     */
+    fun enterReplyMode(message: BaseMessage) {
+        // Store reply state in ViewModel (drives preview bar visibility via flow)
+        viewModel?.setReplyMessage(message)
+        replyingToMessageId = message.id.toLong()
+    }
+
+    /**
+     * Exits reply mode: hides the reply preview bar and clears the reply state.
+     *
+     * Requirements: 13.4
+     */
+    fun exitReplyMode() {
         viewModel?.clearReplyMessage()
+        replyingToMessageId = null
     }
 
     /**
@@ -2839,11 +4296,13 @@ class CometChatMessageComposer @JvmOverloads constructor(
     // ==================== Visibility Setters ====================
 
     fun setHideAttachmentButton(hide: Boolean) {
+        if (isAgentChat && !hide) return // Agent chat always hides attachment button
         hideAttachmentButton = hide
         updateButtonVisibility()
     }
 
     fun setHideVoiceRecordingButton(hide: Boolean) {
+        if (isAgentChat && !hide) return // Agent chat always hides voice recording button
         hideVoiceRecordingButton = hide
         updateButtonVisibility()
     }
@@ -2854,6 +4313,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     }
 
     fun setHideStickerButton(hide: Boolean) {
+        if (isAgentChat && !hide) return // Agent chat always hides sticker button
         hideStickerButton = hide
         updateButtonVisibility()
     }
@@ -2866,10 +4326,17 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * @param visibility View.VISIBLE to show the toolbar, View.GONE to hide it
      */
     fun setRichTextToolbarVisibility(visibility: Int) {
+        // Agent chat always hides the rich text toolbar
+        if (isAgentChat && visibility == View.VISIBLE) return
         richTextToolbarVisibility = visibility
         // Auto-enable all formats if visibility is VISIBLE and no formats are configured
         if (visibility == View.VISIBLE && !richTextConfiguration.hasAnyEnabled()) {
             setRichTextConfiguration(RichTextConfiguration.allEnabled())
+        }
+        // When toolbar is visible, automatically enable text selection menu items (Req 19.8)
+        if (visibility == View.VISIBLE) {
+            showTextSelectionMenuItems = true
+            setupTextSelectionMenu()
         }
         updateButtonVisibility()
     }
@@ -2880,6 +4347,40 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * @return View.VISIBLE or View.GONE
      */
     fun getRichTextToolbarVisibility(): Int = richTextToolbarVisibility
+
+    /**
+     * Enables or disables rich text formatting.
+     * When disabled, the text selection menu formatting options are removed.
+     *
+     * @param enable true to enable rich text formatting, false to disable
+     */
+    fun setEnableRichTextFormatting(enable: Boolean) {
+        enableRichTextFormatting = enable
+        setupTextSelectionMenu()
+    }
+
+    /**
+     * Returns whether rich text formatting is enabled.
+     */
+    fun isEnableRichTextFormatting(): Boolean = enableRichTextFormatting
+
+    /**
+     * Sets whether to show formatting options in the text selection menu.
+     * When enabled and [enableRichTextFormatting] is true, long-pressing and
+     * selecting text will show Bold, Italic, Strikethrough, and InlineCode
+     * options in the system context menu.
+     *
+     * @param show true to show formatting options in selection menu, false to hide
+     */
+    fun setShowTextSelectionMenuItems(show: Boolean) {
+        showTextSelectionMenuItems = show
+        setupTextSelectionMenu()
+    }
+
+    /**
+     * Returns whether formatting options are shown in the text selection menu.
+     */
+    fun isShowTextSelectionMenuItems(): Boolean = showTextSelectionMenuItems
 
     fun setHideEditPreview(hide: Boolean) {
         hideEditPreview = hide
@@ -3259,6 +4760,24 @@ class CometChatMessageComposer @JvmOverloads constructor(
         richTextConfiguration = configuration
         richTextFormatterManager = RichTextFormatterManager(configuration)
         
+        // Initialize FormatSpanWatcher if formats are now enabled and watcher doesn't exist yet
+        if (configuration.hasAnyEnabled() && formatSpanWatcher == null) {
+            formatSpanWatcher = FormatSpanWatcher(context)
+            formatSpanWatcher?.attachTo(binding.etMessageInput.text)
+        }
+        
+        // Disable autocorrect/suggestions when rich text is enabled.
+        // Autocorrect can modify text and break formatting spans,
+        // autocomplete suggestions can replace formatted text,
+        // and spell check underlines interfere with visual formatting.
+        if (configuration.hasAnyEnabled()) {
+            binding.etMessageInput.inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            binding.etMessageInput.imeOptions = binding.etMessageInput.imeOptions or
+                android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+        }
+        
         // Update toolbar visibility based on current text state
         updateButtonVisibility()
     }
@@ -3346,6 +4865,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun getRichTextToolbarBackgroundColor(): Int = style.richTextToolbarBackgroundColor
     fun getRichTextToolbarIconTint(): Int = style.richTextToolbarIconTint
     fun getRichTextToolbarActiveIconTint(): Int = style.richTextToolbarActiveIconTint
+    fun getRichTextToolbarActiveIconBackgroundColor(): Int = style.richTextToolbarActiveIconBackgroundColor
 
     // ==================== Setters (update style object + apply) ====================
 
@@ -3395,8 +4915,6 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.separatorView.setBackgroundColor(color)
             binding.toolbarSeparator1.setBackgroundColor(color)
             binding.toolbarSeparator2.setBackgroundColor(color)
-            binding.toolbarSeparator3.setBackgroundColor(color)
-            binding.toolbarSeparator4.setBackgroundColor(color)
             binding.toolbarInputSeparator.setBackgroundColor(color)
         }
     }
@@ -3604,6 +5122,12 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun setRichTextToolbarActiveIconTint(@ColorInt color: Int) {
         style = style.copy(richTextToolbarActiveIconTint = color)
         // Applied when format buttons are toggled active
+        updateToolbarButtonStates()
+    }
+
+    fun setRichTextToolbarActiveIconBackgroundColor(@ColorInt color: Int) {
+        style = style.copy(richTextToolbarActiveIconBackgroundColor = color)
+        updateToolbarButtonStates()
     }
 
     // ==================== Text Formatters ====================

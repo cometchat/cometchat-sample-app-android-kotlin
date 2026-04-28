@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.Call
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.Action
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.CustomMessage
@@ -38,6 +39,8 @@ import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.mentions.MentionTextStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatActionBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudioBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCallActionBubbleStyle
@@ -79,6 +82,7 @@ import com.cometchat.uikit.compose.presentation.shared.receipts.MessageReceiptUt
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.domain.model.StreamMessage
 
 // ============================================================================
 // Leading View Resolution API
@@ -348,6 +352,8 @@ internal object InternalContentRenderer {
                     renderCustomMessage(message, alignment, styles, messageBubbleStyle, onLongClick)
                 }
             }
+            "agentic" -> renderAIAssistantMessage(message, alignment, styles)
+            UIKitConstants.MessageCategory.STREAM -> renderAIAssistantMessage(message, alignment, styles)
             else -> {
                 logUnknownType(message)
                 false
@@ -412,13 +418,14 @@ internal object InternalContentRenderer {
      * Status info view (timestamp + receipt) should be hidden for:
      * - Messages that use minimal slots (action, call)
      * - Meeting messages (they have timestamp in the bubble itself)
+     * - AIAssistantMessage instances (includes StreamMessage since it extends AIAssistantMessage)
      *
      * @param message The message to check
      * @param useMinimalSlots Whether the message uses minimal slots
      * @return true if status info should be hidden, false otherwise
      */
     fun shouldHideStatusInfo(message: BaseMessage, useMinimalSlots: Boolean): Boolean {
-        return useMinimalSlots || isMeetingMessage(message)
+        return useMinimalSlots || isMeetingMessage(message) || message is AIAssistantMessage
     }
 
     // ========================================================================
@@ -692,6 +699,7 @@ internal object InternalContentRenderer {
                     alignment = alignment,
                     style = effectiveStyle,
                     textFormatters = textFormatters,
+                    onLongClick = onLongClick,
                     onMentionClick = onMentionClick,
                     onMentionAllClick = onMentionAllClick,
                     mentionTextStyle = mentionTextStyle
@@ -1273,6 +1281,44 @@ internal object InternalContentRenderer {
     }
 
     // ========================================================================
+    // AI Assistant message rendering
+    // ========================================================================
+
+    /**
+     * Renders an AI assistant message bubble for agentic and stream categories.
+     *
+     * This function handles both:
+     * - `AIAssistantMessage` (category "agentic") — completed AI responses
+     * - `StreamMessage` (category "stream_message") — in-progress streaming responses
+     *
+     * Both message types are rendered using [CometChatAIAssistantBubble].
+     * The style is resolved from [BubbleStyles.aiAssistantBubbleStyle], falling back
+     * to [CometChatAIAssistantBubbleStyle.incoming] when no override is provided.
+     *
+     * Note: `StreamMessage` extends `AIAssistantMessage`, so the `is StreamMessage`
+     * check must come first to avoid the `is AIAssistantMessage` branch matching both.
+     *
+     * @param message The message to render (expected to be AIAssistantMessage or StreamMessage)
+     * @param alignment The bubble alignment (LEFT, RIGHT, CENTER)
+     * @param styles Container holding all bubble style overrides
+     * @return true if content was rendered, false if the message type is unrecognized
+     */
+    @Composable
+    private fun renderAIAssistantMessage(
+        message: BaseMessage,
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        styles: BubbleStyles
+    ): Boolean {
+        val style = styles.aiAssistantBubbleStyle ?: CometChatAIAssistantBubbleStyle.incoming()
+        when (message) {
+            is StreamMessage -> CometChatAIAssistantBubble(streamMessage = message, style = style)
+            is AIAssistantMessage -> CometChatAIAssistantBubble(aiAssistantMessage = message, style = style)
+            else -> return false
+        }
+        return true
+    }
+
+    // ========================================================================
     // Default style helpers for custom extension messages
     // ========================================================================
 
@@ -1676,7 +1722,35 @@ internal object InternalContentRenderer {
         style: CometChatMessageBubbleStyle,
         hideModerationView: Boolean = false
     ) {
-        // Skip rendering if hideModerationView is true
+        // AI Assistant copy button — shown for AIAssistantMessage with non-empty text
+        if (message is AIAssistantMessage && message !is StreamMessage) {
+            val text = message.text
+            if (!text.isNullOrEmpty()) {
+                val context = LocalContext.current
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.cometchat_ic_copy_paste),
+                        contentDescription = "Copy",
+                        tint = CometChatTheme.colorScheme.textColorSecondary,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable {
+                                val clipboardManager =
+                                    context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                                val clipData = android.content.ClipData.newPlainText("AI Response", text)
+                                clipboardManager?.setPrimaryClip(clipData)
+                            }
+                    )
+                }
+            }
+            return
+        }
+
+        // Skip moderation rendering if hideModerationView is true
         if (hideModerationView) return
 
         val isDisapproved = when (message) {

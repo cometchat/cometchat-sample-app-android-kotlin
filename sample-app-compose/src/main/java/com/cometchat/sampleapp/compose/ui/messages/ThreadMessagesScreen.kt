@@ -60,6 +60,7 @@ import com.cometchat.uikit.compose.presentation.threadheader.ui.CometChatThreadH
 @Composable
 fun ThreadMessagesScreen(
     parentMessageId: Long,
+    goToMessageId: Long? = null,
     onBackPress: () -> Unit
 ) {
     // State for parent message and receiver
@@ -150,6 +151,7 @@ fun ThreadMessagesScreen(
                 user = user,
                 group = group,
                 parentMessageId = parentMessageId.toLong(),
+                goToMessageId = goToMessageId,
                 // Enable real-time updates
                 scrollToBottomOnNewMessage = true,
                 // Hide thread option in thread view (no nested threads)

@@ -63,11 +63,10 @@ fun CometChatReceipts(
  * CometChatReceipts overload that accepts a BaseMessage and extracts the receipt status.
  * This is a convenience function that determines the receipt status based on message properties.
  *
- * Receipt status is determined as follows:
- * - READ: If message.readAt > 0
- * - DELIVERED: If message.deliveredAt > 0
- * - SENT: If message.id > 0 (message has server-assigned ID)
- * - IN_PROGRESS: Otherwise (message is being sent)
+ * Receipt status is determined using [MessageReceiptUtils.getMessageReceipt] which handles:
+ * - Metadata error checks
+ * - Moderation status (DISAPPROVED → ERROR, PENDING → SENT)
+ * - Standard receipt status (READ, DELIVERED, SENT, IN_PROGRESS)
  *
  * @param message The BaseMessage to extract receipt status from
  * @param modifier Modifier for the receipt indicator
@@ -87,25 +86,10 @@ fun CometChatReceipts(
     modifier: Modifier = Modifier,
     style: CometChatReceiptsStyle = CometChatReceiptsStyle.default()
 ) {
-    val receipt = getReceiptFromMessage(message)
+    val receipt = MessageReceiptUtils.getMessageReceipt(message)
     CometChatReceipts(
         receipt = receipt,
         modifier = modifier,
         style = style
     )
-}
-
-/**
- * Extracts the Receipt status from a BaseMessage.
- *
- * @param message The BaseMessage to extract receipt status from
- * @return The Receipt enum value representing the message's current status
- */
-private fun getReceiptFromMessage(message: BaseMessage): Receipt {
-    return when {
-        message.readAt > 0 -> Receipt.READ
-        message.deliveredAt > 0 -> Receipt.DELIVERED
-        message.id > 0 -> Receipt.SENT
-        else -> Receipt.IN_PROGRESS
-    }
 }

@@ -20,6 +20,7 @@ import com.cometchat.chat.models.TypingIndicator
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.factory.CometChatMessageHeaderViewModelFactory
 import com.cometchat.uikit.core.state.MessageHeaderUIState
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.utils.CallsUtils
 import com.cometchat.uikit.core.viewmodel.CometChatMessageHeaderViewModel
 import com.cometchat.uikit.kotlin.R
@@ -123,6 +124,7 @@ class CometChatMessageHeader @JvmOverloads constructor(
     private var voiceCallButtonVisibility = if (CallsUtils.isCallingEnabled()) View.VISIBLE else View.GONE
     private var newChatButtonVisibility = View.GONE
     private var chatHistoryButtonVisibility = View.GONE
+    private var isAgentChat: Boolean = false
 
     // Single style object - NO individual style properties
     private var style: CometChatMessageHeaderStyle = CometChatMessageHeaderStyle()
@@ -290,9 +292,24 @@ class CometChatMessageHeader @JvmOverloads constructor(
     fun setUser(user: User) {
         this.user = user
         this.group = null
+        isAgentChat = AgentChatDetector.isAgentChat(user)
+
+        if (isAgentChat) {
+            videoCallButtonVisibility = View.GONE
+            voiceCallButtonVisibility = View.GONE
+            userStatusVisibility = View.GONE
+            newChatButtonVisibility = View.VISIBLE
+            chatHistoryButtonVisibility = View.VISIBLE
+        }
+
         viewModel?.setUser(user)
         binding.callButtons.setUser(user)
         updateCallButtonsVisibility()
+
+        // Apply AI button visibility after call buttons are updated
+        binding.ivNewChat.visibility = newChatButtonVisibility
+        binding.ivChatHistory.visibility = chatHistoryButtonVisibility
+
         invokeViewCallbacks()
     }
 
@@ -340,7 +357,11 @@ class CometChatMessageHeader @JvmOverloads constructor(
         binding.tvMessageHeaderName.text = user.name
 
         if (subtitleViewListener == null) {
-            if (!isBlocked(user)) {
+            if (isAgentChat) {
+                binding.tvMessageHeaderSubtitle.visibility = View.VISIBLE
+                binding.tvMessageHeaderSubtitle.text = context.getString(R.string.cometchat_ai_assistant)
+                binding.messageHeaderStatusIndicatorView.visibility = View.GONE
+            } else if (!isBlocked(user)) {
                 binding.messageHeaderStatusIndicatorView.visibility = userStatusVisibility
                 showUserStatusAndLastSeen(user)
             } else {
@@ -557,6 +578,7 @@ class CometChatMessageHeader @JvmOverloads constructor(
     }
 
     fun setUserStatusVisibility(visibility: Int) {
+        if (isAgentChat) return // Agent chat always hides user status
         userStatusVisibility = visibility
     }
 
@@ -570,11 +592,13 @@ class CometChatMessageHeader @JvmOverloads constructor(
     }
 
     fun setVideoCallButtonVisibility(visibility: Int) {
+        if (isAgentChat) return // Agent chat always hides call buttons
         videoCallButtonVisibility = visibility
         updateCallButtonsVisibility()
     }
 
     fun setVoiceCallButtonVisibility(visibility: Int) {
+        if (isAgentChat) return // Agent chat always hides call buttons
         voiceCallButtonVisibility = visibility
         updateCallButtonsVisibility()
     }

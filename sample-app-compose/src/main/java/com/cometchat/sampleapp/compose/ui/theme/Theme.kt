@@ -147,7 +147,12 @@ fun SampleAppTheme(
         typography = androidx.compose.material3.Typography(),
         content = {
             // Wrap with CometChat theme for UIKit components
-            CometChatTheme {
+            val cometChatColorScheme = if (darkTheme) {
+                com.cometchat.uikit.compose.theme.darkColorScheme()
+            } else {
+                com.cometchat.uikit.compose.theme.lightColorScheme()
+            }
+            CometChatTheme(colorScheme = cometChatColorScheme) {
                 content()
             }
         }

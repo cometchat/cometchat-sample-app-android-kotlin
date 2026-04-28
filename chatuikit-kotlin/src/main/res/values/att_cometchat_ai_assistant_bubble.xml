@@ -6,10 +6,28 @@
         <attr name="cometChatAIAssistantBubbleBackgroundColor" format="color" />
         <attr name="cometChatAIAssistantBubbleTextColor" format="color" />
         <attr name="cometChatAIAssistantBubbleTextAppearance" format="reference"/>
-        
+
         <attr name="cometchatAIAssistantBubbleCornerRadius" format="dimension" />
         <attr name="cometchatAIAssistantBubbleStrokeWidth" format="dimension" />
         <attr name="cometchatAIAssistantBubbleStrokeColor" format="color" />
         <attr name="cometchatAIAssistantBubbleBackgroundDrawable" format="reference" />
+
+        <!-- Shimmer / thinking state -->
+        <attr name="cometchatAIAssistantBubbleShimmerTextColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleShimmerTextAppearance" format="reference" />
+
+        <!-- Error state -->
+        <attr name="cometchatAIAssistantBubbleErrorBackgroundColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleErrorTextColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleErrorTextAppearance" format="reference" />
+        <attr name="cometchatAIAssistantBubbleErrorIconTint" format="color" />
+
+        <attr name="cometchatAIAssistantBubbleSenderNameTextAppearance" format="reference" />
+        <attr name="cometchatAIAssistantBubbleSenderNameTextColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleThreadIndicatorTextAppearance" format="reference" />
+        <attr name="cometchatAIAssistantBubbleThreadIndicatorTextColor" format="color" />
+        <attr name="cometchatAIAssistantBubbleThreadIndicatorIconTint" format="color" />
+        <attr name="cometchatAIAssistantBubbleDateStyle" format="reference" />
+        <attr name="cometchatAIAssistantBubbleMessageReceiptStyle" format="reference" />
     </declare-styleable>
 </resources>

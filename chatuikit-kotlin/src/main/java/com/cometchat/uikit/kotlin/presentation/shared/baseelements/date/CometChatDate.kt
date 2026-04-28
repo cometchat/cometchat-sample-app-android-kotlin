@@ -333,13 +333,15 @@ class CometChatDate @JvmOverloads constructor(
         }
 
         return when {
-            now.get(Calendar.DAY_OF_YEAR) == timeToCheck.get(Calendar.DAY_OF_YEAR) -> {
+            now.get(Calendar.DAY_OF_YEAR) == timeToCheck.get(Calendar.DAY_OF_YEAR)
+                && now.get(Calendar.YEAR) == timeToCheck.get(Calendar.YEAR) -> {
                 if (isDateTimeFormatterCallbackSet()) {
                     dateTimeFormatterCallback?.today(timeInMillis)?.let { return it }
                 }
                 context.getString(R.string.cometchat_today)
             }
-            (now.get(Calendar.DAY_OF_YEAR) - 1) == timeToCheck.get(Calendar.DAY_OF_YEAR) -> {
+            (now.get(Calendar.DAY_OF_YEAR) - 1) == timeToCheck.get(Calendar.DAY_OF_YEAR)
+                && now.get(Calendar.YEAR) == timeToCheck.get(Calendar.YEAR) -> {
                 if (isDateTimeFormatterCallbackSet()) {
                     dateTimeFormatterCallback?.yesterday(timeInMillis)?.let { return it }
                 }
@@ -365,18 +367,21 @@ class CometChatDate @JvmOverloads constructor(
 
         return when {
             // Today - show time
-            now.get(Calendar.DAY_OF_YEAR) == timeToCheck.get(Calendar.DAY_OF_YEAR) -> {
+            now.get(Calendar.DAY_OF_YEAR) == timeToCheck.get(Calendar.DAY_OF_YEAR)
+                && now.get(Calendar.YEAR) == timeToCheck.get(Calendar.YEAR) -> {
                 getTime(timestamp)
             }
             // Yesterday
-            (now.get(Calendar.DAY_OF_YEAR) - 1) == timeToCheck.get(Calendar.DAY_OF_YEAR) -> {
+            (now.get(Calendar.DAY_OF_YEAR) - 1) == timeToCheck.get(Calendar.DAY_OF_YEAR)
+                && now.get(Calendar.YEAR) == timeToCheck.get(Calendar.YEAR) -> {
                 if (isDateTimeFormatterCallbackSet()) {
                     dateTimeFormatterCallback?.yesterday(timeInMillis)?.let { return it }
                 }
                 context.getString(R.string.cometchat_yesterday)
             }
             // Last 7 days - show day name
-            (now.get(Calendar.DAY_OF_YEAR) - 7) <= timeToCheck.get(Calendar.DAY_OF_YEAR) -> {
+            (now.get(Calendar.DAY_OF_YEAR) - 7) <= timeToCheck.get(Calendar.DAY_OF_YEAR)
+                && now.get(Calendar.YEAR) == timeToCheck.get(Calendar.YEAR) -> {
                 if (isDateTimeFormatterCallbackSet()) {
                     dateTimeFormatterCallback?.lastWeek(timeInMillis)?.let { return it }
                 }

@@ -64,7 +64,7 @@ enum class MentionDisplayContext {
  *     mentionBackgroundColor = Color.Blue.copy(alpha = 0.2f),
  *     selfMentionTextColor = Color.Red,
  *     selfMentionBackgroundColor = Color.Red.copy(alpha = 0.2f),
- *     mentionFontWeight = FontWeight.SemiBold
+ *     mentionFontWeight = FontWeight.Medium
  * )
  * ```
  *
@@ -87,15 +87,16 @@ data class MentionTextStyle(
     companion object {
         /**
          * Creates a default style for incoming message bubbles.
-         * Uses primary color for mentions on light background.
+         * Uses primary color for mentions with primary background at 20% opacity.
+         * Requirement 26.11: Primary color, FontWeight.Medium, primary bg at 20% opacity.
          */
         @Composable
         fun incomingBubble(): MentionTextStyle = MentionTextStyle(
             mentionTextColor = CometChatTheme.colorScheme.primary,
-            mentionBackgroundColor = CometChatTheme.colorScheme.extendedPrimaryColor100,
+            mentionBackgroundColor = CometChatTheme.colorScheme.primary.copy(alpha = 0.2f),
             selfMentionTextColor = CometChatTheme.colorScheme.primary,
-            selfMentionBackgroundColor = CometChatTheme.colorScheme.extendedPrimaryColor200,
-            mentionFontWeight = FontWeight.SemiBold
+            selfMentionBackgroundColor = CometChatTheme.colorScheme.primary.copy(alpha = 0.2f),
+            mentionFontWeight = FontWeight.Medium
         )
 
         /**
@@ -108,7 +109,7 @@ data class MentionTextStyle(
             mentionBackgroundColor = CometChatTheme.colorScheme.extendedPrimaryColor700,
             selfMentionTextColor = CometChatTheme.colorScheme.textColorWhite,
             selfMentionBackgroundColor = CometChatTheme.colorScheme.extendedPrimaryColor600,
-            mentionFontWeight = FontWeight.SemiBold
+            mentionFontWeight = FontWeight.Medium
         )
 
         /**

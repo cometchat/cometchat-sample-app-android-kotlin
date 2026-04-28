@@ -15,9 +15,23 @@ description: "Style CometChat UI Kit components using XML theme attributes or Co
 
 </Accordion>
 
-This page shows how to style CometChat UI Kit components. Each component supports customization of colors, typography, and icons.
+This page shows how to style CometChat UI Kit components in Android. It is written for Android developers customizing UI Kit v6.
 
----
+## When to use this
+
+- You want UI Kit screens (lists, headers, and message UI) to match your brand colors and typography.
+- You need to customize calling and AI UI components without rebuilding UI from scratch.
+- You prefer centralized styling through `res/values/themes.xml` (XML Views) or style data classes (Compose).
+- You want consistent iconography by supplying your own vector drawables.
+- You need a repeatable pattern that can be applied across components.
+
+## Prerequisites
+
+- CometChat Android UI Kit v6 installed in your app.
+- Your app theme extends `CometChatTheme.DayNight` (for XML Views).
+- You can edit `res/values/themes.xml` in your Android module.
+- You can add drawable resources to `res/drawable/` when needed.
+- You rebuild or sync Gradle after updating styles.
 
 ## Styling Pattern
 
@@ -26,9 +40,11 @@ This page shows how to style CometChat UI Kit components. Each component support
 
 Components read styles from XML theme attributes. The pattern is:
 
-1. Create a custom style extending the component's parent style
-2. Override the attributes you want to change
-3. Assign your custom style to `AppTheme` via the component's theme attribute
+1. Open `res/values/themes.xml`.
+2. Create a custom style that extends the component's parent style (for example, `CometChatConversationsStyle`).
+3. Assign your custom style to `AppTheme` using the component's theme attribute (for example, `cometchatConversationsStyle`).
+4. Sync Gradle and rebuild the app.
+5. Navigate to the screen that uses the component and confirm the visual change.
 
 ```xml themes.xml lines
 <resources>
@@ -82,15 +98,37 @@ CometChatConversations(
 </Tab>
 </Tabs>
 
+## Core concepts
+
+- `AppTheme` is the single place where UI Kit style hooks are wired (XML Views).
+- Each UI Kit component has a parent style (for example, `CometChatMessageListStyle`) and a theme attribute (for example, `cometchatMessageListStyle`).
+- Custom styles must extend the correct parent style to inherit default behavior.
+- Drawable overrides (for example, custom icons) live in `res/drawable/` and are referenced from styles.
+- Fonts can be set once at the theme level and reused across components.
+
 ---
 
-## Chat Lists & Messaging
+## Implementation
 
-### Conversation List
+Use the following sections to style each component. Each section lists what changes, where to change it, the exact code to paste, and how to verify the result.
+
+### Chat Lists & Messaging
+
+#### Conversations
+
+The `CometChatConversations` component renders the recent chats list.
 
 <Frame>
   <img src="/images/433c987e-Conversation_Styling-1e5686a26eb349d5cbc40262b9b6df0e.png" />
 </Frame>
+
+What you're changing: avatar and badge styling in the conversation list.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatConversations`
+- **Default behavior**: UI Kit default avatar and badge styles.
+- **Override**: set `cometchatConversationsStyle` in `AppTheme` or pass a style object.
+
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -139,17 +177,39 @@ CometChatConversations(
 </Tab>
 </Tabs>
 
-### Users
+- **What this does**: applies custom avatar and badge styles to conversation list items.
+- **Verify**: the Conversations list shows updated avatar backgrounds and badge colors.
+
+Attribute references:
+- [Conversations attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_conversations.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+- [Badge attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_badge.xml)
+
+#### Users
+
+The `CometChatUsers` component renders a list of users for selection or navigation.
 
 <Frame>
   <img src="/images/c8909b74-users_styling-3acb1ffef7870b6903a070fd83b5103f.png" />
 </Frame>
+
+What you're changing: user list avatar and separator styling.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatUsers`
+- **Default behavior**: UI Kit default avatar and list styling.
+- **Override**: set `cometchatUsersStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
     <style name="CustomUsersStyle" parent="CometChatUsersStyle">
         <item name="cometchatUsersAvatarStyle">@style/CustomAvatarStyle</item>
         <item name="cometchatUsersSeparatorColor">#F76808</item>
@@ -177,17 +237,38 @@ CometChatUsers(
 </Tab>
 </Tabs>
 
-### Groups
+- **What this does**: applies avatar and separator color overrides to the user list.
+- **Verify**: the Users list shows updated avatar backgrounds and separator color.
+
+Attribute references:
+- [Users attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_users.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Groups
+
+The `CometChatGroups` component renders group items and their summary data.
 
 <Frame>
   <img src="/images/5b3c1825-groups_styling-f8164f3a9b1247ad1db859328c199051.png" />
 </Frame>
+
+What you're changing: group list avatar and typography colors.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatGroups`
+- **Default behavior**: UI Kit default group item styling.
+- **Override**: set `cometchatGroupsStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
     <style name="CustomGroupsStyle" parent="CometChatGroupsStyle">
         <item name="cometchatGroupsAvatarStyle">@style/CustomAvatarStyle</item>
         <item name="cometchatGroupsSeparatorColor">#F76808</item>
@@ -215,20 +296,47 @@ CometChatGroups(
 </Tab>
 </Tabs>
 
-### Message Header
+- **What this does**: styles group avatars and separators in the Groups list.
+- **Verify**: the Groups list shows the updated avatar background and title color.
+
+Attribute references:
+- [Groups attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_groups.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Message Header
+
+The `CometChatMessageHeader` component renders the title, avatar, and action icons for a chat.
 
 <Frame>
   <img src="/images/c761803d-message_header_styling-ae4670a5a130374818f37e2144246748.png" />
 </Frame>
+
+What you're changing: title text color, avatar styling, and call button icons.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatMessageHeader`
+- **Default behavior**: UI Kit default header typography and icons.
+- **Override**: set `cometchatMessageHeaderStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
+    <style name="CustomCallButtonStyle" parent="CometChatCallButtonsStyle">
+        <item name="cometchatCallButtonsVideoCallIconTint">#F76808</item>
+        <item name="cometchatCallButtonsVoiceCallIconTint">#F76808</item>
+    </style>
+
     <style name="CustomMessageHeaderStyle" parent="CometChatMessageHeaderStyle">
         <item name="cometchatMessageHeaderTitleTextColor">#F76808</item>
         <item name="cometchatMessageHeaderAvatarStyle">@style/CustomAvatarStyle</item>
+        <item name="cometchatMessageHeaderCallButtonsStyle">@style/CustomCallButtonStyle</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
@@ -251,28 +359,44 @@ CometChatMessageHeader(
 </Tab>
 </Tabs>
 
-### Message List
+- **What this does**: applies custom title color, avatar styling, and call button tints in the message header.
+- **Verify**: open a conversation and check the header text and call button icons.
+
+Attribute references:
+- [Message Header attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_header.xml)
+- [Call Buttons attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_call_buttons.xml)
+
+#### Message List
+
+The `CometChatMessageList` component renders conversation messages and their bubble styles.
 
 <Frame>
   <img src="/images/03a08ce8-message_list_styling-ebbb6bea74da1c21078f037fb50d8bff.png" />
 </Frame>
+
+What you're changing: message list background and outgoing bubble styling.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatMessageList`
+- **Default behavior**: UI Kit default message list background and bubble colors.
+- **Override**: set `cometchatMessageListStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
-    <style name="CustomOutgoingBubble" parent="CometChatOutgoingMessageBubbleStyle">
+    <style name="CustomOutgoingMessageBubbleStyle" parent="CometChatOutgoingMessageBubbleStyle">
         <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
     </style>
 
-    <style name="CustomMessageListStyle" parent="CometChatMessageListStyle">
+    <style name="CustomCometChatMessageListStyle" parent="CometChatMessageListStyle">
         <item name="cometchatMessageListBackgroundColor">#FEEDE1</item>
-        <item name="cometchatMessageListOutgoingMessageBubbleStyle">@style/CustomOutgoingBubble</item>
+        <item name="cometchatMessageListOutgoingMessageBubbleStyle">@style/CustomOutgoingMessageBubbleStyle</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
-        <item name="cometchatMessageListStyle">@style/CustomMessageListStyle</item>
+        <item name="cometchatMessageListStyle">@style/CustomCometChatMessageListStyle</item>
     </style>
 </resources>
 ```
@@ -294,21 +418,58 @@ CometChatMessageList(
 </Tab>
 </Tabs>
 
-### Message Composer
+- **What this does**: changes the message list background and outgoing bubble color.
+- **Verify**: open a conversation and check outgoing message bubble colors.
+
+Attribute references:
+- [Message List attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_list.xml)
+- [Message Bubble attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_bubble.xml)
+
+#### Message Composer
+
+The `CometChatMessageComposer` component renders the input box and action buttons.
 
 <Frame>
   <img src="/images/482915e0-message_composer_styling-db627f8855f376a0287e9d2d7f0be603.png" />
 </Frame>
 
+What you're changing: send button icon and composer icon tints.
+
+- **Where to change it**: `res/drawable/active_send_button.xml` and `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatMessageComposer`
+- **Default behavior**: UI Kit default composer icons and send button drawable.
+- **Override**: set `cometchatMessageComposerStyle` in `AppTheme` or pass a style object.
+
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
-```xml themes.xml lines
+```xml res/drawable/active_send_button.xml lines
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <path
+        android:fillColor="#F76808"
+        android:pathData="M16,0L16,0A16,16 0,0 1,32 16L32,16A16,16 0,0 1,16 32L16,32A16,16 0,0 1,0 16L0,16A16,16 0,0 1,16 0z" />
+    <group>
+        <clip-path android:pathData="M4,4h24v24h-24z" />
+        <path
+            android:fillColor="?attr/cometchatColorWhite"
+            android:pathData="M10.767,22.723C10.465,22.843 10.178,22.818 9.907,22.646C9.636,22.474 9.5,22.223 9.5,21.894V17.673L16.423,16L9.5,14.327V10.106C9.5,9.777 9.636,9.526 9.907,9.354C10.178,9.182 10.465,9.157 10.767,9.277L24.723,15.161C25.095,15.328 25.281,15.608 25.281,16.002C25.281,16.395 25.095,16.674 24.723,16.838L10.767,22.723Z" />
+    </group>
+</vector>
+```
+
+```xml res/values/themes.xml lines
 <resources>
     <style name="CustomMessageComposerStyle" parent="CometChatMessageComposerStyle">
         <item name="cometchatMessageComposerAttachmentIconTint">#F76808</item>
         <item name="cometchatMessageComposerVoiceRecordingIconTint">#F76808</item>
+        <item name="cometchatMessageComposerActiveStickerIconTint">#F76808</item>
+        <item name="cometchatMessageComposerInactiveStickerIconTint">#F76808</item>
         <item name="cometchatMessageComposerAIIconTint">#F76808</item>
+        <item name="cometchatMessageComposerActiveSendButtonDrawable">@drawable/active_send_button</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
@@ -333,25 +494,47 @@ CometChatMessageComposer(
 </Tab>
 </Tabs>
 
-### Group Members
+- **What this does**: applies custom icon tints and the active send button drawable to the composer.
+- **Verify**: the composer shows the custom send button and tinted icons.
+
+Attribute references:
+- [Message Composer attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_composer.xml)
+
+#### Group Members
+
+The `CometChatGroupMembers` component lists users inside a group.
 
 <Frame>
   <img src="/images/1bd5a982-group_members_styling-ee7427e23be4ccf40776d8b1df1342f4.png" />
 </Frame>
+
+What you're changing: group member list avatars, separators, and back icon tint.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatGroupMembers`
+- **Default behavior**: UI Kit default list styling.
+- **Override**: set `cometchatGroupMembersStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
     <style name="CustomGroupMembersStyle" parent="CometChatGroupMembersStyle">
         <item name="cometchatGroupMembersAvatarStyle">@style/CustomAvatarStyle</item>
         <item name="cometchatGroupMembersSeparatorColor">#F76808</item>
         <item name="cometchatGroupMembersTitleTextColor">#F76808</item>
+        <item name="cometchatGroupMembersBackIconTint">#F76808</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
         <item name="cometchatGroupMembersStyle">@style/CustomGroupMembersStyle</item>
+        <item name="cometchatPrimaryColor">#F76808</item>
     </style>
 </resources>
 ```
@@ -371,20 +554,47 @@ CometChatGroupMembers(
 </Tab>
 </Tabs>
 
-### Thread Header
+- **What this does**: applies custom avatar and separator styling to the group members list.
+- **Verify**: the group members screen shows updated avatar and separator colors.
+
+Attribute references:
+- [Group Members attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_group_members.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Thread Header
+
+The `CometChatThreadHeader` component renders the parent message preview in threaded views.
 
 <Frame>
   <img src="/images/76d4d00d-thread_header_styling-447011f9a5da276b357ce91cafa04e94.png" />
 </Frame>
+
+What you're changing: thread header bubble colors and reply count styling.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatThreadHeader`
+- **Default behavior**: UI Kit default thread header styling.
+- **Override**: set `cometchatThreadHeaderStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomOutgoingMessageBubbleStyle" parent="CometChatOutgoingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+    </style>
+
+    <style name="CustomIncomingMessageBubbleStyle" parent="CometChatIncomingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleBackgroundColor">#F76808</item>
+    </style>
+
     <style name="CustomThreadHeaderStyle" parent="CometChatThreadHeaderStyle">
+        <item name="cometchatThreadHeaderOutgoingMessageBubbleStyle">@style/CustomOutgoingMessageBubbleStyle</item>
+        <item name="cometchatThreadHeaderIncomingMessageBubbleStyle">@style/CustomIncomingMessageBubbleStyle</item>
         <item name="cometchatThreadHeaderBackgroundColor">#FEEDE1</item>
         <item name="cometchatThreadHeaderReplyCountTextColor">#F76808</item>
+        <item name="cometchatThreadHeaderReplyCountBackgroundColor">#FEEDE1</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
@@ -408,24 +618,300 @@ CometChatThreadHeader(
 </Tab>
 </Tabs>
 
----
+- **What this does**: customizes thread header bubble colors and reply count styling.
+- **Verify**: open a thread and confirm the header background and reply count colors.
 
-## Calling UI
+Attribute references:
+- [Thread Header attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_thread_header.xml)
+- [Message Bubble attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_bubble.xml)
 
-### Call Logs
+#### Mentions
+
+The `CometChatMentions` styling controls how user mentions appear inside messages.
 
 <Frame>
-  <img src="/images/d0eb378f-calls_styling-72e5f287e16313403492a56094660446.png" />
+  <img src="/images/e2732868-mentions_message_bubble-fccf9cbdd63a54c2f734803e4480418a.png" />
 </Frame>
+
+What you're changing: mention text and background styles for incoming and outgoing bubbles.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatMentions`
+- **Default behavior**: UI Kit default mention styling.
+- **Override**: set `cometchatMessageBubbleMentionsStyle` in both incoming and outgoing bubble styles.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomIncomingMessageBubbleMentionStyle" parent="CometChatIncomingBubbleMentionsStyle">
+        <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatMentionTextColor">#D6409F</item>
+        <item name="cometchatMentionBackgroundColor">#D6409F</item>
+        <item name="cometchatSelfMentionTextColor">#30A46C</item>
+        <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+    </style>
+
+    <style name="CustomOutgoingMessageBubbleMentionStyle" parent="CometChatOutgoingBubbleMentionsStyle">
+        <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatMentionTextColor">#FFFFFF</item>
+        <item name="cometchatMentionBackgroundColor">#F9F8FD</item>
+        <item name="cometchatSelfMentionTextColor">#30A46C</item>
+        <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
+        <item name="cometchatSelfMentionBackgroundColor">#30A46C</item>
+    </style>
+
+    <style name="CustomIncomingMessageBubbleStyle" parent="CometChatIncomingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleMentionsStyle">@style/CustomIncomingMessageBubbleMentionStyle</item>
+    </style>
+
+    <style name="CustomOutgoingMessageBubbleStyle" parent="CometChatOutgoingMessageBubbleStyle">
+        <item name="cometchatMessageBubbleMentionsStyle">@style/CustomOutgoingMessageBubbleMentionStyle</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatIncomingMessageBubbleStyle">@style/CustomIncomingMessageBubbleStyle</item>
+        <item name="cometchatOutgoingMessageBubbleStyle">@style/CustomOutgoingMessageBubbleStyle</item>
+    </style>
+</resources>
+```
+
+</Tab>
+<Tab title="Jetpack Compose">
+
+```kotlin lines
+CometChatMessageList(
+    style = CometChatMessageListStyle.default().copy(
+        incomingMessageBubbleStyle = CometChatIncomingMessageBubbleStyle.default().copy(
+            mentionTextColor = Color(0xFFD6409F)
+        ),
+        outgoingMessageBubbleStyle = CometChatOutgoingMessageBubbleStyle.default().copy(
+            mentionTextColor = Color.White
+        )
+    )
+)
+```
+
+</Tab>
+</Tabs>
+
+- **What this does**: customizes mention colors for incoming and outgoing message bubbles.
+- **Verify**: send a mention in a chat and check the mention highlight colors.
+
+Attribute references:
+- [Mentions attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_mentions.xml)
+- [Message Bubble attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_message_bubble.xml)
+
+#### Search
+
+The `CometChatSearch` component provides cross-conversation and message search UI.
+
+<Frame>
+  <img src="/images/android-search-style.png" />
+</Frame>
+
+What you're changing: search background and typography styles.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatSearch`
+
+- **Default behavior**: UI Kit default search colors and text appearance.
+
+- **Override**: set `cometchatSearchStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="TextStyleTimesNewRoman">
+        <item name="android:fontFamily">@font/times_new_roman_regular</item>
+    </style>
+
+    <style name="CustomSearchStyle" parent="CometChatSearchStyle">
+        <item name="cometchatSearchBackgroundColor">#EDEAFA</item>
+        <item name="cometchatSearchFilterChipTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchSectionHeaderTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchSectionHeaderBackgroundColor">#EDEAFA</item>
+        <item name="cometchatSearchConversationItemBackgroundColor">#EDEAFA</item>
+        <item name="cometchatSearchConversationSubtitleTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchConversationTitleTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchConversationTimestampTextAppearance">?attr/cometchatTextAppearanceCaption1Bold</item>
+        <item name="cometchatSearchSeeMoreTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchMessageItemBackgroundColor">#EDEAFA</item>
+        <item name="cometchatSearchMessageTitleTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchMessageSubtitleTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchMessageTimestampTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometchatSearchBarTextAppearance">@style/TextStyleTimesNewRoman</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatSearchStyle">@style/CustomSearchStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies custom search colors and text styles across search UI sections.
+
+- **Verify**: open Search and check section headers, chips, and list items.
+
+Attribute references:
+- [Search attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_search.xml)
+
+
+#### Message Information
+
+The `CometChatMessageInformation` component displays message metadata such as delivery and read status.
+
+<Frame>
+  <img src="/images/237b6e0a-base_component_message_information_styling-d51400af46b6aebae636302be9ec863a.png" />
+</Frame>
+
+What you're changing: message information styling for metadata views.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatMessageInformation`
+
+- **Default behavior**: UI Kit default metadata styling.
+
+- **Override**: set `cometchatMessageInformationStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomMessageInformationStyle" parent="CometChatMessageInformationStyle">
+        <!-- Add overrides from attr_cometchat_message_information.xml -->
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageInformationStyle">@style/CustomMessageInformationStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: wires a custom Message Information style so you can override specific metadata attributes.
+
+- **Verify**: open Message Information and confirm your overrides apply.
+
+Attribute references:
+- [Message Information attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_message_information.xml)
+
+
+#### Message Option Sheet
+
+The `CometChatMessageOptionSheet` component is the action menu for message-level actions.
+
+<Frame>
+  <img src="/images/73a430b1-base_component_message_optionsheet_styling-935eef6ff9c4b5445b1879df69be40ad.png" />
+</Frame>
+
+What you're changing: option sheet background and icon tint.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatMessageOptionSheet`
+
+- **Default behavior**: UI Kit default option sheet styling.
+
+- **Override**: set `cometchatPopupMenuStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomMessageOptionSheetStyle" parent="CometChatMessageOptionSheetStyle">
+        <item name="cometchatMessageOptionSheetIconTint">#F76808</item>
+        <item name="cometchatMessageOptionSheetBackgroundColor">#FFF9F5</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageListMessageOptionSheetStyle">@style/CustomMessageOptionSheetStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: updates message option sheet icon tint and background color.
+
+- **Verify**: long-press a message and confirm the option sheet styling.
+
+Attribute references:
+- [Message Option Sheet attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_message_option_sheet.xml)
+
+
+#### Attachment Option Sheet
+
+The `CometChatAttachmentOptionSheet` component renders the attachment picker.
+
+<Frame>
+  <img src="/images/4f179536-base_component_attachment_option_styling-bf0616ff37c1b488419f1515e772b10c.png" />
+</Frame>
+
+What you're changing: attachment option sheet background and icon tint.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatAttachmentOptionSheet`
+
+- **Default behavior**: UI Kit default attachment sheet styling.
+
+- **Override**: set `cometchatAttachmentOptionSheetStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomAttachmentOptionSheetStyle" parent="CometChatAttachmentOptionSheetStyle">
+        <item name="cometchatAttachmentOptionSheetBackgroundColor">#FFF9F5</item>
+        <item name="cometchatAttachmentOptionSheetIconTint">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAttachmentOptionSheetStyle">@style/CustomAttachmentOptionSheetStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies custom colors to the attachment picker sheet.
+
+- **Verify**: open the attachment menu and confirm background and icons.
+
+Attribute references:
+- [Attachment Option Sheet attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_attachment_option_sheet.xml)
+
+
+---
+
+### Calling UI
+
+#### Call Logs
+
+The `CometChatCallLogs` component renders recent call history.
+
+<Frame>
+  <img src="/images/d0eb378f-calls_styling-72e5f287e16313403492a56094660446.png" />
+</Frame>
+
+What you're changing: call log list separators and title colors.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatCallLogs`
+- **Default behavior**: UI Kit default call log styling.
+- **Override**: set `cometchatCallLogsStyle` in `AppTheme` or pass a style object.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+
+```xml themes.xml lines
+<resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
     <style name="CustomCallLogStyle" parent="CometChatCallLogsStyle">
         <item name="cometchatCallLogsSeparatorColor">#F76808</item>
         <item name="cometchatCallLogsTitleTextColor">#F76808</item>
+        <item name="cometchatCallLogsAvatarStyle">@style/CustomAvatarStyle</item>
     </style>
 
     <style name="AppTheme" parent="CometChatTheme.DayNight">
@@ -449,11 +935,26 @@ CometChatCallLogs(
 </Tab>
 </Tabs>
 
-### Incoming Call
+- **What this does**: applies custom avatar and text colors to the call logs list.
+- **Verify**: open Call Logs and confirm the separator and title colors.
+
+Attribute references:
+- [Call Logs attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_call_logs.xml)
+
+#### Incoming Call
+
+The `CometChatIncomingCall` component renders the incoming call UI.
 
 <Frame>
   <img src="/images/d771544a-incoming_call_styled-4a37ea9ee6fd91529ac0dc12725739a7.png" />
 </Frame>
+
+What you're changing: incoming call background, buttons, and avatar styling.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatIncomingCall`
+- **Default behavior**: UI Kit default incoming call layout and colors.
+- **Override**: set `cometchatIncomingCallStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -487,17 +988,38 @@ CometChatIncomingCall(
 </Tab>
 </Tabs>
 
-### Outgoing Call
+- **What this does**: customizes the incoming call screen background and action buttons.
+- **Verify**: trigger an incoming call and confirm the background and button colors.
+
+Attribute references:
+- [Incoming Call attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_incoming_call.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Outgoing Call
+
+The `CometChatOutgoingCall` component renders the outgoing call UI.
 
 <Frame>
   <img src="/images/430add9e-outgoing_call_styling-4478d162278403121a8f89d481625c9e.png" />
 </Frame>
+
+What you're changing: outgoing call avatar styling.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatOutgoingCall`
+- **Default behavior**: UI Kit default outgoing call styling.
+- **Override**: set `cometchatOutgoingCallStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
 
 ```xml themes.xml lines
 <resources>
+    <style name="CustomAvatarStyle" parent="CometChatAvatarStyle">
+        <item name="cometchatAvatarStrokeRadius">8dp</item>
+        <item name="cometchatAvatarBackgroundColor">#FBAA75</item>
+    </style>
+
     <style name="CustomOutgoingCall" parent="CometChatOutgoingCallStyle">
         <item name="cometchatOutgoingCallAvatarStyle">@style/CustomAvatarStyle</item>
     </style>
@@ -525,15 +1047,297 @@ CometChatOutgoingCall(
 </Tab>
 </Tabs>
 
+- **What this does**: applies a custom avatar style to the outgoing call screen.
+- **Verify**: place a call and confirm the avatar styling.
+
+Attribute references:
+- [Outgoing Call attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_outgoing_call.xml)
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Call Buttons
+
+The `CometChatCallButton` component renders voice and video call buttons.
+
+<Frame>
+  <img src="/images/9864ab5c-DqXqOIPBfs6BAAAAAElFTkSuQmCC.png" />
+</Frame>
+
+What you're changing: button background, stroke, and icon tint.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatCallButtons`
+
+- **Default behavior**: UI Kit default call button styling.
+
+- **Override**: set `cometchatCallButtonsStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomCallButtonStyle" parent="CometChatCallButtonsStyle">
+        <item name="cometchatCallButtonsVideoCallIconTint">#6852D6</item>
+        <item name="cometchatCallButtonsVoiceCallIconTint">#6852D6</item>
+        <item name="cometchatCallButtonsMarginBetween">16dp</item>
+        <item name="cometchatCallButtonsVideoCallButtonPadding">8dp</item>
+        <item name="cometchatCallButtonsVoiceCallButtonPadding">8dp</item>
+        <item name="cometchatCallButtonsVideoCallBackgroundColor">#EDEAFA</item>
+        <item name="cometchatCallButtonsVoiceCallBackgroundColor">#EDEAFA</item>
+        <item name="cometchatCallButtonsVideoCallStrokeWidth">1dp</item>
+        <item name="cometchatCallButtonsVoiceCallStrokeWidth">1dp</item>
+        <item name="cometchatCallButtonsVideoCallStrokeColor">#E8E8E8</item>
+        <item name="cometchatCallButtonsVoiceCallStrokeColor">#E8E8E8</item>
+        <item name="cometchatCallButtonsVideoCallCornerRadius">8dp</item>
+        <item name="cometchatCallButtonsVoiceCallCornerRadius">8dp</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatCallButtonsStyle">@style/CustomCallButtonStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: customizes call button padding, background, and icon colors.
+
+- **Verify**: open a chat header and confirm button styling.
+
+Attribute references:
+- [Call Buttons attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_call_buttons.xml)
+
+
 ---
 
-## Base Components
+### AI UI
+#### AI Assistant Chat History
 
-### Avatar
+The `CometChatAIAssistantChatHistory` component renders the AI conversation history view.
+
+<Frame>
+  <img src="/images/android-ai-assistant-chat-history-style.png" />
+</Frame>
+
+What you're changing: background, header, and list typography.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatAIAssistantChatHistory`
+
+- **Default behavior**: UI Kit default AI history styling.
+
+- **Override**: set `cometChatAIAssistantChatHistoryStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="TextStyleTimesNewRoman">
+        <item name="android:fontFamily">@font/times_new_roman_regular</item>
+    </style>
+
+    <style name="CustomAIAssistantChatHistoryStyle">
+        <item name="cometChatAIAssistantChatHistoryBackgroundColor">#FFFAF6</item>
+        <item name="cometChatAIAssistantChatHistoryHeaderBackgroundColor">#FFFAF6</item>
+        <item name="cometChatAIAssistantChatHistoryHeaderTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometChatAIAssistantChatHistoryHeaderTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometChatAIAssistantChatHistoryNewChatBackgroundColor">#FFFAF6</item>
+        <item name="cometChatAIAssistantChatHistoryNewChatTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometChatAIAssistantChatHistoryNewChatTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometChatAIAssistantChatHistoryDateSeparatorTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometChatAIAssistantChatHistoryDateSeparatorTextColor">?attr/cometchatTextColorTertiary</item>
+        <item name="cometChatAIAssistantChatHistoryDateSeparatorBackgroundColor">#FFFAF6</item>
+        <item name="cometChatAIAssistantChatHistoryItemBackgroundColor">#FFFAF6</item>
+        <item name="cometChatAIAssistantChatHistoryItemTextAppearance">@style/TextStyleTimesNewRoman</item>
+        <item name="cometChatAIAssistantChatHistoryItemTextColor">?attr/cometchatTextColorPrimary</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometChatAIAssistantChatHistoryStyle">@style/CustomAIAssistantChatHistoryStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies custom colors and font styling to the AI Assistant history screen.
+
+- **Verify**: open AI Assistant history and confirm background and header styling.
+
+Attribute references:
+- [AI Assistant Chat History attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_assistant_chat_history.xml)
+
+#### AI Option Sheet
+
+The `CometChatAIOptionSheet` component renders AI action options.
+
+<Frame>
+  <img src="/images/1afbfbf1-base_component_ai_option_sheet_styling-5c345829d6747a1325b55249062201c9.png" />
+</Frame>
+
+What you're changing: AI option sheet background and icon tint.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatAIOptionSheet`
+
+- **Default behavior**: UI Kit default AI option sheet styling.
+
+- **Override**: set `cometchatAIOptionSheetStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomAIOptionSheetStyle" parent="CometChatAIOptionSheetStyle">
+        <item name="cometchatAIOptionSheetBackgroundColor">#FFF9F5</item>
+        <item name="cometchatAIOptionSheetIconTint">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAIOptionSheetStyle">@style/CustomAIOptionSheetStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: customizes AI option sheet colors.
+
+- **Verify**: open AI actions and confirm the option sheet styling.
+
+Attribute references:
+- [AI Option Sheet attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_option_sheet.xml)
+
+#### Conversation Starter
+
+The `CometChatConversationStarter` component renders AI-powered conversation starters.
+
+<Frame>
+  <img src="/images/b0ddf14a-base_component_conversation_starter_styling-75e0bf1480275f74f5dbfd555aed9f12.png" />
+</Frame>
+
+What you're changing: conversation starter item backgrounds.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatConversationStarter`
+
+- **Default behavior**: UI Kit default conversation starter styling.
+
+- **Override**: set `cometchatAIConversationStarterStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomConversationStarterStyle" parent="CometChatAIConversationStarterStyle">
+        <item name="cometchatAIConversationStarterItemBackgroundColor">#FBAA75</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAIConversationStarterStyle">@style/CustomConversationStarterStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies a custom background color to AI conversation starter items.
+
+- **Verify**: open a new chat and confirm the conversation starter chip color.
+
+Attribute references:
+- [AI Conversation Starter attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_conversation_starter.xml)
+
+#### Conversation Summary
+
+The `CometChatConversationSummary` component renders AI-generated summaries of chats.
+
+<Frame>
+  <img src="/images/c9803cbf-base_component_conversation_summary_styling-ea920dbc92f1645ccc8cd1453f871df6.png" />
+</Frame>
+
+What you're changing: conversation summary background color.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatConversationSummary`
+
+- **Default behavior**: UI Kit default conversation summary styling.
+
+- **Override**: set `cometchatAIConversationSummaryStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomConversationSummaryStyle" parent="CometChatAIConversationSummaryStyle">
+        <item name="cometchatAIConversationSummaryBackgroundColor">#FBAA75</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAIConversationSummaryStyle">@style/CustomConversationSummaryStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies a custom background color to conversation summary cards.
+
+- **Verify**: open a chat summary and confirm the background color.
+
+Attribute references:
+- [AI Conversation Summary attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_conversation_summary.xml)
+
+#### Smart Replies
+
+The `CometChatSmartReplies` component renders AI-generated reply suggestions.
+
+<Frame>
+  <img src="/images/4c575ba5-base_component_smart_replies_styling-566cc54547bd47c1fe602dff1fab9209.png" />
+</Frame>
+
+What you're changing: smart reply background, item color, and stroke.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatSmartReplies`
+
+- **Default behavior**: UI Kit default smart replies styling.
+
+- **Override**: set `cometchatAISmartRepliesStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomSmartRepliesStyle" parent="CometChatAISmartRepliesStyle">
+        <item name="cometchatAISmartRepliesBackgroundColor">#FBBB90</item>
+        <item name="cometchatAISmartRepliesTitleTextColor">#F76808</item>
+        <item name="cometchatAISmartRepliesItemBackgroundColor">#FFF9F5</item>
+        <item name="cometchatAISmartRepliesItemStrokeWidth">1dp</item>
+        <item name="cometchatAISmartRepliesItemStrokeColor">#F76808</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatAISmartRepliesStyle">@style/CustomSmartRepliesStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: customizes smart reply container and chip styling.
+
+- **Verify**: open a conversation with smart replies enabled and confirm chip styling.
+
+Attribute references:
+- [AI Smart Replies attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_ai_smart_replies.xml)
+
+
+---
+
+### Base Components
+
+#### Avatar
+
+The `CometChatAvatar` component is used across lists and headers.
 
 <Frame>
   <img src="/images/b7ff2aa0-base_component_avatar_styling-c10c14904152585dcf4c46f3a1c0a875.png" />
 </Frame>
+
+What you're changing: avatar shape and background color.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatAvatar`
+- **Default behavior**: UI Kit default avatar styling.
+- **Override**: set `cometchatAvatarStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -567,11 +1371,26 @@ style = ComponentStyle.default().copy(
 </Tab>
 </Tabs>
 
-### Badge
+- **What this does**: applies a consistent avatar style across UI Kit components.
+- **Verify**: open any list with avatars and confirm the style.
+
+Attribute references:
+- [Avatar attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_avatar.xml)
+
+#### Badge
+
+The `CometChatBadge` component shows unread or notification counts.
 
 <Frame>
   <img src="/images/c2a0c8d5-base_component_badge_styling-fccd7bebd68b92a1bbcebe7db68b4136.png" />
 </Frame>
+
+What you're changing: badge background, text color, and corner radius.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatBadge`
+- **Default behavior**: UI Kit default badge styling.
+- **Override**: set `cometchatBadgeStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -607,11 +1426,26 @@ style = CometChatConversationsStyle.default().copy(
 </Tab>
 </Tabs>
 
-### Status Indicator
+- **What this does**: applies a custom badge appearance across UI Kit lists.
+- **Verify**: check any unread badge to confirm colors and radius.
+
+Attribute references:
+- [Badge attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_badge.xml)
+
+#### Status Indicator
+
+The `CometChatStatusIndicator` component shows user presence status.
 
 <Frame>
   <img src="/images/3ad97c61-base_component_status_indicator_styling-b6a26bc571a79184023e5b40950bbb53.png" />
 </Frame>
+
+What you're changing: status indicator icon shape and drawable.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatStatusIndicator`
+- **Default behavior**: UI Kit default presence icon.
+- **Override**: set `cometchatStatusIndicatorStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -643,11 +1477,26 @@ style = ComponentStyle.default().copy(
 </Tab>
 </Tabs>
 
-### Reaction List
+- **What this does**: applies the custom status indicator in UI Kit components.
+- **Verify**: check any user list to confirm the presence icon.
+
+Attribute references:
+- [Status Indicator attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_status_indicator.xml)
+
+#### Reaction List
+
+The `CometChatReactionList` component renders reactions on messages.
 
 <Frame>
   <img src="/images/fcaa0634-base_component_reaction_list_styling-16aceef74885c475b8dc129f3114456d.png" />
 </Frame>
+
+What you're changing: active tab color in the reaction list.
+
+- **Where to change it**: `res/values/themes.xml` (XML Views) or `style` parameter (Compose)
+- **Applies to**: `CometChatReactionList`
+- **Default behavior**: UI Kit default reaction list styling.
+- **Override**: set `cometchatReactionListStyle` in `AppTheme` or pass a style object.
 
 <Tabs>
 <Tab title="Kotlin (XML Views)">
@@ -677,3 +1526,206 @@ CometChatReactionList(
 
 </Tab>
 </Tabs>
+
+- **What this does**: applies a custom active tab color in the reaction list.
+- **Verify**: open reactions and confirm the active tab color.
+
+Attribute references:
+- [Reaction List attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit-kotlin/src/main/res/values/attr_cometchat_reaction_list.xml)
+
+#### Date
+
+The `CometChatDate` component formats timestamps in lists and message threads.
+
+<Frame>
+  <img src="/images/e952a7ae-base_component_date_styling-f5654b78737ce3802df87334ea4e0b00.png" />
+</Frame>
+
+What you're changing: date text color.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatDate`
+
+- **Default behavior**: UI Kit default date styling.
+
+- **Override**: set `cometchatDateStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomDateStyle" parent="CometChatDateStyle">
+        <item name="cometchatDateTextColor">#000000</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatDateStyle">@style/CustomDateStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: customizes date text color in UI Kit lists and headers.
+
+- **Verify**: check any timestamp and confirm the color.
+
+Attribute references:
+- [Date attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_date.xml)
+
+
+#### Receipts
+
+The `CometChatReceipts` component renders read and delivered status icons.
+
+<Frame>
+  <img src="/images/4eeff673-base_component_receipt_styling-690e627612f5ebb3935d1e6888b45dc6.png" />
+</Frame>
+
+What you're changing: read receipt icon drawable.
+
+- **Where to change it**: `res/drawable/read_receipts.xml` and `res/values/themes.xml`
+
+- **Applies to**: `CometChatReceipts`
+
+- **Default behavior**: UI Kit default receipt icons.
+
+- **Override**: set `cometchatMessageReceiptStyle` in `AppTheme` and reference a custom drawable.
+
+- **Code**:
+```xml res/drawable/read_receipts.xml lines
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="14dp"
+    android:height="8dp"
+    android:autoMirrored="true"
+    android:viewportWidth="14"
+    android:viewportHeight="8">
+
+    <path
+        android:fillColor="#ffab00"
+        android:pathData="M0.4,4.622C0.289,4.511 0.236,4.38 0.242,4.228C0.247,4.076 0.305,3.944 0.417,3.833C0.528,3.726 0.659,3.671 0.811,3.669C0.963,3.668 1.094,3.722 1.205,3.833L3.761,6.4C3.824,6.463 3.891,6.53 3.961,6.6L4.161,6.8C4.272,6.911 4.327,7.041 4.325,7.189C4.323,7.337 4.267,7.467 4.155,7.578L4.144,7.589C4.033,7.696 3.904,7.751 3.755,7.753C3.607,7.755 3.478,7.7 3.367,7.589L0.4,4.622ZM6.9,6.394L12.822,0.472C12.933,0.361 13.065,0.306 13.217,0.308C13.368,0.31 13.5,0.367 13.611,0.478C13.718,0.589 13.773,0.72 13.775,0.872C13.777,1.024 13.722,1.155 13.611,1.267L7.289,7.589C7.178,7.7 7.048,7.755 6.9,7.755C6.752,7.755 6.622,7.7 6.511,7.589L3.544,4.622C3.437,4.515 3.385,4.384 3.389,4.23C3.393,4.077 3.448,3.944 3.555,3.833C3.667,3.722 3.799,3.667 3.953,3.667C4.106,3.667 4.239,3.722 4.35,3.833L6.9,6.394ZM10.461,1.272L7.289,4.444C7.181,4.552 7.053,4.604 6.903,4.6C6.753,4.596 6.622,4.541 6.511,4.433C6.4,4.322 6.344,4.19 6.344,4.036C6.344,3.882 6.4,3.75 6.511,3.639L9.672,0.478C9.78,0.37 9.91,0.317 10.064,0.317C10.218,0.317 10.35,0.37 10.461,0.478C10.572,0.589 10.628,0.721 10.628,0.875C10.628,1.029 10.572,1.161 10.461,1.272Z"
+        tools:ignore="VectorPath" />
+</vector>
+```
+
+- **What this does**: defines a custom read receipt icon.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomMessageReceiptStyle" parent="CometChatMessageReceiptStyle">
+        <item name="cometchatMessageReceiptReadIcon">@drawable/read_receipts</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMessageReceiptStyle">@style/CustomMessageReceiptStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies the custom receipt icon to message status indicators.
+
+- **Verify**: send a message and check the receipt icon for read status.
+
+Attribute references:
+- [Message Receipt attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_message_receipt.xml)
+
+
+#### Media Recorder
+
+The `CometChatMediaRecorder` component controls audio and video message recording.
+
+<Frame>
+  <img src="/images/ef81461f-base_component_media_recorder_styling-22f506254b6aae6b4d536f1a62fb40cb.png" />
+</Frame>
+
+What you're changing: recorder icon sizes and recording button background color.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatMediaRecorder`
+
+- **Default behavior**: UI Kit default media recorder styling.
+
+- **Override**: set `cometchatMediaRecorderStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomMediaRecorderStyle" parent="CometChatMediaRecorderStyle">
+        <item name="cometchatMediaRecorderDeleteIconRadius">@dimen/cometchat_12dp</item>
+        <item name="cometchatMediaRecorderStartIconRadius">@dimen/cometchat_12dp</item>
+        <item name="cometchatMediaRecorderPauseIconRadius">@dimen/cometchat_12dp</item>
+        <item name="cometchatMediaRecorderRecordingIconBackgroundColor">#F44649</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatMediaRecorderStyle">@style/CustomMediaRecorderStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies custom sizing and color to the media recorder UI.
+
+- **Verify**: open the recorder and check icon sizes and record button color.
+
+Attribute references:
+- [Media Recorder attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_media_recorder.xml)
+
+
+#### Sticker Keyboard
+
+The `CometChatStickerKeyboard` component renders the sticker picker UI.
+
+<Frame>
+  <img src="/images/cdb4fe84-base_component_sticker_keyboard_styling-6dc1b1af676ec3c4cb68a45f4724aaac.png" />
+</Frame>
+
+What you're changing: sticker keyboard background color.
+
+- **Where to change it**: `res/values/themes.xml`
+
+- **Applies to**: `CometChatStickerKeyboard`
+
+- **Default behavior**: UI Kit default sticker keyboard styling.
+
+- **Override**: set `cometchatStickerKeyboardStyle` in `AppTheme`.
+
+- **Code**:
+```xml res/values/themes.xml lines
+<resources>
+    <style name="CustomStickerKeyboardStyle" parent="CometChatStickerKeyboardStyle">
+        <item name="cometchatStickerKeyboardBackgroundColor">#EDEAFA</item>
+    </style>
+
+    <style name="AppTheme" parent="CometChatTheme.DayNight">
+        <item name="cometchatStickerKeyboardStyle">@style/CustomStickerKeyboardStyle</item>
+    </style>
+</resources>
+```
+
+- **What this does**: applies a custom background color to the sticker keyboard.
+
+- **Verify**: open the sticker keyboard and confirm the background color.
+
+Attribute references:
+- [Sticker Keyboard attributes](https://github.com/cometchat/cometchat-uikit-android/blob/v6/chatuikit/src/main/res/values/attr_cometchat_sticker_keyboard.xml)
+
+
+---
+
+## Customization matrix
+
+| What you want to change | Where | Property or API | Example |
+| --- | --- | --- | --- |
+| Conversations avatar and badge | `themes.xml` / style param | `cometchatConversationsStyle` | `cometchatConversationsBadgeStyle` |
+| Users list separators | `themes.xml` / style param | `cometchatUsersStyle` | `cometchatUsersSeparatorColor` |
+| Group list titles | `themes.xml` / style param | `cometchatGroupsStyle` | `cometchatGroupsTitleTextColor` |
+| Header call icons | `themes.xml` / style param | `cometchatMessageHeaderStyle` | `cometchatMessageHeaderCallButtonsStyle` |
+| Message list background | `themes.xml` / style param | `cometchatMessageListStyle` | `cometchatMessageListBackgroundColor` |
+| Search styling | `themes.xml` / style param | `cometchatSearchStyle` | `cometchatSearchBackgroundColor` |
+| Message Information | `themes.xml` / style param | `cometchatMessageInformationStyle` | `cometchatMessageInformationBackgroundColor` |
+| AI Chat History | `themes.xml` / style param | `cometchatAIAssistantChatHistoryStyle` | `cometchatAIAssistantChatHistoryBackgroundColor` |
+| Date formatting | `themes.xml` / style param | `cometchatDateStyle` | `cometchatDateTextColor` |
+| Receipts icons | `themes.xml` / style param | `cometchatReceiptsStyle` | `cometchatReceiptsReadColor` |
+| Composer send button | `res/drawable/` + `themes.xml` | `cometchatMessageComposerActiveSendButtonDrawable` | `@drawable/active_send_button` |
+| Call buttons styling | `themes.xml` / style param | `cometchatCallButtonsStyle` | `cometchatCallButtonsVideoCallBackgroundColor` |

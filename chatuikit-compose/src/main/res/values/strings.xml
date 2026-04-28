@@ -243,6 +243,10 @@
     <string name="cometchat_no_matches_found">We couldn’t find any matches.\nPlease try a different search keyword.</string>
     <string name="cometchat_start_your_search">Start Your Search</string>
     <string name="cometchat_search_for_conversations_or_messages">Search for conversations or messages by typing a keyword above.</string>
+    <string name="cometchat_search_initial_title" translatable="true">Start Your Search</string>
+    <string name="cometchat_search_initial_subtitle" translatable="true">Search for conversations or messages by typing a keyword above.</string>
+    <string name="cometchat_search_empty_title" translatable="true">No Results</string>
+    <string name="cometchat_search_empty_subtitle" translatable="true">We couldn\'t find any matches. Please try a different search keyword.</string>
 
     <string name="cometchat_unread" translatable="true">Unread</string>
     <string name="cometchat_photos" translatable="true">Photos</string>
@@ -273,8 +277,13 @@
     <string name="cometchat_meeting">Meeting</string>
     <string name="cometchat_search_in" translatable="true">Search in</string>
     <string name="cometchat_insert_link" translatable="true">Insert Link</string>
+    <string name="cometchat_add_link" translatable="true">Add Link</string>
+    <string name="cometchat_edit_link" translatable="true">Edit Link</string>
     <string name="cometchat_link_text" translatable="true">Link Text</string>
     <string name="cometchat_link_url" translatable="true">URL</string>
+    <string name="cometchat_text" translatable="true">Text</string>
+    <string name="cometchat_link" translatable="true">Link</string>
+    <string name="cometchat_close" translatable="true">Close</string>
     <string name="cometchat_apply" translatable="true">Apply</string>
     <string name="cometchat_edit_message" translatable="true">Edit Message</string>
     <string name="cometchat_replying_to" translatable="true">Replying to %s</string>
@@ -319,4 +328,5 @@
     </plurals>
     <string name="cometchat_new" translatable="true">New</string>
     <string name="cometchat_smart_replies" translatable="true">Smart Replies</string>
+    <string name="cometchat_ai_assistant" translatable="true">AI Assistant</string>
 </resources>

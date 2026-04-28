@@ -72,6 +72,7 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
  * @param onUserDetailsClick Callback when user header is tapped (for user details navigation)
  * @param onGroupDetailsClick Callback when group header is tapped (for group details navigation)
  * @param onThreadClick Callback when thread indicator is tapped
+ * @param onChatHistoryClick Callback when AI chat history button is tapped
  *
  * Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 7.1, 7.2, 7.3
  */
@@ -79,10 +80,14 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
 fun MessagesScreen(
     userId: String? = null,
     groupId: String? = null,
+    messageId: Long? = null,
+    parentMessageId: Long? = null,
     onBackPress: () -> Unit,
     onUserDetailsClick: ((User) -> Unit)? = null,
     onGroupDetailsClick: ((Group) -> Unit)? = null,
-    onThreadClick: ((BaseMessage) -> Unit)? = null
+    onThreadClick: ((BaseMessage) -> Unit)? = null,
+    onChatHistoryClick: ((User) -> Unit)? = null,
+    onNewChatClick: ((User) -> Unit)? = null
 ) {
     // State for user/group
     var user by remember { mutableStateOf<User?>(null) }
@@ -92,6 +97,7 @@ fun MessagesScreen(
 
     // Fetch user or group based on provided IDs
     LaunchedEffect(userId, groupId) {
+        android.util.Log.d("SearchNav", "MessagesScreen: userId=$userId, groupId=$groupId, messageId=$messageId")
         isLoading = true
         error = null
 
@@ -136,10 +142,14 @@ fun MessagesScreen(
         MessagesContent(
             user = user,
             group = group,
+            messageId = messageId,
+            parentMessageId = parentMessageId,
             onBackPress = onBackPress,
             onUserDetailsClick = onUserDetailsClick,
             onGroupDetailsClick = onGroupDetailsClick,
-            onThreadClick = onThreadClick
+            onThreadClick = onThreadClick,
+            onChatHistoryClick = onChatHistoryClick,
+            onNewChatClick = onNewChatClick
         )
     }
 }
@@ -154,10 +164,14 @@ fun MessagesScreen(
 private fun MessagesContent(
     user: User?,
     group: Group?,
+    messageId: Long? = null,
+    parentMessageId: Long? = null,
     onBackPress: () -> Unit,
     onUserDetailsClick: ((User) -> Unit)?,
     onGroupDetailsClick: ((Group) -> Unit)?,
-    onThreadClick: ((BaseMessage) -> Unit)?
+    onThreadClick: ((BaseMessage) -> Unit)?,
+    onChatHistoryClick: ((User) -> Unit)?,
+    onNewChatClick: ((User) -> Unit)?
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     
@@ -182,14 +196,19 @@ private fun MessagesContent(
                 modifier = Modifier.fillMaxWidth(),
                 user = user,
                 group = group,
-                // Hide call buttons - no VoIP in sample apps
-                hideVideoCallButton = true,
-                hideVoiceCallButton = true,
                 // Show back button for navigation
                 hideBackButton = false,
                 // Hide built-in menu icon - we use custom trailingView
                 hideMenuIcon = true,
                 onBackPress = onBackPress,
+                // Navigate to AI chat history screen
+                onChatHistoryClick = {
+                    user?.let { onChatHistoryClick?.invoke(it) }
+                },
+                // Start a fresh AI conversation
+                onNewChatClick = {
+                    user?.let { onNewChatClick?.invoke(it) }
+                },
                 // Custom trailing view with overflow menu
                 trailingView = { _, _ ->
                     Box {
@@ -223,6 +242,10 @@ private fun MessagesContent(
                     .weight(1f),
                 user = user,
                 group = group,
+                // Set parent message ID for threaded conversations (from chat history)
+                parentMessageId = parentMessageId ?: -1,
+                // Navigate to specific message (e.g., from search)
+                goToMessageId = messageId,
                 // Enable real-time updates
                 scrollToBottomOnNewMessage = true,
                 // Enable swipe to reply
@@ -248,12 +271,8 @@ private fun MessagesContent(
                 modifier = Modifier.fillMaxWidth(),
                 user = user,
                 group = group,
-                // Enable all attachment types (Requirement 6.6)
-                hideAttachmentButton = false,
-                hideVoiceRecordingButton = false,
-                hideSendButton = false,
-                // Enable stickers
-                hideStickersButton = false,
+                // Set parent message ID for threaded conversations (from chat history)
+                parentMessageId = parentMessageId ?: -1,
                 onError = { exception ->
                     // Error handling is done internally by the component
                 }

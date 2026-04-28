@@ -22,7 +22,7 @@ import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatM
  * The icon rotates 45 degrees when the attachment popup is expanded,
  * creating a smooth visual transition from "+" to "x".
  *
- * Uses 24dp icon size to match Figma design specifications.
+ * Uses 40dp touch target with 24dp icon size to match v5 design specifications.
  *
  * @param modifier Modifier for the button
  * @param isExpanded Whether the attachment popup is currently expanded
@@ -48,7 +48,7 @@ fun AnimatedAttachmentButton(
     IconButton(
         onClick = onClick,
         modifier = modifier
-            .size(24.dp)
+            .size(40.dp)
             .semantics { 
                 contentDescription = if (isExpanded) "Close attachments" else "Open attachments"
             }

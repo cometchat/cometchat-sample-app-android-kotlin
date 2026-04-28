@@ -1,6 +1,7 @@
 package com.cometchat.uikit.compose.presentation.shared.messagebubble
 
 import androidx.compose.runtime.Immutable
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatActionBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMessageBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudioBubbleStyle
@@ -59,6 +60,7 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.Comet
  * @property collaborativeBubbleStyle Style for collaborative bubbles (document/whiteboard)
  * @property incomingMessagePreviewStyle Style for the message preview in incoming message bubbles
  * @property outgoingMessagePreviewStyle Style for the message preview in outgoing message bubbles
+ * @property aiAssistantBubbleStyle Style for AI assistant message bubbles (both streaming and static modes)
  */
 @Immutable
 data class BubbleStyles(
@@ -76,5 +78,6 @@ data class BubbleStyles(
     val stickerBubbleStyle: CometChatStickerBubbleStyle? = null,
     val collaborativeBubbleStyle: CometChatCollaborativeBubbleStyle? = null,
     val incomingMessagePreviewStyle: CometChatMessagePreviewStyle? = null,
-    val outgoingMessagePreviewStyle: CometChatMessagePreviewStyle? = null
+    val outgoingMessagePreviewStyle: CometChatMessagePreviewStyle? = null,
+    val aiAssistantBubbleStyle: CometChatAIAssistantBubbleStyle? = null
 )

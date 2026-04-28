@@ -98,12 +98,7 @@ class CometChatReceipt @JvmOverloads constructor(
     }
 
     private fun getReceiptStatus(message: BaseMessage): ReceiptStatus {
-        return when {
-            message.readAt > 0 -> ReceiptStatus.READ
-            message.deliveredAt > 0 -> ReceiptStatus.DELIVERED
-            message.id > 0 -> ReceiptStatus.SENT  // Message has server-assigned ID = sent
-            else -> ReceiptStatus.IN_PROGRESS     // No ID yet = in progress
-        }
+        return MessageReceiptUtils.getMessageReceipt(message)
     }
 
     // ========================================

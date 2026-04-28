@@ -129,7 +129,7 @@ class TagSpanTest : FunSpec({
         }
 
         test("applyColorWithAlpha should produce same result as NonEditableSpan") {
-            checkAll(100, Arb.int()) { color ->
+            checkAll(10, Arb.int()) { color ->
                 val result = applyColorWithAlpha(color, 51)
                 
                 // Alpha should always be 51

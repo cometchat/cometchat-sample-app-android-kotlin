@@ -1,15 +1,25 @@
 package com.cometchat.uikit.compose.presentation.messagecomposer.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -45,6 +55,7 @@ fun CometChatRichTextToolbar(
 ) {
     Row(
         modifier = modifier
+            .background(style.richTextToolbarBackgroundColor)
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .semantics { contentDescription = "Rich Text Toolbar" },
@@ -59,7 +70,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.BOLD in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.BOLD) }
             )
         }
@@ -73,7 +85,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.ITALIC in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.ITALIC) }
             )
         }
@@ -87,7 +100,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.UNDERLINE in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.UNDERLINE) }
             )
         }
@@ -101,21 +115,33 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.STRIKETHROUGH in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.STRIKETHROUGH) }
             )
         }
 
+        // Separator 1: between text formatting group and link/list group
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(24.dp)
+                .background(style.composeBoxStrokeColor)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+
         // Link
         if (RichTextFormat.LINK in enabledFormats) {
             FormatButton(
-                icon = painterResource(R.drawable.cometchat_ic_link_outlined),
+                icon = painterResource(R.drawable.cometchat_ic_format_link),
                 contentDescription = "Link",
                 isActive = RichTextFormat.LINK in activeFormats,
                 isDisabled = RichTextFormat.LINK in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = onLinkClick
             )
         }
@@ -129,7 +155,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.ORDERED_LIST in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.ORDERED_LIST) }
             )
         }
@@ -143,10 +170,21 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.BULLET_LIST in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.BULLET_LIST) }
             )
         }
+
+        // Separator 2: between link/list group and quote/code group
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(24.dp)
+                .background(style.composeBoxStrokeColor)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
 
         // Blockquote
         if (RichTextFormat.BLOCKQUOTE in enabledFormats) {
@@ -157,7 +195,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.BLOCKQUOTE in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.BLOCKQUOTE) }
             )
         }
@@ -171,7 +210,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.INLINE_CODE in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.INLINE_CODE) }
             )
         }
@@ -185,7 +225,8 @@ fun CometChatRichTextToolbar(
                 isDisabled = RichTextFormat.CODE_BLOCK in disabledFormats,
                 activeTint = style.richTextToolbarActiveIconTint,
                 inactiveTint = style.richTextToolbarIconTint,
-                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.3f),
+                disabledTint = style.richTextToolbarIconTint.copy(alpha = 0.4f),
+                activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.CODE_BLOCK) }
             )
         }
@@ -193,8 +234,9 @@ fun CometChatRichTextToolbar(
 }
 
 /**
- * Format button: 36dp touch target, 20dp icon.
- * Disabled buttons are grayed out and non-clickable.
+ * Format button: 40dp touch target, 24dp icon, no ripple.
+ * Active state: dark icon tint with a subtle rounded-rect background.
+ * Disabled state: grayed out (0.4f alpha) and non-clickable.
  */
 @Composable
 private fun FormatButton(
@@ -204,23 +246,43 @@ private fun FormatButton(
     isDisabled: Boolean = false,
     activeTint: Color,
     inactiveTint: Color,
-    disabledTint: Color = inactiveTint.copy(alpha = 0.3f),
+    disabledTint: Color = inactiveTint.copy(alpha = 0.4f),
+    activeBackgroundColor: Color = Color.Transparent,
     onClick: () -> Unit
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.size(36.dp),
-        enabled = !isDisabled
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .focusable(false)
+            .clickable(
+                enabled = !isDisabled,
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = contentDescription,
-            tint = when {
-                isDisabled -> disabledTint
-                isActive -> activeTint
-                else -> inactiveTint
-            },
-            modifier = Modifier.size(20.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .then(
+                    if (isActive) Modifier.background(activeBackgroundColor, RoundedCornerShape(8.dp))
+                    else Modifier
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = contentDescription,
+                tint = when {
+                    isDisabled -> disabledTint
+                    isActive -> activeTint
+                    else -> inactiveTint
+                },
+                modifier = Modifier
+                    .size(24.dp)
+                    .alpha(if (isDisabled) 0.4f else 1f)
+            )
+        }
     }
 }

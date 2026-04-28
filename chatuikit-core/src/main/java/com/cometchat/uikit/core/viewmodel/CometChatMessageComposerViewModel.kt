@@ -26,6 +26,8 @@ import com.cometchat.uikit.core.events.CustomUIPosition
 import com.cometchat.uikit.core.events.MessageStatus
 import com.cometchat.uikit.core.state.ComposerPanelEvent
 import com.cometchat.uikit.core.state.MessageComposerUIState
+import com.cometchat.uikit.core.utils.AgentChatDetector
+import com.cometchat.uikit.core.CometChatAIStreamService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -311,7 +313,7 @@ open class CometChatMessageComposerViewModel(
         _group.value = null
         receiverId = user.uid
         receiverType = UIKitConstants.ReceiverType.USER
-        isAgentChat = isAgentChatUser(user)
+        isAgentChat = AgentChatDetector.isAgentChat(user)
         updateIdMap()
     }
 
@@ -354,15 +356,7 @@ open class CometChatMessageComposerViewModel(
         _idMap.value = map
     }
 
-    /**
-     * Checks if the user is an AI agent chat user.
-     * 
-     * @param user The user to check
-     * @return True if the user is an AI agent
-     */
-    private fun isAgentChatUser(user: User): Boolean {
-        return user.uid.startsWith(UIKitConstants.AIConstants.AGENTIC_USER)
-    }
+
 
     // ==================== Compose Text ====================
 
@@ -373,6 +367,13 @@ open class CometChatMessageComposerViewModel(
      */
     fun setComposeText(text: String) {
         _composeText.value = text
+    }
+
+    /**
+     * Clears the compose text after it has been consumed by the UI.
+     */
+    fun clearComposeText() {
+        _composeText.value = ""
     }
 
     // ==================== Edit Message ====================
@@ -433,6 +434,11 @@ open class CometChatMessageComposerViewModel(
         _isAIGenerating.value = generating
         if (generating) {
             _uiState.value = MessageComposerUIState.AIGenerating
+            // Re-register stream callback to ensure it's on the current service instance.
+            // The service instance is created by MessageListViewModel, which may initialize
+            // after the ComposerViewModel. Re-registering here guarantees the callback
+            // is set on the correct instance when AI generation starts.
+            addStreamCallback()
         } else {
             _uiState.value = MessageComposerUIState.Idle
         }
@@ -864,8 +870,7 @@ open class CometChatMessageComposerViewModel(
                             parentMessageId = sentMsg.id.toLong()
                             updateIdMap()
                         }
-                        _isAIGenerating.value = true
-                        _uiState.value = MessageComposerUIState.AIGenerating
+                        setAIGenerating(true)
                     } else {
                         _uiState.value = MessageComposerUIState.Idle
                     }
@@ -913,8 +918,7 @@ open class CometChatMessageComposerViewModel(
                             parentMessageId = sentMsg.id.toLong()
                             updateIdMap()
                         }
-                        _isAIGenerating.value = true
-                        _uiState.value = MessageComposerUIState.AIGenerating
+                        setAIGenerating(true)
                     } else {
                         _uiState.value = MessageComposerUIState.Idle
                     }
@@ -1214,6 +1218,7 @@ open class CometChatMessageComposerViewModel(
         listenersTag?.let { tag ->
             addMessageEventListeners()
             addUIEventListeners()
+            addStreamCallback()
         }
     }
 
@@ -1301,6 +1306,29 @@ open class CometChatMessageComposerViewModel(
         }
     }
 
+
+    /**
+     * Registers a callback on CometChatAIStreamService to reset AI generating state
+     * when the stream completes or is interrupted.
+     * Matches Java: CometChatAIStreamService.setOnStreamCallBack(...)
+     *
+     * Called from setUser() when agent chat is detected, and also re-registered
+     * whenever AI generating state is set to true (to handle the case where the
+     * service instance is created after the ViewModel).
+     */
+    private fun addStreamCallback() {
+        CometChatAIStreamService.getInstance()?.setOnStreamCallback(
+            object : CometChatAIStreamService.OnStreamCallback {
+                override fun onStreamCompleted() {
+                    setAIGenerating(false)
+                }
+
+                override fun onStreamInterrupted() {
+                    setAIGenerating(false)
+                }
+            }
+        )
+    }
 
     // ==================== ID Map Matching ====================
 
@@ -1549,6 +1577,8 @@ open class CometChatMessageComposerViewModel(
     fun removeListeners() {
         messageEventsJob?.cancel()
         uiEventsJob?.cancel()
+        // Clear the stream callback to avoid leaks
+        CometChatAIStreamService.getInstance()?.setOnStreamCallback(null)
     }
 
     override fun onCleared() {

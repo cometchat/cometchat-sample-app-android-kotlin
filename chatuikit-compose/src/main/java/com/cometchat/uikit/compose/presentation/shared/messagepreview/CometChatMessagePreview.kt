@@ -35,8 +35,10 @@ import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.formatters.FormatterUtils
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.formatter.MarkdownRenderer
 
 /**
  * A composable that renders a quoted/replied-to message preview.
@@ -202,11 +204,17 @@ internal fun resolveMessageContent(
                     alignment = alignment,
                     text = text,
                     formatters = textFormatters
-                )
+                ).text
             } else {
-                AnnotatedString(text)
+                text
             }
-            formatted to null
+            // Parse markdown: keep bold/italic/underline/strikethrough, plain text for code/blockquote
+            val segments = MarkdownRenderer.parse(formatted)
+            val previewText = buildReplyPreviewAnnotatedString(
+                segments = segments,
+                textColor = androidx.compose.ui.graphics.Color.Unspecified
+            )
+            previewText to null
         }
 
         is MediaMessage -> {

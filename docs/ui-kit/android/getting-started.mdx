@@ -8,8 +8,8 @@ description: "Install, configure, and launch the CometChat Android UI Kit in you
 
 | Field | Value |
 | --- | --- |
-| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` v5.x |
-| Jetpack Compose | `com.cometchat:chat-uikit-compose` v5.x |
+| Kotlin (XML Views) | `com.cometchat:chatuikit-kotlin-android` v6.x |
+| Jetpack Compose | `com.cometchat:chatuikit-compose-android` v6.x |
 | Init | `CometChatUIKit.init(context, UIKitSettings, callback)` — must resolve before `login()` |
 | Login | `CometChatUIKit.login("UID", callback)` — must resolve before rendering components |
 | Order | `init()` → `login()` → render. Breaking this order = blank screen |
@@ -88,7 +88,7 @@ Inside `libs.versions.toml`, add the versions:
 
 ```toml libs.versions.toml
 [versions]
-cometchat-ui-kit = "5.2.9"
+cometchat-ui-kit = "6.0.0-beta2"
 cometchat-calls-sdk = "4.3.3"
 ```
 
@@ -98,7 +98,7 @@ Define the libraries — pick the module for your UI toolkit:
 <Tab title="Kotlin (XML Views)">
 ```toml libs.versions.toml
 [libraries]
-cometchat-ui-kit = { module = "com.cometchat:chat-uikit-kotlin", version.ref = "cometchat-ui-kit" }
+cometchat-ui-kit = { module = "com.cometchat:chatuikit-kotlin-android", version.ref = "cometchat-ui-kit" }
 cometchat-calls-sdk = { module = "com.cometchat:calls-sdk-android", version.ref = "cometchat-calls-sdk" }
 ```
 </Tab>
@@ -106,7 +106,7 @@ cometchat-calls-sdk = { module = "com.cometchat:calls-sdk-android", version.ref 
 <Tab title="Jetpack Compose">
 ```toml libs.versions.toml
 [libraries]
-cometchat-ui-kit = { module = "com.cometchat:chat-uikit-compose", version.ref = "cometchat-ui-kit" }
+cometchat-ui-kit = { module = "com.cometchat:chatuikit-compose-android", version.ref = "cometchat-ui-kit" }
 cometchat-calls-sdk = { module = "com.cometchat:calls-sdk-android", version.ref = "cometchat-calls-sdk" }
 ```
 </Tab>
@@ -132,7 +132,7 @@ Open the app-level `build.gradle.kts` file and add the dependency for your chose
 <Tab title="Kotlin (XML Views)">
 ```kotlin build.gradle.kts
 dependencies {
-    implementation("com.cometchat:chat-uikit-kotlin:5.2.9")
+    implementation("com.cometchat:chatuikit-kotlin-android:6.0.0-beta2")
 
     // (Optional) Include if using voice/video calling features
     implementation("com.cometchat:calls-sdk-android:4.3.3")
@@ -143,7 +143,7 @@ dependencies {
 <Tab title="Jetpack Compose">
 ```kotlin build.gradle.kts
 dependencies {
-    implementation("com.cometchat:chat-uikit-compose:5.2.9")
+    implementation("com.cometchat:chatuikit-compose-android:6.0.0-beta2")
 
     // (Optional) Include if using voice/video calling features
     implementation("com.cometchat:calls-sdk-android:4.3.3")
@@ -185,7 +185,7 @@ The remaining integration steps (initialization, login, theming, and rendering c
 Need full control over the UI? Use individual components, customize themes, and wire up your own layouts.
 
 <CardGroup cols={2}>
-  <Card title="Sample App" icon="code" href="https://github.com/cometchat/cometchat-uikit-android/tree/v5/sample-app-kotlin">
+  <Card title="Sample App" icon="code" href="https://github.com/cometchat/cometchat-uikit-android/tree/v6/sample-app-kotlin">
     Working reference app to compare against
   </Card>
   <Card title="Components" icon="grid-2" href="/ui-kit/android/v6/components-overview">

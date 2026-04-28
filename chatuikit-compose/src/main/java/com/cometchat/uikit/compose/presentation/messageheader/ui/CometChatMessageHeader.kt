@@ -49,6 +49,7 @@ import com.cometchat.uikit.compose.presentation.shared.statusindicator.StatusInd
 import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import com.cometchat.uikit.core.factory.CometChatMessageHeaderViewModelFactory
 import com.cometchat.uikit.core.state.MessageHeaderUIState
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.utils.CallsUtils
 import com.cometchat.uikit.core.viewmodel.CometChatMessageHeaderViewModel
 
@@ -135,7 +136,7 @@ fun CometChatMessageHeader(
     )
 
     // Set user or group on ViewModel
-    LaunchedEffect(user, group) {
+    LaunchedEffect(user?.uid, group?.guid) {
         user?.let { viewModel.setUser(it) }
         group?.let { viewModel.setGroup(it) }
     }
@@ -146,6 +147,20 @@ fun CometChatMessageHeader(
     val currentGroup by viewModel.group.collectAsState()
     val typingIndicator by viewModel.typingIndicator.collectAsState()
     val memberCount by viewModel.memberCount.collectAsState()
+
+    // Detect agentic (AI bot) user — mirrors chatuikit-kotlin behavior
+    val isAgentChat = remember(currentUser) {
+        currentUser?.let { AgentChatDetector.isAgentChat(it) } ?: false
+    }
+
+    // Override visibility flags for agentic users:
+    // - Always hide call buttons and user status
+    // - Always show new chat and chat history buttons
+    val effectiveHideVideoCallButton = if (isAgentChat) true else hideVideoCallButton
+    val effectiveHideVoiceCallButton = if (isAgentChat) true else hideVoiceCallButton
+    val effectiveHideUserStatus = if (isAgentChat) true else hideUserStatus
+    val effectiveHideNewChatButton = if (isAgentChat) false else hideNewChatButton
+    val effectiveHideChatHistoryButton = if (isAgentChat) false else hideChatHistoryButton
 
     // Handle error events
     LaunchedEffect(Unit) {
@@ -200,8 +215,9 @@ fun CometChatMessageHeader(
             DefaultLeadingView(
                 user = currentUser,
                 group = currentGroup,
-                hideUserStatus = hideUserStatus,
+                hideUserStatus = effectiveHideUserStatus,
                 hideGroupStatus = hideGroupStatus,
+                isAgentChat = isAgentChat,
                 style = style
             )
         }
@@ -228,7 +244,8 @@ fun CometChatMessageHeader(
                     group = currentGroup,
                     typingIndicator = typingIndicator,
                     memberCount = memberCount,
-                    hideUserStatus = hideUserStatus,
+                    hideUserStatus = effectiveHideUserStatus,
+                    isAgentChat = isAgentChat,
                     lastSeenTextFormatter = lastSeenTextFormatter,
                     dateTimeFormatter = dateTimeFormatter,
                     style = style,
@@ -244,10 +261,10 @@ fun CometChatMessageHeader(
             DefaultAuxiliaryView(
                 user = currentUser,
                 group = currentGroup,
-                hideVideoCallButton = hideVideoCallButton,
-                hideVoiceCallButton = hideVoiceCallButton,
-                hideNewChatButton = hideNewChatButton,
-                hideChatHistoryButton = hideChatHistoryButton,
+                hideVideoCallButton = effectiveHideVideoCallButton,
+                hideVoiceCallButton = effectiveHideVoiceCallButton,
+                hideNewChatButton = effectiveHideNewChatButton,
+                hideChatHistoryButton = effectiveHideChatHistoryButton,
                 onVideoCallClick = onVideoCallClick,
                 onVoiceCallClick = onVoiceCallClick,
                 onNewChatClick = onNewChatClick,
@@ -303,6 +320,7 @@ private fun DefaultLeadingView(
     group: Group?,
     hideUserStatus: Boolean,
     hideGroupStatus: Boolean,
+    isAgentChat: Boolean,
     style: CometChatMessageHeaderStyle
 ) {
     Box(modifier = Modifier.size(48.dp)) {
@@ -314,8 +332,9 @@ private fun DefaultLeadingView(
             style = style.avatarStyle
         )
 
-        // Status indicator
+        // Status indicator — hidden entirely for agentic users
         val statusIndicator = when {
+            isAgentChat -> null
             user != null && !hideUserStatus && !isBlocked(user) -> {
                 if (user.status == CometChatConstants.USER_STATUS_ONLINE) {
                     StatusIndicator.ONLINE
@@ -376,6 +395,7 @@ private fun DefaultSubtitleView(
     typingIndicator: TypingIndicator?,
     memberCount: Int,
     hideUserStatus: Boolean,
+    isAgentChat: Boolean,
     lastSeenTextFormatter: ((Context, User) -> String)?,
     dateTimeFormatter: DateTimeFormatterCallback?,
     style: CometChatMessageHeaderStyle,
@@ -392,6 +412,18 @@ private fun DefaultSubtitleView(
             text = typingText,
             color = style.typingIndicatorTextColor,
             style = style.typingIndicatorTextStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        return
+    }
+
+    // Show "AI Assistant" subtitle for agentic users (matching chatuikit-kotlin behavior)
+    if (isAgentChat && user != null) {
+        Text(
+            text = context.getString(R.string.cometchat_ai_assistant),
+            color = style.subtitleTextColor,
+            style = style.subtitleTextStyle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

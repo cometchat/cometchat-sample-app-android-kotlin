@@ -34,27 +34,41 @@ import com.cometchat.uikit.core.state.MessageAlignment
  * 3. If [alignment] is CENTER (action/system message), always return false
  * 4. If [alignment] is LEFT (incoming message):
  *    - For group conversations: return true (show avatar)
- *    - For user conversations: return false (hide avatar)
+ *    - For agent chats: return true (show avatar, even in 1-on-1)
+ *    - For regular user conversations: return false (hide avatar)
  *
  * ## Decision Table:
- * | Alignment | hideAvatar | isGroupConversation | Show Avatar? |
- * |-----------|------------|---------------------|--------------|
- * | RIGHT     | false      | true                | NO           |
- * | RIGHT     | false      | false               | NO           |
- * | RIGHT     | true       | true                | NO           |
- * | RIGHT     | true       | false               | NO           |
- * | CENTER    | false      | true                | NO           |
- * | CENTER    | false      | false               | NO           |
- * | CENTER    | true       | true                | NO           |
- * | CENTER    | true       | false               | NO           |
- * | LEFT      | false      | true                | YES          |
- * | LEFT      | false      | false               | NO           |
- * | LEFT      | true       | true                | NO           |
- * | LEFT      | true       | false               | NO           |
+ * | Alignment | hideAvatar | isGroupConversation | isAgentChat | Show Avatar? |
+ * |-----------|------------|---------------------|-------------|--------------|
+ * | RIGHT     | false      | true                | true        | NO           |
+ * | RIGHT     | false      | true                | false       | NO           |
+ * | RIGHT     | false      | false               | true        | NO           |
+ * | RIGHT     | false      | false               | false       | NO           |
+ * | RIGHT     | true       | true                | true        | NO           |
+ * | RIGHT     | true       | true                | false       | NO           |
+ * | RIGHT     | true       | false               | true        | NO           |
+ * | RIGHT     | true       | false               | false       | NO           |
+ * | CENTER    | false      | true                | true        | NO           |
+ * | CENTER    | false      | true                | false       | NO           |
+ * | CENTER    | false      | false               | true        | NO           |
+ * | CENTER    | false      | false               | false       | NO           |
+ * | CENTER    | true       | true                | true        | NO           |
+ * | CENTER    | true       | true                | false       | NO           |
+ * | CENTER    | true       | false               | true        | NO           |
+ * | CENTER    | true       | false               | false       | NO           |
+ * | LEFT      | false      | true                | true        | YES          |
+ * | LEFT      | false      | true                | false       | YES          |
+ * | LEFT      | false      | false               | true        | YES          |
+ * | LEFT      | false      | false               | false       | NO           |
+ * | LEFT      | true       | true                | true        | NO           |
+ * | LEFT      | true       | true                | false       | NO           |
+ * | LEFT      | true       | false               | true        | NO           |
+ * | LEFT      | true       | false               | false       | NO           |
  *
  * @param alignment The message bubble alignment (LEFT for incoming, RIGHT for outgoing, CENTER for action)
  * @param hideAvatar The master hide avatar flag from CometChatMessageList
  * @param isGroupConversation Whether the current conversation is a group (true) or user (false)
+ * @param isAgentChat Whether the current conversation is an agent chat (true forces avatar for LEFT-aligned messages)
  * @return true if avatar should be shown, false otherwise
  *
  * @see UIKitConstants.MessageBubbleAlignment
@@ -62,7 +76,8 @@ import com.cometchat.uikit.core.state.MessageAlignment
 internal fun shouldShowAvatar(
     alignment: UIKitConstants.MessageBubbleAlignment,
     hideAvatar: Boolean,
-    isGroupConversation: Boolean
+    isGroupConversation: Boolean,
+    isAgentChat: Boolean = false
 ): Boolean {
     // Rule 1: Master override - if hideAvatar is true, never show avatar
     if (hideAvatar) return false
@@ -73,8 +88,8 @@ internal fun shouldShowAvatar(
         UIKitConstants.MessageBubbleAlignment.RIGHT -> false
         // Rule 3: Action/system messages never show avatar
         UIKitConstants.MessageBubbleAlignment.CENTER -> false
-        // Rule 4: Incoming messages show avatar only in group conversations
-        UIKitConstants.MessageBubbleAlignment.LEFT -> isGroupConversation
+        // Rule 4: Incoming messages show avatar in group conversations or agent chats
+        UIKitConstants.MessageBubbleAlignment.LEFT -> isGroupConversation || isAgentChat
     }
 }
 
@@ -199,6 +214,8 @@ internal fun MessageListItem(
     bubbleStyles: BubbleStyles = BubbleStyles(),
     incomingMessageBubbleStyle: CometChatMessageBubbleStyle? = null,
     outgoingMessageBubbleStyle: CometChatMessageBubbleStyle? = null,
+    // NEW parameter for agent chat mode (Task 2.3)
+    isAgentChat: Boolean = false,
     // NEW parameter for alignment propagation (Task 11.2)
     messageListAlignment: UIKitConstants.MessageListAlignment = UIKitConstants.MessageListAlignment.STANDARD,
     // Highlight parameters for jump-to-parent-message feature
@@ -266,15 +283,13 @@ internal fun MessageListItem(
     // - Action messages (CENTER) never show avatar
     // - Incoming messages (LEFT) show avatar only in group conversations
     // - hideAvatar=true overrides all and hides avatar
-    val shouldShowDefaultAvatar = remember(bubbleAlignment, hideAvatar, isGroupConversation) {
-        val result = shouldShowAvatar(
+    val shouldShowDefaultAvatar = remember(bubbleAlignment, hideAvatar, isGroupConversation, isAgentChat) {
+        shouldShowAvatar(
             alignment = bubbleAlignment,
             hideAvatar = hideAvatar,
-            isGroupConversation = isGroupConversation
+            isGroupConversation = isGroupConversation,
+            isAgentChat = isAgentChat
         )
-        // Debug logging - remove after testing
-        android.util.Log.d("AvatarVisibility", "Message: ${message.id}, Alignment: $bubbleAlignment, hideAvatar: $hideAvatar, isGroupConversation: $isGroupConversation, shouldShowDefaultAvatar: $result")
-        result
     }
 
     // Convert provider callbacks to direct composable lambdas for CometChatMessageBubble.
@@ -299,7 +314,7 @@ internal fun MessageListItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { onMessageClick?.invoke(message) },
-                onLongClick = if (isActionOrCallMessage) null else {
+                onLongClick = if (isAgentChat || isActionOrCallMessage) null else {
                     { onMessageLongClick?.invoke(message) }
                 }
             )
@@ -367,10 +382,12 @@ internal fun MessageListItem(
         bubbleStyles = bubbleStyles,
         incomingMessageBubbleStyle = incomingMessageBubbleStyle,
         outgoingMessageBubbleStyle = outgoingMessageBubbleStyle,
-        onLongClick = { onMessageLongClick?.invoke(message) },
+        onLongClick = if (isAgentChat) null else { { onMessageLongClick?.invoke(message) } },
         
         // Highlight parameters for jump-to-parent-message feature
         highlightedMessageId = highlightedMessageId,
-        highlightAlpha = highlightAlpha
+        highlightAlpha = highlightAlpha,
+        // Agent chat flag for slot suppression and transparent background
+        isAgentChat = isAgentChat
     )
 }

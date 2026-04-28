@@ -70,6 +70,7 @@ import com.cometchat.uikit.core.CometChatUIKit
  * @param onConversationClick Callback when a conversation is tapped
  * @param onLogout Callback when logout is requested
  * @param onNewChatClick Callback when new chat is requested
+ * @param onSearchClick Callback when search is requested
  *
  * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 8.4, 8.5
  */
@@ -77,7 +78,8 @@ import com.cometchat.uikit.core.CometChatUIKit
 fun ConversationsScreen(
     onConversationClick: (Conversation) -> Unit,
     onLogout: () -> Unit = {},
-    onNewChatClick: () -> Unit = {}
+    onNewChatClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {}
 ) {
     // Get logged in user for avatar
     val loggedInUser = remember { CometChatUIKit.getLoggedInUser() }
@@ -102,6 +104,9 @@ fun ConversationsScreen(
         // Callbacks
         onItemClick = { conversation ->
             onConversationClick(conversation)
+        },
+        onSearchClick = {
+            onSearchClick()
         },
         onError = { exception ->
             // Error handling is done internally by the component

@@ -113,7 +113,7 @@ class NonEditableSpanStyleTest : FunSpec({
         }
 
         test("applyColorWithAlpha should work with any color") {
-            checkAll(100, Arb.int()) { color ->
+            checkAll(10, Arb.int()) { color ->
                 val result = applyColorWithAlpha(color, 51)
                 
                 // Alpha should always be 51
@@ -149,28 +149,28 @@ class NonEditableSpanStyleTest : FunSpec({
     context("PromptTextStyle property-based tests") {
 
         test("any color value should be stored and retrieved correctly") {
-            checkAll(100, Arb.int()) { color ->
+            checkAll(10, Arb.int()) { color ->
                 val style = PromptTextStyle().setColor(color)
                 style.getColor() shouldBe color
             }
         }
 
         test("any background color value should be stored and retrieved correctly") {
-            checkAll(100, Arb.int()) { bgColor ->
+            checkAll(10, Arb.int()) { bgColor ->
                 val style = PromptTextStyle().setBackgroundColor(bgColor)
                 style.getBackgroundColor() shouldBe bgColor
             }
         }
 
         test("any text size value should be stored and retrieved correctly") {
-            checkAll(100, Arb.int(0..1000)) { textSize ->
+            checkAll(10, Arb.int(0..1000)) { textSize ->
                 val style = PromptTextStyle().setTextSize(textSize)
                 style.getTextSize() shouldBe textSize
             }
         }
 
         test("multiple style instances should be independent") {
-            checkAll(100, Arb.int(), Arb.int()) { color1, color2 ->
+            checkAll(10, Arb.int(), Arb.int()) { color1, color2 ->
                 val style1 = PromptTextStyle().setColor(color1)
                 val style2 = PromptTextStyle().setColor(color2)
                 

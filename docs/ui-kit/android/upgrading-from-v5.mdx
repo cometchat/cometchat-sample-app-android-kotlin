@@ -5,15 +5,15 @@ description: "Migrate your Android app from CometChat UI Kit V5 to V6 with updat
 
 ## Introduction
 
-The **CometChat V5 Android UI Kit** was a single Java module (`com.cometchat:chat-uikit-android`) that shipped all UI components, ViewModels, and resources in one artifact under the `com.cometchat.chatuikit` package.
+The **CometChat V5 Android UI Kit** was a single Java module (`com.cometchat:chatuikit-kotlin-android`) that shipped all UI components, ViewModels, and resources in one artifact under the `com.cometchat.chatuikit` package.
 
 **V6** splits the UI Kit into three modules built entirely in Kotlin:
 
 | Module | Artifact | Description |
 |:-------|:---------|:------------|
 | **Core** | `com.cometchat:chatuikit-core` | Shared ViewModels, Repositories, DataSources, and events — used by both UI modules. |
-| **Kotlin (XML Views)** | `com.cometchat:chat-uikit-kotlin` | Traditional XML-based Views for Activities and Fragments. |
-| **Jetpack Compose** | `com.cometchat:chat-uikit-compose` | Declarative Compose components. |
+| **Kotlin (XML Views)** | `com.cometchat:chatuikit-kotlin-android` | Traditional XML-based Views for Activities and Fragments. |
+| **Jetpack Compose** | `com.cometchat:chatuikit-compose-android` | Declarative Compose components. |
 
 Choose the UI module that fits your project — both depend on `chatuikit-core` automatically.
 
@@ -28,7 +28,7 @@ The following table summarizes the most impactful changes when migrating from V5
 | Area | V5 | V6 |
 |:-----|:---|:---|
 | **Language** | Java | Kotlin |
-| **Modules** | Single `com.cometchat:chat-uikit-android` | `com.cometchat:chat-uikit-kotlin` (XML) or `com.cometchat:chat-uikit-compose` (Compose) + shared `chatuikit-core` |
+| **Modules** | Single `com.cometchat:chatuikit-kotlin-android` | `com.cometchat:chatuikit-kotlin-android` (XML) or `com.cometchat:chatuikit-compose-android` (Compose) + shared `chatuikit-core` |
 | **Import path** | `com.cometchat.chatuikit.*` | `com.cometchat.uikit.kotlin.presentation.*` or `com.cometchat.uikit.compose.presentation.*` |
 | **CometChatUIKit import** | `com.cometchat.chatuikit.shared.cometchatuikit.CometChatUIKit` | `com.cometchat.uikit.core.CometChatUIKit` |
 | **UIKitSettings import** | `com.cometchat.chatuikit.shared.cometchatuikit.UIKitSettings` | `com.cometchat.uikit.core.UIKitSettings` |
@@ -51,7 +51,7 @@ The following table summarizes the most impactful changes when migrating from V5
 
 ```groovy title="build.gradle"
 dependencies {
-    implementation 'com.cometchat:chat-uikit-android:5.x.x'
+    implementation 'com.cometchat:chatuikit-kotlin-android:5.x.x'
 }
 ```
 
@@ -59,7 +59,7 @@ dependencies {
 
 ```groovy title="build.gradle"
 dependencies {
-    implementation 'com.cometchat:chat-uikit-kotlin:6.x.x'
+    implementation 'com.cometchat:chatuikit-kotlin-android:6.x.x'
     // chatuikit-core is pulled in transitively
 }
 ```
@@ -68,7 +68,7 @@ dependencies {
 
 ```groovy title="build.gradle"
 dependencies {
-    implementation 'com.cometchat:chat-uikit-compose:6.x.x'
+    implementation 'com.cometchat:chatuikit-compose-android:6.x.x'
     // chatuikit-core is pulled in transitively
 }
 ```

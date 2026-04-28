@@ -95,6 +95,7 @@ private data class BottomNavItem(
  * @param onUserClick Callback when a user is tapped
  * @param onGroupClick Callback when a group is tapped
  * @param onNewChatClick Callback when new chat is requested
+ * @param onSearchClick Callback when search is requested from conversations
  *
  * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7
  */
@@ -106,7 +107,8 @@ fun HomeScreen(
     onCallLogClick: (CallLog) -> Unit = {},
     onUserClick: (User) -> Unit,
     onGroupClick: (Group) -> Unit,
-    onNewChatClick: () -> Unit = {}
+    onNewChatClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {}
 ) {
     val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -209,7 +211,8 @@ fun HomeScreen(
                 ConversationsScreen(
                     onConversationClick = onConversationClick,
                     onLogout = onLogout,
-                    onNewChatClick = onNewChatClick
+                    onNewChatClick = onNewChatClick,
+                    onSearchClick = onSearchClick
                 )
             }
             

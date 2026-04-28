@@ -32,8 +32,10 @@ import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.formatter.MarkdownRenderer
 
 /**
  * Default reply preview composable that shows the message being replied to.
@@ -66,43 +68,54 @@ fun DefaultReplyPreview(
     }
     
     // Get message content based on type (matching Java Utils.setReplyMessagePreview logic)
-    // Run formatter pipeline to resolve mention tokens for TextMessages
-    val messageContent: CharSequence = remember(message, textFormatters) {
+    // Run formatter pipeline to resolve mention tokens for TextMessages,
+    // then apply markdown formatting for preview display
+    val messageContent: AnnotatedString = remember(message, textFormatters) {
         when (message) {
             is TextMessage -> {
                 if (message.deletedAt > 0) {
-                    context.getString(R.string.cometchat_this_message_deleted)
+                    AnnotatedString(context.getString(R.string.cometchat_this_message_deleted))
                 } else {
                     val rawText = message.text ?: ""
-                    if (rawText.isEmpty() || textFormatters.isEmpty()) {
-                        rawText
+                    if (rawText.isEmpty()) {
+                        AnnotatedString(rawText)
                     } else {
-                        // Run each formatter through the pipeline with MESSAGE_COMPOSER type
-                        var formattedText: AnnotatedString = AnnotatedString(rawText)
-                        for (formatter in textFormatters) {
-                            formattedText = formatter.prepareMessageString(
-                                context,
-                                message,
-                                formattedText,
-                                UIKitConstants.MessageBubbleAlignment.LEFT,
-                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                            )
+                        // Step 1: Run formatter pipeline to resolve mention tokens
+                        val formattedText = if (textFormatters.isEmpty()) {
+                            rawText
+                        } else {
+                            var result: AnnotatedString = AnnotatedString(rawText)
+                            for (formatter in textFormatters) {
+                                result = formatter.prepareMessageString(
+                                    context,
+                                    message,
+                                    result,
+                                    UIKitConstants.MessageBubbleAlignment.LEFT,
+                                    UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                                )
+                            }
+                            result.text
                         }
-                        formattedText
+                        // Step 2: Parse markdown, keep bold/italic/underline/strikethrough, plain text for code/blockquote
+                        val segments = MarkdownRenderer.parse(formattedText.toString())
+                        buildReplyPreviewAnnotatedString(
+                            segments = segments,
+                            textColor = style.messagePreviewSubtitleTextColor
+                        )
                     }
                 }
             }
             is MediaMessage -> {
-                message.attachment?.fileName ?: when (message.type) {
+                AnnotatedString(message.attachment?.fileName ?: when (message.type) {
                     "image" -> context.getString(R.string.cometchat_message_image)
                     "video" -> context.getString(R.string.cometchat_message_video)
                     "audio" -> context.getString(R.string.cometchat_message_audio)
                     "file" -> context.getString(R.string.cometchat_message_document)
                     else -> message.type ?: ""
-                }
+                })
             }
             is CustomMessage -> {
-                when (message.type) {
+                AnnotatedString(when (message.type) {
                     "extension_poll" -> context.getString(R.string.cometchat_poll)
                     "extension_sticker" -> context.getString(R.string.cometchat_message_sticker)
                     "location" -> context.getString(R.string.cometchat_message_location)
@@ -110,9 +123,9 @@ fun DefaultReplyPreview(
                     "extension_whiteboard" -> context.getString(R.string.cometchat_collaborative_whiteboard)
                     "meeting" -> context.getString(R.string.cometchat_meeting)
                     else -> message.conversationText ?: message.type ?: ""
-                }
+                })
             }
-            else -> message.type ?: ""
+            else -> AnnotatedString(message.type ?: "")
         }
     }
 
@@ -162,23 +175,14 @@ fun DefaultReplyPreview(
                 overflow = TextOverflow.Ellipsis
             )
 
-            // Message content
-            when (messageContent) {
-                is AnnotatedString -> Text(
-                    text = messageContent,
-                    color = style.messagePreviewSubtitleTextColor,
-                    style = style.messagePreviewSubtitleTextStyle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                else -> Text(
-                    text = messageContent.toString(),
-                    color = style.messagePreviewSubtitleTextColor,
-                    style = style.messagePreviewSubtitleTextStyle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            // Message content as plain text (markdown stripped)
+            Text(
+                text = messageContent,
+                color = style.messagePreviewSubtitleTextColor,
+                style = style.messagePreviewSubtitleTextStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))

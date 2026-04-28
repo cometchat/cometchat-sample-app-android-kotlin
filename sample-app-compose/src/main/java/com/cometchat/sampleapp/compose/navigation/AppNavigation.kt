@@ -82,7 +82,9 @@ object HomeRoute
 @Serializable
 data class MessagesRoute(
     val userId: String? = null,
-    val groupId: String? = null
+    val groupId: String? = null,
+    val messageId: Long? = null,
+    val parentMessageId: Long? = null
 )
 
 /**
@@ -120,7 +122,8 @@ data class GroupDetailsRoute(
  */
 @Serializable
 data class ThreadRoute(
-    val parentMessageId: Long
+    val parentMessageId: Long,
+    val goToMessageId: Long? = null
 )
 
 /**
@@ -139,6 +142,19 @@ data class ThreadRoute(
 data class SearchRoute(
     val userId: String? = null,
     val groupId: String? = null
+)
+
+/**
+ * Route for the AI assistant chat history screen.
+ *
+ * Displays past AI assistant conversations for a specific user,
+ * grouped by date with options to view, delete, or start new chats.
+ *
+ * @property userId The UID of the user whose AI chat history to display
+ */
+@Serializable
+data class ChatHistoryRoute(
+    val userId: String
 )
 
 /**

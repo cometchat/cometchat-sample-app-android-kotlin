@@ -20,7 +20,12 @@ import com.cometchat.chat.models.ReactionEvent
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.TypingIndicator
 import com.cometchat.chat.models.User
+import com.cometchat.chat.models.AIAssistantBaseEvent
+import com.cometchat.chat.models.AIAssistantMessage
+import com.cometchat.uikit.core.CometChatAIStreamService
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.domain.model.StreamMessage
+import com.cometchat.uikit.core.domain.model.StreamingState
 import com.cometchat.uikit.core.domain.model.CometChatMessageOption
 import com.cometchat.uikit.core.domain.repository.MessageListRepository
 import com.cometchat.uikit.core.events.CometChatCallEvent
@@ -40,6 +45,7 @@ import com.cometchat.uikit.core.state.MessageListUIState
 import com.cometchat.uikit.core.state.ConversationStarterUIState
 import com.cometchat.uikit.core.state.ConversationSummaryUIState
 import com.cometchat.uikit.core.state.SmartRepliesUIState
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.utils.getDefaultMessagesCategories
 import com.cometchat.uikit.core.utils.getDefaultMessagesTypes
 import kotlinx.coroutines.Job
@@ -54,6 +60,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.log
 
 /**
  * ViewModel for the CometChatMessageList component.
@@ -606,6 +614,29 @@ open class CometChatMessageListViewModel(
     
     /** The group for group conversations, or `null` for 1-on-1 conversations. */
     private var group: Group? = null
+
+    /**
+     * Tracks the ID (uid or guid) for which the ViewModel was last fully initialized.
+     * Used by the Compose LaunchedEffect to skip redundant setup when Navigation Compose
+     * fires the effect twice during animated transitions.
+     */
+    private var initializedId: String? = null
+
+    /**
+     * Returns the ID (uid or guid) for which the ViewModel was last fully initialized.
+     * Used by Compose to skip redundant LaunchedEffect executions during animated transitions.
+     */
+    fun getInitializedId(): String? = initializedId
+
+    /**
+     * Explicitly sets the UI state to [MessageListUIState.Empty].
+     * Used by the Compose layer for agent chat main conversations where
+     * messages are not fetched, so the empty/greeting state with
+     * conversation starters is shown immediately.
+     */
+    fun setUIStateEmpty() {
+        _uiState.value = MessageListUIState.Empty
+    }
     
     /** Parent message ID for threaded conversations, or `-1` for main conversation. */
     private var parentMessageId: Long = -1
@@ -672,6 +703,59 @@ open class CometChatMessageListViewModel(
      * Initialized with defaults and updated by setUser()/setGroup().
      */
     private var messagesCategories: List<String> = getDefaultMessagesCategories()
+
+    // ========================================
+    // Agent Chat State
+    // ========================================
+
+    /** AI stream service instance for agent chat streaming. Only non-null for agent chats. */
+    private var aiStreamService: CometChatAIStreamService? = null
+
+    /**
+     * Returns the [CometChatAIStreamService] instance for agent chat streaming,
+     * or null if this is not an agent chat conversation.
+     *
+     * Used by the UI layer (e.g., [CometChatMessageList]) to wire stream callbacks
+     * and pass the service to the adapter/bubble for real-time event handling.
+     */
+    fun getAIStreamService(): CometChatAIStreamService? = aiStreamService
+
+    /** Whether the current conversation is an agent chat. */
+    private var isAgentChat: Boolean = false
+
+    /**
+     * Returns whether the current conversation is an agent chat.
+     *
+     * An agent chat is a 1-on-1 user conversation where the remote user has the
+     * `@agentic` role, as detected by [AgentChatDetector.isAgentChat].
+     *
+     * This value is set automatically when [setUser] or [setGroup] is called:
+     * - [setUser]: delegates to [AgentChatDetector.isAgentChat] for the given user
+     * - [setGroup]: always sets this to `false` (groups are never agent chats)
+     *
+     * Used by the UI layer to control agent-specific behavior such as avatar
+     * visibility, slot suppression, and swipe-to-reply disabling.
+     */
+    fun isAgentChat(): Boolean = isAgentChat
+
+    /**
+     * Tracks whether [parentMessageId] has been set from a successful first message send
+     * in an agent chat session. When `false` and [isAgentChat] is `true`, the next
+     * successful message send will set [parentMessageId] to the sent message's ID,
+     * creating the agent chat thread. Remains `false` on send failure so retries work.
+     */
+    private var agentChatParentMessageIdSet: Boolean = false
+
+    /** Active stream messages keyed by runId, used to track and update streaming messages. */
+    private val activeStreamMessages = ConcurrentHashMap<Long, StreamMessage>()
+
+    /** RunIds for which the Streaming state has already been processed (metadata stamped,
+     *  completion callback registered). Prevents re-processing when the StateFlow re-emits
+     *  the full map on unrelated changes. Cleared on Completed/cleanup. */
+    private val processedStreamingRunIds = mutableSetOf<Long>()
+
+    /** Job for the AI stream listener coroutine that observes streaming states. */
+    private var streamListenerJob: Job? = null
 
     // ========================================
     // Custom Message Options
@@ -1029,13 +1113,27 @@ open class CometChatMessageListViewModel(
         // Always subscribe to UIKit local events (these don't depend on SDK)
         removeLocalEventListeners()
         addLocalEventListeners()
-        
+
         if (enableListeners) {
             removeListeners()
             addListeners()
         }
+
+        // Detect agent chat and create AI stream service if needed
+        isAgentChat = AgentChatDetector.isAgentChat(user)
+        Log.d("StreamingState", "setUser: isAgentChat = $isAgentChat for user ${user.uid}")
+        agentChatParentMessageIdSet = false
+        if (isAgentChat) {
+            aiStreamService = CometChatAIStreamService(viewModelScope).also {
+                it.attachListener(listenersTag ?: "")
+                // Set the singleton so InternalContentRenderer.bindStreamMessage can access it
+                CometChatAIStreamService.setInstance(it)
+            }
+            setupAIStreamListener()
+        }
+        initializedId = user.uid
     }
-    
+
     /**
      * Configures the ViewModel for a group conversation.
      *
@@ -1065,6 +1163,16 @@ open class CometChatMessageListViewModel(
         this.user = null
         this.parentMessageId = parentMessageId
         this.gotoMessageId = gotoMessageId
+
+        // Groups are never agent chats — reset agent chat state
+        isAgentChat = false
+        agentChatParentMessageIdSet = false
+        streamListenerJob?.cancel()
+        streamListenerJob = null
+        activeStreamMessages.clear()
+        processedStreamingRunIds.clear()
+        aiStreamService = null
+        CometChatAIStreamService.setInstance(null)
         
         // Always use defaults for types and categories
         val effectiveTypes = getDefaultMessagesTypes()
@@ -1087,6 +1195,144 @@ open class CometChatMessageListViewModel(
             removeListeners()
             addListeners()
         }
+        initializedId = group.guid
+    }
+    
+    /**
+     * Sets up the AI stream listener for agent chat streaming.
+     *
+     * This method registers an [CometChatAIStreamService.AIStreamListener] that:
+     * - On `RUN_STARTED`: creates a [StreamMessage] and adds it to the message list
+     * - On text content events: updates the [StreamMessage]'s text from accumulated content
+     * - On `RUN_FINISHED`: handled by the [CometChatAIStreamService.QueueCompletionCallback]
+     *   which replaces the [StreamMessage] with the final [AIAssistantMessage]
+     * - On interruption: marks the [StreamMessage] as interrupted
+     *
+     * Must be called after [aiStreamService] is created and [attachListener] is called.
+     *
+     * @see CometChatAIStreamService.AIStreamListener
+     * @see CometChatAIStreamService.QueueCompletionCallback
+     * @see StreamMessage
+     */
+    private fun setupAIStreamListener() {
+        val service = aiStreamService ?: return
+        if (user == null) return
+
+        // Cancel any previous stream listener job
+        streamListenerJob?.cancel()
+
+        // Observe streaming states — mirrors the Java UIKit pattern:
+        //   Streaming   → stamp RUN_STARTED metadata + register completion callback + trigger rebind
+        //   Completed   → clean up activeStreamMessages + service state
+        //   Interrupted → mark StreamMessage as interrupted
+        // StreamMessage creation is handled exclusively by addStreamMessage() in handleMessageSentEvent(SUCCESS).
+        streamListenerJob = viewModelScope.launch {
+            service.streamingStates.collect { states ->
+                for ((runId, state) in states) {
+                    when (state) {
+                        is StreamingState.Streaming -> {
+                            // Skip if already processed — the StateFlow re-emits the
+                            // full map on every change, so we'd re-process old entries.
+                            if (processedStreamingRunIds.contains(runId)) continue
+
+                            // Find the StreamMessage for this runId
+                            val stream = findOrCacheStreamMessage(runId)
+
+                            if (stream != null) {
+                                activateStreamMessage(stream, runId, service)
+                            }
+                        }
+                        is StreamingState.Interrupted -> {
+                            val stream = activeStreamMessages[runId]
+                            if (stream != null && !stream.isStreamingInterrupted) {
+                                stream.isStreamingInterrupted = true
+                                updateItem(stream) { it === stream }
+                            }
+                        }
+                        is StreamingState.Completed -> {
+                            activeStreamMessages.remove(runId)
+                            processedStreamingRunIds.remove(runId)
+                            service.cleanupRunId(runId)
+                        }
+                        else -> { /* Idle — no action needed */ }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Looks up the [StreamMessage] for [runId] in [activeStreamMessages],
+     * falling back to a linear scan of [_messages] by muid convention.
+     * If found via the fallback, the result is cached in [activeStreamMessages].
+     *
+     * @return The [StreamMessage] for [runId], or `null` if not yet in the list.
+     */
+    private fun findOrCacheStreamMessage(runId: Long): StreamMessage? {
+        activeStreamMessages[runId]?.let { return it }
+        val stream = _messages.value.firstOrNull {
+            it is StreamMessage && it.muid == "stream_$runId"
+        } as? StreamMessage
+        if (stream != null) {
+            activeStreamMessages[runId] = stream
+        }
+        return stream
+    }
+
+    /**
+     * Stamps RUN_STARTED metadata on a [StreamMessage], registers the
+     * completion callback, and emits a guaranteed adapter rebind.
+     *
+     * This is the core "activate" step that transitions a StreamMessage
+     * from the "Thinking" shimmer state to active streaming. It is called
+     * from two sites:
+     * 1. The [setupAIStreamListener] collector when the Streaming state
+     *    arrives after the StreamMessage is already in the list.
+     * 2. [addStreamMessage] when the Streaming state arrived *before*
+     *    the StreamMessage was added (eager path).
+     *
+     * @param stream  The [StreamMessage] to activate.
+     * @param runId   The Run ID for this streaming session.
+     * @param service The [CometChatAIStreamService] instance.
+     */
+    private suspend fun activateStreamMessage(
+        stream: StreamMessage,
+        runId: Long,
+        service: CometChatAIStreamService
+    ) {
+        processedStreamingRunIds.add(runId)
+
+        // Stamp RUN_STARTED metadata (matches Java updateAIStreamMessages)
+        val meta = org.json.JSONObject()
+        meta.put(
+            UIKitConstants.AIConstants.AI_ASSISTANT_EVENT_TYPE,
+            UIKitConstants.AIAssistantEventType.RUN_STARTED
+        )
+        stream.metadata = meta
+
+        // Register completion callback (matches Java RUN_FINISHED handler)
+        val streamMuid = stream.muid
+        service.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback { result ->
+            val finalMessage = result.aiAssistantMessage
+            if (finalMessage != null) {
+                val s = activeStreamMessages.remove(runId)
+                if (s != null) {
+                    val replaced = updateItem(finalMessage) {
+                        it === s || (it is StreamMessage && it.muid == streamMuid)
+                    }
+                    if (replaced) {
+                        latestMessageId = finalMessage.id
+                    }
+                }
+            }
+        })
+
+        // Trigger rebind so the bubble sees RUN_STARTED and calls startStreamingForRunId().
+        // StateFlow conflation can swallow the _messages emission when we're already
+        // inside a collect callback on the main thread, so we also emit via
+        // _messageUpdated (SharedFlow, no conflation) to guarantee the adapter rebinds.
+        updateItem(stream) { it === stream || (it is StreamMessage && it.muid == streamMuid) }
+        _messageUpdated.emit(stream)
     }
     
     /**
@@ -1622,9 +1868,9 @@ open class CometChatMessageListViewModel(
      */
     fun fetchMessages() {
         if (!_hasMorePreviousMessages.value || _isInProgress.value) return
+        _isInProgress.value = true
         
         viewModelScope.launch {
-            _isInProgress.value = true
             
             if (_messages.value.isEmpty()) {
                 _uiState.value = MessageListUIState.Loading
@@ -1637,6 +1883,33 @@ open class CometChatMessageListViewModel(
                     val existingIds = _messages.value.map { it.id }.toSet()
                     val uniqueNewMessages = newMessages.filter { it.id !in existingIds }
                     _messages.value = uniqueNewMessages + _messages.value
+                    
+                    // For agent chats with parentMessageId, fetch and prepend the parent message
+                    // so the user's original question appears at the top of the thread
+                    if (firstFetch && isAgentChat && parentMessageId > 0 
+                        && _messages.value.none { it.id.toLong() == parentMessageId }) {
+                        try {
+                            val parentMessage = kotlinx.coroutines.suspendCancellableCoroutine<BaseMessage?> { cont ->
+                                CometChat.getMessageDetails(
+                                    parentMessageId,
+                                    object : CometChat.CallbackListener<BaseMessage>() {
+                                        override fun onSuccess(message: BaseMessage) {
+                                            cont.resume(message, null)
+                                        }
+                                        override fun onError(e: CometChatException) {
+                                            cont.resume(null, null)
+                                        }
+                                    }
+                                )
+                            }
+                            if (parentMessage != null) {
+                                _messages.value = listOf(parentMessage) + _messages.value
+                            }
+                        } catch (_: Exception) {
+                            // Silently ignore — parent message fetch is best-effort
+                        }
+                    }
+                    
                     _uiState.value = if (_messages.value.isEmpty()) {
                         MessageListUIState.Empty
                     } else {
@@ -2081,7 +2354,15 @@ open class CometChatMessageListViewModel(
      * @see removeMessage
      */
     open fun addMessage(message: BaseMessage) {
-        if (isMessageForCurrentChat(message) && isThreadedMessageForCurrentChat(message)) {
+        val isForChat = isMessageForCurrentChat(message)
+        val isForThread = isThreadedMessageForCurrentChat(message)
+        if (isForChat && isForThread) {
+            
+            // Remove any interrupted StreamMessage before adding a new message.
+            // Matches Java behavior: when the user sends a new message, stale
+            // interrupted stream bubbles are cleaned up automatically.
+            removeInterruptedStreamMessage()
+            
             // Check if message already exists to prevent duplicates
             // First check by muid (for optimistic messages that haven't received server ID yet)
             val muid = message.muid
@@ -2110,6 +2391,28 @@ open class CometChatMessageListViewModel(
             // Clear conversation starters when first message is added
             if (_conversationStarterReplies.value.isNotEmpty()) {
                 clearConversationStarter()
+            }
+        }
+    }
+    
+    /**
+     * Removes the last message in the list if it is an interrupted [StreamMessage].
+     *
+     * This cleanup ensures that stale interrupted stream bubbles are removed
+     * before a new message is added, matching the Java UIKit behavior where
+     * `addMessage()` always calls this before appending.
+     *
+     * @see addMessage
+     */
+    private fun removeInterruptedStreamMessage() {
+        val messages = _messages.value
+        if (messages.isNotEmpty()) {
+            val lastMessage = messages.last()
+            if (lastMessage is StreamMessage) {
+                if (lastMessage.isStreamingInterrupted) {
+                    removeItem(lastMessage)
+                    activeStreamMessages.entries.removeAll { it.value === lastMessage }
+                }
             }
         }
     }
@@ -2178,13 +2481,11 @@ open class CometChatMessageListViewModel(
     open fun updateReplyCount(parentMessageId: Long) {
         val parentMessage = _messages.value.find { it.id == parentMessageId }
         if (parentMessage == null) {
-            android.util.Log.d("ThreadReplyDebug", "updateReplyCount: parent message $parentMessageId NOT found in list (${_messages.value.size} messages)")
             return
         }
         
         val oldCount = parentMessage.replyCount
         parentMessage.replyCount = oldCount + 1
-        android.util.Log.d("ThreadReplyDebug", "updateReplyCount: parent=$parentMessageId, oldCount=$oldCount, newCount=${parentMessage.replyCount}")
         
         // Emit via SharedFlow so the UI layer is guaranteed to receive the update,
         // even though StateFlow conflation would suppress it (same object reference).
@@ -2795,11 +3096,12 @@ open class CometChatMessageListViewModel(
      * @return `true` if the message belongs to the current thread context, `false` otherwise.
      */
     private fun isThreadedMessageForCurrentChat(message: BaseMessage): Boolean {
-        return if (parentMessageId == -1L) {
+        val result = if (parentMessageId == -1L) {
             message.parentMessageId == 0L || message.parentMessageId == -1L
         } else {
             message.parentMessageId == parentMessageId
         }
+        return result
     }
     
     /**
@@ -3283,7 +3585,6 @@ open class CometChatMessageListViewModel(
         
         if (isThreadReplyInMainConversation) {
             // Thread reply sent from main conversation - only update reply count on SUCCESS
-            android.util.Log.d("ThreadReplyDebug", "handleMessageSentEvent: Thread reply in main conv, status=${event.status}, parentMessageId=${message.parentMessageId}")
             if (event.status == MessageStatus.SUCCESS) {
                 updateReplyCount(message.parentMessageId)
             }
@@ -3306,10 +3607,98 @@ open class CometChatMessageListViewModel(
                 
                 // Update latestMessageId for real-time message guards
                 latestMessageId = message.id
+
+                // Agent chat: set parentMessageId on first successful send
+                if (isAgentChat && !agentChatParentMessageIdSet && parentMessageId == -1L) {
+                    parentMessageId = message.id
+                    agentChatParentMessageIdSet = true
+                    _idMap.value = generateIdMap()
+
+                    // No previous messages exist in this new thread context,
+                    // so prevent scroll-up from triggering a fetch of older
+                    // main-conversation messages.
+                    _hasMorePreviousMessages.value = false
+
+                    // Reconfigure the repository with the new parentMessageId
+                    // so any future fetches are scoped to this thread.
+                    val currentUser = user
+                    val currentGroup = group
+                    when {
+                        currentUser != null -> repository.configureForUser(
+                            currentUser, messagesTypes, messagesCategories,
+                            parentMessageId, null
+                        )
+                        currentGroup != null -> repository.configureForGroup(
+                            currentGroup, messagesTypes, messagesCategories,
+                            parentMessageId, null
+                        )
+                    }
+                }
+
+                // Agent chat: create and add the StreamMessage on SUCCESS
+                // (matching Java UIKit's addStreamMessage pattern).
+                // The StreamMessage is added to the list here; the
+                // streamingStates collector only registers the completion
+                // callback once the Streaming state arrives.
+                if (parentMessageId != -1L && isAgentChat && message is TextMessage) {
+                    addStreamMessage(message)
+                }
             }
             MessageStatus.ERROR -> {
                 // Update message to show error state
                 updateMessage(message)
+            }
+        }
+    }
+
+    /**
+     * Creates a [StreamMessage] placeholder and adds it to the message list.
+     *
+     * This is called on [MessageStatus.SUCCESS] in agent chat mode, matching
+     * the Java UIKit's `addStreamMessage` pattern.  The [StreamMessage] acts
+     * as a placeholder that the stream bubble binds to; the completion
+     * callback registered by the [setupAIStreamListener] will later replace
+     * it with the final [AIAssistantMessage].
+     *
+     * @param textMessage The successfully sent [TextMessage] whose ID is used
+     *                    as the runId for the streaming response.
+     */
+    private fun addStreamMessage(textMessage: TextMessage) {
+        val agentUser = user ?: return
+        val loggedInUser = CometChat.getLoggedInUser() ?: return
+
+        // Create StreamMessage WITHOUT RUN_STARTED metadata.
+        // The metadata is stamped later by activateStreamMessage() — either
+        // from the streamingStates collector or eagerly below.
+        val streamMessage = StreamMessage(
+            receiverUid = loggedInUser.uid,
+            receiverType = UIKitConstants.ReceiverType.USER,
+            text = ""
+        )
+        streamMessage.runId = textMessage.id
+        streamMessage.sender = agentUser
+        streamMessage.sentAt = System.currentTimeMillis() / 1000
+        streamMessage.receiver = loggedInUser
+        streamMessage.muid = "stream_${textMessage.id}"
+        streamMessage.parentMessageId = parentMessageId
+
+        activeStreamMessages[textMessage.id] = streamMessage
+        addMessage(streamMessage)
+
+        // Eagerly process Streaming state if it arrived before the StreamMessage.
+        // The streamingStates StateFlow collector may have already seen Streaming
+        // for this runId but couldn't find the StreamMessage (it wasn't in the
+        // list yet). Because StateFlow conflates, the collector won't re-fire
+        // for that runId unless the map changes again. Process it now.
+        val runId = textMessage.id
+        val service = aiStreamService
+        val currentState = service?.streamingStates?.value?.get(runId)
+        if (service != null
+            && currentState is StreamingState.Streaming
+            && !processedStreamingRunIds.contains(runId)
+        ) {
+            viewModelScope.launch {
+                activateStreamMessage(streamMessage, runId, service)
             }
         }
     }
@@ -3373,8 +3762,10 @@ open class CometChatMessageListViewModel(
         // Check if message belongs to current conversation
         if (!isMessageForCurrentChat(message)) return
         
-        if (hideDeleteMessage) {
-            // Remove the message completely
+        if (hideDeleteMessage || isAgentChat) {
+            // Remove the message completely.
+            // In agent chat, deleted messages are always removed (not shown
+            // as "This message was deleted") to keep the conversation clean.
             removeMessage(message)
         } else {
             // Update to show "message deleted" state
@@ -3617,7 +4008,7 @@ open class CometChatMessageListViewModel(
                 
                 override fun onMessageDeleted(message: BaseMessage) {
                     if (isMessageForCurrentChat(message)) {
-                        if (hideDeleteMessage) {
+                        if (hideDeleteMessage || isAgentChat) {
                             removeMessage(message)
                         } else {
                             updateMessage(message)
@@ -3735,7 +4126,7 @@ open class CometChatMessageListViewModel(
                     // Otherwise, use fetchMessages for initial load
                     if (_messages.value.isNotEmpty()) {
                         fetchMissedMessages()
-                    } else {
+                    } else if (!(isAgentChat && parentMessageId == -1L)) {
                         fetchMessages()
                     }
                 }
@@ -3780,23 +4171,64 @@ open class CometChatMessageListViewModel(
      * @see hasMoreNewMessages
      */
     private fun handleIncomingMessage(message: BaseMessage) {
-        android.util.Log.d("ThreadReplyDebug", "handleIncomingMessage: id=${message.id}, parentMessageId=${message.parentMessageId}, category=${message.category}, isForCurrentChat=${isMessageForCurrentChat(message)}, currentParentMessageId=$parentMessageId")
-
         if (!isMessageForCurrentChat(message)) {
-            android.util.Log.d("ThreadReplyDebug", "handleIncomingMessage: NOT for current chat, skipping")
             return
+        }
+
+        // Agent chat: when a StreamMessage placeholder is active in the list,
+        // the streaming service is handling the response.  Skip the real-time
+        // message to avoid a duplicate bubble.  However, if the message is an
+        // AIAssistantMessage (category "agentic"), let it through — it will
+        // replace the StreamMessage placeholder via addMessage's duplicate check
+        // or be added if the StreamMessage was already removed.
+        if (isAgentChat && message.sender?.uid == user?.uid) {
+            val hasStream = _messages.value.any { it is com.cometchat.uikit.core.domain.model.StreamMessage }
+            val isAgenticMessage = message.category == "agentic"
+            if (!isAgenticMessage) {
+                // Non-agentic messages from the agent (e.g. TextMessage delivered
+                // through onTextMessageReceived) are duplicates — skip them.
+                return
+            }
+            // Agentic messages: if there's a StreamMessage in the list, replace it.
+            // Match by runId first for correctness when multiple streams exist.
+            if (hasStream && message is AIAssistantMessage) {
+                val msgRunId = message.runId
+                // Try to find the StreamMessage for this specific runId
+                var streamToReplace = if (msgRunId > 0) {
+                    activeStreamMessages[msgRunId]
+                        ?: _messages.value.firstOrNull { it is com.cometchat.uikit.core.domain.model.StreamMessage && (it as com.cometchat.uikit.core.domain.model.StreamMessage).runId == msgRunId }
+                } else {
+                    null
+                }
+                // Fallback: if only one StreamMessage exists, use it
+                if (streamToReplace == null) {
+                    val allStreams = _messages.value.filterIsInstance<com.cometchat.uikit.core.domain.model.StreamMessage>()
+                    if (allStreams.size == 1) {
+                        streamToReplace = allStreams.first()
+                    }
+                }
+                if (streamToReplace != null) {
+                    activeStreamMessages.entries.removeAll { it.value === streamToReplace }
+                    val streamMuid = (streamToReplace as? com.cometchat.uikit.core.domain.model.StreamMessage)?.muid
+                    val replaced = updateItem(message) { it === streamToReplace || (it is com.cometchat.uikit.core.domain.model.StreamMessage && !streamMuid.isNullOrEmpty() && it.muid == streamMuid) }
+                    if (replaced) {
+                        latestMessageId = message.id
+                        markAsDelivered(message)
+                        return
+                    }
+                }
+            }
+            // No StreamMessage to replace — fall through to normal addMessage path.
         }
 
         // If this is a thread reply arriving in the main conversation,
         // update the parent message's reply count but don't add the message to the list.
         if (parentMessageId == -1L && message.parentMessageId > 0) {
-            android.util.Log.d("ThreadReplyDebug", "handleIncomingMessage: Thread reply detected in main conversation, updating reply count for parent=${message.parentMessageId}")
             updateReplyCount(message.parentMessageId)
             return
         }
 
         if (!isThreadedMessageForCurrentChat(message)) {
-            android.util.Log.d("ThreadReplyDebug", "handleIncomingMessage: NOT for current thread context, skipping")
             return
         }
 
@@ -3987,6 +4419,14 @@ open class CometChatMessageListViewModel(
     
     override fun onCleared() {
         super.onCleared()
+        streamListenerJob?.cancel()
+        activeStreamMessages.clear()
+        processedStreamingRunIds.clear()
+        aiStreamService?.detachListener(listenersTag ?: "")
+        // Clear the singleton when ViewModel is destroyed
+        if (isAgentChat) {
+            CometChatAIStreamService.setInstance(null)
+        }
         removeListeners()
     }
 }

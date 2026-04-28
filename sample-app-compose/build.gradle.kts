@@ -44,6 +44,9 @@ android {
     }
 }
 
+configurations.all {
+    exclude(group = "org.jetbrains", module = "annotations-java5")
+}
 dependencies {
     // CometChat UI Kit modules
     implementation(libs.chatuikit.compose.android)

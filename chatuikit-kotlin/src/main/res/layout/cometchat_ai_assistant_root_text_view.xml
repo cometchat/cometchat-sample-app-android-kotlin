@@ -5,6 +5,4 @@
     android:layout_height="wrap_content"
     android:textColor="@color/cometchat_color_black"
     android:breakStrategy="simple"
-    android:hyphenationFrequency="none"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp" />
+    android:hyphenationFrequency="none" />

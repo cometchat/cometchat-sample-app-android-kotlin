@@ -324,6 +324,7 @@
     <string name="cometchat_format_text" translatable="true">Format text</string>
     <string name="cometchat_format_bold" translatable="true">Bold</string>
     <string name="cometchat_format_italic" translatable="true">Italic</string>
+    <string name="cometchat_format_underline" translatable="true">Underline</string>
     <string name="cometchat_format_strikethrough" translatable="true">Strikethrough</string>
     <string name="cometchat_format_code" translatable="true">Code</string>
     <string name="cometchat_format_code_block" translatable="true">Code Block</string>
@@ -392,4 +393,18 @@
     <string name="cometchat_end_call_button" translatable="true">End call</string>
     <string name="cometchat_recipient_name" translatable="true">Recipient name</string>
     <string name="cometchat_recipient_avatar" translatable="true">Recipient avatar</string>
+    <string name="cometchat_ai_assistant" translatable="true">AI Assistant</string>
+
+    <!-- Text Selection Menu -->
+    <string name="cometchat_bold" translatable="true">Bold</string>
+    <string name="cometchat_italic" translatable="true">Italic</string>
+    <string name="cometchat_strikethrough" translatable="true">Strikethrough</string>
+    <string name="cometchat_inline_code" translatable="true">Inline Code</string>
+
+    <!-- Link Dialog strings -->
+    <string name="cometchat_add_link" translatable="true">Add Link</string>
+    <string name="cometchat_edit_link" translatable="true">Edit Link</string>
+    <string name="cometchat_text" translatable="true">Text</string>
+    <string name="cometchat_link" translatable="true">Link</string>
+    <string name="cometchat_clear" translatable="true">Clear</string>
 </resources>

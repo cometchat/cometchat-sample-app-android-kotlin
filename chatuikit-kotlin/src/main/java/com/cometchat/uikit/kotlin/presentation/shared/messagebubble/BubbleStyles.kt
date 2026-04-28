@@ -1,6 +1,7 @@
 package com.cometchat.uikit.kotlin.presentation.shared.messagebubble
 
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.actionbubble.CometChatActionBubbleStyle
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.callactionbubble.CometChatCallActionBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.collaborativebubble.CometChatCollaborativeBubbleStyle
@@ -41,5 +42,6 @@ data class BubbleStyles(
     val stickerBubbleStyle: CometChatStickerBubbleStyle? = null,
     val collaborativeBubbleStyle: CometChatCollaborativeBubbleStyle? = null,
     val incomingMessagePreviewStyle: CometChatMessagePreviewStyle? = null,
-    val outgoingMessagePreviewStyle: CometChatMessagePreviewStyle? = null
+    val outgoingMessagePreviewStyle: CometChatMessagePreviewStyle? = null,
+    val aiAssistantBubbleStyle: CometChatAIAssistantBubbleStyle? = null
 )

@@ -13,7 +13,7 @@ import io.kotest.matchers.shouldBe
  * these tests verify the data class structure and property behavior using
  * simulated theme token values that match the design specification.
  *
- * Validates: Requirements 14.2
+ * Validates: Requirements 4.2, 6.1, 12.3, 14.2
  */
 class CometChatAIAssistantBubbleStyleTest : StringSpec({
 
@@ -45,6 +45,36 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
         style.strokeColor shouldBe Color.Transparent
     }
 
+    "default style should have textColorSecondary as shimmerTextColor" {
+        val style = createDefaultStyle()
+        style.shimmerTextColor shouldBe SIMULATED_TEXT_COLOR_SECONDARY
+    }
+
+    "default style should have bodyRegular as shimmerTextStyle" {
+        val style = createDefaultStyle()
+        style.shimmerTextStyle shouldBe SIMULATED_BODY_REGULAR
+    }
+
+    "default style should have backgroundColor3 as errorBackgroundColor" {
+        val style = createDefaultStyle()
+        style.errorBackgroundColor shouldBe SIMULATED_BACKGROUND_COLOR_3
+    }
+
+    "default style should have errorColor as errorTextColor" {
+        val style = createDefaultStyle()
+        style.errorTextColor shouldBe SIMULATED_ERROR_COLOR
+    }
+
+    "default style should have caption1Regular as errorTextStyle" {
+        val style = createDefaultStyle()
+        style.errorTextStyle shouldBe SIMULATED_CAPTION1_REGULAR
+    }
+
+    "default style should have errorColor as errorIconTint" {
+        val style = createDefaultStyle()
+        style.errorIconTint shouldBe SIMULATED_ERROR_COLOR
+    }
+
     // --- incoming() and outgoing() share same defaults as default() ---
 
     "incoming style should match default style values" {
@@ -57,6 +87,12 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
         incomingStyle.cornerRadius shouldBe defaultStyle.cornerRadius
         incomingStyle.strokeWidth shouldBe defaultStyle.strokeWidth
         incomingStyle.strokeColor shouldBe defaultStyle.strokeColor
+        incomingStyle.shimmerTextColor shouldBe defaultStyle.shimmerTextColor
+        incomingStyle.shimmerTextStyle shouldBe defaultStyle.shimmerTextStyle
+        incomingStyle.errorBackgroundColor shouldBe defaultStyle.errorBackgroundColor
+        incomingStyle.errorTextColor shouldBe defaultStyle.errorTextColor
+        incomingStyle.errorTextStyle shouldBe defaultStyle.errorTextStyle
+        incomingStyle.errorIconTint shouldBe defaultStyle.errorIconTint
     }
 
     "outgoing style should match default style values" {
@@ -69,6 +105,12 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
         outgoingStyle.cornerRadius shouldBe defaultStyle.cornerRadius
         outgoingStyle.strokeWidth shouldBe defaultStyle.strokeWidth
         outgoingStyle.strokeColor shouldBe defaultStyle.strokeColor
+        outgoingStyle.shimmerTextColor shouldBe defaultStyle.shimmerTextColor
+        outgoingStyle.shimmerTextStyle shouldBe defaultStyle.shimmerTextStyle
+        outgoingStyle.errorBackgroundColor shouldBe defaultStyle.errorBackgroundColor
+        outgoingStyle.errorTextColor shouldBe defaultStyle.errorTextColor
+        outgoingStyle.errorTextStyle shouldBe defaultStyle.errorTextStyle
+        outgoingStyle.errorIconTint shouldBe defaultStyle.errorIconTint
     }
 
     // --- Immutability / copy tests ---
@@ -83,19 +125,65 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
         copied.cornerRadius shouldBe original.cornerRadius
         copied.strokeWidth shouldBe original.strokeWidth
         copied.strokeColor shouldBe original.strokeColor
+        copied.shimmerTextColor shouldBe original.shimmerTextColor
+        copied.shimmerTextStyle shouldBe original.shimmerTextStyle
+        copied.errorBackgroundColor shouldBe original.errorBackgroundColor
+        copied.errorTextColor shouldBe original.errorTextColor
+        copied.errorTextStyle shouldBe original.errorTextStyle
+        copied.errorIconTint shouldBe original.errorIconTint
 
         // Original unchanged
         original.backgroundColor shouldBe SIMULATED_BACKGROUND_COLOR_3
     }
 
+    "copy should allow modifying shimmer properties" {
+        val original = createDefaultStyle()
+        val copied = original.copy(
+            shimmerTextColor = Color.Yellow,
+            shimmerTextStyle = TextStyle()
+        )
+
+        copied.shimmerTextColor shouldBe Color.Yellow
+        copied.errorTextColor shouldBe original.errorTextColor
+
+        // Original unchanged
+        original.shimmerTextColor shouldBe SIMULATED_TEXT_COLOR_SECONDARY
+    }
+
+    "copy should allow modifying error properties" {
+        val original = createDefaultStyle()
+        val copied = original.copy(
+            errorBackgroundColor = Color.DarkGray,
+            errorTextColor = Color.White,
+            errorTextStyle = TextStyle(),
+            errorIconTint = Color.White
+        )
+
+        copied.errorBackgroundColor shouldBe Color.DarkGray
+        copied.errorTextColor shouldBe Color.White
+        copied.errorIconTint shouldBe Color.White
+        copied.shimmerTextColor shouldBe original.shimmerTextColor
+
+        // Original unchanged
+        original.errorBackgroundColor shouldBe SIMULATED_BACKGROUND_COLOR_3
+    }
+
     "all properties should be customizable via constructor" {
+        val customShimmerStyle = TextStyle()
+        val customErrorStyle = TextStyle()
         val custom = CometChatAIAssistantBubbleStyle(
             backgroundColor = Color.Cyan,
             textColor = Color.Green,
             textStyle = TextStyle(),
             cornerRadius = 12.dp,
             strokeWidth = 2.dp,
-            strokeColor = Color.Magenta
+            strokeColor = Color.Magenta,
+            shimmerTextColor = Color.LightGray,
+            shimmerTextStyle = customShimmerStyle,
+            errorBackgroundColor = Color.DarkGray,
+            errorTextColor = Color.Red,
+            errorTextStyle = customErrorStyle,
+            errorIconTint = Color.Red
         )
 
         custom.backgroundColor shouldBe Color.Cyan
@@ -103,6 +191,12 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
         custom.cornerRadius shouldBe 12.dp
         custom.strokeWidth shouldBe 2.dp
         custom.strokeColor shouldBe Color.Magenta
+        custom.shimmerTextColor shouldBe Color.LightGray
+        custom.shimmerTextStyle shouldBe customShimmerStyle
+        custom.errorBackgroundColor shouldBe Color.DarkGray
+        custom.errorTextColor shouldBe Color.Red
+        custom.errorTextStyle shouldBe customErrorStyle
+        custom.errorIconTint shouldBe Color.Red
     }
 })
 
@@ -110,7 +204,10 @@ class CometChatAIAssistantBubbleStyleTest : StringSpec({
 
 private val SIMULATED_BACKGROUND_COLOR_3 = Color(0xFFE8E8E8)
 private val SIMULATED_TEXT_COLOR_PRIMARY = Color(0xFF212121)
+private val SIMULATED_TEXT_COLOR_SECONDARY = Color(0xFF757575)
+private val SIMULATED_ERROR_COLOR = Color(0xFFF44649)
 private val SIMULATED_BODY_REGULAR = TextStyle()
+private val SIMULATED_CAPTION1_REGULAR = TextStyle()
 
 /**
  * Simulates [CometChatAIAssistantBubbleStyle.Companion.default] without Compose context.
@@ -121,7 +218,13 @@ private fun createDefaultStyle() = CometChatAIAssistantBubbleStyle(
     textStyle = SIMULATED_BODY_REGULAR,
     cornerRadius = 0.dp,
     strokeWidth = 0.dp,
-    strokeColor = Color.Transparent
+    strokeColor = Color.Transparent,
+    shimmerTextColor = SIMULATED_TEXT_COLOR_SECONDARY,
+    shimmerTextStyle = SIMULATED_BODY_REGULAR,
+    errorBackgroundColor = SIMULATED_BACKGROUND_COLOR_3,
+    errorTextColor = SIMULATED_ERROR_COLOR,
+    errorTextStyle = SIMULATED_CAPTION1_REGULAR,
+    errorIconTint = SIMULATED_ERROR_COLOR
 )
 
 /**
@@ -133,7 +236,13 @@ private fun createIncomingStyle() = CometChatAIAssistantBubbleStyle(
     textStyle = SIMULATED_BODY_REGULAR,
     cornerRadius = 0.dp,
     strokeWidth = 0.dp,
-    strokeColor = Color.Transparent
+    strokeColor = Color.Transparent,
+    shimmerTextColor = SIMULATED_TEXT_COLOR_SECONDARY,
+    shimmerTextStyle = SIMULATED_BODY_REGULAR,
+    errorBackgroundColor = SIMULATED_BACKGROUND_COLOR_3,
+    errorTextColor = SIMULATED_ERROR_COLOR,
+    errorTextStyle = SIMULATED_CAPTION1_REGULAR,
+    errorIconTint = SIMULATED_ERROR_COLOR
 )
 
 /**
@@ -145,5 +254,11 @@ private fun createOutgoingStyle() = CometChatAIAssistantBubbleStyle(
     textStyle = SIMULATED_BODY_REGULAR,
     cornerRadius = 0.dp,
     strokeWidth = 0.dp,
-    strokeColor = Color.Transparent
+    strokeColor = Color.Transparent,
+    shimmerTextColor = SIMULATED_TEXT_COLOR_SECONDARY,
+    shimmerTextStyle = SIMULATED_BODY_REGULAR,
+    errorBackgroundColor = SIMULATED_BACKGROUND_COLOR_3,
+    errorTextColor = SIMULATED_ERROR_COLOR,
+    errorTextStyle = SIMULATED_CAPTION1_REGULAR,
+    errorIconTint = SIMULATED_ERROR_COLOR
 )

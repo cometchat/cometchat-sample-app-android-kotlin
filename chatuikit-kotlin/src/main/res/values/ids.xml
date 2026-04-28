@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text Selection Menu formatting action IDs -->
+    <item name="action_bold" type="id" />
+    <item name="action_italic" type="id" />
+    <item name="action_strikethrough" type="id" />
+    <item name="action_inline_code" type="id" />
+</resources>

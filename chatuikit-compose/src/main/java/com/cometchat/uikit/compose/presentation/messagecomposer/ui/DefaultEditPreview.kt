@@ -28,7 +28,9 @@ import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.formatter.MarkdownRenderer
 
 /**
  * Default edit preview composable that shows the message being edited.
@@ -50,26 +52,37 @@ fun DefaultEditPreview(
 ) {
     val context = LocalContext.current
     
-    // Run formatter pipeline to resolve mention tokens (e.g., <@uid:userId> -> @userName)
+    // Run formatter pipeline to resolve mention tokens (e.g., <@uid:userId> -> @userName),
+    // then apply partial formatting (bold/italic/underline/strikethrough only) for edit preview
     val messageText = remember(message, textFormatters) {
         when (message) {
             is TextMessage -> {
                 val rawText = message.text ?: ""
-                if (rawText.isEmpty() || textFormatters.isEmpty()) {
+                if (rawText.isEmpty()) {
                     AnnotatedString(rawText)
                 } else {
-                    // Run each formatter through the pipeline with MESSAGE_COMPOSER type
-                    var formattedText: AnnotatedString = AnnotatedString(rawText)
-                    for (formatter in textFormatters) {
-                        formattedText = formatter.prepareMessageString(
-                            context,
-                            message,
-                            formattedText,
-                            UIKitConstants.MessageBubbleAlignment.LEFT,
-                            UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                        )
+                    // Step 1: Run formatter pipeline to resolve mention tokens
+                    val formattedText = if (textFormatters.isEmpty()) {
+                        rawText
+                    } else {
+                        var result: AnnotatedString = AnnotatedString(rawText)
+                        for (formatter in textFormatters) {
+                            result = formatter.prepareMessageString(
+                                context,
+                                message,
+                                result,
+                                UIKitConstants.MessageBubbleAlignment.LEFT,
+                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                            )
+                        }
+                        result.text
                     }
-                    formattedText
+                    // Step 2: Parse markdown, keep bold/italic/underline/strikethrough, plain text for code/blockquote
+                    val segments = MarkdownRenderer.parse(formattedText)
+                    buildReplyPreviewAnnotatedString(
+                        segments = segments,
+                        textColor = style.editPreviewMessageTextColor
+                    )
                 }
             }
             else -> AnnotatedString("")
@@ -107,7 +120,7 @@ fun DefaultEditPreview(
                 style = style.editPreviewTitleTextStyle
             )
 
-            // Message text
+            // Message text as plain text (markdown stripped)
             if (messageText.text.isNotEmpty()) {
                 Text(
                     text = messageText,

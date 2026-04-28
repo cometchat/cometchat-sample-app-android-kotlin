@@ -101,6 +101,7 @@ data class CometChatMessageComposerStyle(
     @ColorInt val richTextToolbarBackgroundColor: Int = 0,
     @ColorInt val richTextToolbarIconTint: Int = 0,
     @ColorInt val richTextToolbarActiveIconTint: Int = 0,
+    @ColorInt val richTextToolbarActiveIconBackgroundColor: Int = 0,
     
     // Rich text toggle button styling (DEPRECATED)
     @Deprecated("Toggle button removed - toolbar visibility is now automatic")
@@ -247,7 +248,7 @@ data class CometChatMessageComposerStyle(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerSendButtonInactiveBackgroundColor,
                     CometChatTheme.getBackgroundColor3(context)
                 ) ?: CometChatTheme.getBackgroundColor3(context),
-                sendButtonIconTint = CometChatTheme.getColorWhite(context),
+                sendButtonIconTint = CometChatTheme.getPrimaryButtonIconTint(context),
                 sendButtonStopIcon = typedArray?.getDrawable(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerSendButtonStopIcon
                 ),
@@ -400,8 +401,12 @@ data class CometChatMessageComposerStyle(
                 ) ?: CometChatTheme.getIconTintSecondary(context),
                 richTextToolbarActiveIconTint = typedArray?.getColor(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerRichTextToolbarActiveIconTint,
-                    CometChatTheme.getPrimaryColor(context)
-                ) ?: CometChatTheme.getPrimaryColor(context),
+                    CometChatTheme.getTextColorPrimary(context)
+                ) ?: CometChatTheme.getTextColorPrimary(context),
+                richTextToolbarActiveIconBackgroundColor = typedArray?.getColor(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerRichTextToolbarActiveIconBackgroundColor,
+                    CometChatTheme.getBackgroundColor4(context)
+                ) ?: CometChatTheme.getBackgroundColor4(context),
                 richTextToolbarToggleIcon = typedArray?.getDrawable(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerRichTextToolbarToggleIcon
                 ),

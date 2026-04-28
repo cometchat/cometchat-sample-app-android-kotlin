@@ -82,10 +82,22 @@ class ChatsFragment : Fragment() {
                 navigateToMessages(conversation)
             }
             
+            // Set click handler for search box
+            setOnSearchClick {
+                navigateToSearch()
+            }
+            
             // Set up overflow menu with user avatar
             // Validates: Requirement 8.4
             setOverflowMenu(createOverflowMenuView())
         }
+    }
+
+    /**
+     * Navigates to the SearchActivity for global search.
+     */
+    private fun navigateToSearch() {
+        com.cometchat.sampleapp.kotlin.ui.search.SearchActivity.start(requireContext())
     }
 
     /**

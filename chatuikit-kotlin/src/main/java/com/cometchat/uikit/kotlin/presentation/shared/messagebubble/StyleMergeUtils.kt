@@ -2,6 +2,7 @@ package com.cometchat.uikit.kotlin.presentation.shared.messagebubble
 
 import android.graphics.drawable.Drawable
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.actionbubble.CometChatActionBubbleStyle
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.callactionbubble.CometChatCallActionBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.collaborativebubble.CometChatCollaborativeBubbleStyle
@@ -283,6 +284,23 @@ fun <T : Any> mergeWithBase(
                 threadIndicatorTextAppearance = m.threadIndicatorTextAppearance, threadIndicatorTextColor = m.threadIndicatorTextColor,
                 threadIndicatorIconTint = m.threadIndicatorIconTint,
                 timestampTextAppearance = m.timestampTextAppearance, timestampTextColor = m.timestampTextColor
+            ) as T
+        }
+
+        is CometChatAIAssistantBubbleStyle -> {
+            val m = computeMerged(
+                bubbleStyle.backgroundColor, bubbleStyle.backgroundDrawable, bubbleStyle.cornerRadius,
+                bubbleStyle.strokeWidth, bubbleStyle.strokeColor,
+                bubbleStyle.senderNameTextAppearance, bubbleStyle.senderNameTextColor,
+                bubbleStyle.threadIndicatorTextAppearance, bubbleStyle.threadIndicatorTextColor, bubbleStyle.threadIndicatorIconTint,
+                STYLE_NOT_SET, STYLE_NOT_SET, base // No timestamp properties for AI assistant bubbles
+            )
+            bubbleStyle.copy(
+                backgroundColor = m.backgroundColor, backgroundDrawable = m.backgroundDrawable,
+                cornerRadius = m.cornerRadius, strokeWidth = m.strokeWidth, strokeColor = m.strokeColor,
+                senderNameTextAppearance = m.senderNameTextAppearance, senderNameTextColor = m.senderNameTextColor,
+                threadIndicatorTextAppearance = m.threadIndicatorTextAppearance, threadIndicatorTextColor = m.threadIndicatorTextColor,
+                threadIndicatorIconTint = m.threadIndicatorIconTint
             ) as T
         }
 

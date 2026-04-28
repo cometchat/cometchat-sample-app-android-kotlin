@@ -18,7 +18,6 @@ import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.presentation.shared.utils.CallsUtils
 import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
-import com.cometchat.uikit.kotlin.shared.formatters.FormatterUtils
 import org.json.JSONObject
 import java.util.Locale
 
@@ -171,25 +170,16 @@ object ConversationUtils {
             return context.getString(R.string.cometchat_start_conv_hint)
         }
 
-        // Only apply text formatters if message is a TextMessage, not deleted, has valid text, and formatters are available
-        return if (message is TextMessage &&
+        // For non-deleted TextMessages with content, render rich text subtitle
+        if (message is TextMessage &&
             message.deletedAt == 0L &&
-            !message.text.isNullOrEmpty() &&
-            textFormatters.isNotEmpty()
+            !message.text.isNullOrEmpty()
         ) {
-            // Apply text formatters using FormatterUtils
-            FormatterUtils.getFormattedText(
-                context = context,
-                baseMessage = message,
-                formattingType = UIKitConstants.FormattingType.CONVERSATIONS,
-                alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
-                text = message.text,
-                formatters = textFormatters
-            )
-        } else {
-            // Use plain text for all other message types (handles deleted, media, custom, call, action, etc.)
-            getLastMessageText(context, message)
+            return ConversationSubtitleRenderer.render(context, message.text)
         }
+
+        // Use plain text for all other message types (handles deleted, media, custom, call, action, etc.)
+        return getLastMessageText(context, message)
     }
 
     /**

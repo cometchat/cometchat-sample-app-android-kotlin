@@ -267,15 +267,15 @@ data class CometChatMessageHeaderStyle(
                 ),
                 newChatIconTint = typedArray?.getColor(
                     R.styleable.CometChatMessageHeader_cometchatMessageHeaderNewChatIconTint,
-                    CometChatTheme.getIconTintSecondary(context)
-                ) ?: CometChatTheme.getIconTintSecondary(context),
+                    CometChatTheme.getIconTintPrimary(context)
+                ) ?: CometChatTheme.getIconTintPrimary(context),
                 chatHistoryIcon = typedArray?.getDrawable(
                     R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryIcon
                 ),
                 chatHistoryIconTint = typedArray?.getColor(
                     R.styleable.CometChatMessageHeader_cometchatMessageHeaderChatHistoryIconTint,
-                    CometChatTheme.getIconTintSecondary(context)
-                ) ?: CometChatTheme.getIconTintSecondary(context),
+                    CometChatTheme.getIconTintPrimary(context)
+                ) ?: CometChatTheme.getIconTintPrimary(context),
 
                 // Call button styling - use IconTintPrimary to match original Java chatuikit behavior
                 videoCallIcon = typedArray?.getDrawable(

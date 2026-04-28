@@ -2,6 +2,8 @@ package com.cometchat.uikit.kotlin.presentation.messagelist.adapter
 
 import android.app.Application
 import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.CometChat
@@ -829,6 +831,60 @@ class MessageAdapterPropertyTest : FunSpec({
 
             // Verify the bubbleFactories map is empty
             adapter.getBubbleFactories().isEmpty().shouldBeTrue()
+        }
+    }
+
+    // ==================== Stream Bubble Property Tests ====================
+
+    /**
+     * Feature: kotlin-stream-bubble, Property 4: StreamBubbleViewHolder visibility reflects deletion status
+     *
+     * *For any* StreamMessage, when StreamBubbleViewHolder.bind() is called, the itemView.visibility
+     * SHALL be GONE if deletedAt > 0, and VISIBLE if deletedAt == 0.
+     *
+     * **Validates: Requirements 4.2, 4.3**
+     */
+    test("Property 4: StreamBubbleViewHolder visibility reflects deletion status").config(invocations = 100) {
+        checkAll(Arb.long(0L..Long.MAX_VALUE)) { deletedAt ->
+            val adapter = MessageAdapter(context)
+
+            // Attach adapter to a RecyclerView (required for onCreateViewHolder)
+            val recyclerView = RecyclerView(context).apply {
+                layoutManager = LinearLayoutManager(context)
+                this.adapter = adapter
+            }
+
+            // Create a mock stream message with the generated deletedAt
+            val mockSender = mock(User::class.java).apply {
+                `when`(this.uid).thenReturn("ai_bot_uid")
+                `when`(this.name).thenReturn("AI Bot")
+                `when`(this.avatar).thenReturn("")
+            }
+
+            val streamMessage = mock(BaseMessage::class.java).apply {
+                `when`(this.id).thenReturn(1L)
+                `when`(this.category).thenReturn(UIKitConstants.MessageCategory.STREAM)
+                `when`(this.type).thenReturn(UIKitConstants.MessageType.STREAM)
+                `when`(this.sentAt).thenReturn(System.currentTimeMillis() / 1000)
+                `when`(this.deletedAt).thenReturn(deletedAt)
+                `when`(this.sender).thenReturn(mockSender)
+            }
+
+            adapter.setMessageList(listOf(streamMessage))
+
+            // Get the stream view type and create the ViewHolder
+            val viewType = adapter.getItemViewType(0)
+            val viewHolder = adapter.onCreateViewHolder(recyclerView, viewType)
+
+            // Bind the ViewHolder
+            adapter.onBindViewHolder(viewHolder, 0)
+
+            // Assert visibility based on deletion status
+            if (deletedAt > 0L) {
+                viewHolder.itemView.visibility shouldBe View.GONE
+            } else {
+                viewHolder.itemView.visibility shouldBe View.VISIBLE
+            }
         }
     }
 })

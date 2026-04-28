@@ -26,6 +26,12 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
  * @property cornerRadius The corner radius of the bubble container
  * @property strokeWidth The stroke width of the bubble border
  * @property strokeColor The stroke color of the bubble border
+ * @property shimmerTextColor The text color used in the shimmer "Thinking" state
+ * @property shimmerTextStyle The text style used in the shimmer "Thinking" state
+ * @property errorBackgroundColor The background color of the error indicator card
+ * @property errorTextColor The text color of the error message
+ * @property errorTextStyle The text style of the error message
+ * @property errorIconTint The tint color of the error icon
  */
 @Immutable
 data class CometChatAIAssistantBubbleStyle(
@@ -34,7 +40,13 @@ data class CometChatAIAssistantBubbleStyle(
     val textStyle: TextStyle,
     val cornerRadius: Dp,
     val strokeWidth: Dp,
-    val strokeColor: Color
+    val strokeColor: Color,
+    val shimmerTextColor: Color = Color.Unspecified,
+    val shimmerTextStyle: TextStyle = TextStyle.Default,
+    val errorBackgroundColor: Color = Color.Unspecified,
+    val errorTextColor: Color = Color.Unspecified,
+    val errorTextStyle: TextStyle = TextStyle.Default,
+    val errorIconTint: Color = Color.Unspecified
 ) {
     companion object {
         /**
@@ -46,6 +58,12 @@ data class CometChatAIAssistantBubbleStyle(
          * @param cornerRadius The corner radius of the bubble container
          * @param strokeWidth The stroke width of the bubble border
          * @param strokeColor The stroke color of the bubble border
+         * @param shimmerTextColor The text color for the shimmer "Thinking" state
+         * @param shimmerTextStyle The text style for the shimmer "Thinking" state
+         * @param errorBackgroundColor The background color of the error indicator
+         * @param errorTextColor The text color of the error message
+         * @param errorTextStyle The text style of the error message
+         * @param errorIconTint The tint color of the error icon
          * @return A new [CometChatAIAssistantBubbleStyle] instance with default values
          */
         @Composable
@@ -55,14 +73,26 @@ data class CometChatAIAssistantBubbleStyle(
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,
             strokeWidth: Dp = 0.dp,
-            strokeColor: Color = Color.Transparent
+            strokeColor: Color = Color.Transparent,
+            shimmerTextColor: Color = CometChatTheme.colorScheme.textColorSecondary,
+            shimmerTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
+            errorBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            errorTextColor: Color = CometChatTheme.colorScheme.errorColor,
+            errorTextStyle: TextStyle = CometChatTheme.typography.caption1Regular,
+            errorIconTint: Color = CometChatTheme.colorScheme.errorColor
         ): CometChatAIAssistantBubbleStyle = CometChatAIAssistantBubbleStyle(
             backgroundColor = backgroundColor,
             textColor = textColor,
             textStyle = textStyle,
             cornerRadius = cornerRadius,
             strokeWidth = strokeWidth,
-            strokeColor = strokeColor
+            strokeColor = strokeColor,
+            shimmerTextColor = shimmerTextColor,
+            shimmerTextStyle = shimmerTextStyle,
+            errorBackgroundColor = errorBackgroundColor,
+            errorTextColor = errorTextColor,
+            errorTextStyle = errorTextStyle,
+            errorIconTint = errorIconTint
         )
 
         /**
@@ -74,6 +104,12 @@ data class CometChatAIAssistantBubbleStyle(
          * @param cornerRadius The corner radius of the bubble container
          * @param strokeWidth The stroke width of the bubble border
          * @param strokeColor The stroke color of the bubble border
+         * @param shimmerTextColor The text color for the shimmer "Thinking" state
+         * @param shimmerTextStyle The text style for the shimmer "Thinking" state
+         * @param errorBackgroundColor The background color of the error indicator
+         * @param errorTextColor The text color of the error message
+         * @param errorTextStyle The text style of the error message
+         * @param errorIconTint The tint color of the error icon
          * @return A new [CometChatAIAssistantBubbleStyle] configured for incoming messages
          */
         @Composable
@@ -83,14 +119,26 @@ data class CometChatAIAssistantBubbleStyle(
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,
             strokeWidth: Dp = 0.dp,
-            strokeColor: Color = Color.Transparent
+            strokeColor: Color = Color.Transparent,
+            shimmerTextColor: Color = CometChatTheme.colorScheme.textColorSecondary,
+            shimmerTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
+            errorBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            errorTextColor: Color = CometChatTheme.colorScheme.errorColor,
+            errorTextStyle: TextStyle = CometChatTheme.typography.caption1Regular,
+            errorIconTint: Color = CometChatTheme.colorScheme.errorColor
         ): CometChatAIAssistantBubbleStyle = CometChatAIAssistantBubbleStyle(
             backgroundColor = backgroundColor,
             textColor = textColor,
             textStyle = textStyle,
             cornerRadius = cornerRadius,
             strokeWidth = strokeWidth,
-            strokeColor = strokeColor
+            strokeColor = strokeColor,
+            shimmerTextColor = shimmerTextColor,
+            shimmerTextStyle = shimmerTextStyle,
+            errorBackgroundColor = errorBackgroundColor,
+            errorTextColor = errorTextColor,
+            errorTextStyle = errorTextStyle,
+            errorIconTint = errorIconTint
         )
 
         /**
@@ -102,6 +150,12 @@ data class CometChatAIAssistantBubbleStyle(
          * @param cornerRadius The corner radius of the bubble container
          * @param strokeWidth The stroke width of the bubble border
          * @param strokeColor The stroke color of the bubble border
+         * @param shimmerTextColor The text color for the shimmer "Thinking" state
+         * @param shimmerTextStyle The text style for the shimmer "Thinking" state
+         * @param errorBackgroundColor The background color of the error indicator
+         * @param errorTextColor The text color of the error message
+         * @param errorTextStyle The text style of the error message
+         * @param errorIconTint The tint color of the error icon
          * @return A new [CometChatAIAssistantBubbleStyle] configured for outgoing messages
          */
         @Composable
@@ -111,14 +165,26 @@ data class CometChatAIAssistantBubbleStyle(
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,
             strokeWidth: Dp = 0.dp,
-            strokeColor: Color = Color.Transparent
+            strokeColor: Color = Color.Transparent,
+            shimmerTextColor: Color = CometChatTheme.colorScheme.textColorSecondary,
+            shimmerTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
+            errorBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            errorTextColor: Color = CometChatTheme.colorScheme.errorColor,
+            errorTextStyle: TextStyle = CometChatTheme.typography.caption1Regular,
+            errorIconTint: Color = CometChatTheme.colorScheme.errorColor
         ): CometChatAIAssistantBubbleStyle = CometChatAIAssistantBubbleStyle(
             backgroundColor = backgroundColor,
             textColor = textColor,
             textStyle = textStyle,
             cornerRadius = cornerRadius,
             strokeWidth = strokeWidth,
-            strokeColor = strokeColor
+            strokeColor = strokeColor,
+            shimmerTextColor = shimmerTextColor,
+            shimmerTextStyle = shimmerTextStyle,
+            errorBackgroundColor = errorBackgroundColor,
+            errorTextColor = errorTextColor,
+            errorTextStyle = errorTextStyle,
+            errorIconTint = errorIconTint
         )
     }
 }

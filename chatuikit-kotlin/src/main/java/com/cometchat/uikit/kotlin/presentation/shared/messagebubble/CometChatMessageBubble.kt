@@ -730,6 +730,13 @@ class CometChatMessageBubble @JvmOverloads constructor(
             return CometChatMessageBubbleStyle(backgroundColor = android.graphics.Color.TRANSPARENT)
         }
 
+        // AI assistant and stream messages: transparent outer bubble so the
+        // CometChatAIAssistantBubble content view controls its own appearance.
+        if (message.category == "agentic" ||
+            message.category == UIKitConstants.MessageCategory.STREAM) {
+            return CometChatMessageBubbleStyle(backgroundColor = android.graphics.Color.TRANSPARENT)
+        }
+
         // Priority 2: Loaded style object or from resource ID (if set)
         when (alignment) {
             UIKitConstants.MessageBubbleAlignment.LEFT -> {

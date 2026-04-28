@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -132,18 +133,40 @@ internal fun DefaultEmptyView(
     style: CometChatMessageListStyle,
     user: User? = null,
     group: Group? = null,
+    isAgentChat: Boolean = false,
+    onSuggestedMessageClick: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val name = user?.name ?: group?.name ?: ""
-    
-    val title = if (name.isNotEmpty()) {
-        stringResource(R.string.cometchat_no_messages_yet)
+
+    // For agent chats, read greeting/introductory messages from user metadata
+    val metadata = user?.metadata
+    val greetingMessage = metadata?.optString("greetingMessage", "") ?: ""
+    val introductoryMessage = metadata?.optString("introductoryMessage", "") ?: ""
+
+    // Extract suggested messages from agent metadata
+    val suggestedMessages = remember(metadata) {
+        if (!isAgentChat || metadata == null) emptyList()
+        else {
+            try {
+                val array = metadata.optJSONArray("suggestedMessages") ?: return@remember emptyList()
+                (0 until array.length()).mapNotNull { array.optString(it, null) }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    val title = if (isAgentChat && greetingMessage.isNotEmpty()) {
+        greetingMessage
     } else {
         stringResource(R.string.cometchat_no_messages_yet)
     }
-    
-    val subtitle = if (name.isNotEmpty()) {
+
+    val subtitle = if (isAgentChat && introductoryMessage.isNotEmpty()) {
+        introductoryMessage
+    } else if (name.isNotEmpty()) {
         stringResource(R.string.cometchat_say_hi_to, name)
     } else {
         stringResource(R.string.cometchat_start_conversation)
@@ -159,6 +182,17 @@ internal fun DefaultEmptyView(
                 .padding(32.dp)
                 .semantics { contentDescription = "$title. $subtitle" }
         ) {
+            // Show avatar for agent chats
+            if (isAgentChat && user != null) {
+                com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatar(
+                    name = user.name ?: "",
+                    avatarUrl = user.avatar,
+                    modifier = Modifier
+                        .size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             Text(
                 text = title,
                 style = style.emptyChatGreetingTitleTextStyle,
@@ -174,7 +208,70 @@ internal fun DefaultEmptyView(
                 color = style.emptyChatGreetingSubtitleTextColor,
                 textAlign = TextAlign.Center
             )
+
+            // Suggested messages chips for agent chats
+            if (isAgentChat && suggestedMessages.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    suggestedMessages.forEach { suggestion ->
+                        SuggestedMessageChip(
+                            text = suggestion,
+                            onClick = { onSuggestedMessageClick?.invoke(suggestion) }
+                        )
+                    }
+                }
+            }
         }
+    }
+}
+
+/**
+ * A chip-style button for suggested messages in the agent greeting view.
+ * Matches the Kotlin UIKit's MaterialButton outlined style with theme defaults:
+ * - strokeColor: cometchatStrokeColorDefault, strokeWidth: 1dp
+ * - cornerRadius: cometchat_radius_max (pill shape)
+ * - backgroundColor: cometchatBackgroundColor1
+ * - textColor: cometchatTextColorSecondary
+ * - endIcon: cometchat_ic_arrow_forward, tint: cometchatIconTintSecondary
+ */
+@Composable
+private fun SuggestedMessageChip(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(50)
+    Row(
+        modifier = modifier
+            .background(
+                color = CometChatTheme.colorScheme.backgroundColor1,
+                shape = shape
+            )
+            .border(
+                width = 1.dp,
+                color = CometChatTheme.colorScheme.strokeColorDefault,
+                shape = shape
+            )
+            .clip(shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = text,
+            style = CometChatTheme.typography.bodyRegular,
+            color = CometChatTheme.colorScheme.textColorSecondary
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.cometchat_ic_arrow_forward),
+            contentDescription = null,
+            tint = CometChatTheme.colorScheme.iconTintSecondary,
+            modifier = Modifier.size(16.dp)
+        )
     }
 }
 

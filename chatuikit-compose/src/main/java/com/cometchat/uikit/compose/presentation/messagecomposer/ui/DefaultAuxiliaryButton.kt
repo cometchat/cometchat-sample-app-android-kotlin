@@ -1,9 +1,7 @@
 package com.cometchat.uikit.compose.presentation.messagecomposer.ui
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -19,7 +17,7 @@ import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatM
  * Contains buttons in order: Rich Text Toggle, Sticker, AI, Voice Recording
  * (matching chatuikit-kotlin layout order)
  * 
- * Uses 24dp icon size with 16dp gap between icons to match Figma design specifications.
+ * Uses 40dp touch targets with 24dp icons (8dp padding) to match v5 design specifications.
  *
  * @param modifier Modifier for the button row
  * @param hideRichTextToggle Whether to hide the rich text toggle button
@@ -27,6 +25,7 @@ import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatM
  * @param hideAIButton Whether to hide the AI button
  * @param hideVoiceRecordingButton Whether to hide the voice recording button
  * @param isRichTextToolbarExpanded Whether the rich text toolbar is currently expanded
+ * @param isStickerKeyboardOpen Whether the sticker keyboard is currently open; when true, shows filled icon with active tint
  * @param style Style configuration for the buttons
  * @param onRichTextToggleClick Callback when the rich text toggle button is clicked
  * @param onStickerClick Callback when the sticker button is clicked
@@ -41,6 +40,7 @@ fun DefaultAuxiliaryButton(
     hideAIButton: Boolean = true,
     hideVoiceRecordingButton: Boolean = true,
     isRichTextToolbarExpanded: Boolean = false,
+    isStickerKeyboardOpen: Boolean = false,
     style: CometChatMessageComposerStyle = CometChatMessageComposerStyle.default(),
     onRichTextToggleClick: () -> Unit = {},
     onStickerClick: () -> Unit = {},
@@ -56,7 +56,7 @@ fun DefaultAuxiliaryButton(
             IconButton(
                 onClick = onRichTextToggleClick,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(40.dp)
                     .semantics { contentDescription = "Format Text" }
             ) {
                 style.richTextToggleIcon?.let { icon ->
@@ -68,27 +68,28 @@ fun DefaultAuxiliaryButton(
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
         }
 
-        // 2. Sticker/Emoji button
+        // 2. Sticker/Emoji button — icon swaps to filled variant when sticker keyboard is open
         if (!hideStickersButton) {
+            val visualState = resolveStickerVisualState(isStickerKeyboardOpen)
+            val stickerIcon = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIcon else style.stickerIcon
+            val stickerTint = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIconTint else style.stickerIconTint
             IconButton(
                 onClick = onStickerClick,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(40.dp)
                     .semantics { contentDescription = "Stickers" }
             ) {
-                style.stickerIcon?.let { icon ->
+                stickerIcon?.let { icon ->
                     Icon(
                         painter = icon,
-                        contentDescription = "Open stickers",
-                        tint = style.stickerIconTint,
+                        contentDescription = if (isStickerKeyboardOpen) "Close stickers" else "Open stickers",
+                        tint = stickerTint,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
         }
 
         // 3. AI button
@@ -96,7 +97,7 @@ fun DefaultAuxiliaryButton(
             IconButton(
                 onClick = onAIClick,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(40.dp)
                     .semantics { contentDescription = "AI Assistant" }
             ) {
                 style.aiIcon?.let { icon ->
@@ -108,7 +109,6 @@ fun DefaultAuxiliaryButton(
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
         }
 
         // 4. Voice Recording button (last, matching chatuikit-kotlin order)
@@ -116,7 +116,7 @@ fun DefaultAuxiliaryButton(
             IconButton(
                 onClick = onVoiceRecordClick,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(40.dp)
                     .semantics { contentDescription = "Voice Recording" }
             ) {
                 style.voiceRecordingIcon?.let { icon ->

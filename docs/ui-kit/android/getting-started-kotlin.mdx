@@ -8,7 +8,7 @@ description: "Step-by-step guide to integrate the CometChat Kotlin UI Kit with X
 
 | Field | Value |
 | --- | --- |
-| Package | `com.cometchat:chat-uikit-kotlin` |
+| Package | `com.cometchat:chatuikit-kotlin-android` |
 | UI Layer | Kotlin + XML Views (View Binding) |
 | Init | `CometChatUIKit.init(context, UIKitSettings, callback)` — must resolve before `login()` |
 | Login | `CometChatUIKit.login("UID", callback)` — must resolve before rendering components |
@@ -93,7 +93,7 @@ android {
 
 dependencies {
     // CometChat Kotlin UI Kit
-    implementation("com.cometchat:chat-uikit-kotlin:latest")
+    implementation("com.cometchat:chatuikit-kotlin-android:6.0.0-beta2")
 
     // (Optional) Voice/video calling
     implementation("com.cometchat:calls-sdk-android:latest")

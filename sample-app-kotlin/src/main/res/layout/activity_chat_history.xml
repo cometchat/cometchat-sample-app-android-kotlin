@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Chat History Activity Layout
+
+    Displays the CometChatAIAssistantChatHistory component full-screen
+    for viewing past AI assistant conversations.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/cometchatBackgroundColor1"
+    android:orientation="vertical"
+    tools:context=".ui.messages.ChatHistoryActivity">
+
+    <com.cometchat.uikit.kotlin.presentation.aiassistantchathistory.ui.CometChatAIAssistantChatHistory
+        android:id="@+id/chatHistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

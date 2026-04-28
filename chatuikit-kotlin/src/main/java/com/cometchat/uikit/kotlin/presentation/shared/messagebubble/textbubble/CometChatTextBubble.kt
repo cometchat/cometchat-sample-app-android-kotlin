@@ -386,27 +386,29 @@ class CometChatTextBubble @JvmOverloads constructor(
         val currentStyle = style ?: return
         val textColor = if (currentStyle.textColor != 0) currentStyle.textColor else CometChatTheme.getTextColorPrimary(context)
         val linkColor = if (currentStyle.textLinkColor != 0) currentStyle.textLinkColor else CometChatTheme.getInfoColor(context)
+        val isSender = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
         
         // Track position in original text to map mention spans to segments
         var originalOffset = 0
         
-        for (segment in segments) {
+        // Group consecutive blockquote segments for continuous stripe rendering
+        var i = 0
+        while (i < segments.size) {
+            val segment = segments[i]
             when (segment) {
                 is MarkdownRenderer.RenderedSegment.Text -> {
                     val textView = createTextView()
-                    // Find mention spans that fall within this segment's range in original text
                     val segmentMentions = findMentionSpansForSegment(
                         segment.text, originalText, originalOffset, mentionSpans
                     )
                     val styledText = buildStyledText(segment.text, segment.spans, textColor, linkColor, segmentMentions)
                     textView.text = styledText
                     markdownContentContainer.addView(textView)
-                    // Update offset: segment text length + newline
                     originalOffset += segment.text.length + 1
                 }
                 
                 is MarkdownRenderer.RenderedSegment.CodeBlock -> {
-                    val codeBlockView = createCodeBlockView(segment.code, segment.language)
+                    val codeBlockView = createCodeBlockView(segment.code, segment.language, isSender)
                     markdownContentContainer.addView(codeBlockView)
                 }
                 
@@ -421,10 +423,17 @@ class CometChatTextBubble @JvmOverloads constructor(
                 }
                 
                 is MarkdownRenderer.RenderedSegment.Blockquote -> {
-                    val quoteView = createBlockquoteView(segment.text, segment.spans, textColor, linkColor)
+                    // Collect consecutive blockquote segments into one group
+                    val blockquoteGroup = mutableListOf(segment)
+                    while (i + 1 < segments.size && segments[i + 1] is MarkdownRenderer.RenderedSegment.Blockquote) {
+                        i++
+                        blockquoteGroup.add(segments[i] as MarkdownRenderer.RenderedSegment.Blockquote)
+                    }
+                    val quoteView = createGroupedBlockquoteView(blockquoteGroup, textColor, linkColor, isSender)
                     markdownContentContainer.addView(quoteView)
                 }
             }
+            i++
         }
     }
     
@@ -454,9 +463,26 @@ class CometChatTextBubble @JvmOverloads constructor(
     }
     
     /**
-     * Creates a code block view with dark background and monospace font.
+     * Creates a code block view with theme-aware colors matching V5.
+     * Sender: uses extended primary colors. Receiver: uses background2 + stroke default.
      */
-    private fun createCodeBlockView(code: String, language: String): View {
+    private fun createCodeBlockView(code: String, language: String, isSender: Boolean): View {
+        val bgColor = if (isSender) {
+            CometChatTheme.getExtendedPrimaryColor700(context)
+        } else {
+            CometChatTheme.getBackgroundColor2(context).takeIf { it != 0 } ?: 0xFFF5F5F5.toInt()
+        }
+        val borderColor = if (isSender) {
+            CometChatTheme.getExtendedPrimaryColor600(context)
+        } else {
+            CometChatTheme.getStrokeColorDefault(context).takeIf { it != 0 } ?: 0xFFDDDDDD.toInt()
+        }
+        val codeTextColor = if (isSender) {
+            CometChatTheme.getColorWhite(context)
+        } else {
+            CometChatTheme.getTextColorPrimary(context)
+        }
+
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -467,8 +493,9 @@ class CometChatTextBubble @JvmOverloads constructor(
                 bottomMargin = dpToPx(4)
             }
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#1E1E1E"))
+                setColor(bgColor)
                 cornerRadius = dpToPx(8).toFloat()
+                setStroke(1, borderColor)
             }
         }
         
@@ -476,7 +503,7 @@ class CometChatTextBubble @JvmOverloads constructor(
         if (language.isNotEmpty()) {
             val languageLabel = TextView(context).apply {
                 text = language
-                setTextColor(Color.parseColor("#888888"))
+                setTextColor(adjustAlpha(codeTextColor, 0.5f))
                 typeface = Typeface.MONOSPACE
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
                 setPadding(dpToPx(12), dpToPx(8), dpToPx(12), 0)
@@ -484,25 +511,16 @@ class CometChatTextBubble @JvmOverloads constructor(
             container.addView(languageLabel)
         }
         
-        // Horizontal scroll for code
-        val scrollView = HorizontalScrollView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            isHorizontalScrollBarEnabled = false
-        }
-        
+        // Code text (wraps, no horizontal scroll — matches V5)
         val codeTextView = TextView(context).apply {
             text = code
-            setTextColor(Color.parseColor("#D4D4D4"))
+            setTextColor(codeTextColor)
             typeface = Typeface.MONOSPACE
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
             setPadding(dpToPx(12), dpToPx(8), dpToPx(12), dpToPx(8))
         }
         
-        scrollView.addView(codeTextView)
-        container.addView(scrollView)
+        container.addView(codeTextView)
         
         return container
     }
@@ -621,6 +639,115 @@ class CometChatTextBubble @JvmOverloads constructor(
         
         return container
     }
+
+    /**
+     * Creates a grouped blockquote view for consecutive blockquote segments.
+     * Renders a single continuous vertical stripe bar on the left with all
+     * blockquote lines joined on the right. Colors differ for sender vs receiver
+     * matching V5's BlockquoteFormatSpan behavior.
+     */
+    private fun createGroupedBlockquoteView(
+        segments: List<MarkdownRenderer.RenderedSegment.Blockquote>,
+        @ColorInt textColor: Int,
+        @ColorInt linkColor: Int,
+        isSender: Boolean
+    ): View {
+        // V5 colors: sender = white stripe + 20% white bg, receiver = highlight stripe + bg3
+        val stripeColor = if (isSender) {
+            CometChatTheme.getColorWhite(context)
+        } else {
+            CometChatTheme.getStrokeColorHighlight(context).takeIf { it != 0 }
+                ?: CometChatTheme.getStrokeColorDark(context)
+        }
+        val bgColor = if (isSender) {
+            0x33FFFFFF // white at 20% opacity
+        } else {
+            CometChatTheme.getBackgroundColor3(context)
+        }
+        val cornerRadius = context.resources.getDimension(R.dimen.cometchat_radius_2)
+
+        // Outer container — full width with rounded background, clips children to rounded shape
+        val outerContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = dpToPx(4)
+                bottomMargin = dpToPx(4)
+            }
+            val bgDrawable = GradientDrawable().apply {
+                setColor(if (bgColor != 0) bgColor else android.graphics.Color.TRANSPARENT)
+                setCornerRadius(cornerRadius)
+            }
+            background = bgDrawable
+            // Clip children to the rounded background shape so the stripe
+            // gets its top-left and bottom-left edges cut by the corner radius
+            clipToOutline = true
+            outlineProvider = object : android.view.ViewOutlineProvider() {
+                override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
+                    outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+                }
+            }
+            setPadding(0, 0, dpToPx(12), 0)
+        }
+
+        // Stripe — flush left, full height, no margins
+        val stripeView = View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                dpToPx(4),
+                LinearLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                marginStart = 0
+                marginEnd = dpToPx(10)
+            }
+            background = GradientDrawable().apply {
+                setColor(stripeColor)
+            }
+        }
+
+        // Text content — join all blockquote lines, use same text color as bubble
+        val contentBuilder = SpannableStringBuilder()
+        for ((index, seg) in segments.withIndex()) {
+            if (index > 0) contentBuilder.append("\n")
+            val (plainText, inlineSpans) = MarkdownRenderer.parseInline(seg.text)
+            val segStart = contentBuilder.length
+            contentBuilder.append(plainText)
+            for (span in inlineSpans) {
+                val spanStart = segStart + span.start
+                val spanEnd = segStart + span.end
+                if (spanStart >= 0 && spanEnd <= contentBuilder.length && spanStart < spanEnd) {
+                    val androidSpan = when (span.format) {
+                        RichTextFormat.BOLD -> StyleSpan(Typeface.BOLD)
+                        RichTextFormat.ITALIC -> StyleSpan(Typeface.ITALIC)
+                        RichTextFormat.STRIKETHROUGH -> StrikethroughSpan()
+                        RichTextFormat.UNDERLINE -> UnderlineSpan()
+                        RichTextFormat.INLINE_CODE -> TypefaceSpan("monospace")
+                        else -> null
+                    }
+                    if (androidSpan != null) {
+                        contentBuilder.setSpan(androidSpan, spanStart, spanEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+            }
+        }
+
+        val contentTextView = createTextView().apply {
+            text = contentBuilder
+            setTextColor(textColor)
+            setPadding(0, dpToPx(8), 0, dpToPx(8))
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        }
+
+        outerContainer.addView(stripeView)
+        outerContainer.addView(contentTextView)
+
+        return outerContainer
+    }
     
     /**
      * Builds styled text with inline formatting spans applied.
@@ -709,8 +836,15 @@ class CometChatTextBubble @JvmOverloads constructor(
                         end,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
+                    // Theme-aware inline code background: sender = white 20%, receiver = backgroundColor3
+                    val isSender = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
+                    val inlineCodeBg = if (isSender) {
+                        0x33FFFFFF // white at 20% opacity
+                    } else {
+                        CometChatTheme.getBackgroundColor3(context)
+                    }
                     spannable.setSpan(
-                        BackgroundColorSpan(adjustAlpha(Color.GRAY, 0.3f)),
+                        BackgroundColorSpan(inlineCodeBg),
                         start,
                         end,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE

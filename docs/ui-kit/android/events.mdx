@@ -7,8 +7,8 @@ description: "Listen to UI Kit events for user actions, group changes, messages,
 
 | Field | Value |
 | --- | --- |
-| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` |
-| Jetpack Compose | `com.cometchat:chat-uikit-compose` |
+| Kotlin (XML Views) | `com.cometchat:chatuikit-kotlin-android` |
+| Jetpack Compose | `com.cometchat:chatuikit-compose-android` |
 | Import | `com.cometchat.uikit.core.events.CometChatEvents` |
 | Event flows | `CometChatEvents.messageEvents`, `CometChatEvents.callEvents`, `CometChatEvents.conversationEvents`, `CometChatEvents.groupEvents`, `CometChatEvents.userEvents`, `CometChatEvents.uiEvents` |
 | Pattern | Kotlin `SharedFlow` with sealed class event types — collect in `viewModelScope` or `lifecycleScope` |
@@ -29,7 +29,7 @@ Events enable a decoupled, flexible architecture in the CometChat UI Kit. Compon
 
 ## Prerequisites
 
-- The `com.cometchat:chat-uikit-kotlin` or `com.cometchat:chat-uikit-compose` dependency added to your project.
+- The `com.cometchat:chatuikit-kotlin-android` or `com.cometchat:chatuikit-compose-android` dependency added to your project.
 - `CometChatUIKit.init()` called and completed successfully.
 - A logged-in CometChat user (call `CometChatUIKit.login()` before collecting events).
 

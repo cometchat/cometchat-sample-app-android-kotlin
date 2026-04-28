@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.uikit.compose.R
+import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -56,6 +57,8 @@ data class SwipeToReplyConfig(
  * Messages are NOT eligible if:
  * - Category is ACTION (system messages like "User joined the group")
  * - Category is CALL (call-related messages)
+ * - Category is "agentic" (AI assistant completed responses)
+ * - Category is STREAM (AI assistant streaming responses)
  * - Message is deleted (deletedAt > 0)
  * - Message is not yet sent (sentAt == 0 or id == 0)
  *
@@ -63,10 +66,12 @@ data class SwipeToReplyConfig(
  * @return true if the message can be swiped to reply, false otherwise
  */
 fun isSwipeToReplyEligible(message: BaseMessage): Boolean {
-    // Disable for ACTION and CALL category messages
+    // Disable for ACTION, CALL, AGENTIC, and STREAM category messages
     val category = message.category
     if (category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
-        category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)) {
+        category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true) ||
+        category.equals("agentic", ignoreCase = true) ||
+        category.equals(UIKitConstants.MessageCategory.STREAM, ignoreCase = true)) {
         return false
     }
     

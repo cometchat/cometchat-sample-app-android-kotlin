@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.helpers.Logger
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
@@ -66,55 +68,51 @@ class MessagesActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_USER_ID = "extra_user_id"
         private const val EXTRA_GROUP_ID = "extra_group_id"
+        private const val EXTRA_GO_TO_MESSAGE_ID = "extra_go_to_message_id"
+        private const val EXTRA_PARENT_MESSAGE_ID = "extra_parent_message_id"
 
         /**
          * Starts MessagesActivity with a User object.
-         *
-         * @param context The context to start the activity from
-         * @param user The user to chat with
          */
-        fun start(context: Context, user: User) {
+        fun start(context: Context, user: User, goToMessageId: Long = 0, parentMessageId: Long = 0) {
             val intent = Intent(context, MessagesActivity::class.java).apply {
                 putExtra(EXTRA_USER_ID, user.uid)
+                if (goToMessageId > 0) putExtra(EXTRA_GO_TO_MESSAGE_ID, goToMessageId)
+                if (parentMessageId > 0) putExtra(EXTRA_PARENT_MESSAGE_ID, parentMessageId)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             context.startActivity(intent)
         }
 
         /**
          * Starts MessagesActivity with a Group object.
-         *
-         * @param context The context to start the activity from
-         * @param group The group to chat in
          */
-        fun start(context: Context, group: Group) {
+        fun start(context: Context, group: Group, goToMessageId: Long = 0) {
             val intent = Intent(context, MessagesActivity::class.java).apply {
                 putExtra(EXTRA_GROUP_ID, group.guid)
+                if (goToMessageId > 0) putExtra(EXTRA_GO_TO_MESSAGE_ID, goToMessageId)
             }
             context.startActivity(intent)
         }
 
         /**
          * Starts MessagesActivity with a user ID.
-         *
-         * @param context The context to start the activity from
-         * @param userId The UID of the user to chat with
          */
-        fun startWithUserId(context: Context, userId: String) {
+        fun startWithUserId(context: Context, userId: String, goToMessageId: Long = 0) {
             val intent = Intent(context, MessagesActivity::class.java).apply {
                 putExtra(EXTRA_USER_ID, userId)
+                if (goToMessageId > 0) putExtra(EXTRA_GO_TO_MESSAGE_ID, goToMessageId)
             }
             context.startActivity(intent)
         }
 
         /**
          * Starts MessagesActivity with a group ID.
-         *
-         * @param context The context to start the activity from
-         * @param groupId The GUID of the group to chat in
          */
-        fun startWithGroupId(context: Context, groupId: String) {
+        fun startWithGroupId(context: Context, groupId: String, goToMessageId: Long = 0) {
             val intent = Intent(context, MessagesActivity::class.java).apply {
                 putExtra(EXTRA_GROUP_ID, groupId)
+                if (goToMessageId > 0) putExtra(EXTRA_GO_TO_MESSAGE_ID, goToMessageId)
             }
             context.startActivity(intent)
         }
@@ -123,10 +121,11 @@ class MessagesActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMessagesBinding
     private var user: User? = null
     private var group: Group? = null
+    private var goToMessageId: Long = 0
+    private var parentMessageId: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMessagesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -209,6 +208,10 @@ class MessagesActivity : AppCompatActivity() {
     private fun loadConversationData() {
         val userId = intent.getStringExtra(EXTRA_USER_ID)
         val groupId = intent.getStringExtra(EXTRA_GROUP_ID)
+        goToMessageId = intent.getLongExtra(EXTRA_GO_TO_MESSAGE_ID, 0)
+        parentMessageId = intent.getLongExtra(EXTRA_PARENT_MESSAGE_ID, 0)
+
+        Log.d("MessagesActivity", "loadConversationData: userId=$userId, groupId=$groupId, goToMessageId=$goToMessageId, parentMessageId=$parentMessageId")
 
         when {
             userId != null -> loadUser(userId)
@@ -334,6 +337,16 @@ class MessagesActivity : AppCompatActivity() {
             // Hide call buttons - no VoIP in sample apps
             setVideoCallButtonVisibility(View.GONE)
             setVoiceCallButtonVisibility(View.GONE)
+
+            // Navigate to AI chat history screen
+            setOnChatHistoryClick {
+                user?.let { ChatHistoryActivity.start(this@MessagesActivity, it) }
+            }
+
+            // Start a fresh AI conversation
+            setOnNewChatClick {
+                user?.let { MessagesActivity.start(this@MessagesActivity, it) }
+            }
         }
         
         // Set up header menu with Details option
@@ -387,7 +400,21 @@ class MessagesActivity : AppCompatActivity() {
      */
     private fun setupMessageList() {
         binding.messageList.apply {
+            // Set parent message ID for threaded conversations (from chat history)
+            if (parentMessageId > 0) {
+                Log.d("MessagesActivity", "setupMessageList: setting parentMessageId=$parentMessageId")
+                setParentMessageId(parentMessageId)
+            }
+
+            // Navigate to specific message if provided (e.g., from search)
+            Log.d("MessagesActivity", "setupMessageList: goToMessageId=$goToMessageId, parentMessageId=$parentMessageId, user=${user?.uid}, group=${group?.guid}")
+            if (goToMessageId > 0) {
+                Log.d("MessagesActivity", "setupMessageList: calling gotoMessage($goToMessageId)")
+                gotoMessage(goToMessageId)
+            }
+
             // Set user or group
+            Log.e("MessagesActivity", "Setting up message list with user: ${user}")
             user?.let { setUser(it) }
             group?.let { setGroup(it) }
 
@@ -414,6 +441,11 @@ class MessagesActivity : AppCompatActivity() {
      */
     private fun setupMessageComposer() {
         binding.messageComposer.apply {
+            // Set parent message ID for threaded conversations (from chat history)
+            if (parentMessageId > 0) {
+                setParentMessageId(parentMessageId)
+            }
+
             // Set user or group
             user?.let { setUser(it) }
             group?.let { setGroup(it) }

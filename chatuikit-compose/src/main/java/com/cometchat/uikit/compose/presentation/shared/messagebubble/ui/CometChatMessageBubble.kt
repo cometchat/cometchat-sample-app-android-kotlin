@@ -25,9 +25,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.constants.CometChatConstants
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.MediaMessage
+import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.domain.model.StreamMessage
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.mentions.MentionTextStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.BubbleStyles
@@ -277,7 +281,9 @@ fun CometChatMessageBubble(
     mentionTextStyle: MentionTextStyle? = null,
     // Highlight parameters for jump-to-parent-message feature
     highlightedMessageId: Long = -1L,
-    highlightAlpha: Float = 0f
+    highlightAlpha: Float = 0f,
+    // Agent chat flag for slot suppression and transparent background
+    isAgentChat: Boolean = false
 ) {
     // Check if factory provides a complete bubble replacement via getBubbleView
     // When getBubbleView returns non-null, it replaces the entire CometChatMessageBubble
@@ -350,10 +356,45 @@ fun CometChatMessageBubble(
         }
 
     // Merge per-bubble-type contentStyle on top of the resolved base style
-    // Special handling for stickers: they should always have transparent background
-    // even when no explicit stickerBubbleStyle is provided
+    // Special handling for stickers and agentic/stream messages: transparent background
     val effectiveStyle = when {
         contentStyle != null -> mergeWithBase(contentStyle, baseStyle)
+        // Agentic and stream messages: transparent outer bubble so the
+        // CometChatAIAssistantBubble content view controls its own appearance.
+        message.category == "agentic" ||
+        message.category == UIKitConstants.MessageCategory.STREAM ->
+            CometChatMessageBubbleStyle(
+                backgroundColor = Color.Transparent,
+                cornerRadius = baseStyle.cornerRadius,
+                strokeWidth = baseStyle.strokeWidth,
+                strokeColor = baseStyle.strokeColor,
+                padding = baseStyle.padding,
+                senderNameTextColor = baseStyle.senderNameTextColor,
+                senderNameTextStyle = baseStyle.senderNameTextStyle,
+                threadIndicatorTextColor = baseStyle.threadIndicatorTextColor,
+                threadIndicatorTextStyle = baseStyle.threadIndicatorTextStyle,
+                threadIndicatorIconTint = baseStyle.threadIndicatorIconTint,
+                timestampTextColor = baseStyle.timestampTextColor,
+                timestampTextStyle = baseStyle.timestampTextStyle,
+                dateStyle = baseStyle.dateStyle,
+                messageReceiptStyle = baseStyle.messageReceiptStyle,
+                avatarStyle = baseStyle.avatarStyle,
+                reactionStyle = baseStyle.reactionStyle,
+                mentionStyle = baseStyle.mentionStyle,
+                moderationViewStyle = baseStyle.moderationViewStyle,
+                aiAssistantBubbleStyle = baseStyle.aiAssistantBubbleStyle,
+                messagePreviewStyle = baseStyle.messagePreviewStyle,
+                textBubbleStyle = baseStyle.textBubbleStyle,
+                imageBubbleStyle = baseStyle.imageBubbleStyle,
+                videoBubbleStyle = baseStyle.videoBubbleStyle,
+                fileBubbleStyle = baseStyle.fileBubbleStyle,
+                audioBubbleStyle = baseStyle.audioBubbleStyle,
+                deleteBubbleStyle = baseStyle.deleteBubbleStyle,
+                stickerBubbleStyle = baseStyle.stickerBubbleStyle,
+                pollBubbleStyle = baseStyle.pollBubbleStyle,
+                collaborativeBubbleStyle = baseStyle.collaborativeBubbleStyle,
+                meetCallBubbleStyle = baseStyle.meetCallBubbleStyle
+            )
         // Stickers need transparent background for the outer wrapper (like Java implementation)
         message.category == CometChatConstants.CATEGORY_CUSTOM && 
         message.type == InternalContentRenderer.EXTENSION_STICKER -> 
@@ -428,6 +469,7 @@ fun CometChatMessageBubble(
     val resolvedHeader = when {
         headerView != null -> headerView
         useMinimalSlots -> null  // No header for action/call messages (center bubbles)
+        isAgentChat && alignment == UIKitConstants.MessageBubbleAlignment.LEFT -> null  // Hide sender name for incoming agent messages
         else -> factory?.getHeaderView(message, alignment, effectiveStyle, showTimeInHeader)
             ?: { InternalContentRenderer.DefaultHeaderView(message, alignment, effectiveStyle, showTime = showTimeInHeader) }
     }
@@ -452,7 +494,20 @@ fun CometChatMessageBubble(
                 )
             }
     }
-    val resolvedBottom = bottomView ?: factory?.getBottomView(message, alignment, effectiveStyle, hideModerationView)
+    val resolvedBottom = bottomView
+        ?: factory?.getBottomView(message, alignment, effectiveStyle, hideModerationView)
+        ?: run {
+            // Default bottom view: copy button for AIAssistantMessage, moderation for others
+            val needsBottomView = (message is AIAssistantMessage && message !is StreamMessage && !message.text.isNullOrEmpty())
+                || (!hideModerationView && when (message) {
+                    is TextMessage -> message.moderationStatus?.name == "DISAPPROVED"
+                    is MediaMessage -> message.moderationStatus?.name == "DISAPPROVED"
+                    else -> false
+                })
+            if (needsBottomView) {
+                { InternalContentRenderer.DefaultBottomView(message, alignment, effectiveStyle, hideModerationView) }
+            } else null
+        }
 
     // Resolve status info view with timeStampAlignment consideration:
     // If explicit statusInfoView is provided, use it. Otherwise, use factory's status info view
@@ -479,6 +534,7 @@ fun CometChatMessageBubble(
     val resolvedThread = when {
         threadView != null -> threadView
         useMinimalSlots -> null  // No thread view for action/call messages (center bubbles)
+        isAgentChat && alignment == UIKitConstants.MessageBubbleAlignment.RIGHT -> null  // Hide thread for outgoing agent messages
         else -> factory?.getThreadView(message, alignment, effectiveStyle, onThreadRepliesClick)
             ?: {
                 InternalContentRenderer.DefaultThreadView(
@@ -496,6 +552,7 @@ fun CometChatMessageBubble(
     val resolvedFooter: (@Composable () -> Unit)? = when {
         footerView != null -> footerView
         useMinimalSlots -> null  // No footer for action/call messages (center bubbles)
+        isAgentChat -> null      // Hide reactions in agent chat for all alignments
         hideReactions -> null    // Skip footer when reactions are hidden
         else -> factory?.getFooterView(
             message, alignment, effectiveStyle,

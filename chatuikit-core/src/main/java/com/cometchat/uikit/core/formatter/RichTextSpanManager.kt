@@ -14,6 +14,47 @@ class RichTextSpanManager {
     /** Read-only snapshot of current spans, sorted by start position. */
     val spans: List<RichTextSpan> get() = _spans.toList()
 
+    // ==================== Link URL Storage ====================
+
+    /**
+     * Maps a link span's start position to its URL.
+     * Updated whenever link spans are added, shifted, or removed.
+     */
+    private val _linkUrlMap = mutableMapOf<Int, String>()
+
+    /** Read-only snapshot of link URL map. */
+    val linkUrlMap: Map<Int, String> get() = _linkUrlMap.toMap()
+
+    /** Stores a URL for a link span starting at [start]. */
+    fun setLinkUrl(start: Int, url: String) {
+        _linkUrlMap[start] = url
+    }
+
+    /**
+     * Returns the URL for the LINK span that contains [position], or null if
+     * the position is not inside a link span or no URL is stored.
+     */
+    fun getLinkUrlAt(position: Int): String? {
+        val linkSpan = findLinkSpanAt(position) ?: return null
+        return _linkUrlMap[linkSpan.start]
+    }
+
+    /**
+     * Returns the LINK span that contains [position], or null.
+     */
+    fun findLinkSpanAt(position: Int): RichTextSpan? {
+        return _spans.firstOrNull { span ->
+            RichTextFormat.LINK in span.formats && span.contains(position)
+        }
+    }
+
+    /**
+     * Removes the URL entry for a link span starting at [start].
+     */
+    fun removeLinkUrl(start: Int) {
+        _linkUrlMap.remove(start)
+    }
+
     // ==================== Format Operations ====================
 
     /**
@@ -165,6 +206,18 @@ class RichTextSpanManager {
     fun onTextInserted(position: Int, length: Int) {
         if (length <= 0) return
 
+        // Shift link URL map keys that are at or after the insertion point
+        val shiftedUrls = mutableMapOf<Int, String>()
+        for ((key, url) in _linkUrlMap) {
+            if (key >= position) {
+                shiftedUrls[key + length] = url
+            } else {
+                shiftedUrls[key] = url
+            }
+        }
+        _linkUrlMap.clear()
+        _linkUrlMap.putAll(shiftedUrls)
+
         val newSpans = mutableListOf<RichTextSpan>()
         for (span in _spans) {
             when {
@@ -177,8 +230,31 @@ class RichTextSpanManager {
                 span.start == position && span.end == position -> newSpans.add(span.shift(length))
                 // Span starts at insertion point but extends beyond — shift start stays, extend end
                 span.start == position -> newSpans.add(span.copy(end = span.end + length))
+                // LINK spans should NOT extend when typing at their end boundary.
+                // Links have fixed boundaries — new text after a link should be plain.
+                span.end == position && RichTextFormat.LINK in span.formats -> newSpans.add(span)
                 // Span contains or ends at the insertion point — extend end
                 else -> newSpans.add(span.copy(end = span.end + length))
+            }
+        }
+        _spans.clear()
+        _spans.addAll(newSpans)
+    }
+
+    /**
+     * Splits any INLINE_CODE span that contains the newline at [newlinePosition].
+     * Inline code is a single-line format — it should end before the newline.
+     * The span is trimmed to end at [newlinePosition] (the position of the \n character).
+     */
+    fun splitInlineCodeAtNewline(newlinePosition: Int) {
+        val newSpans = mutableListOf<RichTextSpan>()
+        for (span in _spans) {
+            if (RichTextFormat.INLINE_CODE in span.formats &&
+                span.start < newlinePosition && span.end > newlinePosition) {
+                // Trim the inline code span to end at the newline position
+                newSpans.add(span.copy(end = newlinePosition))
+            } else {
+                newSpans.add(span)
             }
         }
         _spans.clear()
@@ -192,6 +268,18 @@ class RichTextSpanManager {
     fun onTextDeleted(start: Int, end: Int) {
         if (start >= end) return
         val deleteLength = end - start
+
+        // Adjust link URL map keys for the deletion
+        val adjustedUrls = mutableMapOf<Int, String>()
+        for ((key, url) in _linkUrlMap) {
+            when {
+                key >= end -> adjustedUrls[key - deleteLength] = url
+                key >= start -> { /* key is within deletion range — remove it */ }
+                else -> adjustedUrls[key] = url
+            }
+        }
+        _linkUrlMap.clear()
+        _linkUrlMap.putAll(adjustedUrls)
 
         val newSpans = mutableListOf<RichTextSpan>()
         for (span in _spans) {
@@ -250,6 +338,10 @@ class RichTextSpanManager {
             .sortedWith(compareBy<FormatEvent> { it.position }
                 .thenBy { if (it.isOpen) 0 else 1 })
 
+        // Collect link span ranges for whitespace normalization (Requirement 33.1)
+        val linkRanges = _spans.filter { RichTextFormat.LINK in it.formats }
+            .map { it.start to it.end }
+
         // Build the output by walking through the text and inserting markers
         val sb = StringBuilder()
         var cursor = 0
@@ -260,7 +352,8 @@ class RichTextSpanManager {
         for (pos in positions) {
             // Append text up to this position
             if (pos > cursor) {
-                sb.append(plainText.substring(cursor, pos.coerceAtMost(plainText.length)))
+                val textChunk = plainText.substring(cursor, pos.coerceAtMost(plainText.length))
+                sb.append(normalizeIfInLink(textChunk, cursor, linkRanges))
             }
             cursor = pos
 
@@ -270,7 +363,16 @@ class RichTextSpanManager {
             val opens = eventsAtPos.filter { it.isOpen }.sortedBy { formatPriority(it.format) }
 
             for (e in closes) {
-                sb.append(closingMarker(e.format))
+                if (e.format == RichTextFormat.LINK) {
+                    // Find the link span that ends at this position to get its URL
+                    val linkSpan = _spans.firstOrNull { span ->
+                        RichTextFormat.LINK in span.formats && span.end == pos
+                    }
+                    val url = linkSpan?.let { _linkUrlMap[it.start] } ?: ""
+                    sb.append("](${url})")
+                } else {
+                    sb.append(closingMarker(e.format))
+                }
             }
             for (e in opens) {
                 sb.append(openingMarker(e.format))
@@ -279,7 +381,8 @@ class RichTextSpanManager {
 
         // Append remaining text
         if (cursor < plainText.length) {
-            sb.append(plainText.substring(cursor))
+            val textChunk = plainText.substring(cursor)
+            sb.append(normalizeIfInLink(textChunk, cursor, linkRanges))
         }
 
         return sb.toString()
@@ -343,12 +446,28 @@ class RichTextSpanManager {
                 plainBuilder.append(remaining.substring(srcCursor, m.start))
             }
             // Content of the match (without markers)
-            val content = remaining.substring(m.contentStart, m.contentEnd)
+            val content = if (m.format == RichTextFormat.LINK) {
+                // For links, extract display text (group 1) and URL (group 2)
+                val linkRegex = Regex("\\[([^\\]]+)\\]\\(([^)]+)\\)")
+                val matchResult = linkRegex.find(remaining.substring(m.start, m.end))
+                matchResult?.groupValues?.get(1) ?: remaining.substring(m.contentStart, m.contentEnd)
+            } else {
+                remaining.substring(m.contentStart, m.contentEnd)
+            }
             val spanStart = plainBuilder.length
             plainBuilder.append(content)
             val spanEnd = plainBuilder.length
             if (spanEnd > spanStart) {
                 parsedSpans.add(RichTextSpan(spanStart, spanEnd, setOf(m.format)))
+                // For links, also extract and store the URL
+                if (m.format == RichTextFormat.LINK) {
+                    val linkRegex = Regex("\\[([^\\]]+)\\]\\(([^)]+)\\)")
+                    val matchResult = linkRegex.find(remaining.substring(m.start, m.end))
+                    val url = matchResult?.groupValues?.get(2) ?: ""
+                    if (url.isNotEmpty()) {
+                        _linkUrlMap[spanStart] = url
+                    }
+                }
             }
             srcCursor = m.end
         }
@@ -388,6 +507,7 @@ class RichTextSpanManager {
     /** Removes all spans. */
     fun clear() {
         _spans.clear()
+        _linkUrlMap.clear()
     }
 
     // ==================== Helpers ====================
@@ -398,6 +518,26 @@ class RichTextSpanManager {
         RichTextFormat.CODE_BLOCK, RichTextFormat.LINK -> true
         RichTextFormat.BULLET_LIST, RichTextFormat.ORDERED_LIST,
         RichTextFormat.BLOCKQUOTE -> false
+    }
+
+    /**
+     * Normalizes consecutive whitespace to a single space if the text chunk
+     * falls within a LINK span range. Per Requirement 33.1.
+     */
+    private fun normalizeIfInLink(
+        textChunk: String,
+        chunkStart: Int,
+        linkRanges: List<Pair<Int, Int>>
+    ): String {
+        val chunkEnd = chunkStart + textChunk.length
+        val isInLink = linkRanges.any { (start, end) ->
+            chunkStart >= start && chunkEnd <= end
+        }
+        return if (isInLink) {
+            textChunk.replace(Regex("\\s{2,}"), " ")
+        } else {
+            textChunk
+        }
     }
 
     /** Priority for nesting order (lower = outermost). */

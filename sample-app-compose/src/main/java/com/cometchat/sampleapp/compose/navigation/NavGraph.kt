@@ -17,6 +17,7 @@ import com.cometchat.sampleapp.compose.ui.groups.GroupDetailsScreen
 import com.cometchat.sampleapp.compose.ui.groups.GroupMembersScreen
 import com.cometchat.sampleapp.compose.ui.home.HomeScreen
 import com.cometchat.sampleapp.compose.ui.login.LoginScreen
+import com.cometchat.sampleapp.compose.ui.messages.ChatHistoryScreen
 import com.cometchat.sampleapp.compose.ui.messages.MessagesScreen
 import com.cometchat.sampleapp.compose.ui.messages.ThreadMessagesScreen
 import com.cometchat.sampleapp.compose.ui.newchat.NewChatScreen
@@ -172,6 +173,10 @@ fun AppNavGraph(
                     // Navigate to NewChatScreen to start a new conversation
                     // Validates: Requirement 8.4
                     navController.navigate(NewChatRoute)
+                },
+                onSearchClick = {
+                    // Navigate to SearchScreen for global search
+                    navController.navigate(SearchRoute(userId = null, groupId = null))
                 }
             )
         }
@@ -183,6 +188,8 @@ fun AppNavGraph(
             MessagesScreen(
                 userId = route.userId,
                 groupId = route.groupId,
+                messageId = route.messageId,
+                parentMessageId = route.parentMessageId,
                 onBackPress = { navController.popBackStack() },
                 onUserDetailsClick = { user ->
                     navController.navigate(UserDetailsRoute(userId = user.uid))
@@ -192,6 +199,15 @@ fun AppNavGraph(
                 },
                 onThreadClick = { message ->
                     navController.navigate(ThreadRoute(parentMessageId = message.id.toLong()))
+                },
+                onChatHistoryClick = { user ->
+                    navController.navigate(ChatHistoryRoute(userId = user.uid))
+                },
+                onNewChatClick = { user ->
+                    // Fresh AI conversation — navigate to Messages with no parentMessageId
+                    navController.navigate(MessagesRoute(userId = user.uid, groupId = null)) {
+                        popUpTo<MessagesRoute> { inclusive = true }
+                    }
                 }
             )
         }
@@ -277,7 +293,28 @@ fun AppNavGraph(
             val route = backStackEntry.toRoute<ThreadRoute>()
             ThreadMessagesScreen(
                 parentMessageId = route.parentMessageId,
+                goToMessageId = route.goToMessageId,
                 onBackPress = { navController.popBackStack() }
+            )
+        }
+
+        // Chat History Screen - AI assistant chat history
+        composable<ChatHistoryRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<ChatHistoryRoute>()
+            ChatHistoryScreen(
+                userId = route.userId,
+                onBackPress = { navController.popBackStack() },
+                onNavigateToMessages = { userId, parentMsgId ->
+                    navController.navigate(MessagesRoute(userId = userId, groupId = null, parentMessageId = parentMsgId)) {
+                        popUpTo<MessagesRoute> { inclusive = true }
+                    }
+                },
+                onNewChat = { userId ->
+                    // Fresh AI conversation — no parentMessageId
+                    navController.navigate(MessagesRoute(userId = userId, groupId = null)) {
+                        popUpTo<MessagesRoute> { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -289,15 +326,18 @@ fun AppNavGraph(
                 userId = route.userId,
                 groupId = route.groupId,
                 onBackPress = { navController.popBackStack() },
-                onNavigateToMessages = { userId, groupId ->
-                    // Navigate to messages screen
-                    // Validates: Requirements 5.4, 5.6
-                    navController.navigate(MessagesRoute(userId = userId, groupId = groupId))
+                onNavigateToMessages = { userId, groupId, messageId ->
+                    navController.navigate(MessagesRoute(userId = userId, groupId = groupId, messageId = messageId)) {
+                        // Pop search from back stack to match Java behavior (finish() after navigation)
+                        popUpTo<SearchRoute> { inclusive = true }
+                    }
                 },
-                onNavigateToThread = { parentMessageId ->
-                    // Navigate to thread messages screen
+                onNavigateToThread = { parentMessageId, goToMessageId ->
+                    // Navigate to thread messages screen with goToMessageId
                     // Validates: Requirement 5.5
-                    navController.navigate(ThreadRoute(parentMessageId = parentMessageId))
+                    navController.navigate(ThreadRoute(parentMessageId = parentMessageId, goToMessageId = goToMessageId)) {
+                        popUpTo<SearchRoute> { inclusive = true }
+                    }
                 }
             )
         }

@@ -2,7 +2,6 @@ package com.cometchat.uikit.kotlin.presentation.messagelist.adapter
 
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +17,9 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.Reaction
 import com.cometchat.chat.models.User
+import com.cometchat.uikit.core.CometChatAIStreamService
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.domain.model.StreamMessage
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.DatePattern
@@ -140,7 +141,7 @@ typealias OnMessagePreviewClick = (message: BaseMessage) -> Unit
  * View types are calculated as: `factoryId + alignmentSuffix`
  * - Factory ID: Unique integer assigned per factory key (category_type)
  * - Alignment suffix: "1" (LEFT), "2" (RIGHT), "3" (CENTER)
- * - Special types: "4" (STREAM), "10000" (IGNORE)
+ * - Special types: "10000" (IGNORE)
  *
  * ## Factory Key Format
  *
@@ -205,11 +206,6 @@ class MessageAdapter @JvmOverloads constructor(
          * Appended to factory ID to form view type.
          */
         private const val CENTER_MESSAGE = "3"
-
-        /**
-         * View type for stream messages (AI assistant responses).
-         */
-        private const val STREAM_MESSAGE = "4"
 
         /**
          * View type for ignored messages (hidden group actions).
@@ -301,6 +297,18 @@ class MessageAdapter @JvmOverloads constructor(
      * When null, the component uses CometChatCallActionBubbleStyle.default(context) as default.
      */
     var callActionBubbleStyle: CometChatCallActionBubbleStyle? = null
+
+    /**
+     * Style resource ID for AI assistant bubble.
+     * Applied to CometChatStreamBubble for stream messages.
+     */
+    @StyleRes var aiAssistantBubbleStyle: Int = 0
+
+    /**
+     * AI stream service instance for agent chat streaming.
+     * Passed to CometChatStreamBubble for real-time event handling.
+     */
+    var aiStreamService: CometChatAIStreamService? = null
 
     // ========================================
     // Cached Bubble Styles
@@ -565,7 +573,6 @@ class MessageAdapter @JvmOverloads constructor(
      * - Alignment suffix is based on message category, sender UID, and listAlignment
      *
      * Special cases:
-     * - Stream messages return STREAM_MESSAGE (4)
      * - Hidden group actions return IGNORE_MESSAGE (10000)
      *
      * @param position The position of the message in the list
@@ -574,36 +581,30 @@ class MessageAdapter @JvmOverloads constructor(
     override fun getItemViewType(position: Int): Int {
         val baseMessage = messages[position]
 
-        // 1. Handle stream messages
-        if (baseMessage.category == UIKitConstants.MessageCategory.STREAM &&
-            baseMessage.type == UIKitConstants.MessageType.STREAM) {
-            return STREAM_MESSAGE.toInt()
-        }
-
-        // 2. Get factory key from message (checks deletedAt first, then category_type)
+        // 1. Get factory key from message (checks deletedAt first, then category_type)
         val factoryKey = BubbleFactory.getFactoryKey(baseMessage)
 
-        // 3. Get or assign factory ID (based on message category_type, not factory registration)
+        // 2. Get or assign factory ID (based on message category_type, not factory registration)
         val factoryId = factoryViewTypeHashMap.getOrPut(factoryKey) {
             factoryViewTypeHashMap.size + 1
         }
 
-        // 4. Determine alignment suffix
+        // 3. Determine alignment suffix
         val alignmentSuffix = calculateAlignmentSuffix(baseMessage)
 
-        // 5. Handle IGNORE_MESSAGE case (returns early)
+        // 4. Handle IGNORE_MESSAGE case (returns early)
         if (alignmentSuffix == IGNORE_MESSAGE) {
             return IGNORE_MESSAGE.toInt()
         }
 
-        // 6. Combine factory ID + alignment suffix
+        // 5. Combine factory ID + alignment suffix
         val viewType = "$factoryId$alignmentSuffix".toInt()
 
-        // 7. Store factory reference if available (may be null if no factory registered)
+        // 6. Store factory reference if available (may be null if no factory registered)
         val factory = bubbleFactories[factoryKey]
         viewTypeFactoryHashMap[viewType] = factory
 
-        // 8. Store factory key for extraction in onCreateViewHolder
+        // 7. Store factory key for extraction in onCreateViewHolder
         viewTypeToFactoryKeyMap[viewType] = factoryKey
 
         return viewType
@@ -772,6 +773,10 @@ class MessageAdapter @JvmOverloads constructor(
     internal fun shouldShowAvatarForMessage(message: BaseMessage): Boolean {
         // Global override - if showAvatar is true, always show
         if (showAvatar) return true
+
+        // Agent chat: always show avatar for the agent's messages,
+        // matching group chat behavior where each sender has an avatar.
+        if (isAgentChat) return true
         
         // Check based on conversation type
         return when (message.receiverType) {
@@ -792,7 +797,6 @@ class MessageAdapter @JvmOverloads constructor(
         val viewTypeString = viewType.toString()
 
         return when {
-            viewTypeString == STREAM_MESSAGE -> createStreamViewHolder(parent)
             viewTypeString == IGNORE_MESSAGE || viewTypeString.endsWith(IGNORE_MESSAGE) -> {
                 EmptyRowHolder(createEmptyView(parent.context))
             }
@@ -830,9 +834,6 @@ class MessageAdapter @JvmOverloads constructor(
             is MessageViewHolder -> {
                 val alignment = getMessageAlignment(message)
                 holder.bind(message, alignment, position)
-            }
-            is StreamBubbleViewHolder -> {
-                holder.bind(message, position)
             }
             // EmptyRowHolder needs no binding
         }
@@ -1029,40 +1030,6 @@ class MessageAdapter @JvmOverloads constructor(
                 }
                 // Note: setOnMessagePreviewClickListener is now called BEFORE bindViews()
                 // to ensure the listener is available when InternalContentRenderer.bindReplyView() is called
-            }
-        }
-    }
-
-    /**
-     * ViewHolder for stream messages (AI assistant responses).
-     * Uses a dedicated stream bubble layout.
-     */
-    inner class StreamBubbleViewHolder(
-        itemView: View
-    ) : RecyclerView.ViewHolder(itemView) {
-
-        // TODO: Bind to actual stream bubble view when layout is available
-        // private val binding = CometchatStreamBubbleBinding.bind(itemView)
-
-        /**
-         * Binds the stream message data to the ViewHolder.
-         *
-         * @param streamMessage The stream message to bind
-         * @param position Position in the list
-         */
-        fun bind(streamMessage: BaseMessage, position: Int) {
-            // Stream message binding will be implemented when stream bubble layout is available
-            // For now, this is a placeholder that handles visibility based on deletion status
-            if (streamMessage.deletedAt == 0L) {
-                itemView.visibility = View.VISIBLE
-                // TODO: Bind stream message data when layout is available
-                // binding.streamBubble.setStyle(aiAssistantBubbleStyle)
-                // binding.streamBubble.setStreamMessage(streamMessage)
-                // binding.streamBubble.setBackgroundColor(aiAssistantBubbleBackgroundColor)
-                // binding.streamBubble.setAvatar(streamMessage.sender.name, streamMessage.sender.avatar)
-                // binding.streamBubble.setAvatarStyle(aiAssistantBubbleAvatarStyle)
-            } else {
-                itemView.visibility = View.GONE
             }
         }
     }
@@ -1344,22 +1311,6 @@ class MessageAdapter @JvmOverloads constructor(
     }
 
     /**
-     * Creates a StreamBubbleViewHolder for stream messages.
-     * TODO: Implement proper stream bubble layout in Task 3
-     */
-    private fun createStreamViewHolder(parent: ViewGroup): StreamBubbleViewHolder {
-        // For now, create a placeholder view until stream bubble layout is available
-        val view = LinearLayout(parent.context).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
-        return StreamBubbleViewHolder(view)
-    }
-
-    /**
      * Calculates the highlight background color based on extended primary color 800 and alpha.
      * This matches the Java chatuikit implementation which uses getExtendedPrimaryColor800.
      */
@@ -1629,10 +1580,38 @@ class MessageAdapter @JvmOverloads constructor(
 
         /**
          * Checks if two items represent the same message.
-         * Uses message ID for identity comparison.
+         *
+         * StreamMessage placeholders use reference equality because they
+         * carry id=0 which would collide with other temporary messages.
+         * For all other messages, identity is based on message ID.
          */
         override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
-            return oldList[oldPos].id == newList[newPos].id
+            val old = oldList[oldPos]
+            val new = newList[newPos]
+
+            // StreamMessage is a local placeholder with id=0.
+            // When muid is set (e.g. "stream_335813"), use it for identity —
+            // this correctly tracks multiple concurrent StreamMessages.
+            // When muid is not set, fall back to reference equality.
+            // A StreamMessage is never "the same" as a non-StreamMessage
+            // (the replacement is handled as an insert+remove pair).
+            val oldIsStream = old is StreamMessage
+            val newIsStream = new is StreamMessage
+            if (oldIsStream && newIsStream) {
+                val oldMuid = old.muid
+                val newMuid = new.muid
+                return if (!oldMuid.isNullOrEmpty() && !newMuid.isNullOrEmpty()) {
+                    oldMuid == newMuid
+                } else {
+                    old === new
+                }
+            }
+            if (oldIsStream || newIsStream) {
+                // One is StreamMessage, the other is not — never the same item
+                return false
+            }
+
+            return old.id == new.id
         }
 
         /**
@@ -1648,7 +1627,6 @@ class MessageAdapter @JvmOverloads constructor(
             // trust that its mutable fields haven't changed (the SDK mutates
             // BaseMessage in-place). Always return false to force a rebind.
             if (old === new) {
-                android.util.Log.d("ThreadReplyDebug", "areContentsTheSame: SAME REF for id=${old.id}, forcing rebind")
                 return false
             }
             return old == new
@@ -1665,7 +1643,6 @@ class MessageAdapter @JvmOverloads constructor(
      * @param newMessages The new list of messages
      */
     fun setMessageList(newMessages: List<BaseMessage>) {
-        android.util.Log.d("ThreadReplyDebug", "setMessageList: oldSize=${messages.size}, newSize=${newMessages.size}")
         val diffCallback = MessageDiffCallback(messages, newMessages)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         messages = newMessages.toMutableList()
@@ -1794,16 +1771,6 @@ class MessageAdapter @JvmOverloads constructor(
      */
     internal fun isCenterViewType(viewType: Int): Boolean {
         return viewType.toString().endsWith(CENTER_MESSAGE)
-    }
-
-    /**
-     * Checks if a view type represents a STREAM message.
-     *
-     * @param viewType The view type to check
-     * @return true if STREAM message
-     */
-    internal fun isStreamViewType(viewType: Int): Boolean {
-        return viewType.toString() == STREAM_MESSAGE
     }
 
     /**

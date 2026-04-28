@@ -43,6 +43,10 @@ android {
     }
 }
 
+configurations.all {
+    exclude(group = "org.jetbrains", module = "annotations-java5")
+}
+
 dependencies {
     // CometChat UIKit SDK
     implementation(libs.chatuikit.kotlin.android)

@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.maps.shouldBeEmpty as mapShouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
@@ -622,8 +623,8 @@ class RichTextEditorControllerTest : FunSpec({
             // Now we have "1. first\n2. " — press Enter again on empty "2. "
             pressEnter()
 
-            // Should exit list mode: remove the empty "2. " and the newline
-            controller.state.text shouldBe "1. first"
+            // Should exit list mode: remove the empty "2. " prefix, keep newline
+            controller.state.text shouldBe "1. first\n"
         }
 
         test("ordered list prefix persists after typing") {
@@ -706,7 +707,7 @@ class RichTextEditorControllerTest : FunSpec({
             // Now "- first\n- " — press Enter on empty "- "
             pressEnter()
 
-            controller.state.text shouldBe "- first"
+            controller.state.text shouldBe "- first\n"
         }
 
         test("bullet list prefix persists after typing") {
@@ -754,7 +755,7 @@ class RichTextEditorControllerTest : FunSpec({
             // Now "> quoted\n> " — press Enter on empty "> "
             pressEnter()
 
-            controller.state.text shouldBe "> quoted"
+            controller.state.text shouldBe "> quoted\n"
         }
 
         test("blockquote prefix persists after typing") {
@@ -875,15 +876,11 @@ class RichTextEditorControllerTest : FunSpec({
             pressEnter()
             // "1. a\n2. b\n3. " — exit by pressing Enter on empty "3. "
             pressEnter()
-            controller.state.text shouldBe "1. a\n2. b"
+            controller.state.text shouldBe "1. a\n2. b\n"
 
-            // After exiting, if user presses Enter again, the previous line "2. b"
-            // still matches ordered list pattern, so auto-continuation kicks in.
-            // This is standard editor behavior (Google Docs, Notion, etc.)
-            pressEnter()
-            controller.state.text shouldBe "1. a\n2. b\n3. "
-
-            // To type truly plain text, user would need to backspace the "3. " prefix
+            // After exiting, typing on the new empty line is plain text
+            typeText("plain")
+            controller.state.text shouldBe "1. a\n2. b\nplain"
         }
 
         test("ordered list: cursor position is after prefix on each new line") {
@@ -1034,6 +1031,568 @@ class RichTextEditorControllerTest : FunSpec({
 
             controller.state.text shouldBe "x\n\n\n"
             controller.state.text.count { it == 'x' } shouldBe 1
+        }
+    }
+
+    // ==================== Test 21: Mention Preservation with Formatting ====================
+
+    context("mention preservation with formatting") {
+
+        /**
+         * A simple MentionSpanProvider for testing.
+         * Tracks mentions as (start, end, id, displayText) tuples.
+         */
+        class TestMentionSpanProvider : MentionSpanProvider {
+            private val mentions = mutableListOf<MentionSpanProvider.MentionInfo>()
+
+            fun addMention(start: Int, end: Int, id: Char = '@', displayText: String = "user") {
+                mentions.add(
+                    MentionSpanProvider.MentionInfo(
+                        start = start,
+                        end = end,
+                        id = id,
+                        displayText = displayText,
+                        suggestionItem = "suggestion-$displayText",
+                        textAppearance = "appearance-$displayText"
+                    )
+                )
+            }
+
+            override fun getMentionsInRange(start: Int, end: Int): List<MentionSpanProvider.MentionInfo> {
+                return mentions.filter { it.start < end && it.end > start }
+                    .sortedBy { it.start }
+            }
+
+            override fun removeMentionSpan(start: Int, end: Int) {
+                mentions.removeAll { it.start == start && it.end == end }
+            }
+
+            override fun restoreMentionSpan(start: Int, end: Int, consumed: ConsumedMentionSpan) {
+                mentions.add(
+                    MentionSpanProvider.MentionInfo(
+                        start = start,
+                        end = end,
+                        id = consumed.id,
+                        displayText = consumed.text ?: "",
+                        suggestionItem = consumed.suggestionItem,
+                        textAppearance = consumed.textAppearance
+                    )
+                )
+            }
+        }
+
+        test("INLINE_CODE on text with mention converts mention to ConsumedMentionSpan") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            // Simulate text "hello @user world" with a mention at positions 6..11
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            // Select the mention range and apply INLINE_CODE
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            // Verify ConsumedMentionSpan was created
+            controller.state.consumedMentionSpans.size shouldBe 1
+            val consumed = controller.state.consumedMentionSpans[6]!!
+            consumed.id shouldBe '@'
+            consumed.text shouldBe "@user"
+            consumed.suggestionItem shouldBe "suggestion-@user"
+            consumed.textAppearance shouldBe "appearance-@user"
+            consumed.canRestore().shouldBeTrue()
+
+            // Verify mention span was removed from provider
+            provider.getMentionsInRange(6, 11).shouldBeEmpty()
+
+            // Verify INLINE_CODE format was applied
+            val inlineCodeSpans = controller.state.spans.filter { RichTextFormat.INLINE_CODE in it.formats }
+            inlineCodeSpans shouldHaveSize 1
+        }
+
+        test("BOLD on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.BOLD)
+
+            // No consumed mentions — mentions preserved intact for BOLD
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+
+            // Mention still exists in provider
+            provider.getMentionsInRange(6, 11) shouldHaveSize 1
+        }
+
+        test("ITALIC on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.ITALIC)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+            provider.getMentionsInRange(6, 11) shouldHaveSize 1
+        }
+
+        test("UNDERLINE on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.UNDERLINE)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+            provider.getMentionsInRange(6, 11) shouldHaveSize 1
+        }
+
+        test("STRIKETHROUGH on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.STRIKETHROUGH)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+            provider.getMentionsInRange(6, 11) shouldHaveSize 1
+        }
+
+        test("BLOCKQUOTE on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("@user says hi")
+            provider.addMention(start = 0, end = 5, displayText = "@user")
+
+            moveCursor(0)
+            controller.toggleFormat(RichTextFormat.BLOCKQUOTE)
+
+            // Blockquote adds "> " prefix, shifting positions, but does NOT consume mentions
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+        }
+
+        test("BULLET_LIST on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("@user item")
+            provider.addMention(start = 0, end = 5, displayText = "@user")
+
+            moveCursor(0)
+            controller.toggleFormat(RichTextFormat.BULLET_LIST)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+        }
+
+        test("ORDERED_LIST on text with mention does NOT convert mention") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("@user item")
+            provider.addMention(start = 0, end = 5, displayText = "@user")
+
+            moveCursor(0)
+            controller.toggleFormat(RichTextFormat.ORDERED_LIST)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+        }
+
+        test("INLINE_CODE on range with multiple mentions converts all") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            // "hello @alice and @bob end"
+            typeText("hello @alice and @bob end")
+            provider.addMention(start = 6, end = 12, displayText = "@alice")
+            provider.addMention(start = 17, end = 21, displayText = "@bob")
+
+            selectRange(0, 25)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            controller.state.consumedMentionSpans.size shouldBe 2
+            controller.state.consumedMentionSpans[6]!!.text shouldBe "@alice"
+            controller.state.consumedMentionSpans[17]!!.text shouldBe "@bob"
+        }
+
+        test("consumeMentionsInRange works for CODE_BLOCK scenario") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            // Directly call consumeMentionsInRange (used by SegmentComposerController for CODE_BLOCK)
+            controller.consumeMentionsInRange(0, 17)
+
+            controller.state.consumedMentionSpans.size shouldBe 1
+            val consumed = controller.state.consumedMentionSpans[6]!!
+            consumed.id shouldBe '@'
+            consumed.text shouldBe "@user"
+            consumed.canRestore().shouldBeTrue()
+
+            // Mention removed from provider
+            provider.getMentionsInRange(0, 17).shouldBeEmpty()
+        }
+
+        test("no mention provider set — INLINE_CODE still works without error") {
+            // No provider set — should not crash
+            typeText("hello world")
+            selectRange(0, 5)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            // INLINE_CODE applied, no consumed mentions
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+            val inlineCodeSpans = controller.state.spans.filter { RichTextFormat.INLINE_CODE in it.formats }
+            inlineCodeSpans shouldHaveSize 1
+        }
+
+        test("clear resets consumed mention spans") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+            controller.state.consumedMentionSpans.size shouldBe 1
+
+            controller.clear()
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+        }
+
+        // ==================== Req 22.1: Removing INLINE_CODE restores mentions ====================
+
+        test("removing INLINE_CODE restores mention from ConsumedMentionSpan") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @user world")
+            provider.addMention(start = 6, end = 11, displayText = "@user")
+
+            // Apply INLINE_CODE — mention consumed
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+            controller.state.consumedMentionSpans.size shouldBe 1
+            provider.getMentionsInRange(6, 11).shouldBeEmpty()
+
+            // Remove INLINE_CODE — mention should be restored
+            selectRange(6, 11)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            // ConsumedMentionSpan should be cleared
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+
+            // Mention should be restored in the provider
+            val restored = provider.getMentionsInRange(6, 11)
+            restored shouldHaveSize 1
+            restored[0].displayText shouldBe "@user"
+            restored[0].id shouldBe '@'
+            restored[0].suggestionItem shouldBe "suggestion-@user"
+            restored[0].textAppearance shouldBe "appearance-@user"
+        }
+
+        test("removing INLINE_CODE restores multiple mentions") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            typeText("hello @alice and @bob end")
+            provider.addMention(start = 6, end = 12, displayText = "@alice")
+            provider.addMention(start = 17, end = 21, displayText = "@bob")
+
+            // Apply INLINE_CODE to entire text — both mentions consumed
+            selectRange(0, 25)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+            controller.state.consumedMentionSpans.size shouldBe 2
+
+            // Remove INLINE_CODE — both mentions should be restored
+            selectRange(0, 25)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+            provider.getMentionsInRange(6, 12) shouldHaveSize 1
+            provider.getMentionsInRange(17, 21) shouldHaveSize 1
+        }
+
+        test("removing INLINE_CODE without provider does not crash") {
+            // No provider set
+            typeText("hello world")
+            selectRange(0, 5)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            // Remove INLINE_CODE — should not crash
+            selectRange(0, 5)
+            controller.toggleFormat(RichTextFormat.INLINE_CODE)
+
+            val inlineCodeSpans = controller.state.spans.filter { RichTextFormat.INLINE_CODE in it.formats }
+            inlineCodeSpans.shouldBeEmpty()
+        }
+    }
+
+    // ==================== Req 22.2: CODE_BLOCK removal restores mentions ====================
+
+    context("mention restoration on CODE_BLOCK removal") {
+
+        /**
+         * A simple MentionSpanProvider for testing CODE_BLOCK mention restoration.
+         */
+        class TestMentionSpanProvider : MentionSpanProvider {
+            private val mentions = mutableListOf<MentionSpanProvider.MentionInfo>()
+
+            fun addMention(start: Int, end: Int, id: Char = '@', displayText: String = "user") {
+                mentions.add(
+                    MentionSpanProvider.MentionInfo(
+                        start = start,
+                        end = end,
+                        id = id,
+                        displayText = displayText,
+                        suggestionItem = "suggestion-$displayText",
+                        textAppearance = "appearance-$displayText"
+                    )
+                )
+            }
+
+            fun getMentionCount(): Int = mentions.size
+
+            override fun getMentionsInRange(start: Int, end: Int): List<MentionSpanProvider.MentionInfo> {
+                return mentions.filter { it.start < end && it.end > start }
+                    .sortedBy { it.start }
+            }
+
+            override fun removeMentionSpan(start: Int, end: Int) {
+                mentions.removeAll { it.start == start && it.end == end }
+            }
+
+            override fun restoreMentionSpan(start: Int, end: Int, consumed: ConsumedMentionSpan) {
+                mentions.add(
+                    MentionSpanProvider.MentionInfo(
+                        start = start,
+                        end = end,
+                        id = consumed.id,
+                        displayText = consumed.text ?: "",
+                        suggestionItem = consumed.suggestionItem,
+                        textAppearance = consumed.textAppearance
+                    )
+                )
+            }
+        }
+
+        test("removing CODE_BLOCK restores consumed mentions in merged Normal segment") {
+            // This test verifies that when a code block is removed, consumed mention
+            // spans stored on the surrounding Normal segment are restored via the provider.
+            //
+            // Setup: Create a code block with text "hello @user world", place a
+            // ConsumedMentionSpan on the preceding Normal segment, then remove the
+            // code block and verify the mention is restored.
+
+            val segmentController = SegmentComposerController()
+            val provider = TestMentionSpanProvider()
+
+            // Step 1: Create a code block by typing text and toggling code block
+            val firstNormal = segmentController.segments[0] as ComposerSegment.Normal
+            firstNormal.controller.onTextChanged("hello @user world", 0, 17) // select all
+            segmentController.setFocusedSegment(firstNormal.id)
+            segmentController.toggleCodeBlock()
+
+            // Now segments: [Normal(""), Code("hello @user world"), Normal("")]
+            val codeSegment = segmentController.segments.filterIsInstance<ComposerSegment.Code>().first()
+            codeSegment.text shouldBe "hello @user world"
+
+            // Step 2: Set up the provider and consumed mentions on the preceding Normal
+            val normalBefore = segmentController.segments[0] as ComposerSegment.Normal
+            normalBefore.controller.setMentionSpanProvider(provider)
+
+            // The consumed mention is at position 6 relative to the code text.
+            // When removeCodeSegment collects from prevNormal, it offsets by
+            // (prevText.length + sep1.length). Since prevNormal is empty, offset = 0.
+            // So position 6 stays at 6 in the merged text.
+            normalBefore.controller.state.consumedMentionSpans[6] = ConsumedMentionSpan(
+                id = '@',
+                text = "@user",
+                suggestionItem = "suggestion-@user",
+                textAppearance = "appearance-@user"
+            )
+
+            // Step 3: Remove the code block
+            segmentController.setFocusedSegment(codeSegment.id)
+            segmentController.toggleCodeBlock()
+
+            // Step 4: Verify mentions were restored
+            // The merged text is "hello @user world" and the mention at [6,11) should be restored
+            provider.getMentionCount() shouldBe 1
+            val restoredMentions = provider.getMentionsInRange(0, 50)
+            restoredMentions shouldHaveSize 1
+            restoredMentions[0].displayText shouldBe "@user"
+            restoredMentions[0].id shouldBe '@'
+        }
+
+        test("restoreMentionsInRange restores mention data correctly") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            // Manually set up consumed mention spans (simulating CODE_BLOCK removal scenario)
+            controller.onTextChanged("hello @user world", 17, 17)
+            controller.state.consumedMentionSpans[6] = ConsumedMentionSpan(
+                id = '@',
+                text = "@user",
+                suggestionItem = "suggestion-@user",
+                textAppearance = "appearance-@user"
+            )
+
+            // Restore mentions in range
+            controller.restoreMentionsInRange(0, 17)
+
+            // Consumed mentions should be cleared
+            controller.state.consumedMentionSpans.mapShouldBeEmpty()
+
+            // Mention should be restored in provider
+            val restored = provider.getMentionsInRange(6, 11)
+            restored shouldHaveSize 1
+            restored[0].start shouldBe 6
+            restored[0].end shouldBe 11
+            restored[0].displayText shouldBe "@user"
+            restored[0].suggestionItem shouldBe "suggestion-@user"
+            restored[0].textAppearance shouldBe "appearance-@user"
+        }
+
+        test("restoreMentionsInRange skips non-restorable consumed mentions") {
+            val provider = TestMentionSpanProvider()
+            controller.setMentionSpanProvider(provider)
+
+            controller.onTextChanged("hello world", 11, 11)
+            // ConsumedMentionSpan with null text — canRestore() returns false
+            controller.state.consumedMentionSpans[6] = ConsumedMentionSpan(
+                id = '@',
+                text = null,
+                suggestionItem = null,
+                textAppearance = null
+            )
+
+            controller.restoreMentionsInRange(0, 11)
+
+            // Non-restorable mention should NOT be restored to provider
+            provider.getMentionCount() shouldBe 0
+        }
+    }
+
+    // ==================== Markdown Shortcut Detection Tests ====================
+
+    context("Markdown shortcut detection") {
+
+        test("typing **text** converts to bold") {
+            typeText("**hello**")
+            controller.state.text shouldBe "hello"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.BOLD
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.BOLD
+            controller.state.selectionStart shouldBe 5
+            controller.state.pendingFormats shouldContain RichTextFormat.BOLD
+        }
+
+        test("typing _text_ converts to italic") {
+            typeText("_hello_")
+            controller.state.text shouldBe "hello"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.ITALIC
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.ITALIC
+            controller.state.selectionStart shouldBe 5
+            controller.state.pendingFormats shouldContain RichTextFormat.ITALIC
+        }
+
+        test("typing __text__ does NOT trigger italic") {
+            typeText("__hello__")
+            // Should remain as-is since __ is not a recognized pattern
+            controller.state.text shouldBe "__hello__"
+        }
+
+        test("typing ~~text~~ converts to strikethrough") {
+            typeText("~~hello~~")
+            controller.state.text shouldBe "hello"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.STRIKETHROUGH
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.STRIKETHROUGH
+            controller.state.selectionStart shouldBe 5
+            controller.state.pendingFormats shouldContain RichTextFormat.STRIKETHROUGH
+        }
+
+        test("typing backtick text backtick converts to inline code") {
+            typeText("`hello`")
+            controller.state.text shouldBe "hello"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.INLINE_CODE
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.INLINE_CODE
+            controller.state.selectionStart shouldBe 5
+            controller.state.pendingFormats shouldContain RichTextFormat.INLINE_CODE
+        }
+
+        test("typing triple backtick does NOT trigger inline code") {
+            typeText("```")
+            // Should remain as-is — triple backtick is for code blocks, not inline code
+            controller.state.text shouldBe "```"
+        }
+
+        test("typing <u>text</u> converts to underline") {
+            typeText("<u>hello</u>")
+            controller.state.text shouldBe "hello"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.UNDERLINE
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.UNDERLINE
+            controller.state.selectionStart shouldBe 5
+            controller.state.pendingFormats shouldContain RichTextFormat.UNDERLINE
+        }
+
+        test("typing [text](url) converts to link") {
+            typeText("[click](https://example.com)")
+            controller.state.text shouldBe "click"
+            controller.state.spanManager.getFormatsAt(0) shouldContain RichTextFormat.LINK
+            controller.state.spanManager.getFormatsAt(4) shouldContain RichTextFormat.LINK
+            controller.state.spanManager.getLinkUrlAt(0) shouldBe "https://example.com"
+            controller.state.selectionStart shouldBe 5
+        }
+
+        test("partial bold marker does not trigger conversion") {
+            typeText("*hello")
+            controller.state.text shouldBe "*hello"
+        }
+
+        test("partial strikethrough marker does not trigger conversion") {
+            typeText("~hello")
+            controller.state.text shouldBe "~hello"
+        }
+
+        test("empty content between markers does not trigger conversion") {
+            typeText("****")
+            // ** followed by ** with no content — should not convert
+            controller.state.text shouldBe "****"
+        }
+
+        test("bold shortcut with text before it") {
+            typeText("prefix **bold**")
+            controller.state.text shouldBe "prefix bold"
+            controller.state.spanManager.getFormatsAt(7) shouldContain RichTextFormat.BOLD
+            controller.state.spanManager.getFormatsAt(10) shouldContain RichTextFormat.BOLD
+            // Text before should not be bold
+            controller.state.spanManager.getFormatsAt(0).contains(RichTextFormat.BOLD).shouldBeFalse()
+        }
+
+        test("triple backtick detection in controller") {
+            typeText("```")
+            val detected = controller.detectTripleBacktickShortcut()
+            detected.shouldBeTrue()
+            controller.state.text shouldBe ""
+        }
+
+        test("activeFormats includes format after shortcut conversion") {
+            typeText("**hello**")
+            // After conversion, pendingFormats has BOLD, so activeFormats should include it
+            controller.state.activeFormats shouldContain RichTextFormat.BOLD
         }
     }
 })

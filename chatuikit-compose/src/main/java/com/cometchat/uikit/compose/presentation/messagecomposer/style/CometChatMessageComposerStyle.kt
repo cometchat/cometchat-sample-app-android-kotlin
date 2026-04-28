@@ -50,6 +50,9 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
  * @param editPreviewStrokeWidth Border/stroke width for the edit preview panel
  * @param editPreviewCloseIcon Icon for the edit preview close button
  * @param editPreviewCloseIconTint Tint color for the edit preview close icon
+ * @param richTextToolbarActiveIconBackgroundColor Background color behind active toolbar icons (rounded rect)
+ * @param stickerActiveIcon Filled icon for the sticker button when the sticker keyboard is open
+ * @param stickerActiveIconTint Tint color for the active sticker icon
  */
 @Immutable
 data class CometChatMessageComposerStyle(
@@ -137,6 +140,11 @@ data class CometChatMessageComposerStyle(
     val richTextToolbarBackgroundColor: Color,
     val richTextToolbarIconTint: Color,
     val richTextToolbarActiveIconTint: Color,
+    val richTextToolbarActiveIconBackgroundColor: Color,
+
+    // Sticker active state styling
+    val stickerActiveIcon: Painter?,
+    val stickerActiveIconTint: Color,
 
     // Rich text toggle button styling (DEPRECATED - toggle button removed, toolbar visibility is automatic)
     // These properties are kept for backward compatibility but are no longer used
@@ -171,7 +179,7 @@ data class CometChatMessageComposerStyle(
 
             // Compose box styling - 4dp border radius
             composeBoxBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor1,
-            composeBoxStrokeColor: Color = CometChatTheme.colorScheme.strokeColorLight,
+            composeBoxStrokeColor: Color = CometChatTheme.colorScheme.strokeColorDefault,
             composeBoxStrokeWidth: Dp = 1.dp,
             composeBoxCornerRadius: Dp = 8.dp,
 
@@ -199,7 +207,7 @@ data class CometChatMessageComposerStyle(
             sendButtonInactiveIcon: Painter? = painterResource(R.drawable.cometchat_ic_send_inactive),
             sendButtonActiveBackgroundColor: Color = CometChatTheme.colorScheme.primary,
             sendButtonInactiveBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor4,
-            sendButtonIconTint: Color = CometChatTheme.colorScheme.colorWhite,
+            sendButtonIconTint: Color = CometChatTheme.colorScheme.primaryButtonIconTint,
             sendButtonStopIcon: Painter? = painterResource(R.drawable.cometchat_ic_stop),
 
             // Edit preview styling
@@ -240,13 +248,18 @@ data class CometChatMessageComposerStyle(
             // Input text styling
             inputTextColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             inputTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
-            inputPlaceholderColor: Color = CometChatTheme.colorScheme.textColorTertiary,
+            inputPlaceholderColor: Color = CometChatTheme.colorScheme.textColorSecondary,
             inputPlaceholderStyle: TextStyle = CometChatTheme.typography.bodyRegular,
 
             // Rich text toolbar styling (toolbar is inside compose box, visibility is automatic)
             richTextToolbarBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor2,
             richTextToolbarIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
-            richTextToolbarActiveIconTint: Color = CometChatTheme.colorScheme.primary,
+            richTextToolbarActiveIconTint: Color = CometChatTheme.colorScheme.textColorPrimary,
+            richTextToolbarActiveIconBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor4,
+
+            // Sticker active state styling
+            stickerActiveIcon: Painter? = painterResource(R.drawable.cometchat_ic_filled_sticker),
+            stickerActiveIconTint: Color = CometChatTheme.colorScheme.primary,
 
             // Rich text toggle button styling (DEPRECATED - toggle button removed, toolbar visibility is automatic)
             // These properties are kept for backward compatibility but are no longer used
@@ -257,12 +270,12 @@ data class CometChatMessageComposerStyle(
             // Link edit dialog styling
             linkDialogBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor1,
             linkDialogTitleTextColor: Color = CometChatTheme.colorScheme.textColorPrimary,
-            linkDialogTitleTextStyle: TextStyle = CometChatTheme.typography.heading3Bold,
+            linkDialogTitleTextStyle: TextStyle = CometChatTheme.typography.heading2Bold,
             linkDialogInputBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor2,
             linkDialogInputTextColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             linkDialogInputTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             linkDialogButtonTextColor: Color = CometChatTheme.colorScheme.primary,
-            linkDialogButtonTextStyle: TextStyle = CometChatTheme.typography.bodyMedium
+            linkDialogButtonTextStyle: TextStyle = CometChatTheme.typography.buttonMedium
         ): CometChatMessageComposerStyle = CometChatMessageComposerStyle(
             backgroundColor = backgroundColor,
             strokeColor = strokeColor,
@@ -323,6 +336,9 @@ data class CometChatMessageComposerStyle(
             richTextToolbarBackgroundColor = richTextToolbarBackgroundColor,
             richTextToolbarIconTint = richTextToolbarIconTint,
             richTextToolbarActiveIconTint = richTextToolbarActiveIconTint,
+            richTextToolbarActiveIconBackgroundColor = richTextToolbarActiveIconBackgroundColor,
+            stickerActiveIcon = stickerActiveIcon,
+            stickerActiveIconTint = stickerActiveIconTint,
             richTextToggleIcon = richTextToggleIcon,
             richTextToggleIconTint = richTextToggleIconTint,
             richTextToggleIconActiveTint = richTextToggleIconActiveTint,

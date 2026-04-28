@@ -13,11 +13,9 @@ import androidx.annotation.Dimension
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.cometchat.chat.constants.CometChatConstants
-import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Conversation
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
-import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.databinding.CometchatConversationListItemSubtitleBinding
@@ -34,6 +32,7 @@ import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometCha
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.DatePattern
 import com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceipt
 import com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceiptStyle
+import com.cometchat.uikit.kotlin.presentation.shared.receipts.MessageReceiptUtils
 import com.cometchat.uikit.kotlin.presentation.shared.statusindicator.CometChatStatusIndicatorStyle
 import com.cometchat.uikit.kotlin.presentation.shared.statusindicator.StatusIndicator
 import com.cometchat.uikit.kotlin.presentation.shared.typingindicator.CometChatTypingIndicatorStyle
@@ -938,9 +937,8 @@ class CometChatConversationListItem @JvmOverloads constructor(
         conversation?.let { conv ->
             val lastMessage = conv.lastMessage
             if (lastMessage != null) {
-                // Show receipt for outgoing messages
-                val isOutgoing = isOutgoingMessage(lastMessage)
-                if (!hideReceipts && isOutgoing) {
+                // Show receipt for outgoing messages (matching Java hideReceipt logic)
+                if (!hideReceipts && !MessageReceiptUtils.shouldHideReceipt(lastMessage)) {
                     receiptView?.visibility = VISIBLE
                     receiptView?.setReceipt(lastMessage)
                 } else {
@@ -1065,7 +1063,4 @@ class CometChatConversationListItem @JvmOverloads constructor(
         }
     }
 
-    private fun isOutgoingMessage(message: BaseMessage): Boolean {
-        return message.sender?.uid == CometChatUIKit.getLoggedInUser()?.uid
-    }
 }

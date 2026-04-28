@@ -7,8 +7,8 @@ description: "Add one-on-one and group audio/video calling to your Android app u
 
 | Field | Value |
 | --- | --- |
-| Kotlin (XML Views) | `com.cometchat:chat-uikit-kotlin` + `com.cometchat:calls-sdk-android` |
-| Jetpack Compose | `com.cometchat:chat-uikit-compose` + `com.cometchat:calls-sdk-android` |
+| Kotlin (XML Views) | `com.cometchat:chatuikit-kotlin-android` + `com.cometchat:calls-sdk-android` |
+| Jetpack Compose | `com.cometchat:chatuikit-compose-android` + `com.cometchat:calls-sdk-android` |
 | Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` — Calls SDK must also be installed |
 | Call features | Incoming Call, Outgoing Call, Call Logs, Call Buttons, Ongoing Call |
 | Key components | `CometChatCallButtons`, `CometChatIncomingCall`, `CometChatOutgoingCall`, `CometChatCallLogs`, `CometChatOngoingCall` |
@@ -33,7 +33,7 @@ Add the following dependency to your `build.gradle.kts` file:
 <Tab title="Kotlin (XML Views)">
 ```kotlin build.gradle.kts
 dependencies {
-    implementation("com.cometchat:chat-uikit-kotlin:5.2.9")
+    implementation("com.cometchat:chatuikit-kotlin-android:6.0.0-beta2")
     implementation("com.cometchat:calls-sdk-android:4.3.3")
 }
 ```
@@ -42,7 +42,7 @@ dependencies {
 <Tab title="Jetpack Compose">
 ```kotlin build.gradle.kts
 dependencies {
-    implementation("com.cometchat:chat-uikit-compose:5.2.9")
+    implementation("com.cometchat:chatuikit-compose-android:6.0.0-beta2")
     implementation("com.cometchat:calls-sdk-android:4.3.3")
 }
 ```

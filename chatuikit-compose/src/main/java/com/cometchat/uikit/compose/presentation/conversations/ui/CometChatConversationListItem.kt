@@ -34,6 +34,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,15 +53,18 @@ import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.Comet
 import com.cometchat.uikit.compose.presentation.shared.baseelements.badgecount.CometChatBadgeCount
 import com.cometchat.uikit.compose.presentation.shared.baseelements.date.CometChatDate
 import com.cometchat.uikit.compose.presentation.shared.baseelements.date.Pattern
-import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.formatters.FormatterUtils
 import com.cometchat.uikit.compose.presentation.shared.interfaces.DateTimeFormatterCallback
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildPreviewAnnotatedString
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.FormattedPreviewText
 import com.cometchat.uikit.compose.presentation.shared.receipts.CometChatReceipts
+import com.cometchat.uikit.compose.presentation.shared.receipts.MessageReceiptUtils
 import com.cometchat.uikit.compose.presentation.shared.receipts.Receipt
 import com.cometchat.uikit.compose.presentation.shared.statusindicator.CometChatStatusIndicator
 import com.cometchat.uikit.compose.presentation.shared.statusindicator.StatusIndicator
+import com.cometchat.uikit.core.formatter.MarkdownRenderer
 
 /**
  * Default leading view composable that displays the avatar with status indicator.
@@ -233,9 +238,9 @@ internal fun DefaultSubtitleView(
         ) {
             // Read receipt (if not hidden and message exists)
             val lastMessage = conversation.lastMessage
-            if (!hideReceipts && lastMessage != null && isOutgoingMessage(lastMessage, conversation)) {
+            if (!hideReceipts && lastMessage != null && !MessageReceiptUtils.shouldHideReceipt(lastMessage)) {
                 // Convert message to Receipt enum
-                val receipt = getReceiptFromMessage(lastMessage)
+                val receipt = MessageReceiptUtils.getMessageReceipt(lastMessage)
                 CometChatReceipts(
                     receipt = receipt,
                     style = style.receiptStyle
@@ -273,27 +278,42 @@ internal fun DefaultSubtitleView(
             
             // Last message text with formatting
             // Only apply text formatters if message is not deleted and has valid text
+            // Step 1: Run formatter pipeline (resolves mentions)
+            // Step 2: Parse markdown and build formatted preview
             val messageText: AnnotatedString = if (lastMessage is TextMessage && 
                 lastMessage.deletedAt == 0L && 
-                !lastMessage.text.isNullOrEmpty() &&
-                textFormatters != null && 
-                textFormatters.isNotEmpty()
+                !lastMessage.text.isNullOrEmpty()
             ) {
-                FormatterUtils.getFormattedText(
-                    context = context,
-                    baseMessage = lastMessage,
-                    formattingType = UIKitConstants.FormattingType.CONVERSATIONS,
-                    alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
-                    text = lastMessage.text,
-                    formatters = textFormatters
+                // Step 1: Run formatter pipeline if available
+                val formattedText = if (textFormatters != null && textFormatters.isNotEmpty()) {
+                    FormatterUtils.getFormattedText(
+                        context = context,
+                        baseMessage = lastMessage,
+                        formattingType = UIKitConstants.FormattingType.CONVERSATIONS,
+                        alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+                        text = lastMessage.text,
+                        formatters = textFormatters
+                    ).text
+                } else {
+                    lastMessage.text
+                }
+                // Step 2: Parse markdown and build formatted preview
+                val segments = MarkdownRenderer.parse(formattedText)
+                buildPreviewAnnotatedString(
+                    segments = segments,
+                    textColor = style.subtitleTextColor,
+                    linkColor = style.subtitleTextColor
                 )
             } else {
-                AnnotatedString(ConversationUtils.getLastMessageText(context, conversation.lastMessage))
+                val plainText = ConversationUtils.getLastMessageText(context, conversation.lastMessage)
+                buildAnnotatedString {
+                    append(plainText)
+                    addStyle(SpanStyle(color = style.subtitleTextColor), 0, plainText.length)
+                }
             }
             
-            Text(
+            FormattedPreviewText(
                 text = messageText,
-                color = style.subtitleTextColor,
                 style = style.subtitleTextStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -301,44 +321,6 @@ internal fun DefaultSubtitleView(
         }
     }
 }
-
-/**
- * Converts a BaseMessage to a Receipt enum value based on its delivery status.
- *
- * @param message The message to convert
- * @return The appropriate Receipt enum value
- */
-private fun getReceiptFromMessage(message: BaseMessage): Receipt {
-    return when {
-        message.readAt > 0 -> Receipt.READ
-        message.deliveredAt > 0 -> Receipt.DELIVERED
-        message.sentAt > 0 -> Receipt.SENT
-        else -> Receipt.IN_PROGRESS
-    }
-}
-
-/**
- * Checks if the message is an outgoing message (sent by the logged-in user).
- * Returns false in preview mode when CometChat SDK is not initialized.
- */
-private fun isOutgoingMessage(
-    message: BaseMessage,
-    conversation: Conversation
-): Boolean {
-    return try {
-        // Get the logged-in user
-        val loggedInUser = CometChatUIKit.getLoggedInUser()
-        
-        // Check if the message sender is the logged-in user
-        message.sender?.uid != null && 
-               loggedInUser?.uid != null &&
-               message.sender?.uid == loggedInUser.uid
-    } catch (e: Exception) {
-        // Return false in preview mode when SDK is not initialized
-        false
-    }
-}
-
 
 /**
  * Default trailing view composable that displays the timestamp and unread badge.

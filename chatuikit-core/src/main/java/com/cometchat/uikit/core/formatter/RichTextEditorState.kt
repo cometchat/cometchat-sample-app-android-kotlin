@@ -37,6 +37,16 @@ class RichTextEditorState {
      */
     val disabledFormats: MutableSet<RichTextFormat> = mutableSetOf()
 
+    /**
+     * Consumed mention spans — mentions that were converted to plain text when
+     * code formatting (INLINE_CODE or CODE_BLOCK) was applied. Each entry stores
+     * the original mention data so it can be restored when code formatting is removed.
+     *
+     * Key: start position in the plain text.
+     * Value: the [ConsumedMentionSpan] holding original mention data.
+     */
+    val consumedMentionSpans: MutableMap<Int, ConsumedMentionSpan> = mutableMapOf()
+
     /** Read-only snapshot of current spans. */
     val spans: List<RichTextSpan> get() = _spanManager.spans
 
@@ -109,6 +119,7 @@ class RichTextEditorState {
         selectionEnd = 0
         pendingFormats.clear()
         disabledFormats.clear()
+        consumedMentionSpans.clear()
         _spanManager.clear()
     }
 }

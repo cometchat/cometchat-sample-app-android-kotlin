@@ -7,9 +7,9 @@ description: "Overview of CometChat's core chat features including instant messa
 
 | Field | Value |
 | --- | --- |
-| Packages | `com.cometchat:chat-uikit-kotlin` (Kotlin XML Views), `com.cometchat:chat-uikit-compose` (Jetpack Compose) |
+| Packages | `com.cometchat:chatuikit-kotlin-android` (Kotlin XML Views), `com.cometchat:chatuikit-compose-android` (Jetpack Compose) |
 | Required setup | `CometChatUIKit.init()` then `CometChatUIKit.login()` — must complete before rendering any component |
-| Core features | Instant Messaging, Media Sharing, Read Receipts, Mark as Unread, Typing Indicator, User Presence, Reactions, Mentions, Quoted Reply, Threaded Conversations, Moderation, Report Message, Group Chat |
+| Core features | Instant Messaging, Media Sharing, Read Receipts, Mark as Unread, Typing Indicator, User Presence, Reactions, Mentions, Rich Text Formatting, Quoted Reply, Search, Threaded Conversations, Moderation, Report Message, Group Chat |
 | Key components | `CometChatConversations`, `CometChatMessageList`, `CometChatMessageComposer`, `CometChatMessageHeader`, `CometChatUsers`, `CometChatGroups`, `CometChatGroupMembers`, `CometChatMessageInformation`, `CometChatThreadHeader` |
 | Theming | See [Theming](/ui-kit/android/v6/theme-introduction) |
 
@@ -124,6 +124,19 @@ Address specific users in a conversation by typing `@` to trigger mention sugges
 | [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Triggers mention suggestions on `@` and inserts formatted mentions. |
 | [CometChatMessageList](/ui-kit/android/v6/message-list) | Renders mentions with distinct styling in the message flow. |
 
+
+## Rich Text Formatting
+
+Rich Text Formatting allows users to style their messages with bold, italic, strikethrough, code, code blocks, blockquotes, ordered/unordered lists, and links. This brings richer expression to conversations and helps users emphasize key points.
+
+<Frame>
+  <img src="/images/android-rich-text-formatting.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatMessageComposer](/ui-kit/android/v6/message-composer) | Provides a built-in rich text editor with formatting toolbar and text selection menu items for bold, italic, strikethrough, code, links, lists, blockquotes, and code blocks. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Renders formatted messages with the appropriate styling automatically applied, ensuring that rich text formatting is displayed exactly as intended by the sender. |
 ## Threaded Conversations
 
 Respond directly to a specific message, keeping conversations organized.
@@ -195,6 +208,21 @@ Learn more about flagged messages in the [Flagged Messages](/moderation/flagged-
 | Component | Role |
 | --- | --- |
 | [CometChatMessageList](/ui-kit/android/v6/message-list) | Provides the "Report Message" option in message actions. |
+
+## Conversation and Advanced Search
+
+Conversation and Advanced Search enables users to quickly find conversations, messages, and media across chats in real time. It supports filters, scopes, and custom actions, allowing users to locate content efficiently while keeping the chat experience smooth and intuitive.
+
+<Frame>
+  <img src="/images/android-search-overview.png" />
+</Frame>
+
+| Component | Role |
+| --- | --- |
+| [CometChatSearch](/ui-kit/android/v6/search) | Allows users to search across conversations and messages in real time. Users can click on a result to open the conversation or jump directly to a specific message. |
+| [CometChatMessageHeader](/ui-kit/android/v6/message-header) | Shows the search button in the chat header, allowing users to search within a conversation. |
+| [CometChatMessageList](/ui-kit/android/v6/message-list) | Shows the selected message when clicked from search results and highlights it in the message list. |
+| [CometChatConversations](/ui-kit/android/v6/conversations) | Displays the search input. |
 
 ---
 

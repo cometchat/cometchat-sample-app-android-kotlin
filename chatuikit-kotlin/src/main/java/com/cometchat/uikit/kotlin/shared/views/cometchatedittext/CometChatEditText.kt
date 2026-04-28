@@ -37,6 +37,12 @@ class CometChatEditText @JvmOverloads constructor(
     var onEditTextMediaListener: OnEditTextMediaListener? = null
 
     /**
+     * Callback invoked when the cursor selection changes.
+     * Receives the new selStart and selEnd positions.
+     */
+    private var onSelectionChangedListener: ((Int, Int) -> Unit)? = null
+
+    /**
      * Flag to prevent recursive selection changes.
      */
     private var isAdjustingSelection = false
@@ -132,6 +138,7 @@ class CometChatEditText @JvmOverloads constructor(
         }
 
         super.onSelectionChanged(selStart, selEnd)
+        onSelectionChangedListener?.invoke(selStart, selEnd)
     }
 
     /**
@@ -197,6 +204,15 @@ class CometChatEditText @JvmOverloads constructor(
      * @return The current CometChatTextWatcher, or null if not set
      */
     fun getTextWatcher(): CometChatTextWatcher? = _textWatcher
+
+    /**
+     * Sets a listener to be notified when the cursor selection changes.
+     *
+     * @param listener Callback receiving (selStart, selEnd), or null to remove
+     */
+    fun setOnSelectionChangedListener(listener: ((Int, Int) -> Unit)?) {
+        onSelectionChangedListener = listener
+    }
 
     /**
      * Interface for receiving media content pasted into the EditText.

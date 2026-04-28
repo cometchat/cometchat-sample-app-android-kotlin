@@ -15,6 +15,7 @@ import androidx.annotation.StyleRes
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.models.Action
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.models.CustomMessage
@@ -34,6 +35,10 @@ import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.google.android.material.card.MaterialCardView
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.actionbubble.CometChatActionBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.actionbubble.CometChatActionBubbleStyle
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubble
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
+import com.cometchat.uikit.core.CometChatAIStreamService
+import com.cometchat.uikit.core.domain.model.StreamMessage
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubbleStyle
 import com.cometchat.uikit.kotlin.calls.CometChatCallActivity
@@ -131,8 +136,17 @@ internal object InternalContentRenderer {
                 CometChatCollaborativeBubble(context)
             BubbleFactory.getKey(CometChatConstants.CATEGORY_CUSTOM, EXTENSION_WHITEBOARD) ->
                 CometChatCollaborativeBubble(context)
+            // AI Assistant message (final message after streaming completes)
+            BubbleFactory.getKey("agentic", "assistant") ->
+                CometChatAIAssistantBubble(context)
+            // Stream message (AI assistant streaming response)
+            BubbleFactory.getKey(UIKitConstants.MessageCategory.STREAM, UIKitConstants.MessageType.STREAM) ->
+                CometChatAIAssistantBubble(context)
             // Unknown
-            else -> null
+            else -> {
+                android.util.Log.w("AgentChatDebug", "InternalContentRenderer: unsupported factoryKey='$factoryKey'")
+                null
+            }
         }
     }
 
@@ -181,13 +195,14 @@ internal object InternalContentRenderer {
      * Status info view (timestamp + receipt) should be hidden for:
      * - Messages that use minimal slots (action, call)
      * - Meeting messages (they have timestamp in the bubble itself)
+     * - AI assistant messages (they have their own footer with copy button)
      *
      * @param message The message to check
      * @param useMinimalSlots Whether the message uses minimal slots
      * @return true if status info should be hidden, false otherwise
      */
     fun shouldHideStatusInfo(message: BaseMessage, useMinimalSlots: Boolean): Boolean {
-        return useMinimalSlots || isMeetingMessage(message)
+        return useMinimalSlots || isMeetingMessage(message) || message is AIAssistantMessage
     }
 
     // ================================================================
@@ -237,6 +252,7 @@ internal object InternalContentRenderer {
             return true
         }
 
+        Log.d(TAG, "bindContentView: category='${message.category}' type='${message.type}'")
         return when (message.category) {
             CometChatConstants.CATEGORY_MESSAGE -> bindStandardMessage(view, message, alignment, style, bubbleStyles, textFormatters)
             CometChatConstants.CATEGORY_ACTION -> bindActionMessage(view, message, bubbleStyles)
@@ -249,8 +265,10 @@ internal object InternalContentRenderer {
                     bindCustomMessage(view, message, alignment, style, bubbleStyles)
                 }
             }
+            "agentic" -> bindAIAssistantMessage(view, message, bubbleStyles)
+            UIKitConstants.MessageCategory.STREAM -> bindAIAssistantMessage(view, message, bubbleStyles)
             else -> {
-                Log.w(TAG, "bindContentView: unrecognized category '${message.category}'")
+                Log.w(TAG, "bindContentView: unrecognized category '${message.category}' type='${message.type}'")
                 false
             }
         }
@@ -348,6 +366,42 @@ internal object InternalContentRenderer {
                 return false
             }
         }
+        return true
+    }
+
+    /**
+     * Binds AI assistant messages — both streaming ([StreamMessage]) and
+     * static ([AIAssistantMessage]) — using [CometChatAIAssistantBubble].
+     *
+     * Routes to streaming or static mode based on the message type.
+     * Both modes share the same [CometChatAIAssistantBubbleStyle].
+     */
+    private fun bindAIAssistantMessage(
+        view: View,
+        message: BaseMessage,
+        bubbleStyles: BubbleStyles
+    ): Boolean {
+        val bubble = view as? CometChatAIAssistantBubble ?: return false
+
+        // Apply style — aiAssistantBubbleStyle controls both modes
+        val style = bubbleStyles.aiAssistantBubbleStyle
+            ?: CometChatAIAssistantBubbleStyle.incoming(view.context)
+        bubble.setStyle(style)
+
+        // Route based on message type
+        when (message) {
+            is StreamMessage -> {
+                // Streaming mode: set service and stream message
+                bubble.setAIStreamService(CometChatAIStreamService.getInstance())
+                bubble.setStreamMessage(message)
+            }
+            is AIAssistantMessage -> {
+                // Static mode: render final markdown content
+                bubble.setMessage(message)
+            }
+            else -> return false
+        }
+
         return true
     }
 
@@ -558,15 +612,17 @@ internal object InternalContentRenderer {
     }
 
     /**
-     * Creates the bottom view containing a moderation indicator.
+     * Creates the bottom view containing a moderation indicator and an AI copy button.
      *
-     * Inflates `cometchat_moderation_message.xml`.
+     * Inflates `cometchat_bottom_view.xml` which includes both the moderation
+     * indicator and the AI assistant copy button. Visibility of each section
+     * is controlled in [bindBottomView].
      *
      * @param context The Android context
-     * @return The inflated bottom/moderation view
+     * @return The inflated bottom view
      */
     fun createBottomView(context: Context): View {
-        return View.inflate(context, R.layout.cometchat_moderation_message, null)
+        return View.inflate(context, R.layout.cometchat_bottom_view, null)
     }
 
     /**
@@ -866,9 +922,10 @@ internal object InternalContentRenderer {
     }
 
     /**
-     * Binds the moderation indicator to the bottom view.
+     * Binds the moderation indicator and AI copy button to the bottom view.
      *
      * Shows the moderation indicator only for disapproved [TextMessage] or [MediaMessage].
+     * Shows the copy button only for [AIAssistantMessage] with non-empty text.
      *
      * @param view The bottom view created by [createBottomView]
      * @param message The message to check moderation status for
@@ -882,27 +939,24 @@ internal object InternalContentRenderer {
         val parent = view.parent as? View
         val params = parent?.layoutParams as? LinearLayout.LayoutParams
 
+        val moderationContainer = view.findViewById<LinearLayout>(R.id.moderation_container)
+        val aiCopyContainer = view.findViewById<LinearLayout>(R.id.ai_copy_container)
+        val aiCopyButton = view.findViewById<ImageView>(R.id.ai_copy_button)
+
+        // Reset AI copy button visibility
+        aiCopyContainer?.visibility = View.GONE
+
         when (message) {
-            is TextMessage -> {
-                if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
-                    val length = message.text?.length ?: 0
-                    if (params != null) {
-                        if (length < 15) {
-                            params.width = Utils.convertDpToPx(view.context, 200)
-                        } else {
-                            params.width = MATCH_PARENT
-                        }
+            is AIAssistantMessage -> {
+                moderationContainer?.visibility = View.GONE
+                val text = message.text
+                if (!text.isNullOrEmpty()) {
+                    aiCopyContainer?.visibility = View.VISIBLE
+                    aiCopyButton?.setOnClickListener {
+                        val clipboardManager = view.context.getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                        val clipData = android.content.ClipData.newPlainText("AI Response", text)
+                        clipboardManager?.setPrimaryClip(clipData)
                     }
-                    view.visibility = View.VISIBLE
-                } else {
-                    if (params != null) {
-                        params.width = WRAP_CONTENT
-                    }
-                    view.visibility = View.GONE
-                }
-            }
-            is MediaMessage -> {
-                if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
                     if (params != null) {
                         params.width = MATCH_PARENT
                     }
@@ -914,10 +968,46 @@ internal object InternalContentRenderer {
                     view.visibility = View.GONE
                 }
             }
+            is TextMessage -> {
+                if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
+                    val length = message.text?.length ?: 0
+                    if (params != null) {
+                        if (length < 15) {
+                            params.width = Utils.convertDpToPx(view.context, 200)
+                        } else {
+                            params.width = MATCH_PARENT
+                        }
+                    }
+                    moderationContainer?.visibility = View.VISIBLE
+                    view.visibility = View.VISIBLE
+                } else {
+                    if (params != null) {
+                        params.width = WRAP_CONTENT
+                    }
+                    moderationContainer?.visibility = View.GONE
+                    view.visibility = View.GONE
+                }
+            }
+            is MediaMessage -> {
+                if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
+                    if (params != null) {
+                        params.width = MATCH_PARENT
+                    }
+                    moderationContainer?.visibility = View.VISIBLE
+                    view.visibility = View.VISIBLE
+                } else {
+                    if (params != null) {
+                        params.width = WRAP_CONTENT
+                    }
+                    moderationContainer?.visibility = View.GONE
+                    view.visibility = View.GONE
+                }
+            }
             else -> {
                 if (params != null) {
                     params.width = WRAP_CONTENT
                 }
+                moderationContainer?.visibility = View.GONE
                 view.visibility = View.GONE
             }
         }

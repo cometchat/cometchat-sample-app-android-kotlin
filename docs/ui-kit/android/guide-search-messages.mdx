@@ -1,0 +1,235 @@
+---
+title: "Search Messages"
+sidebarTitle: "Search Messages"
+description: "Add full-text message search across conversations with result routing in CometChat Android UI Kit."
+---
+
+<Accordion title="Quick Reference">
+
+| Field | Value |
+| --- | --- |
+| Packages | `com.cometchat:chatuikit-kotlin-android` · `com.cometchat:chatuikit-compose-android` |
+| Key components | `CometChatSearch`, `CometChatMessageList`, `CometChatMessageComposer`, `CometChatMessageHeader` |
+| Purpose | Full-text message search across conversations with result routing and navigation |
+| Sample app | [GitHub](https://github.com/cometchat/cometchat-uikit-android/tree/v6/sample-app-kotlin) |
+| Related | [Search Component](/ui-kit/android/v6/search), [All Guides](/ui-kit/android/v6/guide-overview) |
+
+</Accordion>
+
+Search Messages lets users locate specific messages across conversations and groups using keyword search, then navigate directly to the result.
+
+Before starting, complete the [Getting Started](/ui-kit/android/v6/getting-started) guide.
+
+---
+
+## Components
+
+| Component / Class | Role |
+|:---|:---|
+| `CometChatSearch` | Main search interface with filter chips and result lists |
+| `CometChatMessageList` | Displays messages in the selected conversation |
+| `CometChatMessageComposer` | Message input for the selected conversation |
+| `CometChatMessageHeader` | Header bar showing conversation context |
+
+---
+
+## Integration Steps
+
+### 1. Add CometChatSearch to your layout
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```xml activity_search.xml lines
+<com.cometchat.uikit.kotlin.presentation.search.ui.CometChatSearch
+    android:id="@+id/cometchat_search"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin SearchScreen.kt lines
+import com.cometchat.uikit.compose.presentation.search.ui.CometChatSearch
+
+@Composable
+fun SearchScreen(navController: NavController) {
+    CometChatSearch(
+        modifier = Modifier.fillMaxSize(),
+        onConversationClick = { conversation ->
+            navController.navigate("messages/${Gson().toJson(conversation)}")
+        },
+        onMessageClick = { message ->
+            if (message.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+                navController.navigate("messages/user/${(message.receiver as User).uid}/${message.id}")
+            } else {
+                navController.navigate("messages/group/${(message.receiver as Group).guid}/${message.id}")
+            }
+        }
+    )
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+### 2. Handle conversation result clicks
+
+When a user taps a conversation result, navigate to the message view for that conversation.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin SearchActivity.kt lines
+val search: CometChatSearch = findViewById(R.id.cometchat_search)
+
+search.setOnConversationClicked { view, position, conversation ->
+    val intent = Intent(this, ChatActivity::class.java)
+    intent.putExtra("conversation", conversation)
+    startActivity(intent)
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin SearchScreen.kt lines
+// Handled inline via onConversationClick lambda in the CometChatSearch composable above
+```
+</Tab>
+</Tabs>
+
+---
+
+### 3. Handle message result clicks
+
+When a user taps a message result, navigate to the conversation and scroll to that message.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin SearchActivity.kt lines
+search.setOnMessageClicked { view, position, message ->
+    val intent = Intent(this, ChatActivity::class.java)
+    if (message.receiverType == CometChatConstants.RECEIVER_TYPE_USER) {
+        intent.putExtra("uid", (message.receiver as User).uid)
+    } else {
+        intent.putExtra("guid", (message.receiver as Group).guid)
+    }
+    intent.putExtra("messageId", message.id)
+    startActivity(intent)
+}
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin SearchScreen.kt lines
+// Handled inline via onMessageClick lambda in the CometChatSearch composable above
+```
+</Tab>
+</Tabs>
+
+---
+
+### 4. Scope search to a specific conversation (optional)
+
+Restrict search results to a single user or group conversation.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+// Scope to a specific user conversation
+search.setUid("alice-uid")
+
+// Or scope to a specific group conversation
+search.setGuid("group-guid")
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+// Scope to a specific user conversation
+CometChatSearch(
+    uid = "alice-uid",
+    modifier = Modifier.fillMaxSize(),
+    onConversationClick = { /* handle click */ },
+    onMessageClick = { /* handle click */ }
+)
+
+// Or scope to a specific group conversation
+CometChatSearch(
+    guid = "group-guid",
+    modifier = Modifier.fillMaxSize(),
+    onConversationClick = { /* handle click */ },
+    onMessageClick = { /* handle click */ }
+)
+```
+</Tab>
+</Tabs>
+
+---
+
+### 5. Configure search filters (optional)
+
+Control which filter chips appear.
+
+<Tabs>
+<Tab title="Kotlin (XML Views)">
+```kotlin lines
+search.setSearchFilters(
+    listOf(
+        UIKitConstants.SearchFilter.MESSAGES,
+        UIKitConstants.SearchFilter.CONVERSATIONS
+    )
+)
+search.setInitialSearchFilter(UIKitConstants.SearchFilter.MESSAGES)
+```
+</Tab>
+
+<Tab title="Jetpack Compose">
+```kotlin lines
+import com.cometchat.uikit.core.constants.SearchFilter
+
+CometChatSearch(
+    searchFilters = listOf(
+        SearchFilter.UNREAD,
+        SearchFilter.GROUPS,
+        SearchFilter.PHOTOS,
+        SearchFilter.VIDEOS
+    ),
+    modifier = Modifier.fillMaxSize(),
+    onConversationClick = { /* handle click */ },
+    onMessageClick = { /* handle click */ }
+)
+```
+</Tab>
+</Tabs>
+
+---
+
+## Feature Matrix
+
+| Feature | Kotlin (XML Views) | Jetpack Compose |
+|:---|:---|:---|
+| Search interface | `CometChatSearch` XML element | `CometChatSearch()` composable |
+| Conversation results | `setOnConversationClicked` | `onConversationClick` lambda |
+| Message results | `setOnMessageClicked` | `onMessageClick` lambda |
+| Scoped search | `setUid()` / `setGuid()` | `uid` / `guid` parameters |
+| Filter chips | `setSearchFilters()` | `searchFilters` parameter |
+| Custom views | `setEmptyView()`, `setErrorView()` | `emptyView`, `errorView` composable slots |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Search" icon="magnifying-glass" href="/ui-kit/android/v6/search">
+    The search component reference
+  </Card>
+  <Card title="Message List" icon="messages" href="/ui-kit/android/v6/message-list">
+    Display messages in a conversation
+  </Card>
+  <Card title="All Guides" icon="book" href="/ui-kit/android/v6/guide-overview">
+    Browse all feature and formatter guides
+  </Card>
+  <Card title="Sample App" icon="github" href="https://github.com/cometchat/cometchat-uikit-android/tree/v6/sample-app-kotlin">
+    Full working sample application on GitHub
+  </Card>
+</CardGroup>

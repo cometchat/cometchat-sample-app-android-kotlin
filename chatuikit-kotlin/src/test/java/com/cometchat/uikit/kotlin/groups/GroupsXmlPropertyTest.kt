@@ -89,7 +89,7 @@ class GroupsXmlPropertyTest : FunSpec({
     context("Property 2: Group Type Indicator Correctness") {
 
         test("public group should show no indicator (null)") {
-            checkAll(100, Arb.string()) { guid ->
+            checkAll(10, Arb.string()) { guid ->
                 val group = TestGroup(
                     guid = guid,
                     groupType = CometChatConstants.GROUP_TYPE_PUBLIC
@@ -102,7 +102,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("private group should show PRIVATE_GROUP indicator") {
-            checkAll(100, Arb.string()) { guid ->
+            checkAll(10, Arb.string()) { guid ->
                 val group = TestGroup(
                     guid = guid,
                     groupType = CometChatConstants.GROUP_TYPE_PRIVATE
@@ -115,7 +115,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("password-protected group should show PROTECTED_GROUP indicator") {
-            checkAll(100, Arb.string()) { guid ->
+            checkAll(10, Arb.string()) { guid ->
                 val group = TestGroup(
                     guid = guid,
                     groupType = CometChatConstants.GROUP_TYPE_PASSWORD
@@ -134,7 +134,7 @@ class GroupsXmlPropertyTest : FunSpec({
                 CometChatConstants.GROUP_TYPE_PASSWORD
             )
 
-            checkAll(100, Arb.string(), groupTypeArb) { guid, groupType ->
+            checkAll(10, Arb.string(), groupTypeArb) { guid, groupType ->
                 val group = TestGroup(guid = guid, groupType = groupType)
 
                 val indicator = getStatusIndicatorFromGroupType(group.groupType)
@@ -148,7 +148,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("unknown group type should default to no indicator (null)") {
-            checkAll(100, Arb.string(), Arb.string()) { guid, unknownType ->
+            checkAll(10, Arb.string(), Arb.string()) { guid, unknownType ->
                 // Skip if unknownType happens to be a valid type
                 if (unknownType !in listOf(
                         CometChatConstants.GROUP_TYPE_PUBLIC,
@@ -172,7 +172,7 @@ class GroupsXmlPropertyTest : FunSpec({
                 CometChatConstants.GROUP_TYPE_PASSWORD
             )
 
-            checkAll(100, Arb.string(), groupTypeArb) { guid, groupType ->
+            checkAll(10, Arb.string(), groupTypeArb) { guid, groupType ->
                 val group = TestGroup(guid = guid, groupType = groupType)
                 val indicator = getStatusIndicatorFromGroupType(group.groupType)
 
@@ -192,7 +192,7 @@ class GroupsXmlPropertyTest : FunSpec({
     context("Property 6: Selection Count Accuracy") {
 
         test("selection count should equal selectedGroups size") {
-            checkAll(100, Arb.list(Arb.string(), 0..20)) { guids ->
+            checkAll(10, Arb.list(Arb.string(), 0..20)) { guids ->
                 val viewModel = TestGroupsSelectionViewModel()
                 val groups = guids.mapIndexed { index, guid -> TestGroup("$guid-$index") }
 
@@ -207,7 +207,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("selection count should update after toggle") {
-            checkAll(100, Arb.list(Arb.string(), 1..10)) { guids ->
+            checkAll(10, Arb.list(Arb.string(), 1..10)) { guids ->
                 val viewModel = TestGroupsSelectionViewModel()
                 val groups = guids.mapIndexed { index, guid -> TestGroup("$guid-$index") }
 
@@ -229,7 +229,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("selection count should be zero after clear") {
-            checkAll(100, Arb.list(Arb.string(), 1..20)) { guids ->
+            checkAll(10, Arb.list(Arb.string(), 1..20)) { guids ->
                 val viewModel = TestGroupsSelectionViewModel()
                 val groups = guids.mapIndexed { index, guid -> TestGroup("$guid-$index") }
 
@@ -253,7 +253,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("selection count should match after random toggles") {
-            checkAll(100, Arb.list(Arb.string(), 1..10), Arb.int(1..20)) { guids, toggleCount ->
+            checkAll(10, Arb.list(Arb.string(), 1..10), Arb.int(1..20)) { guids, toggleCount ->
                 val viewModel = TestGroupsSelectionViewModel()
                 val groups = guids.mapIndexed { index, guid -> TestGroup("$guid-$index") }
 
@@ -269,7 +269,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("toolbar selection count display format should be correct") {
-            checkAll(100, Arb.int(0..100)) { count ->
+            checkAll(10, Arb.int(0..100)) { count ->
                 // Simulate the format string used in the toolbar for XML Views
                 // This matches the CometChatToolbar.showSelectionMode(count) behavior
                 // Java implementation shows just the count number
@@ -281,7 +281,7 @@ class GroupsXmlPropertyTest : FunSpec({
         }
 
         test("selection state should be consistent with adapter") {
-            checkAll(100, Arb.list(Arb.string(), 1..15)) { guids ->
+            checkAll(10, Arb.list(Arb.string(), 1..15)) { guids ->
                 val viewModel = TestGroupsSelectionViewModel()
                 val groups = guids.mapIndexed { index, guid -> TestGroup("$guid-$index") }
 

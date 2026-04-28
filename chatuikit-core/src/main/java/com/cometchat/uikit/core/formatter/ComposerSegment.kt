@@ -24,6 +24,7 @@ sealed class ComposerSegment {
     data class Code(
         override val id: String,
         var text: String = "",
-        var language: String = ""
+        var language: String = "",
+        var cursorPosition: Int = 0
     ) : ComposerSegment()
 }

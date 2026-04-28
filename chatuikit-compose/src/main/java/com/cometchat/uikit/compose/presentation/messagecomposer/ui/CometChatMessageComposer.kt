@@ -13,6 +13,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -22,12 +28,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -69,7 +77,10 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
@@ -101,6 +112,7 @@ import com.cometchat.uikit.core.formatter.RichTextSpan
 import com.cometchat.uikit.core.formatter.ComposerSegment
 import com.cometchat.uikit.core.formatter.SegmentComposerController
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.viewmodel.CometChatMessageComposerViewModel
 import com.cometchat.uikit.core.viewmodel.ComposerMode
 import com.cometchat.uikit.core.viewmodel.RecordingState
@@ -116,6 +128,7 @@ import com.cometchat.uikit.compose.presentation.shared.formatters.SuggestionItem
 import com.cometchat.uikit.compose.presentation.shared.mentions.ComposeMentionState
 import com.cometchat.uikit.compose.presentation.shared.mentions.detectMention
 import com.cometchat.uikit.compose.presentation.shared.mentions.rememberMentionInsertionState
+import com.cometchat.uikit.compose.presentation.shared.mentions.ComposeMentionInsertionState
 import com.cometchat.uikit.compose.presentation.shared.mentions.ComposerMentionVisualTransformation
 import com.cometchat.uikit.compose.presentation.shared.mentions.CombinedVisualTransformation
 import com.cometchat.chat.constants.CometChatConstants
@@ -123,6 +136,9 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.domain.model.Sticker
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.LocalView
 import java.io.File
 
 /**
@@ -375,7 +391,7 @@ fun CometChatMessageComposer(
     )
 
     // Set user or group on ViewModel
-    LaunchedEffect(user, group, parentMessageId) {
+    LaunchedEffect(user?.uid, group?.guid, parentMessageId) {
         user?.let { composerViewModel.setUser(it) }
         group?.let { composerViewModel.setGroup(it) }
         if (parentMessageId > -1) {
@@ -419,15 +435,32 @@ fun CometChatMessageComposer(
     val currentGroup by composerViewModel.group.collectAsState()
     val composerMode by composerViewModel.composerMode.collectAsState()
 
-    // Local state - use TextFieldValue to track selection
-    var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
+    // Detect agentic (AI bot) user — mirrors chatuikit-kotlin behavior
+    val isAgentChat = remember(currentUser) {
+        currentUser?.let { AgentChatDetector.isAgentChat(it) } ?: false
+    }
+
+    // Override visibility flags for agentic users:
+    // - Always hide attachment, voice recording, sticker buttons, and rich text toolbar
+    val effectiveHideAttachmentButton = if (isAgentChat) true else hideAttachmentButton
+    val effectiveHideVoiceRecordingButton = if (isAgentChat) true else hideVoiceRecordingButton
+    val effectiveHideStickersButton = if (isAgentChat) true else hideStickersButton
+    val effectiveEnableRichTextFormatting = if (isAgentChat) false else enableRichTextFormatting
+
+    // Local state
     var showAttachmentPopup by remember { mutableStateOf(false) }
     var showAISheet by remember { mutableStateOf(false) }
     var showLinkDialog by remember { mutableStateOf(false) }
-    var activeFormats by remember { mutableStateOf<Set<RichTextFormat>>(emptySet()) }
-    var spanVersion by remember { mutableStateOf(0) }
+    var showLinkPopup by remember { mutableStateOf(false) }
     var showStickerKeyboard by remember { mutableStateOf(false) }
     var showCreatePollDialog by remember { mutableStateOf(false) }
+
+    // Link editing state
+    var linkEditInitialText by remember { mutableStateOf("") }
+    var linkEditInitialUrl by remember { mutableStateOf("") }
+    var isLinkEditMode by remember { mutableStateOf(false) }
+    var linkEditSpanStart by remember { mutableStateOf(-1) }
+    var linkEditSpanEnd by remember { mutableStateOf(-1) }
 
     // Mention state management
     val mentionInsertionState = rememberMentionInsertionState()
@@ -462,7 +495,7 @@ fun CometChatMessageComposer(
     )
     
     // Sync user/group with text formatters for mentions
-    LaunchedEffect(user, group, effectiveTextFormatters) {
+    LaunchedEffect(user?.uid, group?.guid, effectiveTextFormatters) {
         effectiveTextFormatters.forEach { formatter ->
             formatter.setUser(user)
             formatter.setGroup(group)
@@ -503,13 +536,12 @@ fun CometChatMessageComposer(
         }
     }
 
-    // Span-based rich text controller (WYSIWYG — no markdown markers visible)
-    val richTextController = remember { RichTextEditorController() }
-
     // Segment composer controller — manages normal + code block segments
     val segmentController = remember { SegmentComposerController() }
     // Trigger recomposition when segments change
     var segmentVersion by remember { mutableStateOf(0) }
+    // Trigger toolbar recomposition when formats change (toggleFormat doesn't fire onSegmentsChanged)
+    var formatVersion by remember { mutableStateOf(0) }
     DisposableEffect(Unit) {
         segmentController.setListener(object : SegmentComposerController.Listener {
             override fun onSegmentsChanged() {
@@ -519,15 +551,30 @@ fun CometChatMessageComposer(
         onDispose { segmentController.setListener(null) }
     }
 
-    // Track activeFormats separately — updated immediately for toolbar responsiveness
-    DisposableEffect(Unit) {
-        richTextController.setListener(object : RichTextEditorController.Listener {
-            override fun onStateChanged() {
-                activeFormats = richTextController.state.activeFormats
-                spanVersion++
+    // Map of segment ID → FocusRequester, rebuilt when segments change
+    val focusRequesters = remember(segmentVersion) {
+        segmentController.segments.associate { it.id to FocusRequester() }
+    }
+
+    // Sync composeText from ViewModel (set by ComposeMessage UIEvent) to the segment controller.
+    // This enables suggested message chips and conversation starters to populate the composer.
+    LaunchedEffect(composeText) {
+        if (composeText.isNotEmpty()) {
+            val firstSegment = segmentController.segments.firstOrNull()
+            if (firstSegment is ComposerSegment.Normal) {
+                firstSegment.controller.onTextChanged(composeText, composeText.length, composeText.length)
             }
-        })
-        onDispose { richTextController.setListener(null) }
+            // Clear the ViewModel state to avoid re-applying on recomposition
+            composerViewModel.clearComposeText()
+        }
+    }
+
+    // Consume pending focus after recomposition
+    LaunchedEffect(segmentController.pendingFocusSegmentId, segmentVersion) {
+        val pendingId = segmentController.consumePendingFocus()
+        if (pendingId != null) {
+            focusRequesters[pendingId]?.requestFocus()
+        }
     }
 
     // Samsung keyboard duplication guard.
@@ -541,9 +588,9 @@ fun CometChatMessageComposer(
     // Check if in recording mode
     val isInRecordingMode = composerMode is ComposerMode.Recording
     
-    // Rich text toolbar visibility - controlled by enableRichTextFormatting property
+    // Rich text toolbar visibility - controlled by effectiveEnableRichTextFormatting
     // Toolbar is always visible inside the composer when enabled, regardless of text presence
-    val showRichTextToolbar = enableRichTextFormatting && enabledFormats.isNotEmpty()
+    val showRichTextToolbar = effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
 
     // Media selection state for handling attachment options
     // Each callback uses a fixed message type based on the picker used, NOT the detected content type.
@@ -597,6 +644,8 @@ fun CometChatMessageComposer(
     }
 
     // Sync compose text from ViewModel (for edit mode)
+    // Parses the edit message markdown into segments: fenced code blocks become Code segments,
+    // everything else becomes Normal segments.
     LaunchedEffect(editMessage, effectiveTextFormatters) {
         editMessage?.let { msg ->
             if (msg is TextMessage) {
@@ -611,7 +660,83 @@ fun CometChatMessageComposer(
                         UIKitConstants.FormattingType.MESSAGE_COMPOSER
                     )
                 }
-                textFieldValue = TextFieldValue(formattedText.text)
+                val text = formattedText.text
+
+                // Parse markdown into alternating Normal / Code segments.
+                // Fenced code blocks are delimited by lines starting with ``` (optionally followed by a language hint).
+                segmentController.clear()
+
+                // Regex to match fenced code blocks: ```<optional language>\n<content>\n```
+                val codeBlockRegex = Regex("```(\\w*)\\n([\\s\\S]*?)\\n```")
+                val matches = codeBlockRegex.findAll(text).toList()
+
+                if (matches.isEmpty()) {
+                    // No code blocks — load all text into the first (already-existing) Normal segment
+                    val firstSegment = segmentController.segments.firstOrNull()
+                    if (firstSegment is ComposerSegment.Normal && text.isNotEmpty()) {
+                        firstSegment.controller.onTextChanged(text, text.length, text.length)
+                    }
+                } else {
+                    // Build segments from the parsed markdown
+                    var cursor = 0
+                    var isFirstNormal = true
+                    for (match in matches) {
+                        // Text before this code block → Normal segment
+                        val beforeText = text.substring(cursor, match.range.first).trim()
+                        if (isFirstNormal) {
+                            // Reuse the existing first Normal segment from clear()
+                            val firstSeg = segmentController.segments.firstOrNull()
+                            if (firstSeg is ComposerSegment.Normal && beforeText.isNotEmpty()) {
+                                firstSeg.controller.onTextChanged(beforeText, beforeText.length, beforeText.length)
+                            }
+                            // Focus the first normal, then toggle to insert a code block
+                            segmentController.setFocusedSegment(firstSeg!!.id)
+                            isFirstNormal = false
+                        } else if (beforeText.isNotEmpty()) {
+                            // There should be a Normal segment after the last code block;
+                            // find the last Normal segment and set its text
+                            val lastNormal = segmentController.segments.lastOrNull { it is ComposerSegment.Normal } as? ComposerSegment.Normal
+                            if (lastNormal != null) {
+                                lastNormal.controller.onTextChanged(beforeText, beforeText.length, beforeText.length)
+                            }
+                        }
+
+                        // Insert a code block via toggleCodeBlock (focuses the last Normal, then toggles)
+                        val lastNormalForToggle = segmentController.segments.lastOrNull { it is ComposerSegment.Normal }
+                        if (lastNormalForToggle != null) {
+                            segmentController.setFocusedSegment(lastNormalForToggle.id)
+                        }
+                        segmentController.toggleCodeBlock()
+
+                        // Set the code segment's text and language
+                        val codeSegment = segmentController.segments.lastOrNull { it is ComposerSegment.Code } as? ComposerSegment.Code
+                        if (codeSegment != null) {
+                            val language = match.groupValues[1]
+                            val codeContent = match.groupValues[2]
+                            codeSegment.text = codeContent
+                            codeSegment.language = language
+                        }
+
+                        cursor = match.range.last + 1
+                    }
+
+                    // Text after the last code block → set on the trailing Normal segment
+                    if (cursor < text.length) {
+                        val trailingText = text.substring(cursor).trim()
+                        if (trailingText.isNotEmpty()) {
+                            val lastNormal = segmentController.segments.lastOrNull { it is ComposerSegment.Normal } as? ComposerSegment.Normal
+                            if (lastNormal != null) {
+                                lastNormal.controller.onTextChanged(trailingText, trailingText.length, trailingText.length)
+                            }
+                        }
+                    }
+
+                    // Focus the first segment
+                    val firstSeg = segmentController.segments.firstOrNull()
+                    if (firstSeg != null) {
+                        segmentController.focusSegment(firstSeg.id)
+                    }
+                }
             }
         }
     }
@@ -623,37 +748,12 @@ fun CometChatMessageComposer(
         }
     }
 
-    // Determine send button state — check both single-field text and segment content
-    val isSendButtonActive = textFieldValue.text.isNotBlank() || segmentController.hasContent
+    // Determine send button state — segment controller tracks all content across segments
+    val isSendButtonActive = segmentController.hasContent
 
     // Placeholder text
     val placeholder = placeholderText ?: context.getString(R.string.cometchat_composer_place_holder_text)
     
-    // Span-based visual transformation: recreated whenever spans change (spanVersion)
-    // so BasicTextField re-applies filter() and picks up new formatting.
-    val spanBasedTransformation = remember(enabledFormats, spanVersion) {
-        if (enabledFormats.isNotEmpty()) {
-            SpanBasedVisualTransformation(richTextController)
-        } else {
-            VisualTransformation.None
-        }
-    }
-    
-    // Mention visual transformation: applies styling to tracked mentions
-    // Recreated whenever mentions change to pick up new styling
-    val mentionVisualTransformation = remember(mentionVersion, disableMentions, defaultMentionStyle) {
-        if (!disableMentions) {
-            ComposerMentionVisualTransformation(mentionInsertionState, defaultMentionStyle)
-        } else {
-            VisualTransformation.None
-        }
-    }
-    
-    // Combined visual transformation: applies both rich text and mention styling
-    val combinedVisualTransformation = remember(spanBasedTransformation, mentionVisualTransformation) {
-        CombinedVisualTransformation(listOf(spanBasedTransformation, mentionVisualTransformation))
-    }
-
     // Effective attachment popup style with 12dp corner radius (matching Kotlin cometchat_corner_radius_3)
     // Use iconTintHighlight (primary color) for attachment icons to match Kotlin implementation
     val effectiveAttachmentPopupStyle = attachmentPopupStyle.copy(
@@ -703,47 +803,55 @@ fun CometChatMessageComposer(
                     style = suggestionListStyle,
                     showAvatar = true,
                     onItemClick = { suggestionItem ->
-                        // Insert the mention
+                        // Insert the mention into the focused Normal segment
                         val formatter = mentionDetectionState.activeFormatter
-                        if (formatter != null && mentionDetectionState.isActive) {
+                        val focusedNormal = segmentController.focusedSegment as? ComposerSegment.Normal
+                        if (formatter != null && mentionDetectionState.isActive && focusedNormal != null) {
                             // Get the appropriate style for this suggestion
                             val mentionStyle = if (formatter is CometChatMentionsFormatter) {
                                 formatter.getSpanStyleForSuggestionItem(suggestionItem)
                             } else {
                                 defaultMentionStyle
                             }
-                            
+
+                            // Build a TextFieldValue from the focused segment's controller
+                            val ctrl = focusedNormal.controller
+                            val currentTfv = TextFieldValue(
+                                text = ctrl.state.text,
+                                selection = TextRange(ctrl.state.selectionStart, ctrl.state.selectionEnd)
+                            )
+
                             // Insert the mention using the insertion state
-                            textFieldValue = mentionInsertionState.insertMention(
-                                currentValue = textFieldValue,
+                            val updatedTfv = mentionInsertionState.insertMention(
+                                currentValue = currentTfv,
                                 mentionState = mentionDetectionState,
                                 suggestionItem = suggestionItem,
                                 formatter = formatter,
                                 mentionStyle = mentionStyle
                             )
-                            
+
                             // Increment mention version to trigger visual transformation update
                             mentionVersion++
-                            
-                            // Sync richTextController with the new text after mention insertion
+
+                            // Sync the focused segment's controller with the new text
                             if (enabledFormats.isNotEmpty()) {
-                                richTextController.onTextChanged(
-                                    textFieldValue.text,
-                                    textFieldValue.selection.min,
-                                    textFieldValue.selection.max
+                                ctrl.onTextChanged(
+                                    updatedTfv.text,
+                                    updatedTfv.selection.min,
+                                    updatedTfv.selection.max
                                 )
                             }
-                            
+
                             // Update the formatter's selected list
                             formatter.setSelectedList(context, mentionInsertionState.getSelectedSuggestionItems())
-                            
+
                             // Invoke callback
                             onMentionClick?.invoke(suggestionItem)
-                            
+
                             // Notify text change
-                            onTextChanged?.invoke(textFieldValue.text)
+                            onTextChanged?.invoke(updatedTfv.text)
                         }
-                        
+
                         // Hide suggestion list
                         showSuggestionList = false
                         suggestionItems = emptyList()
@@ -809,7 +917,7 @@ fun CometChatMessageComposer(
                 if (editPreviewView != null) {
                     editPreviewView(message) {
                         composerViewModel.clearEditMessage()
-                        textFieldValue = TextFieldValue("")
+                        segmentController.clear()
                     }
                 } else {
                     DefaultEditPreview(
@@ -818,7 +926,7 @@ fun CometChatMessageComposer(
                         style = style,
                         onClose = {
                             composerViewModel.clearEditMessage()
-                            textFieldValue = TextFieldValue("")
+                            segmentController.clear()
                         }
                     )
                 }
@@ -1012,23 +1120,12 @@ fun CometChatMessageComposer(
                     }
                 ) {
                     DefaultSecondaryButton(
-                        hideAttachmentButton = hideAttachmentButton,
-                        hideVoiceRecordingButton = hideVoiceRecordingButton,
+                        hideAttachmentButton = effectiveHideAttachmentButton,
+                        hideVoiceRecordingButton = effectiveHideVoiceRecordingButton,
                         isAttachmentPopupExpanded = showAttachmentPopup,
                         style = style,
                         onAttachmentClick = { showAttachmentPopup = !showAttachmentPopup },
                         onVoiceRecordClick = { composerViewModel.startRecordingMode() }
-                    )
-                }
-                
-                // Vertical separator after attachment button (12dp spacing from attachment - Figma: padding_3)
-                if (!hideAttachmentButton) {
-                    Spacer(modifier = Modifier.width(12.dp))
-                    VerticalDivider(
-                        modifier = Modifier
-                            .height(20.dp)
-                            .width(1.dp),
-                        color = style.separatorColor
                     )
                 }
                 } // End of inner Row for center alignment
@@ -1039,235 +1136,117 @@ fun CometChatMessageComposer(
             @Suppress("UNUSED_VARIABLE")
             val currentSegmentVersion = segmentVersion
 
-            // Focus requester for normal editor
-            val normalEditorFocusRequester = remember { FocusRequester() }
-            var wasInCodeBlockMode by remember { mutableStateOf(false) }
-            LaunchedEffect(segmentController.hasCodeBlocks) {
-                if (wasInCodeBlockMode && !segmentController.hasCodeBlocks) {
-                    // Code block was removed — merge any code text back into richTextController
-                    // removeCodeSegment() merged everything into the first normal segment's controller
-                    val firstNormal = segmentController.segments.filterIsInstance<ComposerSegment.Normal>().firstOrNull()
-                    if (firstNormal != null) {
-                        val mergedText = firstNormal.controller.state.text
-                        if (mergedText != richTextController.state.text) {
-                            richTextController.clear()
-                            if (mergedText.isNotEmpty()) {
-                                richTextController.onTextChanged(mergedText, mergedText.length, mergedText.length)
-                            }
-                            textFieldValue = TextFieldValue(
-                                text = mergedText,
-                                selection = TextRange(mergedText.length)
-                            )
-                        }
-                    }
-                    activeFormats = richTextController.state.activeFormats
-                    normalEditorFocusRequester.requestFocus()
-                }
-                wasInCodeBlockMode = segmentController.hasCodeBlocks
-            }
-
-            // Always-present Column: normal editor + optional code block below
+            // Segment Column — renders each segment as its own text field
             val inputScrollState = rememberScrollState()
-            // Flag to force-show normal editor after triple-enter exit from code block
-            var forceShowNormalEditor by remember { mutableStateOf(false) }
-            // Reset force flag when code blocks are removed
-            LaunchedEffect(segmentController.hasCodeBlocks) {
-                if (!segmentController.hasCodeBlocks) forceShowNormalEditor = false
-            }
+            val coroutineScope = rememberCoroutineScope()
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(inputScrollState)
                     .padding(horizontal = 4.dp)
             ) {
-                // Normal text editor — shown when no code block, or when text is present with code block,
-                // or when forced visible after triple-enter exit from code block
-                val showNormalEditor = !segmentController.hasCodeBlocks || textFieldValue.text.isNotEmpty() || forceShowNormalEditor
-                if (showNormalEditor) {
-                // Request focus on normal editor when forced visible after triple-enter
-                LaunchedEffect(forceShowNormalEditor) {
-                    if (forceShowNormalEditor) {
-                        normalEditorFocusRequester.requestFocus()
-                    }
-                }
-                BasicTextField(
-                    value = textFieldValue,
-                    onValueChange = { newValue ->
-                        val prevText = textFieldValue.text
-                        val newText = newValue.text
-
-                        // ── Samsung keyboard duplication guard ──
-                        val guardText = lastNewlineText
-                        if (guardText != null) {
-                            lastNewlineText = null
-                            if (newText.length > guardText.length && newText.startsWith(guardText)) {
-                                val appended = newText.substring(guardText.length)
-                                val lastNewlineIdx = guardText.lastIndexOf('\n')
-                                if (lastNewlineIdx >= 0) {
-                                    val prevLine = guardText.substring(
-                                        guardText.lastIndexOf('\n', lastNewlineIdx - 1).coerceAtLeast(0).let {
-                                            if (guardText[it] == '\n') it + 1 else it
-                                        },
-                                        lastNewlineIdx
-                                    )
-                                    if (appended.isNotEmpty() && prevLine.endsWith(appended)) {
-                                        return@BasicTextField
-                                    }
-                                }
-                            }
-                        }
-
-                        val newNewlineCount = newText.count { it == '\n' }
-                        val prevNewlineCount = prevText.count { it == '\n' }
-
-                        // ── Process through controller ──
-                        if (enabledFormats.isNotEmpty()) {
-                            richTextController.onTextChanged(
-                                newValue.text,
-                                newValue.selection.min,
-                                newValue.selection.max
-                            )
-                            val controllerText = richTextController.state.text
-                            val controllerSelStart = richTextController.state.selectionStart
-                            val controllerSelEnd = richTextController.state.selectionEnd
-                            if (controllerText != newValue.text) {
-                                textFieldValue = TextFieldValue(
-                                    text = controllerText,
-                                    selection = TextRange(controllerSelStart, controllerSelEnd),
-                                    composition = null
-                                )
-                            } else {
-                                textFieldValue = newValue
-                            }
-                        } else {
-                            textFieldValue = newValue
-                        }
-
-                        if (newNewlineCount > prevNewlineCount) {
-                            lastNewlineText = textFieldValue.text
-                        }
-
-                        onTextChanged?.invoke(textFieldValue.text)
-                        if (!disableTypingEvents) {
-                            if (textFieldValue.text.isNotEmpty()) composerViewModel.startTyping()
-                            else composerViewModel.endTyping()
-                        }
-                        
-                        // ── Mention detection ──
-                        if (!disableMentions && effectiveTextFormatters.isNotEmpty()) {
-                            // Sync mention insertion state with current text
-                            mentionInsertionState.syncWithText(textFieldValue.text)
-                            
-                            // Detect mention
-                            val newMentionState = detectMention(
-                                text = textFieldValue.text,
-                                cursorPosition = textFieldValue.selection.start,
-                                textFormatters = effectiveTextFormatters
-                            )
-                            
-                            mentionDetectionState = newMentionState
-                            
-                            if (newMentionState.isActive) {
-                                // Trigger search on the active formatter
-                                newMentionState.activeFormatter?.let { formatter ->
-                                    showSuggestionList = true
-                                    isLoadingSuggestions = true
-                                    // Trigger async search - results will be observed via LaunchedEffect
-                                    formatter.search(context, newMentionState.query)
-                                }
-                            } else {
-                                showSuggestionList = false
-                                suggestionItems = emptyList()
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = 36.dp)
-                        .focusRequester(normalEditorFocusRequester)
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused && showStickerKeyboard) {
-                                showStickerKeyboard = false
-                            }
-                        },
-                    textStyle = style.inputTextStyle.copy(color = style.inputTextColor),
-                    cursorBrush = SolidColor(style.inputTextColor),
-                    visualTransformation = combinedVisualTransformation,
-                    onTextLayout = { textLayoutResult ->
-                        textLayoutLineCount = textLayoutResult.lineCount
-                    },
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (textFieldValue.text.isEmpty()) {
-                                Text(
-                                    text = placeholder,
-                                    color = style.inputPlaceholderColor,
-                                    style = style.inputPlaceholderStyle,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            innerTextField()
+                val segments = segmentController.segments
+                segments.forEachIndexed { index, segment ->
+                    // Add spacing between Normal and Code segments when the Normal has text
+                    if (index > 0) {
+                        val prev = segments[index - 1]
+                        val needsSpacing = (prev is ComposerSegment.Normal && segment is ComposerSegment.Code && prev.controller.state.text.isNotEmpty()) ||
+                            (prev is ComposerSegment.Code && segment is ComposerSegment.Normal && segment.controller.state.text.isNotEmpty())
+                        if (needsSpacing) {
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
                     }
-                )
-                } // End of showNormalEditor
-
-                // Code block — shown below normal editor when active
-                if (segmentController.hasCodeBlocks) {
-                    val codeSegment = segmentController.segments.filterIsInstance<ComposerSegment.Code>().firstOrNull()
-                    if (codeSegment != null) {
-                        if (showNormalEditor) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        CodeSegmentTextField(
-                            segment = codeSegment,
-                            segmentController = segmentController,
-                            style = style,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .defaultMinSize(minHeight = 36.dp),
-                            onFocused = {
-                                segmentController.setFocusedSegment(codeSegment.id)
-                                activeFormats = setOf(RichTextFormat.CODE_BLOCK)
-                            },
-                            onTextChanged = { newText ->
-                                onTextChanged?.invoke(segmentController.toPlainText())
-                                if (!disableTypingEvents) {
-                                    if (segmentController.hasContent || textFieldValue.text.isNotEmpty()) composerViewModel.startTyping()
-                                    else composerViewModel.endTyping()
+                    when (segment) {
+                        is ComposerSegment.Normal -> {
+                            NormalSegmentTextField(
+                                segment = segment,
+                                segmentController = segmentController,
+                                focusRequester = focusRequesters[segment.id]!!,
+                                style = style,
+                                enabledFormats = enabledFormats,
+                                placeholder = placeholder,
+                                showPlaceholder = index == 0 && !segmentController.hasContent,
+                                onTextChanged = { text -> onTextChanged?.invoke(text) },
+                                onFocused = {
+                                    // Close sticker keyboard if open
+                                    if (showStickerKeyboard) showStickerKeyboard = false
+                                    // Trigger toolbar recomposition to reflect this segment's formats
+                                    formatVersion++
+                                },
+                                mentionInsertionState = mentionInsertionState,
+                                mentionDetectionState = mentionDetectionState,
+                                onMentionDetected = { state -> mentionDetectionState = state },
+                                showSuggestionList = showSuggestionList,
+                                onShowSuggestionList = { show -> showSuggestionList = show },
+                                effectiveTextFormatters = effectiveTextFormatters,
+                                disableMentions = disableMentions,
+                                composerViewModel = composerViewModel,
+                                formatVersion = formatVersion,
+                                onLinkTapped = { linkText, linkUrl, spanStart, spanEnd ->
+                                    linkEditInitialText = linkText
+                                    linkEditInitialUrl = linkUrl
+                                    linkEditSpanStart = spanStart
+                                    linkEditSpanEnd = spanEnd
+                                    showLinkPopup = true
+                                },
+                                onSelectionChanged = {
+                                    // Trigger toolbar recomposition so activeFormats
+                                    // reflects the formats at the new cursor position
+                                    formatVersion++
+                                },
+                                onCodeBlockInserted = {
+                                    segmentVersion++
+                                    formatVersion++
                                 }
-                            },
-                            onTripleEnterExit = {
-                                // Force normal editor visible and focus it
-                                forceShowNormalEditor = true
-                                activeFormats = richTextController.state.activeFormats
-                            }
-                        )
+                            )
+                        }
+                        is ComposerSegment.Code -> {
+                            CodeSegmentTextField(
+                                segment = segment,
+                                segmentController = segmentController,
+                                focusRequester = focusRequesters[segment.id]!!,
+                                style = style,
+                                onFocused = {
+                                    segmentController.setFocusedSegment(segment.id)
+                                    if (showStickerKeyboard) showStickerKeyboard = false
+                                    // Trigger toolbar recomposition to reflect code segment's formats
+                                    formatVersion++
+                                },
+                                onTextChanged = { text ->
+                                    onTextChanged?.invoke(text)
+                                    // Trigger auto-scroll to keep cursor visible while typing in code block
+                                    formatVersion++
+                                }
+                            )
+                        }
                     }
                 }
             } // End of input Column
 
-            // Auxiliary button (sticker, AI, voice recording - no rich text toggle)
-            // Hide sticker and voice recording buttons when text is entered
-            // Animated visibility for smooth show/hide transition
-            val hasText = textFieldValue.text.isNotEmpty() || segmentController.hasContent
-            AnimatedVisibility(
-                visible = !hideAuxiliaryButton && !hasText,
-                enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-            ) {
+            // Auto-scroll to keep cursor visible when text changes, segments change,
+            // or pending focus is consumed
+            LaunchedEffect(segmentVersion, segmentController.pendingFocusSegmentId) {
+                // Small delay to let recomposition settle before scrolling
+                delay(50)
+                coroutineScope.launch {
+                    inputScrollState.animateScrollTo(inputScrollState.maxValue)
+                }
+            }
+
+            // Auxiliary buttons — sticker and AI remain visible; only voice recording hides when typing
+            val hasText = segmentController.hasContent
+
+            if (!hideAuxiliaryButton) {
                 if (auxiliaryButtonView != null) {
                     auxiliaryButtonView(currentUser, currentGroup, idMap)
                 } else {
+                    // Sticker and AI buttons — always visible regardless of text
                     DefaultAuxiliaryButton(
                         hideRichTextToggle = true, // Always hide - toolbar visibility is automatic
-                        hideStickersButton = hideStickersButton,
+                        hideStickersButton = effectiveHideStickersButton,
                         hideAIButton = true, // AI button hidden by default
-                        hideVoiceRecordingButton = hideVoiceRecordingButton,
+                        hideVoiceRecordingButton = true, // Voice recording handled separately below
+                        isStickerKeyboardOpen = showStickerKeyboard,
                         style = style,
                         onStickerClick = {
                             if (!showStickerKeyboard) {
@@ -1277,8 +1256,24 @@ fun CometChatMessageComposer(
                             showStickerKeyboard = !showStickerKeyboard
                         },
                         onAIClick = { showAISheet = true },
-                        onVoiceRecordClick = { composerViewModel.startRecordingMode() }
+                        onVoiceRecordClick = { /* handled below */ }
                     )
+
+                    // Voice recording button — slides out when typing
+                    AnimatedVisibility(
+                        visible = !effectiveHideVoiceRecordingButton && !hasText,
+                        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+                        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+                    ) {
+                        DefaultAuxiliaryButton(
+                            hideRichTextToggle = true,
+                            hideStickersButton = true,
+                            hideAIButton = true,
+                            hideVoiceRecordingButton = false,
+                            style = style,
+                            onVoiceRecordClick = { composerViewModel.startRecordingMode() }
+                        )
+                    }
                 }
             }
 
@@ -1290,15 +1285,11 @@ fun CometChatMessageComposer(
                         {
                             handleSend(
                                 context = context,
-                                richTextController = if (enabledFormats.isNotEmpty()) richTextController else null,
-                                segmentController = if (segmentController.hasCodeBlocks) segmentController else null,
-                                inputText = textFieldValue.text,
+                                segmentController = segmentController,
                                 editMessage = editMessage,
                                 viewModel = composerViewModel,
                                 onSendButtonClick = onSendButtonClick,
                                 onClear = {
-                                    textFieldValue = TextFieldValue("")
-                                    if (enabledFormats.isNotEmpty()) richTextController.clear()
                                     segmentController.clear()
                                     // Clear mention state
                                     mentionInsertionState.clear()
@@ -1321,36 +1312,29 @@ fun CometChatMessageComposer(
                         modifier = Modifier,
                         isActive = isSendButtonActive,
                         isAIGenerating = isAIGenerating,
+                        isAgentChat = isAgentChat,
                         style = style,
                         onClick = {
-                            if (isAIGenerating) {
-                                composerViewModel.setAIGenerating(false)
-                            } else {
-                                handleSend(
-                                    context = context,
-                                    richTextController = if (enabledFormats.isNotEmpty()) richTextController else null,
-                                    segmentController = if (segmentController.hasCodeBlocks) segmentController else null,
-                                    inputText = textFieldValue.text,
-                                    editMessage = editMessage,
-                                    viewModel = composerViewModel,
-                                    onSendButtonClick = onSendButtonClick,
-                                    onClear = {
-                                        textFieldValue = TextFieldValue("")
-                                        if (enabledFormats.isNotEmpty()) richTextController.clear()
-                                        segmentController.clear()
-                                        // Clear mention state
-                                        mentionInsertionState.clear()
-                                        mentionVersion = 0
-                                        showSuggestionList = false
-                                        suggestionItems = emptyList()
-                                        mentionDetectionState = ComposeMentionState.INACTIVE
-                                        // Clear formatter selected lists
-                                        effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
-                                    },
-                                    mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
-                                    textFormatters = effectiveTextFormatters
-                                )
-                            }
+                            handleSend(
+                                context = context,
+                                segmentController = segmentController,
+                                editMessage = editMessage,
+                                viewModel = composerViewModel,
+                                onSendButtonClick = onSendButtonClick,
+                                onClear = {
+                                    segmentController.clear()
+                                    // Clear mention state
+                                    mentionInsertionState.clear()
+                                    mentionVersion = 0
+                                    showSuggestionList = false
+                                    suggestionItems = emptyList()
+                                    mentionDetectionState = ComposeMentionState.INACTIVE
+                                    // Clear formatter selected lists
+                                    effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
+                                },
+                                mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
+                                textFormatters = effectiveTextFormatters
+                            )
                         }
                     )
                 }
@@ -1366,60 +1350,157 @@ fun CometChatMessageComposer(
                 exit = shrinkVertically() + fadeOut()
             ) {
                 Column {
-                    // Separator between input and toolbar
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = style.separatorColor
-                    )
-                    
+                    // Read formatVersion to trigger recomposition when formats change
+                    @Suppress("UNUSED_VARIABLE")
+                    val currentFormatVersion = formatVersion
+
+                    // Compute effective active formats including line format detection.
+                    // RichTextEditorState.activeFormats only tracks span-based formats + pending.
+                    // Line formats (bullet list, ordered list, blockquote) are stored as text
+                    // prefixes ("- ", "1. ", "> ") and must be detected from the text.
+                    val effectiveActiveFormats = run {
+                        val base = segmentController.activeFormats
+                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                        if (focused != null) {
+                            val text = focused.controller.state.text
+                            val cursorPos = focused.controller.state.selectionStart
+                            if (text.isNotEmpty() && cursorPos <= text.length) {
+                                val lineStart = text.lastIndexOf('\n', (cursorPos - 1).coerceAtLeast(0)) + 1
+                                val lineEnd = text.indexOf('\n', cursorPos).let { if (it == -1) text.length else it }
+                                if (lineStart <= lineEnd && lineEnd <= text.length) {
+                                    val currentLine = text.substring(lineStart, lineEnd)
+                                    val lineFormats = mutableSetOf<RichTextFormat>()
+                                    if (currentLine.startsWith("- ") || currentLine.startsWith("• ")) {
+                                        lineFormats.add(RichTextFormat.BULLET_LIST)
+                                    } else if (currentLine.matches(Regex("^\\d+\\. .*"))) {
+                                        lineFormats.add(RichTextFormat.ORDERED_LIST)
+                                    } else if (currentLine.startsWith("> ")) {
+                                        lineFormats.add(RichTextFormat.BLOCKQUOTE)
+                                    }
+                                    base + lineFormats
+                                } else base
+                            } else base
+                        } else {
+                            base
+                        }
+                    }
+
+                    // Compute effective disabled formats — also disable inline formats
+                    // when cursor is inside a LINK span (links are immune to formatting)
+                    val effectiveDisabledFormats = run {
+                        val base = segmentController.toolbarDisabledFormats
+                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                        if (focused != null) {
+                            val cursorPos = focused.controller.state.selectionStart
+                            val spanManager = focused.controller.state.spanManager
+                            val linkSpan = spanManager.findLinkSpanAt(cursorPos)
+                                ?: if (cursorPos > 0) spanManager.findLinkSpanAt(cursorPos - 1) else null
+                            if (linkSpan != null) {
+                                base + setOf(
+                                    RichTextFormat.BOLD,
+                                    RichTextFormat.ITALIC,
+                                    RichTextFormat.UNDERLINE,
+                                    RichTextFormat.STRIKETHROUGH,
+                                    RichTextFormat.INLINE_CODE
+                                )
+                            } else {
+                                base
+                            }
+                        } else {
+                            base
+                        }
+                    }
+
                     CometChatRichTextToolbar(
                         modifier = Modifier.fillMaxWidth(),
                         style = style,
-                        activeFormats = activeFormats,
-                        disabledFormats = if (segmentController.isTypingInCode) {
-                            RichTextFormat.entries.toSet()
-                        } else {
-                            richTextController.state.toolbarDisabledFormats
-                        },
+                        activeFormats = effectiveActiveFormats,
+                        disabledFormats = effectiveDisabledFormats,
                         enabledFormats = enabledFormats,
                         onFormatClick = { format ->
-                            if (format == RichTextFormat.CODE_BLOCK) {
-                                // Sync richTextController text into the segment's controller
-                                // before toggling, so insertCodeBlock knows the current text
-                                if (!segmentController.hasCodeBlocks) {
-                                    val focused = segmentController.focusedSegment
-                                    if (focused is ComposerSegment.Normal) {
-                                        val currentText = richTextController.state.text
-                                        val selStart = richTextController.state.selectionStart
-                                        val selEnd = richTextController.state.selectionEnd
-                                        focused.controller.clear()
-                                        if (currentText.isNotEmpty()) {
-                                            focused.controller.onTextChanged(currentText, selStart, selEnd)
-                                        }
-                                    }
+                            android.util.Log.d("SegmentDebug", "onFormatClick: format=$format, isTypingInCode=${segmentController.isTypingInCode}, focusedSegmentId=${segmentController.focusedSegmentId}")
+                            
+                            // If no segment is focused, focus the first normal segment
+                            if (segmentController.focusedSegment == null) {
+                                val firstNormal = segmentController.segments.firstOrNull { it is ComposerSegment.Normal }
+                                if (firstNormal != null) {
+                                    segmentController.focusSegment(firstNormal.id)
                                 }
-                                segmentController.toggleCodeBlock()
-                            } else if (!segmentController.isTypingInCode) {
-                                // Always use richTextController for the normal text editor.
-                                // The normal BasicTextField is always backed by richTextController
-                                // regardless of whether code blocks exist.
-                                richTextController.toggleFormat(format)
-                                val controllerText = richTextController.state.text
-                                // Always update textFieldValue to force recomposition.
-                                // For inline formats (bold, italic, etc.) the text doesn't change
-                                // but spans do — we need a new TextFieldValue instance so
-                                // BasicTextField re-applies the VisualTransformation.
-                                textFieldValue = TextFieldValue(
-                                    text = controllerText,
-                                    selection = TextRange(
-                                        richTextController.state.selectionStart.coerceAtMost(controllerText.length),
-                                        richTextController.state.selectionEnd.coerceAtMost(controllerText.length)
-                                    )
-                                )
+                            } else {
+                                // Ensure the focused segment gets keyboard focus
+                                segmentController.focusedSegmentId?.let { id ->
+                                    focusRequesters[id]?.requestFocus()
+                                }
                             }
+                            
+                            val focusedSeg = segmentController.focusedSegment
+                            when {
+                                // Case 1: Tapping CODE_BLOCK while inside a Code segment → extract cursor paragraph
+                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Code -> {
+                                    android.util.Log.d("SegmentDebug", "onFormatClick: extracting paragraph from code block (deselect), cursor=${focusedSeg.cursorPosition}")
+                                    segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, null)
+                                }
+                                // Case 2: Tapping a line format (blockquote/list) while inside a Code segment
+                                // → extract cursor paragraph and apply that format
+                                focusedSeg is ComposerSegment.Code && format in setOf(
+                                    RichTextFormat.BULLET_LIST, RichTextFormat.ORDERED_LIST, RichTextFormat.BLOCKQUOTE
+                                ) -> {
+                                    android.util.Log.d("SegmentDebug", "onFormatClick: extracting paragraph from code block with format=$format, cursor=${focusedSeg.cursorPosition}")
+                                    segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, format)
+                                }
+                                // Case 3: Tapping CODE_BLOCK while in a Normal segment → convert cursor paragraph to code
+                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Normal -> {
+                                    android.util.Log.d("SegmentDebug", "onFormatClick: convertCursorParagraphToCodeBlock")
+                                    segmentController.convertCursorParagraphToCodeBlock()
+                                }
+                                // Case 4: Tapping any format while in a Normal segment → toggle format
+                                focusedSeg is ComposerSegment.Normal -> {
+                                    focusedSeg.controller.toggleFormat(format)
+                                }
+                            }
+                            // Increment formatVersion to trigger toolbar recomposition
+                            // so activeFormats/disabledFormats are re-read after the toggle
+                            formatVersion++
                         },
-                        onLinkClick = { showLinkDialog = true }
+                        onLinkClick = {
+                            val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                            focused?.controller?.let { ctrl ->
+                                val spanManager = ctrl.state.spanManager
+                                val selStart = ctrl.state.selectionStart
+                                val selEnd = ctrl.state.selectionEnd
+                                val text = ctrl.state.text
+
+                                // Check if cursor is inside a LINK span
+                                val checkPos = if (selStart > 0) selStart - 1 else selStart
+                                val linkSpan = spanManager.findLinkSpanAt(checkPos)
+                                    ?: spanManager.findLinkSpanAt(selStart)
+
+                                if (linkSpan != null) {
+                                    // Cursor is inside an existing link → show Link popup
+                                    linkEditInitialText = text.substring(linkSpan.start, linkSpan.end)
+                                    linkEditInitialUrl = spanManager.getLinkUrlAt(linkSpan.start) ?: ""
+                                    linkEditSpanStart = linkSpan.start
+                                    linkEditSpanEnd = linkSpan.end
+                                    showLinkPopup = true
+                                } else if (selStart != selEnd) {
+                                    // Text is selected but not a link → Add Link dialog with pre-filled text
+                                    isLinkEditMode = false
+                                    linkEditInitialText = text.substring(selStart, selEnd)
+                                    linkEditInitialUrl = ""
+                                    linkEditSpanStart = -1
+                                    linkEditSpanEnd = -1
+                                    showLinkDialog = true
+                                } else {
+                                    // No selection, no link → Add Link dialog with empty fields
+                                    isLinkEditMode = false
+                                    linkEditInitialText = ""
+                                    linkEditInitialUrl = ""
+                                    linkEditSpanStart = -1
+                                    linkEditSpanEnd = -1
+                                    showLinkDialog = true
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -1461,21 +1542,51 @@ fun CometChatMessageComposer(
     if (showLinkDialog) {
         CometChatLinkEditDialog(
             style = style,
+            initialText = linkEditInitialText,
+            initialUrl = linkEditInitialUrl,
+            isEditMode = isLinkEditMode,
             onApply = { text, url ->
-                val linkMarkdown = "[$text]($url)"
-                val currentText = textFieldValue.text
-                val newText = if (currentText.isNotEmpty()) {
-                    "$currentText $linkMarkdown"
-                } else {
-                    linkMarkdown
+                val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                focused?.controller?.let { ctrl ->
+                    if (isLinkEditMode && linkEditSpanStart >= 0 && linkEditSpanEnd >= 0) {
+                        // Edit existing link
+                        ctrl.editLink(linkEditSpanStart, linkEditSpanEnd, text, url)
+                    } else {
+                        // Add new link
+                        ctrl.applyLink(text, url)
+                    }
                 }
-                textFieldValue = TextFieldValue(
-                    text = newText,
-                    selection = TextRange(newText.length)
-                )
+                // Trigger recomposition so NormalSegmentTextField syncs tfv from controller
+                formatVersion++
                 showLinkDialog = false
             },
+            onRemove = null,
             onDismiss = { showLinkDialog = false }
+        )
+    }
+
+    // Link popup dialog (shown when tapping link tool while cursor is inside a link)
+    if (showLinkPopup) {
+        CometChatLinkPopupDialog(
+            url = linkEditInitialUrl,
+            style = style,
+            onEdit = {
+                // Dismiss popup, show Edit Link dialog pre-filled
+                showLinkPopup = false
+                isLinkEditMode = true
+                showLinkDialog = true
+            },
+            onRemove = {
+                // Remove the link, keep text plain
+                if (linkEditSpanStart >= 0 && linkEditSpanEnd >= 0) {
+                    val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                    focused?.controller?.removeLink(linkEditSpanStart, linkEditSpanEnd)
+                }
+                // Trigger recomposition so toolbar and text field update
+                formatVersion++
+                showLinkPopup = false
+            },
+            onDismiss = { showLinkPopup = false }
         )
     }
 
@@ -1534,18 +1645,14 @@ fun CometChatMessageComposer(
 
 /**
  * Handles the send action for the message composer.
- * When a [richTextController] is provided, uses it to serialize spans to markdown.
- * When code blocks are present, combines normal text markdown from [richTextController]
- * with code block content from [segmentController].
+ * Uses [segmentController.toMarkdown()][SegmentComposerController.toMarkdown] to serialize
+ * all segments (Normal + Code) into a single markdown string.
  * When mentions are present, processes the text to replace prompt text with underlying text
  * and calls handlePreMessageSend on all formatters.
- * Otherwise falls back to sending the raw input text.
  */
 private fun handleSend(
     context: Context,
-    richTextController: RichTextEditorController? = null,
-    segmentController: SegmentComposerController? = null,
-    inputText: String,
+    segmentController: SegmentComposerController,
     editMessage: TextMessage?,
     viewModel: CometChatMessageComposerViewModel,
     onSendButtonClick: ((Context, BaseMessage) -> Unit)?,
@@ -1553,50 +1660,24 @@ private fun handleSend(
     mentionInsertionState: com.cometchat.uikit.compose.presentation.shared.mentions.ComposeMentionInsertionState? = null,
     textFormatters: List<CometChatTextFormatter> = emptyList()
 ) {
-    android.util.Log.d("MessageComposer", "handleSend: inputText='$inputText', length=${inputText.length}")
-    android.util.Log.d("MessageComposer", "handleSend: richTextController=${richTextController != null}, segmentController=${segmentController != null}")
+    // Serialize all segments to markdown via the controller
+    val markdownText = segmentController.toMarkdown()
+    android.util.Log.d("MessageComposer", "handleSend: markdownText='$markdownText', length=${markdownText.length}")
     android.util.Log.d("MessageComposer", "handleSend: mentionInsertionState=${mentionInsertionState != null}, mentionCount=${mentionInsertionState?.getMentionsManager()?.getMentions()?.size ?: 0}")
-    
-    // First, process mentions on the input text to get the text with underlying mention format
-    var textToProcess = inputText
+
+    // Process mentions on the markdown text
+    var textToSend = markdownText
     if (mentionInsertionState != null) {
-        textToProcess = mentionInsertionState.getProcessedText(inputText)
-        android.util.Log.d("MessageComposer", "handleSend: textToProcess after mention processing='$textToProcess', length=${textToProcess.length}")
-    }
-    
-    // When code blocks are present, the normal text lives in richTextController
-    // (not in the segment's own controller), so we build markdown manually.
-    var markdownText = when {
-        segmentController != null && segmentController.hasCodeBlocks -> {
-            val parts = mutableListOf<String>()
-            // Normal text - use the mention-processed text
-            val normalMd = textToProcess.trim()
-            if (normalMd.isNotEmpty()) parts.add(normalMd)
-            // Code blocks from segments
-            for (seg in segmentController.segments) {
-                if (seg is ComposerSegment.Code) {
-                    val code = seg.text.trim()
-                    if (code.isNotEmpty()) {
-                        parts.add("```${seg.language}\n$code\n```")
-                    }
-                }
-            }
-            parts.joinToString("\n")
-        }
-        richTextController != null -> {
-            // Update the controller with the mention-processed text, then convert to markdown
-            richTextController.onTextChanged(textToProcess, textToProcess.length, textToProcess.length)
-            richTextController.toMarkdown()
-        }
-        else -> textToProcess
+        textToSend = mentionInsertionState.getProcessedText(markdownText)
+        android.util.Log.d("MessageComposer", "handleSend: textToSend after mention processing='$textToSend', length=${textToSend.length}")
     }
 
-    android.util.Log.d("MessageComposer", "handleSend: final markdownText='$markdownText'")
+    android.util.Log.d("MessageComposer", "handleSend: final textToSend='$textToSend'")
 
-    if (markdownText.isBlank()) return
+    if (textToSend.isBlank()) return
 
     if (onSendButtonClick != null) {
-        viewModel.createTextMessage(markdownText)?.let { message ->
+        viewModel.createTextMessage(textToSend)?.let { message ->
             // Call handlePreMessageSend on all formatters to attach mentioned users
             textFormatters.forEach { formatter ->
                 formatter.handlePreMessageSend(context, message)
@@ -1605,10 +1686,10 @@ private fun handleSend(
         }
     } else {
         if (editMessage != null) {
-            viewModel.editMessage(markdownText)
+            viewModel.editMessage(textToSend)
         } else {
             // Create message first to call handlePreMessageSend
-            val message = viewModel.createTextMessage(markdownText)
+            val message = viewModel.createTextMessage(textToSend)
             if (message != null) {
                 // Call handlePreMessageSend on all formatters to attach mentioned users
                 textFormatters.forEach { formatter ->
@@ -1616,7 +1697,7 @@ private fun handleSend(
                 }
                 viewModel.sendTextMessageWithMentions(message)
             } else {
-                viewModel.sendTextMessage(markdownText)
+                viewModel.sendTextMessage(textToSend)
             }
         }
     }
@@ -1625,51 +1706,50 @@ private fun handleSend(
 
 /**
  * Renders a code block segment as a dark-background monospace BasicTextField.
- * No rich text formatting — plain text only.
+ * No rich text formatting — plain text only. Mention detection is intentionally
+ * not wired here, so "@" typed in a Code segment does not trigger suggestions.
  *
  * Handles:
- * - Triple-enter exit: calls [segmentController.handleCodeTextChanged] which detects \n\n\n
+ * - Double-enter exit: calls [segmentController.handleCodeTextChanged] which detects \n\n
  * - Backspace-on-empty: calls [segmentController.handleBackspaceOnEmptyCodeBlock]
- * - FocusRequester with pending focus consumption
+ * - External [focusRequester] from the parent's focus map (pending focus is consumed
+ *   by the shared LaunchedEffect in the parent composable)
  */
 @Composable
 private fun CodeSegmentTextField(
     segment: ComposerSegment.Code,
     segmentController: SegmentComposerController,
+    focusRequester: FocusRequester,
     style: CometChatMessageComposerStyle,
     modifier: Modifier = Modifier,
     onFocused: () -> Unit,
-    onTextChanged: (String) -> Unit,
-    onTripleEnterExit: () -> Unit = {}
+    onTextChanged: (String) -> Unit
 ) {
+    // Note: "@" typed inside a Code segment intentionally does NOT trigger mention
+    // detection. CodeSegmentTextField has no mention detection wiring, so mentions
+    // are suppressed by design — no additional logic is needed.
+
     var tfv by remember(segment.id) {
         mutableStateOf(TextFieldValue(segment.text))
     }
-    val focusRequester = remember { FocusRequester() }
 
-    // Pending focus consumption
-    val isPendingFocus = segmentController.pendingFocusSegmentId == segment.id
-    LaunchedEffect(isPendingFocus) {
-        if (isPendingFocus) {
-            focusRequester.requestFocus()
-            segmentController.consumePendingFocus()
-        }
-    }
-
-    // Sync tfv when segment text changes externally (e.g., triple-enter trim)
+    // Sync tfv when segment text changes externally (e.g., double-enter trim)
     LaunchedEffect(segment.text) {
         if (tfv.text != segment.text) {
             tfv = TextFieldValue(segment.text, TextRange(segment.text.length))
         }
     }
 
+    val codeBackground = CometChatTheme.colorScheme.backgroundColor2
+    val codeBorderColor = CometChatTheme.colorScheme.strokeColorDefault
+    val codeTextColor = CometChatTheme.colorScheme.textColorPrimary
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF1E1E1E))
-            .border(1.dp, Color(0xFF3C3C3C), RoundedCornerShape(8.dp))
+            .background(codeBackground)
+            .border(1.dp, codeBorderColor, RoundedCornerShape(8.dp))
     ) {
         BasicTextField(
             value = tfv,
@@ -1695,14 +1775,16 @@ private fun CodeSegmentTextField(
 
                 tfv = newValue
 
-                // Route through segment controller for triple-enter detection
+                // Track cursor position for paragraph extraction
+                segment.cursorPosition = newValue.selection.start
+
+                // Route through segment controller for double-enter detection.
+                // When exited is true, the controller has trimmed trailing newlines
+                // and set pendingFocusSegmentId — the shared LaunchedEffect in the
+                // parent composable will consume the pending focus and transfer
+                // keyboard focus to the next Normal segment.
                 val exited = segmentController.handleCodeTextChanged(segment, newText)
                 if (exited) {
-                    // Triple-enter detected — text was trimmed, keep code block but
-                    // focus the normal editor. The wasInCodeBlockMode LaunchedEffect
-                    // won't fire since hasCodeBlocks is still true, so we manually
-                    // reset toolbar and request focus via onTripleEnterExit callback.
-                    onTripleEnterExit()
                     return@BasicTextField
                 }
 
@@ -1710,7 +1792,7 @@ private fun CodeSegmentTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
                 .focusRequester(focusRequester)
                 .onFocusChanged { if (it.isFocused) onFocused() }
                 .onPreviewKeyEvent { keyEvent ->
@@ -1727,16 +1809,16 @@ private fun CodeSegmentTextField(
                     }
                 },
             textStyle = style.inputTextStyle.copy(
-                color = Color(0xFFD4D4D4),
+                color = codeTextColor,
                 fontFamily = FontFamily.Monospace
             ),
-            cursorBrush = SolidColor(Color(0xFFD4D4D4)),
+            cursorBrush = SolidColor(codeTextColor),
             decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (tfv.text.isEmpty()) {
                         Text(
                             text = "Enter code...",
-                            color = Color(0xFF666666),
+                            color = CometChatTheme.colorScheme.textColorTertiary,
                             style = style.inputTextStyle.copy(fontFamily = FontFamily.Monospace)
                         )
                     }
@@ -1748,6 +1830,384 @@ private fun CodeSegmentTextField(
 }
 
 /**
+ * Renders a Normal segment as a BasicTextField with rich text support.
+ *
+ * Each Normal segment owns its own [RichTextEditorController] (`segment.controller`).
+ * Visual transformations (rich text spans + mention styling) are created per-segment
+ * and combined via [CombinedVisualTransformation].
+ *
+ * Handles:
+ * - Rich text WYSIWYG rendering via [SpanBasedVisualTransformation]
+ * - Mention styling via [ComposerMentionVisualTransformation]
+ * - Backspace-at-position-0 to navigate to preceding Code segment
+ * - Mention detection on text change
+ * - Typing indicator integration
+ */
+@Composable
+private fun NormalSegmentTextField(
+    segment: ComposerSegment.Normal,
+    segmentController: SegmentComposerController,
+    focusRequester: FocusRequester,
+    style: CometChatMessageComposerStyle,
+    enabledFormats: Set<RichTextFormat>,
+    placeholder: String,
+    showPlaceholder: Boolean,
+    onTextChanged: (String) -> Unit,
+    onFocused: () -> Unit,
+    mentionInsertionState: ComposeMentionInsertionState,
+    mentionDetectionState: ComposeMentionState,
+    onMentionDetected: (ComposeMentionState) -> Unit,
+    showSuggestionList: Boolean,
+    onShowSuggestionList: (Boolean) -> Unit,
+    effectiveTextFormatters: List<CometChatTextFormatter>,
+    disableMentions: Boolean,
+    composerViewModel: CometChatMessageComposerViewModel,
+    formatVersion: Int = 0,
+    onCodeBlockInserted: (() -> Unit)? = null,
+    onLinkTapped: ((linkText: String, linkUrl: String, spanStart: Int, spanEnd: Int) -> Unit)? = null,
+    onSelectionChanged: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    // Per-segment text state backed by the segment's own controller
+    var tfv by remember(segment.id) {
+        mutableStateOf(
+            TextFieldValue(
+                text = segment.controller.state.text,
+                selection = TextRange(segment.controller.state.text.length)
+            )
+        )
+    }
+
+    // Sync tfv when segment text changes externally (e.g., code block removal merges text,
+    // or toolbar toggleFormat modifies text for line formats like bullet list/blockquote).
+    // Reading formatVersion ensures this composable recomposes when toolbar actions change
+    // the controller's text.
+    @Suppress("UNUSED_VARIABLE")
+    val currentFormatVersion = formatVersion
+    val segmentText = segment.controller.state.text
+    val segmentSelStart = segment.controller.state.selectionStart
+    val segmentSelEnd = segment.controller.state.selectionEnd
+    LaunchedEffect(segmentText, segmentSelStart, segmentSelEnd) {
+        if (tfv.text != segmentText || tfv.selection.start != segmentSelStart || tfv.selection.end != segmentSelEnd) {
+            tfv = TextFieldValue(segmentText, TextRange(segmentSelStart, segmentSelEnd))
+        }
+    }
+
+    // Per-segment visual transformations
+    val inlineCodeTextColor = CometChatTheme.colorScheme.textColorHighlight
+    val inlineCodeBgColor = CometChatTheme.colorScheme.backgroundColor3
+    val spanTransformation = remember(segment.id, inlineCodeTextColor, inlineCodeBgColor) {
+        SpanBasedVisualTransformation(
+            controller = segment.controller,
+            inputTextColor = style.inputTextColor,
+            inlineCodeTextColor = inlineCodeTextColor,
+            inlineCodeBackgroundColor = inlineCodeBgColor,
+            linkColor = Color(0xFF3D88F5)
+        )
+    }
+
+    val mentionTransformation = remember(segment.id) {
+        ComposerMentionVisualTransformation(
+            mentionInsertionState = mentionInsertionState,
+            defaultMentionStyle = SpanStyle(
+                color = Color(0xFF3399FF),
+                fontWeight = FontWeight.Medium,
+                background = Color(0xFF3399FF).copy(alpha = 0.2f)
+            )
+        )
+    }
+
+    val combinedTransformation = remember(segment.id) {
+        CombinedVisualTransformation(
+            listOf(spanTransformation, mentionTransformation)
+        )
+    }
+
+    val inputTextColor = style.inputTextColor
+
+    // Track text layout for drawing blockquote bars and inline code
+    var textLayoutResult by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
+    val blockquoteBarColor = CometChatTheme.colorScheme.strokeColorDefault
+    val inlineCodeBorderColor = CometChatTheme.colorScheme.strokeColorDark
+    val inlineCodeCornerRadiusDp = 5.dp
+
+    // Custom text selection toolbar: appends Bold/Italic/Strikethrough/Code to the
+    // default floating menu while preserving system positioning behaviour.
+    val view = LocalView.current
+    val richTextSelectionToolbar = remember(view) {
+        RichTextSelectionToolbar(view) { format ->
+            segment.controller.toggleFormat(format)
+            onSelectionChanged?.invoke()
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalTextToolbar provides if (enabledFormats.isNotEmpty()) richTextSelectionToolbar else LocalTextToolbar.current
+    ) {
+    BasicTextField(
+            value = tfv,
+            onValueChange = { newValue: TextFieldValue ->
+            val prevText = tfv.text
+            val newText = newValue.text
+            tfv = newValue
+
+            // Detect tap on link text: cursor moved without text change, and cursor
+            // is now inside a LINK span → show the link popup
+            if (prevText == newText && enabledFormats.isNotEmpty() && onLinkTapped != null) {
+                val cursorPos = newValue.selection.start
+                if (newValue.selection.start == newValue.selection.end && cursorPos > 0) {
+                    val spanManager = segment.controller.state.spanManager
+                    val linkSpan = spanManager.findLinkSpanAt(cursorPos - 1)
+                        ?: spanManager.findLinkSpanAt(cursorPos)
+                    if (linkSpan != null) {
+                        val text = segment.controller.state.text
+                        val safeStart = linkSpan.start.coerceIn(0, text.length)
+                        val safeEnd = linkSpan.end.coerceIn(safeStart, text.length)
+                        if (safeStart < safeEnd) {
+                            val lt = text.substring(safeStart, safeEnd)
+                            val lu = spanManager.getLinkUrlAt(linkSpan.start) ?: ""
+                            onLinkTapped(lt, lu, safeStart, safeEnd)
+                        }
+                    }
+                }
+            }
+
+            // Route text change through the segment's own RichTextEditorController
+            if (enabledFormats.isNotEmpty()) {
+                segment.controller.onTextChanged(
+                    newText,
+                    newValue.selection.min,
+                    newValue.selection.max
+                )
+
+                // The controller may have modified the text internally (e.g.,
+                // auto-continuation of list/blockquote prefixes, or removal of
+                // an empty prefix line on double-enter). Sync tfv back if so.
+                val controllerText = segment.controller.state.text
+                val controllerSelStart = segment.controller.state.selectionStart
+                val controllerSelEnd = segment.controller.state.selectionEnd
+                if (controllerText != newText || controllerSelStart != newValue.selection.min || controllerSelEnd != newValue.selection.max) {
+                    tfv = TextFieldValue(
+                        controllerText,
+                        TextRange(controllerSelStart, controllerSelEnd)
+                    )
+                }
+
+                // Detect pasted fenced code blocks (```...```) FIRST — before shortcut detection
+                // so that pasting ```code``` converts to a code segment instead of
+                // the shortcut consuming the opening ``` and leaving text + empty code block
+                if (segmentController.detectAndConvertPastedCodeBlocks()) {
+                    onCodeBlockInserted?.invoke()
+                    return@BasicTextField
+                }
+
+                // Detect ``` shortcut (user typed ``` on a line) and insert code block if found
+                if (segmentController.detectAndInsertCodeBlockShortcut()) {
+                    onCodeBlockInserted?.invoke()
+                    return@BasicTextField
+                }
+            }
+
+            // --- Task 3.3: Mention detection ---
+            if (!disableMentions && effectiveTextFormatters.isNotEmpty()) {
+                val detected = detectMention(
+                    text = newText,
+                    cursorPosition = newValue.selection.start,
+                    textFormatters = effectiveTextFormatters
+                )
+                onMentionDetected(detected)
+                onShowSuggestionList(detected.isActive)
+
+                // Sync mention insertion state with the segment's text
+                mentionInsertionState.syncWithText(newText)
+            }
+
+            // --- Task 3.4: Typing indicator integration ---
+            if (newText.isNotEmpty()) {
+                composerViewModel.startTyping()
+            } else if (!segmentController.hasContent) {
+                composerViewModel.endTyping()
+            }
+
+            onTextChanged(newText)
+
+            // Notify that selection/content changed so toolbar can update active formats
+            onSelectionChanged?.invoke()
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .onFocusChanged { focusState ->
+                if (focusState.isFocused) {
+                    segmentController.setFocusedSegment(segment.id)
+                    onFocused()
+                }
+            }
+            // --- Task 3.2: Backspace-at-position-0 handling ---
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.key == Key.Backspace && keyEvent.type == KeyEventType.KeyDown) {
+                    val cursorPos = tfv.selection.start
+                    if (cursorPos == 0) {
+                        val idx = segmentController.segments.indexOf(segment)
+                        // Check if there's a Code segment before this Normal segment
+                        val prevCode = if (idx > 0) {
+                            segmentController.segments.getOrNull(idx - 1) as? ComposerSegment.Code
+                        } else null
+
+                        if (prevCode != null) {
+                            if (tfv.text.isEmpty()) {
+                                // Empty Normal with preceding Code → remove this Normal, focus Code
+                                segmentController.handleBackspaceOnEmptyNormalSegment(segment)
+                                true
+                            } else {
+                                // Non-empty Normal with preceding Code → move focus to end of Code
+                                segmentController.focusSegment(prevCode.id)
+                                true // consume the key event to prevent deleting text
+                            }
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            },
+        textStyle = style.inputTextStyle.copy(color = inputTextColor),
+        cursorBrush = SolidColor(inputTextColor),
+        visualTransformation = if (enabledFormats.isNotEmpty()) combinedTransformation else VisualTransformation.None,
+        onTextLayout = { result -> textLayoutResult = result },
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawWithContent {
+                        val layout = textLayoutResult
+
+                        // --- Draw inline code backgrounds BEFORE content ---
+                        if (layout != null && spanTransformation.inlineCodeRanges.isNotEmpty()) {
+                            val hPad = 4f
+                            val vPad = 2f
+                            val cornerPx = inlineCodeCornerRadiusDp.toPx()
+                            for (range in spanTransformation.inlineCodeRanges) {
+                                val pathBounds = layout.getPathForRange(range.first, range.last + 1)
+                                val bounds = pathBounds.getBounds()
+                                if (bounds.width > 0f && bounds.height > 0f) {
+                                    drawRoundRect(
+                                        color = inlineCodeBgColor,
+                                        topLeft = Offset(bounds.left - hPad, bounds.top - vPad),
+                                        size = Size(bounds.width + hPad * 2, bounds.height + vPad * 2),
+                                        cornerRadius = CornerRadius(cornerPx, cornerPx)
+                                    )
+                                }
+                            }
+                        }
+
+                        // --- Draw content (text, placeholder, cursor) ---
+                        drawContent()
+
+                        // --- Draw inline code borders AFTER content ---
+                        if (layout != null && spanTransformation.inlineCodeRanges.isNotEmpty()) {
+                            val hPad = 4f
+                            val vPad = 2f
+                            val cornerPx = inlineCodeCornerRadiusDp.toPx()
+                            val borderPx = 1.dp.toPx()
+                            for (range in spanTransformation.inlineCodeRanges) {
+                                val pathBounds = layout.getPathForRange(range.first, range.last + 1)
+                                val bounds = pathBounds.getBounds()
+                                if (bounds.width > 0f && bounds.height > 0f) {
+                                    drawRoundRect(
+                                        color = inlineCodeBorderColor,
+                                        topLeft = Offset(bounds.left - hPad, bounds.top - vPad),
+                                        size = Size(bounds.width + hPad * 2, bounds.height + vPad * 2),
+                                        cornerRadius = CornerRadius(cornerPx, cornerPx),
+                                        style = Stroke(width = borderPx)
+                                    )
+                                }
+                            }
+                        }
+
+                        // --- Draw blockquote bars AFTER content ---
+                        if (layout != null) {
+                            val rawText = segment.controller.state.text
+                            if (rawText.isNotEmpty()) {
+                                val rawLines = rawText.split("\n")
+                                val barWidthPx = 3.dp.toPx()
+                                val barCornerRadius = barWidthPx / 2f
+                                val layoutTextLen = layout.layoutInput.text.length
+                                if (layoutTextLen > 0) {
+                                    // Track display-text offsets (accounting for "> " → "   " expansion)
+                                    var displayCharOffset = 0
+                                    var blockquoteFirstDisplayOffset = -1
+                                    var blockquoteLastDisplayOffset = -1
+
+                                    for ((lineIdx, rawLine) in rawLines.withIndex()) {
+                                        val isBlockquote = rawLine.startsWith("> ")
+                                        // Display line length: blockquote adds +1 char (2→3), bullet adds +1 (2→3)
+                                        val displayLineLen = when {
+                                            rawLine.startsWith("> ") -> rawLine.length + 1
+                                            rawLine.startsWith("- ") -> rawLine.length + 1
+                                            else -> rawLine.length
+                                        }
+                                        val displayLineEnd = displayCharOffset + displayLineLen
+
+                                        if (isBlockquote) {
+                                            if (blockquoteFirstDisplayOffset == -1) {
+                                                blockquoteFirstDisplayOffset = displayCharOffset
+                                            }
+                                            blockquoteLastDisplayOffset = displayLineEnd
+                                        }
+
+                                        if ((!isBlockquote || lineIdx == rawLines.size - 1) && blockquoteFirstDisplayOffset >= 0) {
+                                            // Use display offsets for layout queries
+                                            val safeFirst = blockquoteFirstDisplayOffset.coerceIn(0, layoutTextLen - 1)
+                                            // For the last offset, use the end of the last blockquote line
+                                            // but clamp to valid range. For empty lines (just "> "), use safeFirst.
+                                            val safeLast = (blockquoteLastDisplayOffset - 1).coerceIn(safeFirst, layoutTextLen - 1)
+                                            val firstVisualLine = layout.getLineForOffset(safeFirst)
+                                            val lastVisualLine = layout.getLineForOffset(safeLast)
+                                            val topY = layout.getLineTop(firstVisualLine)
+                                            val bottomY = layout.getLineBottom(lastVisualLine)
+                                            val paddingPx = 4.dp.toPx()
+                                            val adjustedTop = if (blockquoteFirstDisplayOffset > 0) topY + paddingPx else topY
+                                            val adjustedBottom = if (lineIdx < rawLines.size - 1 || !isBlockquote) bottomY - paddingPx else bottomY
+                                            if (adjustedBottom > adjustedTop) {
+                                                drawRoundRect(
+                                                    color = blockquoteBarColor,
+                                                    topLeft = Offset(0f, adjustedTop),
+                                                    size = Size(barWidthPx, adjustedBottom - adjustedTop),
+                                                    cornerRadius = CornerRadius(barCornerRadius, barCornerRadius)
+                                                )
+                                            }
+                                            blockquoteFirstDisplayOffset = -1
+                                            blockquoteLastDisplayOffset = -1
+                                        }
+
+                                        displayCharOffset = displayLineEnd + 1 // +1 for \n
+                                    }
+                                }
+                            }
+                        }
+                    }
+            ) {
+                if (showPlaceholder && tfv.text.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = style.inputPlaceholderColor,
+                        style = style.inputPlaceholderStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                innerTextField()
+            }
+        }
+    )
+    } // End CompositionLocalProvider
+}
+
+/**
  * Span-based visual transformation that renders WYSIWYG rich text.
  * Reads formatting spans from the controller at render time (not captured at creation).
  * This avoids stale span data when recomposition timing causes the transformation
@@ -1755,43 +2215,112 @@ private fun CodeSegmentTextField(
  */
 private class SpanBasedVisualTransformation(
     private val controller: RichTextEditorController,
-    private val inputTextColor: Color = Color.Unspecified
+    private val inputTextColor: Color = Color.Unspecified,
+    private val inlineCodeTextColor: Color = Color.Unspecified,
+    private val inlineCodeBackgroundColor: Color = Color.LightGray.copy(alpha = 0.3f),
+    private val linkColor: Color = Color.Unspecified
 ) : VisualTransformation {
+
+    /** Inline code ranges in the *transformed* (display) text, updated on each filter() call. */
+    var inlineCodeRanges: List<IntRange> = emptyList()
+        private set
 
     override fun filter(text: AnnotatedString): TransformedText {
         val currentSpans = controller.state.spans
         val rawText = text.text
 
         // Build display string replacing line prefixes with visual equivalents.
-        // All replacements are same-length so OffsetMapping.Identity still works.
-        //   "- "  →  "• "   (bullet dot)
-        //   "> "  →  "┃ "   (vertical bar for blockquote)
+        // Bullet "- " (2 chars) → "•  " (3 chars) to align with "N. " (3 chars).
+        // Blockquote "> " (2 chars) → "┃  " (3 chars) for consistent alignment.
+        // Since lengths differ, we use a custom OffsetMapping.
+        val lines = rawText.split("\n")
+        // Track cumulative offset difference per line for the offset mapping
+        // offsetDiffs[i] = total extra chars inserted before position i in the raw text
+        val offsetAtRawPos = IntArray(rawText.length + 1) // offsetAtRawPos[rawPos] = extra chars before rawPos
+
         val displayText = buildString {
-            val lines = rawText.split("\n")
+            var rawIdx = 0
+            var extraChars = 0
             for ((i, line) in lines.withIndex()) {
                 when {
                     line.startsWith("- ") -> {
-                        append("• ")
+                        append("•  ") // 3 chars (aligns with "N. ")
                         append(line.substring(2))
+                        // The "- " (2 raw chars) became "•  " (3 display chars) → +1 extra
+                        // Mark offset for each raw position in this line
+                        for (j in 0 until 2) {
+                            offsetAtRawPos[rawIdx + j] = extraChars
+                        }
+                        extraChars += 1 // +1 for the extra space
+                        for (j in 2..line.length) {
+                            offsetAtRawPos[rawIdx + j] = extraChars
+                        }
                     }
                     line.startsWith("> ") -> {
-                        append("┃ ")
+                        append("   ") // 3 spaces — bar drawn via drawBehind, not text
                         append(line.substring(2))
+                        for (j in 0 until 2) {
+                            offsetAtRawPos[rawIdx + j] = extraChars
+                        }
+                        extraChars += 1
+                        for (j in 2..line.length) {
+                            offsetAtRawPos[rawIdx + j] = extraChars
+                        }
                     }
-                    else -> append(line)
+                    else -> {
+                        append(line)
+                        for (j in 0..line.length) {
+                            offsetAtRawPos[rawIdx + j] = extraChars
+                        }
+                    }
                 }
-                if (i < lines.size - 1) append("\n")
+                rawIdx += line.length
+                if (i < lines.size - 1) {
+                    append("\n")
+                    offsetAtRawPos[rawIdx] = extraChars
+                    rawIdx += 1 // for the \n
+                }
+            }
+            // Final position
+            if (rawIdx <= rawText.length) {
+                offsetAtRawPos[rawIdx] = extraChars
+            }
+        }
+
+        val totalExtraChars = displayText.length - rawText.length
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val safeOffset = offset.coerceIn(0, rawText.length)
+                return safeOffset + offsetAtRawPos[safeOffset]
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                val safeOffset = offset.coerceIn(0, displayText.length)
+                // Binary search for the raw position
+                var lo = 0
+                var hi = rawText.length
+                while (lo < hi) {
+                    val mid = (lo + hi + 1) / 2
+                    if (mid + offsetAtRawPos[mid] <= safeOffset) lo = mid else hi = mid - 1
+                }
+                return lo
             }
         }
 
         val styled = buildAnnotatedString {
             append(displayText)
 
-            // Apply inline format spans — combine TextDecorations per span
+            // Collect inline code ranges in display coordinates for custom drawing
+            val collectedInlineCodeRanges = mutableListOf<IntRange>()
+
+            // Apply inline format spans — use offset mapping to convert raw positions to display positions
             for (span in currentSpans) {
-                val start = span.start.coerceAtMost(displayText.length)
-                val end = span.end.coerceAtMost(displayText.length)
-                if (start >= end) continue
+                val rawStart = span.start.coerceAtMost(rawText.length)
+                val rawEnd = span.end.coerceAtMost(rawText.length)
+                if (rawStart >= rawEnd) continue
+                val start = offsetMapping.originalToTransformed(rawStart)
+                val end = offsetMapping.originalToTransformed(rawEnd)
+                if (start >= end || start >= displayText.length) continue
 
                 val decorations = mutableListOf<TextDecoration>()
                 for (format in span.formats) {
@@ -1801,22 +2330,59 @@ private class SpanBasedVisualTransformation(
                         RichTextFormat.LINK -> decorations.add(TextDecoration.Underline)
                         else -> {
                             val s = formatToSpanStyle(format)
-                            if (s != null) addStyle(s, start, end)
+                            if (s != null) addStyle(s, start, end.coerceAtMost(displayText.length))
                         }
+                    }
+                    if (format == RichTextFormat.INLINE_CODE) {
+                        collectedInlineCodeRanges.add(start until end.coerceAtMost(displayText.length))
                     }
                 }
                 if (decorations.isNotEmpty()) {
-                    addStyle(SpanStyle(textDecoration = TextDecoration.combine(decorations)), start, end)
+                    addStyle(SpanStyle(textDecoration = TextDecoration.combine(decorations)), start, end.coerceAtMost(displayText.length))
                 }
                 if (RichTextFormat.LINK in span.formats) {
-                    addStyle(SpanStyle(color = Color(0xFF1A73E8)), start, end)
+                    addStyle(SpanStyle(color = linkColor), start, end.coerceAtMost(displayText.length))
                 }
             }
 
-            // Style line-based prefixes
-            styleLinePrefixes(rawText)
+            inlineCodeRanges = collectedInlineCodeRanges
+
+            // Style line-based prefixes (using display positions)
+            styleLinePrefixes(displayText)
+
+            // Add paragraph indentation for blockquote wrapped lines.
+            // Check raw lines (not display lines) to identify blockquotes accurately.
+            var rawCharIdx = 0
+            val rawLines2 = rawText.split("\n")
+            var blockStart2 = -1
+            var blockEnd2 = -1
+            var displayOffset = 0
+            for ((i, rawLine) in rawLines2.withIndex()) {
+                val isBlockquote = rawLine.startsWith("> ")
+                // Calculate display position for this line
+                val displayLineLen = if (isBlockquote) rawLine.length + 1 else rawLine.length // +1 for "> " → "   " (2→3 chars)
+                if (isBlockquote) {
+                    if (blockStart2 == -1) blockStart2 = displayOffset
+                    blockEnd2 = (displayOffset + displayLineLen).coerceAtMost(displayText.length)
+                }
+                if ((!isBlockquote || i == rawLines2.size - 1) && blockStart2 != -1) {
+                    addStyle(
+                        ParagraphStyle(
+                            textIndent = TextIndent(
+                                firstLine = 0.sp,
+                                restLine = 10.sp
+                            )
+                        ),
+                        blockStart2,
+                        blockEnd2
+                    )
+                    blockStart2 = -1
+                    blockEnd2 = -1
+                }
+                displayOffset += displayLineLen + 1 // +1 for \n
+            }
         }
-        return TransformedText(styled, OffsetMapping.Identity)
+        return TransformedText(styled, offsetMapping)
     }
 
     private fun formatToSpanStyle(format: RichTextFormat): SpanStyle? = when (format) {
@@ -1824,7 +2390,7 @@ private class SpanBasedVisualTransformation(
         RichTextFormat.ITALIC -> SpanStyle(fontStyle = FontStyle.Italic)
         RichTextFormat.INLINE_CODE -> SpanStyle(
             fontFamily = FontFamily.Monospace,
-            background = Color.LightGray.copy(alpha = 0.3f)
+            color = inlineCodeTextColor
         )
         RichTextFormat.CODE_BLOCK -> SpanStyle(
             fontFamily = FontFamily.Monospace,
@@ -1839,12 +2405,12 @@ private class SpanBasedVisualTransformation(
         var idx = 0
         for (line in lines) {
             when {
-                // Bullet list: "- " → displayed as "• " — style the bullet bold with text color
-                line.startsWith("- ") -> {
+                // Bullet list: displayed as "•  " (3 chars) — style the bullet bold with text color
+                line.startsWith("•  ") -> {
                     addStyle(SpanStyle(
                         fontWeight = FontWeight.Bold,
                         color = inputTextColor
-                    ), idx, idx + 2)
+                    ), idx, idx + 3)
                 }
                 // Ordered list: "1. " prefix — style number+dot bold with text color
                 line.matches(Regex("^\\d+\\. .*")) -> {
@@ -1856,20 +2422,8 @@ private class SpanBasedVisualTransformation(
                         ), idx, idx + dotIdx + 2)
                     }
                 }
-                // Blockquote: "> " → displayed as "┃ " — style bar bold with text color,
-                // content in gray (no italic — keep user's own formatting intact)
-                line.startsWith("> ") -> {
-                    addStyle(SpanStyle(
-                        color = inputTextColor,
-                        fontWeight = FontWeight.Bold,
-                        fontStyle = FontStyle.Normal
-                    ), idx, idx + 1)
-                    if (line.length > 2) {
-                        addStyle(SpanStyle(
-                            color = Color(0xFF666666)
-                        ), idx + 2, idx + line.length)
-                    }
-                }
+                // Blockquote lines use default text color — no special styling needed.
+                // The bar is drawn via drawBehind in NormalSegmentTextField.
             }
             idx += line.length + 1 // +1 for newline
         }

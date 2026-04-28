@@ -1050,7 +1050,7 @@
         <item name="cometchatSearchMessageTimestampTextAppearance">?attr/cometchatTextAppearanceCaption1Regular</item>
         <item name="cometchatSearchMessageSeparatorColor">@android:color/transparent</item>
         <item name="cometchatSearchMessageLinkTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
-        <item name="cometChatSearchMessageThreadIcon">@drawable/cometchat_ic_thread</item>
+        <item name="cometchatSearchMessageThreadIcon">@drawable/cometchat_ic_thread</item>
 
         <!-- Avatar Styling -->
         <item name="cometchatSearchAvatarStyle">?attr/cometchatAvatarStyle</item>

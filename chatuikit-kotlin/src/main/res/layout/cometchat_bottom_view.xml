@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Moderation indicator -->
+    <LinearLayout
+        android:id="@+id/moderation_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/cometchat_padding_2"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="@dimen/cometchat_2dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/cometchat_ic_warning" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cometchat_moderation_block_message" />
+    </LinearLayout>
+
+    <!-- AI Assistant copy button -->
+    <LinearLayout
+        android:id="@+id/ai_copy_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/ai_copy_button"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cometchat_copy"
+            android:src="@drawable/cometchat_ic_copy_paste"
+            app:tint="?attr/cometchatTextColorSecondary"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+</LinearLayout>

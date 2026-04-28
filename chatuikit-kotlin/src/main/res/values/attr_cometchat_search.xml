@@ -13,6 +13,7 @@
         <attr name="cometchatSearchBarTextColor" format="color" />
         <attr name="cometchatSearchBarTextAppearance" format="reference" />
         <attr name="cometchatSearchBarHintTextColor" format="color" />
+        <attr name="cometchatSearchBarHintTextAppearance" format="reference" />
 
         <!-- Search Icons -->
         <attr name="cometchatSearchBackIcon" format="reference" />
@@ -59,13 +60,13 @@
         <attr name="cometchatSearchMessageSeparatorColor" format="color" />
         <attr name="cometchatSearchMessageLinkTextColor" format="color" />
         <attr name="cometchatSearchMessageLinkTextAppearance" format="reference" />
-        <attr name="cometChatSearchMessageThreadIcon" format="reference" />
+        <attr name="cometchatSearchMessageThreadIcon" format="reference" />
+        <attr name="cometchatSearchMessageThreadIconTint" format="color" />
 
-        <!-- Date Separator-->
+        <!-- Date Separator -->
         <attr name="cometchatSearchDateSeparatorTextColor" format="color" />
         <attr name="cometchatSearchDateSeparatorTextAppearance" format="reference" />
         <attr name="cometchatSearchDateSeparatorBackgroundColor" format="color" />
-
         <attr name="cometchatSearchMessageDateStyle" format="reference" />
 
         <!-- Avatar Styling -->
@@ -73,6 +74,12 @@
 
         <!-- Badge Styling -->
         <attr name="cometchatSearchBadgeStyle" format="reference" />
+
+        <!-- Status Indicator Styling -->
+        <attr name="cometchatSearchStatusIndicatorStyle" format="reference" />
+
+        <!-- Loading State -->
+        <attr name="cometchatSearchLoadingStateBackgroundColor" format="color" />
 
         <!-- Empty State -->
         <attr name="cometchatSearchEmptyStateTextColor" format="color" />
@@ -82,7 +89,7 @@
         <attr name="cometchatSearchEmptyStateIcon" format="reference" />
         <attr name="cometchatSearchEmptyStateIconTint" format="color" />
 
-        <!-- Empty State -->
+        <!-- Initial State -->
         <attr name="cometchatSearchInitialStateTextColor" format="color" />
         <attr name="cometchatSearchInitialStateTextAppearance" format="reference" />
         <attr name="cometchatSearchInitialStateSubtitleTextColor" format="color" />

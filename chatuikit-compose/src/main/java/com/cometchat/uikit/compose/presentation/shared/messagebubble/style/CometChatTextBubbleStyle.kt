@@ -145,7 +145,7 @@ data class CometChatTextBubbleStyle(
             // Content-specific defaults (keep theme-based values)
             textColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
-            linkColor: Color = CometChatTheme.colorScheme.infoColor,
+            linkColor: Color = CometChatTheme.colorScheme.primary,
             translatedTextColor: Color = CometChatTheme.colorScheme.textColorSecondary,
             translatedTextStyle: TextStyle = CometChatTheme.typography.caption2Regular,
             separatorColor: Color = CometChatTheme.colorScheme.strokeColorLight,

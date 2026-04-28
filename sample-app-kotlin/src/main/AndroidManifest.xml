@@ -103,6 +103,12 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.SampleApp" />
 
+        <!-- Chat History Activity - AI assistant chat history -->
+        <activity
+            android:name=".ui.messages.ChatHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SampleApp" />
+
         <!-- New Chat Activity - Start new conversations -->
         <!-- Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5, 7.6 -->
         <activity
