@@ -846,7 +846,7 @@ class CometChatIncomingCall @JvmOverloads constructor(
             call.sessionId,
             call.type,
             CallWorkFlow.DEFAULT,
-            callSettingsBuilder as? CometChatCalls.CallSettingsBuilder,
+            callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder,
             null
         )
     }

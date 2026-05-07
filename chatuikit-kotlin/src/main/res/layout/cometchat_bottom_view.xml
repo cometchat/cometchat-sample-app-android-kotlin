@@ -11,6 +11,7 @@
         android:id="@+id/moderation_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/cometchat_color_error_100"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="@dimen/cometchat_padding_2"
@@ -26,8 +27,10 @@
 
         <TextView
             android:id="@+id/message"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="2"
             android:text="@string/cometchat_moderation_block_message" />
     </LinearLayout>
 

@@ -85,6 +85,27 @@ class MentionInsertionHelper(
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         
+        // Apply ForegroundColorSpan and BackgroundColorSpan for EditText compatibility.
+        // ClickableSpan.updateDrawState() requires MovementMethod which interferes with editing,
+        // so we apply visual styling via separate color spans.
+        suggestionItem.promptTextStyle?.let { style ->
+            if (style.getColor() != 0) {
+                editable.setSpan(
+                    android.text.style.ForegroundColorSpan(style.getColor()),
+                    spanStart, spanEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            if (style.getBackgroundColor() != 0) {
+                val bgWithAlpha = (51 shl 24) or (style.getBackgroundColor() and 0x00FFFFFF)
+                editable.setSpan(
+                    android.text.style.BackgroundColorSpan(bgWithAlpha),
+                    spanStart, spanEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
+        
         // Move cursor after the mention and space
         val newCursorPosition = replaceStart + mentionWithSpace.length
         editText.setSelection(newCursorPosition)

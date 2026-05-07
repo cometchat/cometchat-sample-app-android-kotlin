@@ -23,6 +23,7 @@ class PreviewConversationListRepository(
 ) : ConversationListRepository {
     
     private var hasMoreData = false // Preview doesn't need pagination
+    private var hasFetched = false // Track if initial fetch has been done
     
     override suspend fun getConversations(
         request: ConversationsRequest
@@ -40,6 +41,11 @@ class PreviewConversationListRepository(
             return Result.success(emptyList())
         }
         
+        // Return data only on first fetch to prevent duplicate appending
+        if (hasFetched) {
+            return Result.success(emptyList())
+        }
+        hasFetched = true
         return Result.success(initialConversations)
     }
     

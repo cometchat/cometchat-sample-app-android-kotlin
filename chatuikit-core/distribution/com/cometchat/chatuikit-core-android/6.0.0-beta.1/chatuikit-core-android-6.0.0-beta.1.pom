@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.cometchat</groupId>
+  <artifactId>chatuikit-core-android</artifactId>
+  <version>6.0.0-beta.1</version>
+  <packaging>aar</packaging>
+  <name>CometChatUIKitCore</name>
+  <description>CometChat virtual chat builder for Android</description>
+  <url>https://www.cometchat.com</url>
+  <licenses>
+    <license>
+      <name>CometChat License</name>
+      <url>https://www.cometchat.com/terms</url>
+    </license>
+  </licenses>
+  <dependencies>
+    <dependency>
+      <groupId>androidx.core</groupId>
+      <artifactId>core-ktx</artifactId>
+      <version>1.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>androidx.appcompat</groupId>
+      <artifactId>appcompat</artifactId>
+      <version>1.7.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.material</groupId>
+      <artifactId>material</artifactId>
+      <version>1.12.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>androidx.constraintlayout</groupId>
+      <artifactId>constraintlayout</artifactId>
+      <version>2.2.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>androidx.lifecycle</groupId>
+      <artifactId>lifecycle-runtime-ktx</artifactId>
+      <version>2.9.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.cometchat</groupId>
+      <artifactId>chat-sdk-android</artifactId>
+      <version>5.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>androidx.lifecycle</groupId>
+      <artifactId>lifecycle-viewmodel-ktx</artifactId>
+      <version>2.9.2</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

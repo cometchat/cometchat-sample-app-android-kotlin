@@ -61,7 +61,6 @@ class CallDetailsHistoryViewModel : ViewModel() {
             .setUid(user.uid)
             .setLimit(30)
             .setCallCategory(CometChatCallsConstants.CALL_CATEGORY_CALL)
-            .setAuthToken(CometChat.getUserAuthToken())
             .build()
         
         // Reset state for new user

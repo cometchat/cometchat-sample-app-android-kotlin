@@ -970,19 +970,34 @@ internal object InternalContentRenderer {
             }
             is TextMessage -> {
                 if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
-                    val length = message.text?.length ?: 0
+                    // Set a fixed width on the message_container so children can fill it
+                    // view → bottomViewContainer → message_container → MaterialCardView
+                    val messageContainer = parent?.parent as? View
+                    val fixedWidth = Utils.convertDpToPx(view.context, 260)
+                    val mcParams = messageContainer?.layoutParams
+                    if (mcParams != null) {
+                        mcParams.width = fixedWidth
+                        messageContainer.layoutParams = mcParams
+                    }
                     if (params != null) {
-                        if (length < 15) {
-                            params.width = Utils.convertDpToPx(view.context, 200)
-                        } else {
-                            params.width = MATCH_PARENT
-                        }
+                        params.width = MATCH_PARENT
                     }
                     moderationContainer?.visibility = View.VISIBLE
+                    // Style the moderation text in error/red color
+                    val messageTextView = view.findViewById<android.widget.TextView>(R.id.message)
+                    messageTextView?.setTextColor(CometChatTheme.getErrorColor(view.context))
+                    val iconView = view.findViewById<android.widget.ImageView>(R.id.icon)
+                    iconView?.setColorFilter(CometChatTheme.getErrorColor(view.context))
                     view.visibility = View.VISIBLE
                 } else {
                     if (params != null) {
                         params.width = WRAP_CONTENT
+                    }
+                    val messageContainer = parent?.parent as? View
+                    val mcParams = messageContainer?.layoutParams
+                    if (mcParams != null) {
+                        mcParams.width = WRAP_CONTENT
+                        messageContainer.layoutParams = mcParams
                     }
                     moderationContainer?.visibility = View.GONE
                     view.visibility = View.GONE
@@ -990,14 +1005,32 @@ internal object InternalContentRenderer {
             }
             is MediaMessage -> {
                 if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
+                    val messageContainer = parent?.parent as? View
+                    val fixedWidth = Utils.convertDpToPx(view.context, 260)
+                    val mcParams = messageContainer?.layoutParams
+                    if (mcParams != null) {
+                        mcParams.width = fixedWidth
+                        messageContainer.layoutParams = mcParams
+                    }
                     if (params != null) {
                         params.width = MATCH_PARENT
                     }
                     moderationContainer?.visibility = View.VISIBLE
+                    // Style the moderation text in error/red color
+                    val messageTextView = view.findViewById<android.widget.TextView>(R.id.message)
+                    messageTextView?.setTextColor(CometChatTheme.getErrorColor(view.context))
+                    val iconView = view.findViewById<android.widget.ImageView>(R.id.icon)
+                    iconView?.setColorFilter(CometChatTheme.getErrorColor(view.context))
                     view.visibility = View.VISIBLE
                 } else {
                     if (params != null) {
                         params.width = WRAP_CONTENT
+                    }
+                    val messageContainer = parent?.parent as? View
+                    val mcParams = messageContainer?.layoutParams
+                    if (mcParams != null) {
+                        mcParams.width = WRAP_CONTENT
+                        messageContainer.layoutParams = mcParams
                     }
                     moderationContainer?.visibility = View.GONE
                     view.visibility = View.GONE

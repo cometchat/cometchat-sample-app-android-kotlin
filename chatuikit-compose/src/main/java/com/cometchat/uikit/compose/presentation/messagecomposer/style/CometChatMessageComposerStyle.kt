@@ -146,11 +146,14 @@ data class CometChatMessageComposerStyle(
     val stickerActiveIcon: Painter?,
     val stickerActiveIconTint: Color,
 
-    // Rich text toggle button styling (DEPRECATED - toggle button removed, toolbar visibility is automatic)
-    // These properties are kept for backward compatibility but are no longer used
+    // Rich text toggle button styling (Aa button in multiline mode Row 2)
     val richTextToggleIcon: Painter?,
     val richTextToggleIconTint: Color,
     val richTextToggleIconActiveTint: Color,
+
+    // Formatting toolbar close button styling (X button at start of toolbar in multiline mode)
+    val formattingToolbarCloseIcon: Painter?,
+    val formattingToolbarCloseIconTint: Color,
 
     // Link edit dialog styling
     val linkDialogBackgroundColor: Color,
@@ -261,11 +264,14 @@ data class CometChatMessageComposerStyle(
             stickerActiveIcon: Painter? = painterResource(R.drawable.cometchat_ic_filled_sticker),
             stickerActiveIconTint: Color = CometChatTheme.colorScheme.primary,
 
-            // Rich text toggle button styling (DEPRECATED - toggle button removed, toolbar visibility is automatic)
-            // These properties are kept for backward compatibility but are no longer used
+            // Rich text toggle button styling (Aa button in multiline mode Row 2)
             richTextToggleIcon: Painter? = painterResource(R.drawable.cometchat_ic_edit),
             richTextToggleIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
             richTextToggleIconActiveTint: Color = CometChatTheme.colorScheme.primary,
+
+            // Formatting toolbar close button styling (X button at start of toolbar in multiline mode)
+            formattingToolbarCloseIcon: Painter? = painterResource(R.drawable.cometchat_ic_close),
+            formattingToolbarCloseIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
 
             // Link edit dialog styling
             linkDialogBackgroundColor: Color = CometChatTheme.colorScheme.backgroundColor1,
@@ -342,6 +348,8 @@ data class CometChatMessageComposerStyle(
             richTextToggleIcon = richTextToggleIcon,
             richTextToggleIconTint = richTextToggleIconTint,
             richTextToggleIconActiveTint = richTextToggleIconActiveTint,
+            formattingToolbarCloseIcon = formattingToolbarCloseIcon,
+            formattingToolbarCloseIconTint = formattingToolbarCloseIconTint,
             linkDialogBackgroundColor = linkDialogBackgroundColor,
             linkDialogTitleTextColor = linkDialogTitleTextColor,
             linkDialogTitleTextStyle = linkDialogTitleTextStyle,

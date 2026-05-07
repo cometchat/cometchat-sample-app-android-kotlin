@@ -156,11 +156,19 @@ fun CometChatUsers(
         CometChatUsersViewModelFactory().create(CometChatUsersViewModel::class.java)
     }
     
-    // Apply users request builder when it changes
+    // Apply users request builder when it changes, and trigger the initial fetch.
+    // The ViewModel no longer fetches in its `init` (that caused a race with
+    // callers who set a custom builder shortly after construction — e.g. the AI
+    // sample filtering by agent role — producing mixed results). This effect is
+    // now responsible for kicking off the first fetch for all cases:
+    //   - builder == null → just call fetchUsers() (unfiltered, default behaviour)
+    //   - builder != null → apply builder and refreshList() (filtered)
     LaunchedEffect(usersRequestBuilder) {
-        usersRequestBuilder?.let { builder ->
-            viewModel.setUsersRequestBuilder(builder)
+        if (usersRequestBuilder != null) {
+            viewModel.setUsersRequestBuilder(usersRequestBuilder)
             viewModel.refreshList()
+        } else {
+            viewModel.fetchUsers()
         }
     }
     

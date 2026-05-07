@@ -174,11 +174,24 @@ class CometChatPopupMenu(
     }
 
     fun dismiss() {
+        android.util.Log.d(TAG, "dismiss() called — popupWindow=${popupWindow?.hashCode()}, isShowing=${popupWindow?.isShowing}")
         popupWindow?.let {
             if (it.isShowing) {
+                android.util.Log.d(TAG, "dismiss() — actually dismissing popupWindow=${it.hashCode()}")
                 it.dismiss()
+            } else {
+                android.util.Log.d(TAG, "dismiss() — popupWindow NOT showing, skipping")
             }
         }
+    }
+
+    /**
+     * Returns whether the popup window is currently showing.
+     */
+    fun isShowing(): Boolean {
+        val showing = popupWindow?.isShowing == true
+        android.util.Log.d(TAG, "isShowing() = $showing, popupWindow=${popupWindow?.hashCode()}")
+        return showing
     }
 
     fun setMenuItems(items: List<MenuItem>) {
@@ -285,9 +298,14 @@ class CometChatPopupMenu(
             elevation = this@CometChatPopupMenu.elevation.toFloat()
             animationStyle = R.style.CometChatPopupMenuAnimation
             setOnDismissListener {
+                android.util.Log.d(TAG, "PopupWindow.onDismiss fired — popupWindow=${this.hashCode()}, thread=${Thread.currentThread().name}")
+                Exception("PopupWindow dismiss stacktrace").also { e ->
+                    android.util.Log.d(TAG, "PopupWindow.onDismiss stacktrace:", e)
+                }
                 this@CometChatPopupMenu.onDismissListener?.invoke()
             }
         }
+        android.util.Log.d(TAG, "show() — created popupWindow=${popupWindow?.hashCode()}, focusable=${popupWindow?.isFocusable}, outsideTouchable=${popupWindow?.isOutsideTouchable}")
 
         // Convert dp offsets to pixels (matching Java: 12dp margin, 10dp vertical offset)
         val marginInPixels = (12 * context.resources.displayMetrics.density + 0.5f).toInt()
@@ -338,7 +356,9 @@ class CometChatPopupMenu(
             }
         }
 
+        android.util.Log.d(TAG, "show() — showAtLocation: x=$adjustedXOffset, y=$yOffset, position=$position, popupWindow=${popupWindow?.hashCode()}")
         popupWindow?.showAtLocation(anchorView, Gravity.NO_GRAVITY, adjustedXOffset, yOffset)
+        android.util.Log.d(TAG, "show() — popup shown, isShowing=${popupWindow?.isShowing}")
     }
 
     /**

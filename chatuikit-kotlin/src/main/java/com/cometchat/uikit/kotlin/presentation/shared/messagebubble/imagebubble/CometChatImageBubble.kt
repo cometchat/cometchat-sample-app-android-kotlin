@@ -350,11 +350,28 @@ class CometChatImageBubble @JvmOverloads constructor(
             val extensions = injected.optJSONObject("extensions") ?: return null
             val thumbnailGeneration = extensions.optJSONObject("thumbnail-generation") ?: return null
             val urlMedium = thumbnailGeneration.optString("url_medium", null)
-            if (urlMedium.isNullOrEmpty()) null else urlMedium
+            if (urlMedium.isNullOrEmpty()) null else sanitizeUrl(urlMedium)
         } catch (e: Exception) {
             Log.e(TAG, "Error extracting thumbnail URL from metadata: ${e.message}")
             null
         }
+    }
+
+    /**
+     * Sanitizes a URL by removing the `fat` (File Access Token) parameter.
+     * The CometChat SDK appends a `fat=` token to CloudFront-signed thumbnail URLs,
+     * which invalidates the CloudFront signature and causes HTTP 403 errors.
+     * Since CloudFront signed URLs already contain their own authentication
+     * (Signature + Key-Pair-Id), the `fat` parameter is redundant and must be removed.
+     */
+    private fun sanitizeUrl(url: String): String {
+        // Remove &fat=... from the URL (everything after &fat= to the end)
+        val fatIndex = url.indexOf("&fat=")
+        if (fatIndex > 0) return url.substring(0, fatIndex)
+        // Also handle ?fat= (in case it's the only query param, though unlikely for thumbnails)
+        val fatIndex2 = url.indexOf("?fat=")
+        if (fatIndex2 > 0) return url.substring(0, fatIndex2)
+        return url
     }
 
     /**

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.cometchat.calls.core.CallSession
 import com.cometchat.calls.core.CometChatCalls
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.core.CometChat
@@ -55,7 +56,7 @@ class CometChatCallActivity : AppCompatActivity() {
         private var user: User? = null
         private var outgoingCallStyle: CometChatOutgoingCallStyle? = null
         private var incomingCallStyle: CometChatIncomingCallStyle? = null
-        private var onGoingCallSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+        private var onGoingSessionSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
         private var callingType: String? = null
         
         // Flag to prevent double launches
@@ -125,11 +126,11 @@ class CometChatCallActivity : AppCompatActivity() {
         fun launchConferenceCallScreen(
             context: Context,
             baseMessage: BaseMessage,
-            callSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+            callSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
         ) {
             callingType = DIRECT_CALL
             Companion.baseMessage = baseMessage
-            onGoingCallSettingsBuilder = callSettingsBuilder
+            onGoingSessionSettingsBuilder = callSettingsBuilder
             startActivity(context)
         }
 
@@ -204,7 +205,7 @@ class CometChatCallActivity : AppCompatActivity() {
                     sessionId = sessionId,
                     callType = callType,
                     callWorkFlow = UIKitConstants.CallWorkFlow.MEETING,
-                    callSettingsBuilder = onGoingCallSettingsBuilder
+                    callSettingsBuilder = onGoingSessionSettingsBuilder
                 )
             }
         }
@@ -299,9 +300,9 @@ class CometChatCallActivity : AppCompatActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
         if (isInPictureInPictureMode) {
-            CometChatCalls.enterPIPMode()
+            CallSession.getInstance()?.enablePictureInPictureLayout()
         } else {
-            CometChatCalls.exitPIPMode()
+            CallSession.getInstance()?.disablePictureInPictureLayout()
         }
     }
 
@@ -312,7 +313,7 @@ class CometChatCallActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        CometChatCalls.endSession()
+        CallSession.getInstance()?.leaveSession()
         CometChat.clearActiveCall()
         
         // Reset the launching flag to allow new calls
@@ -323,7 +324,7 @@ class CometChatCallActivity : AppCompatActivity() {
         call = null
         callingType = null
         user = null
-        onGoingCallSettingsBuilder = null
+        onGoingSessionSettingsBuilder = null
         outgoingCallStyle = null
         incomingCallStyle = null
     }

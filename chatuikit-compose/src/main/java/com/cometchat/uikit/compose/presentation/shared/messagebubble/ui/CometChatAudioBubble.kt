@@ -71,7 +71,8 @@ fun CometChatAudioBubble(
     val audioUrl = message.attachment?.fileUrl ?: ""
     val messageId = message.id.toInt()
     val fileName = message.attachment?.fileName ?: "audio_${messageId}.m4a"
-    CometChatAudioBubbleContent(audioUrl, messageId, fileName, style, alignment, onLongClick, modifier)
+    val fileSize = message.attachment?.fileSize ?: 0
+    CometChatAudioBubbleContent(audioUrl, messageId, fileName, fileSize, style, alignment, onLongClick, modifier)
 }
 
 @Composable
@@ -85,13 +86,13 @@ fun CometChatAudioBubble(
     },
     onLongClick: (() -> Unit)? = null
 ) {
-    CometChatAudioBubbleContent(audioUrl, audioUrl.hashCode(), "audio_${audioUrl.hashCode()}.m4a", style, alignment, onLongClick, modifier)
+    CometChatAudioBubbleContent(audioUrl, audioUrl.hashCode(), "audio_${audioUrl.hashCode()}.m4a", fileSize, style, alignment, onLongClick, modifier)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CometChatAudioBubbleContent(
-    audioUrl: String, messageId: Int, fileName: String,
+    audioUrl: String, messageId: Int, fileName: String, fileSize: Int,
     style: CometChatAudioBubbleStyle,
     alignment: UIKitConstants.MessageBubbleAlignment,
     onLongClick: (() -> Unit)?, modifier: Modifier = Modifier
@@ -107,7 +108,8 @@ private fun CometChatAudioBubbleContent(
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     var progress by remember { mutableFloatStateOf(0f) }
-    var durationText by remember { mutableStateOf("00:00 / --:--") }
+    val initialDisplayText = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / --:--"
+    var durationText by remember { mutableStateOf(initialDisplayText) }
 
     val playbackState = remember(messageId) { AudioBubbleStateManager.getOrCreate(messageId, audioUrl, null) }
     var playState by remember { mutableStateOf(playbackState.playState) }
@@ -244,4 +246,13 @@ fun formatDurationMs(ms: Long): String {
     if (ms <= 0) return "00:00"
     val totalSeconds = ms / 1000; val minutes = (totalSeconds / 60).toInt(); val seconds = (totalSeconds % 60).toInt()
     return String.format(Locale.US, "%02d:%02d", minutes, seconds)
+}
+
+private fun formatFileSize(bytes: Int): String {
+    return when {
+        bytes <= 0 -> "0 KB"
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        else -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0))
+    }
 }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cometchat.calls.core.CallSession
 import com.cometchat.calls.core.CometChatCalls
 import com.cometchat.chat.core.CometChat
 import com.cometchat.uikit.compose.presentation.ongoingcall.style.CometChatOngoingCallStyle
@@ -59,10 +60,10 @@ class CometChatOngoingCallActivity : ComponentActivity() {
         private const val EXTRA_CALL_TYPE = "extra_call_type"
         private const val EXTRA_CALL_WORKFLOW = "extra_call_workflow"
 
-        // Static storage for CallSettingsBuilder (cannot be passed via Intent)
+        // Static storage for SessionSettingsBuilder (cannot be passed via Intent)
         // **Validates: Requirement 12.4**
         @Volatile
-        private var onGoingCallSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+        private var onGoingSessionSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
 
         // Static storage for style
         @Volatile
@@ -86,11 +87,11 @@ class CometChatOngoingCallActivity : ComponentActivity() {
             sessionId: String,
             callType: String,
             callWorkFlow: CallWorkFlow = CallWorkFlow.DEFAULT,
-            callSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null,
+            callSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null,
             style: CometChatOngoingCallStyle? = null
         ) {
-            // Store CallSettingsBuilder in static variable (Requirement 12.4)
-            onGoingCallSettingsBuilder = callSettingsBuilder
+            // Store SessionSettingsBuilder in static variable (Requirement 12.4)
+            onGoingSessionSettingsBuilder = callSettingsBuilder
             ongoingCallStyle = style
 
             val intent = Intent(context, CometChatOngoingCallActivity::class.java).apply {
@@ -142,9 +143,9 @@ class CometChatOngoingCallActivity : ComponentActivity() {
             val sid = sessionId
             val type = callType
             // Use provided builder, or UIKit's configured builder, or create default
-            val builder = onGoingCallSettingsBuilder 
-                ?: CometChatUIKit.getCallSettingsBuilder() 
-                ?: CometChatCalls.CallSettingsBuilder(this)
+            val builder = onGoingSessionSettingsBuilder 
+                ?: CometChatUIKit.getSessionSettingsBuilder() 
+                ?: CometChatCalls.SessionSettingsBuilder()
 
             if (sid != null && type != null) {
                 val viewModel: CometChatOngoingCallViewModel = viewModel()
@@ -164,7 +165,7 @@ class CometChatOngoingCallActivity : ComponentActivity() {
                             is OngoingCallEvent.UserJoined -> {
                                 // Handle PIP mode entry for current user (Requirement 18.1)
                                 if (event.isCurrentUser && isInPipMode) {
-                                    CometChatCalls.enterPIPMode()
+                                    CallSession.getInstance()?.enablePictureInPictureLayout()
                                 }
                             }
                             else -> { /* handled by composable */ }
@@ -278,7 +279,7 @@ class CometChatOngoingCallActivity : ComponentActivity() {
 
     /**
      * Called when PIP mode changes.
-     * Calls CometChatCalls.enterPIPMode/exitPIPMode accordingly.
+     * Calls CallSession.enablePictureInPictureLayout/disablePictureInPictureLayout accordingly.
      *
      * **Validates: Requirements 9.3, 9.4**
      */
@@ -290,12 +291,12 @@ class CometChatOngoingCallActivity : ComponentActivity() {
 
         if (isInPictureInPictureMode) {
             // Entering PIP mode (Requirement 9.3)
-            CometChatCalls.enterPIPMode()
+            CallSession.getInstance()?.enablePictureInPictureLayout()
             // Reset the entering flag after we've entered
             isEnteringPipMode = false
         } else {
             // Exiting PIP mode (Requirement 9.4)
-            CometChatCalls.exitPIPMode()
+            CallSession.getInstance()?.disablePictureInPictureLayout()
             
             // Only call handlePiPExit if the activity is finishing (user dismissed PIP)
             // If the activity is NOT finishing, user clicked PIP to return to full screen
@@ -338,8 +339,8 @@ class CometChatOngoingCallActivity : ComponentActivity() {
             ongoingCallViewModel?.endCall()
             CometChat.clearActiveCall()
         } else {
-            // MEETING workflow: end session only
-            CometChatCalls.endSession()
+            // MEETING workflow: leave session only
+            CallSession.getInstance()?.leaveSession()
         }
 
         CallingState.setIsActiveMeeting(false)
@@ -357,8 +358,11 @@ class CometChatOngoingCallActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
+        // Ensure the call session is fully torn down to stop WebRTC rendering
+        CallSession.getInstance()?.leaveSession()
+
         // Clear static builder (Requirement 11.1)
-        onGoingCallSettingsBuilder = null
+        onGoingSessionSettingsBuilder = null
         ongoingCallStyle = null
 
         // Clear active call (Requirement 11.2)

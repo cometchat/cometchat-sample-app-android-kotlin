@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import com.cometchat.uikit.compose.theme.CometChatTheme
 
 /**
  * Style configuration for [CometChatStickerBubble] composable.
@@ -138,10 +139,15 @@ data class CometChatStickerBubbleStyle(
          * Creates a style for outgoing (right-aligned) sticker messages.
          *
          * Uses transparent background (stickers don't have colored backgrounds).
+         * Explicitly sets timestampTextColor to a visible color since stickers
+         * have transparent backgrounds and the outgoing base style's white timestamp
+         * would be invisible in light mode.
          *
          * @return A new [CometChatStickerBubbleStyle] configured for outgoing messages
          */
         @Composable
-        fun outgoing(): CometChatStickerBubbleStyle = default()
+        fun outgoing(): CometChatStickerBubbleStyle = default(
+            timestampTextColor = CometChatTheme.colorScheme.textColorSecondary
+        )
     }
 }

@@ -14,7 +14,7 @@ package com.cometchat.uikit.core
  * @property overrideAdminHost Custom admin host URL (optional)
  * @property overrideClientHost Custom client host URL (optional)
  * @property enableCalling Whether calling features are enabled (default false)
- * @property callSettingsBuilder Custom CallSettingsBuilder for call configuration (CometChatCalls.CallSettingsBuilder)
+ * @property callSettingsBuilder Custom SessionSettingsBuilder for call configuration (CometChatCalls.SessionSettingsBuilder)
  */
 class UIKitSettings private constructor(
     val appId: String?,
@@ -169,10 +169,10 @@ class UIKitSettings private constructor(
         }
 
         /**
-         * Sets a custom CallSettingsBuilder for call configuration.
-         * This allows customization of call settings such as audio/video modes, default layouts, etc.
+         * Sets a custom SessionSettingsBuilder for call configuration.
+         * This allows customization of session settings such as audio/video modes, default layouts, etc.
          *
-         * @param builder The CometChatCalls.CallSettingsBuilder instance
+         * @param builder The CometChatCalls.SessionSettingsBuilder instance
          * @return This builder instance
          */
         fun setCallSettingsBuilder(builder: Any): UIKitSettingsBuilder {

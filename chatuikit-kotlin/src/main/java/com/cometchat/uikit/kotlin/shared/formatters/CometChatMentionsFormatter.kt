@@ -495,6 +495,8 @@ open class CometChatMentionsFormatter(
         val builder = usersRequestBuilder?.setSearchKeyword(queryString) 
             ?: UsersRequest.UsersRequestBuilder().setLimit(REQUEST_LIMIT).setSearchKeyword(queryString)
         usersRequest = builder.build()
+        // Clear list for new search (pagination will append)
+        localSuggestionItemList.clear()
         fetchUsers()
     }
 
@@ -508,6 +510,8 @@ open class CometChatMentionsFormatter(
             null
         }
         groupMembersRequest = builder?.build()
+        // Clear list for new search (pagination will append)
+        localSuggestionItemList.clear()
         fetchGroupMembers()
     }
 
@@ -526,7 +530,7 @@ open class CometChatMentionsFormatter(
                         promptTextStyle = tagStyle
                     )
                 }
-                localSuggestionItemList.clear()
+                // Append results for pagination (list is cleared in searchUser for new searches)
                 localSuggestionItemList.addAll(suggestions)
                 setSuggestionItemList(localSuggestionItemList.toList())
             }
@@ -585,7 +589,6 @@ open class CometChatMentionsFormatter(
                     }
                 }
 
-                localSuggestionItemList.clear()
                 localSuggestionItemList.addAll(suggestions)
                 setSuggestionItemList(localSuggestionItemList.toList())
             }

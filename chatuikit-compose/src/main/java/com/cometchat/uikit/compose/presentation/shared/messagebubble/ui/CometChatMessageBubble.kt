@@ -409,7 +409,9 @@ fun CometChatMessageBubble(
                 threadIndicatorTextColor = baseStyle.threadIndicatorTextColor,
                 threadIndicatorTextStyle = baseStyle.threadIndicatorTextStyle,
                 threadIndicatorIconTint = baseStyle.threadIndicatorIconTint,
-                timestampTextColor = baseStyle.timestampTextColor,
+                // Stickers have transparent background, so timestamp must use a visible color
+                // regardless of alignment (outgoing base style uses white which is invisible in light mode)
+                timestampTextColor = CometChatTheme.colorScheme.textColorSecondary,
                 timestampTextStyle = baseStyle.timestampTextStyle,
                 dateStyle = baseStyle.dateStyle,
                 messageReceiptStyle = baseStyle.messageReceiptStyle,
@@ -699,7 +701,7 @@ fun CometChatMessageBubble(
                         }
                     }
 
-                    // Bottom view (moderation) - inside the bubble
+                    // Bottom view (moderation) - inside the bubble with its own background
                     resolvedBottom?.invoke()
                 }
             }

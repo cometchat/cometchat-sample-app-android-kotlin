@@ -504,8 +504,8 @@ class GroupDetailsActivity : AppCompatActivity() {
             binding.viewMembers.visibility = View.GONE
             binding.leaveGroupLay.visibility = View.GONE
             
-            // Delete chat visibility based on lastMessage
-            binding.tvDeleteChat.visibility = if (hasLastMessage) View.VISIBLE else View.GONE
+            // Delete chat always visible for joined members
+            binding.tvDeleteChat.visibility = if (g.isJoined) View.VISIBLE else View.GONE
 
             if (g.isJoined) {
                 when (g.scope) {

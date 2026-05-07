@@ -640,7 +640,9 @@
     <style name="CometChatMessageComposerMentionsStyle">
         <item name="cometchatMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
         <item name="cometchatMentionTextColor">?attr/cometchatPrimaryColor</item>
+        <item name="cometchatMentionBackgroundColor">?attr/cometchatPrimaryColor</item>
         <item name="cometchatSelfMentionTextColor">?attr/cometchatWarningColor</item>
+        <item name="cometchatSelfMentionBackgroundColor">?attr/cometchatWarningColor</item>
         <item name="cometchatSelfMentionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
 

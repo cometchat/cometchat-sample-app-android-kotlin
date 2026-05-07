@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.constants.CometChatConstants
+import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.core.MessagesRequest
 import com.cometchat.chat.core.ReactionsRequest
 import com.cometchat.chat.models.BaseMessage
@@ -567,7 +568,19 @@ class CometChatMessageList @JvmOverloads constructor(
 
         // Wire up reaction callbacks on the adapter
         messageAdapter.onReactionClick = { reaction, message ->
-            onReactionClick?.invoke(message, reaction.reaction)
+            if (onReactionClick != null) {
+                onReactionClick?.invoke(message, reaction.reaction)
+            } else {
+                // Default toggle: remove if already reacted, add otherwise
+                val alreadyReacted = message.reactions?.any {
+                    it.reaction == reaction.reaction && it.reactedByMe
+                } == true
+                if (alreadyReacted) {
+                    viewModel?.removeReaction(message, reaction.reaction)
+                } else {
+                    viewModel?.addReaction(message, reaction.reaction)
+                }
+            }
         }
         messageAdapter.onReactionLongClick = { reaction, message ->
             if (onReactionLongClick != null) {
@@ -1057,6 +1070,14 @@ class CometChatMessageList @JvmOverloads constructor(
                 if (previousCount == 0 || (previousCount - 1) - lastVisiblePosition < 5) {
                     scrollToLastItem()
                 }
+            }
+        } else if (newCount > previousCount) {
+            // Even if wasAtBottom is false (stale due to keyboard/reply-preview resize),
+            // always scroll to bottom for the logged-in user's own messages
+            val lastMessage = messages.lastOrNull()
+            val loggedInUserId = CometChat.getLoggedInUser()?.uid
+            if (lastMessage != null && loggedInUserId != null && lastMessage.sender?.uid == loggedInUserId) {
+                scrollToLastItem()
             }
         }
     }
@@ -4396,7 +4417,12 @@ class CometChatMessageList @JvmOverloads constructor(
     private fun scrollToLastItem() {
         val itemCount = messageAdapter.itemCount
         if (itemCount > 0) {
-            recyclerViewMessageList?.scrollToPosition(itemCount - 1)
+            recyclerViewMessageList?.post {
+                val latestCount = messageAdapter.itemCount
+                if (latestCount > 0) {
+                    recyclerViewMessageList?.scrollToPosition(latestCount - 1)
+                }
+            }
         }
     }
 

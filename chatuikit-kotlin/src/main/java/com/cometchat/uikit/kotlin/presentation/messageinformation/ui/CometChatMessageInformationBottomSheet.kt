@@ -1,5 +1,6 @@
 package com.cometchat.uikit.kotlin.presentation.messageinformation.ui
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.BubbleFactory
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
@@ -53,6 +55,45 @@ class CometChatMessageInformationBottomSheet : BottomSheetDialogFragment() {
     private var bubbleFactories: Map<String, BubbleFactory> = emptyMap()
     private var textFormatters: List<com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter> = emptyList()
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.let {
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.isFitToContents = true
+                behavior.skipCollapsed = true
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+                // Set the bottom sheet height to half the screen
+                val displayMetrics = requireContext().resources.displayMetrics
+                val halfScreenHeight = displayMetrics.heightPixels / 2
+                it.layoutParams?.height = halfScreenHeight
+                it.requestLayout()
+
+                // Apply rounded corners to the bottom sheet container
+                val cornerRadius = requireContext().resources.getDimensionPixelSize(
+                    com.cometchat.uikit.kotlin.R.dimen.cometchat_radius_5
+                ).toFloat()
+
+                val shapeModel = com.google.android.material.shape.ShapeAppearanceModel.builder()
+                    .setTopLeftCorner(com.google.android.material.shape.CornerFamily.ROUNDED, cornerRadius)
+                    .setTopRightCorner(com.google.android.material.shape.CornerFamily.ROUNDED, cornerRadius)
+                    .setBottomLeftCorner(com.google.android.material.shape.CornerFamily.ROUNDED, 0f)
+                    .setBottomRightCorner(com.google.android.material.shape.CornerFamily.ROUNDED, 0f)
+                    .build()
+
+                val shapeDrawable = com.google.android.material.shape.MaterialShapeDrawable(shapeModel).apply {
+                    fillColor = android.content.res.ColorStateList.valueOf(
+                        com.cometchat.uikit.kotlin.theme.CometChatTheme.getBackgroundColor1(requireContext())
+                    )
+                }
+                it.background = shapeDrawable
+            }
+        }
+        return dialog
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -69,36 +110,6 @@ class CometChatMessageInformationBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Configure the bottom sheet behavior and styling
-        dialog?.let { dialog ->
-            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            bottomSheet?.let {
-                val behavior = BottomSheetBehavior.from(it)
-                behavior.isFitToContents = false
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.skipCollapsed = true
-                
-                // Apply rounded corners to the bottom sheet container
-                val cornerRadius = requireContext().resources.getDimensionPixelSize(
-                    com.cometchat.uikit.kotlin.R.dimen.cometchat_radius_5
-                ).toFloat()
-                
-                val shapeModel = com.google.android.material.shape.ShapeAppearanceModel.builder()
-                    .setTopLeftCorner(com.google.android.material.shape.CornerFamily.ROUNDED, cornerRadius)
-                    .setTopRightCorner(com.google.android.material.shape.CornerFamily.ROUNDED, cornerRadius)
-                    .setBottomLeftCorner(com.google.android.material.shape.CornerFamily.ROUNDED, 0f)
-                    .setBottomRightCorner(com.google.android.material.shape.CornerFamily.ROUNDED, 0f)
-                    .build()
-                
-                val shapeDrawable = com.google.android.material.shape.MaterialShapeDrawable(shapeModel).apply {
-                    fillColor = android.content.res.ColorStateList.valueOf(
-                        com.cometchat.uikit.kotlin.theme.CometChatTheme.getBackgroundColor1(requireContext())
-                    )
-                }
-                it.background = shapeDrawable
-            }
-        }
 
         // Set up the message information view
         messageInformationView?.apply {

@@ -1,22 +1,16 @@
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("maven-publish")
+    alias(libs.plugins.roborazzi)
 }
 
-ext["publishArtifactId"] = "chatuikit-compose-android"
 
 configurations.all {
     exclude(group = "org.jetbrains", module = "annotations-java5")
 }
 
-ext["publishDescription"] = "CometChat UI Kit Compose – Jetpack Compose chat UI components for Android"
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.0-beta2"
-val libraryGroup = "com.cometchat"
-val libraryArtifact = "chatuikit-compose-android"
 
 android {
     namespace = "com.cometchat.uikit.compose"
@@ -52,16 +46,24 @@ android {
     }
 
     testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+            }
         }
     }
 }
 
+roborazzi {
+    outputDir.set(file("src/test/snapshots"))
+}
+
+
+
 dependencies {
     // Core module – exposed so consumers get ViewModels transitively (published artifact)
     implementation(libs.chatuikit.core.android)
-
 //    implementation(project(":chatuikit-core"))
 
     // CometChat SDK
@@ -81,6 +83,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Android Material (View system) for MaterialCardView used in AI Assistant bubble
+    implementation(libs.material)
 
     // Image loading
     implementation(libs.coil.compose)
@@ -108,12 +113,25 @@ dependencies {
     testImplementation(libs.androidx.lifecycle.runtime.testing)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(libs.androidx.ui.tooling)
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
 
     // Android instrumented testing
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.calls.sdk.android)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
     // Debug-only Compose tooling
     debugImplementation(libs.androidx.ui.tooling)

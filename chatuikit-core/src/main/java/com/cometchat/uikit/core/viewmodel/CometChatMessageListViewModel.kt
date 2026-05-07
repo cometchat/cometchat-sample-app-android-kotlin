@@ -3514,6 +3514,8 @@ open class CometChatMessageListViewModel(
                     is CometChatMessageEvent.MessageSent -> handleMessageSentEvent(event)
                     is CometChatMessageEvent.MessageEdited -> handleMessageEditedEvent(event)
                     is CometChatMessageEvent.MessageDeleted -> handleMessageDeletedEvent(event)
+                    is CometChatMessageEvent.ReactionAdded -> handleReactionAdded(event.event)
+                    is CometChatMessageEvent.ReactionRemoved -> handleReactionRemoved(event.event)
                     else -> { /* Ignore other message events */ }
                 }
             }
@@ -3807,8 +3809,15 @@ open class CometChatMessageListViewModel(
         // Only process in main conversation (not thread view)
         if (parentMessageId != -1L) return
         
-        // Add each action message to the list
+        // Add each action message to the list.
+        // Populate the `message` field if missing — locally-constructed Actions from the
+        // Add Members screen don't have it set, but the action bubble reads it for display.
         event.actions.forEach { action ->
+            if (action.message.isNullOrEmpty()) {
+                val addedByName = (action.actionBy as? com.cometchat.chat.models.User)?.name ?: event.addedBy.name
+                val addedUserName = (action.actionOn as? com.cometchat.chat.models.User)?.name ?: ""
+                action.message = "$addedByName added $addedUserName"
+            }
             addMessage(action)
         }
     }
@@ -3828,7 +3837,12 @@ open class CometChatMessageListViewModel(
         // Only process in main conversation (not thread view)
         if (parentMessageId != -1L) return
         
-        // Add the action message to the list
+        // Populate the `message` field if missing
+        if (event.action.message.isNullOrEmpty()) {
+            val kickedByName = (event.action.actionBy as? com.cometchat.chat.models.User)?.name ?: ""
+            val kickedUserName = (event.action.actionOn as? com.cometchat.chat.models.User)?.name ?: ""
+            event.action.message = "$kickedByName kicked $kickedUserName"
+        }
         addMessage(event.action)
     }
     
@@ -3847,7 +3861,12 @@ open class CometChatMessageListViewModel(
         // Only process in main conversation (not thread view)
         if (parentMessageId != -1L) return
         
-        // Add the action message to the list
+        // Populate the `message` field if missing
+        if (event.action.message.isNullOrEmpty()) {
+            val bannedByName = (event.action.actionBy as? com.cometchat.chat.models.User)?.name ?: ""
+            val bannedUserName = (event.action.actionOn as? com.cometchat.chat.models.User)?.name ?: ""
+            event.action.message = "$bannedByName banned $bannedUserName"
+        }
         addMessage(event.action)
     }
     
@@ -3866,7 +3885,12 @@ open class CometChatMessageListViewModel(
         // Only process in main conversation (not thread view)
         if (parentMessageId != -1L) return
         
-        // Add the action message to the list
+        // Populate the `message` field if missing
+        if (event.action.message.isNullOrEmpty()) {
+            val unbannedByName = (event.action.actionBy as? com.cometchat.chat.models.User)?.name ?: ""
+            val unbannedUserName = (event.action.actionOn as? com.cometchat.chat.models.User)?.name ?: ""
+            event.action.message = "$unbannedByName unbanned $unbannedUserName"
+        }
         addMessage(event.action)
     }
     
@@ -3885,7 +3909,13 @@ open class CometChatMessageListViewModel(
         // Only process in main conversation (not thread view)
         if (parentMessageId != -1L) return
         
-        // Add the action message to the list
+        // Populate the `message` field if missing
+        if (event.action.message.isNullOrEmpty()) {
+            val changedByName = (event.action.actionBy as? com.cometchat.chat.models.User)?.name ?: ""
+            val memberName = (event.action.actionOn as? com.cometchat.chat.models.User)?.name ?: ""
+            val newScope = event.action.newScope ?: ""
+            event.action.message = "$changedByName made $memberName $newScope"
+        }
         addMessage(event.action)
     }
     
@@ -4002,7 +4032,16 @@ open class CometChatMessageListViewModel(
                 
                 override fun onMessageEdited(message: BaseMessage) {
                     if (isMessageForCurrentChat(message)) {
+                        android.util.Log.d("CometChatMsgListVM", "━━━ onMessageEdited ━━━ msgId=${message.id}, type=${message.type}, moderationStatus=${(message as? com.cometchat.chat.models.TextMessage)?.moderationStatus?.name ?: (message as? com.cometchat.chat.models.MediaMessage)?.moderationStatus?.name ?: "N/A"}")
                         updateMessage(message)
+                        // Emit via SharedFlow to bypass StateFlow conflation
+                        // This ensures moderation status changes trigger UI rebind in real-time
+                        viewModelScope.launch {
+                            android.util.Log.d("CometChatMsgListVM", "onMessageEdited: emitting _messageUpdated for msgId=${message.id}")
+                            _messageUpdated.emit(message)
+                        }
+                    } else {
+                        android.util.Log.d("CometChatMsgListVM", "onMessageEdited: IGNORED (not for current chat) msgId=${message.id}")
                     }
                 }
                 
@@ -4223,7 +4262,12 @@ open class CometChatMessageListViewModel(
 
         // If this is a thread reply arriving in the main conversation,
         // update the parent message's reply count but don't add the message to the list.
+        // Skip own messages — reply count is already updated by handleMessageSentEvent
         if (parentMessageId == -1L && message.parentMessageId > 0) {
+            val loggedInUser = CometChat.getLoggedInUser()
+            if (loggedInUser != null && message.sender?.uid == loggedInUser.uid) {
+                return
+            }
             updateReplyCount(message.parentMessageId)
             return
         }

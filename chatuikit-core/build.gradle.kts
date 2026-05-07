@@ -1,15 +1,10 @@
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    id("maven-publish")
 }
 
-ext["publishArtifactId"] = "chatuikit-core-android"
-ext["publishDescription"] = "CometChat UI Kit Core – shared ViewModels, use cases, and repositories for Android"
 // Get version information from properties or environment
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.0-beta2"
-val libraryGroup = "com.cometchat"
-val libraryArtifact = "chatuikit-core-android"
 
 android {
     namespace = "com.cometchat.uikit.core"
@@ -43,9 +38,14 @@ android {
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
+            it.testLogging {
+                events("passed", "failed", "skipped")
+                showStandardStreams = true
+            }
         }
     }
 }
+
 
 dependencies {
     // CometChat SDKs – exposed to consumers
@@ -68,6 +68,11 @@ dependencies {
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.property)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(kotlin("reflect"))
+    // Explicitly include SDK for unit test classpath (IDE test runner compatibility)
+    testImplementation(libs.chat.sdk.android)
 
     // Android instrumented testing
     androidTestImplementation(libs.ext.junit)

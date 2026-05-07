@@ -3,6 +3,9 @@ package com.cometchat.uikit.compose.presentation.messagecomposer.ui
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -108,6 +111,7 @@ import com.cometchat.uikit.core.formatter.RichTextEditorController
 import com.cometchat.uikit.core.formatter.RichTextEditorState
 import com.cometchat.uikit.core.formatter.RichTextFormat
 import com.cometchat.uikit.core.formatter.RichTextFormatterManager
+import com.cometchat.uikit.core.mentions.SelectedMention
 import com.cometchat.uikit.core.formatter.RichTextSpan
 import com.cometchat.uikit.core.formatter.ComposerSegment
 import com.cometchat.uikit.core.formatter.SegmentComposerController
@@ -117,6 +121,7 @@ import com.cometchat.uikit.core.viewmodel.CometChatMessageComposerViewModel
 import com.cometchat.uikit.core.viewmodel.ComposerMode
 import com.cometchat.uikit.core.viewmodel.RecordingState
 import com.cometchat.uikit.core.domain.model.CometChatMessageComposerAction
+import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 import com.cometchat.uikit.compose.presentation.createpoll.ui.CometChatCreatePoll
 import com.cometchat.uikit.compose.presentation.stickerkeyboard.ui.CometChatStickerKeyboard
 import com.cometchat.uikit.compose.presentation.stickerkeyboard.style.CometChatStickerKeyboardStyle
@@ -202,6 +207,8 @@ fun CometChatMessageComposer(
     hideStickersButton: Boolean = false,
     // Rich text formatting - toolbar visible below text input when enabled
     enableRichTextFormatting: Boolean = false,
+    // Composer layout mode - controls single-row vs two-row layout
+    layoutMode: ComposerLayoutMode = ComposerLayoutMode.SINGLE_LINE,
     // Configuration
     disableTypingEvents: Boolean = false,
     disableSoundForMessages: Boolean = false,
@@ -449,11 +456,18 @@ fun CometChatMessageComposer(
 
     // Local state
     var showAttachmentPopup by remember { mutableStateOf(false) }
+    // Tracks the last time the attachment popup was dismissed via outside click.
+    // Used to prevent the button click (which fires in the same gesture) from
+    // immediately re-opening the popup when focusable = false.
+    var attachmentPopupDismissTime by remember { mutableStateOf(0L) }
     var showAISheet by remember { mutableStateOf(false) }
     var showLinkDialog by remember { mutableStateOf(false) }
     var showLinkPopup by remember { mutableStateOf(false) }
     var showStickerKeyboard by remember { mutableStateOf(false) }
     var showCreatePollDialog by remember { mutableStateOf(false) }
+
+    // Multiline mode: formatting toolbar visibility state
+    var isFormattingToolbarVisible by remember { mutableStateOf(false) }
 
     // Link editing state
     var linkEditInitialText by remember { mutableStateOf("") }
@@ -506,6 +520,11 @@ fun CometChatMessageComposer(
     // This uses the exposed Compose State properties for proper recomposition
     val activeFormatter = mentionDetectionState.activeFormatter
     if (activeFormatter != null && mentionDetectionState.isActive) {
+        // Trigger search when mention detection state changes (query or active formatter)
+        LaunchedEffect(mentionDetectionState.query, mentionDetectionState.activeFormatter) {
+            activeFormatter.search(context, mentionDetectionState.query)
+        }
+
         // Read the state values directly - this triggers recomposition when they change
         val formatterSuggestions = activeFormatter.suggestionItemListState.value
         val formatterLoading = activeFormatter.showLoadingIndicatorState.value
@@ -518,6 +537,21 @@ fun CometChatMessageComposer(
             isLoadingSuggestions = formatterLoading
             mentionInfoMessage = formatterInfoMessage
             showMentionInfo = formatterInfoVisible
+        }
+    }
+
+    // Trigger formatter search when mention detection state changes.
+    // Without this, typing @ detects the mention but never calls formatter.search()
+    // so the suggestion list stays empty and the suggestion sheet never appears.
+    LaunchedEffect(mentionDetectionState) {
+        if (mentionDetectionState.isActive && mentionDetectionState.activeFormatter != null) {
+            // Debounce search by a short delay to avoid excessive API calls while typing
+            delay(300)
+            mentionDetectionState.activeFormatter?.search(context, mentionDetectionState.query)
+        } else {
+            // Clear cached results when mention context is lost so stale results
+            // don't appear the next time @ is typed
+            mentionDetectionState.activeFormatter?.search(context, null)
         }
     }
 
@@ -589,8 +623,16 @@ fun CometChatMessageComposer(
     val isInRecordingMode = composerMode is ComposerMode.Recording
     
     // Rich text toolbar visibility - controlled by effectiveEnableRichTextFormatting
-    // Toolbar is always visible inside the composer when enabled, regardless of text presence
-    val showRichTextToolbar = effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
+    // In multiline mode: toolbar shown only when isFormattingToolbarVisible is true (user clicked Aa)
+    // In single-line mode: toolbar always visible when enabled, regardless of text presence
+    val showRichTextToolbar = if (layoutMode == ComposerLayoutMode.MULTI_LINE) {
+        effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty() && isFormattingToolbarVisible
+    } else {
+        effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
+    }
+
+    // Whether to show the Aa formatting toggle in multiline mode Row 2
+    val showFormattingToggle = layoutMode == ComposerLayoutMode.MULTI_LINE && effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
 
     // Media selection state for handling attachment options
     // Each callback uses a fixed message type based on the picker used, NOT the detected content type.
@@ -661,6 +703,36 @@ fun CometChatMessageComposer(
                     )
                 }
                 val text = formattedText.text
+
+                // Register resolved mentions with mentionInsertionState so the
+                // ComposerMentionVisualTransformation can style them in the composer.
+                if (!disableMentions) {
+                    mentionInsertionState.clear()
+                    val mentionedUsers = msg.mentionedUsers
+                    val mentionsFormatter = effectiveTextFormatters
+                        .filterIsInstance<CometChatMentionsFormatter>()
+                        .firstOrNull()
+                    if (mentionedUsers != null && mentionsFormatter != null) {
+                        val trackChar = mentionsFormatter.getTrackingCharacter()
+                        for (user in mentionedUsers) {
+                            val promptText = "$trackChar${user.name}"
+                            val idx = text.indexOf(promptText)
+                            if (idx >= 0) {
+                                mentionInsertionState.getMentionsManager().addMention(
+                                    SelectedMention(
+                                        id = user.uid,
+                                        name = user.name,
+                                        promptText = promptText,
+                                        underlyingText = "<${trackChar}uid:${user.uid}>",
+                                        spanStart = idx,
+                                        spanEnd = idx + promptText.length
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    mentionVersion++
+                }
 
                 // Parse markdown into alternating Normal / Code segments.
                 // Fenced code blocks are delimited by lines starting with ``` (optionally followed by a language hint).
@@ -832,15 +904,21 @@ fun CometChatMessageComposer(
 
                             // Increment mention version to trigger visual transformation update
                             mentionVersion++
+                            // Trigger NormalSegmentTextField recomposition to sync tfv from controller
+                            formatVersion++
 
-                            // Sync the focused segment's controller with the new text
-                            if (enabledFormats.isNotEmpty()) {
-                                ctrl.onTextChanged(
-                                    updatedTfv.text,
-                                    updatedTfv.selection.min,
-                                    updatedTfv.selection.max
-                                )
-                            }
+                            // Sync the focused segment's controller with the new text.
+                            // Always update the controller so the segment text is current,
+                            // regardless of whether rich text formatting is enabled.
+                            ctrl.onTextChanged(
+                                updatedTfv.text,
+                                updatedTfv.selection.min,
+                                updatedTfv.selection.max
+                            )
+
+                            // Bump segmentVersion to force NormalSegmentTextField to
+                            // recompose and pick up the updated controller text.
+                            segmentVersion++
 
                             // Update the formatter's selected list
                             formatter.setSelectedList(context, mentionInsertionState.getSelectedSuggestionItems())
@@ -973,8 +1051,370 @@ fun CometChatMessageComposer(
                     }
                 )
             } else {
-            // Track actual line count of text field to determine button alignment
-            // Center alignment for single line, bottom alignment for multi-line
+            if (layoutMode == ComposerLayoutMode.MULTI_LINE) {
+            // ===== MULTILINE MODE =====
+            // Row 1: Full-width text input (no buttons beside it)
+            // Figma: 12dp padding inside compose box
+            // Min height ensures the text area is visually proportional to the
+            // formatting toolbar / button row beneath it (which is ~48dp tall).
+            // 56dp total ≈ 12dp top padding + ~40dp content (≈2 lines) + 4dp bottom padding.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 40.dp)
+                    .heightIn(max = 200.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 4.dp)
+            ) {
+            // Text input area — segment-based editor
+            @Suppress("UNUSED_VARIABLE")
+            val currentSegmentVersion = segmentVersion
+
+            val inputScrollState = rememberScrollState()
+            val coroutineScope = rememberCoroutineScope()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(inputScrollState)
+            ) {
+                val segments = segmentController.segments
+                segments.forEachIndexed { index, segment ->
+                    if (index > 0) {
+                        val prev = segments[index - 1]
+                        val needsSpacing = (prev is ComposerSegment.Normal && segment is ComposerSegment.Code && prev.controller.state.text.isNotEmpty()) ||
+                            (prev is ComposerSegment.Code && segment is ComposerSegment.Normal && segment.controller.state.text.isNotEmpty())
+                        if (needsSpacing) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                        }
+                    }
+                    when (segment) {
+                        is ComposerSegment.Normal -> {
+                            NormalSegmentTextField(
+                                segment = segment,
+                                segmentController = segmentController,
+                                focusRequester = focusRequesters[segment.id]!!,
+                                style = style,
+                                enabledFormats = enabledFormats,
+                                placeholder = placeholder,
+                                showPlaceholder = index == 0 && !segmentController.hasContent,
+                                onTextChanged = { text -> onTextChanged?.invoke(text) },
+                                onFocused = {
+                                    if (showStickerKeyboard) showStickerKeyboard = false
+                                },
+                                mentionInsertionState = mentionInsertionState,
+                                mentionDetectionState = mentionDetectionState,
+                                onMentionDetected = { detected -> mentionDetectionState = detected },
+                                showSuggestionList = showSuggestionList,
+                                onShowSuggestionList = { show -> showSuggestionList = show },
+                                effectiveTextFormatters = effectiveTextFormatters,
+                                disableMentions = disableMentions,
+                                composerViewModel = composerViewModel,
+                                formatVersion = formatVersion,
+                                onCodeBlockInserted = { segmentVersion++ },
+                                onLinkTapped = { linkText, linkUrl, spanStart, spanEnd ->
+                                    linkEditInitialText = linkText
+                                    linkEditInitialUrl = linkUrl
+                                    linkEditSpanStart = spanStart
+                                    linkEditSpanEnd = spanEnd
+                                    showLinkPopup = true
+                                },
+                                onSelectionChanged = { formatVersion++ }
+                            )
+                        }
+                        is ComposerSegment.Code -> {
+                            CodeSegmentTextField(
+                                segment = segment,
+                                segmentController = segmentController,
+                                focusRequester = focusRequesters[segment.id]!!,
+                                style = style,
+                                onFocused = {
+                                    segmentController.setFocusedSegment(segment.id)
+                                    if (showStickerKeyboard) showStickerKeyboard = false
+                                    formatVersion++
+                                },
+                                onTextChanged = { text ->
+                                    onTextChanged?.invoke(text)
+                                    formatVersion++
+                                }
+                            )
+                        }
+                    }
+                }
+            } // End of multiline text input Column
+
+            LaunchedEffect(segmentVersion, segmentController.pendingFocusSegmentId) {
+                delay(50)
+                coroutineScope.launch {
+                    inputScrollState.animateScrollTo(inputScrollState.maxValue)
+                }
+            }
+            } // End of Row 1 padding Column
+
+            // Row 2: Action buttons OR formatting toolbar (mutually exclusive, animated)
+            androidx.compose.animation.AnimatedContent(
+                targetState = isFormattingToolbarVisible,
+                transitionSpec = {
+                    (fadeIn(animationSpec = tween(200)) + expandVertically())
+                        .togetherWith(fadeOut(animationSpec = tween(200)) + shrinkVertically())
+                },
+                label = "multiline_row2_transition"
+            ) { showToolbar ->
+                if (showToolbar) {
+                    // Formatting toolbar with close button
+                    @Suppress("UNUSED_VARIABLE")
+                    val currentFormatVersion = formatVersion
+
+                    val effectiveActiveFormats = run {
+                        val base = segmentController.activeFormats
+                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                        if (focused != null) {
+                            val text = focused.controller.state.text
+                            val cursorPos = focused.controller.state.selectionStart
+                            if (text.isNotEmpty() && cursorPos <= text.length) {
+                                val lineStart = text.lastIndexOf('\n', (cursorPos - 1).coerceAtLeast(0)) + 1
+                                val lineEnd = text.indexOf('\n', cursorPos).let { if (it == -1) text.length else it }
+                                if (lineStart <= lineEnd && lineEnd <= text.length) {
+                                    val currentLine = text.substring(lineStart, lineEnd)
+                                    val lineFormats = mutableSetOf<RichTextFormat>()
+                                    if (currentLine.startsWith("- ") || currentLine.startsWith("• ")) {
+                                        lineFormats.add(RichTextFormat.BULLET_LIST)
+                                    } else if (currentLine.matches(Regex("^\\d+\\. .*"))) {
+                                        lineFormats.add(RichTextFormat.ORDERED_LIST)
+                                    } else if (currentLine.startsWith("> ")) {
+                                        lineFormats.add(RichTextFormat.BLOCKQUOTE)
+                                    }
+                                    base + lineFormats
+                                } else base
+                            } else base
+                        } else base
+                    }
+
+                    val effectiveDisabledFormats = run {
+                        val base = segmentController.toolbarDisabledFormats
+                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                        if (focused != null) {
+                            val cursorPos = focused.controller.state.selectionStart
+                            val spanManager = focused.controller.state.spanManager
+                            val linkSpan = spanManager.findLinkSpanAt(cursorPos)
+                                ?: if (cursorPos > 0) spanManager.findLinkSpanAt(cursorPos - 1) else null
+                            if (linkSpan != null) {
+                                base + setOf(
+                                    RichTextFormat.BOLD, RichTextFormat.ITALIC, RichTextFormat.UNDERLINE,
+                                    RichTextFormat.STRIKETHROUGH, RichTextFormat.INLINE_CODE
+                                )
+                            } else base
+                        } else base
+                    }
+
+                    CometChatRichTextToolbar(
+                        modifier = Modifier.fillMaxWidth(),
+                        style = style,
+                        activeFormats = effectiveActiveFormats,
+                        disabledFormats = effectiveDisabledFormats,
+                        enabledFormats = enabledFormats,
+                        onCloseClick = { isFormattingToolbarVisible = false },
+                        onFormatClick = { format ->
+                            if (segmentController.focusedSegment == null) {
+                                val firstNormal = segmentController.segments.firstOrNull { it is ComposerSegment.Normal }
+                                if (firstNormal != null) segmentController.focusSegment(firstNormal.id)
+                            } else {
+                                segmentController.focusedSegmentId?.let { id -> focusRequesters[id]?.requestFocus() }
+                            }
+                            val focusedSeg = segmentController.focusedSegment
+                            when {
+                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Code ->
+                                    segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, null)
+                                focusedSeg is ComposerSegment.Code && format in setOf(
+                                    RichTextFormat.BULLET_LIST, RichTextFormat.ORDERED_LIST, RichTextFormat.BLOCKQUOTE
+                                ) -> segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, format)
+                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Normal ->
+                                    segmentController.convertCursorParagraphToCodeBlock()
+                                focusedSeg is ComposerSegment.Normal -> focusedSeg.controller.toggleFormat(format)
+                            }
+                            formatVersion++
+                        },
+                        onLinkClick = {
+                            val focused = segmentController.focusedSegment as? ComposerSegment.Normal
+                            focused?.controller?.let { ctrl ->
+                                val spanManager = ctrl.state.spanManager
+                                val selStart = ctrl.state.selectionStart
+                                val selEnd = ctrl.state.selectionEnd
+                                val text = ctrl.state.text
+                                val checkPos = if (selStart > 0) selStart - 1 else selStart
+                                val linkSpan = spanManager.findLinkSpanAt(checkPos) ?: spanManager.findLinkSpanAt(selStart)
+                                if (linkSpan != null) {
+                                    linkEditInitialText = text.substring(linkSpan.start, linkSpan.end)
+                                    linkEditInitialUrl = spanManager.getLinkUrlAt(linkSpan.start) ?: ""
+                                    linkEditSpanStart = linkSpan.start
+                                    linkEditSpanEnd = linkSpan.end
+                                    showLinkPopup = true
+                                } else if (selStart != selEnd) {
+                                    isLinkEditMode = false
+                                    linkEditInitialText = text.substring(selStart, selEnd)
+                                    linkEditInitialUrl = ""
+                                    linkEditSpanStart = -1
+                                    linkEditSpanEnd = -1
+                                    showLinkDialog = true
+                                } else {
+                                    isLinkEditMode = false
+                                    linkEditInitialText = ""
+                                    linkEditInitialUrl = ""
+                                    linkEditSpanStart = -1
+                                    linkEditSpanEnd = -1
+                                    showLinkDialog = true
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    // Default: MultilineButtonRow with action buttons
+                    // Get attachment options from ViewModel (filtered by visibility flags)
+                    val multilineAttachmentOptions = remember(
+                        composerViewModel.showCameraOption.collectAsState().value,
+                        composerViewModel.showImageOption.collectAsState().value,
+                        composerViewModel.showVideoOption.collectAsState().value,
+                        composerViewModel.showAudioOption.collectAsState().value,
+                        composerViewModel.showFileOption.collectAsState().value,
+                        composerViewModel.showPollOption.collectAsState().value,
+                        composerViewModel.showCollaborativeDocumentOption.collectAsState().value,
+                        composerViewModel.showCollaborativeWhiteboardOption.collectAsState().value
+                    ) {
+                        composerViewModel.getDefaultAttachmentOptions(
+                            cameraTitle = context.getString(R.string.cometchat_camera),
+                            cameraIcon = R.drawable.cometchat_ic_camera,
+                            imageTitle = context.getString(R.string.cometchat_attach_image),
+                            imageIcon = R.drawable.cometchat_ic_image_library,
+                            videoTitle = context.getString(R.string.cometchat_attach_video),
+                            videoIcon = R.drawable.cometchat_ic_video_library,
+                            audioTitle = context.getString(R.string.cometchat_attach_audio),
+                            audioIcon = R.drawable.cometchat_ic_audio,
+                            fileTitle = context.getString(R.string.cometchat_attach_document),
+                            fileIcon = R.drawable.cometchat_ic_file_upload,
+                            pollTitle = context.getString(R.string.cometchat_poll),
+                            pollIcon = R.drawable.cometchat_ic_polls,
+                            collaborativeDocumentTitle = context.getString(R.string.cometchat_collaborative_doc),
+                            collaborativeDocumentIcon = R.drawable.cometchat_ic_collaborative_document,
+                            collaborativeWhiteboardTitle = context.getString(R.string.cometchat_collaborative_whiteboard),
+                            collaborativeWhiteboardIcon = R.drawable.cometchat_ic_conversations_collaborative_whiteboard
+                        )
+                    }
+                    val multilineMenuItems = multilineAttachmentOptions.map { action ->
+                        MenuItem.withIcons(
+                            id = action.id,
+                            name = action.title,
+                            startIcon = androidx.compose.ui.res.painterResource(action.icon)
+                        )
+                    }
+
+                    MultilineButtonRow(
+                        style = style,
+                        hideAttachmentButton = effectiveHideAttachmentButton,
+                        hideVoiceRecordingButton = effectiveHideVoiceRecordingButton,
+                        hideStickersButton = effectiveHideStickersButton,
+                        hideSendButton = hideSendButton,
+                        showFormattingToggle = showFormattingToggle,
+                        isStickerKeyboardOpen = showStickerKeyboard,
+                        isSendButtonActive = isSendButtonActive,
+                        isAIGenerating = isAIGenerating,
+                        isAgentChat = isAgentChat,
+                        isAttachmentPopupExpanded = showAttachmentPopup,
+                        onAttachmentClick = { showAttachmentPopup = !showAttachmentPopup },
+                        onVoiceRecordClick = { composerViewModel.startRecordingMode() },
+                        onStickerClick = {
+                            if (!showStickerKeyboard) keyboardController?.hide()
+                            showStickerKeyboard = !showStickerKeyboard
+                        },
+                        onFormattingToggleClick = { isFormattingToolbarVisible = true },
+                        onSendClick = {
+                            handleSend(
+                                context = context,
+                                segmentController = segmentController,
+                                editMessage = editMessage,
+                                viewModel = composerViewModel,
+                                onSendButtonClick = onSendButtonClick,
+                                onClear = {
+                                    segmentController.clear()
+                                    mentionInsertionState.clear()
+                                    mentionVersion = 0
+                                    showSuggestionList = false
+                                    suggestionItems = emptyList()
+                                    mentionDetectionState = ComposeMentionState.INACTIVE
+                                    effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
+                                },
+                                mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
+                                textFormatters = effectiveTextFormatters
+                            )
+                        },
+                        sendButtonView = sendButtonView,
+                        attachmentButtonContent = if (!effectiveHideAttachmentButton) {
+                            {
+                                CometChatPopupMenu(
+                                    expanded = showAttachmentPopup,
+                                    onDismissRequest = {
+                                        showAttachmentPopup = false
+                                        attachmentPopupDismissTime = System.currentTimeMillis()
+                                    },
+                                    menuItems = multilineMenuItems,
+                                    style = effectiveAttachmentPopupStyle,
+                                    position = PopupPosition.ABOVE,
+                                    onMenuItemClick = { id, _ ->
+                                        showAttachmentPopup = false
+                                        when (id) {
+                                            CometChatMessageComposerAction.ID_CAMERA -> {
+                                                val handled = onCameraClick?.invoke() ?: false
+                                                if (!handled) mediaSelectionState.launchCamera()
+                                            }
+                                            CometChatMessageComposerAction.ID_IMAGE -> {
+                                                val handled = onImageClick?.invoke() ?: false
+                                                if (!handled) mediaSelectionState.launchImagePicker()
+                                            }
+                                            CometChatMessageComposerAction.ID_VIDEO -> {
+                                                val handled = onVideoClick?.invoke() ?: false
+                                                if (!handled) mediaSelectionState.launchVideoPicker()
+                                            }
+                                            CometChatMessageComposerAction.ID_AUDIO -> {
+                                                val handled = onAudioClick?.invoke() ?: false
+                                                if (!handled) mediaSelectionState.launchAudioPicker()
+                                            }
+                                            CometChatMessageComposerAction.ID_DOCUMENT -> {
+                                                val handled = onDocumentClick?.invoke() ?: false
+                                                if (!handled) mediaSelectionState.launchFilePicker()
+                                            }
+                                            CometChatMessageComposerAction.ID_POLL -> {
+                                                val handled = onPollClick?.invoke() ?: false
+                                                if (!handled) showCreatePollDialog = true
+                                            }
+                                            else -> {
+                                                val customAction = multilineAttachmentOptions.find { it.id == id }
+                                                customAction?.let { action -> onAttachmentOptionClick?.invoke(action) }
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    AnimatedAttachmentButton(
+                                        isExpanded = showAttachmentPopup,
+                                        style = style,
+                                        onClick = {
+                                            // Guard against the race condition where
+                                            // dismissOnClickOutside fires onDismissRequest
+                                            // (setting false) and then this click fires
+                                            // (setting true) in the same gesture. If the
+                                            // popup was just dismissed (<300ms ago), treat
+                                            // the click as the closing gesture and skip.
+                                            val now = System.currentTimeMillis()
+                                            if (now - attachmentPopupDismissTime < 300) {
+                                                return@AnimatedAttachmentButton
+                                            }
+                                            showAttachmentPopup = !showAttachmentPopup
+                                        }
+                                    )
+                                }
+                            }
+                        } else null
+                    )
+                }
+            }
+            } else {
+            // ===== SINGLE-LINE MODE (existing layout) =====
             var textLayoutLineCount by remember { mutableStateOf(1) }
             val buttonAlignment = if (textLayoutLineCount > 1) Alignment.Bottom else Alignment.CenterVertically
             
@@ -1340,12 +1780,13 @@ fun CometChatMessageComposer(
                 }
             }
             } // End of input Row
-            } // End of else block (normal mode)
+            } // End of single-line mode else block
+            } // End of recording mode else block
             
-            // Rich text toolbar (inside compose box, always visible when enableRichTextFormatting=true)
-            // Animated visibility for smooth show/hide transition
+            // Rich text toolbar (inside compose box, visible in single-line mode when enableRichTextFormatting=true)
+            // In multiline mode, the toolbar is rendered inside Row 2's AnimatedContent instead
             AnimatedVisibility(
-                visible = showRichTextToolbar,
+                visible = showRichTextToolbar && layoutMode != ComposerLayoutMode.MULTI_LINE,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
@@ -1906,13 +2347,14 @@ private fun NormalSegmentTextField(
         )
     }
 
-    val mentionTransformation = remember(segment.id) {
+    val mentionPrimaryColor = CometChatTheme.colorScheme.primary
+    val mentionTransformation = remember(segment.id, mentionPrimaryColor) {
         ComposerMentionVisualTransformation(
             mentionInsertionState = mentionInsertionState,
             defaultMentionStyle = SpanStyle(
-                color = Color(0xFF3399FF),
+                color = mentionPrimaryColor,
                 fontWeight = FontWeight.Medium,
-                background = Color(0xFF3399FF).copy(alpha = 0.2f)
+                background = mentionPrimaryColor.copy(alpha = 0.2f)
             )
         )
     }
@@ -1949,6 +2391,32 @@ private fun NormalSegmentTextField(
             onValueChange = { newValue: TextFieldValue ->
             val prevText = tfv.text
             val newText = newValue.text
+
+            // --- Backspace-at-mention: delete entire mention in one press ---
+            if (!disableMentions && prevText.length - newText.length == 1 && newValue.selection.collapsed) {
+                val cursorPos = newValue.selection.start
+                val mentions = mentionInsertionState.getMentionsManager().getMentions()
+                val mentionToDelete = mentions.find { m ->
+                    // Cursor was right after the mention end, and one char was deleted from it
+                    cursorPos >= m.spanStart && cursorPos < m.spanEnd
+                }
+                if (mentionToDelete != null) {
+                    val before = prevText.substring(0, mentionToDelete.spanStart)
+                    val after = if (mentionToDelete.spanEnd < prevText.length) prevText.substring(mentionToDelete.spanEnd) else ""
+                    val cleaned = before + after
+                    mentionInsertionState.getMentionsManager().removeMention(mentionToDelete.id)
+                    mentionInsertionState.syncWithText(cleaned)
+                    val newCursor = mentionToDelete.spanStart.coerceIn(0, cleaned.length)
+                    tfv = TextFieldValue(cleaned, TextRange(newCursor))
+                    segment.controller.onTextChanged(cleaned, newCursor, newCursor)
+                    onTextChanged(cleaned)
+                    // Dismiss suggestion list and reset mention detection
+                    onMentionDetected(ComposeMentionState.INACTIVE)
+                    onShowSuggestionList(false)
+                    return@BasicTextField
+                }
+            }
+
             tfv = newValue
 
             // Detect tap on link text: cursor moved without text change, and cursor
@@ -1972,14 +2440,19 @@ private fun NormalSegmentTextField(
                 }
             }
 
-            // Route text change through the segment's own RichTextEditorController
-            if (enabledFormats.isNotEmpty()) {
-                segment.controller.onTextChanged(
-                    newText,
-                    newValue.selection.min,
-                    newValue.selection.max
-                )
+            // Route text change through the segment's own RichTextEditorController.
+            // This MUST happen regardless of `enabledFormats` so the segment controller
+            // is the source of truth for composed text — the send button's active state
+            // is derived from `segmentController.hasContent`, which reads from the
+            // controller. Without this, typing with rich-text disabled leaves the
+            // controller empty and the send button stays disabled.
+            segment.controller.onTextChanged(
+                newText,
+                newValue.selection.min,
+                newValue.selection.max
+            )
 
+            if (enabledFormats.isNotEmpty()) {
                 // The controller may have modified the text internally (e.g.,
                 // auto-continuation of list/blockquote prefixes, or removal of
                 // an empty prefix line on double-enter). Sync tfv back if so.

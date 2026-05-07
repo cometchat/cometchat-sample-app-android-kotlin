@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cometchat.calls.core.CometChatCalls
 import com.cometchat.chat.exceptions.CometChatException
@@ -68,7 +69,7 @@ fun CometChatOngoingCall(
     modifier: Modifier = Modifier,
     viewModel: CometChatOngoingCallViewModel = viewModel(),
     callWorkFlow: CallWorkFlow = CallWorkFlow.DEFAULT,
-    callSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null,
+    callSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null,
     style: CometChatOngoingCallStyle = CometChatOngoingCallStyle.default(),
     onCallEnded: (() -> Unit)? = null,
     onError: ((CometChatException) -> Unit)? = null
@@ -90,13 +91,16 @@ fun CometChatOngoingCall(
         viewModel.setSessionId(sessionId)
         viewModel.setCallType(callType)
         viewModel.setCallWorkFlow(callWorkFlow)
-        viewModel.setCallSettingsBuilder(callSettingsBuilder)
+        viewModel.setSessionSettingsBuilder(callSettingsBuilder)
     }
+
+    // Get lifecycle owner for v5 listener registration
+    val composeLifecycleOwner = LocalLifecycleOwner.current
 
     // Lifecycle management with DisposableEffect (Requirement 15.5)
     DisposableEffect(Unit) {
-        // Add listeners on composition
-        viewModel.addListeners()
+        // Add listeners on composition with lifecycle owner
+        viewModel.addListeners(composeLifecycleOwner)
 
         onDispose {
             // Remove listeners on disposal

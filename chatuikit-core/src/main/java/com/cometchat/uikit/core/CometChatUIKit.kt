@@ -42,7 +42,7 @@ object CometChatUIKit {
 
     private var authenticationSettings: UIKitSettings? = null
     private var isCallsSDKInitialized: Boolean = false
-    private var storedCallSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+    private var storedSessionSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
 
     /**
      * Initializes the CometChat SDK with the provided authentication settings.
@@ -79,7 +79,7 @@ object CometChatUIKit {
         val appSettings = appSettingsBuilder.build()
 
         val appId = authenticationSettings?.appId ?: return
-        
+
         CometChat.init(
             context,
             appId,
@@ -87,7 +87,7 @@ object CometChatUIKit {
             object : CometChat.CallbackListener<String>() {
                 override fun onSuccess(result: String) {
                     CometChat.setSource("uikit-v5", "android", "kotlin")
-                    
+
                     // Auto-initialize CometChatCalls if enableCalling is true
                     if (authenticationSettings?.enableCalling == true) {
                         initCometChatCalls(context, callbackListener, result)
@@ -118,6 +118,7 @@ object CometChatUIKit {
     ) {
         val appId = authenticationSettings?.appId
         val region = authenticationSettings?.region
+        val clientHost = authenticationSettings?.overrideClientHost
 
         if (appId.isNullOrEmpty() || region.isNullOrEmpty()) {
             Log.e(TAG, "Cannot initialize CometChatCalls: missing appId or region")
@@ -125,12 +126,13 @@ object CometChatUIKit {
             return
         }
 
-        // Store the custom callSettingsBuilder if provided
-        storedCallSettingsBuilder = authenticationSettings?.callSettingsBuilder as? CometChatCalls.CallSettingsBuilder
+        // Store the custom sessionSettingsBuilder if provided
+        storedSessionSettingsBuilder = authenticationSettings?.callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder
 
         val callAppSettings = CallAppSettings.CallAppSettingBuilder()
             .setAppId(appId)
             .setRegion(region)
+            .setHost(clientHost)
             .build()
 
         CometChatCalls.init(context, callAppSettings, object : CometChatCalls.CallbackListener<String>() {
@@ -204,15 +206,15 @@ object CometChatUIKit {
     fun isCallsSDKInitialized(): Boolean = isCallsSDKInitialized
 
     /**
-     * Gets the custom CallSettingsBuilder if one was provided during initialization,
+     * Gets the custom SessionSettingsBuilder if one was provided during initialization,
      * or null if using defaults.
      *
-     * This can be used by call components to get the configured CallSettingsBuilder
-     * for starting calls. If null, components should create a default CallSettingsBuilder.
+     * This can be used by call components to get the configured SessionSettingsBuilder
+     * for joining sessions. If null, components should create a default SessionSettingsBuilder.
      *
-     * @return The custom CometChatCalls.CallSettingsBuilder if provided, null otherwise
+     * @return The custom CometChatCalls.SessionSettingsBuilder if provided, null otherwise
      */
-    fun getCallSettingsBuilder(): CometChatCalls.CallSettingsBuilder? = storedCallSettingsBuilder
+    fun getSessionSettingsBuilder(): CometChatCalls.SessionSettingsBuilder? = storedSessionSettingsBuilder
 
     /**
      * Logs in a user with the specified UID.
@@ -231,7 +233,11 @@ object CometChatUIKit {
                 authKey,
                 object : CometChat.CallbackListener<User>() {
                     override fun onSuccess(user: User) {
-                        callbackListener?.onSuccess(user)
+                        if (authenticationSettings?.enableCalling == true && isCallsSDKInitialized) {
+                            loginCometChatCalls(user, callbackListener)
+                        } else {
+                            callbackListener?.onSuccess(user)
+                        }
                     }
 
                     override fun onError(e: CometChatException?) {
@@ -258,9 +264,12 @@ object CometChatUIKit {
                 authToken,
                 object : CometChat.CallbackListener<User>() {
                     override fun onSuccess(user: User) {
-                        callbackListener?.onSuccess(user)
+                        if (authenticationSettings?.enableCalling == true && isCallsSDKInitialized) {
+                            loginCometChatCalls(user, callbackListener)
+                        } else {
+                            callbackListener?.onSuccess(user)
+                        }
                     }
-
                     override fun onError(e: CometChatException?) {
                         e?.let { callbackListener?.onError(it) }
                     }
@@ -272,6 +281,26 @@ object CometChatUIKit {
     }
 
     /**
+     * Logs in to the CometChatCalls SDK using the current user's auth token.
+     * Called automatically after successful CometChat login when calling is enabled.
+     * v5 requires CometChatCalls.login() to cache the auth token internally.
+     */
+    private fun loginCometChatCalls(user: User, callbackListener: CometChat.CallbackListener<User>?) {
+        val authToken = CometChat.getUserAuthToken()
+        CometChatCalls.login(authToken, object : CometChatCalls.CallbackListener<com.cometchat.calls.model.CallUser>() {
+            override fun onSuccess(callUser: com.cometchat.calls.model.CallUser?) {
+                callbackListener?.onSuccess(user)
+                Log.d(TAG, "CometChatCalls login successful")
+            }
+
+            override fun onError(e: com.cometchat.calls.exceptions.CometChatException?) {
+                Log.e(TAG, "CometChatCalls login failed: ${e?.message}")
+                callbackListener?.onError(CometChatException(e?.code ?: "ERR", e?.message ?: "Unknown error"))
+            }
+        })
+    }
+
+    /**
      * Logs out the currently logged-in user.
      *
      * @param callbackListener The callback listener to handle the logout result
@@ -280,7 +309,19 @@ object CometChatUIKit {
         CometChat.logout(object : CometChat.CallbackListener<String>() {
             override fun onSuccess(successMessage: String) {
                 // Cleanup the events bridge on logou
-                callbackListener?.onSuccess(successMessage)
+                if (authenticationSettings?.enableCalling == true && isCallsSDKInitialized) {
+                    CometChatCalls.logout(object : CometChatCalls.CallbackListener<String>() {
+                        override fun onSuccess(result: String?) {
+                            callbackListener?.onSuccess(successMessage)
+                        }
+
+                        override fun onError(e: com.cometchat.calls.exceptions.CometChatException?) {
+                            e?.let { callbackListener?.onError(CometChatException(e.code, e.message)) }
+                        }
+                    })
+                } else {
+                    callbackListener?.onSuccess(successMessage)
+                }
             }
 
             override fun onError(e: CometChatException?) {
@@ -374,8 +415,11 @@ object CometChatUIKit {
         mediaMessage: MediaMessage,
         callbackListener: CometChat.CallbackListener<MediaMessage>?
     ) {
-        android.util.Log.d("CometChatUIKit", "sendMediaMessage: file=${mediaMessage.file?.absolutePath}, fileSize=${mediaMessage.file?.length()}, type=${mediaMessage.type}")
-        
+        android.util.Log.d(
+            "CometChatUIKit",
+            "sendMediaMessage: file=${mediaMessage.file?.absolutePath}, fileSize=${mediaMessage.file?.length()}, type=${mediaMessage.type}"
+        )
+
         if (mediaMessage.sender == null) {
             mediaMessage.sender = CometChat.getLoggedInUser()
         }
@@ -395,7 +439,10 @@ object CometChatUIKit {
             mediaMessage,
             object : CometChat.CallbackListener<MediaMessage>() {
                 override fun onSuccess(message: MediaMessage) {
-                    android.util.Log.d("CometChatUIKit", "sendMediaMessage SUCCESS: id=${message.id}, attachment=${message.attachment}, attachmentFileSize=${message.attachment?.fileSize}")
+                    android.util.Log.d(
+                        "CometChatUIKit",
+                        "sendMediaMessage SUCCESS: id=${message.id}, attachment=${message.attachment}, attachmentFileSize=${message.attachment?.fileSize}"
+                    )
                     // Emit SUCCESS event
                     CometChatEvents.emitMessageEvent(
                         CometChatMessageEvent.MessageSent(message, MessageStatus.SUCCESS)

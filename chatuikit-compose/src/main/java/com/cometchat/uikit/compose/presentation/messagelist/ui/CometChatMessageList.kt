@@ -94,6 +94,7 @@ import com.cometchat.uikit.core.utils.MessageOptionsUtils
 import com.cometchat.uikit.core.viewmodel.CometChatMessageListViewModel
 import com.cometchat.uikit.core.factory.CometChatMessageListViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -798,7 +799,15 @@ fun CometChatMessageList(
             }
 
             // 1. Delegate to ViewModel for business-logic actions
-            val handled = vm.handleMessageOptionClick(context, optionId, message, textFormatterCallback)
+            val handled = if (optionId == UIKitConstants.MessageOption.DELETE) {
+                // Handle delete directly in the UI layer to avoid SharedFlow duplicate-collector issue.
+                // The popup menu Dialog creates a second composition scope, causing two LaunchedEffect
+                // collectors on the same SharedFlow, which results in double dialogs.
+                deleteConfirmationMessage = message
+                true
+            } else {
+                vm.handleMessageOptionClick(context, optionId, message, textFormatterCallback)
+            }
 
             // 2. If ViewModel didn't handle it, handle locally (UI-context actions)
             if (!handled) {
@@ -1199,8 +1208,11 @@ fun CometChatMessageList(
         // AND this is NOT from pagination completing, it means real-time messages arrived
         if (currentLastMessageId > lastKnownMessageId && lastKnownMessageId > 0L && !isAtBottom && !isPaginationComplete) {
             // Real-time new message arrived while user is scrolled up
-            // Count how many new messages were added at the end
-            val newMessagesCount = messagesFromVm.count { it.id > lastKnownMessageId }
+            // Count only messages from OTHER users (exclude own sent messages)
+            val loggedInUserId = CometChat.getLoggedInUser()?.uid
+            val newMessagesCount = messagesFromVm.count { 
+                it.id > lastKnownMessageId && it.sender?.uid != loggedInUserId 
+            }
             newMessageCount += newMessagesCount
         }
         
@@ -1307,13 +1319,10 @@ fun CometChatMessageList(
     }
 
     // Observe delete confirmation requests from ViewModel
-    // When the user selects "Delete", the ViewModel emits a request via SharedFlow.
-    // The composable shows a confirmation dialog before proceeding with deletion.
-    LaunchedEffect(Unit) {
-        vm.deleteConfirmationRequest.collect { message ->
-            deleteConfirmationMessage = message
-        }
-    }
+    // Instead of collecting from SharedFlow (which can have duplicate collectors
+    // when the composable is in multiple composition scopes due to Dialog overlays),
+    // we set deleteConfirmationMessage directly from handleMessageOptionSelected.
+    // The ViewModel's requestDeleteMessage/SharedFlow path is bypassed for Compose.
     
     // Observe message sender fetched from ViewModel
     // When the user selects "Message Privately", the ViewModel fetches the sender
@@ -1928,8 +1937,12 @@ fun CometChatMessageList(
             showQuickReactions = showReactions,
             messageAlignment = messageAlignment,
             onOptionClick = { option ->
-                option.onClick?.invoke()
-                handleMessageOptionSelected(option.id, popupMessage)
+                val clickHandler = option.onClick
+                if (clickHandler != null) {
+                    clickHandler.invoke()
+                } else {
+                    handleMessageOptionSelected(option.id, popupMessage)
+                }
                 showPopupMenu = false
             },
             onReactionClick = { emoji ->

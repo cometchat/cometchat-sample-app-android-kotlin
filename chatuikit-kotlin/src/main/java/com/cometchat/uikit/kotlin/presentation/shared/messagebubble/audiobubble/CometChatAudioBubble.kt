@@ -192,7 +192,9 @@ class CometChatAudioBubble @JvmOverloads constructor(
         waveformView.setBarHeights(WaveformUtils.generateDeterministicWaveform(key, BAR_COUNT))
         playIconImageView.visibility = View.VISIBLE
         subtitleTextView.visibility = View.VISIBLE
-        subtitleTextView.text = "00:00 / --:--"
+        // Show file size initially (like v5), duration appears after play is tapped
+        val fileSize = attachment?.fileSize ?: 0
+        subtitleTextView.text = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / --:--"
     }
 
     /**
@@ -379,6 +381,15 @@ class CometChatAudioBubble @JvmOverloads constructor(
         val minutes = (totalSeconds / 60).toInt()
         val seconds = (totalSeconds % 60).toInt()
         return String.format(Locale.US, "%02d:%02d", minutes, seconds)
+    }
+
+    private fun formatFileSize(bytes: Int): String {
+        return when {
+            bytes <= 0 -> "0 KB"
+            bytes < 1024 -> "$bytes B"
+            bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+            else -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0))
+        }
     }
 
     // ========================================

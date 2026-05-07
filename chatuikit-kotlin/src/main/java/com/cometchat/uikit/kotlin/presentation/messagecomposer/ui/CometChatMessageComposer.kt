@@ -48,12 +48,14 @@ import com.cometchat.uikit.kotlin.shared.spans.LinkFormatSpan
 import com.cometchat.uikit.kotlin.shared.spans.ListContinuationHandler
 import com.cometchat.uikit.kotlin.shared.spans.MarkdownConverter
 import com.cometchat.uikit.kotlin.shared.spans.MentionCodeBlockHandler
+import com.cometchat.uikit.kotlin.shared.spans.NonEditableSpan
 import com.cometchat.uikit.kotlin.shared.spans.NumberedListFormatSpan
 import com.cometchat.uikit.kotlin.shared.spans.RichTextFormatSpan
 import com.cometchat.uikit.kotlin.shared.spans.RichTextSpanManager
 import com.cometchat.uikit.core.state.MessageComposerUIState
 import com.cometchat.uikit.core.viewmodel.CometChatMessageComposerViewModel
 import com.cometchat.uikit.core.domain.model.CometChatMessageComposerAction
+import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.databinding.CometchatMessageComposerBinding
 import com.cometchat.uikit.kotlin.presentation.messagecomposer.style.CometChatMessageComposerStyle
@@ -133,6 +135,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
         private const val OBSERVER_LOADING = "loading"
         private const val OBSERVER_TAG_INFO = "tag_info"
         private const val OBSERVER_TAG_VISIBILITY = "tag_visibility"
+
+        /** Debounce window (ms) to ignore button clicks that arrive after an outside-touch dismiss */
+        private const val DISMISS_DEBOUNCE_MS = 200L
     }
 
     // View Binding
@@ -263,8 +268,18 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private var hideEditPreview: Boolean = false
     private var hideMessagePreview: Boolean = false
 
+    // Multiline mode — two-row layout with text input in Row 1 and buttons in Row 2
+    private var composerLayoutMode: ComposerLayoutMode = ComposerLayoutMode.SINGLE_LINE
+    private var isFormattingToolbarVisible: Boolean = false
+
+    // Multiline toolbar button tracking for state updates
+    private val multilineToolbarButtons = mutableListOf<Pair<android.widget.ImageView, MaterialCardView>>()
+    private val multilineToolbarFormatMap = mutableMapOf<RichTextFormat, Pair<android.widget.ImageView, MaterialCardView>>()
+
     // Attachment popup
     private var attachmentPopup: CometChatPopupMenu? = null
+    private var isAttachmentPopupOpen: Boolean = false
+    private var lastAttachmentDismissTime: Long = 0L
 
     // Inline media recorder
     private var inlineMediaRecorder: CometChatMediaRecorder? = null
@@ -596,7 +611,17 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private fun handleSuggestionItemClick(item: SuggestionItem) {
         val result = currentMentionDetectionResult ?: return
         
-        mentionHelper?.onSuggestionSelected(item, result)
+        // Set flag to prevent the rich text FormatSpanWatcher from processing the
+        // text change triggered by mention insertion.  Without this guard the
+        // afterTextChanged handler calls FormatSpanWatcher.handleTextChanged() which
+        // can extend existing RichTextFormatSpan instances over the mention range,
+        // overriding the NonEditableSpan styling (blue/highlighted text).
+        isApplyingRichTextStyling = true
+        try {
+            mentionHelper?.onSuggestionSelected(item, result)
+        } finally {
+            isApplyingRichTextStyling = false
+        }
         
         // Hide suggestion list after selection
         updateSuggestionListVisibility(false)
@@ -707,6 +732,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.toolbarSeparator1.setBackgroundColor(style.separatorColor)
             binding.toolbarSeparator2.setBackgroundColor(style.separatorColor)
             binding.toolbarInputSeparator.setBackgroundColor(style.separatorColor)
+            binding.multilineRow2Separator?.setBackgroundColor(style.separatorColor)
         }
         
         // Attachment button styling
@@ -724,6 +750,14 @@ class CometChatMessageComposer @JvmOverloads constructor(
         // Sticker button styling
         style.stickerIcon?.let { binding.ivSticker.setImageDrawable(it) }
         if (style.stickerIconTint != 0) binding.ivSticker.setColorFilter(style.stickerIconTint)
+        
+        // Multiline Row 2 button styling — mirror single-line tints to multiline equivalents
+        style.attachmentIcon?.let { binding.ivMultilineAttachment?.setImageDrawable(it) }
+        if (style.attachmentIconTint != 0) binding.ivMultilineAttachment?.setColorFilter(style.attachmentIconTint)
+        style.voiceRecordingIcon?.let { binding.ivMultilineVoiceRecording?.setImageDrawable(it) }
+        if (style.voiceRecordingIconTint != 0) binding.ivMultilineVoiceRecording?.setColorFilter(style.voiceRecordingIconTint)
+        style.stickerIcon?.let { binding.ivMultilineSticker?.setImageDrawable(it) }
+        if (style.stickerIconTint != 0) binding.ivMultilineSticker?.setColorFilter(style.stickerIconTint)
         
         // Send button styling - applied via updateSendButtonState
         style.sendButtonInactiveIcon?.let { binding.ivSend.setImageDrawable(it) }
@@ -765,7 +799,10 @@ class CometChatMessageComposer @JvmOverloads constructor(
         if (style.inputPlaceholderColor != 0) binding.etMessageInput.setHintTextColor(style.inputPlaceholderColor)
         
         // Rich text toolbar styling
-        if (style.richTextToolbarBackgroundColor != 0) binding.richTextToolbarLayout.setBackgroundColor(style.richTextToolbarBackgroundColor)
+        if (style.richTextToolbarBackgroundColor != 0) {
+            binding.richTextToolbarLayout.setBackgroundColor(style.richTextToolbarBackgroundColor)
+            binding.multilineToolbarGroup?.setBackgroundColor(style.richTextToolbarBackgroundColor)
+        }
         if (style.richTextToolbarIconTint != 0) applyRichTextToolbarIconTints()
         
         // Update send button state with current text
@@ -799,6 +836,10 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Animations are applied for smooth transitions with proper tracking to prevent vibration during fast typing.
      */
     private fun updateButtonVisibility() {
+        // In multiline mode, single-line button visibility is managed by updateMultilineModeLayout()
+        // and updateMultilineRow2Visibility(). Skip to prevent re-showing single-line elements.
+        if (composerLayoutMode == ComposerLayoutMode.MULTI_LINE) return
+
         val hasText = binding.etMessageInput.text?.isNotEmpty() == true
         
         binding.ivAttachment.visibility = if (hideAttachmentButton) View.GONE else View.VISIBLE
@@ -1015,6 +1056,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private fun setupClickListeners() {
         // Attachment button - show popup
         binding.ivAttachment.setOnClickListener {
+            android.util.Log.d(TAG, "━━━ ivAttachment.onClick ━━━ isAttachmentPopupOpen=$isAttachmentPopupOpen, popupIsShowing=${attachmentPopup?.isShowing()}, popup=${attachmentPopup?.hashCode()}, thread=${Thread.currentThread().name}, time=${System.currentTimeMillis()}")
             toggleAttachmentPopup()
         }
 
@@ -1053,6 +1095,34 @@ class CometChatMessageComposer @JvmOverloads constructor(
         }
 
         // Rich text toggle button removed - toolbar visibility is now automatic based on text presence
+
+        // Multiline Row 2 button click listeners
+        binding.ivMultilineAttachment?.setOnClickListener {
+            toggleAttachmentPopup()
+        }
+        binding.ivMultilineVoiceRecording?.setOnClickListener {
+            showInlineRecorder()
+        }
+        binding.ivMultilineSticker?.setOnClickListener {
+            toggleStickerKeyboard()
+            onStickerClick?.invoke()
+        }
+        binding.ivMultilineFormattingToggle?.setOnClickListener {
+            isFormattingToolbarVisible = true
+            updateMultilineRow2Visibility()
+            updateFormattingToggleTint()
+        }
+        binding.multilineSendButtonCard?.setOnClickListener {
+            val text = binding.etMessageInput.text?.toString() ?: ""
+            if (text.isNotBlank()) {
+                handleSendClick(text)
+            }
+        }
+        binding.ivMultilineToolbarClose?.setOnClickListener {
+            isFormattingToolbarVisible = false
+            updateMultilineRow2Visibility()
+            updateFormattingToggleTint()
+        }
 
         // Rich text format buttons
         setupRichTextFormatClickListeners()
@@ -1165,6 +1235,13 @@ class CometChatMessageComposer @JvmOverloads constructor(
             // Has selection → apply/remove span on the selected range
             RichTextSpanManager.toggleFormat(editable, format, selStart, selEnd, context)
 
+            // When applying a code format on selection, remove the conflicting code format spans
+            if (isCodeFormat && isNowActive) {
+                val conflicting = if (format == RichTextFormat.CODE_BLOCK)
+                    RichTextFormat.INLINE_CODE else RichTextFormat.CODE_BLOCK
+                RichTextSpanManager.removeFormat(editable, selStart, selEnd, conflicting, context)
+            }
+
             // Consume or restore mentions when code formatting is toggled
             if (isCodeFormat) {
                 if (isNowActive) {
@@ -1185,6 +1262,35 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     removeConflictingListSpansOnCurrentLine(editable, selStart, conflicting)
                 }
 
+                // When enabling a code format, clear the conflicting code format from pending
+                // and remove existing conflicting code spans on the current line
+                if (isCodeFormat) {
+                    val conflicting = if (format == RichTextFormat.CODE_BLOCK)
+                        RichTextFormat.INLINE_CODE else RichTextFormat.CODE_BLOCK
+                    formatSpanWatcher?.disableFormat(conflicting)
+                    // Remove existing conflicting code spans on the current line
+                    val lineStart = findLineStart(editable, selStart)
+                    val lineEnd = findLineEnd(editable, selStart)
+                    if (lineStart < lineEnd) {
+                        RichTextSpanManager.removeFormat(editable, lineStart, lineEnd, conflicting, context)
+                        // Apply the new code format to existing text on the current line
+                        RichTextSpanManager.applyFormat(editable, lineStart, lineEnd, format, context)
+                    }
+
+                    // When enabling CODE_BLOCK, also remove any list/blockquote spans on the current line
+                    // Code block wins — these block formats are mutually exclusive with code block
+                    if (format == RichTextFormat.CODE_BLOCK) {
+                        formatSpanWatcher?.disableFormat(RichTextFormat.BULLET_LIST)
+                        formatSpanWatcher?.disableFormat(RichTextFormat.ORDERED_LIST)
+                        formatSpanWatcher?.disableFormat(RichTextFormat.BLOCKQUOTE)
+                        if (lineStart < lineEnd) {
+                            RichTextSpanManager.removeFormat(editable, lineStart, lineEnd, RichTextFormat.BULLET_LIST, context)
+                            RichTextSpanManager.removeFormat(editable, lineStart, lineEnd, RichTextFormat.ORDERED_LIST, context)
+                            RichTextSpanManager.removeFormat(editable, lineStart, lineEnd, RichTextFormat.BLOCKQUOTE, context)
+                        }
+                    }
+                }
+
                 formatSpanWatcher?.enableFormatWithSpanUpdate(editable, format, selStart)
 
                 // For block formats (list/blockquote), immediately insert a visual
@@ -1197,6 +1303,11 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
                 // When disabling a block format, remove the span from the current line
                 if (isBlockFormat) {
+                    removeBlockFormatFromCurrentLine(editable, selStart, format)
+                }
+
+                // When disabling code block, remove the span from the current line
+                if (format == RichTextFormat.CODE_BLOCK) {
                     removeBlockFormatFromCurrentLine(editable, selStart, format)
                 }
             }
@@ -1530,6 +1641,11 @@ class CometChatMessageComposer @JvmOverloads constructor(
         updateButtonState(binding.ivFormatBulletList, binding.cardBulletList, RichTextFormat.BULLET_LIST, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
         updateButtonState(binding.ivFormatOrderedList, binding.cardOrderedList, RichTextFormat.ORDERED_LIST, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
         updateButtonState(binding.ivFormatBlockquote, binding.cardBlockquote, RichTextFormat.BLOCKQUOTE, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+
+        // Also update multiline toolbar buttons if populated
+        for ((format, pair) in multilineToolbarFormatMap) {
+            updateButtonState(pair.first, pair.second, format, disabledFormats, activeIconTint, activeIconBgColor, normalIconTint, disabledIconTint)
+        }
     }
 
     /**
@@ -2282,9 +2398,37 @@ class CometChatMessageComposer @JvmOverloads constructor(
     /**
      * Toggles the attachment popup visibility.
      * Shows the popup above the attachment button with animated icon rotation.
+     * Uses [isAttachmentPopupOpen] flag to track state reliably, avoiding race
+     * conditions between PopupWindow's outside-touch dismiss and the button click.
      */
     private fun toggleAttachmentPopup() {
-        attachmentPopup?.dismiss()
+        val now = android.os.SystemClock.uptimeMillis()
+        val timeSinceDismiss = now - lastAttachmentDismissTime
+        android.util.Log.d(TAG, "toggleAttachmentPopup() ENTER — isAttachmentPopupOpen=$isAttachmentPopupOpen, popupIsShowing=${attachmentPopup?.isShowing()}, popup=${attachmentPopup?.hashCode()}, timeSinceDismiss=${timeSinceDismiss}ms, time=${System.currentTimeMillis()}")
+        
+        // If popup is logically open, just dismiss it and return.
+        if (isAttachmentPopupOpen) {
+            android.util.Log.d(TAG, "toggleAttachmentPopup() — FLAG IS TRUE, dismissing and returning. popupIsShowing=${attachmentPopup?.isShowing()}")
+            attachmentPopup?.dismiss()
+            // Flag is reset in the dismiss listener
+            android.util.Log.d(TAG, "toggleAttachmentPopup() — after dismiss call, isAttachmentPopupOpen=$isAttachmentPopupOpen")
+            return
+        }
+
+        // Guard against the outside-touch race condition:
+        // When PopupWindow (focusable=false, outsideTouchable=true) receives an outside
+        // touch on the attachment button area, it dismisses itself first (resetting our flag),
+        // then ~80-100ms later the button's onClick fires. By that time isAttachmentPopupOpen
+        // is already false, so the flag guard above doesn't catch it. This debounce window
+        // ensures we treat that stale click as a "close" rather than a "re-open".
+        if (timeSinceDismiss < DISMISS_DEBOUNCE_MS) {
+            android.util.Log.d(TAG, "toggleAttachmentPopup() — DEBOUNCE: ignoring click ${timeSinceDismiss}ms after dismiss (threshold=${DISMISS_DEBOUNCE_MS}ms)")
+            return
+        }
+
+        // Mark as open BEFORE showing so any re-entrant click is guarded
+        isAttachmentPopupOpen = true
+        android.util.Log.d(TAG, "toggleAttachmentPopup() — OPENING popup, set flag=true")
         
         // Rotate the attachment icon to indicate popup is open (45 degrees to form an X)
         binding.ivAttachment.animate()
@@ -2301,12 +2445,19 @@ class CometChatMessageComposer @JvmOverloads constructor(
             setStartIconTint(CometChatTheme.getIconTintHighlight(context))
             setTextColor(CometChatTheme.getTextColorPrimary(context))
             
-            // Set dismiss listener to rotate icon back
+            // Set dismiss listener to rotate icon back and reset open flag
             setOnDismissListener {
+                android.util.Log.d(TAG, "onDismissListener FIRED — isAttachmentPopupOpen was $isAttachmentPopupOpen, setting to false, popupIsShowing=${attachmentPopup?.isShowing()}, time=${System.currentTimeMillis()}")
+                Exception("Composer dismiss listener stacktrace").also { e ->
+                    android.util.Log.d(TAG, "onDismissListener stacktrace:", e)
+                }
+                isAttachmentPopupOpen = false
+                lastAttachmentDismissTime = android.os.SystemClock.uptimeMillis()
                 binding.ivAttachment.animate()
                     .rotation(0f)
                     .setDuration(200)
                     .start()
+                android.util.Log.d(TAG, "onDismissListener DONE — isAttachmentPopupOpen=$isAttachmentPopupOpen, lastDismissTime=$lastAttachmentDismissTime")
             }
             
             // Get attachment options from ViewModel (filtered by visibility flags)
@@ -2411,6 +2562,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         
         // Show popup above the attachment button
         attachmentPopup?.show(binding.ivAttachment, PopupPosition.ABOVE)
+        android.util.Log.d(TAG, "toggleAttachmentPopup() EXIT — popup shown, isAttachmentPopupOpen=$isAttachmentPopupOpen, popupIsShowing=${attachmentPopup?.isShowing()}, popup=${attachmentPopup?.hashCode()}, time=${System.currentTimeMillis()}")
     }
 
     // Bottom sheet dialog for create poll
@@ -2913,7 +3065,27 @@ class CometChatMessageComposer @JvmOverloads constructor(
         val markdownText = if (richTextConfiguration.hasAnyEnabled()) {
             val editable = binding.etMessageInput.text
             if (editable != null && editable.isNotEmpty()) {
-                MarkdownConverter.toMarkdown(editable)
+                // Replace mention display text (@Name) with underlying format (<@uid:xxx>)
+                // before converting to markdown, so the sent message contains proper mention tokens.
+                val mentionSpans = editable.getSpans(0, editable.length, NonEditableSpan::class.java)
+                if (mentionSpans.isNotEmpty()) {
+                    // Work on a copy to avoid modifying the EditText
+                    val editableCopy = android.text.SpannableStringBuilder(editable)
+                    val copySpans = editableCopy.getSpans(0, editableCopy.length, NonEditableSpan::class.java)
+                    // Sort by position descending to replace from end to start (avoids offset shifts)
+                    val sorted = copySpans.sortedByDescending { editableCopy.getSpanStart(it) }
+                    for (span in sorted) {
+                        val start = editableCopy.getSpanStart(span)
+                        val end = editableCopy.getSpanEnd(span)
+                        val underlying = span.getSuggestionItem()?.underlyingText
+                        if (start >= 0 && end > start && underlying != null) {
+                            editableCopy.replace(start, end, underlying)
+                        }
+                    }
+                    MarkdownConverter.toMarkdown(editableCopy)
+                } else {
+                    MarkdownConverter.toMarkdown(editable)
+                }
             } else {
                 processedText
             }
@@ -3794,6 +3966,57 @@ class CometChatMessageComposer @JvmOverloads constructor(
         
         // Apply icon tint — use theme-aware color for light/dark mode support
         binding.ivSend.setColorFilter(style.sendButtonIconTint)
+
+        // Also update multiline send button to stay in sync
+        updateMultilineSendButtonState(hasText, isAIGenerating)
+    }
+
+    /**
+     * Updates the multiline send button appearance to match the single-line send button state.
+     * Uses the same icon, background color, and clickability logic.
+     */
+    private fun updateMultilineSendButtonState(hasText: Boolean, isAIGenerating: Boolean) {
+        val multilineSendIcon = binding.ivMultilineSend ?: return
+        val multilineSendCard = binding.multilineSendButtonCard ?: return
+
+        when {
+            isAIGenerating -> {
+                style.sendButtonStopIcon?.let { multilineSendIcon.setImageDrawable(it) }
+                    ?: multilineSendIcon.setImageResource(R.drawable.cometchat_ic_stop)
+                multilineSendCard.setCardBackgroundColor(style.sendButtonActiveBackgroundColor)
+                multilineSendCard.isClickable = false
+                multilineSendCard.isEnabled = false
+            }
+            isAgentChat && hasText -> {
+                multilineSendIcon.setImageResource(R.drawable.cometchat_ic_arrow_narrow_up)
+                multilineSendCard.setCardBackgroundColor(style.sendButtonActiveBackgroundColor)
+                multilineSendCard.isClickable = true
+                multilineSendCard.isEnabled = true
+            }
+            isAgentChat && !hasText -> {
+                multilineSendIcon.setImageResource(R.drawable.cometchat_ic_arrow_narrow_up)
+                multilineSendCard.setCardBackgroundColor(style.sendButtonInactiveBackgroundColor)
+                multilineSendCard.isClickable = false
+                multilineSendCard.isEnabled = false
+            }
+            hasText -> {
+                style.sendButtonActiveIcon?.let { multilineSendIcon.setImageDrawable(it) }
+                    ?: multilineSendIcon.setImageResource(R.drawable.cometchat_ic_send_active)
+                multilineSendCard.setCardBackgroundColor(style.sendButtonActiveBackgroundColor)
+                multilineSendCard.isClickable = true
+                multilineSendCard.isEnabled = true
+            }
+            else -> {
+                style.sendButtonActiveIcon?.let { multilineSendIcon.setImageDrawable(it) }
+                    ?: multilineSendIcon.setImageResource(R.drawable.cometchat_ic_send_active)
+                multilineSendCard.setCardBackgroundColor(style.sendButtonInactiveBackgroundColor)
+                multilineSendCard.isClickable = false
+                multilineSendCard.isEnabled = false
+            }
+        }
+
+        // Apply icon tint
+        multilineSendIcon.setColorFilter(style.sendButtonIconTint)
     }
     
     /**
@@ -3973,7 +4196,12 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     UIKitConstants.FormattingType.MESSAGE_COMPOSER
                 ) ?: spannableBuilder
             }
-            binding.tvEditPreviewMessage.text = spannableBuilder
+            // Parse markdown into formatted spans (bold, italic, strikethrough, underline, etc.)
+            // so the preview shows rendered text instead of raw markdown markers
+            val formattedText = com.cometchat.uikit.kotlin.presentation.conversations.utils.ConversationSubtitleRenderer.render(
+                context, spannableBuilder.toString()
+            )
+            binding.tvEditPreviewMessage.text = formattedText
         } else {
             binding.editPreviewCard.visibility = View.GONE
         }
@@ -4363,6 +4591,215 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Returns whether rich text formatting is enabled.
      */
     fun isEnableRichTextFormatting(): Boolean = enableRichTextFormatting
+
+    // ==================== Multiline Mode ====================
+
+    /**
+     * Sets the composer layout mode.
+     * 
+     * @param mode [ComposerLayoutMode.SINGLE_LINE] for default single-row layout,
+     *             [ComposerLayoutMode.MULTI_LINE] for two-row layout with text input
+     *             in Row 1 and action buttons in Row 2.
+     */
+    fun setLayoutMode(mode: ComposerLayoutMode) {
+        composerLayoutMode = mode
+        updateMultilineModeLayout()
+    }
+
+    /**
+     * Returns the current composer layout mode.
+     */
+    fun getComposerMode(): ComposerLayoutMode = composerLayoutMode
+
+    /**
+     * Programmatically shows or hides the formatting toolbar in multiline mode.
+     * Only has effect when multiline mode is enabled and rich text formatting is enabled.
+     *
+     * @param show true to show the formatting toolbar, false to show action buttons
+     */
+    fun setShowFormattingToolbar(show: Boolean) {
+        if (composerLayoutMode != ComposerLayoutMode.MULTI_LINE || !enableRichTextFormatting) return
+        isFormattingToolbarVisible = show
+        updateMultilineRow2Visibility()
+    }
+
+    /**
+     * Returns whether the formatting toolbar is currently visible in multiline mode.
+     */
+    fun isFormattingToolbarVisible(): Boolean = isFormattingToolbarVisible
+
+    /**
+     * Updates the layout based on multiline mode state.
+     * In multiline mode: hides inline buttons from the input row, shows Row 2.
+     * In single-line mode: restores the original layout.
+     */
+    private fun updateMultilineModeLayout() {
+        if (composerLayoutMode == ComposerLayoutMode.MULTI_LINE) {
+            // Hide buttons from the input row (they move to Row 2)
+            binding.ivAttachment.visibility = View.GONE
+            binding.secondaryButtonLayout.visibility = View.GONE
+            binding.separatorView.visibility = View.GONE
+            binding.ivVoiceRecording.visibility = View.GONE
+            binding.ivSticker.visibility = View.GONE
+            binding.sendButtonCard.visibility = View.GONE
+            // Show separator and Row 2
+            binding.multilineRow2Separator?.visibility = View.VISIBLE
+            binding.multilineRow2Layout?.visibility = View.VISIBLE
+            // Populate the multiline formatting toolbar buttons
+            populateMultilineToolbar()
+            updateMultilineRow2Visibility()
+        } else {
+            // Restore single-line layout
+            binding.multilineRow2Separator?.visibility = View.GONE
+            binding.multilineRow2Layout?.visibility = View.GONE
+            updateButtonVisibility()
+        }
+    }
+
+    /**
+     * Populates the multiline formatting toolbar with 10 formatting buttons.
+     * Button order matches the Compose reference and single-line toolbar:
+     * Bold, Italic, Underline, Strikethrough | Link, Ordered List, Bullet List | Blockquote, Inline Code, Code Block
+     *
+     * Each button is a 32×32dp ImageButton inside a MaterialCardView wrapper,
+     * matching the single-line toolbar's layout pattern.
+     */
+    private fun populateMultilineToolbar() {
+        val toolbarLayout = binding.multilineToolbarButtonsLayout ?: return
+        // Only populate once
+        if (toolbarLayout.childCount > 0) return
+
+        multilineToolbarButtons.clear()
+        multilineToolbarFormatMap.clear()
+
+        val density = context.resources.displayMetrics.density
+        val buttonSizePx = (40 * density).toInt()
+        val iconPaddingPx = (8 * density).toInt()
+        val marginPx = (context.resources.getDimensionPixelSize(R.dimen.cometchat_margin_2))
+        val separatorWidthPx = (1 * density).toInt()
+        val separatorHeightPx = (24 * density).toInt()
+        val separatorMarginPx = context.resources.getDimensionPixelSize(R.dimen.cometchat_margin_3)
+
+        // Define the toolbar buttons: format, drawable resource, click action
+        data class ToolbarButtonDef(
+            val format: RichTextFormat?,
+            val drawableRes: Int,
+            val contentDesc: String,
+            val onClick: () -> Unit
+        )
+
+        val buttonDefs = listOf(
+            ToolbarButtonDef(RichTextFormat.BOLD, R.drawable.cometchat_ic_format_bold, "Bold") { toggleFormat(RichTextFormat.BOLD) },
+            ToolbarButtonDef(RichTextFormat.ITALIC, R.drawable.cometchat_ic_format_italic, "Italic") { toggleFormat(RichTextFormat.ITALIC) },
+            ToolbarButtonDef(RichTextFormat.UNDERLINE, R.drawable.cometchat_ic_format_underline, "Underline") { toggleFormat(RichTextFormat.UNDERLINE) },
+            ToolbarButtonDef(RichTextFormat.STRIKETHROUGH, R.drawable.cometchat_ic_format_strikethrough, "Strikethrough") { toggleFormat(RichTextFormat.STRIKETHROUGH) },
+            null, // Separator 1
+            ToolbarButtonDef(RichTextFormat.LINK, R.drawable.cometchat_ic_format_link, "Link") { showLinkDialog() },
+            ToolbarButtonDef(RichTextFormat.ORDERED_LIST, R.drawable.cometchat_ic_format_list_numbered, "Ordered List") { toggleFormat(RichTextFormat.ORDERED_LIST) },
+            ToolbarButtonDef(RichTextFormat.BULLET_LIST, R.drawable.cometchat_ic_format_list_bullet, "Bullet List") { toggleFormat(RichTextFormat.BULLET_LIST) },
+            null, // Separator 2
+            ToolbarButtonDef(RichTextFormat.BLOCKQUOTE, R.drawable.cometchat_ic_format_quote, "Blockquote") { toggleFormat(RichTextFormat.BLOCKQUOTE) },
+            ToolbarButtonDef(RichTextFormat.INLINE_CODE, R.drawable.cometchat_ic_format_code, "Inline Code") { toggleFormat(RichTextFormat.INLINE_CODE) },
+            ToolbarButtonDef(RichTextFormat.CODE_BLOCK, R.drawable.cometchat_ic_format_code_block, "Code Block") { toggleFormat(RichTextFormat.CODE_BLOCK) }
+        )
+
+        val normalIconTint = style.richTextToolbarIconTint.takeIf { it != 0 }
+            ?: CometChatTheme.getIconTintSecondary(context)
+        val separatorColor = style.separatorColor.takeIf { it != 0 }
+            ?: CometChatTheme.getBorderColorLight(context)
+
+        for ((index, def) in buttonDefs.withIndex()) {
+            if (def == null) {
+                // Add separator view
+                val separator = View(context).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        separatorWidthPx,
+                        separatorHeightPx
+                    ).apply {
+                        marginStart = separatorMarginPx
+                        marginEnd = separatorMarginPx
+                    }
+                    setBackgroundColor(separatorColor)
+                }
+                toolbarLayout.addView(separator)
+                continue
+            }
+
+            // Create MaterialCardView wrapper
+            val cardView = MaterialCardView(context).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    if (index > 0 && buttonDefs[index - 1] != null) {
+                        marginStart = marginPx
+                    }
+                }
+                setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
+                radius = context.resources.getDimension(R.dimen.cometchat_radius_1)
+                cardElevation = 0f
+                strokeWidth = 0
+            }
+
+            // Create ImageButton
+            val imageButton = android.widget.ImageButton(context).apply {
+                layoutParams = ViewGroup.LayoutParams(buttonSizePx, buttonSizePx)
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                contentDescription = def.contentDesc
+                setPadding(iconPaddingPx, iconPaddingPx, iconPaddingPx, iconPaddingPx)
+                setImageResource(def.drawableRes)
+                setColorFilter(normalIconTint, android.graphics.PorterDuff.Mode.SRC_IN)
+                setOnClickListener { def.onClick() }
+            }
+
+            cardView.addView(imageButton)
+            toolbarLayout.addView(cardView)
+
+            // Track for state updates
+            if (def.format != null) {
+                multilineToolbarButtons.add(Pair(imageButton, cardView))
+                multilineToolbarFormatMap[def.format] = Pair(imageButton, cardView)
+            }
+        }
+    }
+
+    /**
+     * Toggles Row 2 between action buttons and formatting toolbar in multiline mode.
+     */
+    private fun updateMultilineRow2Visibility() {
+        if (composerLayoutMode != ComposerLayoutMode.MULTI_LINE) return
+        val buttonsGroup = binding.multilineButtonsGroup
+        val toolbarGroup = binding.multilineToolbarGroup
+        if (buttonsGroup == null || toolbarGroup == null) return
+
+        if (isFormattingToolbarVisible) {
+            // Show toolbar, hide buttons
+            buttonsGroup.visibility = View.GONE
+            toolbarGroup.visibility = View.VISIBLE
+        } else {
+            // Show buttons, hide toolbar
+            buttonsGroup.visibility = View.VISIBLE
+            toolbarGroup.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Updates the Aa formatting toggle icon tint based on toolbar visibility state.
+     * When the formatting toolbar is visible (active), applies the active tint color
+     * (defaults to primary color). When hidden (inactive), applies the normal toggle tint
+     * (defaults to secondary icon tint).
+     */
+    private fun updateFormattingToggleTint() {
+        val toggleView = binding.ivMultilineFormattingToggle ?: return
+        val tint = if (isFormattingToolbarVisible) {
+            style.richTextToggleIconActiveTint.takeIf { it != 0 }
+                ?: CometChatTheme.getPrimaryColor(context)
+        } else {
+            style.richTextToolbarToggleIconTint.takeIf { it != 0 }
+                ?: CometChatTheme.getIconTintSecondary(context)
+        }
+        toggleView.setColorFilter(tint, android.graphics.PorterDuff.Mode.SRC_IN)
+    }
 
     /**
      * Sets whether to show formatting options in the text selection menu.
@@ -4916,27 +5353,32 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.toolbarSeparator1.setBackgroundColor(color)
             binding.toolbarSeparator2.setBackgroundColor(color)
             binding.toolbarInputSeparator.setBackgroundColor(color)
+            binding.multilineRow2Separator?.setBackgroundColor(color)
         }
     }
 
     fun setAttachmentIcon(icon: Drawable?) {
         style = style.copy(attachmentIcon = icon)
         icon?.let { binding.ivAttachment.setImageDrawable(it) }
+        icon?.let { binding.ivMultilineAttachment?.setImageDrawable(it) }
     }
 
     fun setAttachmentIconTint(@ColorInt color: Int) {
         style = style.copy(attachmentIconTint = color)
         if (color != 0) binding.ivAttachment.setColorFilter(color)
+        if (color != 0) binding.ivMultilineAttachment?.setColorFilter(color)
     }
 
     fun setVoiceRecordingIcon(icon: Drawable?) {
         style = style.copy(voiceRecordingIcon = icon)
         icon?.let { binding.ivVoiceRecording.setImageDrawable(it) }
+        icon?.let { binding.ivMultilineVoiceRecording?.setImageDrawable(it) }
     }
 
     fun setVoiceRecordingIconTint(@ColorInt color: Int) {
         style = style.copy(voiceRecordingIconTint = color)
         if (color != 0) binding.ivVoiceRecording.setColorFilter(color)
+        if (color != 0) binding.ivMultilineVoiceRecording?.setColorFilter(color)
     }
 
     fun setAIIcon(icon: Drawable?) {
@@ -4952,11 +5394,13 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun setStickerIcon(icon: Drawable?) {
         style = style.copy(stickerIcon = icon)
         icon?.let { binding.ivSticker.setImageDrawable(it) }
+        icon?.let { binding.ivMultilineSticker?.setImageDrawable(it) }
     }
 
     fun setStickerIconTint(@ColorInt color: Int) {
         style = style.copy(stickerIconTint = color)
         if (color != 0) binding.ivSticker.setColorFilter(color)
+        if (color != 0) binding.ivMultilineSticker?.setColorFilter(color)
     }
 
     fun setSendButtonActiveIcon(icon: Drawable?) {

@@ -260,6 +260,11 @@ open class CometChatThreadHeaderViewModel(
     open fun addListener() {
         if (!enableListeners) return
         
+        // Remove previous listener to prevent duplicate event handling
+        if (listenerId.isNotEmpty()) {
+            CometChat.removeMessageListener(listenerId)
+        }
+        
         listenerId = "ThreadHeader_${System.currentTimeMillis()}"
 
         CometChat.addMessageListener(listenerId, object : CometChat.MessageListener() {
@@ -314,6 +319,9 @@ open class CometChatThreadHeaderViewModel(
      */
     open fun addLocalEventListeners() {
         if (!enableListeners) return
+        
+        // Cancel previous subscription to prevent duplicate event handling
+        messageEventsJob?.cancel()
         
         messageEventsJob = viewModelScope.launch {
             CometChatEvents.messageEvents.collect { event ->

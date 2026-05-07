@@ -42,6 +42,7 @@ import com.cometchat.uikit.core.formatter.RichTextFormat
  * @param enabledFormats Formats to show buttons for
  * @param onFormatClick Callback when a format button is clicked
  * @param onLinkClick Callback when the link button is clicked
+ * @param onCloseClick Optional callback when the close button is clicked. When provided, a close (X) button is rendered at the start of the toolbar.
  */
 @Composable
 fun CometChatRichTextToolbar(
@@ -51,7 +52,8 @@ fun CometChatRichTextToolbar(
     disabledFormats: Set<RichTextFormat> = emptySet(),
     enabledFormats: Set<RichTextFormat> = RichTextFormat.entries.toSet(),
     onFormatClick: (RichTextFormat) -> Unit = {},
-    onLinkClick: () -> Unit = {}
+    onLinkClick: () -> Unit = {},
+    onCloseClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -61,6 +63,29 @@ fun CometChatRichTextToolbar(
             .semantics { contentDescription = "Rich Text Toolbar" },
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Close button (only shown when onCloseClick is provided — used in multiline mode)
+        if (onCloseClick != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .focusable(false)
+                    .clickable(
+                        onClick = onCloseClick,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = style.formattingToolbarCloseIcon
+                        ?: painterResource(R.drawable.cometchat_ic_close),
+                    contentDescription = "Close formatting toolbar",
+                    tint = style.formattingToolbarCloseIconTint,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
         // Bold
         if (RichTextFormat.BOLD in enabledFormats) {
             FormatButton(

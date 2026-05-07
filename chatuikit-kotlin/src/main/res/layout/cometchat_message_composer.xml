@@ -205,7 +205,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
-                    android:padding="@dimen/cometchat_padding_3">
+                    android:paddingStart="@dimen/cometchat_padding_3"
+                    android:paddingEnd="@dimen/cometchat_padding_3"
+                    android:paddingTop="@dimen/cometchat_padding_2"
+                    android:paddingBottom="@dimen/cometchat_padding_2">
 
                     <!-- Secondary Button (Attachment) - initially centered, dynamically changes to bottom for multi-line -->
                     <FrameLayout
@@ -246,7 +249,7 @@
                         android:hint="@string/cometchat_composer_place_holder_text"
                         android:importantForAutofill="no"
                         android:inputType="textMultiLine|textCapSentences"
-                        android:maxLines="3"
+                        android:maxLines="5"
                         android:minLines="1"
                         android:minHeight="36dp"
                         android:paddingStart="@dimen/cometchat_padding_2"
@@ -580,6 +583,136 @@
 
                     </LinearLayout>
                 </HorizontalScrollView>
+
+                <!-- Separator between input area and multiline Row 2 -->
+                <View
+                    android:id="@+id/multilineRow2Separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
+
+                <!-- Multiline Mode Row 2: Contains two groups that toggle visibility -->
+                <FrameLayout
+                    android:id="@+id/multilineRow2Layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:visibility="gone">
+
+                    <!-- Group 1: Action buttons (default state) -->
+                    <LinearLayout
+                        android:id="@+id/multilineButtonsGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/cometchat_padding_2"
+                        android:paddingEnd="@dimen/cometchat_padding_2">
+
+                        <!-- Attachment button -->
+                        <ImageView
+                            android:id="@+id/ivMultilineAttachment"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@string/cometchat_attachment"
+                            android:padding="8dp"
+                            android:src="@drawable/cometchat_ic_attachment_unselected" />
+
+                        <!-- Voice Recording button -->
+                        <ImageView
+                            android:id="@+id/ivMultilineVoiceRecording"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@string/cometchat_voice_recording"
+                            android:padding="8dp"
+                            android:src="@drawable/cometchat_ic_mic" />
+
+                        <!-- Sticker button -->
+                        <ImageView
+                            android:id="@+id/ivMultilineSticker"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@string/cometchat_sticker"
+                            android:padding="8dp"
+                            android:src="@drawable/cometchat_ic_sticker" />
+
+                        <!-- Aa Formatting toggle button -->
+                        <ImageView
+                            android:id="@+id/ivMultilineFormattingToggle"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@string/cometchat_format_text"
+                            android:padding="8dp"
+                            android:src="@drawable/cometchat_ic_edit" />
+
+                        <!-- Spacer -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <!-- Send button -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/multilineSendButtonCard"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="0dp">
+
+                            <ImageView
+                                android:id="@+id/ivMultilineSend"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:contentDescription="@string/cometchat_send"
+                                android:scaleType="centerInside" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <!-- Group 2: Close button + Formatting toolbar (shown when Aa is clicked) -->
+                    <LinearLayout
+                        android:id="@+id/multilineToolbarGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/cometchat_padding_2"
+                        android:paddingEnd="@dimen/cometchat_padding_2"
+                        android:visibility="gone">
+
+                        <!-- Close button -->
+                        <ImageView
+                            android:id="@+id/ivMultilineToolbarClose"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@string/cometchat_close"
+                            android:padding="8dp"
+                            android:src="@drawable/cometchat_ic_close" />
+
+                        <!-- Formatting toolbar (reuses the same toolbar buttons via code) -->
+                        <HorizontalScrollView
+                            android:id="@+id/multilineToolbarScrollView"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:scrollbars="none">
+
+                            <LinearLayout
+                                android:id="@+id/multilineToolbarButtonsLayout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingStart="@dimen/cometchat_padding_1"
+                                android:paddingEnd="@dimen/cometchat_padding_2"
+                                android:paddingTop="@dimen/cometchat_padding_2"
+                                android:paddingBottom="@dimen/cometchat_padding_2" />
+                        </HorizontalScrollView>
+                    </LinearLayout>
+                </FrameLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

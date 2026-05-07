@@ -180,7 +180,16 @@ open class CometChatConversationsViewModel(
                         }
                     }
                     .onFailure { exception ->
-                        _uiState.value = UIState.Error(exception as CometChatException)
+                        val cometChatException = if (exception is CometChatException) {
+                            exception
+                        } else {
+                            CometChatException(
+                                "ERR_UNKNOWN",
+                                exception.message ?: "Unknown error",
+                                exception.localizedMessage ?: "Unknown error"
+                            )
+                        }
+                        _uiState.value = UIState.Error(cometChatException)
                     }
                 
                 isFetching = false
@@ -231,7 +240,16 @@ open class CometChatConversationsViewModel(
                 .onFailure { exception ->
                     // Only show error if list is empty, otherwise keep existing data
                     if (_conversations.value.isEmpty()) {
-                        _uiState.value = UIState.Error(exception as CometChatException)
+                        val cometChatException = if (exception is CometChatException) {
+                            exception
+                        } else {
+                            CometChatException(
+                                "ERR_UNKNOWN",
+                                exception.message ?: "Unknown error",
+                                exception.localizedMessage ?: "Unknown error"
+                            )
+                        }
+                        _uiState.value = UIState.Error(cometChatException)
                     }
                 }
         }
@@ -257,7 +275,16 @@ open class CometChatConversationsViewModel(
                     }
                 }
                 .onFailure { exception ->
-                    _deleteState.value = DeleteState.Failure(exception as CometChatException)
+                    val cometChatException = if (exception is CometChatException) {
+                        exception
+                    } else {
+                        CometChatException(
+                            "ERR_UNKNOWN",
+                            exception.message ?: "Unknown error",
+                            exception.localizedMessage ?: "Unknown error"
+                        )
+                    }
+                    _deleteState.value = DeleteState.Failure(cometChatException)
                 }
         }
     }
@@ -685,27 +712,27 @@ open class CometChatConversationsViewModel(
                         updateGroupInConversation(event.group)
                     }
                     is CometChatGroupEvent.MembersAdded -> {
+                        android.util.Log.d("ActionDebug", "=== ConvVM: MembersAdded event received === group=${event.group.guid}, actionsCount=${event.actions.size}")
                         updateGroupInConversation(event.group)
-                        // Update conversation for each action message
-                        event.actions.forEach { action ->
-                            updateConversationForGroupAction(action, false)
-                        }
+                        // Fetch the conversation from server to get the real last message
+                        // (locally-constructed Actions have id=0 and message=null)
+                        refreshConversationFromServer(event.group.guid, CometChatConstants.CONVERSATION_TYPE_GROUP)
                     }
                     is CometChatGroupEvent.MemberKicked -> {
                         updateGroupInConversation(event.group)
-                        updateConversationForGroupAction(event.action, false)
+                        refreshConversationFromServer(event.group.guid, CometChatConstants.CONVERSATION_TYPE_GROUP)
                     }
                     is CometChatGroupEvent.MemberBanned -> {
                         updateGroupInConversation(event.group)
-                        updateConversationForGroupAction(event.action, false)
+                        refreshConversationFromServer(event.group.guid, CometChatConstants.CONVERSATION_TYPE_GROUP)
                     }
                     is CometChatGroupEvent.MemberUnbanned -> {
                         updateGroupInConversation(event.group)
-                        updateConversationForGroupAction(event.action, false)
+                        refreshConversationFromServer(event.group.guid, CometChatConstants.CONVERSATION_TYPE_GROUP)
                     }
                     is CometChatGroupEvent.MemberScopeChanged -> {
                         updateGroupInConversation(event.group)
-                        updateConversationForGroupAction(event.action, false)
+                        refreshConversationFromServer(event.group.guid, CometChatConstants.CONVERSATION_TYPE_GROUP)
                     }
                     is CometChatGroupEvent.OwnershipChanged -> {
                         updateGroupInConversation(event.group)
@@ -1099,6 +1126,30 @@ open class CometChatConversationsViewModel(
      * @param action The group action message
      * @param isRemove Whether to remove the conversation (e.g., current user left/kicked/banned)
      */
+    /**
+     * Fetches the conversation from the server and updates the conversation list.
+     * Used for group action events (member added/kicked/banned/etc.) where the
+     * locally-constructed Action objects have id=0 and message=null.
+     * The server provides the real conversation with proper last message.
+     *
+     * @param id The conversation entity ID (group GUID or user UID)
+     * @param type The conversation type (group or user)
+     */
+    private fun refreshConversationFromServer(id: String, type: String) {
+        viewModelScope.launch {
+            CometChat.getConversation(id, type, object : CometChat.CallbackListener<Conversation>() {
+                override fun onSuccess(conversation: Conversation) {
+                    if (conversation.lastMessage != null) {
+                        updateConversation(conversation, isActionMessage = true)
+                    }
+                }
+                override fun onError(e: CometChatException?) {
+                    Log.e("CometChatConvListVM", "Failed to refresh conversation: ${e?.message}")
+                }
+            })
+        }
+    }
+
     private fun updateConversationForGroupAction(action: Action, isRemove: Boolean) {
         viewModelScope.launch {
             // Null safety check - ensure action has required fields before calling SDK

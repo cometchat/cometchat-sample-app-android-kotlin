@@ -278,14 +278,15 @@ internal fun DefaultSubtitleView(
             
             // Last message text with formatting
             // Only apply text formatters if message is not deleted and has valid text
-            // Step 1: Run formatter pipeline (resolves mentions)
+            // Step 1: Run formatter pipeline (resolves mentions with styling)
             // Step 2: Parse markdown and build formatted preview
+            // Step 3: Merge mention styling from formatter onto markdown result
             val messageText: AnnotatedString = if (lastMessage is TextMessage && 
                 lastMessage.deletedAt == 0L && 
                 !lastMessage.text.isNullOrEmpty()
             ) {
-                // Step 1: Run formatter pipeline if available
-                val formattedText = if (textFormatters != null && textFormatters.isNotEmpty()) {
+                // Step 1: Run formatter pipeline if available (resolves mentions)
+                val formatterResult = if (textFormatters != null && textFormatters.isNotEmpty()) {
                     FormatterUtils.getFormattedText(
                         context = context,
                         baseMessage = lastMessage,
@@ -293,17 +294,31 @@ internal fun DefaultSubtitleView(
                         alignment = UIKitConstants.MessageBubbleAlignment.LEFT,
                         text = lastMessage.text,
                         formatters = textFormatters
-                    ).text
+                    )
                 } else {
-                    lastMessage.text
+                    AnnotatedString(lastMessage.text)
                 }
-                // Step 2: Parse markdown and build formatted preview
-                val segments = MarkdownRenderer.parse(formattedText)
-                buildPreviewAnnotatedString(
+                // Step 2: Parse markdown from the resolved text
+                val segments = MarkdownRenderer.parse(formatterResult.text)
+                val markdownStyled = buildPreviewAnnotatedString(
                     segments = segments,
                     textColor = style.subtitleTextColor,
                     linkColor = style.subtitleTextColor
                 )
+                // Step 3: Merge mention styling from formatter onto markdown result
+                if (formatterResult.spanStyles.isNotEmpty()) {
+                    buildAnnotatedString {
+                        append(markdownStyled)
+                        // Re-apply mention spans from the formatter result
+                        for (spanStyle in formatterResult.spanStyles) {
+                            if (spanStyle.end <= markdownStyled.length) {
+                                addStyle(spanStyle.item, spanStyle.start, spanStyle.end)
+                            }
+                        }
+                    }
+                } else {
+                    markdownStyled
+                }
             } else {
                 val plainText = ConversationUtils.getLastMessageText(context, conversation.lastMessage)
                 buildAnnotatedString {

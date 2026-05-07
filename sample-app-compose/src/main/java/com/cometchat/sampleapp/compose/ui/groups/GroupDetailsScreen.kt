@@ -394,8 +394,8 @@ fun GroupDetailsScreen(
                     )
                 }
 
-                // Delete Chat action (if lastMessage exists)
-                if (lastMessage != null) {
+                // Delete Chat action (always available for joined members)
+                if (isMember) {
                     ActionButtonWithIcon(
                         text = "Delete Chat",
                         icon = R.drawable.ic_delete,

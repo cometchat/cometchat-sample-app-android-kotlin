@@ -1008,6 +1008,7 @@ private fun ScopeChangeBottomSheet(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
                             enabled = !isSaving) {
+                            onDismiss()
                         },
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(

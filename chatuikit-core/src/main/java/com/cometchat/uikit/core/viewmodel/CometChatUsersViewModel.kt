@@ -84,7 +84,16 @@ open class CometChatUsersViewModel(
         if (enableListeners) {
             addListeners()
         }
-        fetchUsers()
+        // NOTE: Do NOT fetch users here. The initial fetch is triggered by the
+        // view/composable once the client has had a chance to call
+        // setUsersRequestBuilder(...) (e.g. to filter by role). Fetching in init
+        // would race the caller and emit an unfiltered request to the SDK,
+        // which produced mixed results (agents + regular users) in the
+        // AI-assistant list.
+        //
+        // - Kotlin `CometChatUsers` triggers the first fetch in `onAttachedToWindow`.
+        // - Compose `CometChatUsers` triggers the first fetch in its
+        //   `LaunchedEffect(usersRequestBuilder)` block.
     }
     
     /**

@@ -164,7 +164,7 @@ fun CometChatOutgoingCall(
                     accepted.sessionId,
                     accepted.type,
                     CallWorkFlow.DEFAULT,
-                    callSettingsBuilder as? CometChatCalls.CallSettingsBuilder,
+                    callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder,
                     null
                 )
                 // Finish the current activity to prevent it from showing when ongoing call ends

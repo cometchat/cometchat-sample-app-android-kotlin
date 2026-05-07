@@ -14,7 +14,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,15 +44,12 @@ android {
     }
 }
 
-configurations.all {
-    exclude(group = "org.jetbrains", module = "annotations-java5")
-}
 dependencies {
     // CometChat UI Kit modules
-    implementation(libs.chatuikit.compose.android)
+//    implementation(libs.chatuikit.compose.android)
 
-//    implementation(project(":chatuikit-compose"))
-//    implementation(project(":chatuikit-core"))
+    implementation(project(":chatuikit-compose"))
+    implementation(project(":chatuikit-core"))
 
     // CometChat SDKs
     implementation(libs.chat.sdk.android)

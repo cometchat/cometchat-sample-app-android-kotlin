@@ -170,11 +170,50 @@ object ConversationUtils {
             return context.getString(R.string.cometchat_start_conv_hint)
         }
 
-        // For non-deleted TextMessages with content, render rich text subtitle
+        // For non-deleted TextMessages with content, resolve mentions then render rich text
         if (message is TextMessage &&
             message.deletedAt == 0L &&
             !message.text.isNullOrEmpty()
         ) {
+            // Step 1: Run formatter pipeline to resolve mention tokens (e.g., <@uid:xxx> → @Name)
+            // The formatter returns a SpannableStringBuilder with mention styling (color/background).
+            if (textFormatters.isNotEmpty()) {
+                var spannableBuilder = android.text.SpannableStringBuilder(message.text)
+                for (formatter in textFormatters) {
+                    spannableBuilder = formatter.prepareMessageString(
+                        context,
+                        message,
+                        spannableBuilder,
+                        UIKitConstants.MessageBubbleAlignment.LEFT,
+                        UIKitConstants.FormattingType.CONVERSATIONS
+                    ) ?: spannableBuilder
+                }
+                // Step 2: Render markdown on the resolved text, then merge mention spans
+                val resolvedPlainText = spannableBuilder.toString()
+                val markdownRendered = ConversationSubtitleRenderer.render(context, resolvedPlainText)
+
+                // Merge mention styling (ForegroundColorSpan, BackgroundColorSpan, NonEditableSpan)
+                // from the formatter result onto the markdown-rendered result
+                val merged = android.text.SpannableStringBuilder(markdownRendered)
+                val fgSpans = spannableBuilder.getSpans(0, spannableBuilder.length, android.text.style.ForegroundColorSpan::class.java)
+                for (span in fgSpans) {
+                    val start = spannableBuilder.getSpanStart(span)
+                    val end = spannableBuilder.getSpanEnd(span)
+                    if (start >= 0 && end <= merged.length) {
+                        merged.setSpan(android.text.style.ForegroundColorSpan(span.foregroundColor), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+                val bgSpans = spannableBuilder.getSpans(0, spannableBuilder.length, android.text.style.BackgroundColorSpan::class.java)
+                for (span in bgSpans) {
+                    val start = spannableBuilder.getSpanStart(span)
+                    val end = spannableBuilder.getSpanEnd(span)
+                    if (start >= 0 && end <= merged.length) {
+                        merged.setSpan(android.text.style.BackgroundColorSpan(span.backgroundColor), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+                return merged
+            }
+            // No formatters — just render markdown
             return ConversationSubtitleRenderer.render(context, message.text)
         }
 

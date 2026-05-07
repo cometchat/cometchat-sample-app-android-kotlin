@@ -855,8 +855,8 @@ class CometChatOutgoingCall @JvmOverloads constructor(
         ongoingCallView.setCallWorkFlow(callWorkFlow)
         ongoingCallView.setSessionId(call.sessionId)
         ongoingCallView.setCallType(call.type)
-        (callSettingsBuilder as? CometChatCalls.CallSettingsBuilder)?.let {
-            ongoingCallView.setCallSettingsBuilder(it)
+        (callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder)?.let {
+            ongoingCallView.setSessionSettingsBuilder(it)
         }
         ongoingCallView.startCall()
         ongoingCallView.visibility = View.VISIBLE

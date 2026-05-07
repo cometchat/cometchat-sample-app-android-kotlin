@@ -92,6 +92,11 @@
         <attr name="cometchatMessageComposerRichTextToolbarActiveIconBackgroundColor" format="color" />
         <attr name="cometchatMessageComposerRichTextToolbarToggleIcon" format="reference" />
         <attr name="cometchatMessageComposerRichTextToolbarToggleIconTint" format="color" />
+        <attr name="cometchatMessageComposerRichTextToggleIconActiveTint" format="color" />
+
+        <!-- Formatting toolbar close button styling -->
+        <attr name="cometchatMessageComposerFormattingToolbarCloseIcon" format="reference" />
+        <attr name="cometchatMessageComposerFormattingToolbarCloseIconTint" format="color" />
 
         <!-- Link edit dialog styling -->
         <attr name="cometchatMessageComposerLinkDialogBackgroundColor" format="color" />

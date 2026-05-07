@@ -135,6 +135,23 @@ object MessageOptionsUtils {
         isThreadView: Boolean = false
     ): List<CometChatMessageOption> {
         val optionIds = getDefaultOptionIds(message.category, message.type)
+
+        // Check moderation status — if DISAPPROVED, restrict to Copy, Delete, Translate only
+        val isDisapproved = when (message) {
+            is com.cometchat.chat.models.TextMessage -> message.moderationStatus?.name == "DISAPPROVED"
+            is com.cometchat.chat.models.MediaMessage -> message.moderationStatus?.name == "DISAPPROVED"
+            else -> false
+        }
+        val filteredOptionIds = if (isDisapproved) {
+            optionIds.filter {
+                it == UIKitConstants.MessageOption.COPY ||
+                    it == UIKitConstants.MessageOption.DELETE ||
+                    it == UIKitConstants.MessageOption.TRANSLATE
+            }
+        } else {
+            optionIds
+        }
+
         val loggedInUser = CometChat.getLoggedInUser()
         val isMyMessage = message.sender?.uid == loggedInUser?.uid
         val isGroupAdmin = group?.let {
@@ -142,7 +159,7 @@ object MessageOptionsUtils {
                 it.scope == com.cometchat.chat.constants.CometChatConstants.SCOPE_MODERATOR
         } ?: false
 
-        return optionIds.mapNotNull { optionId ->
+        return filteredOptionIds.mapNotNull { optionId ->
             createMessageOption(
                 context = context,
                 optionId = optionId,

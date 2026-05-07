@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">CometChat AI Sample Compose</string>
+
+    <!-- AI Assistant Users screen -->
+    <string name="app_ai_agents">AI Agents</string>
+
+    <!-- Login screen -->
+    <string name="app_login">Login</string>
+    <string name="app_choose_sample_user">Choose a Sample User</string>
+    <string name="app_or">Or</string>
+    <string name="app_enter_your_uid">Enter Your UID</string>
+    <string name="app_enter_uid">Enter UID</string>
+    <string name="app_continue">Continue</string>
+    <string name="app_change">Change</string>
+    <string name="app_app_credentials">App Credentials</string>
+
+    <!-- App Credentials screen -->
+    <string name="app_credentials_title">App Credentials</string>
+    <string name="app_select_region">Select Region</string>
+    <string name="region_us">US</string>
+    <string name="region_eu">EU</string>
+    <string name="region_in">IN</string>
+    <string name="app_app_id">App ID</string>
+    <string name="app_enter_app_id">Enter App ID</string>
+    <string name="app_auth_key">Auth Key</string>
+    <string name="app_enter_auth_key">Enter Auth Key</string>
+
+    <!-- User profile popup -->
+    <string name="app_logout">Logout</string>
+
+    <!-- Common -->
+    <string name="error_title">Error</string>
+    <string name="error_sdk_init_failed">Failed to initialize CometChat SDK. Please check your credentials and try again.</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="app_ok">OK</string>
+
+</resources>

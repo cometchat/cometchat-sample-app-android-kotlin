@@ -103,11 +103,14 @@ data class CometChatMessageComposerStyle(
     @ColorInt val richTextToolbarActiveIconTint: Int = 0,
     @ColorInt val richTextToolbarActiveIconBackgroundColor: Int = 0,
     
-    // Rich text toggle button styling (DEPRECATED)
-    @Deprecated("Toggle button removed - toolbar visibility is now automatic")
+    // Rich text toggle button styling (Aa button in multiline mode Row 2)
     val richTextToolbarToggleIcon: Drawable? = null,
-    @Deprecated("Toggle button removed - toolbar visibility is now automatic")
     @ColorInt val richTextToolbarToggleIconTint: Int = 0,
+    @ColorInt val richTextToggleIconActiveTint: Int = 0,
+
+    // Formatting toolbar close button styling (X button at start of toolbar in multiline mode)
+    val formattingToolbarCloseIcon: Drawable? = null,
+    @ColorInt val formattingToolbarCloseIconTint: Int = 0,
 
     // Link edit dialog styling
     @ColorInt val linkDialogBackgroundColor: Int = 0,
@@ -412,6 +415,19 @@ data class CometChatMessageComposerStyle(
                 ),
                 richTextToolbarToggleIconTint = typedArray?.getColor(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerRichTextToolbarToggleIconTint,
+                    CometChatTheme.getIconTintSecondary(context)
+                ) ?: CometChatTheme.getIconTintSecondary(context),
+                richTextToggleIconActiveTint = typedArray?.getColor(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerRichTextToggleIconActiveTint,
+                    CometChatTheme.getPrimaryColor(context)
+                ) ?: CometChatTheme.getPrimaryColor(context),
+
+                // Formatting toolbar close button styling
+                formattingToolbarCloseIcon = typedArray?.getDrawable(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerFormattingToolbarCloseIcon
+                ),
+                formattingToolbarCloseIconTint = typedArray?.getColor(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerFormattingToolbarCloseIconTint,
                     CometChatTheme.getIconTintSecondary(context)
                 ) ?: CometChatTheme.getIconTintSecondary(context),
 

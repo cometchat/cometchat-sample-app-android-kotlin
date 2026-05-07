@@ -14,6 +14,7 @@ import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.helpers.Logger
 import com.cometchat.chat.models.User
 import com.cometchat.sampleapp.kotlin.utils.AppPreferences
 import com.cometchat.uikit.core.CometChatUIKit
@@ -111,6 +112,7 @@ class SampleApplication : Application() {
      */
     override fun onCreate() {
         super.onCreate()
+        Logger.enableLogs("221089")
         Log.d(TAG, "SampleApplication created")
         soundManager = CometChatSoundManager(this)
 

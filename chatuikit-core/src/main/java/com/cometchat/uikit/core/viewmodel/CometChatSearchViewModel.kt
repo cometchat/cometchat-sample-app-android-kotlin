@@ -242,7 +242,15 @@ open class CometChatSearchViewModel(
         currentConversationsRequest?.let { request ->
             fetchConversationsUseCase(request)
                 .onSuccess { conversations ->
-                    _conversations.value = _conversations.value + conversations
+                    // Filter out conversations with no last message when UNREAD filter is active
+                    // The SDK returns joined groups with system-only "unread" counts (join notifications)
+                    // but no actual chat messages — these appear as empty conversations in the UI
+                    val filteredConversations = if (filters.contains(SearchFilter.UNREAD)) {
+                        conversations.filter { it.lastMessage != null }
+                    } else {
+                        conversations
+                    }
+                    _conversations.value = _conversations.value + filteredConversations
                     _hasMoreConversations.value = fetchConversationsUseCase.hasMore()
                     isConversationRequestPending = false
                     conversationRequestFailed = false
@@ -471,7 +479,13 @@ open class CometChatSearchViewModel(
             currentConversationsRequest?.let { request ->
                 fetchConversationsUseCase(request)
                     .onSuccess { conversations ->
-                        _conversations.value = _conversations.value + conversations
+                        // Filter out conversations with no last message when UNREAD filter is active
+                        val filteredConversations = if (_selectedFilters.value.contains(SearchFilter.UNREAD)) {
+                            conversations.filter { it.lastMessage != null }
+                        } else {
+                            conversations
+                        }
+                        _conversations.value = _conversations.value + filteredConversations
                         _hasMoreConversations.value = fetchConversationsUseCase.hasMore()
                         isConversationRequestPending = false
                     }
@@ -527,6 +541,7 @@ open class CometChatSearchViewModel(
      */
     fun setUid(uid: String?) {
         this.uid = uid
+        updateVisibleFiltersForContext()
     }
 
     /**
@@ -537,6 +552,30 @@ open class CometChatSearchViewModel(
      */
     fun setGuid(guid: String?) {
         this.guid = guid
+        updateVisibleFiltersForContext()
+    }
+
+    /**
+     * Updates visible filters based on uid/guid context.
+     * When uid or guid is set, conversation filters (GROUPS, UNREAD) are excluded
+     * since only message search is applicable in contextual search.
+     */
+    private fun updateVisibleFiltersForContext() {
+        if (uid != null || guid != null) {
+            // In contextual search (uid/guid), only message filters are relevant
+            _visibleFilters.value = SearchFilter.entries.filter { it.isMessageFilter() }
+            // Clear any selected conversation filters that are no longer valid
+            val currentFilters = _selectedFilters.value
+            val invalidFilters = currentFilters.filter { it.isConversationFilter() }
+            if (invalidFilters.isNotEmpty()) {
+                _selectedFilters.value = currentFilters - invalidFilters.toSet()
+            }
+        } else {
+            // Global search - show all filters (unless a filter group is already selected)
+            if (_selectedFilters.value.isEmpty()) {
+                _visibleFilters.value = SearchFilter.entries.toList()
+            }
+        }
     }
 
     /**

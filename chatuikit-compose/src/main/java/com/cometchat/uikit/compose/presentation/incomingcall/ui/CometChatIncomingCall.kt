@@ -174,7 +174,7 @@ fun CometChatIncomingCall(
                 accepted.sessionId,
                 accepted.type,
                 CallWorkFlow.DEFAULT,
-                callSettingsBuilder as? CometChatCalls.CallSettingsBuilder,
+                callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder,
                 null
             )
             // Invoke callback if provided (for custom app logic after call starts)

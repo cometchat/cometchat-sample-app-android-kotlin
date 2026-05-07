@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.cometchat.calls.core.CallSession
 import com.cometchat.calls.core.CometChatCalls
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.core.CometChat
@@ -53,7 +54,7 @@ class CometChatCallActivity : ComponentActivity() {
         private var user: User? = null
         private var outgoingCallStyle: CometChatOutgoingCallStyle? = null
         private var incomingCallStyle: CometChatIncomingCallStyle? = null
-        private var onGoingCallSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+        private var onGoingSessionSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
         private var callingType: String? = null
         
         // Flag to prevent double launches
@@ -123,11 +124,11 @@ class CometChatCallActivity : ComponentActivity() {
         fun launchConferenceCallScreen(
             context: Context,
             baseMessage: BaseMessage,
-            callSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+            callSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
         ) {
             callingType = DIRECT_CALL
             Companion.baseMessage = baseMessage
-            onGoingCallSettingsBuilder = callSettingsBuilder
+            onGoingSessionSettingsBuilder = callSettingsBuilder
             startActivity(context)
         }
 
@@ -165,7 +166,7 @@ class CometChatCallActivity : ComponentActivity() {
                     callingType = callingType,
                     call = call,
                     baseMessage = baseMessage,
-                    callSettingsBuilder = onGoingCallSettingsBuilder,
+                    callSettingsBuilder = onGoingSessionSettingsBuilder,
                     outgoingStyle = outgoingCallStyle,
                     incomingStyle = incomingCallStyle,
                     onBackPress = { finish() }
@@ -191,7 +192,7 @@ class CometChatCallActivity : ComponentActivity() {
                     sessionId = sessionId,
                     callType = callType,
                     callWorkFlow = UIKitConstants.CallWorkFlow.MEETING,
-                    callSettingsBuilder = onGoingCallSettingsBuilder
+                    callSettingsBuilder = onGoingSessionSettingsBuilder
                 )
                 
                 // Finish this activity so it's not in the back stack
@@ -221,9 +222,9 @@ class CometChatCallActivity : ComponentActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
         if (isInPictureInPictureMode) {
-            CometChatCalls.enterPIPMode()
+            CallSession.getInstance()?.enablePictureInPictureLayout()
         } else {
-            CometChatCalls.exitPIPMode()
+            CallSession.getInstance()?.disablePictureInPictureLayout()
         }
     }
 
@@ -251,7 +252,7 @@ class CometChatCallActivity : ComponentActivity() {
         // Only call endSession() for OUTGOING_CALL and INCOMING_CALL where this activity
         // hosts the call UI directly.
         if (callingType != null && !wasDirectCall) {
-            CometChatCalls.endSession()
+            CallSession.getInstance()?.leaveSession()
             CometChat.clearActiveCall()
         }
         
@@ -263,7 +264,7 @@ class CometChatCallActivity : ComponentActivity() {
         call = null
         callingType = null
         user = null
-        onGoingCallSettingsBuilder = null
+        onGoingSessionSettingsBuilder = null
         outgoingCallStyle = null
         incomingCallStyle = null
     }
@@ -274,7 +275,7 @@ private fun CallActivityContent(
     callingType: String?,
     call: Call?,
     baseMessage: BaseMessage?,
-    callSettingsBuilder: CometChatCalls.CallSettingsBuilder?,
+    callSettingsBuilder: CometChatCalls.SessionSettingsBuilder?,
     outgoingStyle: CometChatOutgoingCallStyle?,
     incomingStyle: CometChatIncomingCallStyle?,
     onBackPress: () -> Unit

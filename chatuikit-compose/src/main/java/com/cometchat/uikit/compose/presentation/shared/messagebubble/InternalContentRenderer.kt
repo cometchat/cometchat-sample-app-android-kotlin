@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.constants.CometChatConstants
@@ -1761,27 +1763,29 @@ internal object InternalContentRenderer {
 
         if (!isDisapproved) return
 
-        val widthModifier = if (message is TextMessage) {
-            val textLength = message.text?.length ?: 0
-            if (textLength < 15) Modifier.widthIn(min = 200.dp) else Modifier
-        } else {
-            Modifier
-        }
-
         Box(
-            modifier = widthModifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(
-                    color = CometChatTheme.colorScheme.errorColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp)
+                    color = androidx.compose.ui.res.colorResource(id = R.color.cometchat_color_error_100)
                 )
-                .padding(8.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            Text(
-                text = "This message has been moderated",
-                color = CometChatTheme.colorScheme.errorColor,
-                style = CometChatTheme.typography.caption1Regular
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.cometchat_ic_warning),
+                    contentDescription = "Moderation warning",
+                    tint = CometChatTheme.colorScheme.errorColor,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(id = R.string.cometchat_moderation_block_message),
+                    color = CometChatTheme.colorScheme.errorColor,
+                    style = CometChatTheme.typography.caption1Regular,
+                    maxLines = 2
+                )
+            }
         }
     }
 
@@ -1818,7 +1822,6 @@ internal object InternalContentRenderer {
 
         Row(
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(top = 4.dp),
             horizontalArrangement = horizontalArrangement
         ) {

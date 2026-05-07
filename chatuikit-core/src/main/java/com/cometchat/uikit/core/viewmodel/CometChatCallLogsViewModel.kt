@@ -120,7 +120,6 @@ open class CometChatCallLogsViewModel(
                     ?: CallLogRequest.CallLogRequestBuilder()
                         .setLimit(limit)
                         .setCallCategory(CometChatCallsConstants.CALL_CATEGORY_CALL)
-                        .setAuthToken(CometChat.getUserAuthToken())
                 callLogRequest = builder.build()
             }
             
@@ -167,7 +166,6 @@ open class CometChatCallLogsViewModel(
                 ?: CallLogRequest.CallLogRequestBuilder()
                     .setLimit(limit)
                     .setCallCategory(CometChatCallsConstants.CALL_CATEGORY_CALL)
-                    .setAuthToken(CometChat.getUserAuthToken())
             
             callLogRequest = builder.build()
             
@@ -234,7 +232,6 @@ open class CometChatCallLogsViewModel(
     fun setCallLogRequestBuilder(builder: CallLogRequest.CallLogRequestBuilder) {
         callLogRequestBuilder = builder
             .setCallCategory(CometChatCallsConstants.CALL_CATEGORY_CALL)
-            .setAuthToken(CometChat.getUserAuthToken())
         callLogRequest = callLogRequestBuilder?.build()
     }
     

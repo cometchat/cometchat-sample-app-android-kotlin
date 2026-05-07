@@ -1,16 +1,10 @@
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    id("maven-publish")
+    alias(libs.plugins.roborazzi)
 }
 
-ext["publishArtifactId"] = "chatuikit-kotlin-android"
-ext["publishDescription"] = "CometChat UI Kit Kotlin – Android Views/XML chat UI components"
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.0-beta2"
-val libraryGroup = "com.cometchat"
-val libraryArtifact = "chatuikit-kotlin-android"
 android {
     namespace = "com.cometchat.uikit.kotlin"
     compileSdk = 36
@@ -54,6 +48,13 @@ android {
         }
     }
 }
+
+roborazzi {
+    outputDir.set(file("src/test/snapshots"))
+}
+
+
+
 configurations.all {
     exclude(group = "org.jetbrains", module = "annotations-java5")
 }
@@ -61,9 +62,7 @@ configurations.all {
 dependencies {
     // Core module – shared ViewModels and business logic (published artifact)
     implementation(libs.chatuikit.core.android)
-
 //    implementation(project(":chatuikit-core"))
-
     // CometChat SDK
     implementation(libs.chat.sdk.android)
     compileOnly(libs.calls.sdk.android)
@@ -109,7 +108,11 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(libs.espresso.core)
     testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test.ext:junit:1.2.1")
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.property)
@@ -119,4 +122,11 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.mockito.core)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation("org.mockito:mockito-android:5.21.0")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1")
+    androidTestImplementation("androidx.fragment:fragment-testing:1.8.6")
+    debugImplementation("androidx.fragment:fragment-testing-manifest:1.8.6")
 }

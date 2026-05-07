@@ -1103,7 +1103,7 @@ class CometChatMessageListAvatarIntegrationTest {
             }
 
             override suspend fun markAsUnread(message: BaseMessage): Result<Conversation> {
-                return Result.success(Conversation().apply { unreadMessageCount = 1 })
+                return Result.success(Conversation("test_conv", CometChatConstants.CONVERSATION_TYPE_USER).apply { unreadMessageCount = 1 })
             }
 
             override fun hasMorePreviousMessages(): Boolean = false

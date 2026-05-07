@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Required for ActivityScenario.launch(ComponentActivity::class.java) in Robolectric tests -->
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+    </application>
+
+</manifest>

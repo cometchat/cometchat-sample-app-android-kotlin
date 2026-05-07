@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.cometchat.calls.core.CallSession
 import com.cometchat.calls.core.CometChatCalls
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
@@ -99,7 +100,7 @@ class CometChatOngoingCall @JvmOverloads constructor(
             initializeView()
             initViewModel()
             // Create default CallSettingsBuilder (matching Java implementation behavior)
-            activity?.let { setCallSettingsBuilder(CometChatCalls.CallSettingsBuilder(it)) }
+            activity?.let { setSessionSettingsBuilder(CometChatCalls.SessionSettingsBuilder()) }
             // Request the necessary permissions (matching Java implementation)
             requestCallPermissions()
         }
@@ -199,14 +200,14 @@ class CometChatOngoingCall @JvmOverloads constructor(
     }
 
     /**
-     * Sets the custom call settings builder.
+     * Sets the custom session settings builder.
      *
      * **Validates: Requirement 2.3**
      *
-     * @param builder The CometChatCalls.CallSettingsBuilder to use for call configuration
+     * @param builder The CometChatCalls.SessionSettingsBuilder to use for session configuration
      */
-    fun setCallSettingsBuilder(builder: CometChatCalls.CallSettingsBuilder?) {
-        viewModel?.setCallSettingsBuilder(builder)
+    fun setSessionSettingsBuilder(builder: CometChatCalls.SessionSettingsBuilder?) {
+        viewModel?.setSessionSettingsBuilder(builder)
     }
 
     /**
@@ -280,7 +281,7 @@ class CometChatOngoingCall @JvmOverloads constructor(
      */
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        viewModel?.addListeners()
+        viewModel?.addListeners(lifecycleOwner)
         lifecycleOwner?.lifecycle?.addObserver(this)
         attachObservers()
     }
@@ -468,7 +469,7 @@ class CometChatOngoingCall @JvmOverloads constructor(
             viewModel?.endCall()
             CometChat.clearActiveCall()
         } else {
-            CometChatCalls.endSession()
+            CallSession.getInstance()?.leaveSession()
         }
         CallingState.setIsActiveMeeting(false)
     }

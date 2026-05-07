@@ -285,10 +285,9 @@ class CometChatReactionListIntegrationTest {
             override suspend fun fetchReactions(request: ReactionsRequest): Result<List<Reaction>> {
                 return Result.success(reactions)
             }
-            override suspend fun removeReaction(messageId: Int, emoji: String): Result<BaseMessage> {
+            override suspend fun removeReaction(messageId: Long, emoji: String): Result<BaseMessage> {
                 return Result.success(createMockMessageWithReactions())
             }
-            override fun hasMoreReactions(): Boolean = false
         }
 
         return CometChatReactionListViewModel(
@@ -303,10 +302,9 @@ class CometChatReactionListIntegrationTest {
             override suspend fun fetchReactions(request: ReactionsRequest): Result<List<Reaction>> {
                 return Result.failure(com.cometchat.chat.exceptions.CometChatException("ERROR", "Test error"))
             }
-            override suspend fun removeReaction(messageId: Int, emoji: String): Result<BaseMessage> {
+            override suspend fun removeReaction(messageId: Long, emoji: String): Result<BaseMessage> {
                 return Result.success(createMockMessageWithReactions())
             }
-            override fun hasMoreReactions(): Boolean = false
         }
 
         return CometChatReactionListViewModel(

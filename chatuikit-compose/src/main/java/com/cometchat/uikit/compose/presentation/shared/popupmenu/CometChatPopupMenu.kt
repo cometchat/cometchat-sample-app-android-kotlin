@@ -174,7 +174,7 @@ fun CometChatPopupMenu(
                         ),
                         onDismissRequest = onDismissRequest,
                         properties = PopupProperties(
-                            focusable = false, // Non-focusable to prevent keyboard dismissal when popup is shown
+                            focusable = true, // Focusable to prevent click-through to attachment button when dismissing
                             dismissOnBackPress = true,
                             dismissOnClickOutside = true
                         )

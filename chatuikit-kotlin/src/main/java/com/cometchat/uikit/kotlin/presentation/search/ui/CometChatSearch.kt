@@ -448,14 +448,12 @@ class CometChatSearch @JvmOverloads constructor(
 
     /**
      * Handles filter chip click with grouped filter logic.
-     * When a filter from one group is selected, filters from other groups are cleared.
+     * Delegates to the ViewModel's toggleFilter() to ensure consistent behavior
+     * with the Compose module (which correctly handles Unread/Groups filtering).
      */
     private fun handleFilterClick(position: Int) {
         val filter = searchFilters.getOrNull(position) ?: return
-        
-        toggleFilter(filter)
-        refreshChipSelectionState()
-        fetchBasedOnSelection()
+        viewModel?.toggleFilter(filter)
     }
 
     /**
@@ -1325,6 +1323,17 @@ class CometChatSearch @JvmOverloads constructor(
         viewScope?.launch {
             vm.selectedFilters.collectLatest { filters ->
                 updateFilterChips(filters)
+            }
+        }
+
+        // Observe visible filters to update chip visibility (e.g., hide conversation filters in uid/guid context)
+        viewScope?.launch {
+            vm.visibleFilters.collectLatest { visibleFilters ->
+                val filteredList = searchFilters.filter { it in visibleFilters }
+                if (filteredList != searchFilters) {
+                    searchFilters = filteredList
+                    setupFilterChips()
+                }
             }
         }
 

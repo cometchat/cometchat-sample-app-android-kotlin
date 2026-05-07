@@ -2,17 +2,18 @@ package com.cometchat.uikit.core.viewmodel
 
 import android.util.Log
 import android.widget.RelativeLayout
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cometchat.calls.core.CallSettings
 import com.cometchat.calls.core.CometChatCalls
-import com.cometchat.calls.listeners.CometChatCallsEventsListener
 import com.cometchat.calls.model.AudioMode
-import com.cometchat.calls.model.CallSwitchRequestInfo
-import com.cometchat.calls.model.GenerateToken
-import com.cometchat.calls.model.RTCMutedUser
-import com.cometchat.calls.model.RTCRecordingInfo
-import com.cometchat.calls.model.RTCUser
+import com.cometchat.calls.model.SessionType
+import com.cometchat.calls.listeners.ButtonClickListener
+import com.cometchat.calls.listeners.SessionStatusListener
+import com.cometchat.calls.listeners.ParticipantEventListener
+import com.cometchat.calls.core.CallSession
+import com.cometchat.calls.model.Participant
+import com.cometchat.calls.core.SessionSettings
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.core.CometChat
@@ -86,7 +87,7 @@ open class CometChatOngoingCallViewModel : ViewModel() {
      * Unique listener ID for CometChatCalls event listeners.
      * Generated using timestamp when listeners are added.
      */
-    internal var listenerId: String? = null
+    internal var lifecycleOwner: LifecycleOwner? = null
 
     /**
      * Current call session ID.
@@ -108,16 +109,22 @@ open class CometChatOngoingCallViewModel : ViewModel() {
     internal var callWorkFlow: CallWorkFlow = CallWorkFlow.DEFAULT
 
     /**
-     * Custom call settings builder provided by the user.
-     * Used to configure call settings before starting the session.
+     * Custom session settings builder provided by the user.
+     * Used to configure session settings before joining the session.
      */
-    internal var callSettingsBuilder: CometChatCalls.CallSettingsBuilder? = null
+    internal var sessionSettingsBuilder: CometChatCalls.SessionSettingsBuilder? = null
 
     /**
-     * Built call settings used for the current session.
-     * Created from callSettingsBuilder with audio-only configuration applied.
+     * Built session settings used for the current session.
+     * Created from sessionSettingsBuilder with session type configuration applied.
      */
-    internal var callSettings: CallSettings? = null
+    internal var sessionSettings: SessionSettings? = null
+
+    /**
+     * The active CallSession instance returned by joinSession().
+     * Used for session actions (leaveSession, etc.) and lifecycle-aware listeners.
+     */
+    internal var callSession: CallSession? = null
 
     // ==================== Protected Mutable State Accessors ====================
 
@@ -175,13 +182,13 @@ open class CometChatOngoingCallViewModel : ViewModel() {
     }
 
     /**
-     * Sets the custom call settings builder.
-     * @param builder The CometChatCalls.CallSettingsBuilder to use for call configuration
+     * Sets the custom session settings builder.
+     * @param builder The CometChatCalls.SessionSettingsBuilder to use for session configuration
      *
      * Validates: Requirement 2.3
      */
-    fun setCallSettingsBuilder(builder: CometChatCalls.CallSettingsBuilder?) {
-        this.callSettingsBuilder = builder
+    fun setSessionSettingsBuilder(builder: CometChatCalls.SessionSettingsBuilder?) {
+        this.sessionSettingsBuilder = builder
     }
 
     // ==================== Call Methods ====================
@@ -189,14 +196,12 @@ open class CometChatOngoingCallViewModel : ViewModel() {
     /**
      * Starts the call session with the configured session ID and call type.
      * 
-     * Flow:
+     * Flow (v5):
      * 1. Set UI state to Loading, isLoading to true
-     * 2. Get auth token via CometChat.getUserAuthToken()
-     * 3. Build CallSettings with isAudioOnly based on callType
-     * 4. Generate call token via CometChatCalls.generateToken()
-     * 5. Start session via CometChatCalls.startSession()
-     * 6. On success: set isLoading false, UI state to Connected
-     * 7. On failure: emit Error event
+     * 2. Build SessionSettings with session type based on callType
+     * 3. Join session via CometChatCalls.joinSession() (handles token generation internally)
+     * 4. On success: store CallSession, set isLoading false, UI state to Connected
+     * 5. On failure: emit Error event
      *
      * @param callViewContainer The RelativeLayout container where the call UI will be rendered
      *
@@ -206,59 +211,35 @@ open class CometChatOngoingCallViewModel : ViewModel() {
         // Validate required parameters
         val sid = sessionId ?: return
         val type = callType ?: return
-        val builder = callSettingsBuilder ?: return
+        val builder = sessionSettingsBuilder ?: return
 
         // Set UI state to Loading, isLoading to true (Requirement 3.1)
         mutableUiState.value = OngoingCallUIState.Loading
         mutableIsLoading.value = true
 
-        // Get auth token (Requirement 3.2)
-        val userAuthToken = CometChat.getUserAuthToken() ?: return
+        // Build SessionSettings with session type based on callType (Requirements 17.1, 17.2, 17.3)
+        val sessionType = if (type.equals(CometChatConstants.CALL_TYPE_AUDIO, ignoreCase = true)) {
+            SessionType.VOICE
+        } else {
+            SessionType.VIDEO
+        }
+        sessionSettings = builder.setSessionType(sessionType).build()
 
-        // Build CallSettings with isAudioOnly based on callType (Requirements 17.1, 17.2, 17.3)
-        // Property 12: Call Type to Audio-Only Mapping
-        val isAudioOnly = type.equals(CometChatConstants.CALL_TYPE_AUDIO, ignoreCase = true)
-        callSettings = builder.setIsAudioOnly(isAudioOnly).build()
+        val settings = sessionSettings ?: return
 
-        // Generate call token (Requirement 3.3)
-        CometChatCalls.generateToken(sid, userAuthToken, object : CometChatCalls.CallbackListener<GenerateToken>() {
-            override fun onSuccess(generateToken: GenerateToken) {
-                // Start session with generated token (Requirement 3.4)
-                startSession(generateToken.token, callViewContainer)
-            }
-
-            override fun onError(e: com.cometchat.calls.exceptions.CometChatException) {
-                // On failure: emit Error event (Requirement 3.7)
-                Log.e(TAG, "generateToken error: $e")
-                val chatException = CometChatException(e.code, e.message)
-                viewModelScope.launch {
-                    mutableEvents.emit(OngoingCallEvent.Error(chatException))
-                }
-            }
-        })
-    }
-
-    /**
-     * Starts the call session with the generated token.
-     *
-     * @param token The generated call token
-     * @param callViewContainer The RelativeLayout container where the call UI will be rendered
-     */
-    private fun startSession(token: String, callViewContainer: RelativeLayout) {
-        val settings = callSettings ?: return
-        val sid = sessionId ?: return
-        val type = callType ?: return
-
-        CometChatCalls.startSession(token, settings, callViewContainer, object : CometChatCalls.CallbackListener<String>() {
-            override fun onSuccess(s: String) {
+        // Join session — v5 handles token generation internally (Requirements 3.3, 3.4)
+        CometChatCalls.joinSession(sid, settings, callViewContainer, object : CometChatCalls.CallbackListener<CallSession>() {
+            override fun onSuccess(session: CallSession) {
+                // Store the CallSession for actions and events
+                callSession = session
                 // On success: set isLoading false, UI state to Connected (Requirements 3.5, 3.6)
                 mutableIsLoading.value = false
                 mutableUiState.value = OngoingCallUIState.Connected(sid, type)
             }
 
             override fun onError(e: com.cometchat.calls.exceptions.CometChatException) {
-                // On failure: emit Error event (Requirement 3.8)
-                Log.e(TAG, "startSession error: $e")
+                // On failure: emit Error event (Requirement 3.7)
+                Log.e(TAG, "joinSession error: $e")
                 val chatException = CometChatException(e.code, e.message)
                 viewModelScope.launch {
                     mutableEvents.emit(OngoingCallEvent.Error(chatException))
@@ -272,12 +253,12 @@ open class CometChatOngoingCallViewModel : ViewModel() {
      *
      * For DEFAULT workflow (1:1 calls):
      * 1. Call CometChat.endCall(sessionId)
-     * 2. On success: call CometChatCalls.endSession(), CometChat.clearActiveCall()
+     * 2. On success: call callSession.leaveSession(), CometChat.clearActiveCall()
      * 3. Set UI state to Ended, emit CallEnded event
      * 4. On failure: still set Ended state, emit Error event
      *
      * For MEETING workflow (group calls):
-     * 1. Call CometChatCalls.endSession() only
+     * 1. Call callSession.leaveSession() only
      * 2. Set CallingState.setIsActiveMeeting(false)
      * 3. Set UI state to Ended, emit CallEnded event
      *
@@ -287,8 +268,9 @@ open class CometChatOngoingCallViewModel : ViewModel() {
     fun endCall() {
         when (callWorkFlow) {
             CallWorkFlow.MEETING -> {
-                // For MEETING: call CometChatCalls.endSession() only
-                CometChatCalls.endSession()
+                // For MEETING: leave session via CallSession instance
+                callSession?.leaveSession()
+                    ?: CallSession.getInstance()?.leaveSession()
                 CallingState.setIsActiveMeeting(false)
                 mutableUiState.value = OngoingCallUIState.Ended
                 viewModelScope.launch {
@@ -305,9 +287,10 @@ open class CometChatOngoingCallViewModel : ViewModel() {
 
                 CometChat.endCall(sid, object : CometChat.CallbackListener<Call>() {
                     override fun onSuccess(call: Call?) {
-                        // On success: call CometChatCalls.endSession(), CometChat.clearActiveCall()
+                        // On success: leave session via CallSession, clear active call
                         // (Requirement 7.2, 7.3)
-                        CometChatCalls.endSession()
+                        callSession?.leaveSession()
+                            ?: CallSession.getInstance()?.leaveSession()
                         CometChat.clearActiveCall()
                         
                         // Set UI state to Ended, emit CallEnded event (Requirement 7.4, 7.5)
@@ -317,7 +300,6 @@ open class CometChatOngoingCallViewModel : ViewModel() {
                         }
                         
                         // Emit UIKit event for inter-component communication
-                        // Matches Java's CometChatUIKitHelper.onCallEnded(call) behavior
                         call?.let {
                             CometChatEvents.emitCallEvent(CometChatCallEvent.CallEnded(it))
                         }
@@ -339,34 +321,36 @@ open class CometChatOngoingCallViewModel : ViewModel() {
     // ==================== Listener Methods ====================
 
     /**
-     * Registers call event listeners with the CometChatCalls SDK.
-     * Generates a unique listener ID using the current timestamp.
+     * Registers v5 lifecycle-aware call event listeners on the CallSession instance.
+     * Uses SessionStatusListener, ParticipantEventListener, and ButtonClickListener.
      *
-     * Property 11: Unique Listener ID Generation
-     * - The generated listener ID is unique (timestamp-based)
-     * - Used consistently for both addCallsEventListeners() and removeCallsEventListeners()
+     * v5 listeners auto-remove on lifecycle owner destroy — no manual removal needed.
      *
      * Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 13.3, 13.4, 13.5
      */
-    fun addListeners() {
-        // Generate unique listener ID using timestamp (Requirement 13.3)
-        listenerId = System.currentTimeMillis().toString()
+    fun addListeners(owner: LifecycleOwner? = null) {
+        val session = callSession ?: CallSession.getInstance() ?: return
+        // Use provided owner, stored owner, or skip registration.
+        // Listeners will be registered when startCall() succeeds if no owner is available yet.
+        val resolvedOwner: LifecycleOwner = owner ?: this.lifecycleOwner ?: return
 
-        // Register CometChatCallsEventsListener (Requirement 13.4)
-        CometChatCalls.addCallsEventListeners(listenerId!!, object : CometChatCallsEventsListener {
+        // 1. Session lifecycle listener
+        session.addSessionStatusListener(resolvedOwner, object : SessionStatusListener() {
+            override fun onSessionJoined() {
+                // No additional action — UI state already set in joinSession callback
+            }
 
             /**
-             * Called when the call is ended by the remote party.
-             * For DEFAULT workflow: end session + clear active call + exit
+             * Called when the session ends (remote party ended or server-side end).
+             * For DEFAULT workflow: leave session + clear active call + exit
              * For MEETING workflow: do nothing
              *
              * Validates: Requirements 6.1, 6.2
              */
-            override fun onCallEnded() {
+            override fun onSessionLeft() {
                 when (callWorkFlow) {
                     CallWorkFlow.DEFAULT -> {
-                        // End session + clear active call (Requirement 6.1)
-                        CometChatCalls.endSession()
+                        // Session already left — just clean up and transition to Ended
                         CometChat.clearActiveCall()
                         mutableUiState.value = OngoingCallUIState.Ended
                         viewModelScope.launch {
@@ -374,27 +358,7 @@ open class CometChatOngoingCallViewModel : ViewModel() {
                         }
                     }
                     CallWorkFlow.MEETING -> {
-                        // Do nothing for MEETING workflow (Requirement 6.2)
-                    }
-                }
-            }
-
-            /**
-             * Called when the user presses the end call button in the SDK UI.
-             * For DEFAULT workflow: call endCall()
-             * For MEETING workflow: end session only + exit
-             *
-             * Validates: Requirements 6.3, 6.4
-             */
-            override fun onCallEndButtonPressed() {
-                when (callWorkFlow) {
-                    CallWorkFlow.DEFAULT -> {
-                        // Call endCall() for full cleanup (Requirement 6.3)
-                        endCall()
-                    }
-                    CallWorkFlow.MEETING -> {
-                        // End session only for MEETING workflow (Requirement 6.4)
-                        CometChatCalls.endSession()
+                        // For MEETING: also transition to Ended so the screen closes
                         CallingState.setIsActiveMeeting(false)
                         mutableUiState.value = OngoingCallUIState.Ended
                         viewModelScope.launch {
@@ -406,104 +370,156 @@ open class CometChatOngoingCallViewModel : ViewModel() {
 
             /**
              * Called when the call session times out.
-             * End session + emit SessionTimeout event + exit (same for both workflows)
+             * Leave session + emit SessionTimeout event + exit (same for both workflows)
              *
              * Validates: Requirement 6.5
              */
-            override fun onSessionTimeout() {
+            override fun onSessionTimedOut() {
                 CallingState.setIsActiveMeeting(false)
-                CometChatCalls.endSession()
+                // Session already timed out — no need to call leaveSession()
                 mutableUiState.value = OngoingCallUIState.Ended
                 viewModelScope.launch {
                     mutableEvents.emit(OngoingCallEvent.SessionTimeout)
                 }
             }
 
+            override fun onConnectionLost() {
+                Log.w(TAG, "Call connection lost")
+            }
+
+            override fun onConnectionRestored() {
+                Log.d(TAG, "Call connection restored")
+            }
+
+            override fun onConnectionClosed() {
+                Log.d(TAG, "Call connection closed")
+            }
+        })
+
+        // 2. Participant event listener
+        session.addParticipantEventListener(resolvedOwner, object : ParticipantEventListener() {
             /**
-             * Called when a user joins the call.
+             * Called when a participant joins the call.
              * Emits UserJoined event with isCurrentUser detection.
-             *
-             * Property 8: User Join Detection
-             * - isCurrentUser equals true if and only if the joined user's UID
-             *   matches CometChat.getLoggedInUser().uid
              *
              * Validates: Requirements 6.6, 18.2
              */
-            override fun onUserJoined(user: RTCUser?) {
-                user?.let { rtcUser ->
-                    val currentUserId = CometChat.getLoggedInUser()?.uid
-                    val isCurrentUser = rtcUser.uid == currentUserId
-                    viewModelScope.launch {
-                        mutableEvents.emit(OngoingCallEvent.UserJoined(rtcUser.uid, isCurrentUser))
-                    }
+            override fun onParticipantJoined(participant: Participant) {
+                val currentUserId = CometChat.getLoggedInUser()?.uid
+                val isCurrentUser = participant.uid == currentUserId
+                viewModelScope.launch {
+                    mutableEvents.emit(OngoingCallEvent.UserJoined(participant.uid, isCurrentUser))
                 }
             }
 
             /**
-             * Called when a user leaves the call.
+             * Called when a participant leaves the call.
              * Emits UserLeft event with the user ID.
              *
              * Validates: Requirement 6.7
              */
-            override fun onUserLeft(user: RTCUser?) {
-                user?.let { rtcUser ->
-                    viewModelScope.launch {
-                        mutableEvents.emit(OngoingCallEvent.UserLeft(rtcUser.uid))
-                    }
+            override fun onParticipantLeft(participant: Participant) {
+                viewModelScope.launch {
+                    mutableEvents.emit(OngoingCallEvent.UserLeft(participant.uid))
                 }
             }
 
+            override fun onParticipantListChanged(participants: List<Participant>) {
+                // No action required per design
+            }
+
+            override fun onParticipantAudioMuted(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantAudioUnmuted(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantVideoPaused(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantVideoResumed(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantHandRaised(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantHandLowered(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantStartedRecording(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onParticipantStoppedRecording(participant: Participant) {
+                // No action required per design
+            }
+
+            override fun onDominantSpeakerChanged(participant: Participant) {
+                // No action required per design
+            }
+        })
+
+        // 3. Button click listener
+        session.addButtonClickListener(resolvedOwner, object : ButtonClickListener() {
             /**
-             * Called when an error occurs during the call.
-             * Emits Error event with the exception.
+             * Called when the user presses the leave session button in the SDK UI.
+             * For DEFAULT workflow: call endCall()
+             * For MEETING workflow: leave session only + exit
+             *
+             * Validates: Requirements 6.3, 6.4
              */
-            override fun onError(e: com.cometchat.calls.exceptions.CometChatException?) {
-                e?.let { exception ->
-                    Log.e(TAG, "Call error: $exception")
-                    val chatException = CometChatException(exception.code, exception.message)
-                    viewModelScope.launch {
-                        mutableEvents.emit(OngoingCallEvent.Error(chatException))
+            override fun onLeaveSessionButtonClicked() {
+                when (callWorkFlow) {
+                    CallWorkFlow.DEFAULT -> {
+                        endCall()
+                    }
+                    CallWorkFlow.MEETING -> {
+                        session.leaveSession()
+                        CallingState.setIsActiveMeeting(false)
+                        mutableUiState.value = OngoingCallUIState.Ended
+                        viewModelScope.launch {
+                            mutableEvents.emit(OngoingCallEvent.CallEnded)
+                        }
                     }
                 }
             }
 
-            // ==================== Other Callbacks (No-op) ====================
-
-            override fun onUserListChanged(users: ArrayList<RTCUser>?) {
+            override fun onToggleAudioButtonClicked() {
                 // No action required per design
             }
 
-            override fun onAudioModeChanged(audioModes: ArrayList<AudioMode>?) {
+            override fun onToggleVideoButtonClicked() {
                 // No action required per design
             }
 
-            override fun onCallSwitchedToVideo(info: CallSwitchRequestInfo?) {
+            override fun onSwitchCameraButtonClicked() {
                 // No action required per design
             }
 
-            override fun onUserMuted(mutedUser: RTCMutedUser?) {
+            override fun onRaiseHandButtonClicked() {
                 // No action required per design
             }
 
-            override fun onRecordingToggled(info: RTCRecordingInfo?) {
+            override fun onRecordingToggleButtonClicked() {
                 // No action required per design
             }
         })
     }
 
     /**
-     * Unregisters call event listeners from the CometChatCalls SDK.
-     * Uses the same listener ID that was generated in addListeners().
-     *
-     * Property 11: Unique Listener ID Generation
-     * - Uses the same listener ID consistently for removeCallsEventListeners()
+     * No-op in v5 — lifecycle-aware listeners auto-remove on destroy.
+     * Kept for API compatibility.
      *
      * Validates: Requirement 13.5
      */
     fun removeListeners() {
-        listenerId?.let { id ->
-            CometChatCalls.removeCallsEventListeners(id)
-        }
+        // v5 listeners are lifecycle-aware and auto-cleanup — no manual removal needed
     }
 
     // ==================== Lifecycle Methods ====================

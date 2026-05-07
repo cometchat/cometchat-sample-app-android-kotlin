@@ -544,7 +544,7 @@ class CometChatTextBubble @JvmOverloads constructor(
         
         val bulletTextView = TextView(context).apply {
             text = "•  "
-            setTextColor(linkColor)
+            setTextColor(textColor)
             setTypeface(typeface, Typeface.BOLD)
             if (style?.textAppearance != 0) {
                 setTextAppearance(style?.textAppearance ?: 0)
@@ -582,7 +582,7 @@ class CometChatTextBubble @JvmOverloads constructor(
         
         val numberTextView = TextView(context).apply {
             text = "$number. "
-            setTextColor(linkColor)
+            setTextColor(textColor)
             setTypeface(typeface, Typeface.BOLD)
             if (style?.textAppearance != 0) {
                 setTextAppearance(style?.textAppearance ?: 0)

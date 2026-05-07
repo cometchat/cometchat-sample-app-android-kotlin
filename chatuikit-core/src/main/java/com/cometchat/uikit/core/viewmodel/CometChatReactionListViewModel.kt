@@ -216,6 +216,10 @@ open class CometChatReactionListViewModel(
             removeReactionUseCase(message.id, emoji)
                 .onSuccess { updatedMessage ->
                     handleReactionRemovedByMe(emoji)
+                    // Emit UIKit event so MessageListViewModel updates the message bubble in real-time
+                    CometChatEvents.emitMessageEvent(
+                        CometChatMessageEvent.MessageEdited(updatedMessage, MessageStatus.SUCCESS)
+                    )
                     isRemovingReaction = false
                 }
                 .onFailure { exception ->

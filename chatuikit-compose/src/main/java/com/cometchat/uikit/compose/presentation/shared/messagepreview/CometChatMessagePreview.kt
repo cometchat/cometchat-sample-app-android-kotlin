@@ -193,6 +193,11 @@ internal fun resolveMessageContent(
     textFormatters: List<CometChatTextFormatter>,
     alignment: UIKitConstants.MessageBubbleAlignment
 ): Pair<AnnotatedString, Int?> {
+    // Check if the quoted message was deleted — show "This message was deleted"
+    if (message.deletedAt > 0) {
+        return AnnotatedString(context.getString(R.string.cometchat_this_message_deleted)) to null
+    }
+
     return when (message) {
         is TextMessage -> {
             val text = message.text ?: ""

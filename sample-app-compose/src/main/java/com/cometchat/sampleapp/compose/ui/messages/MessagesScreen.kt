@@ -36,6 +36,7 @@ import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageL
 import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupMenu
 import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 
 /**
  * Messages screen composable for one-on-one and group messaging.
@@ -271,6 +272,7 @@ private fun MessagesContent(
                 modifier = Modifier.fillMaxWidth(),
                 user = user,
                 group = group,
+                layoutMode = ComposerLayoutMode.MULTI_LINE,
                 // Set parent message ID for threaded conversations (from chat history)
                 parentMessageId = parentMessageId ?: -1,
                 onError = { exception ->

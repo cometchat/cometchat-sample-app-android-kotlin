@@ -122,7 +122,7 @@ class CometChatMessageInput @JvmOverloads constructor(
             inputType = InputType.TYPE_CLASS_TEXT or 
                        InputType.TYPE_TEXT_FLAG_MULTI_LINE or 
                        InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            maxLines = 3
+            maxLines = 5
             minLines = 1
             isSingleLine = false
             setHint(R.string.cometchat_composer_place_holder_text)

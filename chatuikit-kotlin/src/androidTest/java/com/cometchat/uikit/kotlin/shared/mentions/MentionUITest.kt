@@ -204,9 +204,9 @@ class MentionUITest {
             suggestionItem = suggestionItem
         )
 
-        assertEquals(trackingCharacter, span.id)
-        assertEquals("@John Doe", span.text)
-        assertEquals(suggestionItem, span.suggestionItem)
+        assertEquals(trackingCharacter, span.getId())
+        assertEquals("@John Doe", span.getText())
+        assertEquals(suggestionItem, span.getSuggestionItem())
     }
 
     /**
