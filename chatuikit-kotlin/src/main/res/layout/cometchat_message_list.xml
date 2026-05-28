@@ -114,7 +114,7 @@
                 android:layout_height="@dimen/cometchat_121dp"
                 android:layout_marginBottom="@dimen/cometchat_margin_5"
                 android:importantForAccessibility="no"
-                android:src="@drawable/cometchat_ic_conversations_error" />
+                android:src="@drawable/cometchat_ic_error" />
 
             <TextView
                 android:id="@+id/tv_error_title"

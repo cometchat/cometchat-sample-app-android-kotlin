@@ -1,8 +1,8 @@
 [versions]
 agp = "8.6.0"
-chatuikitComposeAndroid = "6.0.0"
-chatuikitCoreAndroid = "6.0.0"
-chatuikitKotlinAndroid = "6.0.0"
+chatuikitComposeAndroid = "6.0.1"
+chatuikitCoreAndroid = "6.0.1"
+chatuikitKotlinAndroid = "6.0.1"
 coreTesting = "2.2.0"
 kotest = "5.8.0"
 firebaseBom = "33.5.1"

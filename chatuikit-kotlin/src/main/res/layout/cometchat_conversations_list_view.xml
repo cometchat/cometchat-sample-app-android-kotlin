@@ -79,7 +79,7 @@
             android:layout_width="@dimen/cometchat_162dp"
             android:layout_height="@dimen/cometchat_121dp"
             android:layout_marginBottom="@dimen/cometchat_margin_5"
-            android:src="@drawable/cometchat_ic_conversations_error"
+            android:src="@drawable/cometchat_ic_error"
             android:importantForAccessibility="no" />
 
         <TextView

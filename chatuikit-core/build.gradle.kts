@@ -51,6 +51,7 @@ dependencies {
     // CometChat SDKs – exposed to consumers
     api(libs.chat.sdk.android)
     compileOnly(libs.calls.sdk.android)
+    implementation(libs.cards.android)
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
@@ -71,8 +72,6 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(kotlin("reflect"))
-    // Explicitly include SDK for unit test classpath (IDE test runner compatibility)
-    testImplementation(libs.chat.sdk.android)
 
     // Android instrumented testing
     androidTestImplementation(libs.ext.junit)
