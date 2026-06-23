@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.cometchat.ai.sampleapp.kotlin"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.cometchat.ai.sampleapp.kotlin"

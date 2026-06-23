@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.cometchat.sampleapp.compose"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.cometchat.sampleapp.compose"
