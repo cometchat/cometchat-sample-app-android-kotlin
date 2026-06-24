@@ -6854,7 +6854,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     // Bind custom bubble view if available
                     template.getBubbleView().bindView(context, bubbleView, baseMessage, alignment, this, baseMessageList, position);
                 } else {
-                    boolean isIncoming = !baseMessage.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
+                    // Guard against a null logged-in user: logout() can clear it while this layout/bind
+                    // pass is still queued on the main thread. This is the LeftViewHolder (received
+                    // message), so default to incoming when the user is gone.
+                    User loggedInUser = CometChatUIKit.getLoggedInUser();
+                    boolean isIncoming = loggedInUser == null || !baseMessage.getSender().getUid().equals(loggedInUser.getUid()); // Check if the message is incoming
                     applyBubbleStyle(baseMessage, isIncoming, alignment, cometchatMessageBubble, showReadReceipt, hideName, headerView, statusInfoView, threadView, leadingView, bottomView);
 
                     if (baseMessage.getId() == highlightedMessageId) {
@@ -7072,7 +7076,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     // Bind custom bubble view if available
                     template.getBubbleView().bindView(context, bubbleView, baseMessage, alignment, this, baseMessageList, position);
                 } else {
-                    boolean isIncoming = !baseMessage.getSender().getUid().equals(CometChatUIKit.getLoggedInUser().getUid()); // Check if the message is incoming
+                    // Guard against a null logged-in user: logout() can clear it while this layout/bind
+                    // pass is still queued on the main thread. This is the RightViewHolder (sent
+                    // message), so default to outgoing when the user is gone.
+                    User loggedInUser = CometChatUIKit.getLoggedInUser();
+                    boolean isIncoming = loggedInUser != null && !baseMessage.getSender().getUid().equals(loggedInUser.getUid()); // Check if the message is incoming
                     applyBubbleStyle(baseMessage, isIncoming, alignment, cometchatMessageBubble, showReadReceipt, hideName, headerView, statusInfoView, threadView, leadingView, bottomView);
 
                     if (baseMessage.getId() == highlightedMessageId) {

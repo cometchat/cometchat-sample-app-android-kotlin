@@ -148,16 +148,16 @@ public class CometChatCompactMessageComposer extends MaterialCardView {
     private BaseMessage quoteMessage;
 
     // Rich Text Formatting Configuration
-    private boolean enableRichTextFormatting = false;  // Master switch for all rich text formatting
-    private int richTextFormattingOptionsVisibility = View.GONE;  // Controls toolbar visibility
+    private boolean enableRichTextFormatting = true;  // Master switch for all rich text formatting
+    private int richTextFormattingOptionsVisibility = View.VISIBLE;  // Controls toolbar visibility
     private boolean isToolbarVisible = false;  // Current toolbar visibility state
-    private boolean showTextSelectionMenuItems = false;  // Show formatting options in text selection menu
+    private boolean showTextSelectionMenuItems = true;  // Show formatting options in text selection menu
 
     // Sticker Keyboard state
     private boolean isStickerKeyboardVisible = false;
 
     // Input Configuration
-    private EnterKeyBehavior enterKeyBehavior = EnterKeyBehavior.SEND_MESSAGE;
+    private EnterKeyBehavior enterKeyBehavior = EnterKeyBehavior.NEW_LINE;
 
     // Feature Toggles
     private int attachmentButtonVisibility = View.VISIBLE;
@@ -298,7 +298,6 @@ public class CometChatCompactMessageComposer extends MaterialCardView {
     private ActivityResultHandlerBuilder activityResultHandlerBuilder;
 
     // Inline Audio Recorder Configuration
-    private boolean useInlineAudioRecorder = false;
     private @StyleRes int inlineAudioRecorderStyle;
     private Drawable recorderDeleteButtonIcon;
     private Drawable recorderSendButtonIcon;
@@ -6596,11 +6595,7 @@ public class CometChatCompactMessageComposer extends MaterialCardView {
      * Shows the inline audio recorder if enabled, otherwise opens the legacy bottom sheet.
      */
     private void onVoiceRecordingButtonClick() {
-        if (useInlineAudioRecorder) {
-            showInlineAudioRecorder();
-        } else {
-            requestMicrophonePermission();
-        }
+        showInlineAudioRecorder();
     }
 
     /**
@@ -6982,26 +6977,6 @@ public class CometChatCompactMessageComposer extends MaterialCardView {
      */
     public void setMediaRecorderStyle(@StyleRes int style) {
         this.mediaRecorderStyle = style;
-    }
-
-    /**
-     * Sets whether to use the inline audio recorder instead of the bottom sheet recorder.
-     * When true, tapping the voice recording button shows the inline recorder in the composer.
-     * When false, tapping the voice recording button opens the legacy bottom sheet recorder.
-     *
-     * @param useInline true to use inline recorder (default), false to use bottom sheet.
-     */
-    public void setUseInlineAudioRecorder(boolean useInline) {
-        this.useInlineAudioRecorder = useInline;
-    }
-
-    /**
-     * Gets whether the inline audio recorder is enabled.
-     *
-     * @return true if inline recorder is enabled, false otherwise.
-     */
-    public boolean isUseInlineAudioRecorder() {
-        return useInlineAudioRecorder;
     }
 
     /**

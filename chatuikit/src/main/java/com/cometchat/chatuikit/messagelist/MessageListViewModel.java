@@ -1669,8 +1669,11 @@ public class MessageListViewModel extends ViewModel {
     }
 
     public BaseMessage getFirstUnreadMessage() {
-        if (!messageArrayList.isEmpty()) {
-            String loggedInUid = CometChatUIKit.getLoggedInUser().getUid();
+        // Guard against a null logged-in user: logout() can clear it while this list update is still
+        // being dispatched on the main thread.
+        User loggedInUser = CometChatUIKit.getLoggedInUser();
+        if (!messageArrayList.isEmpty() && loggedInUser != null) {
+            String loggedInUid = loggedInUser.getUid();
             for (BaseMessage message : messageArrayList) {
                 if (message.getId() > lastReadMessageId
                         && message.getSender() != null

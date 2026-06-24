@@ -13,7 +13,7 @@ android {
         //noinspection OldTargetApi
         targetSdk 35
         versionCode 1
-        versionName "5.2.12"
+        versionName "5.2.13"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
