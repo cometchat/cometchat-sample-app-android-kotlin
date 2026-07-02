@@ -60,7 +60,9 @@ class CometChatUsersViewModelTest : FunSpec({
     suspend fun createViewModel(users: List<User>): CometChatUsersViewModel {
         whenever(fetchUsersUseCase.invoke(any())).thenReturn(Result.success(users))
         whenever(fetchUsersUseCase.hasMore()).thenReturn(users.isNotEmpty())
-        return CometChatUsersViewModel(fetchUsersUseCase, searchUsersUseCase, enableListeners = false)
+        val vm = CometChatUsersViewModel(fetchUsersUseCase, searchUsersUseCase, enableListeners = false)
+        vm.fetchUsers()
+        return vm
     }
 
     beforeTest {
@@ -108,6 +110,7 @@ class CometChatUsersViewModelTest : FunSpec({
                 val exception = MockFactory.createCometChatException(code, msg)
                 whenever(fetchUsersUseCase.invoke(any())).thenReturn(Result.failure(exception))
                 val viewModel = CometChatUsersViewModel(fetchUsersUseCase, searchUsersUseCase, enableListeners = false)
+                viewModel.fetchUsers()
                 advanceUntilIdle()
 
                 println("    → code='$code', msg='$msg'")
@@ -611,6 +614,7 @@ class CometChatUsersViewModelTest : FunSpec({
                 whenever(fetchUsersUseCase.invoke(any())).thenReturn(Result.success(page1))
                 whenever(fetchUsersUseCase.hasMore()).thenReturn(true)
                 val viewModel = CometChatUsersViewModel(fetchUsersUseCase, searchUsersUseCase, enableListeners = false)
+                viewModel.fetchUsers()
                 advanceUntilIdle()
 
                 val page2 = MockFactory.createUsers(page2Size, "p2")

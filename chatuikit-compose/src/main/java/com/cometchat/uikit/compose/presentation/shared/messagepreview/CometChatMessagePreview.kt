@@ -29,6 +29,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.CustomMessage
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
@@ -237,6 +238,12 @@ internal fun resolveMessageContent(
         }
 
         is CustomMessage -> resolveCustomMessageContent(context, message)
+
+        is CardMessage -> {
+            val subtitle = message.text?.ifEmpty { null }
+                ?: context.getString(R.string.cometchat_message_card)
+            AnnotatedString(subtitle) to null
+        }
 
         else -> {
             AnnotatedString(message.type ?: "") to null

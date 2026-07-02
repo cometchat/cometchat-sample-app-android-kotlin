@@ -65,6 +65,7 @@ import com.cometchat.uikit.compose.presentation.shared.receipts.Receipt
 import com.cometchat.uikit.compose.presentation.shared.statusindicator.CometChatStatusIndicator
 import com.cometchat.uikit.compose.presentation.shared.statusindicator.StatusIndicator
 import com.cometchat.uikit.core.formatter.MarkdownRenderer
+import com.cometchat.uikit.core.utils.AgentChatDetector
 
 /**
  * Default leading view composable that displays the avatar with status indicator.
@@ -202,6 +203,12 @@ internal fun DefaultSubtitleView(
     style: CometChatConversationListItemStyle
 ) {
     val context = LocalContext.current
+
+    // If the conversation is agentic, show blank subtitle
+    val user = conversation.conversationWith as? User
+    if (user != null && AgentChatDetector.isAgentChat(user)) {
+        return
+    }
     
     // Show typing indicator if active, otherwise show last message
     if (typingIndicator != null && typingIndicator.isTyping && typingIndicator.typingUsers.isNotEmpty()) {
@@ -369,9 +376,11 @@ internal fun DefaultTrailingView(
             )
         }
         
-        // Unread badge (only show if count > 0)
+        // Unread badge (only show if count > 0 and not an agent chat)
+        val user = conversation.conversationWith as? User
+        val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)
         val unreadCount = conversation.unreadMessageCount
-        if (unreadCount > 0) {
+        if (unreadCount > 0 && !isAgentChat) {
             Spacer(modifier = Modifier.size(4.dp))
             CometChatBadgeCount(
                 count = unreadCount,

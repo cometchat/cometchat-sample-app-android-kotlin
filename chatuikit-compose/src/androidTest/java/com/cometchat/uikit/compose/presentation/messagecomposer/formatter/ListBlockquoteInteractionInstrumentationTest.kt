@@ -116,7 +116,7 @@ class ListBlockquoteInteractionInstrumentationTest {
         pressEnter()
 
         val text = controller.state.text
-        assertEquals("- first", text)
+        assertEquals("- first\n", text)
     }
 
     // ==================== 16.4 Empty ordered list item exits list on Enter ====================
@@ -135,7 +135,7 @@ class ListBlockquoteInteractionInstrumentationTest {
         pressEnter()
 
         val text = controller.state.text
-        assertEquals("1. first", text)
+        assertEquals("1. first\n", text)
     }
 
     // ==================== 16.5 Blockquote auto-continuation on Enter ====================
@@ -171,7 +171,7 @@ class ListBlockquoteInteractionInstrumentationTest {
         pressEnter()
 
         val text = controller.state.text
-        assertEquals("> quoted", text)
+        assertEquals("> quoted\n", text)
     }
 
     // ==================== 16.7 Inline formats work inside list items ====================

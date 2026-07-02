@@ -425,6 +425,9 @@ abstract class BubbleFactory {
         fun getFactoryKey(message: BaseMessage): String {
             return if (message.deletedAt > 0) {
                 DELETED_KEY
+            } else if (message.category == UIKitConstants.MessageCategory.CARD) {
+                // Card messages route on category alone — type is arbitrary/developer-chosen
+                CARD_KEY
             } else {
                 "${message.category}_${message.type}"
             }
@@ -446,5 +449,10 @@ abstract class BubbleFactory {
          * Special key used for deleted messages.
          */
         const val DELETED_KEY = "deleted"
+
+        /**
+         * Special key used for card messages (category-only, type is arbitrary).
+         */
+        const val CARD_KEY = "card"
     }
 }

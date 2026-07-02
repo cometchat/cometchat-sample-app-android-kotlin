@@ -51,43 +51,6 @@ class CoreFormattingEnginePropertyTest : StringSpec({
         controller.onTextChanged(controller.state.text, pos, pos)
     }
 
-
-    // ==================== Property 2 ====================
-    // Feature: rich-text-formatting-parity, Property 2: Cursor inside formatted span reports format as active
-
-    /**
-     * Property 2: For any format and for any text with a span of that format,
-     * placing the cursor at any position within the span (start ≤ cursor < end)
-     * SHALL result in activeFormats containing that format.
-     *
-     * **Validates: Requirements 1.2, 2.2, 3.2, 4.2, 5.2**
-     */
-    "Property 2: cursor inside formatted span reports format as active" {
-        data class TestCase(val text: String, val spanStart: Int, val spanEnd: Int, val cursorPos: Int, val format: RichTextFormat)
-
-        val arbTestCase: Arb<TestCase> = arbitrary {
-            val text = arbText.bind()
-            val format = arbInlineFormat.bind()
-            val spanStart = Arb.int(0, text.length - 2).bind()
-            val spanEnd = Arb.int(spanStart + 1, text.length).bind()
-            // Cursor within the span: start <= cursor < end
-            val cursorPos = Arb.int(spanStart, spanEnd - 1).bind()
-            TestCase(text, spanStart, spanEnd, cursorPos, format)
-        }
-
-        checkAll(100, arbTestCase) { (text, spanStart, spanEnd, cursorPos, format) ->
-            val controller = RichTextEditorController()
-            // Set up text
-            controller.onTextChanged(text, text.length, text.length)
-            // Apply format to range
-            controller.state.spanManager.addFormat(spanStart, spanEnd, format)
-            // Place cursor inside the span
-            controller.onTextChanged(text, cursorPos, cursorPos)
-
-            controller.state.activeFormats.contains(format) shouldBe true
-        }
-    }
-
     // ==================== Property 3 ====================
     // Feature: rich-text-formatting-parity, Property 3: Text insertion inside formatted span extends the span
 

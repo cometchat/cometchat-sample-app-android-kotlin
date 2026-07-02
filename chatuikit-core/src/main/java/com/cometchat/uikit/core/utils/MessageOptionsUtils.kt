@@ -90,6 +90,21 @@ object MessageOptionsUtils {
     )
 
     /**
+     * Default options for card messages (category = "card").
+     * Includes delete, info, reply, reply in thread, mark as unread, and report.
+     * Excludes edit, copy, translate, and share (not meaningful for rich cards).
+     */
+    private val cardMessageDefaultOptions: List<String> = listOf(
+        UIKitConstants.MessageOption.REPLY_IN_THREAD,
+        UIKitConstants.MessageOption.REPLY,
+        UIKitConstants.MessageOption.MARK_AS_UNREAD,
+        UIKitConstants.MessageOption.MESSAGE_INFORMATION,
+        UIKitConstants.MessageOption.DELETE,
+        UIKitConstants.MessageOption.REPORT,
+        UIKitConstants.MessageOption.MESSAGE_PRIVATELY
+    )
+
+    /**
      * Default options for custom messages (category = "custom").
      * These are common options that apply to any custom message type.
      */
@@ -104,6 +119,17 @@ object MessageOptionsUtils {
     )
 
     /**
+     * Default options for agent (agentic) messages — COPY ONLY.
+     *
+     * Agent messages (category "agentic", type "assistant") expose only the copy
+     * action. No react, reply, edit, delete, or other options are available.
+     * The copy button is also rendered as a visible footer in the bubble itself.
+     */
+    private val agenticMessageDefaultOptions: List<String> = listOf(
+        UIKitConstants.MessageOption.COPY
+    )
+
+    /**
      * Returns the list of default option IDs for a given message category and type.
      *
      * @param category The message category (e.g., "message", "custom")
@@ -112,6 +138,14 @@ object MessageOptionsUtils {
      *         returns common options that apply to all messages.
      */
     fun getDefaultOptionIds(category: String, type: String): List<String> {
+        // Agent (agentic) messages — copy only, no react/reply/edit/delete
+        if (category.lowercase() == UIKitConstants.MessageCategory.AGENTIC) {
+            return agenticMessageDefaultOptions
+        }
+        // Card messages route on category alone (type is arbitrary/developer-chosen)
+        if (category.lowercase() == UIKitConstants.MessageCategory.CARD) {
+            return cardMessageDefaultOptions
+        }
         val key = "${category}_$type".lowercase()
         return defaultOptionsMap[key] ?: customMessageDefaultOptions
     }

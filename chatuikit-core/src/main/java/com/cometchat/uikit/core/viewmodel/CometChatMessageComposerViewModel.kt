@@ -28,6 +28,7 @@ import com.cometchat.uikit.core.state.ComposerPanelEvent
 import com.cometchat.uikit.core.state.MessageComposerUIState
 import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.core.CometChatAIStreamService
+import com.cometchat.uikit.core.domain.model.StreamingState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -424,6 +425,9 @@ open class CometChatMessageComposerViewModel(
 
     // ==================== AI State ====================
 
+    /** Job for monitoring stream completion as a fallback safety mechanism. */
+    private var streamMonitorJob: Job? = null
+
     /**
      * Sets the AI generating state.
      * Updates UI state accordingly.
@@ -439,8 +443,51 @@ open class CometChatMessageComposerViewModel(
             // after the ComposerViewModel. Re-registering here guarantees the callback
             // is set on the correct instance when AI generation starts.
             addStreamCallback()
+            // Start monitoring stream states as a safety fallback.
+            // If the onStreamCompleted callback doesn't fire for any reason
+            // (e.g., timing issues, instance mismatch), this observer will
+            // detect when all streams have completed and reset the state.
+            startStreamMonitor()
         } else {
             _uiState.value = MessageComposerUIState.Idle
+            streamMonitorJob?.cancel()
+            streamMonitorJob = null
+        }
+    }
+
+    /**
+     * Monitors the stream service's streamingStates as a fallback mechanism.
+     * When all active streaming runs complete or get interrupted,
+     * resets the AI generating state independently of the onStreamCallback.
+     *
+     * This ensures the stop button always transitions back to send button,
+     * even if the scroll-to-bottom or other UI actions disrupt the callback flow.
+     */
+    private fun startStreamMonitor() {
+        streamMonitorJob?.cancel()
+        streamMonitorJob = viewModelScope.launch {
+            val service = CometChatAIStreamService.getInstance() ?: return@launch
+            var hasSeenStreaming = false
+            service.streamingStates.collect { states ->
+                if (!_isAIGenerating.value) return@collect
+
+                // Track if we've ever seen an active streaming state
+                if (states.values.any { it is StreamingState.Streaming }) {
+                    hasSeenStreaming = true
+                }
+
+                // If we've seen streaming activity and now all states are
+                // completed/interrupted, or all states were cleaned up (empty),
+                // reset the generating state.
+                if (hasSeenStreaming) {
+                    val allDone = states.isEmpty() || states.values.all { state ->
+                        state is StreamingState.Completed || state is StreamingState.Interrupted
+                    }
+                    if (allDone) {
+                        setAIGenerating(false)
+                    }
+                }
+            }
         }
     }
 
@@ -855,6 +902,13 @@ open class CometChatMessageComposerViewModel(
             message.quotedMessageId = quotedMsg.id.toLong()
         }
 
+        // Show the thinking/buffering indicator immediately when the user taps
+        // send in an agent chat, matching the v5 Java reference where
+        // updateComposerState(true) is called before the network request.
+        if (isAgentChat) {
+            setAIGenerating(true)
+        }
+
         viewModelScope.launch {
             _uiState.value = MessageComposerUIState.Sending
 
@@ -864,13 +918,12 @@ open class CometChatMessageComposerViewModel(
                     _replyMessage.value = null
                     _uiState.value = MessageComposerUIState.Success(sentMsg)
 
-                    // Handle AI agent chat
+                    // Handle AI agent chat — update parentMessageId for threading
                     if (isAgentChat) {
                         if (parentMessageId == -1L) {
                             parentMessageId = sentMsg.id.toLong()
                             updateIdMap()
                         }
-                        setAIGenerating(true)
                     } else {
                         _uiState.value = MessageComposerUIState.Idle
                     }
@@ -881,6 +934,11 @@ open class CometChatMessageComposerViewModel(
                     )
                 }
                 .onFailure { e ->
+                    // Reset AI generating state on failure so the composer
+                    // returns to the normal send button state.
+                    if (isAgentChat) {
+                        setAIGenerating(false)
+                    }
                     val exception = if (e is CometChatException) e 
                         else CometChatException("SEND_ERROR", e.message ?: "Unknown error")
                     _errorEvent.emit(exception)
@@ -903,6 +961,13 @@ open class CometChatMessageComposerViewModel(
             message.quotedMessageId = quotedMsg.id.toLong()
         }
 
+        // Show the thinking/buffering indicator immediately when the user taps
+        // send in an agent chat, matching the v5 Java reference where
+        // updateComposerState(true) is called before the network request.
+        if (isAgentChat) {
+            setAIGenerating(true)
+        }
+
         viewModelScope.launch {
             _uiState.value = MessageComposerUIState.Sending
 
@@ -912,13 +977,12 @@ open class CometChatMessageComposerViewModel(
                     _replyMessage.value = null
                     _uiState.value = MessageComposerUIState.Success(sentMsg)
 
-                    // Handle AI agent chat
+                    // Handle AI agent chat — update parentMessageId for threading
                     if (isAgentChat) {
                         if (parentMessageId == -1L) {
                             parentMessageId = sentMsg.id.toLong()
                             updateIdMap()
                         }
-                        setAIGenerating(true)
                     } else {
                         _uiState.value = MessageComposerUIState.Idle
                     }
@@ -929,6 +993,11 @@ open class CometChatMessageComposerViewModel(
                     )
                 }
                 .onFailure { e ->
+                    // Reset AI generating state on failure so the composer
+                    // returns to the normal send button state.
+                    if (isAgentChat) {
+                        setAIGenerating(false)
+                    }
                     val exception = if (e is CometChatException) e 
                         else CometChatException("SEND_ERROR", e.message ?: "Unknown error")
                     _errorEvent.emit(exception)
@@ -1181,7 +1250,7 @@ open class CometChatMessageComposerViewModel(
      * Starts typing indicator.
      * Only sends if user is not blocked.
      */
-    fun startTyping() {
+    open fun startTyping() {
         if (!isUserBlocked()) {
             CometChat.startTyping(TypingIndicator(receiverId, receiverType))
         }
@@ -1191,7 +1260,7 @@ open class CometChatMessageComposerViewModel(
      * Ends typing indicator.
      * Only sends if user is not blocked.
      */
-    fun endTyping() {
+    open fun endTyping() {
         if (!isUserBlocked()) {
             CometChat.endTyping(TypingIndicator(receiverId, receiverType))
         }
@@ -1298,6 +1367,16 @@ open class CometChatMessageComposerViewModel(
                     is CometChatUIEvent.ComposeMessage -> {
                         if (event.id == receiverId) {
                             _composeText.value = event.text
+                        }
+                    }
+                    is CometChatUIEvent.AgentChatThreadResolved -> {
+                        // Sync parentMessageId when the MessageList resolves the
+                        // agent chat thread (e.g., via fetchLastAgentConversation).
+                        // Without this, the Composer would still have parentMessageId=-1
+                        // and sent messages would lack thread context.
+                        if (isAgentChat && event.receiverId == receiverId) {
+                            parentMessageId = event.parentMessageId
+                            updateIdMap()
                         }
                     }
                     else -> {}
@@ -1583,6 +1662,8 @@ open class CometChatMessageComposerViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        streamMonitorJob?.cancel()
+        streamMonitorJob = null
         removeListeners()
     }
 }

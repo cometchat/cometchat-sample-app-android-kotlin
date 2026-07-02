@@ -1,0 +1,253 @@
+package com.cometchat.uikit.kotlin.presentation.callbuttons
+
+import com.cometchat.chat.core.Call
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.CustomMessage
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
+import com.cometchat.uikit.core.domain.usecase.InitiateUserCallUseCase
+import com.cometchat.uikit.core.domain.usecase.StartGroupCallUseCase
+import com.cometchat.uikit.core.state.CallButtonsEvent
+import com.cometchat.uikit.core.state.CallButtonsUIState
+import com.cometchat.uikit.core.viewmodel.CometChatCallButtonsViewModel
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+
+/**
+ * Tests for CometChatCallButtons Kotlin component interaction behavior.
+ *
+ * Verifies that button tap interactions produce correct ViewModel state changes
+ * and event emissions:
+ * - Voice call button tap → initiateCall("audio") → CallInitiated event
+ * - Video call button tap → initiateCall("video") → CallInitiated/StartDirectCall event
+ * - Error scenarios → error event emitted
+ *
+ * Validates: Requirements 12.2, 12.4
+ *
+ * Run with:
+ *   ./gradlew :chatuikit-kotlin:testDebugUnitTest --tests "*CometChatCallButtonsInteractionTest"
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class CometChatCallButtonsInteractionTest : FunSpec({
+
+    val testDispatcher = UnconfinedTestDispatcher()
+
+    beforeTest {
+        Dispatchers.setMain(testDispatcher)
+        println("  🧪 ${it.name.testName}")
+    }
+
+    afterTest {
+        Dispatchers.resetMain()
+        println()
+    }
+
+    // ==================== Voice Call Button Tap (Requirement 12.2) ====================
+
+    test("voice call button tap with user → initiates audio call and emits CallInitiated") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            val user = mock<User>().also { whenever(it.uid).thenReturn("user-1"); whenever(it.name).thenReturn("Iron Man") }
+            viewModel.setUser(user)
+
+            val mockCall = mock<Call>()
+            whenever(initiateUseCase.invoke("user-1", "audio")).thenReturn(Result.success(mockCall))
+
+            // Collect events
+            val collectedEvents = mutableListOf<CallButtonsEvent>()
+            val job = launch(testDispatcher) {
+                viewModel.events.toList(collectedEvents)
+            }
+
+            // Simulate voice call button tap
+            viewModel.initiateCall("audio")
+            advanceUntilIdle()
+
+            verify(initiateUseCase).invoke("user-1", "audio")
+            collectedEvents.size shouldBe 1
+            collectedEvents[0].shouldBeInstanceOf<CallButtonsEvent.CallInitiated>()
+            (collectedEvents[0] as CallButtonsEvent.CallInitiated).call shouldBe mockCall
+            viewModel.uiState.value shouldBe CallButtonsUIState.Idle
+
+            job.cancel()
+            println("    ✅ Voice call tap → audio call initiated, CallInitiated event emitted")
+        }
+    }
+
+    // ==================== Video Call Button Tap (Requirement 12.2) ====================
+
+    test("video call button tap with user → initiates video call and emits CallInitiated") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            val user = mock<User>().also { whenever(it.uid).thenReturn("user-1"); whenever(it.name).thenReturn("Iron Man") }
+            viewModel.setUser(user)
+
+            val mockCall = mock<Call>()
+            whenever(initiateUseCase.invoke("user-1", "video")).thenReturn(Result.success(mockCall))
+
+            // Collect events
+            val collectedEvents = mutableListOf<CallButtonsEvent>()
+            val job = launch(testDispatcher) {
+                viewModel.events.toList(collectedEvents)
+            }
+
+            // Simulate video call button tap
+            viewModel.initiateCall("video")
+            advanceUntilIdle()
+
+            verify(initiateUseCase).invoke("user-1", "video")
+            collectedEvents.size shouldBe 1
+            collectedEvents[0].shouldBeInstanceOf<CallButtonsEvent.CallInitiated>()
+            viewModel.uiState.value shouldBe CallButtonsUIState.Idle
+
+            job.cancel()
+            println("    ✅ Video call tap → video call initiated, CallInitiated event emitted")
+        }
+    }
+
+    // ==================== Group Call Button Tap (Requirement 12.2) ====================
+
+    test("voice call button tap with group → starts group call and emits StartDirectCall") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            val group = mock<Group>().also { whenever(it.guid).thenReturn("group-1"); whenever(it.name).thenReturn("Avengers") }
+            viewModel.setGroup(group)
+
+            val mockMessage = mock<CustomMessage>()
+            whenever(groupUseCase.invoke("group-1", "audio")).thenReturn(Result.success(mockMessage))
+
+            // Collect events
+            val collectedEvents = mutableListOf<CallButtonsEvent>()
+            val job = launch(testDispatcher) {
+                viewModel.events.toList(collectedEvents)
+            }
+
+            // Simulate voice call button tap for group
+            viewModel.initiateCall("audio")
+            advanceUntilIdle()
+
+            verify(groupUseCase).invoke("group-1", "audio")
+            collectedEvents.size shouldBe 1
+            collectedEvents[0].shouldBeInstanceOf<CallButtonsEvent.StartDirectCall>()
+            (collectedEvents[0] as CallButtonsEvent.StartDirectCall).message shouldBe mockMessage
+            viewModel.uiState.value shouldBe CallButtonsUIState.Idle
+
+            job.cancel()
+            println("    ✅ Voice call tap (group) → group call started, StartDirectCall event emitted")
+        }
+    }
+
+    test("video call button tap with group → starts group video call and emits StartDirectCall") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            val group = mock<Group>().also { whenever(it.guid).thenReturn("group-1"); whenever(it.name).thenReturn("Avengers") }
+            viewModel.setGroup(group)
+
+            val mockMessage = mock<CustomMessage>()
+            whenever(groupUseCase.invoke("group-1", "video")).thenReturn(Result.success(mockMessage))
+
+            // Collect events
+            val collectedEvents = mutableListOf<CallButtonsEvent>()
+            val job = launch(testDispatcher) {
+                viewModel.events.toList(collectedEvents)
+            }
+
+            // Simulate video call button tap for group
+            viewModel.initiateCall("video")
+            advanceUntilIdle()
+
+            verify(groupUseCase).invoke("group-1", "video")
+            collectedEvents.size shouldBe 1
+            collectedEvents[0].shouldBeInstanceOf<CallButtonsEvent.StartDirectCall>()
+            viewModel.uiState.value shouldBe CallButtonsUIState.Idle
+
+            job.cancel()
+            println("    ✅ Video call tap (group) → group video call started, StartDirectCall event emitted")
+        }
+    }
+
+    // ==================== Error Interaction (Requirement 12.4) ====================
+
+    test("call button tap when active call exists → emits error event") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            val user = mock<User>().also { whenever(it.uid).thenReturn("user-1"); whenever(it.name).thenReturn("Iron Man") }
+            viewModel.setUser(user)
+
+            val exception = CometChatException("ACTIVE_CALL", "Cannot initiate call while another call is active")
+            whenever(initiateUseCase.invoke("user-1", "audio")).thenReturn(Result.failure(exception))
+
+            // Collect error events
+            val collectedErrors = mutableListOf<CometChatException>()
+            val job = launch(testDispatcher) {
+                viewModel.errorEvent.toList(collectedErrors)
+            }
+
+            // Simulate button tap when active call exists
+            viewModel.initiateCall("audio")
+            advanceUntilIdle()
+
+            viewModel.uiState.value.shouldBeInstanceOf<CallButtonsUIState.Error>()
+            collectedErrors.size shouldBe 1
+            collectedErrors[0].code shouldBe "ACTIVE_CALL"
+
+            job.cancel()
+            println("    ✅ Button tap with active call → error event emitted to onError callback")
+        }
+    }
+
+    test("switching from user to group and tapping → calls correct use case") {
+        runTest {
+            val initiateUseCase = mock<InitiateUserCallUseCase>()
+            val groupUseCase = mock<StartGroupCallUseCase>()
+            val viewModel = CometChatCallButtonsViewModel(initiateUseCase, groupUseCase, enableListeners = false)
+
+            // First set user
+            val user = mock<User>().also { whenever(it.uid).thenReturn("user-1"); whenever(it.name).thenReturn("Iron Man") }
+            viewModel.setUser(user)
+
+            // Then switch to group
+            val group = mock<Group>().also { whenever(it.guid).thenReturn("group-1"); whenever(it.name).thenReturn("Avengers") }
+            viewModel.setGroup(group)
+
+            val mockMessage = mock<CustomMessage>()
+            whenever(groupUseCase.invoke("group-1", "video")).thenReturn(Result.success(mockMessage))
+
+            // Tap video call button — should use group use case
+            viewModel.initiateCall("video")
+            advanceUntilIdle()
+
+            verify(groupUseCase).invoke("group-1", "video")
+            viewModel.uiState.value shouldBe CallButtonsUIState.Idle
+            println("    ✅ After switching user→group, tap uses group use case")
+        }
+    }
+})

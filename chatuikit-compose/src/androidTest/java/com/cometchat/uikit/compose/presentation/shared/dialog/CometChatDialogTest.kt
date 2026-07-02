@@ -539,7 +539,10 @@ class CometChatDialogTest {
             }
         }
 
+        composeTestRule.waitForIdle()
+
         // Assert - dialog should display with all elements
+        // Dialog renders in a separate window, use waitForIdle for reliability
         composeTestRule.onNodeWithText("Delete Conversation").assertIsDisplayed()
         composeTestRule.onNodeWithText("Are you sure you want to delete this conversation?").assertIsDisplayed()
         composeTestRule.onNodeWithText("Delete").assertIsDisplayed()

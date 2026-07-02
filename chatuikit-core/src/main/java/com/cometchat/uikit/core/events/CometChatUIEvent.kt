@@ -66,4 +66,32 @@ sealed class CometChatUIEvent {
         val user: User?,
         val group: Group?
     ) : CometChatUIEvent()
+
+    /**
+     * Event emitted when the MessageList resolves the agent chat thread parentMessageId.
+     * This happens when [fetchLastAgentConversation] determines the thread root from the
+     * last conversation message. The Composer observes this to sync its parentMessageId
+     * so that sent messages are correctly associated with the thread.
+     *
+     * @param receiverId The user/group ID of the agent conversation
+     * @param parentMessageId The resolved parent message ID for the thread
+     */
+    data class AgentChatThreadResolved(
+        val receiverId: String,
+        val parentMessageId: Long
+    ) : CometChatUIEvent()
+
+    /**
+     * Event emitted when a user taps a card action (developer card or agent card block).
+     * For developer cards, [message] is a CardMessage.
+     * For agent card blocks (nested inside the AI-assistant bubble), [message] is the owning AIAssistantMessage.
+     * [actionEvent] is the raw renderer action event from the cards library.
+     *
+     * This event enables the app to receive actions from nested agent-card blocks
+     * where a direct callback/lambda path is not reachable (§2.6.1 of the Card Messages spec).
+     */
+    data class CardActionClicked(
+        val message: BaseMessage,
+        val actionEvent: Any
+    ) : CometChatUIEvent()
 }

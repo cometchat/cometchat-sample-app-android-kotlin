@@ -18,6 +18,7 @@ import com.cometchat.uikit.core.constants.UIKitConstants
  * - Sticker messages
  * - Collaborative document messages
  * - Collaborative whiteboard messages
+ * - Card messages (developer card messages with type defaulting to "card")
  *
  * @return List of message type strings
  */
@@ -35,6 +36,7 @@ fun getDefaultMessagesTypes(): List<String> {
         UIKitConstants.MessageType.EXTENSION_STICKER,
         UIKitConstants.MessageType.EXTENSION_DOCUMENT,
         UIKitConstants.MessageType.EXTENSION_WHITEBOARD,
+        UIKitConstants.MessageType.CARD,
         "assistant"
     )
 }
@@ -58,6 +60,7 @@ fun getDefaultMessagesCategories(): List<String> {
         CometChatConstants.CATEGORY_CALL,
         CometChatConstants.CATEGORY_CUSTOM,
         CometChatConstants.CATEGORY_INTERACTIVE,
-        "agentic"
+        CometChatConstants.CATEGORY_CARD,
+        UIKitConstants.MessageCategory.AGENTIC
     )
 }

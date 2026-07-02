@@ -68,7 +68,11 @@ data class CometChatAIAssistantBubbleStyle(
          */
         @Composable
         fun default(
-            backgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            // Transparent by default so the inner AI bubble never paints over the outer
+            // message-bubble wrapper. The wrapper controls the visible color: transparent
+            // in 1:1 agent chats, and the filled incoming color in groups (matches the
+            // Kotlin UIKit, where the inner bubble is transparent unless explicitly styled).
+            backgroundColor: Color = Color.Transparent,
             textColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,
@@ -114,7 +118,9 @@ data class CometChatAIAssistantBubbleStyle(
          */
         @Composable
         fun incoming(
-            backgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            // Transparent so the outer message-bubble wrapper controls the visible color
+            // (transparent in 1:1 agent chats, filled incoming color in groups).
+            backgroundColor: Color = Color.Transparent,
             textColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,
@@ -160,7 +166,8 @@ data class CometChatAIAssistantBubbleStyle(
          */
         @Composable
         fun outgoing(
-            backgroundColor: Color = CometChatTheme.colorScheme.backgroundColor3,
+            // Transparent so the outer message-bubble wrapper controls the visible color.
+            backgroundColor: Color = Color.Transparent,
             textColor: Color = CometChatTheme.colorScheme.textColorPrimary,
             textStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             cornerRadius: Dp = 0.dp,

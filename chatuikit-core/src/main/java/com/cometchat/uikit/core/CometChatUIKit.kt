@@ -86,9 +86,104 @@ object CometChatUIKit {
             appSettings,
             object : CometChat.CallbackListener<String>() {
                 override fun onSuccess(result: String) {
-                    CometChat.setSource("uikit-v5", "android", "kotlin")
+                    CometChat.setSource("uikit-v6", "android", "kotlin")
 
                     // Auto-initialize CometChatCalls if enableCalling is true
+                    if (authenticationSettings?.enableCalling == true) {
+                        initCometChatCalls(context, callbackListener, result)
+                    } else {
+                        callbackListener?.onSuccess(result)
+                    }
+                }
+
+                override fun onError(e: CometChatException?) {
+                    e?.let { callbackListener?.onError(it) }
+                }
+            }
+        )
+    }
+
+    /**
+     * Initializes the CometChat UIKit by reading configuration from the
+     * `cometchat-settings.json` file located in the app's assets directory.
+     *
+     * This method reads the `uiKit` and `credentials` sections from the settings file,
+     * builds [UIKitSettings], and delegates to the Chat SDK's `initFromSettings` method
+     * which persists the `integrationSource` flag for telemetry attribution.
+     *
+     * The settings file must contain at minimum `appId` and `region` at the root level.
+     * The `uiKit` section and `credentials` section are optional with sensible defaults.
+     *
+     * @param context The context of the calling activity or application
+     * @param callbackListener The callback listener to handle initialization success or failure
+     *
+     */
+    fun initFromSettings(
+        context: Context,
+        callbackListener: CometChat.CallbackListener<String>?
+    ) {
+        // 1. Read cometchat-settings.json from assets
+        val settingsJson: JSONObject
+        try {
+            val jsonString = context.assets.open("cometchat-settings.json").bufferedReader().use { it.readText() }
+            settingsJson = JSONObject(jsonString)
+        } catch (e: Exception) {
+            callbackListener?.onError(
+                CometChatException(
+                    "ERR_SETTINGS_FILE_NOT_FOUND",
+                    "cometchat-settings.json not found. Ensure the file exists at app/src/main/assets/.",
+                    e.message ?: ""
+                )
+            )
+            return
+        }
+
+        // 2. Parse uiKit + credentials sections and build UIKitSettings
+        val appId = settingsJson.optString("appId", "")
+        if (appId.isEmpty()) {
+            callbackListener?.onError(
+                CometChatException("ERR_SETTINGS_INVALID", "appId is required in cometchat-settings.json.", "")
+            )
+            return
+        }
+
+        val region = settingsJson.optString("region", "")
+        if (region.isEmpty()) {
+            callbackListener?.onError(
+                CometChatException("ERR_SETTINGS_INVALID", "region is required in cometchat-settings.json.", "")
+            )
+            return
+        }
+
+        val credentials = settingsJson.optJSONObject("credentials")
+        val authKey = credentials?.optString("authKey", "") ?: ""
+
+        val uiKitSection = settingsJson.optJSONObject("uiKit")
+        val subscribePresenceForAllUsers = uiKitSection?.optBoolean("subscribePresenceForAllUsers", true) ?: true
+
+        val settingsBuilder = UIKitSettings.UIKitSettingsBuilder()
+            .setAppId(appId)
+            .setRegion(region)
+
+        if (authKey.isNotEmpty()) {
+            settingsBuilder.setAuthKey(authKey)
+        }
+
+        if (subscribePresenceForAllUsers) {
+            settingsBuilder.subscribePresenceForAllUsers()
+        }
+
+        authenticationSettings = settingsBuilder.build()
+
+        // 3. Delegate to Chat SDK's initFromSettings which reads the chatSDK section
+        //    and persists integrationSource = "ai-agent"
+        CometChat.initFromSettings(
+            context,
+            object : CometChat.CallbackListener<String>() {
+                override fun onSuccess(result: String) {
+                    CometChat.setSource("uikit-v6", "android", "kotlin")
+
+                    // 4. Auto-initialize CometChatCalls if enableCalling is true
                     if (authenticationSettings?.enableCalling == true) {
                         initCometChatCalls(context, callbackListener, result)
                     } else {

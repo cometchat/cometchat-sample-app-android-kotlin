@@ -1,13 +1,28 @@
 package com.cometchat.uikit.compose.presentation.shared.baseelements
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import coil.Coil
+import coil.ImageLoader
+import coil.decode.DataSource
+import coil.intercept.Interceptor
+import coil.request.ErrorResult
+import coil.request.ImageResult
+import coil.request.SuccessResult
 import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatar
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,6 +32,60 @@ class CometChatAvatarInstrumentedTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private var originalImageLoader: ImageLoader? = null
+
+    /**
+     * Installs a Coil ImageLoader that forces all image loads to fail
+     * by returning an ErrorResult. This triggers the onError callback
+     * in AsyncImage, causing the avatar to fall back to displaying initials.
+     */
+    private fun installFailingImageLoader() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        originalImageLoader = Coil.imageLoader(context)
+        val interceptor = object : Interceptor {
+            override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
+                return ErrorResult(
+                    drawable = null,
+                    request = chain.request,
+                    throwable = RuntimeException("Simulated image load failure")
+                )
+            }
+        }
+        val imageLoader = ImageLoader.Builder(context)
+            .components { add(interceptor) }
+            .crossfade(false)
+            .build()
+        Coil.setImageLoader(imageLoader)
+    }
+
+    /**
+     * Installs a Coil ImageLoader that returns a successful result with a
+     * transparent drawable for all image requests.
+     */
+    private fun installSuccessImageLoader() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        originalImageLoader = Coil.imageLoader(context)
+        val interceptor = object : Interceptor {
+            override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
+                return SuccessResult(
+                    drawable = ColorDrawable(Color.TRANSPARENT),
+                    request = chain.request,
+                    dataSource = DataSource.MEMORY
+                )
+            }
+        }
+        val imageLoader = ImageLoader.Builder(context)
+            .components { add(interceptor) }
+            .crossfade(false)
+            .build()
+        Coil.setImageLoader(imageLoader)
+    }
+
+    @After
+    fun tearDown() {
+        originalImageLoader?.let { Coil.setImageLoader(it) }
+    }
 
     @Test
     fun displaysInitialsWhenNoAvatarUrlProvided() {
@@ -30,19 +99,19 @@ class CometChatAvatarInstrumentedTest {
 
     @Test
     fun displaysImageWhenAvatarUrlIsValid() {
+        installSuccessImageLoader()
+
         composeTestRule.setContent {
             CometChatTheme {
                 CometChatAvatar(
                     name = "John Doe",
-                    avatarUrl = "https://i0.wp.com/www.thewrap.com/wp-content/uploads/2022/06/Avatar-The-Last-Airbender.jpg?fit=1200%2C675&quality=89&ssl=1"
+                    avatarUrl = "https://example.com/avatar.jpg"
                 )
             }
         }
 
-        // Wait for async image loading to complete
         composeTestRule.waitForIdle()
-        Thread.sleep(2000) // Wait for image to load successfully
-        
+
         // When image URL loads successfully, initials should NOT be displayed
         // The image should be shown instead
         composeTestRule.onNodeWithText("JD").assertIsNotDisplayed()
@@ -50,19 +119,23 @@ class CometChatAvatarInstrumentedTest {
 
     @Test
     fun displaysInitialsWhenAvatarUrlFails() {
+        installFailingImageLoader()
+
         composeTestRule.setContent {
             CometChatTheme {
                 CometChatAvatar(
+                    modifier = Modifier.size(48.dp),
                     name = "John Doe",
                     avatarUrl = "https://invalid-url-that-does-not-exist-xyz123.com/avatar.jpg"
                 )
             }
         }
 
-        // Wait for async image loading to fail and fallback to initials
-        composeTestRule.waitForIdle()
-        Thread.sleep(1500) // Wait for image loading to timeout/fail
-        
+        // Wait until the image loading fails and initials become visible
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodesWithText("JD").fetchSemanticsNodes().isNotEmpty()
+        }
+
         // When image URL fails to load, initials should be displayed as fallback
         composeTestRule.onNodeWithText("JD").assertIsDisplayed()
     }

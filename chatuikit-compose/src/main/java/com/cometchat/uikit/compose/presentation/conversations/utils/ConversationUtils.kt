@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.annotation.DrawableRes
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.Call
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.Action
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.Conversation
 import com.cometchat.chat.models.CustomMessage
 import com.cometchat.chat.models.Group
@@ -47,10 +49,13 @@ object ConversationUtils {
         }
 
         return when (message) {
+            is AIAssistantMessage -> getAIAssistantMessageText(context, message)
             is TextMessage -> getTextMessageText(context, message)
             is MediaMessage -> getMediaMessageText(context, message)
             is CustomMessage -> getCustomMessageText(context, message)
             is Call -> CallsUtils.getCallStatus(context, message)
+            is CardMessage -> message.text?.ifEmpty { null }
+                ?: context.getString(R.string.cometchat_message_card)
             is InteractiveMessage -> context.getString(R.string.cometchat_this_message_type_is_not_supported)
             is Action -> getActionMessageText(context, message)
             else -> context.getString(R.string.cometchat_start_conv_hint)
@@ -144,6 +149,24 @@ object ConversationUtils {
         val messageText = getLastMessageText(context, message)
 
         return prefix + messageText
+    }
+
+    /**
+     * Returns the subtitle text for an AI assistant (agentic) message.
+     *
+     * Text is read from the message's text field. Falls back to the
+     * localized "AI agent message" label when the text is empty/null.
+     *
+     * @param context Android context for accessing resources
+     * @param message The AIAssistantMessage to format
+     * @return Formatted string for display in conversation subtitle
+     */
+    private fun getAIAssistantMessageText(context: Context, message: AIAssistantMessage): String {
+        val text = message.text
+        if (!text.isNullOrEmpty()) {
+            return text
+        }
+        return context.getString(R.string.cometchat_ai_agent_message)
     }
 
     private fun getTextMessageText(context: Context, message: TextMessage): String {

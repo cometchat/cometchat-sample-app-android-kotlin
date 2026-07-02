@@ -54,7 +54,7 @@ interface MessageListDataSource {
      * @return The deleted BaseMessage with updated metadata
      * @throws Exception if deletion fails
      */
-    suspend fun deleteMessage(messageId: Long): BaseMessage
+    suspend fun deleteMessage(messageId: Long): BaseMessage?
     
     /**
      * Flags/reports a message for moderation.

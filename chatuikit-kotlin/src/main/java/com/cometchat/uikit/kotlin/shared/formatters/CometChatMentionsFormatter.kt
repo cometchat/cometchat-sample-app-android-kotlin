@@ -533,11 +533,13 @@ open class CometChatMentionsFormatter(
                 // Append results for pagination (list is cleared in searchUser for new searches)
                 localSuggestionItemList.addAll(suggestions)
                 setSuggestionItemList(localSuggestionItemList.toList())
+                setShowLoadingIndicator(false)
             }
 
             override fun onError(e: CometChatException) {
                 localSuggestionItemList.clear()
                 setSuggestionItemList(emptyList())
+                setShowLoadingIndicator(false)
             }
         })
     }
@@ -562,21 +564,24 @@ open class CometChatMentionsFormatter(
                     ))
                 }
 
-                // Add mention all option for groups
-                if (!disableMentionAll && getGroup() != null) {
-                    val metaData = JSONObject()
-                    try { metaData.put("infoText", mentionAllInfoText) } catch (e: JSONException) { }
+                // Append fetched members to the accumulated list first
+                localSuggestionItemList.addAll(suggestions)
 
+                // Add @all only once: check the accumulated list to prevent duplicates on pagination
+                if (!disableMentionAll && getGroup() != null) {
+                    val containsMentionAll = localSuggestionItemList.any { it.id == mentionAllId }
                     val searchKeyword = groupMembersRequest?.searchKeyword ?: ""
 
-                    if (mentionAllId.lowercase().contains(searchKeyword.lowercase())) {
+                    if (!containsMentionAll && mentionAllId.lowercase().contains(searchKeyword.lowercase())) {
+                        val metaData = JSONObject()
+                        try { metaData.put("infoText", mentionAllInfoText) } catch (e: JSONException) { }
                         val group = getGroup()
                         val iconUrl = when {
                             group?.icon?.isNotEmpty() == true -> group.icon
                             group?.name?.isNotEmpty() == true -> group.name
                             else -> ""
                         }
-                        suggestions.add(0, SuggestionItem(
+                        localSuggestionItemList.add(0, SuggestionItem(
                             id = mentionAllId,
                             name = "${getTrackingCharacter()}$mentionAllLabelText",
                             leadingIconUrl = iconUrl,
@@ -589,7 +594,6 @@ open class CometChatMentionsFormatter(
                     }
                 }
 
-                localSuggestionItemList.addAll(suggestions)
                 setSuggestionItemList(localSuggestionItemList.toList())
             }
 

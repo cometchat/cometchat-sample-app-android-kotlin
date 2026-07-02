@@ -27,6 +27,8 @@ class PreviewGetConversationListUseCase(
     private val simulateDelay: Boolean = false
 ) : GetConversationListUseCase(PreviewNoOpRepository()) {
     
+    private var hasFetched = false
+    
     override suspend operator fun invoke(request: ConversationsRequest): Result<List<Conversation>> {
         if (simulateDelay) {
             kotlinx.coroutines.delay(2000) // Simulate network delay
@@ -38,10 +40,16 @@ class PreviewGetConversationListUseCase(
             )
         }
         
+        // Return data only on the first call; subsequent calls return empty
+        // to signal end-of-list to the ViewModel (which uses empty result to set hasMoreData=false)
+        if (hasFetched) {
+            return Result.success(emptyList())
+        }
+        hasFetched = true
         return Result.success(conversations)
     }
     
-    override fun hasMore(): Boolean = false
+    override fun hasMore(): Boolean = !hasFetched
 }
 
 /**

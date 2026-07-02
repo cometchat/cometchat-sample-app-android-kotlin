@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.models.Action
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.constants.UIKitConstants
@@ -167,8 +168,33 @@ class CometChatSearchMessageListAdapter : ListAdapter<BaseMessage, RecyclerView.
                             onClick = onMessageClick
                         )
                     }
+                    is CardMessage -> {
+                        // Show the card's text as subtitle (falls back to "Card Message"),
+                        // matching the conversation/reply preview handling
+                        holder.bindCard(
+                            message = message,
+                            messageList = currentList,
+                            position = position,
+                            style = style,
+                            dateTimeFormatter = dateTimeFormatter,
+                            onClick = onMessageClick,
+                            uid = uid,
+                            guid = guid
+                        )
+                    }
                     else -> {
-                        // Skip unsupported message types
+                        // Render unmapped/unsupported types with a generic fallback,
+                        // matching the Compose DefaultMessageContent
+                        holder.bindDefault(
+                            message = message,
+                            messageList = currentList,
+                            position = position,
+                            style = style,
+                            dateTimeFormatter = dateTimeFormatter,
+                            onClick = onMessageClick,
+                            uid = uid,
+                            guid = guid
+                        )
                     }
                 }
             }

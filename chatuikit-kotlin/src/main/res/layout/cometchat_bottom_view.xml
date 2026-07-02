@@ -34,25 +34,8 @@
             android:text="@string/cometchat_moderation_block_message" />
     </LinearLayout>
 
-    <!-- AI Assistant copy button -->
-    <LinearLayout
-        android:id="@+id/ai_copy_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="start"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <ImageView
-            android:id="@+id/ai_copy_button"
-            android:layout_width="@dimen/cometchat_20dp"
-            android:layout_height="@dimen/cometchat_20dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/cometchat_copy"
-            android:src="@drawable/cometchat_ic_copy_paste"
-            app:tint="?attr/cometchatTextColorSecondary"
-            tools:ignore="ContentDescription" />
-
-    </LinearLayout>
+    <!-- NOTE: The AI Assistant copy button lives in cometchat_ai_copy_button.xml and is
+         rendered in the `ai_copy_view` slot OUTSIDE the bubble card so it does not inherit
+         the bubble background. -->
 
 </LinearLayout>

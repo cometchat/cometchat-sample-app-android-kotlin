@@ -92,12 +92,14 @@ dependencies {
     testImplementation(libs.kotest.property)
     
     // JUnit Vintage engine to run JUnit 4 tests alongside JUnit 5
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testRuntimeOnly(libs.junit.vintage.engine)
     
     // Android instrumentation tests
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.androidx.rules)
     
     // Debug dependencies for Compose tooling
     debugImplementation(libs.androidx.ui.tooling)

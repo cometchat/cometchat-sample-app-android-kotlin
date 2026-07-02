@@ -50,6 +50,7 @@ class MessageInformationRepositoryImplTest : FunSpec({
     }
 
     afterSpec {
+        Thread.sleep(50)
         Dispatchers.resetMain()
     }
 

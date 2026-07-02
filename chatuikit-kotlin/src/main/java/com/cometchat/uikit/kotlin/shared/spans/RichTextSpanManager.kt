@@ -120,9 +120,35 @@ object RichTextSpanManager {
     ) {
         if (!isValidRange(editable, selStart, selEnd)) return
 
-        val formatsInRange = getFormatsInRange(editable, selStart, selEnd)
-        if (format in formatsInRange) {
-            removeFormat(editable, selStart, selEnd, format, context)
+        // Check if the format fully covers the entire selection range.
+        // "Fully covers" means every position in [selStart, selEnd) has the format.
+        val fullyCovered = (selStart until selEnd).all { pos ->
+            format in getFormatsAt(editable, pos)
+        }
+
+        if (fullyCovered) {
+            // Remove only spans that fully cover the toggle range. This preserves
+            // pre-existing partial spans that were layered underneath, ensuring
+            // toggle is self-inverse.
+            val spans = editable.getSpans(selStart, selEnd, RichTextFormatSpan::class.java)
+            for (span in spans) {
+                if (span.getFormatType() != format) continue
+                val spanStart = editable.getSpanStart(span)
+                val spanEnd = editable.getSpanEnd(span)
+                // Only remove spans that cover the entire toggle range
+                if (spanStart <= selStart && spanEnd >= selEnd) {
+                    editable.removeSpan(span)
+                    // Re-apply portions outside the toggle range
+                    if (spanStart < selStart) {
+                        val leftSpan = createSpan(format, context)
+                        editable.setSpan(leftSpan, spanStart, selStart, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                    if (spanEnd > selEnd) {
+                        val rightSpan = createSpan(format, context)
+                        editable.setSpan(rightSpan, selEnd, spanEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                }
+            }
         } else {
             applyFormat(editable, selStart, selEnd, format, context)
         }
@@ -143,8 +169,10 @@ object RichTextSpanManager {
         val result = mutableSetOf<RichTextFormat>()
         // Query spans that touch the position. Use max(position-1, 0) as start
         // so we also catch spans that end exactly at position (cursor at span boundary).
+        // Use position+1 as end so we also catch spans that start exactly at position.
         val queryStart = maxOf(position - 1, 0)
-        val spans = editable.getSpans(queryStart, position, RichTextFormatSpan::class.java)
+        val queryEnd = minOf(position + 1, editable.length)
+        val spans = editable.getSpans(queryStart, queryEnd, RichTextFormatSpan::class.java)
         for (span in spans) {
             val spanStart = editable.getSpanStart(span)
             val spanEnd = editable.getSpanEnd(span)

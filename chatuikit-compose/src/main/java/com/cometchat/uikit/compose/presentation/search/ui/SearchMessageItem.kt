@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -35,6 +36,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.R
@@ -186,7 +188,13 @@ private fun MessageContent(
             }
         }
         else -> {
-            DefaultMessageContent(message = message, style = style, modifier = modifier)
+            // Card messages show their text as subtitle (matches conversation/reply preview);
+            // any other unmapped type uses the generic fallback.
+            if (message is CardMessage) {
+                CardMessageContent(message = message, style = style, modifier = modifier)
+            } else {
+                DefaultMessageContent(message = message, style = style, modifier = modifier)
+            }
         }
     }
 }
@@ -497,6 +505,34 @@ private fun DefaultMessageContent(
             color = style.subtitleTextColor,
             style = style.subtitleTextStyle,
             maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun CardMessageContent(
+    message: CardMessage,
+    style: SearchMessageItemStyle,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = message.sender?.name ?: "",
+            color = style.titleTextColor,
+            style = style.titleTextStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.size(2.dp))
+        // Subtitle = card text, falling back to the generic card label (matches conversation/reply)
+        val subtitle = message.text?.ifEmpty { null }
+            ?: stringResource(R.string.cometchat_message_card)
+        Text(
+            text = subtitle,
+            color = style.subtitleTextColor,
+            style = style.subtitleTextStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

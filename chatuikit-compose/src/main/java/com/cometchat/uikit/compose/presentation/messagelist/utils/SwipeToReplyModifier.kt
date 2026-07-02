@@ -70,7 +70,7 @@ fun isSwipeToReplyEligible(message: BaseMessage): Boolean {
     val category = message.category
     if (category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
         category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true) ||
-        category.equals("agentic", ignoreCase = true) ||
+        category.equals(UIKitConstants.MessageCategory.AGENTIC, ignoreCase = true) ||
         category.equals(UIKitConstants.MessageCategory.STREAM, ignoreCase = true)) {
         return false
     }

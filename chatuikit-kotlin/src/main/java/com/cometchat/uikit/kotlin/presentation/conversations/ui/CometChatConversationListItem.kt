@@ -24,6 +24,7 @@ import com.cometchat.uikit.kotlin.databinding.CometchatConversationsListItemsBin
 import com.cometchat.uikit.kotlin.presentation.conversations.style.CometChatConversationListItemStyle
 import com.cometchat.uikit.kotlin.presentation.conversations.utils.ConversationUtils
 import com.cometchat.uikit.kotlin.presentation.conversations.utils.TypingIndicator
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.avatar.CometChatAvatarStyle
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCount
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCountStyle
@@ -935,6 +936,16 @@ class CometChatConversationListItem @JvmOverloads constructor(
         subtitleTextView?.visibility = VISIBLE
 
         conversation?.let { conv ->
+            // If the conversation is agentic, show blank subtitle
+            val user = conv.conversationWith as? User
+            if (user != null && AgentChatDetector.isAgentChat(user)) {
+                receiptView?.visibility = GONE
+                senderPrefixTextView?.visibility = GONE
+                messageTypeIconView?.visibility = GONE
+                subtitleTextView?.text = ""
+                return
+            }
+
             val lastMessage = conv.lastMessage
             if (lastMessage != null) {
                 // Show receipt for outgoing messages (matching Java hideReceipt logic)
@@ -1017,9 +1028,11 @@ class CometChatConversationListItem @JvmOverloads constructor(
                 dateView?.visibility = GONE
             }
 
-            // Unread badge
+            // Unread badge (hide for agent chats since last message is also hidden)
+            val user = conv.conversationWith as? User
+            val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)
             val unreadCount = conv.unreadMessageCount
-            if (unreadCount > 0) {
+            if (unreadCount > 0 && !isAgentChat) {
                 badgeView?.visibility = VISIBLE
                 badgeView?.setCount(unreadCount)
             } else {

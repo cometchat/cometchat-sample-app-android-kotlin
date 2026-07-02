@@ -357,12 +357,14 @@ fun CometChatMessageBubble(
 
     // Merge per-bubble-type contentStyle on top of the resolved base style
     // Special handling for stickers and agentic/stream messages: transparent background
+    val isGroupMessage = message.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP
     val effectiveStyle = when {
         contentStyle != null -> mergeWithBase(contentStyle, baseStyle)
         // Agentic and stream messages: transparent outer bubble so the
         // CometChatAIAssistantBubble content view controls its own appearance.
-        message.category == "agentic" ||
-        message.category == UIKitConstants.MessageCategory.STREAM ->
+        // In groups, keep the normal bubble background for agent messages.
+        (message.category == UIKitConstants.MessageCategory.AGENTIC ||
+        message.category == UIKitConstants.MessageCategory.STREAM) && !isGroupMessage ->
             CometChatMessageBubbleStyle(
                 backgroundColor = Color.Transparent,
                 cornerRadius = baseStyle.cornerRadius,
@@ -478,9 +480,13 @@ fun CometChatMessageBubble(
 
     // Resolve other slots: explicit parameter > factory slot > null
     // For minimal slots (action/call messages), return null to hide these views.
+    // For agent (agentic) messages in a 1:1 agent chat, suppress the quoted-reply
+    // preview. In a group, keep it so the user sees which message the agent answered.
+    val isAgenticMessage = message is AIAssistantMessage && message !is StreamMessage
     val resolvedReply = when {
         replyView != null -> replyView
         useMinimalSlots -> null  // No reply view for action/call messages (center bubbles)
+        isAgentChat && isAgenticMessage -> null  // Strip quoted-reply preview in 1:1 agent chat
         else -> factory?.getReplyView(message, alignment, effectiveStyle)
             ?: {
                 InternalContentRenderer.DefaultReplyView(
@@ -496,20 +502,34 @@ fun CometChatMessageBubble(
                 )
             }
     }
+    val factoryBottom = factory?.getBottomView(message, alignment, effectiveStyle, hideModerationView)
+    val hasCustomBottom = bottomView != null || factoryBottom != null
     val resolvedBottom = bottomView
-        ?: factory?.getBottomView(message, alignment, effectiveStyle, hideModerationView)
+        ?: factoryBottom
         ?: run {
-            // Default bottom view: copy button for AIAssistantMessage, moderation for others
-            val needsBottomView = (message is AIAssistantMessage && message !is StreamMessage && !message.text.isNullOrEmpty())
-                || (!hideModerationView && when (message) {
-                    is TextMessage -> message.moderationStatus?.name == "DISAPPROVED"
-                    is MediaMessage -> message.moderationStatus?.name == "DISAPPROVED"
-                    else -> false
-                })
-            if (needsBottomView) {
+            // Default in-bubble bottom view: moderation only. The AI copy button is
+            // rendered OUTSIDE the bubble background (see resolvedAiCopy) so it does not
+            // inherit the bubble color — notably in group agent chats where the wrapper
+            // keeps its filled background.
+            val needsModeration = !hideModerationView && when (message) {
+                is TextMessage -> message.moderationStatus?.name == "DISAPPROVED"
+                is MediaMessage -> message.moderationStatus?.name == "DISAPPROVED"
+                else -> false
+            }
+            if (needsModeration) {
                 { InternalContentRenderer.DefaultBottomView(message, alignment, effectiveStyle, hideModerationView) }
             } else null
         }
+
+    // AI copy button — rendered outside the bubble background. Only when no custom/factory
+    // bottom view overrides it.
+    val resolvedAiCopy: (@Composable () -> Unit)? = when {
+        hasCustomBottom -> null
+        message is AIAssistantMessage && message !is StreamMessage && !message.text.isNullOrEmpty() -> {
+            { InternalContentRenderer.AiCopyButton(message) }
+        }
+        else -> null
+    }
 
     // Resolve status info view with timeStampAlignment consideration:
     // If explicit statusInfoView is provided, use it. Otherwise, use factory's status info view
@@ -705,6 +725,11 @@ fun CometChatMessageBubble(
                     resolvedBottom?.invoke()
                 }
             }
+
+            // AI copy button - OUTSIDE the bubble card so it never inherits the bubble
+            // background (group agent chats keep a filled bubble color). Matches the
+            // Kotlin UIKit `ai_copy_view` slot, which sits between the bubble and footer.
+            resolvedAiCopy?.invoke()
 
             // Footer view (reactions) - outside the bubble
             // Uses negative top margin (-8dp) to create overlapping effect with the bubble

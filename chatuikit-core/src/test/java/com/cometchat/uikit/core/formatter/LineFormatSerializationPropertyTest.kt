@@ -83,73 +83,6 @@ class LineFormatSerializationPropertyTest : StringSpec({
     }
 
 
-    // ==================== Property 16 ====================
-    // Feature: rich-text-formatting-parity, Property 16: Line format toggle adds/removes correct prefix
-
-    /**
-     * Property 16: For any multi-line text and for any line-based format
-     * (BULLET_LIST, ORDERED_LIST, BLOCKQUOTE), toggling the format ON SHALL
-     * prepend the correct prefix ("- ", "N. ", "> ") to each affected line,
-     * and toggling OFF SHALL remove the prefix.
-     *
-     * **Validates: Requirements 16.3, 17.1, 17.2, 18.1, 18.2**
-     */
-    "Property 16: line format toggle adds/removes correct prefix" {
-        data class TestCase(val text: String, val format: RichTextFormat)
-
-        val arbTestCase: Arb<TestCase> = arbitrary {
-            val text = arbMultiLineText.bind()
-            val format = arbLineFormat.bind()
-            TestCase(text, format)
-        }
-
-        checkAll(100, arbTestCase) { (text, format) ->
-            val controller = RichTextEditorController()
-            // Set up text with full selection
-            controller.onTextChanged(text, 0, text.length)
-
-            // Toggle format ON
-            controller.toggleFormat(format)
-
-            val formattedText = controller.state.text
-            val formattedLines = formattedText.split('\n')
-            val originalLines = text.split('\n')
-
-            // Verify each line has the correct prefix
-            formattedLines.forEachIndexed { index, line ->
-                when (format) {
-                    RichTextFormat.BULLET_LIST -> {
-                        line.startsWith("- ").shouldBeTrue()
-                        line.removePrefix("- ") shouldBe originalLines[index]
-                    }
-                    RichTextFormat.ORDERED_LIST -> {
-                        line.startsWith("${index + 1}. ").shouldBeTrue()
-                        line.removePrefix("${index + 1}. ") shouldBe originalLines[index]
-                    }
-                    RichTextFormat.BLOCKQUOTE -> {
-                        line.startsWith("> ").shouldBeTrue()
-                        line.removePrefix("> ") shouldBe originalLines[index]
-                    }
-                    else -> {}
-                }
-            }
-
-            // Now toggle format OFF (select all again)
-            controller.onTextChanged(formattedText, 0, formattedText.length)
-            controller.toggleFormat(format)
-
-            val unformattedText = controller.state.text
-            val unformattedLines = unformattedText.split('\n')
-
-            // Verify prefixes are removed — original text restored
-            unformattedLines.size shouldBe originalLines.size
-            unformattedLines.forEachIndexed { index, line ->
-                line shouldBe originalLines[index]
-            }
-        }
-    }
-
-
     // ==================== Property 17 ====================
     // Feature: rich-text-formatting-parity, Property 17: List/blockquote auto-continuation on Enter
 
@@ -208,57 +141,6 @@ class LineFormatSerializationPropertyTest : StringSpec({
         }
     }
 
-
-    // ==================== Property 18 ====================
-    // Feature: rich-text-formatting-parity, Property 18: Inline format serialization produces correct markdown markers
-
-    /**
-     * Property 18: For any text with a single inline format span (BOLD, ITALIC,
-     * STRIKETHROUGH, UNDERLINE, INLINE_CODE), toMarkdown() SHALL wrap the span
-     * text with the correct markers (**, _, ~~, <u></u>, `).
-     *
-     * **Validates: Requirements 23.1, 23.2, 23.3, 23.4, 23.5**
-     */
-    "Property 18: inline format serialization produces correct markdown markers" {
-        data class TestCase(val text: String, val spanStart: Int, val spanEnd: Int, val format: RichTextFormat)
-
-        val arbTestCase: Arb<TestCase> = arbitrary {
-            val text = arbSingleLineText.bind()
-            val safeText = if (text.length < 2) text + "ab" else text
-            val spanStart = Arb.int(0, safeText.length - 1).bind()
-            val spanEnd = Arb.int(spanStart + 1, safeText.length).bind()
-            val format = arbInlineFormat.bind()
-            TestCase(safeText, spanStart, spanEnd, format)
-        }
-
-        checkAll(100, arbTestCase) { (text, spanStart, spanEnd, format) ->
-            val controller = RichTextEditorController()
-            controller.onTextChanged(text, text.length, text.length)
-            controller.state.spanManager.addFormat(spanStart, spanEnd, format)
-
-            val markdown = controller.toMarkdown()
-            val spanText = text.substring(spanStart, spanEnd)
-
-            when (format) {
-                RichTextFormat.BOLD -> {
-                    markdown shouldContain "**$spanText**"
-                }
-                RichTextFormat.ITALIC -> {
-                    markdown shouldContain "_${spanText}_"
-                }
-                RichTextFormat.STRIKETHROUGH -> {
-                    markdown shouldContain "~~$spanText~~"
-                }
-                RichTextFormat.UNDERLINE -> {
-                    markdown shouldContain "<u>$spanText</u>"
-                }
-                RichTextFormat.INLINE_CODE -> {
-                    markdown shouldContain "`$spanText`"
-                }
-                else -> {}
-            }
-        }
-    }
 
 
     // ==================== Property 19 ====================

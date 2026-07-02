@@ -16,13 +16,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.presentation.aiassistantchathistory.style.CometChatAIAssistantChatHistoryStyle
+import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupMenu
+import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,6 +50,7 @@ import java.util.Locale
  * @param onFetchMore Callback invoked when more messages should be loaded
  * @param onItemClick Callback invoked when a message item is tapped
  * @param onItemLongClick Callback invoked when a message item is long-pressed
+ * @param popupMenuItems Function that builds popup menu items for a given message
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,7 +62,8 @@ internal fun ChatHistoryListContent(
     listState: LazyListState = rememberLazyListState(),
     onFetchMore: () -> Unit,
     onItemClick: (BaseMessage) -> Unit,
-    onItemLongClick: (BaseMessage) -> Unit
+    onItemLongClick: (BaseMessage) -> Unit,
+    popupMenuItems: @Composable (BaseMessage, onDismiss: () -> Unit) -> List<MenuItem> = { _, _ -> emptyList() }
 ) {
     // Date formatter for grouping messages — "MMM dd, yyyy"
     val dateFormat = remember {
@@ -106,11 +113,23 @@ internal fun ChatHistoryListContent(
                 items = dateMessages,
                 key = { message -> message.id }
             ) { message ->
+                // Per-item popup state (same pattern as CometChatConversations)
+                var showPopupMenu by remember { mutableStateOf(false) }
+
+                val menuItems = popupMenuItems(message) { showPopupMenu = false }
+
                 ChatHistoryMessageItem(
                     message = message,
                     style = style,
+                    showPopupMenu = showPopupMenu,
+                    popupMenuItems = menuItems,
                     onClick = { onItemClick(message) },
-                    onLongClick = { onItemLongClick(message) }
+                    onLongClick = {
+                        showPopupMenu = true
+                        onItemLongClick(message)
+                    },
+                    onDismissPopup = { showPopupMenu = false },
+                    onMenuItemClick = { showPopupMenu = false }
                 )
             }
         }
@@ -145,19 +164,28 @@ private fun DateSeparatorHeader(
 /**
  * Single message item in the chat history list.
  * Displays the message text as a single-line truncated row with ellipsis overflow.
+ * Includes an anchored popup menu for long-press actions.
  *
  * @param message The message to display
  * @param style Style configuration for the message item
+ * @param showPopupMenu Whether the popup menu is currently shown for this item
+ * @param popupMenuItems The menu items to display in the popup
  * @param onClick Callback invoked when the item is tapped
  * @param onLongClick Callback invoked when the item is long-pressed
+ * @param onDismissPopup Callback invoked when the popup menu is dismissed
+ * @param onMenuItemClick Callback invoked when a popup menu item is clicked
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ChatHistoryMessageItem(
     message: BaseMessage,
     style: CometChatAIAssistantChatHistoryStyle,
+    showPopupMenu: Boolean = false,
+    popupMenuItems: List<MenuItem> = emptyList(),
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    onDismissPopup: () -> Unit = {},
+    onMenuItemClick: () -> Unit = {}
 ) {
     val messageText = if (message is TextMessage) {
         message.text
@@ -182,6 +210,20 @@ private fun ChatHistoryMessageItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        // Popup menu anchored to the bottom-end of the item
+        Box(
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) {
+            CometChatPopupMenu(
+                expanded = showPopupMenu,
+                onDismissRequest = onDismissPopup,
+                menuItems = popupMenuItems,
+                onMenuItemClick = { _, _ -> onMenuItemClick() }
+            ) {
+                // Empty anchor - the popup will appear at this position
+            }
+        }
     }
 }
 

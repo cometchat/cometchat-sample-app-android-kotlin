@@ -49,7 +49,7 @@ open class CometChatAIAssistantChatHistoryViewModel(
     val uiState: StateFlow<ChatHistoryUIState> = _uiState.asStateFlow()
 
     /** Delete operation state. */
-    private val _deleteState = MutableSharedFlow<UIKitConstants.DeleteState>(extraBufferCapacity = 1)
+    private val _deleteState = MutableSharedFlow<UIKitConstants.DeleteState>(extraBufferCapacity = 3)
     val deleteState: SharedFlow<UIKitConstants.DeleteState> = _deleteState.asSharedFlow()
 
     /** Emits the position of a removed message for adapter notification. */
@@ -152,7 +152,8 @@ open class CometChatAIAssistantChatHistoryViewModel(
     /**
      * Deletes a chat history message via the CometChat SDK.
      * Emits INITIATED_DELETE, then SUCCESS_DELETE or FAILURE_DELETE.
-     * On success, fires a UIKit MessageDeleted event for inter-component communication.
+     * On success, removes the message from the local list and fires a UIKit
+     * MessageDeleted event for inter-component communication.
      *
      * @param baseMessage The message to delete
      */
@@ -162,6 +163,8 @@ open class CometChatAIAssistantChatHistoryViewModel(
         CometChat.deleteMessage(baseMessage.id, object : CometChat.CallbackListener<BaseMessage>() {
             override fun onSuccess(deletedMessage: BaseMessage) {
                 _deleteState.tryEmit(UIKitConstants.DeleteState.SUCCESS_DELETE)
+                // Remove the original message from the local list immediately
+                remove(baseMessage)
                 // Emit UIKit event for inter-component communication
                 // Equivalent to Java's CometChatUIKitHelper.onMessageDeleted()
                 CometChatEvents.emitMessageEvent(
@@ -177,12 +180,13 @@ open class CometChatAIAssistantChatHistoryViewModel(
 
     /**
      * Removes a message from the internal list and emits the removed position.
+     * Matches by message ID for reliable identification regardless of object reference.
      * Transitions to Empty state if the list becomes empty after removal.
      *
      * @param baseMessage The message to remove
      */
     fun remove(baseMessage: BaseMessage) {
-        val oldIndex = messageArrayList.indexOf(baseMessage)
+        val oldIndex = messageArrayList.indexOfFirst { it.id == baseMessage.id }
         if (oldIndex == -1) return
 
         messageArrayList.removeAt(oldIndex)

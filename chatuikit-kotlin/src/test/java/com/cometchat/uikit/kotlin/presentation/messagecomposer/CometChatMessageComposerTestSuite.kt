@@ -14,6 +14,9 @@ import org.junit.runners.Suite
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
     CometChatMessageComposerCallbackTest::class,
-    CometChatMessageComposerStyleTest::class
+    CometChatMessageComposerStyleTest::class,
+    CometChatMessageComposerRenderingTest::class,
+    CometChatMessageComposerInteractionTest::class,
+    CometChatMessageComposerScreenshotTest::class
 )
 class CometChatMessageComposerTestSuite

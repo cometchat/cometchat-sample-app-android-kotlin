@@ -520,10 +520,10 @@ fun CometChatMessageComposer(
     // This uses the exposed Compose State properties for proper recomposition
     val activeFormatter = mentionDetectionState.activeFormatter
     if (activeFormatter != null && mentionDetectionState.isActive) {
-        // Trigger search when mention detection state changes (query or active formatter)
-        LaunchedEffect(mentionDetectionState.query, mentionDetectionState.activeFormatter) {
-            activeFormatter.search(context, mentionDetectionState.query)
-        }
+        // NOTE: search() is intentionally NOT triggered here. The single debounced
+        // LaunchedEffect(mentionDetectionState) below is the only search path.
+        // Calling search() here as well caused two overlapping GroupMembersRequest
+        // fetches to append to the same list, duplicating the suggestion items.
 
         // Read the state values directly - this triggers recomposition when they change
         val formatterSuggestions = activeFormatter.suggestionItemListState.value

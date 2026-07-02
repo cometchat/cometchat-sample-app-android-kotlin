@@ -1,9 +1,13 @@
 [versions]
+firebaseBom = "34.15.0"
 agp = "8.9.1"
 chatuikitComposeAndroid = "6.0.1"
 chatuikitCoreAndroid = "6.0.1"
 chatuikitKotlinAndroid = "6.0.1"
 coreTesting = "2.2.0"
+drawerlayout = "1.2.0"
+junitVintageEngine = "6.1.1"
+espressoContrib = "3.7.0"
 kotest = "5.8.0"
 flexbox = "3.0.0"
 glide = "4.16.0"
@@ -15,7 +19,7 @@ kotlinxCoroutinesTest = "1.10.2"
 lottie = "6.5.2"
 material = "1.12.0"
 constraintlayout = "2.2.0"
-chatSdkAndroid = "5.0.3"
+chatSdkAndroid = "5.0.4"
 callsSdkAndroid = "5.0.1"
 mockitoCore = "5.21.0"
 mockitoKotlin = "6.1.0"
@@ -37,10 +41,13 @@ coil = "2.7.0"
 rules = "1.7.0"
 roborazzi = "1.8.0-alpha-5"
 cardsAndroid = "1.0.0"
+uiautomator = "2.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "drawerlayout" }
+androidx-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espressoContrib" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-runtime-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
@@ -54,6 +61,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 chatuikit-compose-android = { module = "com.cometchat:chatuikit-compose-android", version.ref = "chatuikitComposeAndroid" }
 chatuikit-core-android = { module = "com.cometchat:chatuikit-core-android", version.ref = "chatuikitCoreAndroid" }
 chatuikit-kotlin-android = { module = "com.cometchat:chatuikit-kotlin-android", version.ref = "chatuikitKotlinAndroid" }
@@ -62,6 +70,7 @@ flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbo
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngine" }
 kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { group = "io.kotest", name = "kotest-property", version.ref = "kotest" }
@@ -90,6 +99,8 @@ cards-android = { module = "com.cometchat:cards-android", version.ref = "cardsAn
 roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
 roborazzi-junit-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoCore" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,16 +1,24 @@
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.roborazzi)
+    id("maven-publish")
 }
 
+ext["publishArtifactId"] = "chatuikit-compose-android"
 
 configurations.all {
     exclude(group = "org.jetbrains", module = "annotations-java5")
 }
 
+ext["publishDescription"] = "CometChat UI Kit Compose – Jetpack Compose chat UI components for Android"
+val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.3"
+val cloudsmithRepo = System.getenv("CLOUDSMITH_REPO") ?: "cometchat/call-team"
+val libraryGroup = "com.cometchat"
+val libraryArtifact = "chatuikit-compose-android"
 
 android {
     namespace = "com.cometchat.uikit.compose"
@@ -32,6 +40,10 @@ android {
         }
     }
 
+    testOptions {
+        animationsDisabled = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -48,17 +60,89 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-            all {
-                it.useJUnitPlatform()
+            isReturnDefaultValues = true
+            all { testTask ->
+                testTask.useJUnitPlatform()
+                // Complete separation between unit tests and screenshot tests:
+                // - testDebugUnitTest: only unit tests (excludes *ScreenshotTest*)
+                // - recordRoborazziDebug / verifyRoborazziDebug: only screenshot tests
+                val isRoborazziTask = project.gradle.startParameter.taskNames.any { taskName ->
+                    taskName.lowercase().contains("roborazzi")
+                }
+                if (isRoborazziTask) {
+                    testTask.include("**/*ScreenshotTest*")
+                } else {
+                    testTask.exclude("**/*ScreenshotTest*")
+                }
             }
         }
     }
 }
 
 roborazzi {
-    outputDir.set(file("src/test/snapshots"))
+    outputDir.set(rootProject.file("screenshot-gallery"))
 }
 
+publishing {
+    repositories {
+
+        maven {
+            url = uri("$projectDir/distribution")
+        }
+
+        maven {
+            name = "cloudsmith"
+            url = uri("https://api-g.cloudsmith.io/maven/$cloudsmithRepo")
+
+            credentials {
+                val properties = Properties()
+                properties.load(project.rootProject.file("local.properties").inputStream())
+                username = properties.getProperty("cloudsmith.username")
+                password = properties.getProperty("cloudsmith.apikey")
+            }
+        }
+    }
+
+    publications {
+        register<MavenPublication>("chatuikitcompose") {
+            groupId = libraryGroup
+            artifactId = libraryArtifact
+            version = libraryVersion
+
+            artifact("${layout.buildDirectory.get()}/outputs/aar/chatuikit-compose-release.aar")
+
+            pom {
+                name.set("CometChatUIKitCompose")
+                description.set("CometChat virtual chat builder for Android")
+                url.set("https://www.cometchat.com")
+
+                licenses {
+                    license {
+                        name.set("CometChat License")
+                        url.set("https://www.cometchat.com/terms")
+                    }
+                }
+
+                withXml {
+                    val dependenciesNode = asNode().appendNode("dependencies")
+                    val compileDeps = project.configurations.getByName("implementation").allDependencies
+                        .filter { dep ->
+                            dep.group != null && dep.version != null &&
+                                dep.name != "unspecified" &&
+                                dep.javaClass.simpleName != "DefaultSelfResolvingDependency"
+                        }
+                    compileDeps.forEach { dep ->
+                        val depNode = dependenciesNode.appendNode("dependency")
+                        depNode.appendNode("groupId", dep.group)
+                        depNode.appendNode("artifactId", dep.name)
+                        depNode.appendNode("version", dep.version)
+                        depNode.appendNode("scope", "compile")
+                    }
+                }
+            }
+        }
+    }
+}
 
 dependencies {
     // Core module – exposed so consumers get ViewModels transitively (published artifact)
@@ -119,6 +203,7 @@ dependencies {
     testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.androidx.ui.test.manifest)
     testImplementation(libs.androidx.ui.tooling)
+    testImplementation(libs.calls.sdk.android)
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.2.1")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")

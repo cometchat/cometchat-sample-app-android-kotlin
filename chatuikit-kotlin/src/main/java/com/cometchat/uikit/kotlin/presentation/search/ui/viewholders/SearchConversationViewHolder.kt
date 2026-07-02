@@ -23,6 +23,7 @@ import com.cometchat.uikit.kotlin.presentation.search.utils.SearchConversationsV
 import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.formatters.FormatterUtils
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCount
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.DatePattern
@@ -440,9 +441,11 @@ class SearchConversationViewHolder(
             setDate(timestamp, DatePattern.DAY_DATE_TIME)
         }
 
-        // Set unread badge
+        // Set unread badge (hide for agent chats since last message is also hidden)
+        val user = conversation.conversationWith as? User
+        val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)
         val unreadCount = conversation.unreadMessageCount
-        if (unreadCount > 0) {
+        if (unreadCount > 0 && !isAgentChat) {
             badgeView?.visibility = View.VISIBLE
             badgeView?.setCount(unreadCount)
         } else {

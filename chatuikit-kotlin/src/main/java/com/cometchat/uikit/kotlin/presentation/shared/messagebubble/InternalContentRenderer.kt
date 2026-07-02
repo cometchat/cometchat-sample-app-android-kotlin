@@ -137,11 +137,14 @@ internal object InternalContentRenderer {
             BubbleFactory.getKey(CometChatConstants.CATEGORY_CUSTOM, EXTENSION_WHITEBOARD) ->
                 CometChatCollaborativeBubble(context)
             // AI Assistant message (final message after streaming completes)
-            BubbleFactory.getKey("agentic", "assistant") ->
+            BubbleFactory.getKey(UIKitConstants.MessageCategory.AGENTIC, "assistant") ->
                 CometChatAIAssistantBubble(context)
             // Stream message (AI assistant streaming response)
             BubbleFactory.getKey(UIKitConstants.MessageCategory.STREAM, UIKitConstants.MessageType.STREAM) ->
                 CometChatAIAssistantBubble(context)
+            // Card message (developer card — category "card", type is arbitrary)
+            BubbleFactory.CARD_KEY ->
+                com.cometchat.uikit.kotlin.presentation.shared.messagebubble.cardbubble.CometChatCardBubble(context)
             // Unknown
             else -> {
                 android.util.Log.w("AgentChatDebug", "InternalContentRenderer: unsupported factoryKey='$factoryKey'")
@@ -265,8 +268,9 @@ internal object InternalContentRenderer {
                     bindCustomMessage(view, message, alignment, style, bubbleStyles)
                 }
             }
-            "agentic" -> bindAIAssistantMessage(view, message, bubbleStyles)
+            UIKitConstants.MessageCategory.AGENTIC -> bindAIAssistantMessage(view, message, bubbleStyles)
             UIKitConstants.MessageCategory.STREAM -> bindAIAssistantMessage(view, message, bubbleStyles)
+            UIKitConstants.MessageCategory.CARD -> bindCardMessage(view, message, alignment)
             else -> {
                 Log.w(TAG, "bindContentView: unrecognized category '${message.category}' type='${message.type}'")
                 false
@@ -370,7 +374,22 @@ internal object InternalContentRenderer {
     }
 
     /**
-     * Binds AI assistant messages — both streaming ([StreamMessage]) and
+     * Binds a card message (developer card, category "card") to a [CometChatCardBubble].
+     */
+    private fun bindCardMessage(
+        view: View,
+        message: BaseMessage,
+        alignment: UIKitConstants.MessageBubbleAlignment
+    ): Boolean {
+        val cardBubble = view as? com.cometchat.uikit.kotlin.presentation.shared.messagebubble.cardbubble.CometChatCardBubble
+            ?: return false
+        val cardMessage = message as? com.cometchat.chat.models.CardMessage ?: return false
+        cardBubble.setMessage(cardMessage, alignment)
+        return true
+    }
+
+    /**
+     * Binds an AI assistant message in either streaming ([StreamMessage]) or
      * static ([AIAssistantMessage]) — using [CometChatAIAssistantBubble].
      *
      * Routes to streaming or static mode based on the message type.
@@ -623,6 +642,45 @@ internal object InternalContentRenderer {
      */
     fun createBottomView(context: Context): View {
         return View.inflate(context, R.layout.cometchat_bottom_view, null)
+    }
+
+    /**
+     * Creates the AI assistant copy button view.
+     *
+     * This view is hosted in the `ai_copy_view` slot OUTSIDE the bubble card so it does
+     * not inherit the bubble background (in group agent chats the bubble keeps a filled
+     * background). Visibility/behaviour is controlled in [bindAiCopyView].
+     *
+     * @param context The Android context
+     * @return The inflated AI copy button view
+     */
+    fun createAiCopyView(context: Context): View {
+        return View.inflate(context, R.layout.cometchat_ai_copy_button, null)
+    }
+
+    /**
+     * Binds the AI assistant copy button: shows it for an [AIAssistantMessage] with
+     * non-empty text and wires the copy-to-clipboard click. Hides it otherwise.
+     *
+     * @param view The view created by [createAiCopyView]
+     * @param message The message being bound
+     */
+    fun bindAiCopyView(view: View, message: BaseMessage) {
+        val container = view.findViewById<LinearLayout>(R.id.ai_copy_container) ?: (view as? LinearLayout)
+        val copyButton = view.findViewById<ImageView>(R.id.ai_copy_button)
+        val text = (message as? AIAssistantMessage)?.text
+        if (message is AIAssistantMessage && message !is StreamMessage && !text.isNullOrEmpty()) {
+            container?.visibility = View.VISIBLE
+            view.visibility = View.VISIBLE
+            copyButton?.setOnClickListener {
+                val clipboardManager = view.context.getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                val clipData = android.content.ClipData.newPlainText("AI Response", text)
+                clipboardManager?.setPrimaryClip(clipData)
+            }
+        } else {
+            container?.visibility = View.GONE
+            view.visibility = View.GONE
+        }
     }
 
     /**
@@ -940,33 +998,16 @@ internal object InternalContentRenderer {
         val params = parent?.layoutParams as? LinearLayout.LayoutParams
 
         val moderationContainer = view.findViewById<LinearLayout>(R.id.moderation_container)
-        val aiCopyContainer = view.findViewById<LinearLayout>(R.id.ai_copy_container)
-        val aiCopyButton = view.findViewById<ImageView>(R.id.ai_copy_button)
-
-        // Reset AI copy button visibility
-        aiCopyContainer?.visibility = View.GONE
 
         when (message) {
             is AIAssistantMessage -> {
+                // The AI copy button is rendered in the `ai_copy_view` slot OUTSIDE the
+                // bubble card (see [bindAiCopyView]); the in-bubble bottom view stays hidden.
                 moderationContainer?.visibility = View.GONE
-                val text = message.text
-                if (!text.isNullOrEmpty()) {
-                    aiCopyContainer?.visibility = View.VISIBLE
-                    aiCopyButton?.setOnClickListener {
-                        val clipboardManager = view.context.getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
-                        val clipData = android.content.ClipData.newPlainText("AI Response", text)
-                        clipboardManager?.setPrimaryClip(clipData)
-                    }
-                    if (params != null) {
-                        params.width = MATCH_PARENT
-                    }
-                    view.visibility = View.VISIBLE
-                } else {
-                    if (params != null) {
-                        params.width = WRAP_CONTENT
-                    }
-                    view.visibility = View.GONE
+                if (params != null) {
+                    params.width = WRAP_CONTENT
                 }
+                view.visibility = View.GONE
             }
             is TextMessage -> {
                 if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {

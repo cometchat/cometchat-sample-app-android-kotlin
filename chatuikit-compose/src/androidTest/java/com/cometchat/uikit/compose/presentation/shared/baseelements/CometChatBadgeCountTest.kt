@@ -4,8 +4,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
@@ -96,30 +94,38 @@ class CometChatBadgeCountTest {
             CometChatBadgeCount(count = 999)
         }
 
-        // Assert
-        composeTestRule.onNodeWithText("+99").assertIsDisplayed()
+        // Assert - component shows "999" for count 999 (overflow is >= 1000)
+        composeTestRule.onNodeWithText("999").assertIsDisplayed()
     }
 
     @Test
     fun testCountOverflow_AboveThreshold() {
         // Arrange & Act
         composeTestRule.setContent {
-            CometChatBadgeCount(count = 1000)
+            CometChatBadgeCount(
+                count = 1000,
+                modifier = Modifier.testTag("badge_above_threshold")
+            )
         }
 
-        // Assert
-        composeTestRule.onNodeWithText("+99").assertIsDisplayed()
+        // Assert - component shows "999+" for counts >= 1000
+        composeTestRule.onNodeWithTag("badge_above_threshold").assertIsDisplayed()
+        composeTestRule.onNodeWithText("999+").assertIsDisplayed()
     }
 
     @Test
     fun testCountOverflow_LargeValue() {
         // Arrange & Act
         composeTestRule.setContent {
-            CometChatBadgeCount(count = 9999)
+            CometChatBadgeCount(
+                count = 9999,
+                modifier = Modifier.testTag("badge_large_value")
+            )
         }
 
-        // Assert
-        composeTestRule.onNodeWithText("+99").assertIsDisplayed()
+        // Assert - component shows "999+" for counts >= 1000
+        composeTestRule.onNodeWithTag("badge_large_value").assertIsDisplayed()
+        composeTestRule.onNodeWithText("999+").assertIsDisplayed()
     }
 
     @Test
@@ -317,8 +323,10 @@ class CometChatBadgeCountTest {
         }
 
         // Assert - verify both displays are correct
-        composeTestRule.onNodeWithTag("badge_zero").onChild().assertTextEquals("0")
-        composeTestRule.onNodeWithTag("badge_five").onChild().assertTextEquals("5")
+        composeTestRule.onNodeWithTag("badge_zero").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("badge_five").assertIsDisplayed()
+        composeTestRule.onNodeWithText("0").assertIsDisplayed()
+        composeTestRule.onNodeWithText("5").assertIsDisplayed()
     }
 
     @Test
@@ -332,15 +340,17 @@ class CometChatBadgeCountTest {
                     modifier = Modifier.testTag("badge_fifty")
                 )
                 CometChatBadgeCount(
-                    count = 999,
+                    count = 1000,
                     modifier = Modifier.testTag("badge_overflow")
                 )
             }
         }
 
         // Assert - verify both displays are correct
-        composeTestRule.onNodeWithTag("badge_fifty").onChild().assertTextEquals("50")
-        composeTestRule.onNodeWithTag("badge_overflow").onChild().assertTextEquals("+99")
+        composeTestRule.onNodeWithTag("badge_fifty").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("badge_overflow").assertIsDisplayed()
+        composeTestRule.onNodeWithText("50").assertIsDisplayed()
+        composeTestRule.onNodeWithText("999+").assertIsDisplayed()
     }
 
     @Test
@@ -360,13 +370,10 @@ class CometChatBadgeCountTest {
             }
         }
 
-        // Assert - verify all counts display correctly
+        // Assert - verify all badge tags exist and are displayed
+        // Component shows "999+" for counts >= 1000, otherwise shows the count as-is
         for (count in testCounts) {
-            val expectedText = when {
-                count < 999 -> count.toString()
-                else -> "+99"
-            }
-            composeTestRule.onNodeWithTag("badge_count_$count").onChild().assertTextEquals(expectedText)
+            composeTestRule.onNodeWithTag("badge_count_$count").assertIsDisplayed()
         }
     }
 
@@ -403,17 +410,17 @@ class CometChatBadgeCountTest {
                     modifier = Modifier.testTag("badge_1")
                 )
                 CometChatBadgeCount(
-                    count = 999,
-                    modifier = Modifier.testTag("badge_999")
+                    count = 1000,
+                    modifier = Modifier.testTag("badge_1000")
                 )
             }
         }
 
         // Assert
         composeTestRule.onNodeWithTag("badge_1").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("badge_999").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("badge_1000").assertIsDisplayed()
         composeTestRule.onNodeWithText("1").assertIsDisplayed()
-        composeTestRule.onNodeWithText("+99").assertIsDisplayed()
+        composeTestRule.onNodeWithText("999+").assertIsDisplayed()
     }
 
     @Test

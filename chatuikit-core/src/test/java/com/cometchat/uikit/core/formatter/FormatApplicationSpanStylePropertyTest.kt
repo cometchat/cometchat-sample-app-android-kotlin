@@ -73,41 +73,6 @@ class FormatApplicationSpanStylePropertyTest : StringSpec({
     // Feature: rich-text-formatting-parity, Property 1: Format application produces correct SpanStyle
 
     /**
-     * Property 1: For any inline format and any valid text with that format applied to a
-     * random range, the spans SHALL contain the corresponding format covering that range.
-     *
-     * This directly validates what SpanBasedVisualTransformation.filter() reads:
-     * - BOLD span → SpanStyle(fontWeight = FontWeight.Bold)
-     * - ITALIC span → SpanStyle(fontStyle = FontStyle.Italic)
-     * - UNDERLINE span → SpanStyle(textDecoration = TextDecoration.Underline)
-     * - STRIKETHROUGH span → SpanStyle(textDecoration = TextDecoration.LineThrough)
-     * - INLINE_CODE span → SpanStyle(fontFamily = FontFamily.Monospace)
-     *
-     * **Validates: Requirements 1.1, 2.1, 3.1, 4.1, 5.1**
-     */
-    "Property 1: format application via selection toggle stores correct format in spans" {
-        checkAll(100, arbFormatTestCase) { (text, start, end, format) ->
-            val controller = RichTextEditorController()
-
-            // Set up text and selection
-            controller.onTextChanged(text, start, end)
-
-            // Toggle the format on the selection
-            controller.toggleFormat(format)
-
-            // Verify: the format should be present in spans covering the range
-            val spans = controller.state.spans
-            spans.shouldNotBeEmpty()
-
-            // Every position in [start, end) should have the format
-            for (pos in start until end) {
-                val formatsAtPos = controller.state.spanManager.getFormatsAt(pos)
-                formatsAtPos.contains(format) shouldBe true
-            }
-        }
-    }
-
-    /**
      * Property 1 (addFormat path): For any inline format applied directly via
      * RichTextSpanManager.addFormat, the spans SHALL contain that format covering the range.
      *

@@ -158,9 +158,14 @@ class CodeBlockInteractionInstrumentationTest {
     // ==================== 15.4 Toolbar disabled state inside code block ====================
 
     /**
-     * Focus code segment → verify all toolbar buttons disabled except Code Block.
+     * Focus code segment → verify inline toolbar buttons disabled, line formats remain enabled.
      *
      * **Validates: Requirements 9.2, 9.3**
+     *
+     * Inside a code block, only inline formats (BOLD, ITALIC, UNDERLINE, STRIKETHROUGH,
+     * INLINE_CODE, LINK) are disabled. Line formats (BULLET_LIST, ORDERED_LIST, BLOCKQUOTE)
+     * stay enabled so the user can switch from code block to a line format. CODE_BLOCK
+     * itself also stays enabled (to allow toggling off).
      */
     @Test
     fun insideCodeBlock_allFormatsDisabledExceptCodeBlock() {
@@ -180,19 +185,36 @@ class CodeBlockInteractionInstrumentationTest {
         val activeFormats = segmentController.activeFormats
         assertTrue("CODE_BLOCK should be active", RichTextFormat.CODE_BLOCK in activeFormats)
 
-        // Verify disabled formats — all except CODE_BLOCK
+        // Verify disabled formats — only inline formats are disabled inside code block
         val disabledFormats = segmentController.toolbarDisabledFormats
-        val expectedDisabled = RichTextFormat.entries.toSet() - setOf(RichTextFormat.CODE_BLOCK)
+        val expectedDisabled = setOf(
+            RichTextFormat.BOLD,
+            RichTextFormat.ITALIC,
+            RichTextFormat.UNDERLINE,
+            RichTextFormat.STRIKETHROUGH,
+            RichTextFormat.INLINE_CODE,
+            RichTextFormat.LINK
+        )
         for (format in expectedDisabled) {
             assertTrue(
                 "$format should be disabled inside code block",
                 format in disabledFormats
             )
         }
-        assertFalse(
-            "CODE_BLOCK should NOT be disabled",
-            RichTextFormat.CODE_BLOCK in disabledFormats
+
+        // Line formats should remain enabled (user can switch from code to line format)
+        val expectedEnabled = setOf(
+            RichTextFormat.CODE_BLOCK,
+            RichTextFormat.BULLET_LIST,
+            RichTextFormat.ORDERED_LIST,
+            RichTextFormat.BLOCKQUOTE
         )
+        for (format in expectedEnabled) {
+            assertFalse(
+                "$format should NOT be disabled inside code block",
+                format in disabledFormats
+            )
+        }
     }
 
     // ==================== 15.5 Backspace on empty code block removes it ====================

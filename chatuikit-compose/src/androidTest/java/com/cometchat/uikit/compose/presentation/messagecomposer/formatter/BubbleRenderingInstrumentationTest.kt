@@ -168,12 +168,12 @@ class BubbleRenderingInstrumentationTest {
     fun linkMarkdown_parsesToLinkSpan() {
         val (plainText, spans) = spanManager.fromMarkdown("Click [here](https://example.com) for info")
 
-        // fromMarkdown() preserves the full link markdown syntax in plain text;
-        // the UI layer handles rendering the display text and making it clickable.
-        assertEquals("Click [here](https://example.com) for info", plainText)
+        // fromMarkdown() strips link markdown and extracts the display text;
+        // the URL is stored internally and the UI layer makes it clickable.
+        assertEquals("Click here for info", plainText)
         val linkSpans = spans.filter { RichTextFormat.LINK in it.formats }
         assertEquals("Should have one link span", 1, linkSpans.size)
-        assertEquals("[here](https://example.com)", plainText.substring(linkSpans[0].start, linkSpans[0].end))
+        assertEquals("here", plainText.substring(linkSpans[0].start, linkSpans[0].end))
     }
 
     // ==================== 14.9 Bullet list markdown renders with bullet markers ====================

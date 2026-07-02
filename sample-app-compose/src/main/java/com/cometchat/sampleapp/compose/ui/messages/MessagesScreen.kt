@@ -199,6 +199,9 @@ private fun MessagesContent(
                 group = group,
                 // Show back button for navigation
                 hideBackButton = false,
+                // Show call buttons
+                hideVideoCallButton = false,
+                hideVoiceCallButton = false,
                 // Hide built-in menu icon - we use custom trailingView
                 hideMenuIcon = true,
                 onBackPress = onBackPress,
@@ -272,7 +275,8 @@ private fun MessagesContent(
                 modifier = Modifier.fillMaxWidth(),
                 user = user,
                 group = group,
-                layoutMode = ComposerLayoutMode.MULTI_LINE,
+                layoutMode = ComposerLayoutMode.SINGLE_LINE,
+                enableRichTextFormatting = true,
                 // Set parent message ID for threaded conversations (from chat history)
                 parentMessageId = parentMessageId ?: -1,
                 onError = { exception ->

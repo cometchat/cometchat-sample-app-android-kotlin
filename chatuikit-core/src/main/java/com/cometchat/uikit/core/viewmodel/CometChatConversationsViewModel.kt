@@ -485,6 +485,14 @@ open class CometChatConversationsViewModel(
                 override fun onCustomMessageReceived(message: CustomMessage) {
                     checkAndUpdateConversation(message, true)
                 }
+
+                override fun onCardMessageReceived(message: com.cometchat.chat.models.CardMessage) {
+                    checkAndUpdateConversation(message, true)
+                }
+
+                override fun onAIAssistantMessageReceived(message: com.cometchat.chat.models.AIAssistantMessage) {
+                    checkAndUpdateConversation(message, true)
+                }
                 
                 override fun onMessageEdited(message: BaseMessage) {
                     val conversation = CometChatHelper.getConversationFromMessage(message)

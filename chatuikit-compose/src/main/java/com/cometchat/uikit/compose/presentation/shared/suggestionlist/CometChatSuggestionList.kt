@@ -147,7 +147,13 @@ fun CometChatSuggestionList(
             val layoutInfo = listState.layoutInfo
             val totalItems = layoutInfo.totalItemsCount
             val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            totalItems > 0 && lastVisibleItem >= totalItems - 1
+            // Only treat as "at bottom" when the list is actually scrollable (content
+            // overflows the viewport). For short lists where every item is already
+            // visible, this stays false so pagination does NOT auto-fire on first
+            // render — which otherwise triggered a redundant fetch and duplicated items.
+            totalItems > 0 &&
+                lastVisibleItem >= totalItems - 1 &&
+                layoutInfo.visibleItemsInfo.size < totalItems
         }
     }
     

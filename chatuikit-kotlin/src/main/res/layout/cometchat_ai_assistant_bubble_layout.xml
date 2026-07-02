@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/horizontalLayout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -26,9 +26,9 @@
             tools:ignore="ContentDescription" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/contentColumn"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="40dp"
             android:orientation="vertical">
 
             <com.cometchat.uikit.kotlin.presentation.shared.shimmer.ShimmerTextView
@@ -41,12 +41,12 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/error_card"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/cometchat_margin_2"
                 android:layout_marginBottom="@dimen/cometchat_margin_2"
@@ -57,7 +57,7 @@
 
                 <LinearLayout
                     android:id="@+id/error_layout"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:background="@color/cometchat_color_error_100"
@@ -74,10 +74,9 @@
                         tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_weight="1"
                         android:text="@string/cometchat_something_went_wrong_try_again"
                         android:textColor="#D32F2F"
                         android:textSize="12sp" />

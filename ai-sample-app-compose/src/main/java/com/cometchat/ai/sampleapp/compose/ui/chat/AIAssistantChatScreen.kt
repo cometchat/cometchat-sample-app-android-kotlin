@@ -157,7 +157,7 @@ fun AIAssistantChatScreen(
             ModalDrawerSheet(
                 drawerContainerColor = colorScheme.backgroundColor1,
                 drawerContentColor = colorScheme.textColorPrimary,
-                modifier = Modifier.fillMaxWidth(0.85f)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 CometChatAIAssistantChatHistory(
                     modifier = Modifier.fillMaxSize(),

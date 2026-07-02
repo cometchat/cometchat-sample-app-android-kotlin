@@ -625,7 +625,16 @@ fun CometChatMessageList(
      * When provided, the message list will scroll to and highlight the message
      * with this ID after loading. Used for search-to-message navigation.
      */
-    goToMessageId: Long? = null
+    goToMessageId: Long? = null,
+
+    /**
+     * When true and the conversation is an agent chat with no explicit parentMessageId,
+     * the message list will attempt to load the most recent agent conversation thread
+     * instead of showing the empty/greeting state.
+     *
+     * When false (default), a new agent chat is always started.
+     */
+    loadLastAgentConversation: Boolean = false
 ) {
     // ========================================
     // State Management (Task 39)
@@ -953,6 +962,8 @@ fun CometChatMessageList(
     
     // Track if user is at bottom (last items visible due to reverseLayout=false)
     // With reverseLayout=false, user is at bottom when viewing the last items (highest indices)
+    // Uses a threshold of 2 items (matching v5's lenient check) to avoid race conditions
+    // where adding a new item increments totalItems before the scroll catches up.
     val isAtBottom by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -961,7 +972,7 @@ fun CometChatMessageList(
                 true // Empty list is considered "at bottom"
             } else {
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                lastVisibleItem != null && lastVisibleItem.index >= totalItems - 1
+                lastVisibleItem != null && lastVisibleItem.index >= totalItems - 2
             }
         }
     }
@@ -971,6 +982,20 @@ fun CometChatMessageList(
     
     // Track if we need to scroll to bottom after a refresh (scroll-to-bottom button click)
     var pendingScrollToBottom by remember { mutableStateOf(false) }
+    
+    // Track previous message count and "was at bottom" state for auto-scroll logic.
+    // These capture the state BEFORE new messages arrive, matching the kotlin XML
+    // version's handleMessagesUpdate pattern where wasAtBottom is checked before
+    // the adapter processes new items.
+    var previousMessageCount by remember { mutableIntStateOf(0) }
+    var wasAtBottom by remember { mutableStateOf(true) }
+    
+    // Continuously sync wasAtBottom with actual scroll position.
+    // This ensures that when a new message arrives, we know the user's scroll
+    // position from BEFORE the message was added (not after totalItems increased).
+    LaunchedEffect(isAtBottom) {
+        wasAtBottom = isAtBottom
+    }
     
     // Get logged in user
     val loggedInUser = remember { CometChat.getLoggedInUser() }
@@ -1028,6 +1053,7 @@ fun CometChatMessageList(
         vm.setStartFromUnreadMessages(startFromUnreadMessages)
         vm.setUnreadThreshold(unreadMessageThreshold)
         vm.setDisableSoundForMessages(disableSoundForMessages)
+        vm.setLoadLastAgentConversation(loadLastAgentConversation)
         
         // AI feature controls
         vm.setEnableConversationStarter(enableConversationStarter)
@@ -1062,9 +1088,14 @@ fun CometChatMessageList(
         }
         
         if (isAgentChat && parentMessageId <= 0) {
-            // Main agent conversation — show empty/greeting state directly,
-            // do NOT fetch messages (matching chatuikit-kotlin behaviour).
-            vm.setUIStateEmpty()
+            // Main agent conversation
+            if (loadLastAgentConversation) {
+                // Attempt to load the most recent agent conversation thread
+                vm.fetchLastAgentConversation()
+            } else {
+                // Show empty/greeting state directly, do NOT fetch messages
+                vm.setUIStateEmpty()
+            }
         } else if (autoFetch && (user != null || group != null)) {
             if (goToMessageId != null && goToMessageId > 0) {
                 // Navigate to specific message (e.g., from search)
@@ -1172,8 +1203,8 @@ fun CometChatMessageList(
                 if (!isInProgress && totalItems > 0) {
                     // Fetch older messages when scrolled near the top
                     // With reverseLayout=false: firstVisibleIndex approaches 0 when scrolling up
-                    // Skip for main agent conversations — they don't paginate backwards
-                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages && !(isAgentChat && parentMessageId <= 0)) {
+                    // Skip for main agent conversations without loadLastAgentConversation — they don't paginate backwards
+                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages && !(isAgentChat && parentMessageId <= 0 && !loadLastAgentConversation)) {
                         vm.fetchMessages()
                     }
                     // Fetch newer messages when scrolled near the bottom
@@ -1251,23 +1282,59 @@ fun CometChatMessageList(
             // Wait for the LazyColumn to have items visible on screen
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.size }
                 .first { it > 0 }
-            listState.scrollToItem(messages.lastIndex)
+            // Use a large scrollOffset to ensure the bottom of the last item is visible,
+            // not just the top (important for tall message bubbles)
+            listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
             hasCompletedDefaultInitialScroll = true
         }
     }
 
-    // Auto-scroll effect
+    // Auto-scroll effect — matches the kotlin XML v6 handleMessagesUpdate logic:
+    // 1. If message count increased AND user was at bottom → scroll to bottom
+    // 2. If message count increased AND last message is from logged-in user → always scroll
+    // This captures "wasAtBottom" before the list size changes via previousMessageCount tracking.
+    //
+    // Uses scrollToItem (instant) instead of animateScrollToItem to prevent the "glitch"
+    // in AI agent chats where multiple rapid message additions (user msg + StreamMessage)
+    // caused competing animated scrolls that visually bounced the list up and down.
+    // The kotlin XML version also uses instant scroll (scrollToPositionWithOffset) for this.
     LaunchedEffect(messages.size) {
-        if (scrollToBottomOnNewMessage && isAtBottom && messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.lastIndex)
+        if (!hasCompletedDefaultInitialScroll || messages.isEmpty()) {
+            previousMessageCount = messages.size
+            return@LaunchedEffect
         }
+
+        val newCount = messages.size
+        if (newCount > previousMessageCount && previousMessageCount > 0) {
+            val lastMessage = messages.lastOrNull()
+            val loggedInUserId = loggedInUser?.uid
+
+            if (wasAtBottom) {
+                if (scrollToBottomOnNewMessage) {
+                    listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
+                } else {
+                    // Only scroll if user is within 5 items of the bottom
+                    val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    if (previousMessageCount == 0 || (previousMessageCount - 1) - lastVisibleIndex < 5) {
+                        listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
+                    }
+                }
+            } else if (lastMessage != null && loggedInUserId != null && lastMessage.sender?.uid == loggedInUserId) {
+                // Always scroll to bottom for the logged-in user's own sent messages,
+                // even if they weren't at bottom (handles keyboard/compose-area resize edge cases)
+                listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
+            }
+        }
+
+        // Update tracking state for the next change
+        previousMessageCount = newCount
     }
     
     // Scroll to bottom after refresh (triggered by scroll-to-bottom button click)
     // This effect watches for the pendingScrollToBottom flag and scrolls when messages are loaded
     LaunchedEffect(pendingScrollToBottom, messages.size, uiState) {
         if (pendingScrollToBottom && uiState is MessageListUIState.Loaded && messages.isNotEmpty()) {
-            listState.scrollToItem(messages.lastIndex)
+            listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
             pendingScrollToBottom = false
         }
     }
@@ -1305,10 +1372,20 @@ fun CometChatMessageList(
     // Observe scrollToBottomEvent to scroll to newest messages
     // This is emitted after initial message load and when new messages arrive
     // With reverseLayout=false, newest messages are at the end (highest index)
+    //
+    // Uses scrollToItem (instant) instead of animateScrollToItem to prevent
+    // competing animations in AI agent chats. When the ViewModel emits this event
+    // (e.g., for incoming AI response), the auto-scroll LaunchedEffect(messages.size)
+    // may also fire simultaneously. Two concurrent animateScrollToItem calls cause
+    // the visible "bounce" glitch. Instant scroll matches kotlin XML's behavior
+    // (scrollToPositionWithOffset via post{}).
     LaunchedEffect(Unit) {
         vm.scrollToBottomEvent.collect {
             if (messages.isNotEmpty()) {
-                listState.animateScrollToItem(messages.lastIndex.coerceAtLeast(0))
+                listState.scrollToItem(messages.lastIndex.coerceAtLeast(0), Int.MAX_VALUE)
+                if (!hasCompletedDefaultInitialScroll) {
+                    hasCompletedDefaultInitialScroll = true
+                }
             }
         }
     }
@@ -1385,9 +1462,10 @@ fun CometChatMessageList(
             .semantics { contentDescription = "Message list" }
     ) {
         when (uiState) {
-            // Loading state — skip for main agent conversations (greeting view handles it)
+            // Loading state — skip for main agent conversations without loadLastAgentConversation
+            // (greeting view handles it). When loadLastAgentConversation is true, show loading.
             is MessageListUIState.Loading -> {
-                if (isAgentChat && parentMessageId <= 0) {
+                if (isAgentChat && parentMessageId <= 0 && !loadLastAgentConversation) {
                     // Agent main conversation: skip loading shimmer, the Empty state
                     // will show the greeting view once the ViewModel settles.
                 } else if (!hideLoadingState) {
@@ -1813,24 +1891,44 @@ fun CometChatMessageList(
                                 .padding(end = 8.dp, bottom = 8.dp)
                         ) {
                             newMessageIndicatorView?.invoke(newMessageCount) {
-                                // Reset and fetch behavior (matches XML implementation)
+                                // Scroll-to-bottom works independently from streaming.
+                                // If we already have the latest messages, just scroll.
+                                // Only clear+refetch when user has paginated away.
                                 newMessageCount = 0
-                                pendingScrollToBottom = true
-                                vm.clear()
-                                vm.fetchMessages()
+                                if (hasMoreNewMessages) {
+                                    // User paginated away — need to refetch latest messages
+                                    pendingScrollToBottom = true
+                                    vm.clear()
+                                    vm.fetchMessages()
+                                } else {
+                                    // User has the latest messages — just scroll to bottom
+                                    scope.launch {
+                                        if (messages.isNotEmpty()) {
+                                            listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
+                                        }
+                                    }
+                                }
                             } ?: DefaultNewMessageIndicator(
                                 count = newMessageCount,
                                 style = style,
                                 onClick = {
-                                    // Reset and fetch behavior (matches XML implementation)
-                                    // 1. Reset new message count
-                                    // 2. Set pending scroll flag to scroll after messages load
-                                    // 3. Clear message list and reset request
-                                    // 4. Fetch fresh messages from the latest
+                                    // Scroll-to-bottom works independently from streaming.
+                                    // If we already have the latest messages, just scroll.
+                                    // Only clear+refetch when user has paginated away.
                                     newMessageCount = 0
-                                    pendingScrollToBottom = true
-                                    vm.clear()
-                                    vm.fetchMessages()
+                                    if (hasMoreNewMessages) {
+                                        // User paginated away — need to refetch latest messages
+                                        pendingScrollToBottom = true
+                                        vm.clear()
+                                        vm.fetchMessages()
+                                    } else {
+                                        // User has the latest messages — just scroll to bottom
+                                        scope.launch {
+                                            if (messages.isNotEmpty()) {
+                                                listState.scrollToItem(messages.lastIndex, Int.MAX_VALUE)
+                                            }
+                                        }
+                                    }
                                 }
                             )
                         }

@@ -1,6 +1,5 @@
 package com.cometchat.uikit.kotlin.presentation.messagelist
 
-import com.cometchat.uikit.kotlin.presentation.messagelist.adapter.MessageAdapterPropertyTest
 import com.cometchat.uikit.kotlin.presentation.messagelist.adapter.MessageAdapterTest
 import com.cometchat.uikit.kotlin.presentation.messagelist.popupmenu.PopupMenuAdapterColorFallbackPropertyTest
 import com.cometchat.uikit.kotlin.presentation.messagelist.popupmenu.PopupMenuAdapterIconVisibilityPropertyTest
@@ -42,8 +41,9 @@ import org.junit.runners.Suite
     ReactionClickPropertyTest::class,
     RegularMessageInteractionPreservationTest::class,
     // Adapter tests
-    MessageAdapterPropertyTest::class,
     MessageAdapterTest::class,
+    // BubbleViewProvider tests
+    BubbleViewProviderPropertyTest::class,
     // Popup menu tests
     PopupMenuAdapterColorFallbackPropertyTest::class,
     PopupMenuAdapterIconVisibilityPropertyTest::class,

@@ -41,7 +41,7 @@ class StreamMessageLifecycleTest : StringSpec({
     val testDispatcher = UnconfinedTestDispatcher()
 
     beforeSpec { Dispatchers.setMain(testDispatcher) }
-    afterSpec { Dispatchers.resetMain() }
+    afterSpec { Thread.sleep(50); Dispatchers.resetMain() }
 
     // ── Property 19: StreamMessage Lifecycle ─────────────────────────────
     // Validates: Requirements 14.1, 14.2, 14.3
@@ -102,15 +102,22 @@ class StreamMessageLifecycleTest : StringSpec({
         service.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback { result ->
             completionInvoked = true
             completionResult = result
-            // Replace StreamMessage with final message in the list
-            val idx = messageList.indexOf(streamMessage)
-            if (idx >= 0) {
-                messageList[idx] = finalMessage
+            // Replace StreamMessage with final message in the list (use index 0 since we know it's the only item)
+            if (messageList.isNotEmpty()) {
+                messageList[0] = finalMessage
             }
         })
 
-        // Trigger completion (queue is already drained after processing)
-        service.checkAndTriggerQueueCompletion(runId)
+        // Send RUN_FINISHED event so checkAndTriggerQueueCompletion knows the run is done
+        val runFinished = AIAssistantBaseEvent().apply {
+            id = runId
+            type = UIKitConstants.AIAssistantEventType.RUN_FINISHED
+        }
+        service.handleIncomingEvent(runFinished)
+
+        // Process the RUN_FINISHED event from the queue
+        service.processQueueSequentially(runId)
+        testScope.testScheduler.advanceUntilIdle()
 
         // 8. Verify the completion callback was invoked and the StreamMessage was replaced
         completionInvoked shouldBe true

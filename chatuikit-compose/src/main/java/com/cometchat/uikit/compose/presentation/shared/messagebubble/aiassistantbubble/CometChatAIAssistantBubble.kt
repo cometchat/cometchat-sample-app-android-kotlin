@@ -24,12 +24,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +39,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -115,6 +117,20 @@ fun CometChatAIAssistantBubble(
 
 // ── Streaming Mode ──────────────────────────────────────────────────────
 
+/**
+ * Represents an ordered block in the streaming content.
+ * Blocks are appended in arrival order to preserve the sequential rendering
+ * of interleaved text and card content from the AI agent.
+ */
+private sealed class StreamedBlock {
+    /** A text block whose markdown content grows as deltas arrive. */
+    data class Text(val id: String, var markdown: String) : StreamedBlock()
+    /** A card block in loading state (placeholder). */
+    data class CardLoading(val cardId: String, val label: String) : StreamedBlock()
+    /** A card block that has been fully received and is ready to render. */
+    data class CardRendered(val cardId: String, val cardJson: String) : StreamedBlock()
+}
+
 @Composable
 private fun StreamingMode(
     message: StreamMessage,
@@ -123,17 +139,72 @@ private fun StreamingMode(
     modifier: Modifier
 ) {
     val runId = message.runId
-    val context = LocalContext.current
 
-    // Observe accumulated text from the stream service
-    val accumulatedText by aiStreamService?.accumulatedText(runId)
-        ?.collectAsState() ?: remember { mutableStateOf("") }
+    // Ordered block list — preserves arrival order of text and card content
+    val streamedBlocks = remember { mutableStateOf(listOf<StreamedBlock>()) }
 
     // Lifecycle: start/stop streaming
     DisposableEffect(runId, aiStreamService) {
         val listener = object : CometChatAIStreamService.AIStreamListener {
             override fun onAIAssistantEventReceived(event: AIAssistantBaseEvent) {
-                // Events handled by the service; bubble just observes accumulatedText
+                when (event) {
+                    is com.cometchat.chat.models.AIAssistantContentReceivedEvent -> {
+                        val delta = event.delta ?: ""
+                        if (delta.isNotEmpty()) {
+                            val blocks = streamedBlocks.value.toMutableList()
+                            val lastBlock = blocks.lastOrNull()
+                            if (lastBlock is StreamedBlock.Text) {
+                                // Append delta to the current text block
+                                blocks[blocks.lastIndex] = lastBlock.copy(
+                                    markdown = lastBlock.markdown + delta
+                                )
+                            } else {
+                                // Start a new text block (first block, or after a card)
+                                blocks.add(StreamedBlock.Text(
+                                    id = "text_${blocks.size}",
+                                    markdown = delta
+                                ))
+                            }
+                            streamedBlocks.value = blocks
+                        }
+                    }
+                    is com.cometchat.chat.models.AIAssistantCardStartedEvent -> {
+                        val blocks = streamedBlocks.value.toMutableList()
+                        blocks.add(StreamedBlock.CardLoading(
+                            cardId = event.cardId,
+                            label = event.executionText ?: "Building card…"
+                        ))
+                        streamedBlocks.value = blocks
+                    }
+                    is com.cometchat.chat.models.AIAssistantCardReceivedEvent -> {
+                        val cardJson = event.card?.toString() ?: ""
+                        if (cardJson.isNotEmpty()) {
+                            val blocks = streamedBlocks.value.toMutableList()
+                            val index = blocks.indexOfFirst {
+                                it is StreamedBlock.CardLoading && it.cardId == event.cardId
+                            }
+                            if (index >= 0) {
+                                blocks[index] = StreamedBlock.CardRendered(
+                                    cardId = event.cardId,
+                                    cardJson = cardJson
+                                )
+                            } else {
+                                // No placeholder found — append rendered card
+                                blocks.add(StreamedBlock.CardRendered(
+                                    cardId = event.cardId,
+                                    cardJson = cardJson
+                                ))
+                            }
+                            streamedBlocks.value = blocks
+                        }
+                    }
+                    is com.cometchat.chat.models.AIAssistantCardEndedEvent -> {
+                        // No-op — the persisted message replaces the streamed bubble
+                    }
+                    else -> {
+                        // Other events (tool start, text message start, etc.) handled below
+                    }
+                }
             }
 
             override fun onError(exception: CometChatException) {
@@ -146,29 +217,92 @@ private fun StreamingMode(
         }
     }
 
-    // Determine display state based on metadata and accumulated text
-    // Use message.text as fallback — the ViewModel updates it directly from accumulated content
+    // Determine display state
     val hasRunStarted = message.metadata?.optString(
         UIKitConstants.AIConstants.AI_ASSISTANT_EVENT_TYPE
     ) == UIKitConstants.AIAssistantEventType.RUN_STARTED
-    val displayText = accumulatedText.ifEmpty { message.text ?: "" }
+    val blocks = streamedBlocks.value
+    // Fallback: if no blocks yet but message.text has content (rebind case), show it
+    val fallbackText = if (blocks.isEmpty()) (message.text ?: "") else ""
 
     BubbleContainer(style = style, modifier = modifier) {
-        when {
-            message.isStreamingInterrupted -> {
-                // Show accumulated text + error indicator
-                if (displayText.isNotEmpty()) {
-                    MarkdownContent(text = displayText, style = style)
+        Column {
+            when {
+                message.isStreamingInterrupted -> {
+                    // Show all accumulated blocks + error indicator
+                    for (block in blocks) {
+                        RenderStreamedBlock(block = block, message = message, style = style)
+                    }
+                    if (blocks.isEmpty() && fallbackText.isNotEmpty()) {
+                        MarkdownContent(text = fallbackText, style = style)
+                    }
+                    ErrorIndicator(style = style)
                 }
-                ErrorIndicator(style = style)
+                !hasRunStarted && blocks.isEmpty() && fallbackText.isEmpty() -> {
+                    // Thinking state: shimmer animation
+                    ShimmerThinkingText(style = style)
+                }
+                else -> {
+                    // Render blocks sequentially in arrival order
+                    if (blocks.isNotEmpty()) {
+                        for (block in blocks) {
+                            RenderStreamedBlock(block = block, message = message, style = style)
+                        }
+                    } else if (fallbackText.isNotEmpty()) {
+                        // Fallback for rebind (no blocks yet, but text available)
+                        MarkdownContent(text = fallbackText, style = style)
+                    }
+                }
             }
-            !hasRunStarted && displayText.isEmpty() -> {
-                // Thinking state: shimmer animation
-                ShimmerThinkingText(style = style)
+        }
+    }
+}
+
+/**
+ * Renders a single [StreamedBlock] — either markdown text or a card (loading/rendered).
+ */
+@Composable
+private fun RenderStreamedBlock(
+    block: StreamedBlock,
+    message: StreamMessage,
+    style: CometChatAIAssistantBubbleStyle
+) {
+    when (block) {
+        is StreamedBlock.Text -> {
+            if (block.markdown.isNotEmpty()) {
+                MarkdownContent(text = block.markdown, style = style)
             }
-            else -> {
-                // Streaming or completed: render markdown
-                MarkdownContent(text = displayText, style = style)
+        }
+        is StreamedBlock.CardLoading -> {
+            Text(
+                text = block.label,
+                style = CometChatTheme.typography.bodyRegular,
+                color = CometChatTheme.colorScheme.textColorSecondary,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        is StreamedBlock.CardRendered -> {
+            // Center the card horizontally and cap it at ~65% of screen width
+            // (Kotlin's `maxCardViewWidth`) so it stays narrower than the bubble.
+            val cardMaxWidth = (LocalConfiguration.current.screenWidthDp * 0.65f).dp
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.widthIn(max = cardMaxWidth)) {
+                    com.cometchat.cards.CometChatCardComposable(
+                        cardJson = block.cardJson,
+                        themeMode = com.cometchat.cards.models.CometChatCardThemeMode.AUTO,
+                        onAction = { event ->
+                            com.cometchat.uikit.core.events.CometChatEvents.emitUIEvent(
+                                com.cometchat.uikit.core.events.CometChatUIEvent.CardActionClicked(
+                                    message = message,
+                                    actionEvent = event
+                                )
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -182,9 +316,69 @@ private fun StaticMode(
     style: CometChatAIAssistantBubbleStyle,
     modifier: Modifier
 ) {
-    val text = message.text ?: ""
-    BubbleContainer(style = style, modifier = modifier) {
-        MarkdownContent(text = text, style = style)
+    val elements = message.elements
+    if (elements.isNullOrEmpty()) {
+        // Fallback: render getText() as markdown (existing behavior, regression guard)
+        val text = message.text ?: ""
+        BubbleContainer(style = style, modifier = modifier) {
+            MarkdownContent(text = text, style = style)
+        }
+    } else {
+        // Walk elements in array order and render per type
+        BubbleContainer(style = style, modifier = modifier) {
+            Column {
+                for (element in elements) {
+                    when (element.type) {
+                        "text" -> {
+                            // Render text element as markdown (same as existing text rendering)
+                            val textValue = element.data?.toString() ?: ""
+                            if (textValue.isNotEmpty()) {
+                                MarkdownContent(text = textValue, style = style)
+                            }
+                        }
+                        "card" -> {
+                            // Render card element via the cards renderer
+                            val cardData = element.data
+                            val cardObj = when (cardData) {
+                                is org.json.JSONObject -> cardData.optJSONObject("card")
+                                is Map<*, *> -> {
+                                    val cardMap = cardData["card"]
+                                    if (cardMap != null) org.json.JSONObject(cardMap.toString()) else null
+                                }
+                                else -> null
+                            }
+                            val cardJson = cardObj?.toString() ?: ""
+                            if (cardJson.isNotEmpty()) {
+                                // Center the card horizontally and cap it at ~65% of screen
+                                // width (Kotlin's `maxCardViewWidth`) so it stays narrower
+                                // than the bubble with breathing room on both sides.
+                                val cardMaxWidth = (LocalConfiguration.current.screenWidthDp * 0.65f).dp
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(modifier = Modifier.widthIn(max = cardMaxWidth)) {
+                                        com.cometchat.cards.CometChatCardComposable(
+                                            cardJson = cardJson,
+                                            themeMode = com.cometchat.cards.models.CometChatCardThemeMode.AUTO,
+                                            onAction = { event ->
+                                                com.cometchat.uikit.core.events.CometChatEvents.emitUIEvent(
+                                                    com.cometchat.uikit.core.events.CometChatUIEvent.CardActionClicked(
+                                                        message = message,
+                                                        actionEvent = event
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        // Unknown element types — skip silently
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -198,11 +392,17 @@ private fun BubbleContainer(
 ) {
     val shape = RoundedCornerShape(style.cornerRadius)
 
-    // Matches the Kotlin UIKit XML layout:
-    // - Outer LinearLayout has paddingVertical=8dp (cometchat_padding_2)
-    // - Inner content LinearLayout has marginEnd=40dp
+    // Cap the bubble at ~70% of screen width to match the Kotlin UIKit (`maxCardWidth`),
+    // so the AI bubble covers the same area in both SDKs instead of sizing to content.
+    val maxBubbleWidth = (LocalConfiguration.current.screenWidthDp * 0.70f).dp
+
+    // Symmetric content padding so the text/card never hugs the bubble edge — matches the
+    // standard bubble content inset (12dp horizontal / 8dp vertical) used by the other
+    // Kotlin/Compose bubbles. This matters in group agent chats where the wrapper draws a
+    // filled background; in 1:1 chats the wrapper is transparent so the inset is invisible.
     Column(
         modifier = modifier
+            .widthIn(max = maxBubbleWidth)
             .clip(shape)
             .background(style.backgroundColor, shape)
             .then(
@@ -212,8 +412,10 @@ private fun BubbleContainer(
                     Modifier
                 }
             )
-            .padding(vertical = 8.dp)
-            .padding(end = 40.dp)
+            .padding(
+                horizontal = dimensionResource(R.dimen.cometchat_padding_3),
+                vertical = dimensionResource(R.dimen.cometchat_padding_2)
+            )
     ) {
         content()
     }

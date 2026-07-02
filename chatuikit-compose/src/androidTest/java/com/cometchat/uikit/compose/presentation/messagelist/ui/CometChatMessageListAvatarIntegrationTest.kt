@@ -27,6 +27,7 @@ import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.domain.repository.MessageListRepository
 import com.cometchat.uikit.core.state.MessageAlignment
 import com.cometchat.uikit.core.viewmodel.CometChatMessageListViewModel
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,6 +55,11 @@ class CometChatMessageListAvatarIntegrationTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        MessageListComposeTestHelper.ensureInitialized()
+    }
 
     // ========================================
     // Test: Avatar visibility in group conversations
@@ -272,8 +278,9 @@ class CometChatMessageListAvatarIntegrationTest {
      *
      * **Validates: Design - Error Handling section**
      *
-     * When both user and group are null, isGroupConversation defaults to false,
-     * so incoming messages should hide avatars.
+     * When both user and group are null, the component does not fetch messages
+     * (matching chatuikit-kotlin behavior). The message list container is rendered
+     * but no messages are displayed since autoFetch requires user or group to be set.
      */
     @Test
     fun bothUserAndGroupNull_defaultsToUserConversationBehavior() {
@@ -298,8 +305,10 @@ class CometChatMessageListAvatarIntegrationTest {
         // Wait for state to settle
         composeTestRule.waitForIdle()
 
-        // Assert - Message should be displayed (avatar hidden due to isGroupConversation=false)
-        composeTestRule.onNodeWithContentDescription("Incoming message from Alice")
+        // Assert - The message list container should be rendered but messages are NOT
+        // fetched when both user and group are null (component requires at least one).
+        // The "Message list" container should still be displayed.
+        composeTestRule.onNodeWithContentDescription("Message list")
             .assertIsDisplayed()
     }
 
@@ -1023,12 +1032,13 @@ class CometChatMessageListAvatarIntegrationTest {
      * Creates a mock outgoing TextMessage (from the logged-in user).
      *
      * Note: In actual usage, the logged-in user's UID would match the sender's UID
-     * to determine alignment. For testing, we simulate this by setting a specific sender.
+     * to determine alignment. We use the same UID as the logged-in test user
+     * (cometchat-uid-2) so that the alignment logic correctly identifies this as outgoing.
      */
     private fun createOutgoingTextMessage(id: Long, senderName: String): TextMessage {
         val sender = User().apply {
-            // Use a UID that would match the logged-in user
-            this.uid = "logged-in-user-uid"
+            // Use the same UID as the logged-in test user so alignment is RIGHT
+            this.uid = MessageListComposeTestHelper.LOGGED_IN_USER_UID
             this.name = senderName
         }
         return TextMessage(

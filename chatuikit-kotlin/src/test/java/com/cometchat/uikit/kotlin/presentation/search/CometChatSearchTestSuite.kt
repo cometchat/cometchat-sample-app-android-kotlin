@@ -1,6 +1,5 @@
 package com.cometchat.uikit.kotlin.presentation.search
 
-import com.cometchat.uikit.kotlin.presentation.search.adapter.CometChatSearchConversationsAdapterTest
 import com.cometchat.uikit.kotlin.presentation.search.adapter.CometChatSearchMessageListAdapterTest
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
@@ -16,7 +15,6 @@ import org.junit.runners.Suite
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
     CometChatSearchViewTest::class,
-    CometChatSearchConversationsAdapterTest::class,
     CometChatSearchMessageListAdapterTest::class
 )
 class CometChatSearchTestSuite

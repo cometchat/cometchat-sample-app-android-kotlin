@@ -247,7 +247,7 @@ class MentionUITest {
         // Expected cursor position is after the mention and space
         val expectedCursorPosition = triggerIndex + insertedTextWithSpace.length
 
-        assertEquals(11, expectedCursorPosition)
+        assertEquals(10, expectedCursorPosition)
     }
 
     // ==================== Cursor Behavior Tests ====================

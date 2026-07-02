@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.models.Action
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.kotlin.R
@@ -181,5 +182,67 @@ class SearchTextMessageViewHolder(
 
         // Set action message text
         binding.messageSubtitle.text = action.message ?: action.action ?: ""
+    }
+
+    /**
+     * Binds an unsupported/unmapped message type to the views as a generic fallback.
+     * Mirrors the Compose `DefaultMessageContent`: shows the conversation/sender title
+     * with a generic "Message" subtitle so the row is still rendered (e.g. card messages).
+     *
+     * @param message The message to display
+     * @param messageList The full list of messages
+     * @param position The position in the list
+     * @param style The style configuration
+     * @param dateTimeFormatter Optional custom date/time formatter
+     * @param onClick Click callback for the item
+     * @param uid Optional user ID for context-aware display
+     * @param guid Optional group ID for context-aware display
+     */
+    fun bindDefault(
+        message: BaseMessage,
+        messageList: List<BaseMessage>,
+        position: Int,
+        style: CometChatSearchStyle?,
+        dateTimeFormatter: DateTimeFormatterCallback?,
+        onClick: ((BaseMessage) -> Unit)?,
+        uid: String? = null,
+        guid: String? = null
+    ) {
+        // Bind common data (title, timestamp, thread indicator, click, style)
+        bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
+
+        // Generic subtitle for unmapped types, matching the Compose fallback
+        binding.messageSubtitle.text = context.getString(R.string.cometchat_message_generic)
+    }
+
+    /**
+     * Binds a card message to the views. Mirrors the conversation/reply preview handling:
+     * shows the card's text, falling back to the generic "Card Message" label when empty.
+     *
+     * @param message The card message to display
+     * @param messageList The full list of messages
+     * @param position The position in the list
+     * @param style The style configuration
+     * @param dateTimeFormatter Optional custom date/time formatter
+     * @param onClick Click callback for the item
+     * @param uid Optional user ID for context-aware display
+     * @param guid Optional group ID for context-aware display
+     */
+    fun bindCard(
+        message: CardMessage,
+        messageList: List<BaseMessage>,
+        position: Int,
+        style: CometChatSearchStyle?,
+        dateTimeFormatter: DateTimeFormatterCallback?,
+        onClick: ((BaseMessage) -> Unit)?,
+        uid: String? = null,
+        guid: String? = null
+    ) {
+        // Bind common data (title, timestamp, thread indicator, click, style)
+        bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
+
+        // Subtitle = card text, falling back to the generic card label (matches conversation/reply)
+        binding.messageSubtitle.text = message.text?.ifEmpty { null }
+            ?: context.getString(R.string.cometchat_message_card)
     }
 }

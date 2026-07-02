@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // DrawerLayout for the chat history drawer
-    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
+    implementation(libs.androidx.drawerlayout)
 
     // Gson for JSON serialization
     implementation(libs.gson)

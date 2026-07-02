@@ -404,6 +404,8 @@ object UIKitConstants {
         const val ACTION = "action"
         const val CALL = "call"
         const val STREAM = "stream_message"
+        const val CARD = "card"
+        const val AGENTIC = "agentic"
     }
 
     /**
@@ -423,6 +425,7 @@ object UIKitConstants {
         const val EXTENSION_DOCUMENT = "extension_document"
         const val EXTENSION_WHITEBOARD = "extension_whiteboard"
         const val EXTENSION_MEETING = "meeting"
+        const val CARD = "card"
     }
 
     /**

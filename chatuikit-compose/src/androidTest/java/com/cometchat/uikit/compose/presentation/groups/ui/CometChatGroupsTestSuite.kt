@@ -14,6 +14,6 @@ import org.junit.runners.Suite
  */
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
-    CometChatGroupsTest::class
+    CometChatGroupsInstrumentedTest::class
 )
 class CometChatGroupsTestSuite

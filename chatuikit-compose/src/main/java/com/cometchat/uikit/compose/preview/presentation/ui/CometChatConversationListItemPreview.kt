@@ -8,18 +8,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConversationListItem
-import com.cometchat.uikit.compose.presentation.conversations.style.CometChatConversationListItemStyle
 import com.cometchat.uikit.compose.presentation.conversations.utils.ConversationUtils
 import com.cometchat.uikit.compose.presentation.conversations.utils.TypingIndicator
 import com.cometchat.uikit.compose.preview.domain.PreviewMockData
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.compose.theme.darkColorScheme
 
 // ============================================================================
 // Preview: User Conversation
@@ -591,28 +590,26 @@ fun PreviewComprehensiveList() {
 }
 
 /**
- * Preview showing dark theme appearance (simulated with custom colors).
+ * Preview showing dark theme appearance.
  */
-@Preview(showBackground = true, backgroundColor = 0xFF1A1A1A, name = "Dark Theme Simulation")
+@Preview(showBackground = true, name = "Dark Theme")
 @Composable
-fun PreviewDarkThemeSimulation() {
-    CometChatTheme {
+fun PreviewDarkTheme() {
+    CometChatTheme(colorScheme = darkColorScheme()) {
         val conversation = PreviewMockData.createUserConversation(
-            user = PreviewMockData.createMockUser(name = "Dark Theme User"),
+            user = PreviewMockData.createMockUser(
+                uid = "dark_1",
+                name = "Iron Man"
+            ),
             lastMessage = PreviewMockData.createMockTextMessage(
-                text = "Testing dark theme appearance"
+                text = "Hey, are we meeting today?"
             ),
             unreadCount = 5
         )
         
         CometChatConversationListItem(
             conversation = conversation,
-            onItemClick = { },
-            style = CometChatConversationListItemStyle.default(
-                backgroundColor = Color(0xFF1A1A1A),
-                titleTextColor = Color.White,
-                subtitleTextColor = Color(0xFFB0B0B0)
-            )
+            onItemClick = { }
         )
     }
 }

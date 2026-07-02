@@ -82,6 +82,7 @@ class CometChatMessageBubble @JvmOverloads constructor(
     private var replyViewContainer: LinearLayout? = null
     private var contentViewContainer: LinearLayout? = null
     private var bottomViewContainer: LinearLayout? = null
+    private var aiCopyViewContainer: LinearLayout? = null
     private var statusInfoViewContainer: LinearLayout? = null
     private var threadViewContainer: LinearLayout? = null
     private var footerViewContainer: LinearLayout? = null
@@ -134,6 +135,7 @@ class CometChatMessageBubble @JvmOverloads constructor(
     private var factoryReplyView: View? = null
     private var factoryContentView: View? = null
     private var factoryBottomView: View? = null
+    private var factoryAiCopyView: View? = null
     private var factoryStatusInfoView: View? = null
     private var factoryThreadView: View? = null
     private var factoryFooterView: View? = null
@@ -372,6 +374,8 @@ class CometChatMessageBubble @JvmOverloads constructor(
                 handleView(headerViewContainer, null)
                 handleView(replyViewContainer, null)
                 handleView(bottomViewContainer, null)
+                factoryAiCopyView = null
+                handleView(aiCopyViewContainer, null)
                 handleView(statusInfoViewContainer, null)
                 handleView(threadViewContainer, null)
                 handleView(footerViewContainer, null)
@@ -406,7 +410,11 @@ class CometChatMessageBubble @JvmOverloads constructor(
                 factoryBottomView = factory.createBottomView(context)
                 handleView(bottomViewContainer, factoryBottomView)
             }
-            
+
+            // No auto AI copy button when an external factory drives the bubble.
+            factoryAiCopyView = null
+            handleView(aiCopyViewContainer, null)
+
             if (customStatusInfoView == null) {
                 factoryStatusInfoView = factory.createStatusInfoView(context)
                 handleView(statusInfoViewContainer, factoryStatusInfoView)
@@ -458,6 +466,10 @@ class CometChatMessageBubble @JvmOverloads constructor(
                 factoryBottomView = InternalContentRenderer.createBottomView(context)
                 handleView(bottomViewContainer, factoryBottomView)
             }
+
+            // AI copy button — hosted outside the bubble card (internal rendering only)
+            factoryAiCopyView = InternalContentRenderer.createAiCopyView(context)
+            handleView(aiCopyViewContainer, factoryAiCopyView)
 
             if (customStatusInfoView == null) {
                 factoryStatusInfoView = InternalContentRenderer.createStatusInfoView(context)
@@ -634,8 +646,16 @@ class CometChatMessageBubble @JvmOverloads constructor(
                 headerViewContainer?.visibility = VISIBLE
             }
 
-            // Reply: hide for minimal slots
+            // Reply: hide for minimal slots and for agent (agentic) messages in 1:1 chat.
+            // In a group, keep the reply view so the user sees which message the agent answered.
+            val isAgenticMessage = message is com.cometchat.chat.models.AIAssistantMessage &&
+                message !is com.cometchat.uikit.core.domain.model.StreamMessage
+            val isGroupAgenticMessage = isAgenticMessage &&
+                message.receiverType == com.cometchat.chat.constants.CometChatConstants.RECEIVER_TYPE_GROUP
             if (useMinimalSlots) {
+                replyViewContainer?.visibility = GONE
+            } else if (isAgenticMessage && !isGroupAgenticMessage) {
+                // 1:1 agent chat — strip quoted-reply preview
                 replyViewContainer?.visibility = GONE
             } else if (factoryReplyView != null && customReplyView == null) {
                 InternalContentRenderer.bindReplyView(
@@ -647,12 +667,18 @@ class CometChatMessageBubble @JvmOverloads constructor(
                     bubbleStyles.outgoingMessagePreviewStyle,
                     onMessagePreviewClick
                 )
+                // Ensure container is visible (may be GONE from a recycled ViewHolder)
+                replyViewContainer?.visibility = VISIBLE
             }
 
             // Bottom view (not hidden for minimal slots — moderation can apply to any type)
             if (factoryBottomView != null && customBottomView == null) {
                 InternalContentRenderer.bindBottomView(factoryBottomView!!, message, alignment)
             }
+
+            // AI copy button — rendered outside the bubble card so it never inherits the
+            // bubble background (group agent chats keep a filled bubble color).
+            factoryAiCopyView?.let { InternalContentRenderer.bindAiCopyView(it, message) }
 
             // StatusInfo: hide for minimal slots or meeting messages
             // Also respect receiptsVisibility setting for the receipt indicator
@@ -732,9 +758,14 @@ class CometChatMessageBubble @JvmOverloads constructor(
 
         // AI assistant and stream messages: transparent outer bubble so the
         // CometChatAIAssistantBubble content view controls its own appearance.
-        if (message.category == "agentic" ||
+        // In groups, keep the normal bubble background so the agent message has
+        // the standard incoming bubble color (per §7.2 of the AI Agents in Group plan).
+        if (message.category == UIKitConstants.MessageCategory.AGENTIC ||
             message.category == UIKitConstants.MessageCategory.STREAM) {
-            return CometChatMessageBubbleStyle(backgroundColor = android.graphics.Color.TRANSPARENT)
+            val isGroupMessage = message.receiverType == com.cometchat.chat.constants.CometChatConstants.RECEIVER_TYPE_GROUP
+            if (!isGroupMessage) {
+                return CometChatMessageBubbleStyle(backgroundColor = android.graphics.Color.TRANSPARENT)
+            }
         }
 
         // Priority 2: Loaded style object or from resource ID (if set)
@@ -1076,6 +1107,7 @@ class CometChatMessageBubble @JvmOverloads constructor(
         replyViewContainer = findViewById(R.id.reply_bubble)
         contentViewContainer = findViewById(R.id.content_view)
         bottomViewContainer = findViewById(R.id.bottom_view)
+        aiCopyViewContainer = findViewById(R.id.ai_copy_view)
         statusInfoViewContainer = findViewById(R.id.status_info_view)
         threadViewContainer = findViewById(R.id.view_replies)
         footerViewContainer = findViewById(R.id.footer_view_layout)

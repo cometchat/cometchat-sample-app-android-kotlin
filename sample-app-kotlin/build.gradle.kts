@@ -95,9 +95,11 @@ dependencies {
     testImplementation(libs.kotest.property)
     
     // JUnit Vintage engine to run JUnit 4 tests alongside JUnit 5
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testRuntimeOnly(libs.junit.vintage.engine)
     
-    // Android instrumentation tests
+    // Android instrumentation tests (E2E)
     androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.contrib)
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.androidx.rules)
 }

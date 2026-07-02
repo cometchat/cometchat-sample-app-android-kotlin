@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<!--
+  E2E "driver" page. Loaded inside an in-test WebView (CometChatJsDriver) so the CometChat
+  JavaScript SDK runs in its own JS context — an independent second session (e.g. "d1") with
+  its own WebSocket, separate from the native Android SDK session in the app under test.
+  Used to simulate a partner being ONLINE (presence) and TYPING on a single emulator.
+-->
+<script src="https://unpkg.com/@cometchat/chat-sdk-javascript/CometChat.js"></script>
+<script>
+  function status(s) {
+    try { AndroidDriver.onStatus(s); } catch (e) {}
+  }
+
+  // Called by the test via evaluateJavascript once the page has loaded.
+  async function startDriver(appId, region, authKey, uid, action, receiver, receiverType) {
+    try {
+      // Wait for the CDN SDK to finish loading.
+      var n = 0;
+      while (!window.CometChat && n++ < 200) {
+        await new Promise(function (r) { setTimeout(r, 100); });
+      }
+      if (!window.CometChat) { status("ERR: SDK script not loaded"); return; }
+
+      var settings = new CometChat.AppSettingsBuilder()
+        .subscribePresenceForAllUsers()
+        .setRegion(region)
+        .autoEstablishSocketConnection(true)
+        .build();
+
+      await CometChat.init(appId, settings);
+      status("init-ok");
+
+      await CometChat.login(uid, authKey);
+      status("login-ok:" + uid);
+
+      if (action === "typing") {
+        // Keep the typing indicator alive: re-emit every 2s (it's transient ~a few seconds).
+        window.__typingReceiver = receiver;
+        window.__typingType = receiverType;
+        window.__typingInterval = setInterval(function () {
+          try {
+            CometChat.startTyping(new CometChat.TypingIndicator(receiver, receiverType));
+            status("typing:" + receiver);
+          } catch (e) { status("ERR-typing:" + (e && e.message ? e.message : e)); }
+        }, 2000);
+      }
+      if (action === "call_audio" || action === "call_video") {
+        // Initiate a default call so the receiver (app under test) gets onIncomingCallReceived.
+        var callType = (action === "call_video") ? CometChat.CALL_TYPE.VIDEO : CometChat.CALL_TYPE.AUDIO;
+        var call = new CometChat.Call(receiver, callType, receiverType);
+        CometChat.initiateCall(call).then(function (c) {
+          window.__callSessionId = c.getSessionId();
+          status("call-initiated:" + c.getSessionId());
+        }).catch(function (e) { status("ERR-call:" + (e && e.message ? e.message : JSON.stringify(e))); });
+      }
+      // For "presence": nothing else to do — staying logged in keeps this user ONLINE.
+    } catch (e) {
+      status("ERR:" + (e && e.message ? e.message : JSON.stringify(e)));
+    }
+  }
+
+  // Stops typing properly: clears the loop AND sends endTyping so the receiver's
+  // indicator clears immediately (destroying the WebView alone would not send endTyping).
+  function stopTyping() {
+    try {
+      if (window.__typingInterval) { clearInterval(window.__typingInterval); window.__typingInterval = null; }
+      if (window.CometChat && window.__typingReceiver) {
+        CometChat.endTyping(new CometChat.TypingIndicator(window.__typingReceiver, window.__typingType));
+      }
+      status("endtyping");
+    } catch (e) { status("ERR-endtyping:" + (e && e.message ? e.message : e)); }
+  }
+
+  // Cancels the call this driver initiated (initiator-side CANCELLED) so the receiver's
+  // incoming-call UI dismisses immediately.
+  function cancelCall() {
+    try {
+      if (window.CometChat && window.__callSessionId) {
+        CometChat.rejectCall(window.__callSessionId, CometChat.CALL_STATUS.CANCELLED)
+          .then(function () { status("call-cancelled"); })
+          .catch(function (e) { status("ERR-cancel:" + (e && e.message ? e.message : e)); });
+      }
+    } catch (e) { status("ERR-cancel:" + (e && e.message ? e.message : e)); }
+  }
+
+  // Rapidly toggles startTyping/endTyping `count` times to stress the receiver's typing handling.
+  function rapidTyping(count, receiver, receiverType) {
+    try {
+      var r = receiver, t = receiverType || "user", i = 0;
+      (function tick() {
+        if (i >= count) {
+          try { CometChat.endTyping(new CometChat.TypingIndicator(r, t)); } catch (e) {}
+          status("rapidtyping-done");
+          return;
+        }
+        try { CometChat.startTyping(new CometChat.TypingIndicator(r, t)); } catch (e) {}
+        setTimeout(function () {
+          try { CometChat.endTyping(new CometChat.TypingIndicator(r, t)); } catch (e) {}
+          i++; setTimeout(tick, 120);
+        }, 120);
+      })();
+    } catch (e) { status("ERR-rapid:" + (e && e.message ? e.message : e)); }
+  }
+</script>
+</body>
+</html>

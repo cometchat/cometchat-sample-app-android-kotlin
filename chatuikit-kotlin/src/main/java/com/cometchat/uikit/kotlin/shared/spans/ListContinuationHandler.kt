@@ -45,9 +45,24 @@ object ListContinuationHandler {
         val prevLineStart = findLineStart(editable, prevLineEnd)
 
         // If the previous line is completely blank (no content at all),
-        // just delete the newline we just typed — don't try to exit list mode
-        // because the blank line doesn't own any list span.
+        // remove any list/blockquote spans at that position and delete the
+        // newline we just typed to exit the mode.
         if (prevLineStart >= prevLineEnd) {
+            // Remove any list/blockquote format spans at the blank line position
+            val spansAtPos = editable.getSpans(prevLineStart, prevLineStart + 1, RichTextFormatSpan::class.java)
+            for (span in spansAtPos) {
+                if (span is BulletListFormatSpan || span is NumberedListFormatSpan || span is BlockquoteFormatSpan) {
+                    editable.removeSpan(span)
+                }
+            }
+            // Also remove zero-length MARK_MARK spans at the position
+            val zeroLenSpans = editable.getSpans(prevLineStart, prevLineStart, RichTextFormatSpan::class.java)
+            for (span in zeroLenSpans) {
+                if (span is BulletListFormatSpan || span is NumberedListFormatSpan || span is BlockquoteFormatSpan) {
+                    editable.removeSpan(span)
+                }
+            }
+
             if (newlineIndex >= 0 && newlineIndex < editable.length && editable[newlineIndex] == '\n') {
                 editable.delete(newlineIndex, newlineIndex + 1)
             }

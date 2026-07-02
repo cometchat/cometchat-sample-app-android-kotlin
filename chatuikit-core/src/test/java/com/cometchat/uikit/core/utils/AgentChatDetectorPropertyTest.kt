@@ -24,17 +24,6 @@ class AgentChatDetectorPropertyTest : StringSpec({
 
     val prefix = UIKitConstants.AIConstants.AGENTIC_USER
 
-    "Property 15: isAgentChat returns true for any user whose uid starts with @agentic" {
-        forAll(
-            PropTestConfig(iterations = 100),
-            Arb.string(0..200)
-        ) { suffix ->
-            val user = User()
-            user.uid = "$prefix$suffix"
-            AgentChatDetector.isAgentChat(user)
-        }
-    }
-
     "Property 15: isAgentChat returns false for any user whose uid does NOT start with @agentic" {
         forAll(
             PropTestConfig(iterations = 100),

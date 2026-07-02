@@ -41,7 +41,9 @@ import com.cometchat.uikit.core.factory.CometChatConversationsViewModelFactory
 import com.cometchat.uikit.compose.preview.data.repository.PreviewConversationListRepository
 import com.cometchat.uikit.compose.preview.domain.PreviewMockData
 import com.cometchat.uikit.compose.preview.presentation.viewmodels.PreviewViewModelFactory
+import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.compose.theme.darkColorScheme
 
 /**
  * Helper to create a preview ViewModel with mock data using the factory pattern.
@@ -862,23 +864,72 @@ fun PreviewCustomTitleColorStyle() {
 }
 
 /**
- * Preview with dark theme simulation.
+ * Preview with dark theme.
  */
-@Preview(showBackground = true, backgroundColor = 0xFF1A1A1A, name = "Style - Dark Theme")
+@Preview(showBackground = true, name = "Style - Dark Theme")
 @Composable
 fun PreviewDarkThemeStyle() {
-    CometChatTheme {
+    CometChatTheme(colorScheme = darkColorScheme()) {
         val viewModel = rememberPreviewViewModel(
             conversations = PreviewMockData.createSampleConversations().take(3)
         )
         CometChatConversations(
             conversationListViewModel = viewModel,
             title = "Dark Theme",
+            hideBackIcon = true
+        )
+    }
+}
+
+// ============================================================================
+// SECTION: OPTIONS PREVIEWS
+// ============================================================================
+
+/**
+ * Preview with custom options (replace default menu).
+ */
+@Preview(showBackground = true, name = "Options - Replace")
+@Composable
+fun PreviewOptionsReplace() {
+    CometChatTheme {
+        val viewModel = rememberPreviewViewModel(
+            conversations = PreviewMockData.createSampleConversations().take(3)
+        )
+        CometChatConversations(
+            conversationListViewModel = viewModel,
+            title = "Custom Options",
             hideBackIcon = true,
-            style = CometChatConversationsStyle.default(
-                backgroundColor = Color(0xFF1A1A1A),
-                titleTextColor = Color.White
-            )
+            options = { context, conversation ->
+                listOf(
+                    MenuItem(id = "pin", name = "Pin Chat"),
+                    MenuItem(id = "mute", name = "Mute Notifications"),
+                    MenuItem(id = "archive", name = "Archive")
+                )
+            }
+        )
+    }
+}
+
+/**
+ * Preview with additional options (append to default menu).
+ */
+@Preview(showBackground = true, name = "Options - Append")
+@Composable
+fun PreviewOptionsAppend() {
+    CometChatTheme {
+        val viewModel = rememberPreviewViewModel(
+            conversations = PreviewMockData.createSampleConversations().take(3)
+        )
+        CometChatConversations(
+            conversationListViewModel = viewModel,
+            title = "Add Options",
+            hideBackIcon = true,
+            addOptions = { context, conversation ->
+                listOf(
+                    MenuItem(id = "pin", name = "Pin Chat"),
+                    MenuItem(id = "mute", name = "Mute")
+                )
+            }
         )
     }
 }

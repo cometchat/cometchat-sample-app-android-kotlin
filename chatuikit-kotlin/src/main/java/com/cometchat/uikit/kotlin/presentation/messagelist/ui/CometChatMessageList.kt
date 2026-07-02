@@ -267,6 +267,7 @@ class CometChatMessageList @JvmOverloads constructor(
     private var unreadMessageThreshold: Int = 30
     private var disableReceipt: Boolean = false
     private var enableConversationStarter: Boolean = false
+    private var loadLastAgentConversation: Boolean = false
 
     // AI Conversation Starter View
     private var aiConversationStarterView: CometChatAIConversationStarterView? = null
@@ -406,6 +407,7 @@ class CometChatMessageList @JvmOverloads constructor(
     private var newMessageCount: Int = 0
     private var isUserAtBottom: Boolean = true
     private var isScrolling: Boolean = false
+    private var hasUserScrolled: Boolean = false
     
     // Highlight animation - stored as property to prevent garbage collection
     private var highlightAnimator: android.animation.ValueAnimator? = null
@@ -732,7 +734,10 @@ class CometChatMessageList @JvmOverloads constructor(
      */
     private fun handleScrollStateChange(newState: Int) {
         when (newState) {
-            android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL -> isScrolling = true
+            android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL -> {
+                isScrolling = true
+                hasUserScrolled = true
+            }
             android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> isScrolling = false
         }
     }
@@ -750,9 +755,19 @@ class CometChatMessageList @JvmOverloads constructor(
         isUserAtBottom = lastVisiblePosition >= totalItemCount - 2
         
         // Update new message indicator visibility
+        // Show indicator whenever user is NOT at bottom (matches Compose behavior)
         if (isUserAtBottom) {
             newMessageCount = 0
             newMessageIndicator?.visibility = View.GONE
+        } else if (hasUserScrolled) {
+            newMessageIndicator?.visibility = View.VISIBLE
+            // Show badge only when there are new messages, hide it otherwise
+            if (newMessageCount > 0) {
+                newMessageBadge?.visibility = View.VISIBLE
+                newMessageBadge?.setCount(newMessageCount)
+            } else {
+                newMessageBadge?.visibility = View.GONE
+            }
         }
         
         val vm = viewModel ?: return
@@ -868,7 +883,13 @@ class CometChatMessageList @JvmOverloads constructor(
         // StateFlow conflation would suppress because the object reference is the same.
         lifecycleOwner.lifecycleScope.launch {
             vm.messageUpdated.collect { updatedMessage ->
-                val position = messageAdapter.getMessages().indexOfFirst { it.id == updatedMessage.id }
+                // Use reference equality for StreamMessages (id=0 for all of them),
+                // fall back to muid match, then id match for regular messages.
+                val position = messageAdapter.getMessages().indexOfFirst { msg ->
+                    msg === updatedMessage ||
+                    (!updatedMessage.muid.isNullOrEmpty() && msg.muid == updatedMessage.muid) ||
+                    (updatedMessage.id > 0 && msg.id == updatedMessage.id)
+                }
                 if (position >= 0) {
                     messageAdapter.notifyItemChanged(position)
                 }
@@ -1023,16 +1044,27 @@ class CometChatMessageList @JvmOverloads constructor(
     }
 
     private fun handleUIState(state: MessageListUIState) {
-        // For agent main conversations, skip Loading state to prevent shimmer
-        // from overriding the greeting view set up in setUser()
+        // For agent main conversations without loadLastAgentConversation, skip Loading state
+        // to prevent shimmer from overriding the greeting view set up in setUser()
         if (state is MessageListUIState.Loading
             && messageAdapter.isAgentChat
-            && parentMessageId == -1L) {
+            && parentMessageId == -1L
+            && !loadLastAgentConversation) {
             return
         }
         when (state) {
             is MessageListUIState.Loading -> showLoadingState()
-            is MessageListUIState.Loaded -> showLoadedState()
+            is MessageListUIState.Loaded -> {
+                // Sync the resolved parentMessageId from ViewModel when loading
+                // the last agent conversation (the ViewModel resolves it internally)
+                if (messageAdapter.isAgentChat && parentMessageId == -1L) {
+                    val resolvedId = viewModel?.getParentMessageId() ?: -1L
+                    if (resolvedId > -1L) {
+                        this.parentMessageId = resolvedId
+                    }
+                }
+                showLoadedState()
+            }
             is MessageListUIState.Empty -> showEmptyState()
             is MessageListUIState.Error -> showErrorState(state.exception)
         }
@@ -1430,8 +1462,15 @@ class CometChatMessageList @JvmOverloads constructor(
         val entity = user ?: group
         when (entity) {
             is User -> {
-                emptyTitle?.text = context.getString(R.string.cometchat_say_hello, entity.name)
-                emptySubtitle?.text = context.getString(R.string.cometchat_start_conversation)
+                if (AgentChatDetector.isAgentChat(entity)) {
+                    // For agent chats, delegate to the greeting view setup
+                    // which reads greetingMessage, introductoryMessage, and
+                    // suggestedMessages from user metadata.
+                    setUpAIAssistantGreetingView()
+                } else {
+                    emptyTitle?.text = context.getString(R.string.cometchat_say_hello, entity.name)
+                    emptySubtitle?.text = context.getString(R.string.cometchat_start_conversation)
+                }
             }
             is Group -> {
                 emptyTitle?.text = context.getString(R.string.cometchat_no_messages_yet)
@@ -1514,9 +1553,14 @@ class CometChatMessageList @JvmOverloads constructor(
     }
 
     private fun updateNewMessageIndicator() {
-        if (newMessageCount > 0 && !isUserAtBottom) {
+        if (!isUserAtBottom && hasUserScrolled) {
             newMessageIndicator?.visibility = View.VISIBLE
-            newMessageBadge?.setCount(newMessageCount)
+            if (newMessageCount > 0) {
+                newMessageBadge?.visibility = View.VISIBLE
+                newMessageBadge?.setCount(newMessageCount)
+            } else {
+                newMessageBadge?.visibility = View.GONE
+            }
         } else {
             newMessageIndicator?.visibility = View.GONE
         }
@@ -1569,6 +1613,9 @@ class CometChatMessageList @JvmOverloads constructor(
                 } else {
                     viewModel?.fetchMessages()
                 }
+            } else if (loadLastAgentConversation) {
+                // Attempt to load the most recent agent conversation thread
+                viewModel?.fetchLastAgentConversation()
             } else {
                 // Main agent conversation — show empty/greeting state directly,
                 // do NOT fetch messages (matching Java reference behaviour)
@@ -1656,6 +1703,7 @@ class CometChatMessageList @JvmOverloads constructor(
         viewModel.setStartFromUnreadMessages(startFromUnreadMessages)
         viewModel.setUnreadThreshold(unreadMessageThreshold)
         viewModel.setDisableSoundForMessages(disableSoundForMessages)
+        viewModel.setLoadLastAgentConversation(loadLastAgentConversation)
         if (customSoundForMessages != 0) {
             viewModel.setCustomSoundForMessages(customSoundForMessages)
         }
@@ -1780,7 +1828,7 @@ class CometChatMessageList @JvmOverloads constructor(
                         val category = message.category
                         if (category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
                             category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true) ||
-                            category.equals("agentic", ignoreCase = true) ||
+                            category.equals(UIKitConstants.MessageCategory.AGENTIC, ignoreCase = true) ||
                             category.equals(UIKitConstants.MessageCategory.STREAM, ignoreCase = true)) {
                             return makeMovementFlags(0, 0)
                         }
@@ -1935,6 +1983,27 @@ class CometChatMessageList @JvmOverloads constructor(
         this.disableReceipt = disabled
         viewModel?.setDisableReceipt(disabled)
     }
+
+    /**
+     * Enables loading the most recent agent conversation when the message list opens.
+     *
+     * When set to `true` and a previous agent conversation exists, it will be loaded
+     * automatically instead of showing the greeting/empty state.
+     * When set to `false` (default), a new agent chat is always started.
+     *
+     * @param enabled `true` to load the last agent conversation, `false` to always start fresh.
+     */
+    fun setLoadLastAgentConversation(enabled: Boolean) {
+        this.loadLastAgentConversation = enabled
+        viewModel?.setLoadLastAgentConversation(enabled)
+    }
+
+    /**
+     * Checks if loading the most recent agent conversation is enabled.
+     *
+     * @return `true` if loading the last agent conversation is enabled, `false` otherwise.
+     */
+    fun isLoadLastAgentConversation(): Boolean = loadLastAgentConversation
 
     /**
      * Sets the text formatters for message text rendering.
@@ -4263,14 +4332,21 @@ class CometChatMessageList @JvmOverloads constructor(
     fun scrollToBottom() {
         newMessageCount = 0
         recyclerViewMessageList?.stopScroll()
-        viewModel?.clear()
-        viewModel?.clearScrollToMessage()
-        if (isUserAtBottom) {
+        newMessageIndicator?.visibility = View.GONE
+        
+        // Scroll-to-bottom works independently from streaming.
+        // If we already have the latest messages, just scroll.
+        // Only clear+refetch when user has paginated away.
+        val hasMoreNext = viewModel?.hasMoreNewMessages?.value ?: false
+        if (hasMoreNext) {
+            // User paginated away — need to refetch latest messages
+            viewModel?.clear()
+            viewModel?.clearScrollToMessage()
             viewModel?.fetchMessages()
         } else {
-            viewModel?.fetchMessagesWithUnreadCount()
+            // User has the latest messages — just scroll to the last item
+            scrollToLastItem()
         }
-        newMessageIndicator?.visibility = View.GONE
     }
 
     private fun scrollToMessage(messageId: Long) {
@@ -4420,7 +4496,9 @@ class CometChatMessageList @JvmOverloads constructor(
             recyclerViewMessageList?.post {
                 val latestCount = messageAdapter.itemCount
                 if (latestCount > 0) {
-                    recyclerViewMessageList?.scrollToPosition(latestCount - 1)
+                    // Use a large negative offset to ensure the bottom of the last item
+                    // is visible, not just the top (important for tall message bubbles)
+                    linearLayoutManager.scrollToPositionWithOffset(latestCount - 1, -1000000000)
                 }
             }
         }

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.Reaction
@@ -1000,8 +1001,10 @@ class MessageAdapter @JvmOverloads constructor(
                 val isActionOrCallMessage = message.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
                                             message.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)
 
-                if (isActionOrCallMessage) {
-                    // Disable long-click for action/call messages
+                // Agentic (AI assistant) messages never get the long-press popup menu,
+                // even outside agent chat - only the copy button on the bubble works.
+                if (isActionOrCallMessage || message is AIAssistantMessage) {
+                    // Disable long-click for action/call and AI assistant messages
                     rowRoot.setOnLongClickListener(null)
                 } else {
                     rowRoot.setOnLongClickListener {

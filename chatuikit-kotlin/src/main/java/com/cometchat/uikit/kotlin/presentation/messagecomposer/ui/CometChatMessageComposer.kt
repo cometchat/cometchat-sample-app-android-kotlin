@@ -26,6 +26,7 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.CustomMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.MediaMessage
@@ -4266,6 +4267,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
                         else -> message.conversationText ?: message.type ?: ""
                     }
                 }
+                is CardMessage -> message.text?.ifEmpty { null }
+                    ?: context.getString(R.string.cometchat_message_card)
                 else -> message.type ?: ""
             }
             binding.tvMessagePreviewSubtitle.text = subtitleText

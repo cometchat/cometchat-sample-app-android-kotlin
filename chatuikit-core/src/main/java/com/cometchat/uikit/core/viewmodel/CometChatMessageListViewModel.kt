@@ -33,6 +33,7 @@ import com.cometchat.uikit.core.events.CometChatConversationEvent
 import com.cometchat.uikit.core.events.CometChatEvents
 import com.cometchat.uikit.core.events.CometChatGroupEvent
 import com.cometchat.uikit.core.events.CometChatMessageEvent
+import com.cometchat.uikit.core.events.CometChatUIEvent
 import com.cometchat.uikit.core.events.MessageStatus
 import com.cometchat.chat.helpers.CometChatHelper
 import com.cometchat.chat.models.Conversation
@@ -640,6 +641,19 @@ open class CometChatMessageListViewModel(
     
     /** Parent message ID for threaded conversations, or `-1` for main conversation. */
     private var parentMessageId: Long = -1
+
+    /**
+     * When `true`, the message list will attempt to load the most recent agent
+     * conversation thread instead of showing the empty/greeting state.
+     *
+     * Only effective when:
+     * - [isAgentChat] is `true`
+     * - [parentMessageId] is `-1` (main conversation, no specific thread passed)
+     *
+     * @see setLoadLastAgentConversation
+     * @see fetchLastAgentConversation
+     */
+    private var loadLastAgentConversation: Boolean = false
     
     /** Whether to disable sending read receipts for viewed messages. */
     private var disableReceipt: Boolean = false
@@ -1112,7 +1126,9 @@ open class CometChatMessageListViewModel(
         
         // Always subscribe to UIKit local events (these don't depend on SDK)
         removeLocalEventListeners()
-        addLocalEventListeners()
+        if (enableListeners) {
+            addLocalEventListeners()
+        }
 
         if (enableListeners) {
             removeListeners()
@@ -1189,7 +1205,9 @@ open class CometChatMessageListViewModel(
         
         // Always subscribe to UIKit local events (these don't depend on SDK)
         removeLocalEventListeners()
-        addLocalEventListeners()
+        if (enableListeners) {
+            addLocalEventListeners()
+        }
         
         if (enableListeners) {
             removeListeners()
@@ -1391,6 +1409,33 @@ open class CometChatMessageListViewModel(
      * @param threshold Minimum unread count (default is 30).
      */
     fun setUnreadThreshold(threshold: Int) { unreadThreshold = threshold }
+
+    /**
+     * Enables loading the most recent agent conversation when the message list opens.
+     *
+     * When set to `true` and a previous agent conversation exists, it will be loaded
+     * automatically instead of showing the greeting/empty state.
+     * When set to `false` (default), a new agent chat is always started.
+     *
+     * Only effective when:
+     * - The current conversation is an agent chat ([isAgentChat] is `true`)
+     * - No specific thread is passed ([parentMessageId] is `-1`)
+     *
+     * @param enable `true` to load the last agent conversation, `false` to always start fresh.
+     *
+     * @see fetchLastAgentConversation
+     */
+    fun setLoadLastAgentConversation(enable: Boolean) { loadLastAgentConversation = enable }
+
+    /**
+     * Returns the current `parentMessageId` value.
+     *
+     * This is useful for the UI layer to sync its local state after [fetchLastAgentConversation]
+     * resolves the thread parent ID internally.
+     *
+     * @return The parent message ID, or `-1` for main conversation.
+     */
+    fun getParentMessageId(): Long = parentMessageId
     
     /**
      * Sets whether to disable playing sounds for incoming messages.
@@ -1849,6 +1894,100 @@ open class CometChatMessageListViewModel(
     // ========================================
     // Message Fetching
     // ========================================
+
+    /**
+     * Fetches the most recent agent conversation for the current user.
+     *
+     * Uses a [MessagesRequest] to fetch recent parent-level messages (replies hidden,
+     * deleted messages hidden), then filters for session starters (`parentMessageId == 0`)
+     * and picks the latest one as the active conversation thread.
+     *
+     * If a previous conversation exists, it reconfigures the repository with the
+     * resolved parentMessageId and fetches messages for that conversation thread.
+     *
+     * If no previous conversation exists or the API call fails, it signals the
+     * empty state so the greeting view can be shown.
+     *
+     * This method is only meaningful when:
+     * - [isAgentChat] is `true`
+     * - [parentMessageId] is `-1` (no thread explicitly passed)
+     * - [loadLastAgentConversation] is `true`
+     *
+     * @see setLoadLastAgentConversation
+     */
+    fun fetchLastAgentConversation() {
+        val currentUser = user
+        if (currentUser == null) {
+            _uiState.value = MessageListUIState.Empty
+            return
+        }
+        _uiState.value = MessageListUIState.Loading
+
+        viewModelScope.launch {
+            try {
+                val request = MessagesRequest.MessagesRequestBuilder()
+                    .setUID(currentUser.uid)
+                    .hideReplies(true)
+                    .hideDeletedMessages(true)
+                    .setTypes(messagesTypes)
+                    .setCategories(messagesCategories)
+                    .setLimit(30)
+                    .build()
+
+                val fetchedMessages = suspendCancellableCoroutine<List<BaseMessage>> { cont ->
+                    request.fetchPrevious(object : CometChat.CallbackListener<List<BaseMessage>>() {
+                        override fun onSuccess(messages: List<BaseMessage>) {
+                            cont.resume(messages)
+                        }
+                        override fun onError(e: CometChatException) {
+                            cont.resumeWithException(e)
+                        }
+                    })
+                }
+
+                // Only true session starters (parentMessageId == 0) qualify as conversations.
+                val sessionStarters = fetchedMessages.filter { it.parentMessageId == 0L }
+
+                val latest = sessionStarters.maxByOrNull { it.id }
+                if (latest != null) {
+                    parentMessageId = latest.id
+                    agentChatParentMessageIdSet = true
+
+                    // Reconfigure repository with the resolved parentMessageId
+                    repository.configureForUser(
+                        currentUser,
+                        messagesTypes,
+                        messagesCategories,
+                        parentMessageId,
+                        null
+                    )
+
+                    // Regenerate ID map with the new parentMessageId
+                    _idMap.value = generateIdMap()
+
+                    // Notify the Composer so it can sync its parentMessageId.
+                    // Without this, the Composer would still have parentMessageId=-1
+                    // and sent messages would lack the thread context, causing them
+                    // to be rejected by isThreadedMessageForCurrentChat().
+                    CometChatEvents.emitUIEvent(
+                        CometChatUIEvent.AgentChatThreadResolved(
+                            receiverId = currentUser.uid,
+                            parentMessageId = latest.id
+                        )
+                    )
+
+                    // Fetch messages for the resolved thread
+                    fetchMessages()
+                } else {
+                    // No previous conversation — show greeting/empty state
+                    _uiState.value = MessageListUIState.Empty
+                }
+            } catch (_: Exception) {
+                // On any error, fall back to empty/greeting state
+                _uiState.value = MessageListUIState.Empty
+            }
+        }
+    }
     
     /**
      * Fetches previous (older) messages from the repository.
@@ -2512,6 +2651,11 @@ open class CometChatMessageListViewModel(
         repository.resetRequest()
         _hasMorePreviousMessages.value = true
         _hasMoreNewMessages.value = false
+        // Reset firstFetch so that on the next fetchMessages() call,
+        // the parent message (agent's initial question) is re-fetched and
+        // prepended. Without this, scrollToBottom → clear → fetch would
+        // lose the first/top message in agent chats.
+        firstFetch = true
     }
     
     // ========================================
@@ -4029,6 +4173,16 @@ open class CometChatMessageListViewModel(
                 override fun onCustomMessageReceived(message: CustomMessage) {
                     handleIncomingMessage(message)
                 }
+
+                override fun onCardMessageReceived(message: com.cometchat.chat.models.CardMessage) {
+                    handleIncomingMessage(message)
+                }
+
+                override fun onAIAssistantMessageReceived(message: com.cometchat.chat.models.AIAssistantMessage) {
+                    if (!isAgentChat) {
+                        handleIncomingMessage(message)
+                    }
+                }
                 
                 override fun onMessageEdited(message: BaseMessage) {
                     if (isMessageForCurrentChat(message)) {
@@ -4222,7 +4376,7 @@ open class CometChatMessageListViewModel(
         // or be added if the StreamMessage was already removed.
         if (isAgentChat && message.sender?.uid == user?.uid) {
             val hasStream = _messages.value.any { it is com.cometchat.uikit.core.domain.model.StreamMessage }
-            val isAgenticMessage = message.category == "agentic"
+            val isAgenticMessage = message.category == UIKitConstants.MessageCategory.AGENTIC
             if (!isAgenticMessage) {
                 // Non-agentic messages from the agent (e.g. TextMessage delivered
                 // through onTextMessageReceived) are duplicates — skip them.
@@ -4467,8 +4621,12 @@ open class CometChatMessageListViewModel(
         activeStreamMessages.clear()
         processedStreamingRunIds.clear()
         aiStreamService?.detachListener(listenersTag ?: "")
-        // Clear the singleton when ViewModel is destroyed
-        if (isAgentChat) {
+        // Only clear the singleton if it still points to THIS ViewModel's instance.
+        // During navigation transitions (e.g., "New Chat"), the new ViewModel's
+        // setUser() may have already set a new instance on the singleton before
+        // this old ViewModel's onCleared() fires. Unconditionally clearing would
+        // null out the new instance, causing the bubble to see aiStreamService=null.
+        if (isAgentChat && CometChatAIStreamService.getInstance() === aiStreamService) {
             CometChatAIStreamService.setInstance(null)
         }
         removeListeners()

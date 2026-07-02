@@ -12,6 +12,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -60,6 +61,26 @@ import org.mockito.Mockito.`when`
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class CometChatConversationsSelectionModeTest {
+
+    /**
+     * Waits for the RecyclerView to have at least the expected number of items.
+     * This prevents Espresso from clicking before async data has loaded and laid out.
+     */
+    private fun waitForRecyclerViewPopulated(minItems: Int = 1, timeoutMs: Long = 5000) {
+        val startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() - startTime < timeoutMs) {
+            try {
+                onView(withId(R.id.recyclerview_conversations_list))
+                    .check(matches(hasMinimumChildCount(minItems)))
+                return
+            } catch (e: AssertionError) {
+                Thread.sleep(100)
+            }
+        }
+        // Final assertion — will throw with a clear message if still not populated
+        onView(withId(R.id.recyclerview_conversations_list))
+            .check(matches(hasMinimumChildCount(minItems)))
+    }
 
     @Before
     fun setup() {
@@ -127,9 +148,8 @@ class CometChatConversationsSelectionModeTest {
             themeResId = R.style.CometChatTheme_DayNight
         )
 
-        // Wait for content to load
-        onView(withId(R.id.recyclerview_conversations_list))
-            .check(matches(isDisplayed()))
+        // Wait for content to load and items to be laid out
+        waitForRecyclerViewPopulated(3)
 
         // Click on the first conversation item
         onView(withId(R.id.recyclerview_conversations_list))
@@ -155,9 +175,8 @@ class CometChatConversationsSelectionModeTest {
             themeResId = R.style.CometChatTheme_DayNight
         )
 
-        // Wait for content to load
-        onView(withId(R.id.recyclerview_conversations_list))
-            .check(matches(isDisplayed()))
+        // Wait for content to load and items to be laid out
+        waitForRecyclerViewPopulated(3)
 
         // Click first item
         onView(withId(R.id.recyclerview_conversations_list))
@@ -188,9 +207,8 @@ class CometChatConversationsSelectionModeTest {
             themeResId = R.style.CometChatTheme_DayNight
         )
 
-        // Wait for content to load
-        onView(withId(R.id.recyclerview_conversations_list))
-            .check(matches(isDisplayed()))
+        // Wait for content to load and items to be laid out
+        waitForRecyclerViewPopulated(3)
 
         // Select a conversation
         onView(withId(R.id.recyclerview_conversations_list))
@@ -224,9 +242,8 @@ class CometChatConversationsSelectionModeTest {
             themeResId = R.style.CometChatTheme_DayNight
         )
 
-        // Wait for content to load
-        onView(withId(R.id.recyclerview_conversations_list))
-            .check(matches(isDisplayed()))
+        // Wait for content to load and items to be laid out
+        waitForRecyclerViewPopulated(3)
 
         // Select two items
         onView(withId(R.id.recyclerview_conversations_list))
@@ -261,13 +278,17 @@ class CometChatConversationsSelectionModeTest {
             themeResId = R.style.CometChatTheme_DayNight
         )
 
-        // Wait for content to load
-        onView(withId(R.id.recyclerview_conversations_list))
-            .check(matches(isDisplayed()))
+        // Wait for content to load and items to be laid out
+        waitForRecyclerViewPopulated(3)
 
-        // Select first and third items
+        // Select first and third items (scroll to ensure visibility)
+        onView(withId(R.id.recyclerview_conversations_list))
+            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(0))
         onView(withId(R.id.recyclerview_conversations_list))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+
+        onView(withId(R.id.recyclerview_conversations_list))
+            .perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(2))
         onView(withId(R.id.recyclerview_conversations_list))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(2, click()))
 

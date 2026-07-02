@@ -16,6 +16,7 @@ import com.cometchat.uikit.core.state.ReactionListUIState
 import com.cometchat.uikit.core.viewmodel.CometChatReactionListViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -34,6 +35,23 @@ import org.junit.runner.RunWith
 class CometChatReactionListIntegrationTest {
 
     private lateinit var context: Context
+
+    companion object {
+        private const val STATE_SETTLE_TIMEOUT_MS = 5000L
+        private const val POLL_INTERVAL_MS = 50L
+    }
+
+    /**
+     * Waits for a condition to become true, polling every 50ms.
+     * Times out after 5 seconds to avoid infinite hangs in CI.
+     */
+    private suspend fun awaitCondition(description: String = "", condition: () -> Boolean) {
+        withTimeout(STATE_SETTLE_TIMEOUT_MS) {
+            while (!condition()) {
+                kotlinx.coroutines.delay(POLL_INTERVAL_MS)
+            }
+        }
+    }
 
     @Before
     fun setup() {
@@ -76,7 +94,7 @@ class CometChatReactionListIntegrationTest {
         viewModel.fetchReactedUsers()
 
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Content state") { viewModel.uiState.value is ReactionListUIState.Content }
 
         val state = viewModel.uiState.value
         assertTrue("State should be Content", state is ReactionListUIState.Content)
@@ -178,7 +196,7 @@ class CometChatReactionListIntegrationTest {
         viewModel.fetchReactedUsers()
 
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Users populated") { viewModel.reactedUsers.value.size == 3 }
 
         val reactedUsers = viewModel.reactedUsers.value
         assertEquals(3, reactedUsers.size)
@@ -201,7 +219,7 @@ class CometChatReactionListIntegrationTest {
         viewModel.fetchReactedUsers()
 
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Users populated") { viewModel.reactedUsers.value.size == 1 }
 
         assertEquals(1, viewModel.reactedUsers.value.size)
 
@@ -226,7 +244,7 @@ class CometChatReactionListIntegrationTest {
         viewModel.fetchReactedUsers()
 
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Error state") { viewModel.uiState.value is ReactionListUIState.Error }
 
         val state = viewModel.uiState.value
         assertTrue("State should be Error", state is ReactionListUIState.Error)
@@ -245,7 +263,7 @@ class CometChatReactionListIntegrationTest {
         val message = createMockMessageWithReactions()
         viewModel.setBaseMessage(message)
 
-        assertEquals(12345, viewModel.baseMessage.value?.id)
+        assertEquals(12345L, viewModel.baseMessage.value?.id)
     }
 
     // ==================== Helper Methods ====================

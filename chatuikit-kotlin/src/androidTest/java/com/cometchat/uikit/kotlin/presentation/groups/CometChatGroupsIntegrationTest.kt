@@ -15,6 +15,7 @@ import com.cometchat.uikit.core.state.GroupsUIState
 import com.cometchat.uikit.core.viewmodel.CometChatGroupsViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -39,6 +40,23 @@ class CometChatGroupsIntegrationTest {
     // Mock data
     private lateinit var mockGroup1: Group
     private lateinit var mockGroup2: Group
+
+    companion object {
+        private const val STATE_SETTLE_TIMEOUT_MS = 5000L
+        private const val POLL_INTERVAL_MS = 50L
+    }
+
+    /**
+     * Waits for a condition to become true, polling every 50ms.
+     * Times out after 5 seconds to avoid infinite hangs in CI.
+     */
+    private suspend fun awaitCondition(description: String = "", condition: () -> Boolean) {
+        withTimeout(STATE_SETTLE_TIMEOUT_MS) {
+            while (!condition()) {
+                kotlinx.coroutines.delay(POLL_INTERVAL_MS)
+            }
+        }
+    }
 
     @Before
     fun setup() {
@@ -90,7 +108,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(groups)
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Content state") { viewModel.uiState.value is GroupsUIState.Content }
         
         val state = viewModel.uiState.value
         assertTrue("State should be Content", state is GroupsUIState.Content)
@@ -108,7 +126,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(emptyList())
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Empty state") { viewModel.uiState.value is GroupsUIState.Empty }
         
         val state = viewModel.uiState.value
         assertTrue("State should be Empty", state is GroupsUIState.Empty)
@@ -126,7 +144,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(groups)
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Content state") { viewModel.uiState.value is GroupsUIState.Content }
         
         // Select a group
         viewModel.selectGroup(mockGroup1, UIKitConstants.SelectionMode.MULTIPLE)
@@ -146,7 +164,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(groups)
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Content state") { viewModel.uiState.value is GroupsUIState.Content }
         
         // Select groups
         viewModel.selectGroup(mockGroup1, UIKitConstants.SelectionMode.MULTIPLE)
@@ -170,7 +188,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(groups)
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Content state") { viewModel.uiState.value is GroupsUIState.Content }
         
         // Select first group
         viewModel.selectGroup(mockGroup1, UIKitConstants.SelectionMode.SINGLE)
@@ -195,7 +213,7 @@ class CometChatGroupsIntegrationTest {
         val viewModel = createTestViewModel(groups)
         
         // Wait for state to settle
-        Thread.sleep(100)
+        awaitCondition("Groups populated") { viewModel.groups.value.size == 2 }
         
         val groupsList = viewModel.groups.value
         assertEquals(2, groupsList.size)

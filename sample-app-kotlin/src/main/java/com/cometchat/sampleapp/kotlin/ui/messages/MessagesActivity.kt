@@ -22,6 +22,7 @@ import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.ui.groups.GroupDetailsActivity
 import com.cometchat.sampleapp.kotlin.ui.users.UserDetailsActivity
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 import com.cometchat.uikit.kotlin.presentation.shared.popupmenu.CometChatPopupMenu
 
 /**
@@ -334,9 +335,9 @@ class MessagesActivity : AppCompatActivity() {
             setBackButtonVisibility(View.VISIBLE)
             setOnBackPress { finish() }
 
-            // Hide call buttons - no VoIP in sample apps
-            setVideoCallButtonVisibility(View.GONE)
-            setVoiceCallButtonVisibility(View.GONE)
+            // Show call buttons for voice and video calls
+            setVideoCallButtonVisibility(View.VISIBLE)
+            setVoiceCallButtonVisibility(View.VISIBLE)
 
             // Navigate to AI chat history screen
             setOnChatHistoryClick {
@@ -453,6 +454,9 @@ class MessagesActivity : AppCompatActivity() {
             // Enable all attachment types (Requirement 6.6)
             setHideAttachmentButton(false)
             setHideVoiceRecordingButton(false)
+            setEnableRichTextFormatting(true)
+            setRichTextToolbarVisibility(View.VISIBLE)
+            setLayoutMode(ComposerLayoutMode.SINGLE_LINE)
         }
     }
 

@@ -76,9 +76,9 @@ class MessageListDataSourceImpl : MessageListDataSource {
 
     override suspend fun deleteMessage(
         messageId: Long
-    ): BaseMessage = suspendCancellableCoroutine { continuation ->
+    ): BaseMessage? = suspendCancellableCoroutine { continuation ->
         CometChat.deleteMessage(messageId, object : CometChat.CallbackListener<BaseMessage>() {
-            override fun onSuccess(deletedMessage: BaseMessage) {
+            override fun onSuccess(deletedMessage: BaseMessage?) {
                 continuation.resume(deletedMessage)
             }
 

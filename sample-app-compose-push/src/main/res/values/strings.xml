@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">CometChat Push (Compose)</string>
+
+    <!-- SharedPreferences Keys -->
+    <string name="app_shared_pref" translatable="false">cometchat_sample_app</string>
+    <string name="app_cred_id" translatable="false">app_cred_id</string>
+    <string name="app_cred_region" translatable="false">app_cred_region</string>
+    <string name="app_cred_auth" translatable="false">app_cred_auth</string>
+
+    <!-- App Credentials Screen -->
+    <string name="app_region" translatable="true">Region</string>
+    <string name="app_region_us" translatable="true">US</string>
+    <string name="app_region_eu" translatable="true">EU</string>
+    <string name="app_region_in" translatable="true">IN</string>
+    <string name="app_app_id" translatable="true">App ID</string>
+    <string name="app_auth_key" translatable="true">Auth Key</string>
+    <string name="app_enter_app_id" translatable="true">Enter the App ID</string>
+    <string name="app_enter_auth_key" translatable="true">Enter the Auth Key</string>
+
+    <!-- Login Screen -->
+    <string name="app_login" translatable="true">Login</string>
+    <string name="app_choose_sample_user" translatable="true">Choose a Sample User</string>
+    <string name="app_or" translatable="true">Or</string>
+    <string name="app_enter_your_uid" translatable="true">Enter Your UID</string>
+    <string name="app_enter_uid" translatable="true">Enter UID</string>
+    <string name="app_continue" translatable="true">Continue</string>
+    <string name="app_change" translatable="true">Change</string>
+    <string name="app_app_credentials" translatable="true">App Credentials</string>
+    <string name="app_error_select_user_or_uid" translatable="true">Please select user or enter the correct UID</string>
+    <string name="app_error_select_region" translatable="true">Please select App Region</string>
+    <string name="app_error_invalid_app_id" translatable="true">Please enter valid App ID</string>
+    <string name="app_error_invalid_auth_key" translatable="true">Please enter valid Auth Token</string>
+
+    <!-- Home Screen -->
+    <string name="app_home" translatable="true">Home</string>
+    <string name="app_logged_in_as" translatable="true">Logged in as</string>
+    <string name="app_app_flow" translatable="true">App Flow</string>
+    <string name="app_app_flow_description" translatable="true">Full chat experience with Chats, Calls, Users, Groups</string>
+    <string name="app_customizations" translatable="true">Customizations</string>
+    <string name="app_customizations_description" translatable="true">Explore and customize individual components</string>
+    <string name="navigate" translatable="true">Navigate</string>
+
+    <!-- App Flow Intent Extras -->
+    <string name="app_session_id" translatable="true">session_id</string>
+    <string name="app_call_type" translatable="true">call_type</string>
+</resources>

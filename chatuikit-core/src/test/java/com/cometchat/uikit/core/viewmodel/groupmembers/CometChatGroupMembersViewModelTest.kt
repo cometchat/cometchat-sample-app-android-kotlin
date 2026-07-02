@@ -85,6 +85,7 @@ class CometChatGroupMembersViewModelTest : FunSpec({
     }
 
     afterSpec {
+        Thread.sleep(50)
         Dispatchers.resetMain()
     }
 

@@ -8,4 +8,16 @@
     
     <!-- CometChat Dimensions -->
     <dimen name="cometchat_1000dp">1000dp</dimen>
+
+    <!-- CometChat Spacing -->
+    <dimen name="cometchat_spacing_1">4dp</dimen>
+    <dimen name="cometchat_spacing_2">8dp</dimen>
+    <dimen name="cometchat_spacing_3">12dp</dimen>
+    <dimen name="cometchat_spacing_4">16dp</dimen>
+
+    <!-- CometChat Padding -->
+    <dimen name="cometchat_padding_1">@dimen/cometchat_spacing_1</dimen>
+    <dimen name="cometchat_padding_2">@dimen/cometchat_spacing_2</dimen>
+    <dimen name="cometchat_padding_3">@dimen/cometchat_spacing_3</dimen>
+    <dimen name="cometchat_padding_4">@dimen/cometchat_spacing_4</dimen>
 </resources>

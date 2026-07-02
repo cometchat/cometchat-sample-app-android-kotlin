@@ -39,7 +39,6 @@ import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatEm
 import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatErrorState
 import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatLoadingState
 import com.cometchat.uikit.compose.presentation.shared.dialog.CometChatDialog
-import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupMenu
 import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.constants.UIKitConstants
@@ -99,10 +98,6 @@ fun CometChatAIAssistantChatHistory(
     // Local state for delete confirmation dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var messageToDelete by remember { mutableStateOf<BaseMessage?>(null) }
-
-    // Local state for popup menu
-    var showPopupMenu by remember { mutableStateOf(false) }
-    var popupMenuMessage by remember { mutableStateOf<BaseMessage?>(null) }
 
     // Lifecycle management — register/unregister listeners
     DisposableEffect(viewModel) {
@@ -197,47 +192,30 @@ fun CometChatAIAssistantChatHistory(
                             if (onItemLongClick != null) {
                                 // Custom long-click overrides default popup menu
                                 onItemLongClick.invoke(message)
+                            }
+                        },
+                        popupMenuItems = { message, onDismiss ->
+                            if (onItemLongClick != null) {
+                                // Custom long-click handler provided — no default popup
+                                emptyList()
                             } else {
-                                // Show default popup menu
-                                popupMenuMessage = message
-                                showPopupMenu = true
+                                buildPopupMenuItems(
+                                    context = context,
+                                    message = message,
+                                    style = style,
+                                    options = options,
+                                    addOptions = addOptions,
+                                    onDelete = {
+                                        onDismiss()
+                                        messageToDelete = message
+                                        showDeleteDialog = true
+                                    }
+                                )
                             }
                         }
                     )
                 }
             }
-        }
-    }
-
-    // Popup menu for long-press actions
-    if (showPopupMenu && popupMenuMessage != null) {
-        val menuMessage = popupMenuMessage!!
-        val menuItems = buildPopupMenuItems(
-            context = context,
-            message = menuMessage,
-            style = style,
-            options = options,
-            addOptions = addOptions,
-            onDelete = {
-                showPopupMenu = false
-                messageToDelete = menuMessage
-                showDeleteDialog = true
-            }
-        )
-
-        CometChatPopupMenu(
-            expanded = true,
-            onDismissRequest = {
-                showPopupMenu = false
-                popupMenuMessage = null
-            },
-            menuItems = menuItems,
-            onMenuItemClick = { _, _ ->
-                showPopupMenu = false
-                popupMenuMessage = null
-            }
-        ) {
-            // Empty anchor — popup is shown programmatically
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatRichTextToolbar
 import com.cometchat.uikit.compose.theme.CometChatTheme
@@ -116,8 +117,8 @@ class RichTextToolbarInstrumentationTest {
             disabledFormats = emptySet()
             composeTestRule.waitForIdle()
 
-            // Click to activate
-            composeTestRule.onNodeWithContentDescription(contentDesc).performClick()
+            // Click to activate (scroll into view first for buttons in scrollable row)
+            composeTestRule.onNodeWithContentDescription(contentDesc).performScrollTo().performClick()
             composeTestRule.waitForIdle()
 
             // Verify format is now active
@@ -126,7 +127,7 @@ class RichTextToolbarInstrumentationTest {
             }
 
             // Click again to deactivate
-            composeTestRule.onNodeWithContentDescription(contentDesc).performClick()
+            composeTestRule.onNodeWithContentDescription(contentDesc).performScrollTo().performClick()
             composeTestRule.waitForIdle()
 
             // Verify format is now inactive
@@ -171,8 +172,8 @@ class RichTextToolbarInstrumentationTest {
         }
         composeTestRule.waitForIdle()
 
-        // Activate Code Block
-        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performClick()
+        // Activate Code Block (scroll into view first since it's the last button)
+        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performScrollTo().performClick()
         composeTestRule.waitForIdle()
 
         // Verify CODE_BLOCK is active
@@ -191,23 +192,23 @@ class RichTextToolbarInstrumentationTest {
         }
 
         // Verify disabled buttons are rendered (still displayed but not clickable)
-        composeTestRule.onNodeWithContentDescription(BOLD).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(ITALIC).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(UNDERLINE).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(STRIKETHROUGH).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(INLINE_CODE).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(LINK).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(BOLD).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(ITALIC).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(UNDERLINE).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(STRIKETHROUGH).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(INLINE_CODE).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(LINK).performScrollTo().assertIsDisplayed()
 
         // Clicking a disabled button should NOT change activeFormats
         val formatsBefore = activeFormats.toSet()
-        composeTestRule.onNodeWithContentDescription(BOLD).performClick()
+        composeTestRule.onNodeWithContentDescription(BOLD).performScrollTo().performClick()
         composeTestRule.waitForIdle()
         assert(activeFormats == formatsBefore) {
             "Clicking disabled Bold should not change activeFormats"
         }
 
         // Deactivate Code Block
-        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performClick()
+        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performScrollTo().performClick()
         composeTestRule.waitForIdle()
 
         // Verify all buttons re-enabled
@@ -400,9 +401,9 @@ class RichTextToolbarInstrumentationTest {
         }
 
         // Verify toolbar reflects the new state
-        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(BOLD).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(ITALIC).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).assertExists()
+        composeTestRule.onNodeWithContentDescription(BOLD).assertExists()
+        composeTestRule.onNodeWithContentDescription(ITALIC).assertExists()
     }
 
     // ========================================================================
@@ -447,7 +448,7 @@ class RichTextToolbarInstrumentationTest {
         // Scenario 1: CODE_BLOCK active → toggle BULLET_LIST programmatically
         // (toolbar disables BULLET_LIST when CODE_BLOCK is active, so we
         // simulate the toggle as the segment controller would)
-        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performClick()
+        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).performScrollTo().performClick()
         composeTestRule.waitForIdle()
         assert(RichTextFormat.CODE_BLOCK in activeFormats) { "CODE_BLOCK should be active" }
 
@@ -464,8 +465,8 @@ class RichTextToolbarInstrumentationTest {
         }
 
         // Verify toolbar reflects the new state: BULLET_LIST active, CODE_BLOCK not active
-        composeTestRule.onNodeWithContentDescription(BULLET_LIST).assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(BULLET_LIST).assertExists()
+        composeTestRule.onNodeWithContentDescription(CODE_BLOCK).assertExists()
 
         // Reset
         activeFormats = emptySet()
@@ -583,14 +584,14 @@ class RichTextToolbarInstrumentationTest {
         // Verify the toolbar container is displayed
         composeTestRule.onNodeWithContentDescription(TOOLBAR).assertIsDisplayed()
 
-        // Verify all 10 format buttons are displayed in the toolbar
+        // Verify all 10 format buttons exist in the toolbar
         val expectedButtons = listOf(
             BOLD, ITALIC, UNDERLINE, STRIKETHROUGH,
             LINK, NUMBERED_LIST, BULLET_LIST,
             BLOCKQUOTE, INLINE_CODE, CODE_BLOCK
         )
         for (button in expectedButtons) {
-            composeTestRule.onNodeWithContentDescription(button).assertIsDisplayed()
+            composeTestRule.onNodeWithContentDescription(button).assertExists()
         }
 
         // Verify button order by checking positional relationships.

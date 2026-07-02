@@ -8,6 +8,7 @@
     <string name="cometchat_call" translatable="true">Call</string>
     <string name="cometchat_sticker_lowercase" translatable="true">sticker</string>
     <string name="cometchat_message" translatable="true">Write a message</string>
+    <string name="cometchat_message_generic" translatable="true">Message</string>
     <string name="cometchat_start_conv_hint" translatable="true">Tap to start conversation</string>
     <string name="cometchat_admin" translatable="true">Admin</string>
     <string name="cometchat_moderator" translatable="true">Moderator</string>
@@ -184,7 +185,7 @@
     <string name="cometchat_this_message_deleted" translatable="true">This message was deleted</string>
     <string name="cometchat_this_message_type_is_not_supported" translatable="true">This message type is not supported</string>
     <string name="cometchat_message_form" translatable="true">Form</string>
-    <string name="cometchat_message_card" translatable="true">Card</string>
+    <string name="cometchat_message_card" translatable="true">Card Message</string>
     <string name="cometchat_message_scheduler" translatable="true">Scheduler</string>
     <string name="cometchat_message_mention_max_limit" translatable="true">You can mention up to 10 times at once</string>
     <string name="cometchat_ask_question" translatable="true">Ask question</string>
@@ -394,6 +395,7 @@
     <string name="cometchat_recipient_name" translatable="true">Recipient name</string>
     <string name="cometchat_recipient_avatar" translatable="true">Recipient avatar</string>
     <string name="cometchat_ai_assistant" translatable="true">AI Assistant</string>
+    <string name="cometchat_ai_agent_message" translatable="true">AI agent message</string>
 
     <!-- Text Selection Menu -->
     <string name="cometchat_bold" translatable="true">Bold</string>

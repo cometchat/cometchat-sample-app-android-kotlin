@@ -294,13 +294,16 @@ class CometChatMentionsFormatter(
                     )
                 }
                 val currentList = localSuggestionItemList.value.toMutableList()
-                currentList.addAll(suggestions)
+                val existingIds = currentList.mapTo(HashSet()) { it.id }
+                currentList.addAll(suggestions.filter { existingIds.add(it.id) })
                 localSuggestionItemList.value = currentList
                 setSuggestionItemList(currentList)
+                setShowLoadingIndicator(false)
             }
             override fun onError(e: CometChatException) {
                 localSuggestionItemList.value = emptyList()
                 setSuggestionItemList(emptyList())
+                setShowLoadingIndicator(false)
             }
         })
     }
@@ -320,19 +323,26 @@ class CometChatMentionsFormatter(
                         promptTextStyle = if (isSelf && selfTagStyle != null) selfTagStyle else tagStyle
                     ))
                 }
+                // Append fetched members to the accumulated list first, skipping any
+                // ids already present so overlapping fetches can't duplicate members.
+                val currentList = localSuggestionItemList.value.toMutableList()
+                val existingIds = currentList.mapTo(HashSet()) { it.id }
+                currentList.addAll(suggestions.filter { existingIds.add(it.id) })
+
+                // Add @all only once: check the accumulated list (not just the old snapshot)
                 if (!disableMentionAll && getGroup() != null) {
-                    val metaData = JSONObject()
-                    try { metaData.put("infoText", mentionAllInfoText) } catch (e: JSONException) { }
-                    val containsMentionAll = localSuggestionItemList.value.any { it.id == mentionAllId }
+                    val containsMentionAll = currentList.any { it.id == mentionAllId }
                     val searchKeyword = groupMembersRequest?.searchKeyword ?: ""
                     if (!containsMentionAll && mentionAllId.lowercase().contains(searchKeyword.lowercase())) {
+                        val metaData = JSONObject()
+                        try { metaData.put("infoText", mentionAllInfoText) } catch (e: JSONException) { }
                         val group = getGroup()
                         val iconUrl = when {
                             group?.icon?.isNotEmpty() == true -> group.icon
                             group?.name?.isNotEmpty() == true -> group.name
                             else -> ""
                         }
-                        suggestions.add(0, SuggestionItem(
+                        currentList.add(0, SuggestionItem(
                             id = mentionAllId, name = "${getTrackingCharacter()}$mentionAllLabelText",
                             leadingIconUrl = iconUrl, status = null,
                             promptText = "${getTrackingCharacter()}$mentionAllLabelText",
@@ -341,14 +351,14 @@ class CometChatMentionsFormatter(
                         ))
                     }
                 }
-                val currentList = localSuggestionItemList.value.toMutableList()
-                currentList.addAll(suggestions)
                 localSuggestionItemList.value = currentList
                 setSuggestionItemList(currentList)
+                setShowLoadingIndicator(false)
             }
             override fun onError(e: CometChatException) {
                 localSuggestionItemList.value = emptyList()
                 setSuggestionItemList(emptyList())
+                setShowLoadingIndicator(false)
             }
         })
     }

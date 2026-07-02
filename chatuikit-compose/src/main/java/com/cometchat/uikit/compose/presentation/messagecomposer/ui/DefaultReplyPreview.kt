@@ -26,6 +26,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.CustomMessage
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
@@ -125,6 +126,9 @@ fun DefaultReplyPreview(
                     else -> message.conversationText ?: message.type ?: ""
                 })
             }
+            is CardMessage -> AnnotatedString(
+                message.text?.ifEmpty { null } ?: context.getString(R.string.cometchat_message_card)
+            )
             else -> AnnotatedString(message.type ?: "")
         }
     }

@@ -127,7 +127,7 @@ class MessageListRepositoryImpl(
     override suspend fun deleteMessage(message: BaseMessage): Result<BaseMessage> {
         return try {
             val deletedMessage = dataSource.deleteMessage(message.id)
-            Result.success(deletedMessage)
+            Result.success(deletedMessage ?: message)
         } catch (e: Exception) {
             Result.failure(e)
         }

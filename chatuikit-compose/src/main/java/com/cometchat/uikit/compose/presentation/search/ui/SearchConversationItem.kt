@@ -42,6 +42,7 @@ import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextF
 import com.cometchat.uikit.compose.presentation.shared.formatters.FormatterUtils
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.utils.AgentChatDetector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
@@ -266,7 +267,9 @@ private fun DefaultTrailingView(
         }
 
         val unreadCount = conversation.unreadMessageCount
-        if (unreadCount > 0) {
+        val user = conversation.conversationWith as? User
+        val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)
+        if (unreadCount > 0 && !isAgentChat) {
             Spacer(modifier = Modifier.size(4.dp))
             CometChatBadgeCount(
                 count = unreadCount,

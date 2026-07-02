@@ -94,12 +94,55 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
     private var aiStreamService: CometChatAIStreamService? = null
     private var currentBubbleListener: CometChatAIStreamService.AIStreamListener? = null
 
+    /**
+     * Maximum width (in pixels) for the AI bubble content column.
+     * Calculated as ~70% of the screen width matching Flutter's behavior.
+     */
+    private val maxCardWidth: Int by lazy {
+        val screenWidth = resources.displayMetrics.widthPixels
+        (screenWidth * 0.70).toInt()
+    }
+
+    /**
+     * Maximum width (in pixels) for card content rendered inside this bubble.
+     * Calculated as ~65% of the screen width (narrower than bubble) to provide
+     * breathing room between card edges and bubble boundary, matching Flutter.
+     */
+    private val maxCardViewWidth: Int by lazy {
+        val screenWidth = resources.displayMetrics.widthPixels
+        (screenWidth * 0.65).toInt()
+    }
+
     init {
         Utils.initMaterialCard(this)
         setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
+        // Ensure wrap_content layoutParams are set so that handleView() in
+        // CometChatMessageBubble doesn't default to MATCH_PARENT when lp is null.
+        layoutParams = android.widget.LinearLayout.LayoutParams(
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        )
         initMarkwon()
         setupRecyclerView()
         applyStyleAttributes(attrs, defStyleAttr, 0)
+        applyMaxWidth()
+    }
+
+    /**
+     * Constrains the content column to [maxCardWidth] so that card elements
+     * (WebView-based, no intrinsic width) don't cause the bubble to expand
+     * to full parent width through the wrap_content measurement chain.
+     */
+    private fun applyMaxWidth() {
+        val contentColumn = binding.contentColumn
+        contentColumn.post {
+            if (contentColumn.width > maxCardWidth) {
+                contentColumn.layoutParams = contentColumn.layoutParams.apply {
+                    width = maxCardWidth
+                }
+                contentColumn.requestLayout()
+            }
+        }
     }
 
     // ── Markwon Initialization ──────────────────────────────────────────
@@ -218,6 +261,25 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
         binding.recyclerView.itemAnimator = null
     }
 
+    // ── Ordered Block Model ────────────────────────────────────────────
+
+    /**
+     * Represents an ordered block in the streaming content.
+     * Blocks are appended in arrival order to preserve the sequential rendering
+     * of interleaved text and card content from the AI agent.
+     */
+    private sealed class StreamedBlock {
+        /** A text block whose markdown content grows as deltas arrive. */
+        data class Text(val id: String, var markdown: String) : StreamedBlock()
+        /** A card block in loading state (placeholder). */
+        data class CardLoading(val cardId: String, val label: String) : StreamedBlock()
+        /** A card block that has been fully received and is ready to render. */
+        data class CardRendered(val cardId: String, val cardJson: String) : StreamedBlock()
+    }
+
+    /** Ordered list of blocks — preserves arrival order of text and cards. */
+    private val streamedBlocks = mutableListOf<StreamedBlock>()
+
     // ── Stream Message Handling ─────────────────────────────────────────
 
     /**
@@ -225,6 +287,9 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
      *
      * Shows shimmer/thinking state initially, then streams content in real-time
      * as events arrive from the AI assistant service.
+     *
+     * Uses an ordered block list to preserve the sequential rendering of
+     * interleaved text and card content from the AI agent.
      */
     fun setStreamMessage(message: StreamMessage) {
         if (message !== this.streamMessage) {
@@ -238,6 +303,13 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
             }
             this.streamMessage = message
             streamingBuilder.setLength(0)
+            streamedBlocks.clear()
+            // Drop any block views left over from a previously bound message on this
+            // recycled bubble so incremental rendering starts from a clean container.
+            (binding.recyclerView.parent as? android.view.ViewGroup)?.let { p ->
+                p.findViewWithTag<android.widget.LinearLayout>("ordered_blocks_container")
+                    ?.let { p.removeView(it) }
+            }
             renderMarkdown(streamingBuilder.toString())
             lastRenderedContent = ""
             isStreaming = false
@@ -246,9 +318,11 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
         // Error state — when interrupted, hide thinking and show error, then return
         if (message.isStreamingInterrupted) {
             hideAnimatedText()
-            val hasContent = !message.text.isNullOrEmpty()
-            if (hasContent) {
-                // Show accumulated content above the error
+            if (streamedBlocks.isNotEmpty()) {
+                // Show all accumulated blocks above the error
+                renderOrderedBlocks(message)
+            } else if (!message.text.isNullOrEmpty()) {
+                // Fallback: show text directly
                 binding.recyclerView.visibility = VISIBLE
                 streamingBuilder.setLength(0)
                 streamingBuilder.append(message.text)
@@ -265,7 +339,7 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
 
         // Text-based branching
         val messageText = message.text
-        if (messageText.isNullOrEmpty()) {
+        if (messageText.isNullOrEmpty() && streamedBlocks.isEmpty()) {
             // No text yet — show shimmer, but guard against overwriting
             // tool execution text (e.g., "Searching...") during active streaming
             val currentShimmerText = binding.streamShimmerTextView.text?.toString() ?: ""
@@ -276,8 +350,12 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
                     context.getString(R.string.cometchat_thinking)
                 showAnimatedText()
             }
-        } else {
-            // Text already accumulated (rebind during streaming) — render it directly
+        } else if (streamedBlocks.isNotEmpty()) {
+            // Blocks are being managed — render them in order
+            hideAnimatedText()
+            renderOrderedBlocks(message)
+        } else if (!messageText.isNullOrEmpty()) {
+            // Text already accumulated (rebind during streaming, no blocks yet) — render directly
             hideAnimatedText()
             streamingBuilder.setLength(0)
             streamingBuilder.append(messageText)
@@ -317,11 +395,126 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
         binding.errorCard.visibility = GONE
         hideAnimatedText()
 
-        // Render the markdown content
-        val text = message.text ?: ""
-        streamingBuilder.setLength(0)
-        streamingBuilder.append(text)
-        renderMarkdown(text)
+        // Check for elements (ordered blocks) — new card message support
+        val elements = message.elements
+        if (!elements.isNullOrEmpty()) {
+            renderElements(message, elements)
+        } else {
+            // Fallback: render getText() as markdown (existing behavior, regression guard)
+            val text = message.text ?: ""
+            streamingBuilder.setLength(0)
+            streamingBuilder.append(text)
+            renderMarkdown(text)
+        }
+    }
+
+    /**
+     * Renders an ordered list of [AIAssistantElement] blocks inline.
+     * Text blocks use the existing markdown renderer; card blocks use [CometChatCardView].
+     */
+    private fun renderElements(message: AIAssistantMessage, elements: List<com.cometchat.chat.models.AIAssistantElement>) {
+        // Use the recycler view's parent as a container for mixed content
+        // For elements rendering, we hide the recycler and add views to a dynamic container
+        binding.recyclerView.visibility = GONE
+
+        // Get or create the elements container (LinearLayout added dynamically)
+        val parentLayout = binding.recyclerView.parent as? android.view.ViewGroup ?: return
+        // Remove any previous elements container
+        val existingContainer = parentLayout.findViewWithTag<android.widget.LinearLayout>("elements_container")
+        existingContainer?.let { parentLayout.removeView(it) }
+        // Also remove any streaming blocks container from a previous session
+        val existingBlocksContainer = parentLayout.findViewWithTag<android.widget.LinearLayout>("ordered_blocks_container")
+        existingBlocksContainer?.let { parentLayout.removeView(it) }
+
+        val elementsContainer = android.widget.LinearLayout(context).apply {
+            tag = "elements_container"
+            orientation = android.widget.LinearLayout.VERTICAL
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                maxCardWidth,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        for (element in elements) {
+            when (element.type) {
+                "text" -> {
+                    val textValue = element.data?.toString() ?: ""
+                    if (textValue.isNotEmpty()) {
+                        // Create a markdown text block using Markwon
+                        val recyclerView = androidx.recyclerview.widget.RecyclerView(context).apply {
+                            layoutParams = android.widget.LinearLayout.LayoutParams(
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                            isNestedScrollingEnabled = false
+                            overScrollMode = android.view.View.OVER_SCROLL_NEVER
+                            val markwonAdapter = io.noties.markwon.recycler.MarkwonAdapter.builderTextViewIsRoot(android.R.layout.simple_list_item_1)
+                                .build()
+                            adapter = markwonAdapter
+                            markwonAdapter.setMarkdown(markwon, textValue)
+                            markwonAdapter.notifyDataSetChanged()
+                        }
+                        elementsContainer.addView(recyclerView)
+                    }
+                }
+                "card" -> {
+                    val cardData = element.data
+                    val cardJson = try {
+                        when (cardData) {
+                            is org.json.JSONObject -> cardData.optJSONObject("card")?.toString() ?: ""
+                            is Map<*, *> -> {
+                                val cardMap = cardData["card"]
+                                cardMap?.let { org.json.JSONObject(it.toString()).toString() } ?: ""
+                            }
+                            else -> ""
+                        }
+                    } catch (e: Exception) { "" }
+
+                    if (cardJson.isNotEmpty()) {
+                        // Wrap card in a FrameLayout to constrain its height measurement.
+                        // CometChatCardView (WebView-based) can report incorrect heights
+                        // when placed directly in a LinearLayout, causing extra empty space.
+                        val cardWrapper = android.widget.FrameLayout(context).apply {
+                            layoutParams = android.widget.LinearLayout.LayoutParams(
+                                maxCardViewWidth,
+                                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                            ).apply {
+                                topMargin = (8 * resources.displayMetrics.density).toInt()
+                                bottomMargin = (8 * resources.displayMetrics.density).toInt()
+                                // Center the card horizontally within the bubble content,
+                                // since it is narrower than the surrounding text/code-box.
+                                gravity = android.view.Gravity.CENTER_HORIZONTAL
+                            }
+                        }
+                        val cardView = com.cometchat.cards.CometChatCardView(context).apply {
+                            layoutParams = android.widget.FrameLayout.LayoutParams(
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                            setThemeMode(com.cometchat.cards.models.CometChatCardThemeMode.AUTO)
+                            // Action callback BEFORE schema (critical — assigning schema triggers render)
+                            setActionCallback(com.cometchat.cards.actions.CometChatCardActionCallback { event ->
+                                com.cometchat.uikit.core.events.CometChatEvents.emitUIEvent(
+                                    com.cometchat.uikit.core.events.CometChatUIEvent.CardActionClicked(
+                                        message = message,
+                                        actionEvent = event
+                                    )
+                                )
+                            })
+                            setCardSchema(cardJson)
+                        }
+                        cardWrapper.addView(cardView)
+                        elementsContainer.addView(cardWrapper)
+                    }
+                }
+                // Unknown element types — skip silently
+            }
+        }
+
+        // Add the elements container to the parent at the position where recycler was
+        val recyclerIndex = parentLayout.indexOfChild(binding.recyclerView)
+        parentLayout.addView(elementsContainer, recyclerIndex + 1)
     }
 
     // ── Streaming ───────────────────────────────────────────────────────
@@ -368,19 +561,240 @@ class CometChatAIAssistantBubble @JvmOverloads constructor(
             CometChatConstants.WSKeys.AI_ASSISTANT_EVENT_RUN_FINISHED == event.type -> {
                 handleRunFinished(message)
             }
+            // Card lifecycle events (streaming) — ordered block approach
+            event is com.cometchat.chat.models.AIAssistantCardStartedEvent -> {
+                // Append a card loading placeholder as the next block in order
+                streamedBlocks.add(StreamedBlock.CardLoading(
+                    cardId = event.cardId,
+                    label = event.executionText ?: context.getString(R.string.cometchat_thinking)
+                ))
+                hideAnimatedText()
+                renderOrderedBlocks(message)
+            }
+            event is com.cometchat.chat.models.AIAssistantCardReceivedEvent -> {
+                // Replace the loading placeholder with the rendered card at the same position
+                val cardJson = event.card?.toString() ?: ""
+                if (cardJson.isNotEmpty()) {
+                    val index = streamedBlocks.indexOfFirst {
+                        it is StreamedBlock.CardLoading && it.cardId == event.cardId
+                    }
+                    if (index >= 0) {
+                        streamedBlocks[index] = StreamedBlock.CardRendered(
+                            cardId = event.cardId,
+                            cardJson = cardJson
+                        )
+                    } else {
+                        // No placeholder found — append rendered card
+                        streamedBlocks.add(StreamedBlock.CardRendered(
+                            cardId = event.cardId,
+                            cardJson = cardJson
+                        ))
+                    }
+                    renderOrderedBlocks(message)
+                }
+            }
+            event is com.cometchat.chat.models.AIAssistantCardEndedEvent -> {
+                // No-op — the persisted message replaces the streamed bubble after run finishes
+            }
         }
 
-        // When actual text content arrives, hide shimmer and render markdown
+        // When actual text content arrives, append to or extend the current text block
         if (event is AIAssistantContentReceivedEvent) {
             val delta = event.delta
             if (!delta.isNullOrEmpty()) {
-                if (streamingBuilder.isEmpty()) {
-                    hideAnimatedText()
+                hideAnimatedText()
+                // Append to existing text block or create a new one
+                val lastBlock = streamedBlocks.lastOrNull()
+                if (lastBlock is StreamedBlock.Text) {
+                    streamedBlocks[streamedBlocks.lastIndex] = lastBlock.copy(
+                        markdown = lastBlock.markdown + delta
+                    )
+                } else {
+                    streamedBlocks.add(StreamedBlock.Text(
+                        id = "text_${streamedBlocks.size}",
+                        markdown = delta
+                    ))
                 }
+                // Also update streamingBuilder and message.text for backward compatibility
                 streamingBuilder.append(delta)
-                val updatedText = streamingBuilder.toString()
-                message.text = updatedText
-                renderMarkdown(updatedText)
+                message.text = streamingBuilder.toString()
+                renderOrderedBlocks(message)
+            }
+        }
+    }
+
+    // ── Ordered Block Rendering ─────────────────────────────────────────
+
+    /**
+     * Renders the ordered list of [StreamedBlock]s sequentially in a dynamic
+     * LinearLayout container. This preserves the arrival order of interleaved
+     * text and card content from the AI agent.
+     */
+    private fun renderOrderedBlocks(message: StreamMessage) {
+        // Hide the recycler view (used for single-text streaming) since we use the container
+        binding.recyclerView.visibility = GONE
+
+        val parentLayout = binding.recyclerView.parent as? android.view.ViewGroup ?: return
+
+        // Remove any stale elements container left over from a static render on this recycled bubble
+        val staleElementsContainer = parentLayout.findViewWithTag<android.widget.LinearLayout>("elements_container")
+        staleElementsContainer?.let { parentLayout.removeView(it) }
+
+        // Get or create the ordered blocks container
+        val existingContainer = parentLayout.findViewWithTag<android.widget.LinearLayout>("ordered_blocks_container")
+        val blocksContainer: android.widget.LinearLayout
+        if (existingContainer != null) {
+            blocksContainer = existingContainer
+        } else {
+            blocksContainer = android.widget.LinearLayout(context).apply {
+                tag = "ordered_blocks_container"
+                orientation = android.widget.LinearLayout.VERTICAL
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    maxCardWidth,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+            val recyclerIndex = parentLayout.indexOfChild(binding.recyclerView)
+            parentLayout.addView(blocksContainer, recyclerIndex + 1)
+        }
+
+        // Reconcile the existing child views with the current blocks instead of tearing
+        // everything down and rebuilding it on every delta. Only the changed block (the
+        // growing text tail, a newly appended block, or a card placeholder swapped to its
+        // rendered form) does any real work; untouched blocks are skipped. This keeps a
+        // streaming response O(n) overall instead of O(n^2).
+        var childIndex = 0
+        for (block in streamedBlocks) {
+            // An empty text block renders no view (mirrors the original behavior); skip it
+            // without advancing childIndex so block/view positions stay aligned.
+            if (block is StreamedBlock.Text && block.markdown.isEmpty()) continue
+
+            val signature = blockSignature(block)
+            val existing = blocksContainer.getChildAt(childIndex)
+
+            when {
+                // Identical block already rendered at this position — leave it untouched.
+                // This is what skips the unchanged prior blocks (the real O(n^2) source):
+                // finished text and already-rendered cards are not rebuilt on every delta.
+                existing != null && existing.tag == signature -> { /* no-op */ }
+
+                // New or changed block — the growing text tail, a freshly appended block,
+                // or a CardLoading -> CardRendered swap. Rebuild only this one view (siblings
+                // are left untouched) so each view is constructed exactly as a fresh render
+                // would, avoiding any reuse/re-measure quirks of a nested RecyclerView.
+                else -> {
+                    if (existing != null) blocksContainer.removeViewAt(childIndex)
+                    val view = buildBlockView(block, message)
+                    view.tag = signature
+                    blocksContainer.addView(view, childIndex)
+                }
+            }
+            childIndex++
+        }
+
+        // Trim any trailing views left over from a previous, longer render.
+        while (blocksContainer.childCount > childIndex) {
+            blocksContainer.removeViewAt(blocksContainer.childCount - 1)
+        }
+    }
+
+    /**
+     * Stable identity + content signature for a block, stored as the rendered view's tag.
+     * Used to detect whether a view can be reused as-is, updated in place, or rebuilt.
+     */
+    private fun blockSignature(block: StreamedBlock): String = when (block) {
+        is StreamedBlock.Text -> "T|${block.id}|${block.markdown.hashCode()}"
+        is StreamedBlock.CardLoading -> "L|${block.cardId}"
+        is StreamedBlock.CardRendered -> "R|${block.cardId}|${block.cardJson.hashCode()}"
+    }
+
+    /** Builds the view for a single [StreamedBlock]. The caller positions and tags it. */
+    private fun buildBlockView(block: StreamedBlock, message: StreamMessage): View = when (block) {
+        is StreamedBlock.Text -> {
+            androidx.recyclerview.widget.RecyclerView(context).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                itemAnimator = null
+                val markwonAdapter = io.noties.markwon.recycler.MarkwonAdapter.builder(
+                    object : io.noties.markwon.recycler.MarkwonAdapter.Entry<org.commonmark.node.Node, io.noties.markwon.recycler.MarkwonAdapter.Holder>() {
+                        override fun createHolder(
+                            inflater: LayoutInflater,
+                            parent: ViewGroup
+                        ): io.noties.markwon.recycler.MarkwonAdapter.Holder {
+                            val view = inflater.inflate(
+                                R.layout.cometchat_ai_assistant_root_text_view, parent, false
+                            )
+                            return io.noties.markwon.recycler.MarkwonAdapter.Holder(view)
+                        }
+
+                        override fun bindHolder(
+                            markwon: Markwon,
+                            holder: io.noties.markwon.recycler.MarkwonAdapter.Holder,
+                            node: org.commonmark.node.Node
+                        ) {
+                            val textView = holder.itemView.findViewById<TextView>(R.id.root_text_view)
+                            if (rootTextColor != 0) textView.setTextColor(rootTextColor)
+                            if (rootTextAppearance != 0) textView.setTextAppearance(rootTextAppearance)
+                            textView.setLineSpacing(
+                                Utils.convertDpToPx(context, 20).toFloat(), 0f
+                            )
+                            val spanned = markwon.render(node)
+                            textView.text = spanned
+                            textView.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+                        }
+                    })
+                    .build()
+                adapter = markwonAdapter
+                markwonAdapter.setMarkdown(markwon, block.markdown)
+                markwonAdapter.notifyDataSetChanged()
+            }
+        }
+        is StreamedBlock.CardLoading -> {
+            android.widget.TextView(context).apply {
+                text = block.label
+                setTextColor(CometChatTheme.getTextColorSecondary(context))
+                textSize = 13f
+                val padding = (12 * resources.displayMetrics.density).toInt()
+                setPadding(padding, padding, padding, padding)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(CometChatTheme.getBackgroundColor3(context))
+                    cornerRadius = 8 * resources.displayMetrics.density
+                }
+                val lp = android.widget.LinearLayout.LayoutParams(
+                    maxCardViewWidth,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                lp.topMargin = (8 * resources.displayMetrics.density).toInt()
+                lp.bottomMargin = (8 * resources.displayMetrics.density).toInt()
+                lp.gravity = android.view.Gravity.CENTER_HORIZONTAL
+                layoutParams = lp
+            }
+        }
+        is StreamedBlock.CardRendered -> {
+            com.cometchat.cards.CometChatCardView(context).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    maxCardViewWidth,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = (8 * resources.displayMetrics.density).toInt()
+                    bottomMargin = (8 * resources.displayMetrics.density).toInt()
+                    // Center the card horizontally within the bubble content.
+                    gravity = android.view.Gravity.CENTER_HORIZONTAL
+                }
+                setThemeMode(com.cometchat.cards.models.CometChatCardThemeMode.AUTO)
+                // Action callback BEFORE schema
+                setActionCallback(com.cometchat.cards.actions.CometChatCardActionCallback { event ->
+                    com.cometchat.uikit.core.events.CometChatEvents.emitUIEvent(
+                        com.cometchat.uikit.core.events.CometChatUIEvent.CardActionClicked(
+                            message = message,
+                            actionEvent = event
+                        )
+                    )
+                })
+                setCardSchema(block.cardJson)
             }
         }
     }

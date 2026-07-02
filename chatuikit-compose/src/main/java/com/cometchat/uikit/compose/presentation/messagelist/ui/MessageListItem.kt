@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.cometchat.chat.constants.CometChatConstants
+import com.cometchat.chat.models.AIAssistantMessage
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.presentation.messagelist.style.CometChatMessageListStyle
@@ -277,6 +278,10 @@ internal fun MessageListItem(
         message.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)
     }
 
+    // Agentic (AI assistant) messages never get the long-press popup menu, even outside
+    // agent chat - only the copy button on the bubble works.
+    val isAgenticMessage = message is AIAssistantMessage
+
     // Compute whether to show the default avatar based on alignment, hideAvatar, and conversation type.
     // This follows the avatar visibility rules:
     // - Outgoing messages (RIGHT) never show avatar
@@ -314,7 +319,7 @@ internal fun MessageListItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { onMessageClick?.invoke(message) },
-                onLongClick = if (isAgentChat || isActionOrCallMessage) null else {
+                onLongClick = if (isAgentChat || isActionOrCallMessage || isAgenticMessage) null else {
                     { onMessageLongClick?.invoke(message) }
                 }
             )
@@ -382,7 +387,7 @@ internal fun MessageListItem(
         bubbleStyles = bubbleStyles,
         incomingMessageBubbleStyle = incomingMessageBubbleStyle,
         outgoingMessageBubbleStyle = outgoingMessageBubbleStyle,
-        onLongClick = if (isAgentChat) null else { { onMessageLongClick?.invoke(message) } },
+        onLongClick = if (isAgentChat || isAgenticMessage) null else { { onMessageLongClick?.invoke(message) } },
         
         // Highlight parameters for jump-to-parent-message feature
         highlightedMessageId = highlightedMessageId,

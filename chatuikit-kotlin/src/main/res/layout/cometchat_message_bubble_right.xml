@@ -77,6 +77,14 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- AI copy button - OUTSIDE the bubble card so it never inherits the
+                 bubble background (group agent chats keep a filled bubble color). -->
+            <LinearLayout
+                android:id="@+id/ai_copy_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
             <LinearLayout
                 android:id="@+id/footer_view_layout"
                 android:layout_width="wrap_content"

@@ -30,7 +30,7 @@ object AppConstants {
      *
      * Format: Alphanumeric string (e.g., "123456abcdef")
      */
-    const val APP_ID = "XXXXXXXXX"
+    const val APP_ID = "XXXXXXXXXXXXXXXXXX"
 
     /**
      * Default CometChat Region.
@@ -41,7 +41,7 @@ object AppConstants {
      * This should match the region selected when creating your
      * CometChat app in the dashboard.
      */
-    const val REGION = "XXXXXXXXX"
+    const val REGION = "XXXXXXXXXXXXXXXX"
 
     /**
      * Default CometChat Auth Key.
@@ -53,7 +53,7 @@ object AppConstants {
      * secure authentication method such as Auth Tokens generated
      * from your backend server.
      */
-    const val AUTH_KEY = "XXXXXXXXX"
+    const val AUTH_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 
 }

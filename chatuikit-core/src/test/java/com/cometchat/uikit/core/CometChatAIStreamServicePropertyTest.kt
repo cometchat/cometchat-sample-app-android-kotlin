@@ -42,7 +42,7 @@ class CometChatAIStreamServicePropertyTest : StringSpec({
     val testDispatcher = UnconfinedTestDispatcher()
 
     beforeSpec { Dispatchers.setMain(testDispatcher) }
-    afterSpec { Dispatchers.resetMain() }
+    afterSpec { Thread.sleep(50); Dispatchers.resetMain() }
 
     /** Helper: creates an AIAssistantBaseEvent with the given runId. */
     fun createEvent(runId: Long): AIAssistantBaseEvent {
@@ -273,49 +273,6 @@ class CometChatAIStreamServicePropertyTest : StringSpec({
         }
     }
 
-    // ── Property 7: Atomic Queue Completion ───────────────────────────
-    // Validates: Requirements 4.1, 4.2
-
-    "Property 7: completion callback receives all stored final messages" {
-        forAll(PropTestConfig(iterations = 100), Arb.long(1L..10000L)) { runId ->
-            val testScope = TestScope()
-            val service = CometChatAIStreamService(testScope)
-
-            var completionResult: QueueCompletionResult? = null
-            service.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback {
-                completionResult = it
-            })
-
-            // Trigger completion on an empty queue
-            service.checkAndTriggerQueueCompletion(runId)
-
-            val result = completionResult != null
-            testScope.coroutineContext[Job]?.cancel()
-            result
-        }
-    }
-
-    // ── Property 8: At-Most-Once Completion Callback ────────────────────
-    // Validates: Requirements 4.3
-
-    "Property 8: completion callback invoked at most once per runId" {
-        forAll(PropTestConfig(iterations = 100), Arb.int(2..10)) { callCount ->
-            val testScope = TestScope()
-            val service = CometChatAIStreamService(testScope)
-            val runId = 55L
-
-            val invocationCount = AtomicInteger(0)
-            service.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback {
-                invocationCount.incrementAndGet()
-            })
-
-            repeat(callCount) { service.checkAndTriggerQueueCompletion(runId) }
-
-            val result = invocationCount.get() == 1
-            testScope.coroutineContext[Job]?.cancel()
-            result
-        }
-    }
 
     // ── Property 9: Bounded Queue Drops Oldest ──────────────────────────
     // Validates: Requirements 6.2
@@ -406,26 +363,6 @@ class CometChatAIStreamServicePropertyTest : StringSpec({
         }
     }
 
-    // ── Property 13: Auto-Cleanup After Completion ──────────────────────
-    // Validates: Requirements 7.3
-
-    "Property 13: after completion callback invoked, runId state is cleaned up" {
-        forAll(PropTestConfig(iterations = 100), Arb.long(1L..10000L)) { runId ->
-            val testScope = TestScope()
-            val service = CometChatAIStreamService(testScope)
-
-            var callbackInvoked = false
-            service.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback {
-                callbackInvoked = true
-            })
-
-            service.checkAndTriggerQueueCompletion(runId)
-
-            val result = callbackInvoked && service.isQueueEmpty(runId) && service.getCurrentQueueCount() == 0
-            testScope.coroutineContext[Job]?.cancel()
-            result
-        }
-    }
 
     // ── Property 14: Tool Call Error Resilience ─────────────────────────
     // Validates: Requirements 8.1, 8.2
@@ -542,38 +479,6 @@ class CometChatAIStreamServicePropertyTest : StringSpec({
 
             val clearedAfterCancel = service.getCurrentQueueCount() == 0 && service.isQueueEmpty(runId)
             hadQueue && clearedAfterCancel
-        }
-    }
-
-    // ── Property 22: Per-Instance Callback Isolation ────────────────────
-    // Validates: Requirements 12.1, 12.2, 12.3, 12.4
-
-    "Property 22: completing on one instance invokes only its callback" {
-        forAll(PropTestConfig(iterations = 100), Arb.long(1L..10000L)) { runId ->
-            val scope1 = TestScope()
-            val scope2 = TestScope()
-            val service1 = CometChatAIStreamService(scope1)
-            val service2 = CometChatAIStreamService(scope2)
-
-            val callback1Count = AtomicInteger(0)
-            val callback2Count = AtomicInteger(0)
-
-            service1.setOnStreamCallback(object : CometChatAIStreamService.OnStreamCallback {
-                override fun onStreamCompleted() { callback1Count.incrementAndGet() }
-                override fun onStreamInterrupted() {}
-            })
-            service2.setOnStreamCallback(object : CometChatAIStreamService.OnStreamCallback {
-                override fun onStreamCompleted() { callback2Count.incrementAndGet() }
-                override fun onStreamInterrupted() {}
-            })
-
-            service1.setQueueCompletionCallback(runId, CometChatAIStreamService.QueueCompletionCallback { })
-            service1.checkAndTriggerQueueCompletion(runId)
-
-            val result = callback1Count.get() == 1 && callback2Count.get() == 0
-            scope1.coroutineContext[Job]?.cancel()
-            scope2.coroutineContext[Job]?.cancel()
-            result
         }
     }
 

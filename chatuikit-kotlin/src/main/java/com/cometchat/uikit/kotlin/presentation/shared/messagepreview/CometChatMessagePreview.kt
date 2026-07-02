@@ -15,6 +15,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.CardMessage
 import com.cometchat.chat.models.CustomMessage
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
@@ -514,10 +515,18 @@ class CometChatMessagePreview @JvmOverloads constructor(
                 is TextMessage -> handleTextMessagePreview(context, sender, message, textFormatters, formattingType, alignment)
                 is MediaMessage -> handleMediaMessagePreview(context, sender, message)
                 is CustomMessage -> handleCustomMessagePreview(context, sender, message)
+                is CardMessage -> {
+                    setMessagePreviewTitleText(sender)
+                    setMessagePreviewSubtitleText(
+                        message.text?.ifEmpty { null }
+                            ?: context.getString(R.string.cometchat_message_card)
+                    )
+                    setMessageIconVisibility(GONE)
+                }
                 else -> {
                     setMessagePreviewTitleText(sender)
                     setMessagePreviewSubtitleText(message.type ?: "")
-                    setMessageIconVisibility(View.GONE)
+                    setMessageIconVisibility(GONE)
                 }
             }
         } catch (e: Exception) {

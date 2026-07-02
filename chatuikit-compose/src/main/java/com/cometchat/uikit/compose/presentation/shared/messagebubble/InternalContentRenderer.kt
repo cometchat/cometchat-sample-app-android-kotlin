@@ -354,8 +354,9 @@ internal object InternalContentRenderer {
                     renderCustomMessage(message, alignment, styles, messageBubbleStyle, onLongClick)
                 }
             }
-            "agentic" -> renderAIAssistantMessage(message, alignment, styles)
+            UIKitConstants.MessageCategory.AGENTIC -> renderAIAssistantMessage(message, alignment, styles)
             UIKitConstants.MessageCategory.STREAM -> renderAIAssistantMessage(message, alignment, styles)
+            UIKitConstants.MessageCategory.CARD -> renderCardMessage(message, alignment, styles, messageBubbleStyle)
             else -> {
                 logUnknownType(message)
                 false
@@ -1283,6 +1284,38 @@ internal object InternalContentRenderer {
     }
 
     // ========================================================================
+    // Card message rendering
+    // ========================================================================
+
+    /**
+     * Renders a developer card message bubble (category "card").
+     *
+     * Delegates to [CometChatCardBubble] composable which handles the card payload,
+     * fallback text, and action forwarding.
+     *
+     * @param message The CardMessage to render
+     * @param alignment The bubble alignment
+     * @param styles Container holding all bubble style overrides
+     * @param messageBubbleStyle Optional message bubble style override
+     * @return true if content was rendered, false if the message type is unrecognized
+     */
+    @Composable
+    private fun renderCardMessage(
+        message: BaseMessage,
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        styles: BubbleStyles,
+        messageBubbleStyle: CometChatMessageBubbleStyle?
+    ): Boolean {
+        val cardMessage = message as? com.cometchat.chat.models.CardMessage ?: return false
+
+        com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatCardBubble(
+            message = cardMessage,
+            alignment = alignment
+        )
+        return true
+    }
+
+    // ========================================================================
     // AI Assistant message rendering
     // ========================================================================
 
@@ -1724,34 +1757,6 @@ internal object InternalContentRenderer {
         style: CometChatMessageBubbleStyle,
         hideModerationView: Boolean = false
     ) {
-        // AI Assistant copy button — shown for AIAssistantMessage with non-empty text
-        if (message is AIAssistantMessage && message !is StreamMessage) {
-            val text = message.text
-            if (!text.isNullOrEmpty()) {
-                val context = LocalContext.current
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cometchat_ic_copy_paste),
-                        contentDescription = "Copy",
-                        tint = CometChatTheme.colorScheme.textColorSecondary,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                val clipboardManager =
-                                    context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
-                                val clipData = android.content.ClipData.newPlainText("AI Response", text)
-                                clipboardManager?.setPrimaryClip(clipData)
-                            }
-                    )
-                }
-            }
-            return
-        }
-
         // Skip moderation rendering if hideModerationView is true
         if (hideModerationView) return
 
@@ -1786,6 +1791,39 @@ internal object InternalContentRenderer {
                     maxLines = 2
                 )
             }
+        }
+    }
+
+    /**
+     * AI Assistant copy button — rendered OUTSIDE the bubble background so it never
+     * inherits the bubble color (notably in group agent chats where the wrapper keeps
+     * a filled incoming-bubble background). Mirrors the Kotlin UIKit `ai_copy_view`
+     * slot, which is a sibling of the bubble card rather than a child of it.
+     *
+     * Shown only for a completed [AIAssistantMessage] (not a [StreamMessage]) with
+     * non-empty text.
+     */
+    @Composable
+    fun AiCopyButton(message: BaseMessage) {
+        if (message !is AIAssistantMessage || message is StreamMessage) return
+        val text = message.text
+        if (text.isNullOrEmpty()) return
+
+        val context = LocalContext.current
+        Box(modifier = Modifier.padding(top = 4.dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.cometchat_ic_copy_paste),
+                contentDescription = "Copy",
+                tint = CometChatTheme.colorScheme.textColorSecondary,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable {
+                        val clipboardManager =
+                            context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                        val clipData = android.content.ClipData.newPlainText("AI Response", text)
+                        clipboardManager?.setPrimaryClip(clipData)
+                    }
+            )
         }
     }
 
