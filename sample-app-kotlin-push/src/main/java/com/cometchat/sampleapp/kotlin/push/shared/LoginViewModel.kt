@@ -8,7 +8,6 @@ import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.User
 import com.cometchat.pushnotification.CometChatPushNotifications
 import com.cometchat.pushnotification.models.PushPlatform
-import com.cometchat.sampleapp.kotlin.push.fcm.AppFCMService
 import com.cometchat.uikit.core.CometChatUIKit
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
@@ -151,7 +150,7 @@ class LoginViewModel : ViewModel() {
             CometChatPushNotifications.registerToken(
                 platform = PushPlatform.FCM_ANDROID,
                 token = token,
-                providerId = AppFCMService.PROVIDER_ID,
+                providerId = AppCredentials.PROVIDER_ID,
                 onSuccess = { Log.d(TAG, "FCM token registered with CometChat") },
                 onError = { e -> Log.e(TAG, "FCM token registration failed: ${e.message}") }
             )

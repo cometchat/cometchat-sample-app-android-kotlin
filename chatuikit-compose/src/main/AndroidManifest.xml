@@ -61,6 +61,13 @@
             android:exported="false"
             android:theme="@style/Theme.JetpackUIKit.Transparent" />
 
+        <!-- In-app (non full-screen) video player -->
+        <activity
+            android:name=".presentation.imageviewer.ui.CometChatVideoViewerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@style/Theme.JetpackUIKit.Transparent" />
+
     </application>
 
 </manifest>

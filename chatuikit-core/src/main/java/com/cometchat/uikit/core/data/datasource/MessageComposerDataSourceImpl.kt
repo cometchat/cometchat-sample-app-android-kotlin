@@ -114,17 +114,17 @@ class MessageComposerDataSourceImpl : MessageComposerDataSource {
         }
     
     /**
-     * Edits an existing text message using CometChat SDK directly.
-     * 
+     * Edits an existing message using CometChat SDK directly.
+     *
      * The message object should have:
      * - The original message ID set
-     * - The updated text content
-     * 
-     * @param message The TextMessage object with updated content
+     * - The updated content (text for TextMessage, caption for MediaMessage)
+     *
+     * @param message The message with updated content
      * @return The edited BaseMessage with updated metadata from the server
      * @throws CometChatException if the SDK call fails
      */
-    override suspend fun editMessage(message: TextMessage): BaseMessage = 
+    override suspend fun editMessage(message: BaseMessage): BaseMessage =
         suspendCancellableCoroutine { continuation ->
             CometChat.editMessage(
                 message,

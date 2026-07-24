@@ -20,6 +20,7 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -316,6 +317,82 @@ class CometChatMessageHeaderViewModelTest : FunSpec({
 
             emittedError?.code shouldBe "ERR_REFRESH"
             println("    → Error emitted: code=${emittedError?.code}")
+            job.cancel()
+        }
+    }
+
+    // Regression for ENG-37016: navigating away mid-refresh cancels the ViewModel scope;
+    // the resulting CancellationException must not be cast to CometChatException (crash)
+    // nor surface as an error event.
+    test("refreshGroup with CancellationException failure should not crash or emit error") {
+        runTest {
+            val viewModel = createViewModel()
+            whenever(getGroupUseCase.invoke("group-1"))
+                .thenReturn(Result.failure(CancellationException("scope cancelled")))
+            println("    → refreshGroup with CancellationException failure")
+
+            viewModel.setGroup(MockFactory.createGroup(guid = "group-1"))
+            advanceUntilIdle()
+
+            var emittedError: CometChatException? = null
+            val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+                viewModel.errorEvent.collect { emittedError = it }
+            }
+
+            viewModel.refreshGroup("group-1")
+            advanceUntilIdle()
+
+            emittedError shouldBe null
+            println("    → No crash, no error emitted")
+            job.cancel()
+        }
+    }
+
+    test("refreshUser with CancellationException failure should not crash or emit error") {
+        runTest {
+            val viewModel = createViewModel()
+            whenever(getUserUseCase.invoke("user-1"))
+                .thenReturn(Result.failure(CancellationException("scope cancelled")))
+            println("    → refreshUser with CancellationException failure")
+
+            viewModel.setUser(MockFactory.createUser(uid = "user-1"))
+            advanceUntilIdle()
+
+            var emittedError: CometChatException? = null
+            val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+                viewModel.errorEvent.collect { emittedError = it }
+            }
+
+            viewModel.refreshUser("user-1")
+            advanceUntilIdle()
+
+            emittedError shouldBe null
+            println("    → No crash, no error emitted")
+            job.cancel()
+        }
+    }
+
+    test("refreshGroup with non-CometChat exception should emit wrapped UNKNOWN_ERROR instead of crashing") {
+        runTest {
+            val viewModel = createViewModel()
+            whenever(getGroupUseCase.invoke("group-1"))
+                .thenReturn(Result.failure(IllegalStateException("Network timeout")))
+            println("    → refreshGroup with IllegalStateException failure")
+
+            viewModel.setGroup(MockFactory.createGroup(guid = "group-1"))
+            advanceUntilIdle()
+
+            var emittedError: CometChatException? = null
+            val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+                viewModel.errorEvent.collect { emittedError = it }
+            }
+
+            viewModel.refreshGroup("group-1")
+            advanceUntilIdle()
+
+            emittedError?.code shouldBe "UNKNOWN_ERROR"
+            emittedError?.message shouldBe "Network timeout"
+            println("    → Wrapped error emitted: code=${emittedError?.code}")
             job.cancel()
         }
     }

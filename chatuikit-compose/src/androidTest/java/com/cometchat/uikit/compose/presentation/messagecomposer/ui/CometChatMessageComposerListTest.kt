@@ -61,7 +61,7 @@ class CometChatMessageComposerListTest {
             }
             override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
             override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-            override suspend fun editMessage(message: TextMessage): BaseMessage = mock()
+            override suspend fun editMessage(message: BaseMessage): BaseMessage = mock()
         }
     }
 

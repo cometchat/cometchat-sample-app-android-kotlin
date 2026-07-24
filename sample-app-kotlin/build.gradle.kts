@@ -13,7 +13,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "6.0"
+        versionName = "6.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -99,7 +99,8 @@ dependencies {
     
     // Android instrumentation tests (E2E)
     androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.androidx.espresso.contrib)
-    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.uiautomator)
 }

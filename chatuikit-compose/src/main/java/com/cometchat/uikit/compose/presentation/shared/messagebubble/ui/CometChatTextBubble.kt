@@ -204,187 +204,25 @@ fun CometChatTextBubble(
                 contentDescription = "Text message: ${message.text}"
             }
     ) {
-        // Parse markdown on the formatter-transformed text so positions align
-        val renderedSegments = remember(message.id, textForMarkdown) {
-            MarkdownRenderer.parse(textForMarkdown)
-        }
-
-        // Render markdown segments with formatter spans overlaid
-        
-        // Theme-aware inline code colors for receiver/sender differentiation
         val isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT
-        val inlineCodeBgColor = if (isOutgoing) {
-            Color.White.copy(alpha = 0.2f)
-        } else {
-            CometChatTheme.colorScheme.backgroundColor3  // Figma: Color/Background Color/Background3
-        }
-        val inlineCodeTextColor = if (isOutgoing) {
-            Color.Unspecified
-        } else {
-            CometChatTheme.colorScheme.textColorHighlight  // Figma: text highlight
-        }
-        val inlineCodeBorderColor = if (isOutgoing) {
-            Color.White.copy(alpha = 0.3f)
-        } else {
-            CometChatTheme.colorScheme.strokeColorDark  // Figma: neutral400 (#DCDCDC)
-        }
 
-        // Merge consecutive Blockquote segments into single entries so the bar is continuous
-        val mergedSegments = remember(renderedSegments) {
-            val result = mutableListOf<MarkdownRenderer.RenderedSegment>()
-            var i = 0
-            while (i < renderedSegments.size) {
-                val seg = renderedSegments[i]
-                if (seg is MarkdownRenderer.RenderedSegment.Blockquote) {
-                    // Collect all consecutive blockquote segments
-                    val texts = mutableListOf(seg.text)
-                    val allSpans = mutableListOf<MarkdownRenderer.InlineSpan>()
-                    allSpans.addAll(seg.spans)
-                    var j = i + 1
-                    while (j < renderedSegments.size && renderedSegments[j] is MarkdownRenderer.RenderedSegment.Blockquote) {
-                        val next = renderedSegments[j] as MarkdownRenderer.RenderedSegment.Blockquote
-                        val offset = texts.joinToString("\n").length + 1 // +1 for the newline
-                        texts.add(next.text)
-                        allSpans.addAll(next.spans.map { it.copy(start = it.start + offset, end = it.end + offset) })
-                        j++
-                    }
-                    result.add(MarkdownRenderer.RenderedSegment.Blockquote(
-                        text = texts.joinToString("\n"),
-                        spans = allSpans
-                    ))
-                    i = j
-                } else {
-                    result.add(seg)
-                    i++
-                }
-            }
-            result
-        }
-
-        Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp)) {
-            for ((segIndex, segment) in mergedSegments.withIndex()) {
-                // Add spacing between code block/blockquote and adjacent segments
-                if (segIndex > 0) {
-                    val prev = mergedSegments[segIndex - 1]
-                    val needsSpacing = prev is MarkdownRenderer.RenderedSegment.CodeBlock ||
-                        prev is MarkdownRenderer.RenderedSegment.Blockquote ||
-                        segment is MarkdownRenderer.RenderedSegment.CodeBlock ||
-                        segment is MarkdownRenderer.RenderedSegment.Blockquote
-                    if (needsSpacing) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                }
-                when (segment) {
-                    is MarkdownRenderer.RenderedSegment.Text -> {
-                        // Use MentionText for clickable mentions when message has mentions
-                        // and mention click callback is provided
-                        if (hasMentions && onMentionClick != null) {
-                            // Apply RTL-aware text style
-                            val effectiveTextStyle = remember(style.textStyle, layoutDirection) {
-                                if (layoutDirection == LayoutDirection.Rtl) {
-                                    style.textStyle.copy(
-                                        textDirection = androidx.compose.ui.text.style.TextDirection.Rtl
-                                    )
-                                } else {
-                                    style.textStyle
-                                }
-                            }
-                            
-                            MentionText(
-                                text = segment.text,
-                                mentionedUsers = message.mentionedUsers ?: emptyList(),
-                                onMentionClick = onMentionClick,
-                                onMentionAllClick = onMentionAllClick,
-                                style = effectiveMentionStyle,
-                                textStyle = effectiveTextStyle
-                            )
-                        } else {
-                            // Use ClickableText for messages without mentions to handle link clicks
-                            val styledText = remember(segment.text, formattedText) {
-                                buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
-                            }
-                            ClickableLinkText(
-                                text = styledText,
-                                style = style.textStyle,
-                                onLinkClick = onLinkClick,
-                                onLongClick = onLongClick,
-                                inlineCodeBorderColor = inlineCodeBorderColor,
-                                inlineCodeBgColor = inlineCodeBgColor
-                            )
-                        }
-                    }
-
-                    is MarkdownRenderer.RenderedSegment.CodeBlock -> {
-                        CodeBlockBubble(
-                            code = segment.code,
-                            language = segment.language,
-                            isOutgoing = isOutgoing
-                        )
-                    }
-
-                    is MarkdownRenderer.RenderedSegment.BulletItem -> {
-                        val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
-                        }
-                        Row(
-                            modifier = Modifier
-                                .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
-                        ) {
-                            Text(
-                                text = "• ",
-                                style = style.textStyle.copy(color = style.textColor)
-                            )
-                            ClickableLinkText(
-                                text = styledText,
-                                style = style.textStyle,
-                                onLinkClick = onLinkClick,
-                                onLongClick = onLongClick,
-                                inlineCodeBorderColor = inlineCodeBorderColor,
-                                inlineCodeBgColor = inlineCodeBgColor
-                            )
-                        }
-                    }
-
-                    is MarkdownRenderer.RenderedSegment.OrderedItem -> {
-                        val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
-                        }
-                        Row(
-                            modifier = Modifier
-                                .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
-                        ) {
-                            Text(
-                                text = "${segment.number}. ",
-                                style = style.textStyle.copy(color = style.textColor)
-                            )
-                            ClickableLinkText(
-                                text = styledText,
-                                style = style.textStyle,
-                                onLinkClick = onLinkClick,
-                                onLongClick = onLongClick,
-                                inlineCodeBorderColor = inlineCodeBorderColor,
-                                inlineCodeBgColor = inlineCodeBgColor
-                            )
-                        }
-                    }
-
-                    is MarkdownRenderer.RenderedSegment.Blockquote -> {
-                        val styledText = remember(segment.text, formattedText) {
-                            buildSegmentText(segment.text, formattedText, message.text, style.textColor, style.linkColor, inlineCodeBgColor, inlineCodeTextColor)
-                        }
-                        BlockquoteBubble(
-                            text = styledText,
-                            textStyle = style.textStyle,
-                            isOutgoing = isOutgoing,
-                            onLinkClick = onLinkClick,
-                            onLongClick = onLongClick,
-                            inlineCodeBorderColor = inlineCodeBorderColor,
-                            inlineCodeBgColor = inlineCodeBgColor
-                        )
-                    }
-                }
-            }
-        }
+        // Markdown is parsed from the formatter-transformed text so span offsets align. The block
+        // rendering (code blocks, quotes, lists) is shared with media captions — see MarkdownSegments.
+        MarkdownSegments(
+            sourceText = textForMarkdown,
+            formattedText = formattedText,
+            textStyle = style.textStyle,
+            textColor = style.textColor,
+            linkColor = style.linkColor,
+            isOutgoing = isOutgoing,
+            modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp),
+            mentionedUsers = if (hasMentions) message.mentionedUsers ?: emptyList() else emptyList(),
+            mentionTextStyle = effectiveMentionStyle,
+            onLinkClick = onLinkClick,
+            onLongClick = onLongClick,
+            onMentionClick = onMentionClick,
+            onMentionAllClick = onMentionAllClick
+        )
 
         // Link preview section
         if (linkPreview != null) {
@@ -614,7 +452,7 @@ private fun extractTranslatedText(message: TextMessage): String? {
  * Draws rounded rect borders around inline code spans using onTextLayout + drawWithContent.
  */
 @Composable
-private fun ClickableLinkText(
+internal fun ClickableLinkText(
     text: AnnotatedString,
     style: androidx.compose.ui.text.TextStyle,
     onLinkClick: ((String) -> Unit)?,
@@ -752,7 +590,7 @@ private fun ClickableLinkText(
  * markdown parsing, the segment text and formatted text are now aligned, making
  * span overlay straightforward.
  */
-private fun buildSegmentText(
+internal fun buildSegmentText(
     segmentText: String,
     formattedText: AnnotatedString?,
     fullText: String,
@@ -818,8 +656,11 @@ private fun buildSegmentText(
 /**
  * Builds a position map from original text positions to plain text positions.
  * This accounts for markdown markers that are stripped.
+ *
+ * Shared with the media-bubble captions ([MultiAttachmentCaption]), which overlay formatter
+ * spans onto markdown-stripped text exactly the same way.
  */
-private fun buildPositionMap(original: String, plain: String): IntArray {
+internal fun buildPositionMap(original: String, plain: String): IntArray {
     // For each position in original, find corresponding position in plain
     // by matching characters
     val map = IntArray(original.length + 1) { -1 }
@@ -842,7 +683,7 @@ private fun buildPositionMap(original: String, plain: String): IntArray {
 /**
  * Maps a position from original text to plain text using the position map.
  */
-private fun mapPositionUsingMap(pos: Int, map: IntArray, plainLength: Int): Int {
+internal fun mapPositionUsingMap(pos: Int, map: IntArray, plainLength: Int): Int {
     if (pos < 0) return -1
     if (pos >= map.size) return plainLength
     
@@ -944,7 +785,7 @@ private fun buildStyledText(
  * Sender (right): ExtendedPrimaryColor700 bg, appropriate border, 16dp corners, 24dp/12dp padding
  */
 @Composable
-private fun CodeBlockBubble(
+internal fun CodeBlockBubble(
     code: String,
     language: String,
     isOutgoing: Boolean
@@ -1014,7 +855,7 @@ private fun CodeBlockBubble(
  * Sender (right): White stripe, white at 20% opacity bg, 8dp corners
  */
 @Composable
-private fun BlockquoteBubble(
+internal fun BlockquoteBubble(
     text: AnnotatedString,
     textStyle: androidx.compose.ui.text.TextStyle,
     isOutgoing: Boolean,

@@ -530,7 +530,7 @@ class CometChatMessageComposerScreenshotTest {
                 return Result.success(message)
             }
 
-            override suspend fun editMessage(message: TextMessage): Result<BaseMessage> {
+            override suspend fun editMessage(message: BaseMessage): Result<BaseMessage> {
                 return Result.success(message)
             }
         }

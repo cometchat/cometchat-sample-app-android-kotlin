@@ -97,6 +97,66 @@ fun <T : CometChatMessageBubbleStyle> mergeWithBase(
             timestampTextStyle = mergedTimestampStyle
         ) as T
 
+        is CometChatImagesBubbleStyle -> bubbleStyle.copy(
+            backgroundColor = mergedBg,
+            cornerRadius = mergedRadius,
+            strokeWidth = mergedStrokeW,
+            strokeColor = mergedStrokeC,
+            padding = mergedPadding,
+            senderNameTextColor = mergedSenderNameColor,
+            senderNameTextStyle = mergedSenderNameStyle,
+            threadIndicatorTextColor = mergedThreadColor,
+            threadIndicatorTextStyle = mergedThreadStyle,
+            threadIndicatorIconTint = mergedThreadIcon,
+            timestampTextColor = mergedTimestampColor,
+            timestampTextStyle = mergedTimestampStyle
+        ) as T
+
+        is CometChatVideosBubbleStyle -> bubbleStyle.copy(
+            backgroundColor = mergedBg,
+            cornerRadius = mergedRadius,
+            strokeWidth = mergedStrokeW,
+            strokeColor = mergedStrokeC,
+            padding = mergedPadding,
+            senderNameTextColor = mergedSenderNameColor,
+            senderNameTextStyle = mergedSenderNameStyle,
+            threadIndicatorTextColor = mergedThreadColor,
+            threadIndicatorTextStyle = mergedThreadStyle,
+            threadIndicatorIconTint = mergedThreadIcon,
+            timestampTextColor = mergedTimestampColor,
+            timestampTextStyle = mergedTimestampStyle
+        ) as T
+
+        is CometChatAudiosBubbleStyle -> bubbleStyle.copy(
+            backgroundColor = mergedBg,
+            cornerRadius = mergedRadius,
+            strokeWidth = mergedStrokeW,
+            strokeColor = mergedStrokeC,
+            padding = mergedPadding,
+            senderNameTextColor = mergedSenderNameColor,
+            senderNameTextStyle = mergedSenderNameStyle,
+            threadIndicatorTextColor = mergedThreadColor,
+            threadIndicatorTextStyle = mergedThreadStyle,
+            threadIndicatorIconTint = mergedThreadIcon,
+            timestampTextColor = mergedTimestampColor,
+            timestampTextStyle = mergedTimestampStyle
+        ) as T
+
+        is CometChatFilesBubbleStyle -> bubbleStyle.copy(
+            backgroundColor = mergedBg,
+            cornerRadius = mergedRadius,
+            strokeWidth = mergedStrokeW,
+            strokeColor = mergedStrokeC,
+            padding = mergedPadding,
+            senderNameTextColor = mergedSenderNameColor,
+            senderNameTextStyle = mergedSenderNameStyle,
+            threadIndicatorTextColor = mergedThreadColor,
+            threadIndicatorTextStyle = mergedThreadStyle,
+            threadIndicatorIconTint = mergedThreadIcon,
+            timestampTextColor = mergedTimestampColor,
+            timestampTextStyle = mergedTimestampStyle
+        ) as T
+
         is CometChatVideoBubbleStyle -> bubbleStyle.copy(
             backgroundColor = mergedBg,
             cornerRadius = mergedRadius,

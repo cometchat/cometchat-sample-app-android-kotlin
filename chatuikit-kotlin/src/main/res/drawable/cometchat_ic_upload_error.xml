@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bare exclamation glyph (pill + dot) for the round REJECTED badge on attachment tiles. The
+     viewport is the full badge area (the red circle itself is drawn at usage with the theme error
+     color), so render it at the badge's full size. Tinted at usage; white is a tintable default. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10.75,7.25A1.25,1.25 0,0 1,13.25 7.25L13.25,12.25A1.25,1.25 0,0 1,10.75 12.25Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,16.5m-1.5,0a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0" />
+</vector>

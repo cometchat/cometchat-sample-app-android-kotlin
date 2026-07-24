@@ -170,37 +170,32 @@ class ConversationUseCasesTest : FunSpec({
             useCase = RefreshConversationListUseCase(repository)
         }
 
-        test("invoke should build request from builder and delegate to repository") {
+        test("invoke should delegate the caller's request to the repository") {
             runTest {
                 val conversations = MockFactory.createUserConversations(5)
-                val builder = mock<ConversationsRequest.ConversationsRequestBuilder>()
-                val builtRequest = mock<ConversationsRequest>()
-                whenever(builder.build()).thenReturn(builtRequest)
-                whenever(repository.getConversations(builtRequest)).thenReturn(Result.success(conversations))
+                val request = mock<ConversationsRequest>()
+                whenever(repository.getConversations(request)).thenReturn(Result.success(conversations))
 
                 println("  → Testing RefreshConversationListUseCase delegation")
 
-                val result = useCase(builder)
+                val result = useCase(request)
 
                 result.isSuccess shouldBe true
                 result.getOrNull() shouldBe conversations
-                verify(builder).build()
-                verify(repository).getConversations(builtRequest)
-                println("  ✅ Built request and delegated, returned ${result.getOrNull()?.size} conversations")
+                verify(repository).getConversations(request)
+                println("  ✅ Delegated caller's request, returned ${result.getOrNull()?.size} conversations")
             }
         }
 
         test("invoke should propagate Result.failure from repository") {
             runTest {
                 val exception = MockFactory.createCometChatException("ERR_REFRESH", "Refresh failed")
-                val builder = mock<ConversationsRequest.ConversationsRequestBuilder>()
-                val builtRequest = mock<ConversationsRequest>()
-                whenever(builder.build()).thenReturn(builtRequest)
-                whenever(repository.getConversations(builtRequest)).thenReturn(Result.failure(exception))
+                val request = mock<ConversationsRequest>()
+                whenever(repository.getConversations(request)).thenReturn(Result.failure(exception))
 
                 println("  → Testing RefreshConversationListUseCase failure propagation")
 
-                val result = useCase(builder)
+                val result = useCase(request)
 
                 result.isFailure shouldBe true
                 result.exceptionOrNull() shouldBe exception

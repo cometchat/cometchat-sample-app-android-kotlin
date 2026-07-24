@@ -1,16 +1,15 @@
 package com.cometchat.uikit.core.domain.usecase
 
 import com.cometchat.chat.models.BaseMessage
-import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.domain.repository.MessageComposerRepository
 
 /**
- * Use case for editing an existing text message.
+ * Use case for editing an existing message.
  * Contains business logic for message editing operations.
  *
  * This use case is used by the CometChatMessageComposerViewModel to edit
- * existing text messages. Only text messages sent by the current user
- * can be edited.
+ * existing text messages and media message captions. Only messages sent
+ * by the current user can be edited.
  *
  * @param repository The repository to edit messages through
  */
@@ -18,24 +17,23 @@ open class EditMessageUseCase(
     private val repository: MessageComposerRepository
 ) {
     /**
-     * Edits an existing text message.
+     * Edits an existing message.
      *
-     * This method updates the text content of an existing message. The message
+     * This method updates the content of an existing message. The message
      * object should have:
      * - id: The original message ID
-     * - text: The updated message content
+     * - the updated content (text for TextMessage, caption for MediaMessage)
      * - receiverId: The ID of the user or group
      * - receiverType: Either "user" or "group"
      *
-     * Note: Only text messages sent by the current user can be edited.
-     * The edit operation will fail if the message was sent by another user
-     * or if the message is not a text message.
+     * Note: Only messages sent by the current user can be edited.
+     * The edit operation will fail if the message was sent by another user.
      *
-     * @param message The TextMessage object with updated text content
+     * @param message The message with updated content
      * @return Result containing the edited BaseMessage with updated metadata on success,
      *         or error on failure
      */
-    open suspend operator fun invoke(message: TextMessage): Result<BaseMessage> {
+    open suspend operator fun invoke(message: BaseMessage): Result<BaseMessage> {
         return repository.editMessage(message)
     }
 }

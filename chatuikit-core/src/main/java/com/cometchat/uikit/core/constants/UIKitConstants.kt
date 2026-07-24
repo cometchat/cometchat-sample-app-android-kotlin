@@ -274,6 +274,19 @@ object UIKitConstants {
         const val EXTENSIONS = "extensions"
         const val LINK_PREVIEW = "link-preview"
         const val LINKS = "links"
+
+        // Multi-attachment batching (ENG-36737). Cross-platform interop contract shared with
+        // iOS/RN/web: a single multi-attachment send is split into one MediaMessage per type, all
+        // sharing [BATCH_ID]. Grouping is derived from list-neighbor adjacency on [BATCH_ID] (no
+        // index/count keys — matches iOS). A mic-recorded voice note is marked with
+        // [AUDIO_TYPE] = [AUDIO_TYPE_VOICE_NOTE] (matches the cross-platform DD / iOS), which routes
+        // it to VoiceNoteBubble (always standalone); picker audio has no flag → AudiosBubble.
+        // [VOICE_NOTE] is the legacy Bool key — still read for backward compatibility, no longer
+        // written.
+        const val BATCH_ID = "batchId"
+        const val AUDIO_TYPE = "audioType"
+        const val AUDIO_TYPE_VOICE_NOTE = "voice_note"
+        const val VOICE_NOTE = "voiceNote"
     }
 
     /**
@@ -322,6 +335,47 @@ object UIKitConstants {
 
         // Default (unknown)
         const val MIME_UNKNOWN = "unknown"
+    }
+
+    /**
+     * MIME-type keyword fragments, prefixes and file extensions used to resolve a file's display
+     * type (the colored file-type icon). Single source of truth for both UIKits — the Compose
+     * `FileTypeUtils.getFileType` and the Views `MultiAttachmentUtils.fileIconRes` match against
+     * these, so a given file always resolves to the same icon everywhere.
+     */
+    object FileTypeMatchers {
+        // Reuses [MimeType] constants where the value matches. The DOC / XLS / PPT keyword lists
+        // deliberately do NOT use MimeType.DOC / XLS / PPT: as `contains()` fragments those would
+        // misclassify — every OOXML MIME contains "officedocument" (so "doc" would match an .xlsx
+        // MIME); "msword" / "wordprocessingml" etc. are the discriminating fragments.
+        const val PDF_KEYWORD = MimeType.PDF
+        val PDF_EXTENSIONS = listOf(".pdf")
+
+        val DOC_KEYWORDS = listOf("msword", "wordprocessingml")
+        val DOC_EXTENSIONS = listOf(".doc", ".docx")
+
+        val XLS_KEYWORDS = listOf("spreadsheet", "excel")
+        val XLS_EXTENSIONS = listOf(".xls", ".xlsx", ".csv")
+
+        val PPT_KEYWORDS = listOf("presentation", "powerpoint")
+        val PPT_EXTENSIONS = listOf(".ppt", ".pptx")
+
+        val ARCHIVE_KEYWORDS = listOf(MimeType.ZIP, "compressed", "archive", "rar", "7z", "tar", "gzip")
+        val ARCHIVE_EXTENSIONS = listOf(".zip", ".rar", ".7z", ".tar", ".gz")
+
+        const val AUDIO_MIME_PREFIX = "audio/"
+        val AUDIO_EXTENSIONS = listOf(".mp3", ".wav", ".aac", ".m4a", ".ogg", ".flac")
+
+        const val VIDEO_MIME_PREFIX = "video/"
+        val VIDEO_EXTENSIONS = listOf(".mp4", ".mov", ".avi", ".mkv", ".webm")
+
+        const val IMAGE_MIME_PREFIX = "image/"
+        val IMAGE_EXTENSIONS = listOf(".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg")
+
+        const val TEXT_MIME_PREFIX = "text/"
+        val TEXT_EXTENSIONS = listOf(".txt", ".rtf", ".md", ".json", ".xml", ".html", ".css", ".js")
+
+        val LINK_PREFIXES = listOf("http://", "https://")
     }
 
     /**

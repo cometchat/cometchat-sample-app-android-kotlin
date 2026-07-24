@@ -19,8 +19,8 @@ kotlinxCoroutinesTest = "1.10.2"
 lottie = "6.5.2"
 material = "1.12.0"
 constraintlayout = "2.2.0"
-chatSdkAndroid = "5.0.4"
-callsSdkAndroid = "5.0.1"
+chatSdkAndroid = "5.0.5"
+callsSdkAndroid = "5.0.2"
 mockitoCore = "5.21.0"
 mockitoKotlin = "6.1.0"
 robolectric = "4.11.1"
@@ -42,6 +42,8 @@ rules = "1.7.0"
 roborazzi = "1.8.0-alpha-5"
 cardsAndroid = "1.0.0"
 uiautomator = "2.3.0"
+rulesVersion = "1.6.1"
+pushNotificationsAndroid = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +56,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModelCompose" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-rules-v161 = { module = "androidx.test:rules", version.ref = "rulesVersion" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -66,6 +69,7 @@ chatuikit-compose-android = { module = "com.cometchat:chatuikit-compose-android"
 chatuikit-core-android = { module = "com.cometchat:chatuikit-core-android", version.ref = "chatuikitCoreAndroid" }
 chatuikit-kotlin-android = { module = "com.cometchat:chatuikit-kotlin-android", version.ref = "chatuikitKotlinAndroid" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-video = { group = "io.coil-kt", name = "coil-video", version.ref = "coil" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -87,6 +91,7 @@ calls-sdk-android = { group = "com.cometchat", name = "calls-sdk-android", versi
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+push-notifications-android = { module = "com.cometchat:push-notifications-android", version.ref = "pushNotificationsAndroid" }
 gridlayout = { module = "androidx.gridlayout:gridlayout", version.ref = "gridlayout" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }

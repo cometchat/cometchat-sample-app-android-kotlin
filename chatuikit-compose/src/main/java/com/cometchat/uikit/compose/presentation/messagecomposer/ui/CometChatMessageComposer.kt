@@ -1,7 +1,16 @@
 package com.cometchat.uikit.compose.presentation.messagecomposer.ui
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.mimeTypes
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
+import com.cometchat.uikit.compose.presentation.shared.mediaselection.createMediaSelectionResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -42,7 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,7 +70,15 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
@@ -88,9 +105,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.R
+import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatAttachmentTileStyle
+import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatAttachmentTrayStyle
+import com.cometchat.uikit.compose.presentation.shared.erroralert.CometChatErrorAlert
+import com.cometchat.uikit.compose.presentation.shared.erroralert.style.CometChatErrorAlertStyle
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupMenu
 import com.cometchat.uikit.compose.presentation.shared.popupmenu.PopupPosition
@@ -103,6 +125,9 @@ import com.cometchat.uikit.compose.presentation.shared.inlineaudiorecorder.style
 import com.cometchat.uikit.compose.presentation.shared.mediaselection.MediaContentType
 import com.cometchat.uikit.compose.presentation.shared.mediaselection.MediaSelectionResult
 import com.cometchat.uikit.compose.presentation.shared.mediaselection.rememberMediaSelectionState
+import com.cometchat.uikit.core.models.AttachmentSource
+import com.cometchat.uikit.core.models.StagedAttachmentInput
+import com.cometchat.uikit.core.models.defaultAttachmentCategory
 import com.cometchat.uikit.core.factory.CometChatMessageComposerViewModelFactory
 import com.cometchat.uikit.core.viewmodel.CometChatMediaRecorderViewModel
 import com.cometchat.uikit.core.viewmodel.CometChatInlineAudioRecorderViewModel
@@ -117,6 +142,7 @@ import com.cometchat.uikit.core.formatter.ComposerSegment
 import com.cometchat.uikit.core.formatter.SegmentComposerController
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.utils.AgentChatDetector
+import com.cometchat.uikit.core.utils.extractMediaDurationMillis
 import com.cometchat.uikit.core.viewmodel.CometChatMessageComposerViewModel
 import com.cometchat.uikit.core.viewmodel.ComposerMode
 import com.cometchat.uikit.core.viewmodel.RecordingState
@@ -142,8 +168,11 @@ import com.cometchat.uikit.core.domain.model.Sticker
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import java.io.File
 
 /**
@@ -199,6 +228,16 @@ fun CometChatMessageComposer(
     // Style
     style: CometChatMessageComposerStyle = CometChatMessageComposerStyle.default(),
     attachmentPopupStyle: CometChatPopupMenuStyle = CometChatPopupMenuStyle.default(),
+    attachmentTrayStyle: CometChatAttachmentTrayStyle = CometChatAttachmentTrayStyle.default(),
+    attachmentTileStyle: CometChatAttachmentTileStyle = CometChatAttachmentTileStyle.default(),
+    attachmentErrorAlertStyle: CometChatErrorAlertStyle = CometChatErrorAlertStyle.default(),
+    /**
+     * When `true` (default), picking attachments stages them in a horizontal tray and uploads them
+     * up front; the send button is gated until **all** staged attachments finish uploading, and a
+     * single multi-attachment message is sent on tap. When `false`, every attachment option reverts
+     * to the legacy single-pick, send-immediately behavior (no tray, no multi-upload).
+     */
+    enableMultipleAttachments: Boolean = true,
     // Visibility controls
     hideAttachmentButton: Boolean = false,
     hideVoiceRecordingButton: Boolean = false,
@@ -432,15 +471,35 @@ fun CometChatMessageComposer(
         composerViewModel.setAttachmentOptions(attachmentOptions)
     }
 
+    // Sync typing event preference with ViewModel and end any active typing
+    // session when the composer leaves composition
+    LaunchedEffect(disableTypingEvents) {
+        composerViewModel.disableTypingEvents = disableTypingEvents
+    }
+    DisposableEffect(composerViewModel) {
+        onDispose { composerViewModel.endTyping() }
+    }
+
     // Collect state from ViewModel
-    val editMessage by composerViewModel.editMessage.collectAsState()
-    val replyMessage by composerViewModel.replyMessage.collectAsState()
-    val composeText by composerViewModel.composeText.collectAsState()
-    val isAIGenerating by composerViewModel.isAIGenerating.collectAsState()
-    val idMap by composerViewModel.idMap.collectAsState()
-    val currentUser by composerViewModel.user.collectAsState()
-    val currentGroup by composerViewModel.group.collectAsState()
-    val composerMode by composerViewModel.composerMode.collectAsState()
+    val editMessage by composerViewModel.editMessage.collectAsStateWithLifecycle()
+    val replyMessage by composerViewModel.replyMessage.collectAsStateWithLifecycle()
+    val composeText by composerViewModel.composeText.collectAsStateWithLifecycle()
+    val isAIGenerating by composerViewModel.isAIGenerating.collectAsStateWithLifecycle()
+    val idMap by composerViewModel.idMap.collectAsStateWithLifecycle()
+    val currentUser by composerViewModel.user.collectAsStateWithLifecycle()
+    val currentGroup by composerViewModel.group.collectAsStateWithLifecycle()
+    val composerMode by composerViewModel.composerMode.collectAsStateWithLifecycle()
+
+    // Multi-attachment staging state (only meaningful when enableMultipleAttachments = true)
+    val attachmentTiles by composerViewModel.attachmentTiles.collectAsStateWithLifecycle()
+    val attachmentsAllUploaded by composerViewModel.attachmentsAllUploaded.collectAsStateWithLifecycle()
+    val hasStagedAttachments = enableMultipleAttachments && attachmentTiles.isNotEmpty()
+
+    // Per-message attachment cap: the server's fileCount setting. The remaining slots drive the
+    // picker selection limit (Gate A); stageAttachments trims anything that slips past it (Gate B).
+    val maxAttachmentCount = composerViewModel.maxAttachmentCount
+    val remainingAttachmentSlots =
+        (maxAttachmentCount - attachmentTiles.size).coerceAtLeast(0)
 
     // Detect agentic (AI bot) user — mirrors chatuikit-kotlin behavior
     val isAgentChat = remember(currentUser) {
@@ -465,9 +524,6 @@ fun CometChatMessageComposer(
     var showLinkPopup by remember { mutableStateOf(false) }
     var showStickerKeyboard by remember { mutableStateOf(false) }
     var showCreatePollDialog by remember { mutableStateOf(false) }
-
-    // Multiline mode: formatting toolbar visibility state
-    var isFormattingToolbarVisible by remember { mutableStateOf(false) }
 
     // Link editing state
     var linkEditInitialText by remember { mutableStateOf("") }
@@ -622,51 +678,172 @@ fun CometChatMessageComposer(
     // Check if in recording mode
     val isInRecordingMode = composerMode is ComposerMode.Recording
     
-    // Rich text toolbar visibility - controlled by effectiveEnableRichTextFormatting
-    // In multiline mode: toolbar shown only when isFormattingToolbarVisible is true (user clicked Aa)
-    // In single-line mode: toolbar always visible when enabled, regardless of text presence
-    val showRichTextToolbar = if (layoutMode == ComposerLayoutMode.MULTI_LINE) {
-        effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty() && isFormattingToolbarVisible
-    } else {
-        effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
-    }
-
-    // Whether to show the Aa formatting toggle in multiline mode Row 2
-    val showFormattingToggle = layoutMode == ComposerLayoutMode.MULTI_LINE && effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
+    // Rich text toolbar visibility - controlled by effectiveEnableRichTextFormatting.
+    // The toolbar sits below the input row in both layout modes and is always visible
+    // when formatting is enabled, regardless of text presence.
+    val showRichTextToolbar = effectiveEnableRichTextFormatting && enabledFormats.isNotEmpty()
 
     // Media selection state for handling attachment options
-    // Each callback uses a fixed message type based on the picker used, NOT the detected content type.
-    // This matches Java reference behavior where the action type determines the message type.
+    // Each callback uses a fixed category based on the picker used, NOT the detected content type.
+    // This matches Java reference behavior where the action type determines the message type: a
+    // photo chosen through the file picker stays a `file` (document tile, file message), while the
+    // same photo from the gallery/camera is an `image`.
+    // Stages a batch of picked files into the composer tray (multi-attachment flow). Items whose
+    // cached file is missing are skipped with an error; the rest start uploading immediately.
+    // `category` fixes the tile/send category for every item; null derives it from the MIME type
+    // (used by the visual-media picker, which returns a mix of images and videos).
+    val stageResultsAs: (List<MediaSelectionResult>, String?) -> Unit = { results, category ->
+        val inputs = results.mapNotNull { result ->
+            val file = result.file
+            if (file == null || !file.exists()) {
+                onError?.invoke(CometChatException("FILE_ERROR", "Selected file does not exist"))
+                null
+            } else {
+                val mime = result.mimeType ?: "application/octet-stream"
+                StagedAttachmentInput(
+                    file = file,
+                    name = result.fileName,
+                    size = if (result.fileSize > 0) result.fileSize else file.length(),
+                    mimeType = mime,
+                    category = category ?: defaultAttachmentCategory(mime),
+                    source = AttachmentSource.PICKER,
+                    localUri = result.uri.toString(),
+                    // Duration badge (video/audio) — read once at staging so it can be stored in
+                    // the sent message metadata and shown on the receive-side bubble.
+                    durationMillis = extractMediaDurationMillis(file.absolutePath, mime)
+                )
+            }
+        }
+        if (inputs.isNotEmpty()) composerViewModel.stageAttachments(inputs)
+    }
+
+    // Media dragged onto the composer (multi-window, tablets, ChromeOS/DeX) stages into the tray
+    // like a picker selection, category from MIME. NOTE: keyboard image-paste needs the
+    // TextFieldState-based BasicTextField content receiver — the composer's legacy
+    // TextFieldValue fields can't receive it; the Views composer covers that path.
+    val currentStageResults by rememberUpdatedState(stageResultsAs)
+    val mediaDropTarget = remember {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                return try {
+                    val dragEvent = event.toAndroidDragEvent()
+                    // Content uris need the platform grant before they can be read.
+                    context.findActivity()?.requestDragAndDropPermissions(dragEvent)
+                    val clip = dragEvent.clipData ?: return false
+                    val uris = (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }
+                    if (uris.isEmpty()) return false
+                    val results = uris.map { createMediaSelectionResult(context, it, copyToCache = true) }
+                    currentStageResults(results, null)
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+            }
+        }
+    }
+
+    // Paste interception: the legacy TextFieldValue-based BasicTextField can only paste TEXT —
+    // an image/file on the clipboard never reaches the field (and compose hides the Paste action
+    // entirely for media-only clips, since its clipboard check is text-based). The segment text
+    // fields wrap LocalTextToolbar with these two hooks: offer Paste when the clipboard holds
+    // media uris, and stage them into the tray like a picker selection instead of pasting.
+    val hasClipboardMedia: () -> Boolean = hasMedia@{
+        if (!enableMultipleAttachments) return@hasMedia false
+        val description = try {
+            (context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager)
+                .primaryClipDescription
+        } catch (e: Exception) {
+            null
+        } ?: return@hasMedia false
+        (0 until description.mimeTypeCount).any { i ->
+            val mime = description.getMimeType(i)
+            mime.startsWith("image/") || mime.startsWith("video/") ||
+                mime.startsWith("audio/") || mime.startsWith("application/")
+        }
+    }
+    val stageClipboardMedia: () -> Boolean = stageMedia@{
+        if (!enableMultipleAttachments) return@stageMedia false
+        try {
+            val clip = (context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager)
+                .primaryClip ?: return@stageMedia false
+            val uris = (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }
+            if (uris.isEmpty()) return@stageMedia false
+            val results = uris.map { createMediaSelectionResult(context, it, copyToCache = true) }
+            stageResultsAs(results, null)
+            true
+        } catch (e: Exception) {
+            Log.e("CometChatMessageComposer", "Failed to stage clipboard media: ${e.message}")
+            false
+        }
+    }
+
     val mediaSelectionState = rememberMediaSelectionState(
+        // Gate A: the OS visual-media picker only offers the remaining tray slots.
+        maxSelection = remainingAttachmentSlots,
+        // Single-select callbacks fire only on the legacy path (enableMultipleAttachments = false),
+        // where each pick is sent immediately with a fixed message type.
         onImageSelected = { result ->
-            // Image picker always sends as "image" type
             handleMediaSelectionWithType(result, "image", composerViewModel, onError)
         },
         onVideoSelected = { result ->
-            // Video picker always sends as "video" type
             handleMediaSelectionWithType(result, "video", composerViewModel, onError)
         },
         onAudioSelected = { result ->
-            // Audio picker always sends as "audio" type
             handleMediaSelectionWithType(result, "audio", composerViewModel, onError)
         },
         onFileSelected = { result ->
-            // File picker always sends as "file" type regardless of actual MIME type
-            // This matches Java reference behavior where DOCUMENT action always uses MESSAGE_TYPE_FILE
             handleMediaSelectionWithType(result, "file", composerViewModel, onError)
         },
+        // Camera/video capture are always single-shot; they stage in the multi-attachment flow and
+        // send immediately on the legacy path.
         onCameraCapture = { result ->
-            // Camera capture always sends as "image" type
-            handleMediaSelectionWithType(result, "image", composerViewModel, onError)
+            if (enableMultipleAttachments) stageResultsAs(listOf(result), CometChatConstants.MESSAGE_TYPE_IMAGE)
+            else handleMediaSelectionWithType(result, "image", composerViewModel, onError)
         },
         onVideoCapture = { result ->
-            // Video capture always sends as "video" type
-            handleMediaSelectionWithType(result, "video", composerViewModel, onError)
+            if (enableMultipleAttachments) stageResultsAs(listOf(result), CometChatConstants.MESSAGE_TYPE_VIDEO)
+            else handleMediaSelectionWithType(result, "video", composerViewModel, onError)
         },
+        // Multi-select callbacks fire only on the multi-attachment path and always stage. The
+        // picker fixes the category: file-picker picks stay `file` and audio-picker picks stay
+        // `audio` regardless of MIME; the visual-media picker derives image/video per item.
+        onImagesSelected = { stageResultsAs(it, null) },
+        onVideosSelected = { stageResultsAs(it, null) },
+        onAudiosSelected = { stageResultsAs(it, CometChatConstants.MESSAGE_TYPE_AUDIO) },
+        onFilesSelected = { stageResultsAs(it, CometChatConstants.MESSAGE_TYPE_FILE) },
         onError = { exception ->
             onError?.invoke(CometChatException("MEDIA_SELECTION_ERROR", exception.message ?: "Media selection failed"))
         }
     )
+
+    // The documents / audio picker UI can't be capped like the photo picker, so the selection
+    // limit is surfaced as the picker opens instead: a toast with the remaining slot count renders
+    // on top of the opening picker. Shown only when part of the cap is already used.
+    val toastRemainingSlotsHint: () -> Unit = {
+        if (enableMultipleAttachments &&
+            remainingAttachmentSlots in 1 until maxAttachmentCount
+        ) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.cometchat_attachment_remaining_slots, remainingAttachmentSlots),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    // Gate A (multi-attachment): refuse to open a picker when the tray is already at the cap.
+    // Anything that still slips past the picker limit is trimmed by stageAttachments (Gate B).
+    val launchIfSlotsRemain: (() -> Unit) -> Unit = { launch ->
+        if (enableMultipleAttachments && remainingAttachmentSlots <= 0) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.cometchat_attachment_count_exceeded, maxAttachmentCount),
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            launch()
+        }
+    }
 
     // Rich text formatter manager (kept for backward compat — bubble display side)
     val formatterManager = remember(enabledFormats) {
@@ -690,9 +867,15 @@ fun CometChatMessageComposer(
     // everything else becomes Normal segments.
     LaunchedEffect(editMessage, effectiveTextFormatters) {
         editMessage?.let { msg ->
-            if (msg is TextMessage) {
+            // Text messages edit their text; media messages edit their caption.
+            val rawText = when (msg) {
+                is TextMessage -> msg.text ?: ""
+                is MediaMessage -> msg.caption ?: ""
+                else -> null
+            }
+            if (rawText != null) {
                 // Run formatter pipeline to resolve mention tokens (e.g., <@uid:userId> -> @userName)
-                var formattedText: AnnotatedString = AnnotatedString(msg.text ?: "")
+                var formattedText: AnnotatedString = AnnotatedString(rawText)
                 for (formatter in effectiveTextFormatters) {
                     formattedText = formatter.prepareMessageString(
                         context,
@@ -816,12 +999,30 @@ fun CometChatMessageComposer(
     // Handle error events
     LaunchedEffect(Unit) {
         composerViewModel.errorEvent.collect { error ->
+            // Gate B backstop: picked files beyond the attachment cap were dropped — tell the user.
+            if (error.code == CometChatMessageComposerViewModel.ERROR_MAX_ATTACHMENTS_EXCEEDED) {
+                Toast.makeText(
+                    context,
+                    context.getString(
+                        R.string.cometchat_attachment_count_exceeded,
+                        composerViewModel.maxAttachmentCount
+                    ),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             onError?.invoke(error)
         }
     }
 
-    // Determine send button state — segment controller tracks all content across segments
-    val isSendButtonActive = segmentController.hasContent
+    // Determine send button state — segment controller tracks all content across segments.
+    // With staged attachments, the send button follows the all-or-nothing rule: it stays disabled
+    // until every staged attachment has finished uploading (text becomes an optional caption).
+    val canSendStagedAttachments = hasStagedAttachments && attachmentsAllUploaded
+    val isSendButtonActive = if (hasStagedAttachments) {
+        canSendStagedAttachments
+    } else {
+        segmentController.hasContent
+    }
 
     // Placeholder text
     val placeholder = placeholderText ?: context.getString(R.string.cometchat_composer_place_holder_text)
@@ -834,10 +1035,19 @@ fun CometChatMessageComposer(
         startIconTint = CometChatTheme.colorScheme.iconTintHighlight
     )
 
+    // Transient messages (e.g. why a staged attachment was rejected) surface through a themed
+    // CometChatErrorAlert pinned just ABOVE the composer. Setting the text shows it; it clears itself
+    // on timeout or ✕. The composer width is tracked so the floating bar can match it.
+    var attachmentErrorMessage by remember { mutableStateOf<String?>(null) }
+    var composerWidthPx by remember { mutableStateOf(0) }
 
-
-    Column(
+    Box(
         modifier = modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { composerWidthPx = it.size.width }
+    ) {
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
             .background(
                 color = style.backgroundColor,
@@ -851,6 +1061,15 @@ fun CometChatMessageComposer(
                         shape = RoundedCornerShape(style.cornerRadius)
                     )
                 } else Modifier
+            )
+            .dragAndDropTarget(
+                shouldStartDragAndDrop = { event ->
+                    enableMultipleAttachments && event.mimeTypes().any { mime ->
+                        mime.startsWith("image/") || mime.startsWith("video/") ||
+                            mime.startsWith("audio/") || mime.startsWith("application/")
+                    }
+                },
+                target = mediaDropTarget
             )
             .semantics { contentDescription = "Message Composer" }
     ) {
@@ -1027,6 +1246,31 @@ fun CometChatMessageComposer(
                     )
                 }
             }
+
+            // Multi-attachment staging tray (renders only while ≥1 attachment is staged).
+            // Rendered BELOW the text input, per the design: text on top, tray under it, action
+            // buttons at the bottom.
+            val attachmentTrayContent: @Composable () -> Unit = {
+                if (enableMultipleAttachments) {
+                    CometChatAttachmentTray(
+                        tiles = attachmentTiles,
+                        style = attachmentTrayStyle,
+                        tileStyle = attachmentTileStyle,
+                        onCancelTile = { composerViewModel.removeAttachment(it) },
+                        onRemoveTile = { composerViewModel.removeAttachment(it) },
+                        onRetryTile = { composerViewModel.retryAttachment(it) },
+                        onTileClick = { openStagedAttachmentPreview(context, it) },
+                        onRejectedTile = { tile ->
+                            // Surface the SDK-provided rejection reason verbatim (e.g. the size-limit
+                            // message already carries the actual per-file limit) — the UIKit never
+                            // recomputes or hardcodes the limit.
+                            attachmentErrorMessage = tile.error?.message?.takeIf { it.isNotBlank() }
+                                ?: context.getString(R.string.cometchat_attachment_upload_failed)
+                        }
+                    )
+                }
+            }
+
             // Input row with buttons - or inline recorder when in recording mode
             if (isInRecordingMode) {
                 // Show new CometChatInlineAudioRecorder component
@@ -1038,8 +1282,8 @@ fun CometChatMessageComposer(
                     viewModel = inlineAudioRecorderViewModel,
                     style = CometChatInlineAudioRecorderStyle.default(),
                     onSubmit = { file ->
-                        // Send the audio file with correct CometChat message type
-                        composerViewModel.sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_AUDIO)
+                        // Recorded voice note → mark it so the receive side uses VoiceNoteBubble.
+                        composerViewModel.sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_AUDIO, isVoiceNote = true)
                         composerViewModel.exitRecordingMode()
                     },
                     onCancel = {
@@ -1050,371 +1294,12 @@ fun CometChatMessageComposer(
                         composerViewModel.exitRecordingMode()
                     }
                 )
+                attachmentTrayContent()
             } else {
-            if (layoutMode == ComposerLayoutMode.MULTI_LINE) {
-            // ===== MULTILINE MODE =====
-            // Row 1: Full-width text input (no buttons beside it)
-            // Figma: 12dp padding inside compose box
-            // Min height ensures the text area is visually proportional to the
-            // formatting toolbar / button row beneath it (which is ~48dp tall).
-            // 56dp total ≈ 12dp top padding + ~40dp content (≈2 lines) + 4dp bottom padding.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 40.dp)
-                    .heightIn(max = 200.dp)
-                    .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 4.dp)
-            ) {
-            // Text input area — segment-based editor
-            @Suppress("UNUSED_VARIABLE")
-            val currentSegmentVersion = segmentVersion
-
-            val inputScrollState = rememberScrollState()
-            val coroutineScope = rememberCoroutineScope()
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(inputScrollState)
-            ) {
-                val segments = segmentController.segments
-                segments.forEachIndexed { index, segment ->
-                    if (index > 0) {
-                        val prev = segments[index - 1]
-                        val needsSpacing = (prev is ComposerSegment.Normal && segment is ComposerSegment.Code && prev.controller.state.text.isNotEmpty()) ||
-                            (prev is ComposerSegment.Code && segment is ComposerSegment.Normal && segment.controller.state.text.isNotEmpty())
-                        if (needsSpacing) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                        }
-                    }
-                    when (segment) {
-                        is ComposerSegment.Normal -> {
-                            NormalSegmentTextField(
-                                segment = segment,
-                                segmentController = segmentController,
-                                focusRequester = focusRequesters[segment.id]!!,
-                                style = style,
-                                enabledFormats = enabledFormats,
-                                placeholder = placeholder,
-                                showPlaceholder = index == 0 && !segmentController.hasContent,
-                                onTextChanged = { text -> onTextChanged?.invoke(text) },
-                                onFocused = {
-                                    if (showStickerKeyboard) showStickerKeyboard = false
-                                },
-                                mentionInsertionState = mentionInsertionState,
-                                mentionDetectionState = mentionDetectionState,
-                                onMentionDetected = { detected -> mentionDetectionState = detected },
-                                showSuggestionList = showSuggestionList,
-                                onShowSuggestionList = { show -> showSuggestionList = show },
-                                effectiveTextFormatters = effectiveTextFormatters,
-                                disableMentions = disableMentions,
-                                composerViewModel = composerViewModel,
-                                formatVersion = formatVersion,
-                                onCodeBlockInserted = { segmentVersion++ },
-                                onLinkTapped = { linkText, linkUrl, spanStart, spanEnd ->
-                                    linkEditInitialText = linkText
-                                    linkEditInitialUrl = linkUrl
-                                    linkEditSpanStart = spanStart
-                                    linkEditSpanEnd = spanEnd
-                                    showLinkPopup = true
-                                },
-                                onSelectionChanged = { formatVersion++ }
-                            )
-                        }
-                        is ComposerSegment.Code -> {
-                            CodeSegmentTextField(
-                                segment = segment,
-                                segmentController = segmentController,
-                                focusRequester = focusRequesters[segment.id]!!,
-                                style = style,
-                                onFocused = {
-                                    segmentController.setFocusedSegment(segment.id)
-                                    if (showStickerKeyboard) showStickerKeyboard = false
-                                    formatVersion++
-                                },
-                                onTextChanged = { text ->
-                                    onTextChanged?.invoke(text)
-                                    formatVersion++
-                                }
-                            )
-                        }
-                    }
-                }
-            } // End of multiline text input Column
-
-            LaunchedEffect(segmentVersion, segmentController.pendingFocusSegmentId) {
-                delay(50)
-                coroutineScope.launch {
-                    inputScrollState.animateScrollTo(inputScrollState.maxValue)
-                }
-            }
-            } // End of Row 1 padding Column
-
-            // Row 2: Action buttons OR formatting toolbar (mutually exclusive, animated)
-            androidx.compose.animation.AnimatedContent(
-                targetState = isFormattingToolbarVisible,
-                transitionSpec = {
-                    (fadeIn(animationSpec = tween(200)) + expandVertically())
-                        .togetherWith(fadeOut(animationSpec = tween(200)) + shrinkVertically())
-                },
-                label = "multiline_row2_transition"
-            ) { showToolbar ->
-                if (showToolbar) {
-                    // Formatting toolbar with close button
-                    @Suppress("UNUSED_VARIABLE")
-                    val currentFormatVersion = formatVersion
-
-                    val effectiveActiveFormats = run {
-                        val base = segmentController.activeFormats
-                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
-                        if (focused != null) {
-                            val text = focused.controller.state.text
-                            val cursorPos = focused.controller.state.selectionStart
-                            if (text.isNotEmpty() && cursorPos <= text.length) {
-                                val lineStart = text.lastIndexOf('\n', (cursorPos - 1).coerceAtLeast(0)) + 1
-                                val lineEnd = text.indexOf('\n', cursorPos).let { if (it == -1) text.length else it }
-                                if (lineStart <= lineEnd && lineEnd <= text.length) {
-                                    val currentLine = text.substring(lineStart, lineEnd)
-                                    val lineFormats = mutableSetOf<RichTextFormat>()
-                                    if (currentLine.startsWith("- ") || currentLine.startsWith("• ")) {
-                                        lineFormats.add(RichTextFormat.BULLET_LIST)
-                                    } else if (currentLine.matches(Regex("^\\d+\\. .*"))) {
-                                        lineFormats.add(RichTextFormat.ORDERED_LIST)
-                                    } else if (currentLine.startsWith("> ")) {
-                                        lineFormats.add(RichTextFormat.BLOCKQUOTE)
-                                    }
-                                    base + lineFormats
-                                } else base
-                            } else base
-                        } else base
-                    }
-
-                    val effectiveDisabledFormats = run {
-                        val base = segmentController.toolbarDisabledFormats
-                        val focused = segmentController.focusedSegment as? ComposerSegment.Normal
-                        if (focused != null) {
-                            val cursorPos = focused.controller.state.selectionStart
-                            val spanManager = focused.controller.state.spanManager
-                            val linkSpan = spanManager.findLinkSpanAt(cursorPos)
-                                ?: if (cursorPos > 0) spanManager.findLinkSpanAt(cursorPos - 1) else null
-                            if (linkSpan != null) {
-                                base + setOf(
-                                    RichTextFormat.BOLD, RichTextFormat.ITALIC, RichTextFormat.UNDERLINE,
-                                    RichTextFormat.STRIKETHROUGH, RichTextFormat.INLINE_CODE
-                                )
-                            } else base
-                        } else base
-                    }
-
-                    CometChatRichTextToolbar(
-                        modifier = Modifier.fillMaxWidth(),
-                        style = style,
-                        activeFormats = effectiveActiveFormats,
-                        disabledFormats = effectiveDisabledFormats,
-                        enabledFormats = enabledFormats,
-                        onCloseClick = { isFormattingToolbarVisible = false },
-                        onFormatClick = { format ->
-                            if (segmentController.focusedSegment == null) {
-                                val firstNormal = segmentController.segments.firstOrNull { it is ComposerSegment.Normal }
-                                if (firstNormal != null) segmentController.focusSegment(firstNormal.id)
-                            } else {
-                                segmentController.focusedSegmentId?.let { id -> focusRequesters[id]?.requestFocus() }
-                            }
-                            val focusedSeg = segmentController.focusedSegment
-                            when {
-                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Code ->
-                                    segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, null)
-                                focusedSeg is ComposerSegment.Code && format in setOf(
-                                    RichTextFormat.BULLET_LIST, RichTextFormat.ORDERED_LIST, RichTextFormat.BLOCKQUOTE
-                                ) -> segmentController.extractParagraphFromCodeBlock(focusedSeg.cursorPosition, format)
-                                format == RichTextFormat.CODE_BLOCK && focusedSeg is ComposerSegment.Normal ->
-                                    segmentController.convertCursorParagraphToCodeBlock()
-                                focusedSeg is ComposerSegment.Normal -> focusedSeg.controller.toggleFormat(format)
-                            }
-                            formatVersion++
-                        },
-                        onLinkClick = {
-                            val focused = segmentController.focusedSegment as? ComposerSegment.Normal
-                            focused?.controller?.let { ctrl ->
-                                val spanManager = ctrl.state.spanManager
-                                val selStart = ctrl.state.selectionStart
-                                val selEnd = ctrl.state.selectionEnd
-                                val text = ctrl.state.text
-                                val checkPos = if (selStart > 0) selStart - 1 else selStart
-                                val linkSpan = spanManager.findLinkSpanAt(checkPos) ?: spanManager.findLinkSpanAt(selStart)
-                                if (linkSpan != null) {
-                                    linkEditInitialText = text.substring(linkSpan.start, linkSpan.end)
-                                    linkEditInitialUrl = spanManager.getLinkUrlAt(linkSpan.start) ?: ""
-                                    linkEditSpanStart = linkSpan.start
-                                    linkEditSpanEnd = linkSpan.end
-                                    showLinkPopup = true
-                                } else if (selStart != selEnd) {
-                                    isLinkEditMode = false
-                                    linkEditInitialText = text.substring(selStart, selEnd)
-                                    linkEditInitialUrl = ""
-                                    linkEditSpanStart = -1
-                                    linkEditSpanEnd = -1
-                                    showLinkDialog = true
-                                } else {
-                                    isLinkEditMode = false
-                                    linkEditInitialText = ""
-                                    linkEditInitialUrl = ""
-                                    linkEditSpanStart = -1
-                                    linkEditSpanEnd = -1
-                                    showLinkDialog = true
-                                }
-                            }
-                        }
-                    )
-                } else {
-                    // Default: MultilineButtonRow with action buttons
-                    // Get attachment options from ViewModel (filtered by visibility flags)
-                    val multilineAttachmentOptions = remember(
-                        composerViewModel.showCameraOption.collectAsState().value,
-                        composerViewModel.showImageOption.collectAsState().value,
-                        composerViewModel.showVideoOption.collectAsState().value,
-                        composerViewModel.showAudioOption.collectAsState().value,
-                        composerViewModel.showFileOption.collectAsState().value,
-                        composerViewModel.showPollOption.collectAsState().value,
-                        composerViewModel.showCollaborativeDocumentOption.collectAsState().value,
-                        composerViewModel.showCollaborativeWhiteboardOption.collectAsState().value
-                    ) {
-                        composerViewModel.getDefaultAttachmentOptions(
-                            cameraTitle = context.getString(R.string.cometchat_camera),
-                            cameraIcon = R.drawable.cometchat_ic_camera,
-                            imageTitle = context.getString(R.string.cometchat_attach_image),
-                            imageIcon = R.drawable.cometchat_ic_image_library,
-                            videoTitle = context.getString(R.string.cometchat_attach_video),
-                            videoIcon = R.drawable.cometchat_ic_video_library,
-                            audioTitle = context.getString(R.string.cometchat_attach_audio),
-                            audioIcon = R.drawable.cometchat_ic_audio,
-                            fileTitle = context.getString(R.string.cometchat_attach_document),
-                            fileIcon = R.drawable.cometchat_ic_file_upload,
-                            pollTitle = context.getString(R.string.cometchat_poll),
-                            pollIcon = R.drawable.cometchat_ic_polls,
-                            collaborativeDocumentTitle = context.getString(R.string.cometchat_collaborative_doc),
-                            collaborativeDocumentIcon = R.drawable.cometchat_ic_collaborative_document,
-                            collaborativeWhiteboardTitle = context.getString(R.string.cometchat_collaborative_whiteboard),
-                            collaborativeWhiteboardIcon = R.drawable.cometchat_ic_conversations_collaborative_whiteboard
-                        )
-                    }
-                    val multilineMenuItems = multilineAttachmentOptions.map { action ->
-                        MenuItem.withIcons(
-                            id = action.id,
-                            name = action.title,
-                            startIcon = androidx.compose.ui.res.painterResource(action.icon)
-                        )
-                    }
-
-                    MultilineButtonRow(
-                        style = style,
-                        hideAttachmentButton = effectiveHideAttachmentButton,
-                        hideVoiceRecordingButton = effectiveHideVoiceRecordingButton,
-                        hideStickersButton = effectiveHideStickersButton,
-                        hideSendButton = hideSendButton,
-                        showFormattingToggle = showFormattingToggle,
-                        isStickerKeyboardOpen = showStickerKeyboard,
-                        isSendButtonActive = isSendButtonActive,
-                        isAIGenerating = isAIGenerating,
-                        isAgentChat = isAgentChat,
-                        isAttachmentPopupExpanded = showAttachmentPopup,
-                        onAttachmentClick = { showAttachmentPopup = !showAttachmentPopup },
-                        onVoiceRecordClick = { composerViewModel.startRecordingMode() },
-                        onStickerClick = {
-                            if (!showStickerKeyboard) keyboardController?.hide()
-                            showStickerKeyboard = !showStickerKeyboard
-                        },
-                        onFormattingToggleClick = { isFormattingToolbarVisible = true },
-                        onSendClick = {
-                            handleSend(
-                                context = context,
-                                segmentController = segmentController,
-                                editMessage = editMessage,
-                                viewModel = composerViewModel,
-                                onSendButtonClick = onSendButtonClick,
-                                onClear = {
-                                    segmentController.clear()
-                                    mentionInsertionState.clear()
-                                    mentionVersion = 0
-                                    showSuggestionList = false
-                                    suggestionItems = emptyList()
-                                    mentionDetectionState = ComposeMentionState.INACTIVE
-                                    effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
-                                },
-                                mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
-                                textFormatters = effectiveTextFormatters
-                            )
-                        },
-                        sendButtonView = sendButtonView,
-                        attachmentButtonContent = if (!effectiveHideAttachmentButton) {
-                            {
-                                CometChatPopupMenu(
-                                    expanded = showAttachmentPopup,
-                                    onDismissRequest = {
-                                        showAttachmentPopup = false
-                                        attachmentPopupDismissTime = System.currentTimeMillis()
-                                    },
-                                    menuItems = multilineMenuItems,
-                                    style = effectiveAttachmentPopupStyle,
-                                    position = PopupPosition.ABOVE,
-                                    onMenuItemClick = { id, _ ->
-                                        showAttachmentPopup = false
-                                        when (id) {
-                                            CometChatMessageComposerAction.ID_CAMERA -> {
-                                                val handled = onCameraClick?.invoke() ?: false
-                                                if (!handled) mediaSelectionState.launchCamera()
-                                            }
-                                            CometChatMessageComposerAction.ID_IMAGE -> {
-                                                val handled = onImageClick?.invoke() ?: false
-                                                if (!handled) mediaSelectionState.launchImagePicker()
-                                            }
-                                            CometChatMessageComposerAction.ID_VIDEO -> {
-                                                val handled = onVideoClick?.invoke() ?: false
-                                                if (!handled) mediaSelectionState.launchVideoPicker()
-                                            }
-                                            CometChatMessageComposerAction.ID_AUDIO -> {
-                                                val handled = onAudioClick?.invoke() ?: false
-                                                if (!handled) mediaSelectionState.launchAudioPicker()
-                                            }
-                                            CometChatMessageComposerAction.ID_DOCUMENT -> {
-                                                val handled = onDocumentClick?.invoke() ?: false
-                                                if (!handled) mediaSelectionState.launchFilePicker()
-                                            }
-                                            CometChatMessageComposerAction.ID_POLL -> {
-                                                val handled = onPollClick?.invoke() ?: false
-                                                if (!handled) showCreatePollDialog = true
-                                            }
-                                            else -> {
-                                                val customAction = multilineAttachmentOptions.find { it.id == id }
-                                                customAction?.let { action -> onAttachmentOptionClick?.invoke(action) }
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    AnimatedAttachmentButton(
-                                        isExpanded = showAttachmentPopup,
-                                        style = style,
-                                        onClick = {
-                                            // Guard against the race condition where
-                                            // dismissOnClickOutside fires onDismissRequest
-                                            // (setting false) and then this click fires
-                                            // (setting true) in the same gesture. If the
-                                            // popup was just dismissed (<300ms ago), treat
-                                            // the click as the closing gesture and skip.
-                                            val now = System.currentTimeMillis()
-                                            if (now - attachmentPopupDismissTime < 300) {
-                                                return@AnimatedAttachmentButton
-                                            }
-                                            showAttachmentPopup = !showAttachmentPopup
-                                        }
-                                    )
-                                }
-                            }
-                        } else null
-                    )
-                }
-            }
-            } else {
-            // ===== SINGLE-LINE MODE (existing layout) =====
+            // ===== INPUT ROW =====
+            // Both layout modes keep the action buttons inline with the text input:
+            // attachment on the left, then sticker, voice recording and send on the right.
+            // MULTI_LINE only differs by pinning the rich text toolbar below this row.
             var textLayoutLineCount by remember { mutableStateOf(1) }
             val buttonAlignment = if (textLayoutLineCount > 1) Alignment.Bottom else Alignment.CenterVertically
             
@@ -1439,14 +1324,14 @@ fun CometChatMessageComposer(
                 ) {
                 // Get attachment options from ViewModel (filtered by visibility flags)
                 val attachmentOptions = remember(
-                    composerViewModel.showCameraOption.collectAsState().value,
-                    composerViewModel.showImageOption.collectAsState().value,
-                    composerViewModel.showVideoOption.collectAsState().value,
-                    composerViewModel.showAudioOption.collectAsState().value,
-                    composerViewModel.showFileOption.collectAsState().value,
-                    composerViewModel.showPollOption.collectAsState().value,
-                    composerViewModel.showCollaborativeDocumentOption.collectAsState().value,
-                    composerViewModel.showCollaborativeWhiteboardOption.collectAsState().value
+                    composerViewModel.showCameraOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showImageOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showVideoOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showAudioOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showFileOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showPollOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showCollaborativeDocumentOption.collectAsStateWithLifecycle().value,
+                    composerViewModel.showCollaborativeWhiteboardOption.collectAsStateWithLifecycle().value
                 ) {
                     composerViewModel.getDefaultAttachmentOptions(
                         cameraTitle = context.getString(R.string.cometchat_camera),
@@ -1491,23 +1376,23 @@ fun CometChatMessageComposer(
                         when (id) {
                             CometChatMessageComposerAction.ID_CAMERA -> {
                                 val handled = onCameraClick?.invoke() ?: false
-                                if (!handled) mediaSelectionState.launchCamera()
+                                if (!handled) launchIfSlotsRemain(mediaSelectionState.launchCamera)
                             }
                             CometChatMessageComposerAction.ID_IMAGE -> {
                                 val handled = onImageClick?.invoke() ?: false
-                                if (!handled) mediaSelectionState.launchImagePicker()
+                                if (!handled) { if (enableMultipleAttachments) launchIfSlotsRemain(mediaSelectionState.launchImagePickerMultiple) else mediaSelectionState.launchImagePicker() }
                             }
                             CometChatMessageComposerAction.ID_VIDEO -> {
                                 val handled = onVideoClick?.invoke() ?: false
-                                if (!handled) mediaSelectionState.launchVideoPicker()
+                                if (!handled) { if (enableMultipleAttachments) launchIfSlotsRemain(mediaSelectionState.launchVideoPickerMultiple) else mediaSelectionState.launchVideoPicker() }
                             }
                             CometChatMessageComposerAction.ID_AUDIO -> {
                                 val handled = onAudioClick?.invoke() ?: false
-                                if (!handled) mediaSelectionState.launchAudioPicker()
+                                if (!handled) { if (enableMultipleAttachments) run { toastRemainingSlotsHint(); launchIfSlotsRemain(mediaSelectionState.launchAudioPickerMultiple) } else mediaSelectionState.launchAudioPicker() }
                             }
                             CometChatMessageComposerAction.ID_DOCUMENT -> {
                                 val handled = onDocumentClick?.invoke() ?: false
-                                if (!handled) mediaSelectionState.launchFilePicker()
+                                if (!handled) { if (enableMultipleAttachments) run { toastRemainingSlotsHint(); launchIfSlotsRemain(mediaSelectionState.launchFilePickerMultiple) } else mediaSelectionState.launchFilePicker() }
                             }
                             CometChatMessageComposerAction.ID_POLL -> {
                                 val handled = onPollClick?.invoke() ?: false
@@ -1637,7 +1522,9 @@ fun CometChatMessageComposer(
                                 onCodeBlockInserted = {
                                     segmentVersion++
                                     formatVersion++
-                                }
+                                },
+                                onMediaPaste = stageClipboardMedia,
+                                hasClipboardMedia = hasClipboardMedia
                             )
                         }
                         is ComposerSegment.Code -> {
@@ -1656,6 +1543,11 @@ fun CometChatMessageComposer(
                                     onTextChanged?.invoke(text)
                                     // Trigger auto-scroll to keep cursor visible while typing in code block
                                     formatVersion++
+                                    if (text.isNotEmpty()) {
+                                        composerViewModel.startTyping()
+                                    } else if (!segmentController.hasContent) {
+                                        composerViewModel.endTyping()
+                                    }
                                 }
                             )
                         }
@@ -1699,9 +1591,9 @@ fun CometChatMessageComposer(
                         onVoiceRecordClick = { /* handled below */ }
                     )
 
-                    // Voice recording button — slides out when typing
+                    // Voice recording button — slides out when typing or when attachments are staged
                     AnimatedVisibility(
-                        visible = !effectiveHideVoiceRecordingButton && !hasText,
+                        visible = !effectiveHideVoiceRecordingButton && !hasText && !hasStagedAttachments,
                         enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
                         exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
                     ) {
@@ -1741,7 +1633,8 @@ fun CometChatMessageComposer(
                                     effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
                                 },
                                 mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
-                                textFormatters = effectiveTextFormatters
+                                textFormatters = effectiveTextFormatters,
+                                sendStagedAttachments = canSendStagedAttachments
                             )
                         },
                         isSendButtonActive,
@@ -1773,20 +1666,21 @@ fun CometChatMessageComposer(
                                     effectiveTextFormatters.forEach { it.setSelectedList(context, emptyList()) }
                                 },
                                 mentionInsertionState = if (!disableMentions) mentionInsertionState else null,
-                                textFormatters = effectiveTextFormatters
+                                textFormatters = effectiveTextFormatters,
+                                sendStagedAttachments = canSendStagedAttachments
                             )
                         }
                     )
                 }
             }
             } // End of input Row
-            } // End of single-line mode else block
+
+            attachmentTrayContent()
             } // End of recording mode else block
             
-            // Rich text toolbar (inside compose box, visible in single-line mode when enableRichTextFormatting=true)
-            // In multiline mode, the toolbar is rendered inside Row 2's AnimatedContent instead
+            // Rich text toolbar (inside compose box, below the input row, when enableRichTextFormatting=true)
             AnimatedVisibility(
-                visible = showRichTextToolbar && layoutMode != ComposerLayoutMode.MULTI_LINE,
+                visible = showRichTextToolbar,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
@@ -1979,6 +1873,45 @@ fun CometChatMessageComposer(
         }
     }
 
+        // Transient error alert for composer messages (e.g. attachment rejection reasons). Rendered in
+        // an overlay Popup pinned just ABOVE the composer (its bottom edge sits at the composer's
+        // top), mirroring the Views CometChatErrorAlert / iOS behaviour instead of overlapping the
+        // composer content.
+        // Only compose the Popup while there is a message. Presence drives show/hide — animating an
+        // AnimatedVisibility inside an always-present, self-sizing Popup made the alert flash/double
+        // on appear and stay stuck on ✕, because the Popup re-anchors per frame and never tears the
+        // exit frame down cleanly.
+        if (!attachmentErrorMessage.isNullOrBlank()) {
+            val errorAlertDensity = LocalDensity.current
+            val errorAlertSidePaddingPx = with(errorAlertDensity) { 8.dp.roundToPx() }
+            val errorAlertGapPx = with(errorAlertDensity) { 8.dp.roundToPx() }
+            Popup(
+                popupPositionProvider = object : PopupPositionProvider {
+                    override fun calculatePosition(
+                        anchorBounds: IntRect,
+                        windowSize: IntSize,
+                        layoutDirection: LayoutDirection,
+                        popupContentSize: IntSize
+                    ): IntOffset = IntOffset(
+                        x = anchorBounds.left + errorAlertSidePaddingPx,
+                        y = (anchorBounds.top - popupContentSize.height - errorAlertGapPx).coerceAtLeast(0)
+                    )
+                },
+                properties = PopupProperties(focusable = false)
+            ) {
+                val errorAlertWidthDp = with(errorAlertDensity) {
+                    (composerWidthPx - errorAlertSidePaddingPx * 2).coerceAtLeast(0).toDp()
+                }
+                CometChatErrorAlert(
+                    message = attachmentErrorMessage,
+                    onDismiss = { attachmentErrorMessage = null },
+                    modifier = Modifier.width(errorAlertWidthDp),
+                    style = attachmentErrorAlertStyle
+                )
+            }
+        }
+    }
+
     // Link edit dialog
     if (showLinkDialog) {
         CometChatLinkEditDialog(
@@ -2094,12 +2027,13 @@ fun CometChatMessageComposer(
 private fun handleSend(
     context: Context,
     segmentController: SegmentComposerController,
-    editMessage: TextMessage?,
+    editMessage: BaseMessage?,
     viewModel: CometChatMessageComposerViewModel,
     onSendButtonClick: ((Context, BaseMessage) -> Unit)?,
     onClear: () -> Unit,
     mentionInsertionState: com.cometchat.uikit.compose.presentation.shared.mentions.ComposeMentionInsertionState? = null,
-    textFormatters: List<CometChatTextFormatter> = emptyList()
+    textFormatters: List<CometChatTextFormatter> = emptyList(),
+    sendStagedAttachments: Boolean = false
 ) {
     // Serialize all segments to markdown via the controller
     val markdownText = segmentController.toMarkdown()
@@ -2115,6 +2049,17 @@ private fun handleSend(
 
     android.util.Log.d("MessageComposer", "handleSend: final textToSend='$textToSend'")
 
+    // Multi-attachment send: the staged attachments go out as a single media message with the
+    // current text as caption (which may be blank). Takes precedence over a plain text send.
+    if (sendStagedAttachments) {
+        viewModel.sendStagedAttachments(caption = textToSend.takeIf { it.isNotBlank() })
+        // Compose clears the input programmatically, which never fires onValueChange —
+        // end the typing session here, where legacy's clear-triggered watcher would have
+        viewModel.endTyping()
+        onClear()
+        return
+    }
+
     if (textToSend.isBlank()) return
 
     if (onSendButtonClick != null) {
@@ -2128,6 +2073,7 @@ private fun handleSend(
     } else {
         if (editMessage != null) {
             viewModel.editMessage(textToSend)
+            viewModel.clearEditMessage()
         } else {
             // Create message first to call handlePreMessageSend
             val message = viewModel.createTextMessage(textToSend)
@@ -2142,6 +2088,9 @@ private fun handleSend(
             }
         }
     }
+    // Compose clears the input programmatically, which never fires onValueChange —
+    // end the typing session here, where legacy's clear-triggered watcher would have
+    viewModel.endTyping()
     onClear()
 }
 
@@ -2307,6 +2256,8 @@ private fun NormalSegmentTextField(
     onCodeBlockInserted: (() -> Unit)? = null,
     onLinkTapped: ((linkText: String, linkUrl: String, spanStart: Int, spanEnd: Int) -> Unit)? = null,
     onSelectionChanged: (() -> Unit)? = null,
+    onMediaPaste: (() -> Boolean)? = null,
+    hasClipboardMedia: (() -> Boolean)? = null,
     modifier: Modifier = Modifier
 ) {
     // Per-segment text state backed by the segment's own controller
@@ -2383,8 +2334,22 @@ private fun NormalSegmentTextField(
         }
     }
 
+    // Media paste support: wrap whichever toolbar is active so the Paste action can stage
+    // clipboard media (image/video/audio/file uris) into the attachment tray — the legacy
+    // BasicTextField itself can only paste text.
+    val baseToolbar = if (enabledFormats.isNotEmpty()) richTextSelectionToolbar else LocalTextToolbar.current
+    val currentOnMediaPaste by rememberUpdatedState(onMediaPaste)
+    val currentHasClipboardMedia by rememberUpdatedState(hasClipboardMedia)
+    val mediaAwareToolbar = remember(baseToolbar) {
+        MediaPasteTextToolbar(
+            delegate = baseToolbar,
+            onMediaPaste = { currentOnMediaPaste?.invoke() ?: false },
+            hasClipboardMedia = { currentHasClipboardMedia?.invoke() ?: false }
+        )
+    }
+
     CompositionLocalProvider(
-        LocalTextToolbar provides if (enabledFormats.isNotEmpty()) richTextSelectionToolbar else LocalTextToolbar.current
+        LocalTextToolbar provides mediaAwareToolbar
     ) {
     BasicTextField(
             value = tfv,
@@ -2929,3 +2894,104 @@ private fun handleMediaSelectionWithType(
     viewModel.sendMediaMessage(file, messageType)
 }
 
+
+/**
+ * Opens a fullscreen preview for a successfully-uploaded tray tile: images in the in-app
+ * [CometChatImageViewerActivity], videos in an external player via ACTION_VIEW (the staged local
+ * copy through FileProvider, a picker content uri with our read grant forwarded, or the uploaded
+ * URL as fallback). Audio plays inline on its tile's play button and file tiles have no preview,
+ * so both are ignored here.
+ */
+private fun openStagedAttachmentPreview(
+    context: android.content.Context,
+    tile: com.cometchat.uikit.core.models.AttachmentUploadTile
+) {
+    try {
+        when (tile.category) {
+            CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+                // Coil (the viewer's loader) needs a scheme — prefix bare file paths.
+                val model = tile.localUri?.let { if (it.startsWith("/")) "file://$it" else it }
+                    ?: tile.attachment?.fileUrl
+                    ?: return
+                context.startActivity(
+                    com.cometchat.uikit.compose.presentation.imageviewer.ui.CometChatImageViewerActivity.createIntent(
+                        context = context,
+                        imageUrl = model,
+                        fileName = tile.name,
+                        mimeType = tile.mimeType
+                    )
+                )
+            }
+
+            CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+                val local = tile.localUri
+                val uri = when {
+                    local == null -> tile.attachment?.fileUrl?.let(android.net.Uri::parse)
+                    local.startsWith("/") -> File(local).takeIf { it.exists() }?.let {
+                        androidx.core.content.FileProvider.getUriForFile(
+                            context, "${context.packageName}.provider", it
+                        )
+                    } ?: tile.attachment?.fileUrl?.let(android.net.Uri::parse)
+                    else -> android.net.Uri.parse(local)
+                } ?: return
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, tile.mimeType.ifEmpty { "video/*" })
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                }
+            }
+
+            else -> Unit
+        }
+    } catch (e: Exception) {
+        Log.e("CometChatMessageComposer", "Failed to open staged attachment preview: ${e.message}")
+    }
+}
+
+/** Unwraps the [Activity] behind a composable's context (needed for drag-and-drop uri grants). */
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/**
+ * [TextToolbar] wrapper that makes the Paste action media-aware. The legacy TextFieldValue-based
+ * BasicTextField can only paste text — and compose hides Paste entirely for media-only clips
+ * (its clipboard check is text-based). This wrapper (a) intercepts Paste to stage clipboard
+ * media uris into the attachment tray via [onMediaPaste], falling through to the delegate's
+ * text paste when the clipboard has no media, and (b) offers a Paste action of its own when
+ * compose suppressed it but [hasClipboardMedia] says there is something stageable.
+ */
+private class MediaPasteTextToolbar(
+    private val delegate: TextToolbar,
+    private val onMediaPaste: () -> Boolean,
+    private val hasClipboardMedia: () -> Boolean
+) : TextToolbar {
+
+    override val status: TextToolbarStatus
+        get() = delegate.status
+
+    override fun hide() = delegate.hide()
+
+    override fun showMenu(
+        rect: Rect,
+        onCopyRequested: (() -> Unit)?,
+        onPasteRequested: (() -> Unit)?,
+        onCutRequested: (() -> Unit)?,
+        onSelectAllRequested: (() -> Unit)?
+    ) {
+        val wrappedPaste: (() -> Unit)? = when {
+            onPasteRequested != null -> {
+                { if (!onMediaPaste()) onPasteRequested() }
+            }
+            hasClipboardMedia() -> {
+                { onMediaPaste() }
+            }
+            else -> null
+        }
+        delegate.showMenu(rect, onCopyRequested, wrappedPaste, onCutRequested, onSelectAllRequested)
+    }
+}

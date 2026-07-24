@@ -10,8 +10,8 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/iv_button"
-        android:layout_width="@dimen/cometchat_32dp"
-        android:layout_height="@dimen/cometchat_32dp"
+        android:layout_width="@dimen/cometchat_34dp"
+        android:layout_height="@dimen/cometchat_34dp"
         android:elevation="@dimen/cometchat_0dp"
         app:cardCornerRadius="@dimen/cometchat_radius_max"
         app:cardElevation="@dimen/cometchat_0dp">
@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:padding="5dp"
             android:importantForAccessibility="no"
             android:src="@drawable/cometchat_play_icon" />
 
@@ -39,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:padding="5dp"
             android:importantForAccessibility="no"
             android:src="@drawable/cometchat_ic_pause"
             android:visibility="gone" />

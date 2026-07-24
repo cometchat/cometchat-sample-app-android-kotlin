@@ -28,7 +28,10 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.cometchat.chat.models.Attachment
 import com.cometchat.chat.models.MediaMessage
+import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.R
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
+import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.interfaces.OnClick
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -78,8 +81,18 @@ class CometChatVideoBubble @JvmOverloads constructor(
     private lateinit var gridLayout: GridLayout
     private lateinit var captionTextView: TextView
 
+    // Block-level caption sibling of [captionTextView]: markdown captions (fenced code blocks,
+    // blockquotes, lists) render as their own child views, as in the text bubble, instead of being
+    // flattened into one TextView. The legacy `setCaption(SpannableString?)` path keeps using
+    // [captionTextView]; only one of the two is ever visible.
+    private lateinit var captionBlockContainer: LinearLayout
+    private lateinit var editedTextView: TextView
+
     // State
     private var mediaMessage: MediaMessage? = null
+
+    private var textFormatters: List<CometChatTextFormatter> = emptyList()
+    private var messageAlignment = UIKitConstants.MessageBubbleAlignment.LEFT
     private var attachments: List<Attachment> = emptyList()
     private var onClick: OnClick? = null
     private var onVideoClick: ((Int, Attachment) -> Unit)? = null
@@ -175,7 +188,23 @@ class CometChatVideoBubble @JvmOverloads constructor(
             setTextIsSelectable(true)
         }
         rootLayout.addView(captionTextView)
-        
+
+        // Sibling block-caption container, inserted right after the caption TextView. Matches the
+        // caption's padding_2 margin so switching between the flat and block paths does not shift
+        // layout.
+        captionBlockContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            val margin = resources.getDimensionPixelSize(R.dimen.cometchat_padding_2)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(margin, margin, margin, margin) }
+        }
+        rootLayout.addView(captionBlockContainer)
+        editedTextView = MultiAttachmentUtils.createEditedLabel(context)
+        rootLayout.addView(editedTextView)
+
         addView(rootLayout)
 
         // Set up click listeners
@@ -348,6 +377,7 @@ class CometChatVideoBubble @JvmOverloads constructor(
         
         // Set caption from message
         setCaption(mediaMessage.caption)
+        MultiAttachmentUtils.bindEditedLabel(editedTextView, mediaMessage, style?.captionTextColor ?: 0)
     }
 
     /**
@@ -684,7 +714,11 @@ class CometChatVideoBubble @JvmOverloads constructor(
 
         // Set click listener
         container.setOnClickListener {
-            onVideoClick?.invoke(index, attachment)
+            if (onVideoClick != null) {
+                onVideoClick?.invoke(index, attachment)
+            } else {
+                openMediaViewActivity(index)
+            }
         }
 
         container.setOnLongClickListener { v ->
@@ -794,21 +828,54 @@ class CometChatVideoBubble @JvmOverloads constructor(
     // ========================================
 
     /**
-     * Sets the caption text for the video bubble.
+     * Sets the caption text for the video bubble. Captions travel as markdown and carry mention
+     * tokens, so they go through the same formatter + markdown pipeline as a text message and render
+     * as block-level views (fenced code blocks, blockquotes, lists) into [captionBlockContainer] via
+     * [MultiAttachmentUtils.renderCaptionInto] rather than being flattened into one TextView.
      */
     fun setCaption(caption: String?) {
         if (!caption.isNullOrEmpty()) {
-            captionTextView.visibility = View.VISIBLE
-            captionTextView.text = caption
+            captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.VISIBLE
+            val appearance = style?.captionTextAppearance ?: 0
+            MultiAttachmentUtils.renderCaptionInto(
+                captionBlockContainer,
+                caption,
+                mediaMessage,
+                textFormatters,
+                messageAlignment,
+                captionTextColor = style?.captionTextColor ?: 0,
+                captionTextAppearance = appearance,
+                // The style's text appearance owns the size when one is set.
+                textSizeSp = if (appearance != 0) 0f else MultiAttachmentUtils.CAPTION_TEXT_SIZE_SP
+            )
         } else {
             captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.GONE
+            captionBlockContainer.removeAllViews()
         }
     }
 
     /**
-     * Sets the caption text using a SpannableString.
+     * Formatters applied to the caption, exactly as the text bubble applies them to its text (so a
+     * mention resolves to a display name instead of a raw `<@uid:...>` token). Call before
+     * [setMessage] — the caption is rendered there.
+     */
+    fun setTextFormatters(
+        formatters: List<CometChatTextFormatter>?,
+        alignment: UIKitConstants.MessageBubbleAlignment
+    ) {
+        textFormatters = formatters ?: emptyList()
+        messageAlignment = alignment
+    }
+
+    /**
+     * Sets the caption text using a SpannableString. This legacy path renders into the flat
+     * [captionTextView]; the block-caption container is hidden and cleared so the two never overlap.
      */
     fun setCaption(caption: SpannableString?) {
+        captionBlockContainer.visibility = View.GONE
+        captionBlockContainer.removeAllViews()
         if (caption != null) {
             captionTextView.visibility = View.VISIBLE
             captionTextView.text = caption
@@ -821,23 +888,32 @@ class CometChatVideoBubble @JvmOverloads constructor(
     // Media Viewer
     // ========================================
 
-    private fun openMediaViewActivity() {
+    private fun openMediaViewActivity(startIndex: Int = 0) {
         if (mediaMessage == null && attachments.isEmpty() && videoUrl.isNullOrEmpty()) {
             Log.e(TAG, "No media to display")
             return
         }
 
-        val url = videoUrl ?: attachments.firstOrNull()?.fileUrl ?: ""
-        val mimeType = attachments.firstOrNull()?.fileMimeType ?: "video/*"
-        
-        if (url.isNotEmpty()) {
-            // Open video in external player (matches Java MediaUtils.openMediaInPlayer)
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-            intent.setDataAndType(android.net.Uri.parse(url), mimeType)
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intent)
-            }
+        // Build the full list of videos so the in-app player can swipe through the whole message.
+        val videoItems: List<Triple<String, String, String>> = when {
+            attachments.isNotEmpty() -> attachments
+                .filter { !it.fileUrl.isNullOrEmpty() }
+                .map { Triple(it.fileUrl!!, it.fileName ?: "", it.fileMimeType ?: "video/*") }
+            !videoUrl.isNullOrEmpty() -> listOf(Triple(videoUrl!!, "", "video/*"))
+            else -> emptyList()
+        }
+
+        if (videoItems.isNotEmpty()) {
+            // Play in the in-app (non full-screen) video player with download + share actions.
+            context.startActivity(
+                com.cometchat.uikit.kotlin.presentation.shared.mediaviewer.CometChatVideoViewerActivity.createIntent(
+                    context,
+                    videoItems.map { it.first },
+                    videoItems.map { it.second },
+                    videoItems.map { it.third },
+                    startIndex.coerceIn(0, videoItems.lastIndex)
+                )
+            )
         } else if (file != null && file!!.exists()) {
             com.cometchat.uikit.kotlin.shared.resources.utils.MediaUtils.openFile(context, file!!)
         }

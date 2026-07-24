@@ -198,6 +198,9 @@ class MessageListHostFragment : Fragment() {
         var hideLoadingState: Boolean = false
         var hideErrorState: Boolean = false
 
+        /** ENG-36737: per-type multi-attachment bubbles vs deprecated single bubbles (null = view default) */
+        var enableMultipleAttachments: Boolean? = null
+
         /** Options callbacks */
         var optionsCallback: ((BaseMessage) -> List<com.cometchat.uikit.core.domain.model.CometChatMessageOption>?)? = null
         var addOptionsCallback: ((BaseMessage) -> List<com.cometchat.uikit.core.domain.model.CometChatMessageOption>)? = null
@@ -224,6 +227,7 @@ class MessageListHostFragment : Fragment() {
             customErrorView = null
             hideLoadingState = false
             hideErrorState = false
+            enableMultipleAttachments = null
             optionsCallback = null
             addOptionsCallback = null
             leadingViewProvider = null
@@ -275,6 +279,9 @@ class MessageListHostFragment : Fragment() {
         // Configure visibility flags
         if (hideLoadingState) {
             messageListView.setHideLoadingState(true)
+        }
+        enableMultipleAttachments?.let { enable ->
+            messageListView.setEnableMultipleAttachments(enable)
         }
         if (hideErrorState) {
             messageListView.setHideErrorState(true)

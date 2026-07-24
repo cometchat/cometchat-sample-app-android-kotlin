@@ -13,6 +13,7 @@ import com.cometchat.uikit.kotlin.databinding.CometchatSearchMessageItemImageBin
 import com.cometchat.uikit.kotlin.presentation.search.style.CometChatSearchStyle
 import com.cometchat.uikit.kotlin.presentation.search.utils.SearchMessagesViewHolderListener
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.shared.interfaces.DateTimeFormatterCallback
 
 /**
@@ -107,13 +108,24 @@ class SearchImageMessageViewHolder(
         // Bind common data with uid/guid context
         bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
 
-        // Set subtitle label — use file name with fallback (matching reference)
-        val fileName = message.attachment?.fileName
-        binding.tvSubtitleView.text = if (!fileName.isNullOrEmpty()) fileName else context.getString(R.string.cometchat_message_image)
+        // ENG-36737 media-row rules (single + multi share the subtitle): sender-prefixed caption
+        // if present, else "N Images" for multi, else the file name. The blurred "+N" scrim stays
+        // multi-only; both decorations are also reset here for recycled single-attachment rows.
+        val attachments = MultiAttachmentUtils.resolveAttachments(message)
+        val isMulti = attachments.size > 1
+        binding.multiAttachmentOverlay.visibility = if (isMulti) View.VISIBLE else View.GONE
+        setThumbnailBlur(binding.ivThumbnail, isMulti)
 
-        // Load image thumbnail
-        val attachment = message.attachment
-        val imageUrl = attachment?.fileUrl
+        if (isMulti) binding.tvMultiAttachmentCount.text = "+${attachments.size - 1}"
+        binding.tvSubtitleView.text = buildMediaSubtitle(
+            message, attachments.size, R.drawable.cometchat_ic_conversations_photo,
+            R.string.cometchat_message_image, uid, guid
+        )
+
+        // Load the thumbnail — the Thumbnail Generation extension's url_medium (generated from
+        // the first attachment) when present, else the first/single attachment's full fileUrl.
+        val imageUrl = MultiAttachmentUtils.thumbnailUrl(message)
+            ?: (if (isMulti) attachments.first() else message.attachment)?.fileUrl
         if (!imageUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(imageUrl)

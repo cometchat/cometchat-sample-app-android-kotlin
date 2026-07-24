@@ -7,6 +7,7 @@ import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.data.datasource.MessageComposerDataSource
 import com.cometchat.uikit.core.domain.repository.MessageComposerRepository
+import kotlinx.coroutines.CancellationException
 
 /**
  * Repository implementation that coordinates data sources for message composer.
@@ -36,6 +37,8 @@ class MessageComposerRepositoryImpl(
         return try {
             val sentMessage = dataSource.sendTextMessage(message)
             Result.success(sentMessage)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -56,6 +59,8 @@ class MessageComposerRepositoryImpl(
         return try {
             val sentMessage = dataSource.sendMediaMessage(message)
             Result.success(sentMessage)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -76,6 +81,8 @@ class MessageComposerRepositoryImpl(
         return try {
             val sentMessage = dataSource.sendCustomMessage(message)
             Result.success(sentMessage)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -84,18 +91,20 @@ class MessageComposerRepositoryImpl(
     }
 
     /**
-     * Edits an existing text message using the data source.
+     * Edits an existing message using the data source.
      *
      * Wraps the data source call in a Result type to provide proper error handling.
      * Both CometChatException and general exceptions are caught and wrapped as failures.
      *
-     * @param message The TextMessage object with updated text content and the original message ID
+     * @param message The message with updated content and the original message ID
      * @return Result containing the edited BaseMessage on success or error on failure
      */
-    override suspend fun editMessage(message: TextMessage): Result<BaseMessage> {
+    override suspend fun editMessage(message: BaseMessage): Result<BaseMessage> {
         return try {
             val editedMessage = dataSource.editMessage(message)
             Result.success(editedMessage)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {

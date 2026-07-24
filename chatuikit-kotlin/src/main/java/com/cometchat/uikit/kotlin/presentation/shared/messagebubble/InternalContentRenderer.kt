@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.models.Action
 import com.cometchat.chat.models.AIAssistantMessage
+import com.cometchat.chat.models.Attachment
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.core.Call
 import com.cometchat.chat.models.CustomMessage
@@ -41,6 +42,7 @@ import com.cometchat.uikit.core.CometChatAIStreamService
 import com.cometchat.uikit.core.domain.model.StreamMessage
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubbleStyle
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiosbubble.CometChatAudiosBubble
 import com.cometchat.uikit.kotlin.calls.CometChatCallActivity
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.callactionbubble.CometChatCallActionBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.callactionbubble.CometChatCallActionBubbleStyle
@@ -52,6 +54,12 @@ import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.filebubble.C
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.filebubble.CometChatFileBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.imagebubble.CometChatImageBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.imagebubble.CometChatImageBubbleStyle
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.imagesbubble.CometChatImagesBubble
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.videosbubble.CometChatVideosBubble
+import com.cometchat.uikit.kotlin.presentation.shared.mediaviewer.CometChatImageViewerActivity
+import com.cometchat.uikit.kotlin.shared.resources.utils.MediaUtils
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.filesbubble.CometChatFilesBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.meetcallbubble.CometChatMeetCallBubble
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.meetcallbubble.CometChatMeetCallBubbleStyle
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.pollbubble.CometChatPollBubble
@@ -100,19 +108,22 @@ internal object InternalContentRenderer {
      * @param factoryKey The factory key (e.g., "message_text", "deleted")
      * @return The content view, or null for unknown types
      */
-    fun createContentView(context: Context, factoryKey: String): View? {
+    fun createContentView(context: Context, factoryKey: String, enableMultipleAttachments: Boolean = false): View? {
         return when (factoryKey) {
             // Standard messages
             BubbleFactory.getKey(CometChatConstants.CATEGORY_MESSAGE, CometChatConstants.MESSAGE_TYPE_TEXT) ->
                 CometChatTextBubble(context)
+            // ENG-36737: multi-attachment on → new per-type bubbles; off → deprecated single bubbles.
             BubbleFactory.getKey(CometChatConstants.CATEGORY_MESSAGE, CometChatConstants.MESSAGE_TYPE_IMAGE) ->
-                CometChatImageBubble(context)
+                if (enableMultipleAttachments) CometChatImagesBubble(context) else CometChatImageBubble(context)
             BubbleFactory.getKey(CometChatConstants.CATEGORY_MESSAGE, CometChatConstants.MESSAGE_TYPE_VIDEO) ->
-                CometChatVideoBubble(context)
+                if (enableMultipleAttachments) CometChatVideosBubble(context) else CometChatVideoBubble(context)
+            // Audio splits per-message (voice note vs picker audio) inside CometChatAudiosBubble,
+            // since only the factory key — not the message — is known here.
             BubbleFactory.getKey(CometChatConstants.CATEGORY_MESSAGE, CometChatConstants.MESSAGE_TYPE_AUDIO) ->
-                CometChatAudioBubble(context)
+                if (enableMultipleAttachments) CometChatAudiosBubble(context) else CometChatAudioBubble(context)
             BubbleFactory.getKey(CometChatConstants.CATEGORY_MESSAGE, CometChatConstants.MESSAGE_TYPE_FILE) ->
-                CometChatFileBubble(context)
+                if (enableMultipleAttachments) CometChatFilesBubble(context) else CometChatFileBubble(context)
             // Deleted
             BubbleFactory.DELETED_KEY ->
                 CometChatDeleteBubble(context)
@@ -306,64 +317,130 @@ internal object InternalContentRenderer {
                 textBubble.setMessage(message as? TextMessage, textFormatters, alignment)
             }
             CometChatConstants.MESSAGE_TYPE_IMAGE -> {
-                val imageBubble = view as? CometChatImageBubble
-                    ?: run {
-                        Log.w(TAG, "bindStandardMessage: expected CometChatImageBubble but got ${view.javaClass.simpleName}")
-                        return false
-                    }
+                val mediaMessage = message as? MediaMessage ?: return false
                 val imageStyle = bubbleStyles.imageBubbleStyle
                     ?: when (alignment) {
                         UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatImageBubbleStyle.incoming(view.context)
                         UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatImageBubbleStyle.outgoing(view.context)
                         else -> CometChatImageBubbleStyle.default(view.context)
                     }
-                imageBubble.setStyle(imageStyle)
-                imageBubble.setMessage(message as? MediaMessage ?: return false)
+                when (view) {
+                    is CometChatImagesBubble -> {
+                        view.setStyle(imageStyle)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
+                        // Grid preview: a tapped tile opens the viewer at that image, the "+N"
+                        // overflow tile opens it at the first — either way the user can swipe
+                        // through every attachment of the message. Kind-mismatched attachments
+                        // stay in the carousel and render as "No preview available" pages, so
+                        // tile indices map 1:1 onto viewer pages.
+                        val allAttachments = MultiAttachmentUtils.resolveAttachments(mediaMessage)
+                        view.setOnMediaClickListener { index, _ ->
+                            openImagesPreview(view.context, allAttachments, index)
+                        }
+                        view.setOnMoreClickListener {
+                            openImagesPreview(view.context, allAttachments, 0)
+                        }
+                    }
+                    is CometChatImageBubble -> {
+                        view.setStyle(imageStyle)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
+                    }
+                    else -> return false
+                }
             }
             CometChatConstants.MESSAGE_TYPE_VIDEO -> {
-                val videoBubble = view as? CometChatVideoBubble
-                    ?: run {
-                        Log.w(TAG, "bindStandardMessage: expected CometChatVideoBubble but got ${view.javaClass.simpleName}")
-                        return false
+                val mediaMessage = message as? MediaMessage ?: return false
+                when (view) {
+                    is CometChatVideosBubble -> {
+                        // VideosBubble reuses the image grid style tokens.
+                        val imageStyle = bubbleStyles.imageBubbleStyle ?: when (alignment) {
+                            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatImageBubbleStyle.incoming(view.context)
+                            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatImageBubbleStyle.outgoing(view.context)
+                            else -> CometChatImageBubbleStyle.default(view.context)
+                        }
+                        view.setStyle(imageStyle)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
+                        // A tapped video tile plays that video externally; the "+N" overflow tile
+                        // plays the first one (external players can't page through the batch). A
+                        // tapped BROKEN tile (kind-mismatched attachment of a server-sent mixed
+                        // payload) opens the viewer's "No preview available" page instead.
+                        val gridVideos = MultiAttachmentUtils.resolveAttachments(mediaMessage)
+                            .filter { MultiAttachmentUtils.kindOf(it) == MultiAttachmentUtils.KIND_VIDEO }
+                        view.setOnMediaClickListener { _, attachment ->
+                            if (MultiAttachmentUtils.kindOf(attachment) == MultiAttachmentUtils.KIND_VIDEO) {
+                                MediaUtils.openMediaInPlayer(view.context, attachment.fileUrl, attachment.fileMimeType)
+                            } else {
+                                openImagesPreview(view.context, listOf(attachment), 0)
+                            }
+                        }
+                        view.setOnMoreClickListener {
+                            gridVideos.firstOrNull()?.let {
+                                MediaUtils.openMediaInPlayer(view.context, it.fileUrl, it.fileMimeType)
+                            }
+                        }
                     }
-                val videoStyle = bubbleStyles.videoBubbleStyle
-                    ?: when (alignment) {
-                        UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatVideoBubbleStyle.incoming(view.context)
-                        UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatVideoBubbleStyle.outgoing(view.context)
-                        else -> CometChatVideoBubbleStyle.default(view.context)
+                    is CometChatVideoBubble -> {
+                        val videoStyle = bubbleStyles.videoBubbleStyle ?: when (alignment) {
+                            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatVideoBubbleStyle.incoming(view.context)
+                            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatVideoBubbleStyle.outgoing(view.context)
+                            else -> CometChatVideoBubbleStyle.default(view.context)
+                        }
+                        view.setStyle(videoStyle)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
                     }
-                videoBubble.setStyle(videoStyle)
-                videoBubble.setMessage(message as? MediaMessage ?: return false)
+                    else -> return false
+                }
             }
             CometChatConstants.MESSAGE_TYPE_AUDIO -> {
-                val audioBubble = view as? CometChatAudioBubble
-                    ?: run {
-                        Log.w(TAG, "bindStandardMessage: expected CometChatAudioBubble but got ${view.javaClass.simpleName}")
-                        return false
-                    }
+                val mediaMessage = message as? MediaMessage ?: return false
                 val audioStyle = bubbleStyles.audioBubbleStyle
                     ?: when (alignment) {
                         UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatAudioBubbleStyle.incoming(view.context)
                         UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatAudioBubbleStyle.outgoing(view.context)
                         else -> CometChatAudioBubbleStyle.default(view.context)
                     }
-                audioBubble.setStyle(audioStyle)
-                audioBubble.setMessage(message as? MediaMessage ?: return false)
-            }
-            CometChatConstants.MESSAGE_TYPE_FILE -> {
-                val fileBubble = view as? CometChatFileBubble
-                    ?: run {
-                        Log.w(TAG, "bindStandardMessage: expected CometChatFileBubble but got ${view.javaClass.simpleName}")
+                when (view) {
+                    is CometChatAudiosBubble -> {
+                        view.setStyle(audioStyle)
+                        view.setOutgoing(alignment == UIKitConstants.MessageBubbleAlignment.RIGHT)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
+                    }
+                    is CometChatAudioBubble -> {
+                        view.setStyle(audioStyle)
+                        view.setTextFormatters(textFormatters, alignment)
+                        view.setMessage(mediaMessage)
+                    }
+                    else -> {
+                        Log.w(TAG, "bindStandardMessage: expected an audio bubble but got ${view.javaClass.simpleName}")
                         return false
                     }
+                }
+            }
+            CometChatConstants.MESSAGE_TYPE_FILE -> {
                 val fileStyle = bubbleStyles.fileBubbleStyle
                     ?: when (alignment) {
                         UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatFileBubbleStyle.incoming(view.context)
                         UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatFileBubbleStyle.outgoing(view.context)
                         else -> CometChatFileBubbleStyle.default(view.context)
                     }
-                fileBubble.setStyle(fileStyle)
-                fileBubble.setMessage(message as? MediaMessage)
+                when (view) {
+                    is CometChatFilesBubble -> {
+                        view.setStyle(fileStyle)
+                        view.setOutgoing(alignment == UIKitConstants.MessageBubbleAlignment.RIGHT)
+                        view.setTextFormatters(textFormatters, alignment)
+                        (message as? MediaMessage)?.let { view.setMessage(it) }
+                    }
+                    is CometChatFileBubble -> {
+                        view.setStyle(fileStyle)
+                        view.setMessage(message as? MediaMessage)
+                    }
+                    else -> return false
+                }
             }
             else -> {
                 Log.w(TAG, "bindStandardMessage: unrecognized type '${message.type}'")
@@ -1047,7 +1124,7 @@ internal object InternalContentRenderer {
             is MediaMessage -> {
                 if (UIKitConstants.ModerationConstants.DISAPPROVED == message.moderationStatus?.name?.lowercase()) {
                     val messageContainer = parent?.parent as? View
-                    val fixedWidth = Utils.convertDpToPx(view.context, 260)
+                    val fixedWidth = view.resources.getDimensionPixelSize(R.dimen.cometchat_240dp)
                     val mcParams = messageContainer?.layoutParams
                     if (mcParams != null) {
                         mcParams.width = fixedWidth
@@ -1216,5 +1293,22 @@ internal object InternalContentRenderer {
         val green = Color.green(color)
         val blue = Color.blue(color)
         return Color.argb(alpha, red, green, blue)
+    }
+
+    /**
+     * Opens the fullscreen image viewer over [attachments], starting at [startIndex] with swipe
+     * navigation through the rest (multi-attachment grid preview).
+     */
+    private fun openImagesPreview(context: Context, attachments: List<Attachment>, startIndex: Int) {
+        if (attachments.isEmpty()) return
+        context.startActivity(
+            CometChatImageViewerActivity.createIntent(
+                context,
+                attachments.map { it.fileUrl.orEmpty() },
+                attachments.map { it.fileMimeType.orEmpty() },
+                attachments.map { it.fileName.orEmpty() },
+                startIndex.coerceIn(0, attachments.lastIndex)
+            )
+        )
     }
 }

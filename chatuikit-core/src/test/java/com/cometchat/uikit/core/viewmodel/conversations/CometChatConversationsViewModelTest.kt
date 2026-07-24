@@ -33,8 +33,13 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import com.cometchat.chat.core.ConversationsRequest
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /**
@@ -448,6 +453,77 @@ class CometChatConversationsViewModelTest : FunSpec({
                 viewModel.conversations.value.size shouldBe page1Size + page2Size
                 println("    ✅ appended correctly")
             }
+        }
+    }
+
+    // ENG-37363 regression: a reconnect refreshList() resets pagination while realtime
+    // events reorder the server list, so a fetched page can overlap conversations already
+    // shown. Duplicate conversationIds crash the list UI (duplicate LazyColumn keys), so
+    // the append must dedup by conversationId and keep the first (realtime-fresher) copy.
+    test("for any overlap: fetchConversations must dedup appended page by conversationId") {
+        checkAll(20, Arb.int(2..10), Arb.int(1..10)) { page1Size, freshSize ->
+            runTest {
+                val page1 = MockFactory.createUserConversations(page1Size, "p1")
+                whenever(getConversationListUseCase.invoke(any())).thenReturn(Result.success(page1))
+                whenever(getConversationListUseCase.hasMore()).thenReturn(true)
+                val viewModel = CometChatConversationsViewModel(
+                    getConversationListUseCase, deleteConversationUseCase,
+                    refreshConversationListUseCase, enableListeners = false
+                )
+                advanceUntilIdle()
+
+                // Page 2 re-serves some of page 1 (same "p1" prefix → same conversationIds)
+                // plus genuinely new conversations.
+                val overlapSize = page1Size / 2 + 1
+                val page2 = MockFactory.createUserConversations(overlapSize, "p1") +
+                    MockFactory.createUserConversations(freshSize, "p2")
+                whenever(getConversationListUseCase.invoke(any())).thenReturn(Result.success(page2))
+                viewModel.fetchConversations()
+                advanceUntilIdle()
+
+                val result = viewModel.conversations.value
+                println("    → page1=$page1Size, overlap=$overlapSize, fresh=$freshSize, total=${result.size}")
+                result.size shouldBe page1Size + freshSize
+                result.map { it.conversationId }.toSet().size shouldBe result.size
+                println("    ✅ no duplicate conversationIds after overlapping append")
+            }
+        }
+    }
+
+    // ENG-37363 regression: refreshList must hand its CONSUMED request to pagination.
+    // Storing a rebuilt (page-0) request made the next fetch re-serve page 1 and append
+    // duplicate conversationIds, crashing the list UI on duplicate LazyColumn keys.
+    test("after refreshList, pagination continues on the same consumed request") {
+        runTest {
+            val viewModel = createViewModel(MockFactory.createUserConversations(3))
+            advanceUntilIdle()
+
+            // Build mock data BEFORE stubbing — MockFactory stubs mocks internally, and
+            // nesting it inside thenReturn(...) trips UnfinishedStubbingException.
+            val freshConversations = MockFactory.createUserConversations(3, "fresh")
+            whenever(refreshConversationListUseCase.invoke(any()))
+                .thenReturn(Result.success(freshConversations))
+            viewModel.refreshList()
+            advanceUntilIdle()
+
+            val refreshedRequest = argumentCaptor<ConversationsRequest>().run {
+                verify(refreshConversationListUseCase).invoke(capture())
+                firstValue
+            }
+
+            val page2Conversations = MockFactory.createUserConversations(2, "page2")
+            whenever(getConversationListUseCase.invoke(any()))
+                .thenReturn(Result.success(page2Conversations))
+            viewModel.fetchConversations()
+            advanceUntilIdle()
+
+            val paginatedRequest = argumentCaptor<ConversationsRequest>().run {
+                verify(getConversationListUseCase, atLeastOnce()).invoke(capture())
+                lastValue
+            }
+
+            paginatedRequest shouldBeSameInstanceAs refreshedRequest
+            println("    ✅ pagination reused the refresh-consumed request instance")
         }
     }
 

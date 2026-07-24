@@ -71,6 +71,28 @@
                 android:importantForAccessibility="no" />
         </LinearLayout>
 
+        <!-- Multi-attachment "+N" scrim over the (blurred) first image; shown only when the
+             message carries more than one attachment. -->
+        <!-- Sized explicitly: FrameLayout only re-measures match_parent children when there is
+             more than one, so a lone match_parent overlay in this wrap_content card would
+             collapse to its text. -->
+        <FrameLayout
+            android:id="@+id/multi_attachment_overlay"
+            android:layout_width="@dimen/cometchat_70dp"
+            android:layout_height="@dimen/cometchat_70dp"
+            android:background="#66000000"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_multi_attachment_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+        </FrameLayout>
+
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

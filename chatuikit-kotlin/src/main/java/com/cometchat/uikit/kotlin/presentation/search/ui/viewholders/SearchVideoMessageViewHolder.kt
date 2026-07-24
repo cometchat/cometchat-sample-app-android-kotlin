@@ -1,6 +1,9 @@
 package com.cometchat.uikit.kotlin.presentation.search.ui.viewholders
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +17,7 @@ import com.cometchat.uikit.kotlin.databinding.CometchatSearchMessageItemVideoBin
 import com.cometchat.uikit.kotlin.presentation.search.style.CometChatSearchStyle
 import com.cometchat.uikit.kotlin.presentation.search.utils.SearchMessagesViewHolderListener
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.shared.interfaces.DateTimeFormatterCallback
 
 /**
@@ -29,6 +33,17 @@ class SearchVideoMessageViewHolder(
 ) : BaseSearchMessageViewHolder(binding.root) {
 
     companion object {
+        /** Max decoded video frames kept in memory; each entry holds a full-resolution bitmap. */
+        private const val FRAME_CACHE_MAX = 50
+
+        /**
+         * URL-keyed, LRU-bounded cache so recycled rows don't re-decode a frame on every scroll
+         * while capping how many bitmaps stay resident (avoids unbounded growth / OOM over a long
+         * search session). [LruCache] is internally synchronized, so the decode thread and the bind
+         * thread can share it safely.
+         */
+        private val frameCache = LruCache<String, Bitmap>(FRAME_CACHE_MAX)
+
         /**
          * Creates a new SearchVideoMessageViewHolder.
          *
@@ -44,6 +59,9 @@ class SearchVideoMessageViewHolder(
             return SearchVideoMessageViewHolder(binding)
         }
     }
+
+    /** Url whose async frame decode may still be in flight — guards recycled rows. */
+    private var pendingFrameUrl: String? = null
 
     override val titleTextView: TextView = binding.tvMessageTitle
     override val subtitleTextView: TextView = binding.tvSubtitleView
@@ -109,25 +127,87 @@ class SearchVideoMessageViewHolder(
         // Bind common data with uid/guid context
         bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
 
-        // Set subtitle label — use file name with fallback (matching reference)
-        val fileName = message.attachment?.fileName
-        binding.tvSubtitleView.text = if (!fileName.isNullOrEmpty()) fileName else context.getString(R.string.cometchat_message_video)
+        // ENG-36737 media-row rules (single + multi share the subtitle): sender-prefixed caption
+        // if present, else "N Videos" for multi, else the file name. The blurred "+N" scrim that
+        // replaces the play badge stays multi-only; both decorations are also reset here for
+        // recycled single-attachment rows.
+        val attachments = MultiAttachmentUtils.resolveAttachments(message)
+        val isMulti = attachments.size > 1
+        binding.multiAttachmentOverlay.visibility = if (isMulti) View.VISIBLE else View.GONE
+        binding.playButtonLayout.visibility = if (isMulti) View.GONE else View.VISIBLE
+        setThumbnailBlur(binding.videoThumbnail, isMulti)
+
+        binding.tvSubtitleView.text = buildMediaSubtitle(
+            message, attachments.size, R.drawable.cometchat_ic_conversations_video,
+            R.string.cometchat_message_video, uid, guid
+        )
+
+        // Thumbnail Generation extension url_medium (generated from the first attachment) is the
+        // expected thumbnail source; the on-the-fly frame decode is the fallback for multi, and
+        // the raw video url for singles.
+        val thumbnailUrl = MultiAttachmentUtils.thumbnailUrl(message)
+
+        if (isMulti) {
+            binding.tvMultiAttachmentCount.text = "+${attachments.size - 1}"
+            if (thumbnailUrl != null) {
+                pendingFrameUrl = null
+                loadThumbnail(thumbnailUrl)
+            } else {
+                loadVideoFrame(attachments.first().fileUrl, binding.videoThumbnail)
+            }
+            return
+        }
+        pendingFrameUrl = null
 
         // Load video thumbnail
-        val attachment = message.attachment
-        val videoUrl = attachment?.fileUrl
+        val videoUrl = thumbnailUrl ?: message.attachment?.fileUrl
         if (!videoUrl.isNullOrEmpty()) {
-            Glide.with(context)
-                .load(videoUrl)
-                .placeholder(R.drawable.cometchat_video_file_icon)
-                .error(R.drawable.cometchat_video_file_icon)
-                .centerCrop()
-                .into(binding.videoThumbnail)
+            loadThumbnail(videoUrl)
         } else {
             binding.videoThumbnail.setImageResource(R.drawable.cometchat_video_file_icon)
         }
+    }
 
-        // Play button is always visible for video items
-        binding.playButtonLayout.visibility = View.VISIBLE
+    private fun loadThumbnail(url: String) {
+        Glide.with(context)
+            .load(url)
+            .placeholder(R.drawable.cometchat_video_file_icon)
+            .error(R.drawable.cometchat_video_file_icon)
+            .centerCrop()
+            .into(binding.videoThumbnail)
+    }
+
+    /**
+     * First frame of the (remote) video url via [MediaMetadataRetriever] on a background thread —
+     * same on-the-fly approach as the video bubble tiles. Falls back to the placeholder icon
+     * until decoded (or on failure, e.g. no network).
+     */
+    private fun loadVideoFrame(url: String?, target: ImageView) {
+        pendingFrameUrl = url
+        // A recycled row may still have a single-video Glide request in flight on this view.
+        Glide.with(context).clear(target)
+        frameCache.get(url ?: "")?.let {
+            target.setImageBitmap(it)
+            return
+        }
+        target.setImageResource(R.drawable.cometchat_video_file_icon)
+        if (url.isNullOrEmpty()) return
+        Thread {
+            val frame = try {
+                val retriever = MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(url, HashMap())
+                    retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                } finally {
+                    runCatching { retriever.release() }
+                }
+            } catch (e: Exception) {
+                null
+            }
+            if (frame != null) {
+                frameCache.put(url, frame)
+                target.post { if (pendingFrameUrl == url) target.setImageBitmap(frame) }
+            }
+        }.start()
     }
 }

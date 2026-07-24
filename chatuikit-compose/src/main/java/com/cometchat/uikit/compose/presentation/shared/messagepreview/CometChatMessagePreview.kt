@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
@@ -37,6 +38,7 @@ import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.formatters.FormatterUtils
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.resolveAttachments
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.formatter.MarkdownRenderer
@@ -224,9 +226,6 @@ internal fun resolveMessageContent(
         }
 
         is MediaMessage -> {
-            val subtitle = message.attachment?.fileName
-                ?: message.type
-                ?: ""
             val iconRes = when (message.type?.lowercase()) {
                 UIKitConstants.MessageType.IMAGE -> R.drawable.cometchat_ic_message_preview_image
                 UIKitConstants.MessageType.VIDEO -> R.drawable.cometchat_ic_message_preview_image
@@ -234,7 +233,7 @@ internal fun resolveMessageContent(
                 UIKitConstants.MessageType.FILE -> R.drawable.cometchat_ic_message_preview_document
                 else -> null
             }
-            AnnotatedString(subtitle) to iconRes
+            mediaPreviewSubtitle(context, message) to iconRes
         }
 
         is CustomMessage -> resolveCustomMessageContent(context, message)
@@ -249,6 +248,63 @@ internal fun resolveMessageContent(
             AnnotatedString(message.type ?: "") to null
         }
     }
+}
+
+/**
+ * Summarized one-line subtitle for a media message, shared by every preview surface
+ * (quoted/reply preview, composer reply & edit banners): more than one attachment →
+ * "N Images · caption" / "N Images"; single attachment → caption if present, else file name.
+ */
+internal fun mediaPreviewSubtitle(
+    context: android.content.Context,
+    message: MediaMessage
+): AnnotatedString {
+    val attachmentCount = resolveAttachments(message).size
+    val caption = message.caption?.takeIf { it.isNotBlank() }
+    return when {
+        attachmentCount > 1 -> {
+            val countLabel = mediaCountLabel(context, message.type, attachmentCount)
+            if (caption != null) {
+                buildAnnotatedString {
+                    append(countLabel)
+                    append(" · ")
+                    append(captionPreviewText(caption))
+                }
+            } else {
+                AnnotatedString(countLabel)
+            }
+        }
+
+        caption != null -> captionPreviewText(caption)
+
+        else -> AnnotatedString(message.attachment?.fileName ?: message.type ?: "")
+    }
+}
+
+/**
+ * Count summary for a multi-attachment media message, e.g. "6 Images" / "2 Audio".
+ */
+private fun mediaCountLabel(
+    context: android.content.Context,
+    messageType: String?,
+    count: Int
+): String = when (messageType?.lowercase()) {
+    UIKitConstants.MessageType.IMAGE -> context.getString(R.string.cometchat_n_images, count)
+    UIKitConstants.MessageType.VIDEO -> context.getString(R.string.cometchat_n_videos, count)
+    UIKitConstants.MessageType.AUDIO -> context.getString(R.string.cometchat_n_audio, count)
+    else -> context.getString(R.string.cometchat_n_files, count)
+}
+
+/**
+ * Caption markdown rendered as a single-line-friendly preview string (markers stripped,
+ * inline styles kept, no color spans so the subtitle color applies).
+ */
+private fun captionPreviewText(caption: String): AnnotatedString {
+    val segments = MarkdownRenderer.parse(caption)
+    return buildReplyPreviewAnnotatedString(
+        segments = segments,
+        textColor = androidx.compose.ui.graphics.Color.Unspecified
+    )
 }
 
 /**

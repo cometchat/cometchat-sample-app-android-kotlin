@@ -1,10 +1,13 @@
 package com.cometchat.uikit.compose.presentation.imageviewer.ui
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,18 +32,51 @@ class CometChatImageViewerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val imageUrl = intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty()
-        val fileName = intent.getStringExtra(EXTRA_FILE_NAME).orEmpty()
-        val mimeType = intent.getStringExtra(EXTRA_MIME_TYPE).orEmpty()
+        // List extras (multi-attachment grid preview) with the single extras as fallback so
+        // pre-existing single-image intents keep working.
+        val imageUrls = intent.getStringArrayListExtra(EXTRA_IMAGE_URLS)
+            ?: arrayListOf(intent.getStringExtra(EXTRA_IMAGE_URL).orEmpty())
+        val fileNames = intent.getStringArrayListExtra(EXTRA_FILE_NAMES)
+            ?: arrayListOf(intent.getStringExtra(EXTRA_FILE_NAME).orEmpty())
+        val mimeTypes = intent.getStringArrayListExtra(EXTRA_MIME_TYPES)
+            ?: arrayListOf(intent.getStringExtra(EXTRA_MIME_TYPE).orEmpty())
+        val startIndex = intent.getIntExtra(EXTRA_START_INDEX, 0)
 
         setContent {
             CometChatImageViewerScreen(
-                imageUrl = imageUrl,
-                fileName = fileName,
-                mimeType = mimeType,
+                imageUrls = imageUrls,
+                fileNames = fileNames,
+                mimeTypes = mimeTypes,
+                initialPage = startIndex,
                 onBack = { finish() },
+                onDownload = { url, name, _ -> downloadImage(url, name) },
                 onShare = { url, name, mime -> shareImage(url, name, mime) }
             )
+        }
+    }
+
+    /**
+     * Saves the image to the public Downloads directory via [DownloadManager] without opening the
+     * share sheet. Shows a system download notification on completion.
+     */
+    private fun downloadImage(url: String, fileName: String) {
+        if (url.isEmpty()) {
+            Log.e(TAG, "Cannot download image, url is empty")
+            return
+        }
+        try {
+            val safeName = fileName.ifEmpty { url.substringAfterLast('/').ifEmpty { "download" } }
+            val request = DownloadManager.Request(Uri.parse(url))
+                .setTitle(safeName)
+                .setDescription("Downloading…")
+                .setNotificationVisibility(
+                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                )
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, safeName)
+            (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+            Toast.makeText(this, R.string.cometchat_downloading, Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to download image: ${e.message}")
         }
     }
 
@@ -108,10 +144,14 @@ class CometChatImageViewerActivity : ComponentActivity() {
         private const val EXTRA_IMAGE_URL = "extra_image_url"
         private const val EXTRA_FILE_NAME = "extra_file_name"
         private const val EXTRA_MIME_TYPE = "extra_mime_type"
+        private const val EXTRA_IMAGE_URLS = "extra_image_urls"
+        private const val EXTRA_FILE_NAMES = "extra_file_names"
+        private const val EXTRA_MIME_TYPES = "extra_mime_types"
+        private const val EXTRA_START_INDEX = "extra_start_index"
         private const val TAG = "CometChatImageViewerActivity"
 
         /**
-         * Creates an Intent to launch the image viewer.
+         * Creates an Intent to launch the image viewer for a single image.
          *
          * @param context The context to create the intent from
          * @param imageUrl Remote URL of the image to display
@@ -123,11 +163,30 @@ class CometChatImageViewerActivity : ComponentActivity() {
             imageUrl: String,
             fileName: String,
             mimeType: String
+        ): Intent = createIntent(context, listOf(imageUrl), listOf(fileName), listOf(mimeType))
+
+        /**
+         * Creates an Intent to launch the image viewer for a set of images with swipe navigation
+         * (multi-attachment grid preview), opened at [startIndex].
+         *
+         * @param context The context to create the intent from
+         * @param imageUrls Urls of the images, in grid order
+         * @param fileNames Filenames parallel to [imageUrls] (used in share)
+         * @param mimeTypes MIME types parallel to [imageUrls]
+         * @param startIndex Index of the image to show first
+         */
+        fun createIntent(
+            context: Context,
+            imageUrls: List<String>,
+            fileNames: List<String>,
+            mimeTypes: List<String>,
+            startIndex: Int = 0
         ): Intent {
             return Intent(context, CometChatImageViewerActivity::class.java).apply {
-                putExtra(EXTRA_IMAGE_URL, imageUrl)
-                putExtra(EXTRA_FILE_NAME, fileName)
-                putExtra(EXTRA_MIME_TYPE, mimeType)
+                putStringArrayListExtra(EXTRA_IMAGE_URLS, ArrayList(imageUrls))
+                putStringArrayListExtra(EXTRA_FILE_NAMES, ArrayList(fileNames))
+                putStringArrayListExtra(EXTRA_MIME_TYPES, ArrayList(mimeTypes))
+                putExtra(EXTRA_START_INDEX, startIndex)
             }
         }
     }

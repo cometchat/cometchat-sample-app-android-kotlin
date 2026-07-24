@@ -60,14 +60,14 @@ interface MessageComposerRepository {
     suspend fun sendCustomMessage(message: CustomMessage): Result<CustomMessage>
 
     /**
-     * Edits an existing text message.
+     * Edits an existing message.
      *
-     * This method updates the text content of an existing message. The message
-     * must have been sent by the current user and must be a text message.
+     * This method updates the content of an existing message (text for TextMessage,
+     * caption for MediaMessage). The message must have been sent by the current user.
      *
-     * @param message The TextMessage object with updated text content and the original message ID
+     * @param message The message with updated content and the original message ID
      * @return Result containing the edited BaseMessage with updated metadata on success,
      *         or error on failure
      */
-    suspend fun editMessage(message: TextMessage): Result<BaseMessage>
+    suspend fun editMessage(message: BaseMessage): Result<BaseMessage>
 }

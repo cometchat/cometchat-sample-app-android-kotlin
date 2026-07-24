@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -237,6 +238,13 @@ fun CometChatMessageBubble(
     style: CometChatMessageBubbleStyle? = null,
     factory: BubbleFactory? = null,
     shouldShowDefaultAvatar: Boolean = true,
+    // Opacity of the leading (avatar) slot. Used by batch grouping to keep the avatar column width
+    // (so bubbles stay aligned) while hiding the avatar on all but the first message of a batch.
+    leadingAlpha: Float = 1f,
+    // Opacity of the status-info (timestamp + receipt) row. Batch grouping draws it invisibly on all
+    // but the LAST message so the timestamp shows once, while the reserved height keeps the bubble's
+    // bottom padding identical to a normal (timestamped) bubble.
+    statusInfoAlpha: Float = 1f,
     timeStampAlignment: UIKitConstants.TimeStampAlignment = UIKitConstants.TimeStampAlignment.BOTTOM,
     hideModerationView: Boolean = false,
     leadingView: (@Composable () -> Unit)? = null,
@@ -632,9 +640,13 @@ fun CometChatMessageBubble(
             horizontalArrangement = horizontalArrangement,
             verticalAlignment = Alignment.Top
         ) {
-            // Leading view (avatar) - only for LEFT alignment typically
+            // Leading view (avatar) - only for LEFT alignment typically. When leadingAlpha < 1 the
+            // avatar is drawn invisibly so its column width is preserved and batched bubbles stay
+            // aligned with the first one.
             if (alignment == UIKitConstants.MessageBubbleAlignment.LEFT) {
-                resolvedLeading?.invoke()
+                resolvedLeading?.let { leading ->
+                    Box(modifier = Modifier.alpha(leadingAlpha)) { leading() }
+                }
             }
 
             // Main bubble content
@@ -716,7 +728,7 @@ fun CometChatMessageBubble(
                     // Status info view (timestamp, receipts) - inside the bubble per XML layout
                     // Wrapped in Box with end alignment to match XML's android:layout_gravity="bottom|end"
                     if (resolvedStatusInfo != null) {
-                        Box(modifier = Modifier.align(Alignment.End)) {
+                        Box(modifier = Modifier.align(Alignment.End).alpha(statusInfoAlpha)) {
                             resolvedStatusInfo()
                         }
                     }

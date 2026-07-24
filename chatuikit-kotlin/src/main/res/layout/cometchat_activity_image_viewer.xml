@@ -35,6 +35,16 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent" />
 
+            <!-- Download button (saves to device) -->
+            <ImageView
+                android:id="@+id/button_download"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:src="@drawable/cometchat_download_icon"
+                android:contentDescription="@string/cometchat_download"
+                app:tint="@color/cometchat_color_white" />
+
             <!-- Share button sticks to the right -->
             <ImageView
                 android:id="@+id/button_share"
@@ -42,7 +52,7 @@
                 android:layout_height="match_parent"
                 android:padding="8dp"
                 android:src="@drawable/cometchat_ic_share"
-                android:contentDescription="Share"
+                android:contentDescription="@string/cometchat_share"
                 app:tint="@color/cometchat_color_white" />
         </LinearLayout>
 

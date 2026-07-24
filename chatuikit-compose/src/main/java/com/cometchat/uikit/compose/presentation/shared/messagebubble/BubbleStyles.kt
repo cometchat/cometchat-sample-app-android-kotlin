@@ -9,13 +9,17 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.Comet
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCollaborativeBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatDeleteBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagepreview.CometChatMessagePreviewStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudiosBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFileBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFilesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImageBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImagesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMeetCallBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatPollBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatStickerBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatTextBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideoBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideosBubbleStyle
 
 /**
  * Container for all bubble style overrides.
@@ -51,6 +55,10 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.Comet
  * @property videoBubbleStyle Style for video message bubbles
  * @property audioBubbleStyle Style for audio message bubbles
  * @property fileBubbleStyle Style for file message bubbles
+ * @property imagesBubbleStyle Style for the multi-attachment image grid bubble
+ * @property videosBubbleStyle Style for the multi-attachment video grid bubble
+ * @property audiosBubbleStyle Style for the multi-attachment audio player-card bubble
+ * @property filesBubbleStyle Style for the multi-attachment file-card stack bubble
  * @property deleteBubbleStyle Style for deleted message bubbles
  * @property actionBubbleStyle Style for action message bubbles (e.g., group member events)
  * @property callActionBubbleStyle Style for call action bubbles (audio/video calls)
@@ -70,6 +78,10 @@ data class BubbleStyles(
     val videoBubbleStyle: CometChatVideoBubbleStyle? = null,
     val audioBubbleStyle: CometChatAudioBubbleStyle? = null,
     val fileBubbleStyle: CometChatFileBubbleStyle? = null,
+    val imagesBubbleStyle: CometChatImagesBubbleStyle? = null,
+    val videosBubbleStyle: CometChatVideosBubbleStyle? = null,
+    val audiosBubbleStyle: CometChatAudiosBubbleStyle? = null,
+    val filesBubbleStyle: CometChatFilesBubbleStyle? = null,
     val deleteBubbleStyle: CometChatDeleteBubbleStyle? = null,
     val actionBubbleStyle: CometChatActionBubbleStyle? = null,
     val callActionBubbleStyle: CometChatCallActionBubbleStyle? = null,

@@ -164,6 +164,41 @@ object RestApiHelper {
         return post(url("messages"), sender, body).getJSONObject("data").get("id").toString()
     }
 
+    /**
+     * Sends ONE media message carrying MULTIPLE attachments on behalf of [sender] — the
+     * receive-side shape of the multi-attachment feature (ENG-36737). All attachments share
+     * the message [type]/[mimeType]; the UIKit groups them into a single per-type bubble.
+     * @return the new message id.
+     */
+    fun sendMultiAttachmentMessage(
+        sender: String,
+        receiver: String,
+        fileUrl: String,
+        names: List<String>,
+        type: String = "file",
+        mimeType: String = "application/pdf",
+        receiverType: String = "user"
+    ): String {
+        val attachments = JSONArray()
+        names.forEach { name ->
+            attachments.put(JSONObject().apply {
+                put("url", fileUrl)
+                put("name", name)
+                put("mimeType", mimeType)
+                put("extension", name.substringAfterLast('.', ""))
+                put("size", "2048")
+            })
+        }
+        val body = JSONObject().apply {
+            put("receiver", receiver)
+            put("receiverType", receiverType)
+            put("category", "message")
+            put("type", type)
+            put("data", JSONObject().put("attachments", attachments))
+        }
+        return post(url("messages"), sender, body).getJSONObject("data").get("id").toString()
+    }
+
     /** Edits a text message on behalf of [sender]. */
     fun editMessage(sender: String, messageId: String, newText: String) {
         val body = JSONObject().put("data", JSONObject().put("text", newText))

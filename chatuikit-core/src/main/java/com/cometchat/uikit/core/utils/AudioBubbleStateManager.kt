@@ -15,6 +15,9 @@ object AudioBubbleStateManager {
         return states.getOrPut(id) { AudioBubblePlaybackState(id = id, audioUrl = audioUrl, localPath = localPath) }
     }
 
+    /** Returns the existing state without creating one — for restoring UI on RecyclerView re-bind. */
+    fun peek(id: Int): AudioBubblePlaybackState? = states[id]
+
     fun pauseAllExcept(excludeId: Int) {
         states.values.toList().forEach { state ->
             if (state.id != excludeId && state.playState == PlayState.PLAYING) state.pause()

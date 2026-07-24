@@ -158,6 +158,23 @@ class CometChatMessageBubble @JvmOverloads constructor(
     private var avatarVisibility: Int = View.VISIBLE
     private var receiptsVisibility: Int = View.VISIBLE
 
+    // ENG-36737: when true, the internal renderer creates the new per-type multi-attachment content
+    // bubbles (Images/Videos/Audios/Files) instead of the deprecated single-attachment ones.
+    private var enableMultipleAttachments: Boolean = false
+
+    /** Sets whether the new multi-attachment content bubbles are used. Set before the content view is created. */
+    fun setEnableMultipleAttachments(enabled: Boolean) {
+        if (enableMultipleAttachments == enabled) return
+        enableMultipleAttachments = enabled
+        // The flag decides which content view class createViews builds. If content already exists
+        // (view created in onCreateViewHolder before the adapter pushed the flag, or the flag was
+        // toggled at runtime), drop the cached key so the next bindViews recreates the content view
+        // with the right bubble class.
+        if (factoryContentView != null) {
+            currentFactoryKey = null
+        }
+    }
+
     // Click listener for message preview (quoted message)
     private var onMessagePreviewClick: ((BaseMessage) -> Unit)? = null
 
@@ -438,7 +455,7 @@ class CometChatMessageBubble @JvmOverloads constructor(
 
             // Content: custom > InternalContentRenderer > fallback
             if (customContentView == null) {
-                factoryContentView = InternalContentRenderer.createContentView(context, factoryKey)
+                factoryContentView = InternalContentRenderer.createContentView(context, factoryKey, enableMultipleAttachments)
                     ?: createFallbackView()
                 handleView(contentViewContainer, factoryContentView)
             }
@@ -517,7 +534,7 @@ class CometChatMessageBubble @JvmOverloads constructor(
             return factoryContentView!!
         } else {
             // No factory set - use InternalContentRenderer or create fallback
-            factoryContentView = InternalContentRenderer.createContentView(context, factoryKey)
+            factoryContentView = InternalContentRenderer.createContentView(context, factoryKey, enableMultipleAttachments)
                 ?: createFallbackView()
             currentFactoryKey = factoryKey
             handleView(contentViewContainer, factoryContentView)
@@ -687,8 +704,8 @@ class CometChatMessageBubble @JvmOverloads constructor(
                 statusInfoViewContainer?.visibility = GONE
             } else if (factoryStatusInfoView != null && customStatusInfoView == null) {
                 InternalContentRenderer.bindStatusInfoView(
-                    factoryStatusInfoView!!, 
-                    message, 
+                    factoryStatusInfoView!!,
+                    message,
                     alignment,
                     effectiveStyle,
                     timeFormat,
@@ -696,6 +713,10 @@ class CometChatMessageBubble @JvmOverloads constructor(
                     timeStampAlignment,
                     receiptsVisibility
                 )
+                // Ensure container is visible (may be GONE from a recycled ViewHolder — e.g. a
+                // non-last batch message hid it via setStatusInfoViewVisibility; the adapter
+                // re-applies the batch override after bind).
+                statusInfoViewContainer?.visibility = VISIBLE
             }
 
             // Thread: hide for minimal slots
@@ -1263,6 +1284,21 @@ class CometChatMessageBubble @JvmOverloads constructor(
 
     fun setStatusInfoViewVisibility(visibility: Int) {
         statusInfoViewContainer?.visibility = visibility
+        // The per-type content views keep 0 bottom padding because the timestamp row below provides
+        // the visual gap — when that row is hidden (e.g. non-last message of a batch), the content
+        // view adds its own bottom inset so it isn't flush with the bubble edge.
+        when (val content = factoryContentView) {
+            is com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiobubble.CometChatAudioBubble ->
+                content.setStatusInfoVisible(visibility == VISIBLE)
+            is com.cometchat.uikit.kotlin.presentation.shared.messagebubble.audiosbubble.CometChatAudiosBubble ->
+                content.setStatusInfoVisible(visibility == VISIBLE)
+            // Covers CometChatVideosBubble too (it extends CometChatImagesBubble).
+            is com.cometchat.uikit.kotlin.presentation.shared.messagebubble.imagesbubble.CometChatImagesBubble ->
+                content.setStatusInfoVisible(visibility == VISIBLE)
+            is com.cometchat.uikit.kotlin.presentation.shared.messagebubble.filesbubble.CometChatFilesBubble ->
+                content.setStatusInfoVisible(visibility == VISIBLE)
+            else -> Unit
+        }
     }
 
     fun setThreadViewVisibility(visibility: Int) {

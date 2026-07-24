@@ -12,6 +12,7 @@ import com.cometchat.uikit.kotlin.databinding.CometchatSearchMessageItemDocument
 import com.cometchat.uikit.kotlin.presentation.search.style.CometChatSearchStyle
 import com.cometchat.uikit.kotlin.presentation.search.utils.SearchMessagesViewHolderListener
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.shared.interfaces.DateTimeFormatterCallback
 
 /**
@@ -44,6 +45,7 @@ class SearchDocumentMessageViewHolder(
 
     override val titleTextView: TextView = binding.tvMessageTitle
     override val subtitleTextView: TextView = binding.tvSubtitleView
+    override val subtitleSuffixTextView: TextView = binding.tvSubtitleSuffix
     override val timestampDateView: CometChatDate? = binding.date
     override val threadIndicator: ImageView = binding.icThreadMessage
     override val parentLayout: View = binding.parentLayout
@@ -106,13 +108,23 @@ class SearchDocumentMessageViewHolder(
         // Bind common data with uid/guid context
         bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
 
-        // Set subtitle with file name
-        val attachment = message.attachment
-        val fileName = attachment?.fileName ?: context.getString(R.string.cometchat_document)
-        binding.tvSubtitleView.text = fileName
+        // ENG-36737 media-row rules: sender-prefixed subtitle = caption if present (multi keeps
+        // its count as a non-truncating "· N Files" suffix), else "N Files" for multi, else the
+        // file name. Multi stacks the FIRST document's type icon; reset for recycled single rows.
+        val attachments = MultiAttachmentUtils.resolveAttachments(message)
+        val isMulti = attachments.size > 1
+        binding.tvSubtitleView.text = buildMediaSubtitle(
+            message, attachments.size, R.drawable.cometchat_ic_conversations_document,
+            R.string.cometchat_document, uid, guid
+        )
+        bindMediaCountSuffix(message, attachments.size)
 
-        // Set document icon based on MIME type (matching Java reference)
-        binding.messageIvDocumentThumbnail.setImageResource(getDocumentIcon(attachment))
+        // Document icon based on the (first) attachment's MIME type (matching Java reference)
+        val iconRes = getDocumentIcon(attachments.firstOrNull() ?: message.attachment)
+        binding.messageIvDocumentThumbnail.setImageResource(iconRes)
+        binding.ivDocumentStack1.setImageResource(iconRes)
+        binding.ivDocumentStack2.setImageResource(iconRes)
+        setStackedTypeIcon(binding.ivDocumentStack1, binding.ivDocumentStack2, isMulti)
     }
 
     /**

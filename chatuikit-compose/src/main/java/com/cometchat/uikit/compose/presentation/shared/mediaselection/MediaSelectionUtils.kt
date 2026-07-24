@@ -229,6 +229,10 @@ fun createTempFileForCapture(
 
 /**
  * State holder for media selection launchers.
+ *
+ * The `*Picker` launchers select a single item; the `*PickerMultiple` launchers allow selecting
+ * several at once (used by the multi-attachment composer flow). Camera/video capture are always
+ * single-shot.
  */
 class MediaSelectionState(
     val launchImagePicker: () -> Unit,
@@ -237,7 +241,12 @@ class MediaSelectionState(
     val launchAudioPicker: () -> Unit,
     val launchFilePicker: () -> Unit,
     val launchCamera: () -> Unit,
-    val launchVideoCapture: () -> Unit
+    val launchVideoCapture: () -> Unit,
+    val launchImagePickerMultiple: () -> Unit = {},
+    val launchVideoPickerMultiple: () -> Unit = {},
+    val launchImageAndVideoPickerMultiple: () -> Unit = {},
+    val launchAudioPickerMultiple: () -> Unit = {},
+    val launchFilePickerMultiple: () -> Unit = {}
 )
 
 /**
@@ -250,20 +259,38 @@ class MediaSelectionState(
  * @param onCameraCapture Callback when a photo is captured
  * @param onVideoCapture Callback when a video is captured
  * @param onError Callback when an error occurs
+ * @param maxSelection Selection cap for the multi visual-media pickers (image/video), typically
+ * the remaining attachment slots. The OS photo picker enforces it directly; the content pickers
+ * (audio/file) cannot cap selection, so callers must trim overflow after the pick.
  * @return MediaSelectionState with launcher functions
  */
 @Composable
 fun rememberMediaSelectionState(
+    maxSelection: Int = Int.MAX_VALUE,
     onImageSelected: ((MediaSelectionResult) -> Unit)? = null,
     onVideoSelected: ((MediaSelectionResult) -> Unit)? = null,
     onAudioSelected: ((MediaSelectionResult) -> Unit)? = null,
     onFileSelected: ((MediaSelectionResult) -> Unit)? = null,
     onCameraCapture: ((MediaSelectionResult) -> Unit)? = null,
     onVideoCapture: ((MediaSelectionResult) -> Unit)? = null,
+    onImagesSelected: ((List<MediaSelectionResult>) -> Unit)? = null,
+    onVideosSelected: ((List<MediaSelectionResult>) -> Unit)? = null,
+    onAudiosSelected: ((List<MediaSelectionResult>) -> Unit)? = null,
+    onFilesSelected: ((List<MediaSelectionResult>) -> Unit)? = null,
     onError: ((Exception) -> Unit)? = null
 ): MediaSelectionState {
     val context = androidx.compose.ui.platform.LocalContext.current
-    
+
+    // Maps a batch of picked uris into results, surfacing per-item failures via [onError].
+    fun resultsFor(uris: List<Uri>): List<MediaSelectionResult> = uris.mapNotNull { uri ->
+        try {
+            createMediaSelectionResult(context, uri)
+        } catch (e: Exception) {
+            onError?.invoke(e)
+            null
+        }
+    }
+
     // Camera capture state
     val cameraFileState = remember { mutableMapOf<String, Pair<File, Uri>?>() }
     
@@ -356,6 +383,70 @@ fun rememberMediaSelectionState(
         }
     }
     
+    // Multi visual-media contract capped at the caller's remaining slots so the OS picker
+    // physically blocks over-selection. PickMultipleVisualMedia requires maxItems > 1, and the
+    // photo picker rejects values above the system limit — clamp to both. A remaining count of 1
+    // therefore still opens with limit 2; the caller's staging guard trims the extra.
+    val visualMediaContract = remember(maxSelection) {
+        val systemMax = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            android.provider.MediaStore.getPickImagesMaxLimit()
+        } else {
+            Int.MAX_VALUE
+        }
+        ActivityResultContracts.PickMultipleVisualMedia(maxSelection.coerceIn(2, systemMax))
+    }
+
+    // Multiple image picker launcher
+    val imagePickerMultipleLauncher = rememberLauncherForActivityResult(
+        contract = visualMediaContract
+    ) { uris ->
+        if (!uris.isNullOrEmpty()) onImagesSelected?.invoke(resultsFor(uris))
+    }
+
+    // Multiple video picker launcher
+    val videoPickerMultipleLauncher = rememberLauncherForActivityResult(
+        contract = visualMediaContract
+    ) { uris ->
+        if (!uris.isNullOrEmpty()) onVideosSelected?.invoke(resultsFor(uris))
+    }
+
+    // Multiple image and video picker launcher — splits the batch by detected content type.
+    val imageAndVideoPickerMultipleLauncher = rememberLauncherForActivityResult(
+        contract = visualMediaContract
+    ) { uris ->
+        if (!uris.isNullOrEmpty()) {
+            val results = resultsFor(uris)
+            val images = results.filter { it.contentType == MediaContentType.IMAGE }
+            val videos = results.filter { it.contentType == MediaContentType.VIDEO }
+            val others = results.filter {
+                it.contentType != MediaContentType.IMAGE && it.contentType != MediaContentType.VIDEO
+            }
+            if (images.isNotEmpty()) onImagesSelected?.invoke(images)
+            if (videos.isNotEmpty()) onVideosSelected?.invoke(videos)
+            if (others.isNotEmpty()) onFilesSelected?.invoke(others)
+        }
+    }
+
+    // The documents/audio picker UI can't be capped like the visual-media picker, so the
+    // selection-count limit is enforced on the result instead. Only maxSelection + 1 uris are
+    // copied out of the picker result — the one extra lets the caller's staging guard still
+    // detect the overflow (and show the limit toast) without copying an unbounded selection.
+    val overflowCap = if (maxSelection == Int.MAX_VALUE) Int.MAX_VALUE else maxSelection + 1
+
+    // Multiple audio picker launcher
+    val audioPickerMultipleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        if (!uris.isNullOrEmpty()) onAudiosSelected?.invoke(resultsFor(uris.take(overflowCap)))
+    }
+
+    // Multiple file picker launcher
+    val filePickerMultipleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        if (!uris.isNullOrEmpty()) onFilesSelected?.invoke(resultsFor(uris.take(overflowCap)))
+    }
+
     // Camera launcher
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -410,6 +501,11 @@ fun rememberMediaSelectionState(
         imageAndVideoPickerLauncher,
         audioPickerLauncher,
         filePickerLauncher,
+        imagePickerMultipleLauncher,
+        videoPickerMultipleLauncher,
+        imageAndVideoPickerMultipleLauncher,
+        audioPickerMultipleLauncher,
+        filePickerMultipleLauncher,
         cameraLauncher,
         videoCaptureLauncher,
         cameraPermissionLauncher
@@ -435,6 +531,27 @@ fun rememberMediaSelectionState(
             },
             launchFilePicker = {
                 filePickerLauncher.launch("*/*")
+            },
+            launchImagePickerMultiple = {
+                imagePickerMultipleLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            launchVideoPickerMultiple = {
+                videoPickerMultipleLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                )
+            },
+            launchImageAndVideoPickerMultiple = {
+                imageAndVideoPickerMultipleLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+                )
+            },
+            launchAudioPickerMultiple = {
+                audioPickerMultipleLauncher.launch("audio/*")
+            },
+            launchFilePickerMultiple = {
+                filePickerMultipleLauncher.launch("*/*")
             },
             launchCamera = {
                 // Check if camera permission is already granted

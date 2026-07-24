@@ -52,7 +52,7 @@ class PreviewMessageComposerRepository(
         return Result.success(message)
     }
 
-    override suspend fun editMessage(message: TextMessage): Result<BaseMessage> {
+    override suspend fun editMessage(message: BaseMessage): Result<BaseMessage> {
         if (simulateError) {
             return Result.failure(
                 com.cometchat.chat.exceptions.CometChatException(

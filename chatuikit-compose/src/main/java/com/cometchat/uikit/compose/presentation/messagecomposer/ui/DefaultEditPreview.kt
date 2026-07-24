@@ -24,11 +24,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
+import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
+import com.cometchat.uikit.compose.presentation.shared.messagepreview.mediaPreviewSubtitle
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.formatter.MarkdownRenderer
 
@@ -55,37 +57,38 @@ fun DefaultEditPreview(
     // Run formatter pipeline to resolve mention tokens (e.g., <@uid:userId> -> @userName),
     // then apply partial formatting (bold/italic/underline/strikethrough only) for edit preview
     val messageText = remember(message, textFormatters) {
-        when (message) {
-            is TextMessage -> {
-                val rawText = message.text ?: ""
-                if (rawText.isEmpty()) {
-                    AnnotatedString(rawText)
-                } else {
-                    // Step 1: Run formatter pipeline to resolve mention tokens
-                    val formattedText = if (textFormatters.isEmpty()) {
-                        rawText
-                    } else {
-                        var result: AnnotatedString = AnnotatedString(rawText)
-                        for (formatter in textFormatters) {
-                            result = formatter.prepareMessageString(
-                                context,
-                                message,
-                                result,
-                                UIKitConstants.MessageBubbleAlignment.LEFT,
-                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                            )
-                        }
-                        result.text
-                    }
-                    // Step 2: Parse markdown, keep bold/italic/underline/strikethrough, plain text for code/blockquote
-                    val segments = MarkdownRenderer.parse(formattedText)
-                    buildReplyPreviewAnnotatedString(
-                        segments = segments,
-                        textColor = style.editPreviewMessageTextColor
+        // Text messages preview their text; media messages show the summarized attachment
+        // preview: "N Images · caption" / "N Images" / caption / file name — same rules
+        // as the quoted message preview.
+        if (message is MediaMessage) {
+            return@remember mediaPreviewSubtitle(context, message)
+        }
+        val rawText = (message as? TextMessage)?.text ?: ""
+        if (rawText.isEmpty()) {
+            AnnotatedString(rawText)
+        } else {
+            // Step 1: Run formatter pipeline to resolve mention tokens
+            val formattedText = if (textFormatters.isEmpty()) {
+                rawText
+            } else {
+                var result: AnnotatedString = AnnotatedString(rawText)
+                for (formatter in textFormatters) {
+                    result = formatter.prepareMessageString(
+                        context,
+                        message,
+                        result,
+                        UIKitConstants.MessageBubbleAlignment.LEFT,
+                        UIKitConstants.FormattingType.MESSAGE_COMPOSER
                     )
                 }
+                result.text
             }
-            else -> AnnotatedString("")
+            // Step 2: Parse markdown, keep bold/italic/underline/strikethrough, plain text for code/blockquote
+            val segments = MarkdownRenderer.parse(formattedText)
+            buildReplyPreviewAnnotatedString(
+                segments = segments,
+                textColor = style.editPreviewMessageTextColor
+            )
         }
     }
 

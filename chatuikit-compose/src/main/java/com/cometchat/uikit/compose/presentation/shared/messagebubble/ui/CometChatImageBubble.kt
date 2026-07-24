@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,8 @@ import coil.request.ImageRequest
 import com.cometchat.chat.models.Attachment
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.compose.R
+import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImageBubbleStyle
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import org.json.JSONObject
@@ -90,6 +93,7 @@ fun CometChatImageBubble(
         else -> CometChatImageBubbleStyle.incoming()
     },
     caption: String? = message.caption,
+    textFormatters: List<CometChatTextFormatter> = emptyList(),
     onImageClick: ((Int, Attachment) -> Unit)? = null,
     onMoreClick: ((List<Attachment>) -> Unit)? = null,
     onLongClick: (() -> Unit)? = null
@@ -179,17 +183,27 @@ fun CometChatImageBubble(
             }
         }
 
-        // Caption
+        // Caption — same formatter + block markdown pipeline as the text bubble (see
+        // MarkdownSegments), so mentions, rich text and code/quote/list blocks all render.
         if (!caption.isNullOrEmpty()) {
-            Text(
-                text = caption,
-                style = style.captionTextStyle,
-                color = style.captionTextColor,
-                modifier = Modifier.padding(
-                    horizontal = 12.dp,
-                    vertical = 8.dp
-                )
+            val formatted = rememberCaptionFormatterOutput(caption, message, alignment, textFormatters)
+            MarkdownSegments(
+                sourceText = formatted?.text ?: caption,
+                formattedText = formatted,
+                textStyle = style.captionTextStyle,
+                textColor = style.captionTextColor,
+                linkColor = style.captionTextColor,
+                isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
+            if (message.editedAt > 0) {
+                Text(
+                    text = stringResource(R.string.cometchat_edited),
+                    style = CometChatTheme.typography.caption2Regular,
+                    color = style.captionTextColor,
+                    modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
+                )
+            }
         }
     }
 }

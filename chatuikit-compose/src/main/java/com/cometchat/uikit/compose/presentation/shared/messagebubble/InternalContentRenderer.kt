@@ -45,16 +45,20 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.aiassistant
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.aiassistantbubble.CometChatAIAssistantBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatActionBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudioBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudiosBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCallActionBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCollaborativeBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatDeleteBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFileBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFilesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImageBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImagesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMeetCallBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatPollBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatStickerBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatTextBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideoBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideosBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatActionBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatAudioBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatCallActionBubble
@@ -62,6 +66,16 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometCha
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatDeleteBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatFileBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatImageBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatImagesBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatVideosBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatAudiosBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.isImage
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.isVideo
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.resolveAttachments
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatVoiceNoteBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatFilesBubble
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.LocalEnableMultipleAttachments
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.isVoiceNote
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatMeetCallBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatPollBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatStickerBubble
@@ -467,10 +481,12 @@ internal object InternalContentRenderer {
     /**
      * Determines whether the download icon should be shown for a file message.
      *
-     * Matches the Java reference behavior:
+     * The icon is shown whenever there is a remote file to fetch. We intentionally do NOT hide it
+     * for files that already exist locally — tapping the icon always re-downloads, so a user can
+     * grab the file again on demand.
      * - If the message has no attachment (local outgoing file) → hide download icon
-     * - If the message metadata contains a local "path" and that file exists → hide download icon
-     * - Otherwise (remote file not yet downloaded) → show download icon
+     * - If the attachment has no remote URL → hide download icon
+     * - Otherwise → show download icon
      *
      * @param mediaMessage The media message to check
      * @return true if the download icon should be shown
@@ -479,18 +495,6 @@ internal object InternalContentRenderer {
         // No attachment means it's a local outgoing file — no download needed
         val attachment = mediaMessage.attachment ?: return false
         if (attachment.fileUrl.isNullOrEmpty()) return false
-
-        // Check if file already exists locally via metadata "path"
-        try {
-            val metadata = mediaMessage.metadata
-            if (metadata != null && metadata.has("path")) {
-                val path = metadata.getString("path")
-                if (!path.isNullOrEmpty()) {
-                    val file = java.io.File(path)
-                    if (file.exists()) return false
-                }
-            }
-        } catch (_: Exception) { }
 
         return true
     }
@@ -574,9 +578,11 @@ internal object InternalContentRenderer {
         val attachment = attachments.getOrNull(index) ?: return
         val fileUrl = attachment.fileUrl ?: return
         if (fileUrl.isEmpty()) return
-        val fileName = attachment.fileName?.takeIf { it.isNotEmpty() }
-            ?: System.currentTimeMillis().toString()
-        enqueueDownload(context, fileUrl, fileName)
+        val baseName = attachment.fileName?.takeIf { it.isNotEmpty() }
+            ?: "file_${System.currentTimeMillis()}"
+        // Resolve against on-disk files so the tap always downloads, even if a same-named file
+        // already exists (a fresh copy is saved with a (1)/(2)… suffix rather than being skipped).
+        enqueueDownload(context, fileUrl, resolveUniqueFileName(context, baseName, mutableSetOf()))
     }
 
     /**
@@ -587,13 +593,54 @@ internal object InternalContentRenderer {
      */
     private fun downloadAllFileAttachments(context: android.content.Context, mediaMessage: MediaMessage) {
         val attachments = getAttachmentsList(mediaMessage)
-        for (attachment in attachments) {
-            val fileUrl = attachment.fileUrl ?: continue
-            if (fileUrl.isEmpty()) continue
-            val fileName = attachment.fileName?.takeIf { it.isNotEmpty() }
-                ?: System.currentTimeMillis().toString()
-            enqueueDownload(context, fileUrl, fileName)
+        // Shared across the batch: queued downloads have not been written to disk yet, so a plain
+        // File.exists() check can't see them. Without this every unnamed file would fall back to the
+        // same System.currentTimeMillis() value (the loop runs in <1 ms) and any duplicate name would
+        // collide on the same destination — DownloadManager then fails all but the first. Reserving
+        // each resolved name guarantees a distinct destination per file so every one downloads.
+        val reservedNames = mutableSetOf<String>()
+        attachments.forEachIndexed { index, attachment ->
+            val fileUrl = attachment.fileUrl ?: return@forEachIndexed
+            if (fileUrl.isEmpty()) return@forEachIndexed
+            val baseName = attachment.fileName?.takeIf { it.isNotEmpty() }
+                ?: "file_${System.currentTimeMillis()}_$index"
+            enqueueDownload(context, fileUrl, resolveUniqueFileName(context, baseName, reservedNames))
         }
+    }
+
+    /**
+     * Resolves a destination file name that does not clash with a file already in the downloads
+     * directory or with another name already [reserved] in the current batch, appending a
+     * `(1)`, `(2)`… suffix before the extension when needed. This keeps every tap on the download
+     * button an actual download — an existing copy is never a reason to skip.
+     *
+     * @param context The Android context
+     * @param fileName The desired file name
+     * @param reserved Names already claimed by earlier files in the same batch (mutated here)
+     * @return A file name unique against both disk and [reserved]
+     */
+    private fun resolveUniqueFileName(
+        context: android.content.Context,
+        fileName: String,
+        reserved: MutableSet<String>
+    ): String {
+        val dir = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS)
+        } else {
+            android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+        }
+        val dotIndex = fileName.lastIndexOf('.')
+        val base = if (dotIndex > 0) fileName.substring(0, dotIndex) else fileName
+        val extension = if (dotIndex > 0) fileName.substring(dotIndex) else ""
+
+        var candidate = fileName
+        var counter = 1
+        while (reserved.contains(candidate) || (dir != null && java.io.File(dir, candidate).exists())) {
+            candidate = "$base($counter)$extension"
+            counter++
+        }
+        reserved.add(candidate)
+        return candidate
     }
 
     /**
@@ -627,7 +674,13 @@ internal object InternalContentRenderer {
      * @return List of attachments (may be empty)
      */
     private fun getAttachmentsList(mediaMessage: MediaMessage): List<com.cometchat.chat.models.Attachment> {
-        // Check metadata for multiple attachments
+        // Prefer the SDK-parsed multi-attachment list. Multi-file messages are sent via the native
+        // setAttachments (plural), NOT a metadata "attachments" array — so this must mirror the
+        // render path (resolveAttachments). Without it the fallbacks below return only the single
+        // primary attachment and a multi-file message downloads just its first file.
+        mediaMessage.attachments?.takeIf { it.isNotEmpty() }?.let { return it }
+
+        // Check metadata for multiple attachments (legacy grid path)
         try {
             val metadata = mediaMessage.metadata
             if (metadata != null && metadata.has("attachments")) {
@@ -651,6 +704,62 @@ internal object InternalContentRenderer {
         // Fall back to single attachment
         val attachment = mediaMessage.attachment
         return if (attachment != null) listOf(attachment) else emptyList()
+    }
+
+    /** Opens a single image attachment in the in-app image viewer. */
+    private fun openImageViewer(context: android.content.Context, attachment: com.cometchat.chat.models.Attachment) {
+        openImageViewer(context, listOf(attachment), 0)
+    }
+
+    /**
+     * Opens a set of image attachments in the in-app image viewer, starting at [startIndex] with
+     * swipe navigation through the rest (multi-attachment grid preview).
+     */
+    private fun openImageViewer(
+        context: android.content.Context,
+        attachments: List<com.cometchat.chat.models.Attachment>,
+        startIndex: Int
+    ) {
+        // Keep all four lists parallel (urls included) — dropping empty-url entries here would
+        // shift pages against fileNames/mimeTypes and against the grid's tile indices.
+        if (attachments.none { !it.fileUrl.isNullOrEmpty() }) return
+        context.startActivity(
+            CometChatImageViewerActivity.createIntent(
+                context = context,
+                imageUrls = attachments.map { it.fileUrl.orEmpty() },
+                fileNames = attachments.map { it.fileName.orEmpty() },
+                mimeTypes = attachments.map { it.fileMimeType.orEmpty() },
+                startIndex = startIndex.coerceIn(0, attachments.lastIndex)
+            )
+        )
+    }
+
+    /** Opens a single video attachment in the in-app (non full-screen) video player. */
+    private fun openVideoViewer(context: android.content.Context, attachment: com.cometchat.chat.models.Attachment) {
+        openVideoViewer(context, listOf(attachment), 0)
+    }
+
+    /**
+     * Opens a set of video attachments in the in-app (non full-screen) video player, starting at
+     * [startIndex] with swipe navigation through the rest (multi-attachment message).
+     */
+    private fun openVideoViewer(
+        context: android.content.Context,
+        attachments: List<com.cometchat.chat.models.Attachment>,
+        startIndex: Int
+    ) {
+        // Keep all four lists parallel (urls included) — dropping empty-url entries here would
+        // shift pages against fileNames/mimeTypes and against the grid's tile indices.
+        if (attachments.none { !it.fileUrl.isNullOrEmpty() }) return
+        context.startActivity(
+            com.cometchat.uikit.compose.presentation.imageviewer.ui.CometChatVideoViewerActivity.createIntent(
+                context = context,
+                videoUrls = attachments.map { it.fileUrl.orEmpty() },
+                fileNames = attachments.map { it.fileName.orEmpty() },
+                mimeTypes = attachments.map { it.fileMimeType?.takeIf { m -> m.isNotEmpty() } ?: "video/*" },
+                startIndex = startIndex.coerceIn(0, attachments.lastIndex)
+            )
+        )
     }
 
     // ========================================================================
@@ -715,29 +824,35 @@ internal object InternalContentRenderer {
                     logCastFailure(message, "MediaMessage")
                     return false
                 }
-                val effectiveStyle = styles.imageBubbleStyle ?: getDefaultImageBubbleStyle(alignment, messageBubbleStyle)
                 val context = LocalContext.current
-                CometChatImageBubble(
-                    message = mediaMessage,
-                    alignment = alignment,
-                    style = effectiveStyle,
-                    onImageClick = { _, attachment ->
-                        val imageUrl = attachment.fileUrl ?: ""
-                        val fileName = attachment.fileName ?: ""
-                        val mimeType = attachment.fileMimeType ?: ""
-                        if (imageUrl.isNotEmpty()) {
-                            context.startActivity(
-                                CometChatImageViewerActivity.createIntent(
-                                    context = context,
-                                    imageUrl = imageUrl,
-                                    fileName = fileName,
-                                    mimeType = mimeType
-                                )
-                            )
-                        }
-                    },
-                    onLongClick = onLongClick
-                )
+                if (LocalEnableMultipleAttachments.current) {
+                    // Grid preview: a tapped tile opens the viewer at that image, the "+N"
+                    // overflow tile opens it at the first — either way the user can swipe
+                    // through every attachment of the message. Kind-mismatched attachments stay
+                    // in the carousel and render as "No preview available" pages, so tile
+                    // indices map 1:1 onto viewer pages.
+                    val allAttachments = resolveAttachments(mediaMessage)
+                    val effectiveStyle = styles.imagesBubbleStyle ?: getDefaultImagesBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatImagesBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        textFormatters = textFormatters,
+                        onMediaClick = { index, _ -> openImageViewer(context, allAttachments, index) },
+                        onMoreClick = { list -> openImageViewer(context, list, 0) },
+                        onLongClick = onLongClick
+                    )
+                } else {
+                    val effectiveStyle = styles.imageBubbleStyle ?: getDefaultImageBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatImageBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        textFormatters = textFormatters,
+                        onImageClick = { _, attachment -> openImageViewer(context, attachment) },
+                        onLongClick = onLongClick
+                    )
+                }
             }
             CometChatConstants.MESSAGE_TYPE_VIDEO -> {
                 // Safe cast to MediaMessage
@@ -746,38 +861,35 @@ internal object InternalContentRenderer {
                     logCastFailure(message, "MediaMessage")
                     return false
                 }
-                val effectiveStyle = styles.videoBubbleStyle ?: getDefaultVideoBubbleStyle(alignment, messageBubbleStyle)
                 val context = LocalContext.current
-                CometChatVideoBubble(
-                    message = mediaMessage,
-                    alignment = alignment,
-                    style = effectiveStyle,
-                    onVideoClick = { _, attachment ->
-                        val videoUrl = attachment.fileUrl ?: ""
-                        val mimeType = attachment.fileMimeType ?: "video/*"
-                        if (videoUrl.isNotEmpty()) {
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                            intent.setDataAndType(android.net.Uri.parse(videoUrl), mimeType)
-                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                            if (intent.resolveActivity(context.packageManager) != null) {
-                                context.startActivity(intent)
-                            }
-                        }
-                    },
-                    onPlayClick = { attachment ->
-                        val videoUrl = attachment.fileUrl ?: ""
-                        val mimeType = attachment.fileMimeType ?: "video/*"
-                        if (videoUrl.isNotEmpty()) {
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                            intent.setDataAndType(android.net.Uri.parse(videoUrl), mimeType)
-                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                            if (intent.resolveActivity(context.packageManager) != null) {
-                                context.startActivity(intent)
-                            }
-                        }
-                    },
-                    onLongClick = onLongClick
-                )
+                if (LocalEnableMultipleAttachments.current) {
+                    // Grid preview: a tapped tile opens the player at that video, the "+N" overflow
+                    // tile opens it at the first — either way the user can swipe through every
+                    // attachment. Kind-mismatched attachments stay in the carousel and render as
+                    // "No preview available" pages, so tile indices map 1:1 onto viewer pages.
+                    val allAttachments = resolveAttachments(mediaMessage)
+                    val effectiveStyle = styles.videosBubbleStyle ?: getDefaultVideosBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatVideosBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        textFormatters = textFormatters,
+                        onMediaClick = { index, _ -> openVideoViewer(context, allAttachments, index) },
+                        onMoreClick = { list -> openVideoViewer(context, list, 0) },
+                        onLongClick = onLongClick
+                    )
+                } else {
+                    val effectiveStyle = styles.videoBubbleStyle ?: getDefaultVideoBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatVideoBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        textFormatters = textFormatters,
+                        onVideoClick = { _, attachment -> openVideoViewer(context, attachment) },
+                        onPlayClick = { attachment -> openVideoViewer(context, attachment) },
+                        onLongClick = onLongClick
+                    )
+                }
             }
             CometChatConstants.MESSAGE_TYPE_AUDIO -> {
                 // Safe cast to MediaMessage
@@ -786,13 +898,33 @@ internal object InternalContentRenderer {
                     logCastFailure(message, "MediaMessage")
                     return false
                 }
-                val effectiveStyle = styles.audioBubbleStyle ?: getDefaultAudioBubbleStyle(alignment, messageBubbleStyle)
-                CometChatAudioBubble(
-                    message = mediaMessage,
-                    alignment = alignment,
-                    style = effectiveStyle,
-                    onLongClick = onLongClick
-                )
+                if (LocalEnableMultipleAttachments.current) {
+                    // Recorded voice notes get the dedicated bubble; picker audio gets the player cards.
+                    if (mediaMessage.isVoiceNote()) {
+                        CometChatVoiceNoteBubble(message = mediaMessage, alignment = alignment, onLongClick = onLongClick)
+                    } else {
+                        val context = LocalContext.current
+                        val shouldShowDownload = remember(mediaMessage.id) { shouldShowDownloadIcon(mediaMessage) }
+                        val effectiveStyle = styles.audiosBubbleStyle ?: getDefaultAudiosBubbleStyle(alignment, messageBubbleStyle)
+                        CometChatAudiosBubble(
+                            message = mediaMessage,
+                            alignment = alignment,
+                            style = effectiveStyle,
+                            textFormatters = textFormatters,
+                            showDownloadIcon = shouldShowDownload,
+                            onDownloadClick = { index -> downloadFileAttachment(context, mediaMessage, index) },
+                            onLongClick = onLongClick
+                        )
+                    }
+                } else {
+                    val effectiveStyle = styles.audioBubbleStyle ?: getDefaultAudioBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatAudioBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        onLongClick = onLongClick
+                    )
+                }
             }
             CometChatConstants.MESSAGE_TYPE_FILE -> {
                 // Safe cast to MediaMessage
@@ -801,27 +933,37 @@ internal object InternalContentRenderer {
                     logCastFailure(message, "MediaMessage")
                     return false
                 }
-                val effectiveStyle = styles.fileBubbleStyle ?: getDefaultFileBubbleStyle(alignment, messageBubbleStyle)
                 val context = LocalContext.current
                 val shouldShowDownload = remember(mediaMessage.id) {
                     shouldShowDownloadIcon(mediaMessage)
                 }
-                CometChatFileBubble(
-                    message = mediaMessage,
-                    alignment = alignment,
-                    style = effectiveStyle,
-                    showDownloadIcon = shouldShowDownload,
-                    onFileClick = { _ ->
-                        openFileAttachment(context, mediaMessage)
-                    },
-                    onDownloadClick = { index ->
-                        downloadFileAttachment(context, mediaMessage, index)
-                    },
-                    onDownloadAllClick = {
-                        downloadAllFileAttachments(context, mediaMessage)
-                    },
-                    onLongClick = onLongClick
-                )
+                // Always pass the merged style: the bare per-type style leaves wrapper props
+                // (e.g. cornerRadius) UNSET_DP until merged with the base message-bubble style.
+                if (LocalEnableMultipleAttachments.current) {
+                    val effectiveStyle = styles.filesBubbleStyle ?: getDefaultFilesBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatFilesBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        textFormatters = textFormatters,
+                        showDownloadIcon = shouldShowDownload,
+                        onFileClick = { _ -> openFileAttachment(context, mediaMessage) },
+                        onDownloadClick = { index -> downloadFileAttachment(context, mediaMessage, index) },
+                        onLongClick = onLongClick
+                    )
+                } else {
+                    val effectiveStyle = styles.fileBubbleStyle ?: getDefaultFileBubbleStyle(alignment, messageBubbleStyle)
+                    CometChatFileBubble(
+                        message = mediaMessage,
+                        alignment = alignment,
+                        style = effectiveStyle,
+                        showDownloadIcon = shouldShowDownload,
+                        onFileClick = { _ -> openFileAttachment(context, mediaMessage) },
+                        onDownloadClick = { index -> downloadFileAttachment(context, mediaMessage, index) },
+                        onDownloadAllClick = { downloadAllFileAttachments(context, mediaMessage) },
+                        onLongClick = onLongClick
+                    )
+                }
             }
             else -> return false
         }
@@ -939,6 +1081,98 @@ internal object InternalContentRenderer {
             UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatFileBubbleStyle.incoming()
             UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatFileBubbleStyle.outgoing()
             UIKitConstants.MessageBubbleAlignment.CENTER -> CometChatFileBubbleStyle.default()
+        }
+        return if (messageBubbleStyle != null) {
+            mergeWithBase(alignmentDefault, messageBubbleStyle)
+        } else {
+            alignmentDefault
+        }
+    }
+
+    /**
+     * Gets the default multi-attachment images bubble style based on alignment.
+     *
+     * @param alignment The bubble alignment
+     * @return The appropriate style variant (incoming, outgoing, or default)
+     */
+    @Composable
+    private fun getDefaultImagesBubbleStyle(
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        messageBubbleStyle: CometChatMessageBubbleStyle?
+    ): CometChatImagesBubbleStyle {
+        val alignmentDefault = when (alignment) {
+            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatImagesBubbleStyle.incoming()
+            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatImagesBubbleStyle.outgoing()
+            UIKitConstants.MessageBubbleAlignment.CENTER -> CometChatImagesBubbleStyle.default()
+        }
+        return if (messageBubbleStyle != null) {
+            mergeWithBase(alignmentDefault, messageBubbleStyle)
+        } else {
+            alignmentDefault
+        }
+    }
+
+    /**
+     * Gets the default multi-attachment videos bubble style based on alignment.
+     *
+     * @param alignment The bubble alignment
+     * @return The appropriate style variant (incoming, outgoing, or default)
+     */
+    @Composable
+    private fun getDefaultVideosBubbleStyle(
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        messageBubbleStyle: CometChatMessageBubbleStyle?
+    ): CometChatVideosBubbleStyle {
+        val alignmentDefault = when (alignment) {
+            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatVideosBubbleStyle.incoming()
+            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatVideosBubbleStyle.outgoing()
+            UIKitConstants.MessageBubbleAlignment.CENTER -> CometChatVideosBubbleStyle.default()
+        }
+        return if (messageBubbleStyle != null) {
+            mergeWithBase(alignmentDefault, messageBubbleStyle)
+        } else {
+            alignmentDefault
+        }
+    }
+
+    /**
+     * Gets the default multi-attachment audios bubble style based on alignment.
+     *
+     * @param alignment The bubble alignment
+     * @return The appropriate style variant (incoming, outgoing, or default)
+     */
+    @Composable
+    private fun getDefaultAudiosBubbleStyle(
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        messageBubbleStyle: CometChatMessageBubbleStyle?
+    ): CometChatAudiosBubbleStyle {
+        val alignmentDefault = when (alignment) {
+            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatAudiosBubbleStyle.incoming()
+            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatAudiosBubbleStyle.outgoing()
+            UIKitConstants.MessageBubbleAlignment.CENTER -> CometChatAudiosBubbleStyle.default()
+        }
+        return if (messageBubbleStyle != null) {
+            mergeWithBase(alignmentDefault, messageBubbleStyle)
+        } else {
+            alignmentDefault
+        }
+    }
+
+    /**
+     * Gets the default multi-attachment files bubble style based on alignment.
+     *
+     * @param alignment The bubble alignment
+     * @return The appropriate style variant (incoming, outgoing, or default)
+     */
+    @Composable
+    private fun getDefaultFilesBubbleStyle(
+        alignment: UIKitConstants.MessageBubbleAlignment,
+        messageBubbleStyle: CometChatMessageBubbleStyle?
+    ): CometChatFilesBubbleStyle {
+        val alignmentDefault = when (alignment) {
+            UIKitConstants.MessageBubbleAlignment.LEFT -> CometChatFilesBubbleStyle.incoming()
+            UIKitConstants.MessageBubbleAlignment.RIGHT -> CometChatFilesBubbleStyle.outgoing()
+            UIKitConstants.MessageBubbleAlignment.CENTER -> CometChatFilesBubbleStyle.default()
         }
         return if (messageBubbleStyle != null) {
             mergeWithBase(alignmentDefault, messageBubbleStyle)
@@ -1580,12 +1814,23 @@ internal object InternalContentRenderer {
         // Only show background for sticker messages (custom category with sticker type)
         val isSticker = message.category == "custom" && message.type == "extension_sticker"
 
+        // The per-type multi-attachment bubbles end with 0 bottom padding ("the timestamp row
+        // below provides the gap"), so this row's extra top inset would double the gap under
+        // their grid/caption — collapse it for them (the Views module collapses the status
+        // row's 4dp top margin the same way).
+        val onPerTypeMediaBubble = LocalEnableMultipleAttachments.current &&
+            message.category == CometChatConstants.CATEGORY_MESSAGE &&
+            (message.type == CometChatConstants.MESSAGE_TYPE_IMAGE ||
+                message.type == CometChatConstants.MESSAGE_TYPE_VIDEO ||
+                message.type == CometChatConstants.MESSAGE_TYPE_AUDIO ||
+                message.type == CometChatConstants.MESSAGE_TYPE_FILE)
+
         // Status info view - renders the timestamp and receipt.
         // Alignment to the end of the bubble is handled by the parent (CometChatMessageBubble)
         // which wraps this in a Box with Alignment.End.
         Row(
             modifier = Modifier
-                .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
+                .padding(start = 4.dp, top = if (onPerTypeMediaBubble) 0.dp else 4.dp, end = 4.dp, bottom = 4.dp)
                 .then(
                     if (isSticker) {
                         Modifier
@@ -1770,6 +2015,11 @@ internal object InternalContentRenderer {
 
         Box(
             modifier = Modifier
+                // The bubble content Column uses Modifier.width(IntrinsicSize.Max); the long
+                // moderation text's single-line intrinsic width would otherwise stretch the whole
+                // bubble past the media/content width (leaving the media left-aligned with a gap).
+                // Report a 0 intrinsic width so the banner fills the content width without widening it.
+                .ignoreIntrinsicWidth()
                 .fillMaxWidth()
                 .background(
                     color = androidx.compose.ui.res.colorResource(id = R.color.cometchat_color_error_100)
@@ -1793,6 +2043,31 @@ internal object InternalContentRenderer {
             }
         }
     }
+
+    /**
+     * Fills the resolved width like [Modifier.fillMaxWidth] but reports a 0 intrinsic width, so a
+     * child does not inflate a parent measured with `Modifier.width(IntrinsicSize.Max)`. Used by the
+     * moderation banner so its long text can't stretch the bubble past the media/content width.
+     */
+    private fun Modifier.ignoreIntrinsicWidth(): Modifier = this.then(
+        object : androidx.compose.ui.layout.LayoutModifier {
+            override fun androidx.compose.ui.layout.MeasureScope.measure(
+                measurable: androidx.compose.ui.layout.Measurable,
+                constraints: androidx.compose.ui.unit.Constraints
+            ): androidx.compose.ui.layout.MeasureResult {
+                val placeable = measurable.measure(constraints)
+                return layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+            }
+
+            override fun androidx.compose.ui.layout.IntrinsicMeasureScope.minIntrinsicWidth(
+                measurable: androidx.compose.ui.layout.IntrinsicMeasurable, height: Int
+            ): Int = 0
+
+            override fun androidx.compose.ui.layout.IntrinsicMeasureScope.maxIntrinsicWidth(
+                measurable: androidx.compose.ui.layout.IntrinsicMeasurable, height: Int
+            ): Int = 0
+        }
+    )
 
     /**
      * AI Assistant copy button — rendered OUTSIDE the bubble background so it never

@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import coil.request.ImageRequest
 import com.cometchat.chat.models.Attachment
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.uikit.compose.R
+import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideoBubbleStyle
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.constants.UIKitConstants
@@ -95,6 +97,7 @@ fun CometChatVideoBubble(
         else -> CometChatVideoBubbleStyle.incoming()
     },
     caption: String? = message.caption,
+    textFormatters: List<CometChatTextFormatter> = emptyList(),
     onVideoClick: ((Int, Attachment) -> Unit)? = null,
     onMoreClick: ((List<Attachment>) -> Unit)? = null,
     onPlayClick: ((Attachment) -> Unit)? = null,
@@ -134,7 +137,11 @@ fun CometChatVideoBubble(
         onMoreClick = onMoreClick,
         onPlayClick = onPlayClick,
         onLongClick = onLongClick,
-        modifier = modifier
+        isEdited = message.editedAt > 0,
+        modifier = modifier,
+        captionMessage = message,
+        alignment = alignment,
+        textFormatters = textFormatters
     )
 }
 
@@ -194,7 +201,13 @@ private fun CometChatVideoBubbleContent(
     onMoreClick: ((List<Attachment>) -> Unit)?,
     onPlayClick: ((Attachment) -> Unit)?,
     onLongClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    isEdited: Boolean = false,
+    modifier: Modifier = Modifier,
+    // Caption formatting context — absent on the attachments-only overload, where the caption
+    // still renders markdown but has no message to resolve mentions against.
+    captionMessage: MediaMessage? = null,
+    alignment: UIKitConstants.MessageBubbleAlignment = UIKitConstants.MessageBubbleAlignment.LEFT,
+    textFormatters: List<CometChatTextFormatter> = emptyList()
 ) {
     Column(
         modifier = modifier
@@ -258,17 +271,27 @@ private fun CometChatVideoBubbleContent(
             }
         }
 
-        // Caption
+        // Caption — same formatter + block markdown pipeline as the text bubble (see
+        // MarkdownSegments), so mentions, rich text and code/quote/list blocks all render.
         if (!caption.isNullOrEmpty()) {
-            Text(
-                text = caption,
-                style = style.captionTextStyle,
-                color = style.captionTextColor,
-                modifier = Modifier.padding(
-                    horizontal = 12.dp,
-                    vertical = 8.dp
-                )
+            val formatted = rememberCaptionFormatterOutput(caption, captionMessage, alignment, textFormatters)
+            MarkdownSegments(
+                sourceText = formatted?.text ?: caption,
+                formattedText = formatted,
+                textStyle = style.captionTextStyle,
+                textColor = style.captionTextColor,
+                linkColor = style.captionTextColor,
+                isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
+            if (isEdited) {
+                Text(
+                    text = stringResource(R.string.cometchat_edited),
+                    style = CometChatTheme.typography.caption2Regular,
+                    color = style.captionTextColor,
+                    modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
+                )
+            }
         }
     }
 }

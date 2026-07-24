@@ -9,7 +9,7 @@ plugins {
 
 ext["publishArtifactId"] = "chatuikit-kotlin-android"
 ext["publishDescription"] = "CometChat UI Kit Kotlin – Android Views/XML chat UI components"
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.3"
+val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.4"
 val cloudsmithRepo = System.getenv("CLOUDSMITH_REPO") ?: "cometchat/call-team"
 val libraryGroup = "com.cometchat"
 val libraryArtifact = "chatuikit-kotlin-android"

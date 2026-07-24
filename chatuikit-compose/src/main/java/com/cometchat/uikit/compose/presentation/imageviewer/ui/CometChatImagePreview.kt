@@ -3,9 +3,11 @@ package com.cometchat.uikit.compose.presentation.imageviewer.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -136,21 +139,39 @@ internal fun CometChatImagePreview(
                     translationY = offset.y + dragOffsetY
                 }
                 // --- Task 4.2: Pinch-to-zoom gesture handling ---
+                // Hand-rolled instead of detectTransformGestures: only multi-touch pinches and
+                // pans while zoomed in are claimed. Single-finger drags at minimum zoom stay
+                // unconsumed so the hosting HorizontalPager can swipe pages (horizontal) and the
+                // drag-to-dismiss handler below can take verticals.
                 .pointerInput(minScale, maxScale) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        val newScale = (scale * zoom).coerceIn(minScale, maxScale)
-                        val newOffset = if (newScale > minScale) {
-                            ImageViewerUtils.constrainOffset(
-                                offset = offset + pan,
-                                scale = newScale,
-                                imageSize = imageIntrinsicSize,
-                                containerSize = containerSize
-                            )
-                        } else {
-                            Offset.Zero
-                        }
-                        scale = newScale
-                        offset = newOffset
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        do {
+                            val event = awaitPointerEvent()
+                            val pressedCount = event.changes.count { it.pressed }
+                            if (pressedCount > 1 || scale > minScale) {
+                                val zoom = event.calculateZoom()
+                                val pan = event.calculatePan()
+                                if (zoom != 1f || pan != Offset.Zero) {
+                                    val newScale = (scale * zoom).coerceIn(minScale, maxScale)
+                                    val newOffset = if (newScale > minScale) {
+                                        ImageViewerUtils.constrainOffset(
+                                            offset = offset + pan,
+                                            scale = newScale,
+                                            imageSize = imageIntrinsicSize,
+                                            containerSize = containerSize
+                                        )
+                                    } else {
+                                        Offset.Zero
+                                    }
+                                    scale = newScale
+                                    offset = newOffset
+                                    event.changes.forEach {
+                                        if (it.positionChanged()) it.consume()
+                                    }
+                                }
+                            }
+                        } while (event.changes.any { it.pressed })
                     }
                 }
                 // --- Task 4.3: Double-tap-to-zoom gesture handling ---
@@ -230,6 +251,7 @@ internal fun CometChatImagePreview(
 
                             var dragStarted = false
                             var totalDragY = 0f
+                            var totalDragX = 0f
 
                             try {
                                 while (true) {
@@ -291,9 +313,12 @@ internal fun CometChatImagePreview(
 
                                     val dragDelta = change.position - change.previousPosition
                                     totalDragY += dragDelta.y
+                                    totalDragX += dragDelta.x
 
-                                    // Start drag after a small threshold to avoid accidental drags
-                                    if (!dragStarted && abs(totalDragY) > 8f) {
+                                    // Start drag after a small threshold to avoid accidental
+                                    // drags; mostly-horizontal movement is left unconsumed so the
+                                    // hosting pager can swipe between images instead.
+                                    if (!dragStarted && abs(totalDragY) > 8f && abs(totalDragY) > abs(totalDragX)) {
                                         dragStarted = true
                                         isDragging = true
                                         onDragStart()

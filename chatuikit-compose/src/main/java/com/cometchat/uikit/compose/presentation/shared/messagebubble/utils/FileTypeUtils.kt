@@ -1,6 +1,7 @@
 package com.cometchat.uikit.compose.presentation.shared.messagebubble.utils
 
 import com.cometchat.uikit.compose.R
+import com.cometchat.uikit.core.constants.UIKitConstants
 
 /**
  * Enum representing different file types for display in file bubbles.
@@ -30,88 +31,41 @@ enum class FileType {
 fun getFileType(mimeType: String?, fileUrl: String?): FileType {
     val lowerMimeType = mimeType?.lowercase()
     val lowerUrl = fileUrl?.lowercase()
-    
+    val matchers = UIKitConstants.FileTypeMatchers
+
+    fun mimeContainsAny(keywords: List<String>) = keywords.any { lowerMimeType?.contains(it) == true }
+    fun urlEndsWithAny(extensions: List<String>) = extensions.any { lowerUrl?.endsWith(it) == true }
+
     return when {
-        // PDF
-        lowerMimeType?.contains("pdf") == true ||
-        lowerUrl?.endsWith(".pdf") == true -> FileType.PDF
-        
-        // Word documents
-        lowerMimeType?.contains("msword") == true ||
-        lowerMimeType?.contains("wordprocessingml") == true ||
-        lowerUrl?.endsWith(".doc") == true ||
-        lowerUrl?.endsWith(".docx") == true -> FileType.DOC
-        
-        // Excel spreadsheets
-        lowerMimeType?.contains("spreadsheet") == true ||
-        lowerMimeType?.contains("excel") == true ||
-        lowerUrl?.endsWith(".xls") == true ||
-        lowerUrl?.endsWith(".xlsx") == true ||
-        lowerUrl?.endsWith(".csv") == true -> FileType.XLS
-        
-        // PowerPoint presentations
-        lowerMimeType?.contains("presentation") == true ||
-        lowerMimeType?.contains("powerpoint") == true ||
-        lowerUrl?.endsWith(".ppt") == true ||
-        lowerUrl?.endsWith(".pptx") == true -> FileType.PPT
-        
-        // Archives
-        lowerMimeType?.contains("zip") == true ||
-        lowerMimeType?.contains("compressed") == true ||
-        lowerMimeType?.contains("archive") == true ||
-        lowerMimeType?.contains("rar") == true ||
-        lowerMimeType?.contains("7z") == true ||
-        lowerMimeType?.contains("tar") == true ||
-        lowerMimeType?.contains("gzip") == true ||
-        lowerUrl?.endsWith(".zip") == true ||
-        lowerUrl?.endsWith(".rar") == true ||
-        lowerUrl?.endsWith(".7z") == true ||
-        lowerUrl?.endsWith(".tar") == true ||
-        lowerUrl?.endsWith(".gz") == true -> FileType.ZIP
-        
-        // Audio files
-        lowerMimeType?.startsWith("audio/") == true ||
-        lowerUrl?.endsWith(".mp3") == true ||
-        lowerUrl?.endsWith(".wav") == true ||
-        lowerUrl?.endsWith(".aac") == true ||
-        lowerUrl?.endsWith(".m4a") == true ||
-        lowerUrl?.endsWith(".ogg") == true ||
-        lowerUrl?.endsWith(".flac") == true -> FileType.AUDIO
-        
-        // Video files
-        lowerMimeType?.startsWith("video/") == true ||
-        lowerUrl?.endsWith(".mp4") == true ||
-        lowerUrl?.endsWith(".mov") == true ||
-        lowerUrl?.endsWith(".avi") == true ||
-        lowerUrl?.endsWith(".mkv") == true ||
-        lowerUrl?.endsWith(".webm") == true -> FileType.VIDEO
-        
-        // Image files
-        lowerMimeType?.startsWith("image/") == true ||
-        lowerUrl?.endsWith(".jpg") == true ||
-        lowerUrl?.endsWith(".jpeg") == true ||
-        lowerUrl?.endsWith(".png") == true ||
-        lowerUrl?.endsWith(".gif") == true ||
-        lowerUrl?.endsWith(".webp") == true ||
-        lowerUrl?.endsWith(".bmp") == true ||
-        lowerUrl?.endsWith(".svg") == true -> FileType.IMAGE
-        
-        // Text files
-        lowerMimeType?.startsWith("text/") == true ||
-        lowerUrl?.endsWith(".txt") == true ||
-        lowerUrl?.endsWith(".rtf") == true ||
-        lowerUrl?.endsWith(".md") == true ||
-        lowerUrl?.endsWith(".json") == true ||
-        lowerUrl?.endsWith(".xml") == true ||
-        lowerUrl?.endsWith(".html") == true ||
-        lowerUrl?.endsWith(".css") == true ||
-        lowerUrl?.endsWith(".js") == true -> FileType.TEXT
-        
-        // Links
-        lowerUrl?.startsWith("http://") == true ||
-        lowerUrl?.startsWith("https://") == true -> FileType.LINK
-        
-        // Unknown
+        lowerMimeType?.contains(matchers.PDF_KEYWORD) == true ||
+            urlEndsWithAny(matchers.PDF_EXTENSIONS) -> FileType.PDF
+
+        mimeContainsAny(matchers.DOC_KEYWORDS) ||
+            urlEndsWithAny(matchers.DOC_EXTENSIONS) -> FileType.DOC
+
+        mimeContainsAny(matchers.XLS_KEYWORDS) ||
+            urlEndsWithAny(matchers.XLS_EXTENSIONS) -> FileType.XLS
+
+        mimeContainsAny(matchers.PPT_KEYWORDS) ||
+            urlEndsWithAny(matchers.PPT_EXTENSIONS) -> FileType.PPT
+
+        mimeContainsAny(matchers.ARCHIVE_KEYWORDS) ||
+            urlEndsWithAny(matchers.ARCHIVE_EXTENSIONS) -> FileType.ZIP
+
+        lowerMimeType?.startsWith(matchers.AUDIO_MIME_PREFIX) == true ||
+            urlEndsWithAny(matchers.AUDIO_EXTENSIONS) -> FileType.AUDIO
+
+        lowerMimeType?.startsWith(matchers.VIDEO_MIME_PREFIX) == true ||
+            urlEndsWithAny(matchers.VIDEO_EXTENSIONS) -> FileType.VIDEO
+
+        lowerMimeType?.startsWith(matchers.IMAGE_MIME_PREFIX) == true ||
+            urlEndsWithAny(matchers.IMAGE_EXTENSIONS) -> FileType.IMAGE
+
+        lowerMimeType?.startsWith(matchers.TEXT_MIME_PREFIX) == true ||
+            urlEndsWithAny(matchers.TEXT_EXTENSIONS) -> FileType.TEXT
+
+        matchers.LINK_PREFIXES.any { lowerUrl?.startsWith(it) == true } -> FileType.LINK
+
         else -> FileType.UNKNOWN
     }
 }

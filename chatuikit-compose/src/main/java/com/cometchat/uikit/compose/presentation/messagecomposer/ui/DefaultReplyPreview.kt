@@ -34,6 +34,7 @@ import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildReplyPreviewAnnotatedString
+import com.cometchat.uikit.compose.presentation.shared.messagepreview.mediaPreviewSubtitle
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.formatter.MarkdownRenderer
@@ -107,13 +108,16 @@ fun DefaultReplyPreview(
                 }
             }
             is MediaMessage -> {
-                AnnotatedString(message.attachment?.fileName ?: when (message.type) {
-                    "image" -> context.getString(R.string.cometchat_message_image)
-                    "video" -> context.getString(R.string.cometchat_message_video)
-                    "audio" -> context.getString(R.string.cometchat_message_audio)
-                    "file" -> context.getString(R.string.cometchat_message_document)
-                    else -> message.type ?: ""
-                })
+                // Summarized attachment preview: "N Images · caption" / "N Images" /
+                // caption / file name — same rules as the quoted message preview.
+                mediaPreviewSubtitle(context, message).takeIf { it.text.isNotEmpty() }
+                    ?: AnnotatedString(when (message.type) {
+                        "image" -> context.getString(R.string.cometchat_message_image)
+                        "video" -> context.getString(R.string.cometchat_message_video)
+                        "audio" -> context.getString(R.string.cometchat_message_audio)
+                        "file" -> context.getString(R.string.cometchat_message_document)
+                        else -> message.type ?: ""
+                    })
             }
             is CustomMessage -> {
                 AnnotatedString(when (message.type) {

@@ -16,11 +16,14 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import com.cometchat.chat.models.MediaMessage
+import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.utils.AudioBubblePlaybackState
 import com.cometchat.uikit.core.utils.AudioBubbleStateManager
 import com.cometchat.uikit.core.utils.PlayState
 import com.cometchat.uikit.core.utils.WaveformUtils
 import com.cometchat.uikit.kotlin.R
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
+import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.interfaces.OnClick
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -62,10 +65,20 @@ class CometChatAudioBubble @JvmOverloads constructor(
     private lateinit var progressBar: ProgressBar
     private lateinit var waveformView: AudioWaveformBarsView
     private lateinit var subtitleTextView: TextView
+    private lateinit var captionTextView: TextView
+
+    // Block-level caption sibling of [captionTextView]: markdown captions (fenced code blocks,
+    // blockquotes, lists) render as their own child views, as in the text bubble, instead of being
+    // flattened into one TextView.
+    private lateinit var captionBlockContainer: LinearLayout
+    private lateinit var editedTextView: TextView
 
     // State
     private var audioUrl: String? = null
     private var messageId: Int = 0
+
+    private var textFormatters: List<CometChatTextFormatter> = emptyList()
+    private var messageAlignment = UIKitConstants.MessageBubbleAlignment.LEFT
     private var fileName: String = ""
     private var onClick: OnClick? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -74,6 +87,7 @@ class CometChatAudioBubble @JvmOverloads constructor(
     private var style: CometChatAudioBubbleStyle = CometChatAudioBubbleStyle()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var isDownloading = false
+    private var statusInfoVisible = true
 
     @DrawableRes private var playIcon: Int = R.drawable.cometchat_play_icon
     @DrawableRes private var pauseIcon: Int = R.drawable.cometchat_ic_pause
@@ -85,7 +99,39 @@ class CometChatAudioBubble @JvmOverloads constructor(
     private fun inflateAndInitializeView(attrs: AttributeSet?, defStyleAttr: Int) {
         Utils.initMaterialCard(this)
         val view = View.inflate(context, R.layout.cometchat_audio_bubble, null)
-        addView(view)
+        // Player row + optional caption stack vertically. The caption rides the last message of a
+        // multi-attachment batch, which is the audio message when the batch has no files
+        // (image → video → audio → file send order).
+        captionTextView = TextView(context).apply {
+            visibility = View.GONE
+            val pad = resources.getDimensionPixelSize(R.dimen.cometchat_padding_2)
+            // 0 bottom — the timestamp row below the bubble provides the gap (same rule as the
+            // content padding); a bottom inset here doubles up and bloats captioned bubbles.
+            setPadding(pad, pad, pad, 0)
+        }
+        // Sibling block-caption container, sitting right after the flat caption TextView. Matches
+        // the caption's padding (padding_2 sides, 0 bottom) so the block path lines up with it.
+        captionBlockContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            val pad = resources.getDimensionPixelSize(R.dimen.cometchat_padding_2)
+            setPadding(pad, pad, pad, 0)
+        }
+        editedTextView = MultiAttachmentUtils.createEditedLabel(context)
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(view)
+            addView(captionTextView, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ))
+            addView(captionBlockContainer, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ))
+            addView(editedTextView, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ))
+        }
+        addView(container)
 
         parentLayout = view.findViewById(R.id.parent)
         buttonCardView = view.findViewById(R.id.iv_button)
@@ -122,12 +168,29 @@ class CometChatAudioBubble @JvmOverloads constructor(
     }
 
     private fun applyDefaultStyles() {
-        val padding3 = resources.getDimensionPixelSize(R.dimen.cometchat_padding_3)
-        setContentPadding(padding3, padding3, padding3, 0)
+        applyContentPadding()
         layoutParams = LayoutParams(
             resources.getDimensionPixelSize(R.dimen.cometchat_240dp),
             LayoutParams.WRAP_CONTENT
         )
+    }
+
+    private fun applyContentPadding() {
+        val padding3 = resources.getDimensionPixelSize(R.dimen.cometchat_padding_3)
+        // 0 bottom by default — the timestamp row below the content provides the visual gap. When
+        // that row is hidden (setStatusInfoVisible(false)), pad the bottom so the player isn't
+        // flush with the bubble edge.
+        setContentPadding(padding3, padding3, padding3, if (statusInfoVisible) 0 else padding3)
+    }
+
+    /**
+     * Tells the bubble whether the message's timestamp/receipt row is visible below it, so it can
+     * compensate with bottom padding when the row is hidden. Called by [CometChatMessageBubble].
+     */
+    fun setStatusInfoVisible(visible: Boolean) {
+        if (statusInfoVisible == visible) return
+        statusInfoVisible = visible
+        applyContentPadding()
     }
 
     private fun applyStyleAttributes(attrs: AttributeSet?, defStyleAttr: Int) {
@@ -150,6 +213,7 @@ class CometChatAudioBubble @JvmOverloads constructor(
         if (style.playIconTint != 0) progressBar.indeterminateDrawable.setColorFilter(style.playIconTint, PorterDuff.Mode.SRC_IN)
         if (style.subtitleTextColor != 0) subtitleTextView.setTextColor(style.subtitleTextColor)
         if (style.subtitleTextAppearance != 0) subtitleTextView.setTextAppearance(style.subtitleTextAppearance)
+        if (style.subtitleTextColor != 0) captionTextView.setTextColor(style.subtitleTextColor)
 
         // Waveform colors — derive from audioWaveColor if not explicitly set
         // audioWaveColor is correctly set per incoming/outgoing from theme:
@@ -169,6 +233,19 @@ class CometChatAudioBubble @JvmOverloads constructor(
     // ========================================
 
     /**
+     * Formatters applied to the caption, exactly as the text bubble applies them to its text (so a
+     * mention resolves to a display name instead of a raw `<@uid:...>` token). Call before
+     * [setMessage] — the caption is rendered there.
+     */
+    fun setTextFormatters(
+        formatters: List<CometChatTextFormatter>?,
+        alignment: UIKitConstants.MessageBubbleAlignment
+    ) {
+        textFormatters = formatters ?: emptyList()
+        messageAlignment = alignment
+    }
+
+    /**
      * Sets the media message to display.
      * Extracts the audio URL and file size from the message attachment.
      * Generates a deterministic waveform based on the message ID.
@@ -176,7 +253,9 @@ class CometChatAudioBubble @JvmOverloads constructor(
      * @param mediaMessage The MediaMessage containing audio attachment
      */
     fun setMessage(mediaMessage: MediaMessage) {
-        // Release previous state if re-binding
+        // Release previous state if re-binding; restore the default 0 bottom padding (a recycled
+        // bubble may have been padded for a hidden timestamp row — the adapter re-hides after bind).
+        setStatusInfoVisible(true)
         resetVisualState()
         messageId = mediaMessage.id.toInt()
         val attachment = mediaMessage.attachment
@@ -194,7 +273,27 @@ class CometChatAudioBubble @JvmOverloads constructor(
         subtitleTextView.visibility = View.VISIBLE
         // Show file size initially (like v5), duration appears after play is tapped
         val fileSize = attachment?.fileSize ?: 0
-        subtitleTextView.text = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / --:--"
+        subtitleTextView.text = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / 00:00"
+
+        val caption = mediaMessage.caption
+        if (caption.isNullOrEmpty()) {
+            captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.GONE
+            captionBlockContainer.removeAllViews()
+        } else {
+            captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.VISIBLE
+            // Captions travel as markdown — render the same block-level views as the text bubble.
+            MultiAttachmentUtils.renderCaptionInto(
+                captionBlockContainer,
+                caption,
+                mediaMessage,
+                textFormatters,
+                messageAlignment,
+                captionTextColor = style.subtitleTextColor
+            )
+        }
+        MultiAttachmentUtils.bindEditedLabel(editedTextView, mediaMessage, style.subtitleTextColor)
     }
 
     /**
@@ -218,7 +317,7 @@ class CometChatAudioBubble @JvmOverloads constructor(
         }
         playIconImageView.visibility = View.VISIBLE
         subtitleTextView.visibility = View.VISIBLE
-        subtitleTextView.text = "00:00 / --:--"
+        subtitleTextView.text = "00:00 / 00:00"
     }
 
     // ========================================
@@ -268,7 +367,11 @@ class CometChatAudioBubble @JvmOverloads constructor(
         AudioBubbleStateManager.pauseAllExcept(messageId)
         val ps = AudioBubbleStateManager.getOrCreate(messageId, audioUrl, filePath)
         playbackState = ps
-        ps.initFromFile(filePath) {
+        ps.initFromFile(filePath, onError = {
+            // Evict the file — a truncated cache entry would otherwise fail on every replay.
+            File(filePath).delete()
+            handler.post { showIdleState() }
+        }) {
             handler.post {
                 val dur = ps.totalDuration
                 subtitleTextView.text = "00:00 / ${formatTime(dur)}"
@@ -361,7 +464,7 @@ class CometChatAudioBubble @JvmOverloads constructor(
     private fun showIdleState() {
         showPlayState()
         waveformView.setProgress(0f)
-        subtitleTextView.text = "00:00 / --:--"
+        subtitleTextView.text = "00:00 / 00:00"
     }
 
     private fun resetVisualState() {
@@ -397,6 +500,9 @@ class CometChatAudioBubble @JvmOverloads constructor(
     // ========================================
 
     private suspend fun downloadFile(url: String, targetFile: File): String? = withContext(Dispatchers.IO) {
+        // Stream into a temp file and rename on completion — if the process dies mid-download, no
+        // truncated file survives to pass the cache check and feed MediaPlayer a corrupt source.
+        val tempFile = File(targetFile.parentFile, "${targetFile.name}.part")
         try {
             val connection = URL(url).openConnection() as HttpURLConnection
             connection.connectTimeout = 15_000
@@ -407,13 +513,13 @@ class CometChatAudioBubble @JvmOverloads constructor(
                 return@withContext null
             }
             connection.inputStream.use { input ->
-                targetFile.outputStream().use { output -> input.copyTo(output) }
+                tempFile.outputStream().use { output -> input.copyTo(output) }
             }
             connection.disconnect()
-            if (targetFile.exists() && targetFile.length() > 0) targetFile.absolutePath else { targetFile.delete(); null }
+            if (tempFile.length() > 0 && tempFile.renameTo(targetFile)) targetFile.absolutePath else { tempFile.delete(); null }
         } catch (e: Exception) {
             Log.e(TAG, "Download failed: ${e.message}")
-            targetFile.delete()
+            tempFile.delete()
             null
         }
     }

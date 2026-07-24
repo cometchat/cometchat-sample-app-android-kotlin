@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One audio-attachment player row inside CometChatAudiosBubble: play/pause circle, file name,
+     flat seek bar + elapsed/total time, trailing download icon. Colors are applied at bind time
+     from the bubble alignment (translucent card on the tinted outgoing bubble). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <!-- 34dp circle with a 24dp glyph (5dp padding, matches Compose) — same as the voice-note bubble's button -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/audio_play_button"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        app:cardCornerRadius="17dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <ImageView
+            android:id="@+id/iv_play"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:contentDescription="@string/cometchat_play"
+            android:src="@drawable/cometchat_play_icon" />
+
+        <ImageView
+            android:id="@+id/iv_pause"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:contentDescription="@string/cometchat_pause"
+            android:src="@drawable/cometchat_ic_pause"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/pb_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:padding="7dp"
+            android:visibility="gone" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_audio_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- Same flat track as the composer tray audio tile, with a larger knob for the bubble -->
+        <SeekBar
+            android:id="@+id/sb_audio_seek"
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:layout_marginTop="4dp"
+            android:maxHeight="6dp"
+            android:minHeight="6dp"
+            android:paddingStart="0dp"
+            android:paddingTop="0dp"
+            android:paddingEnd="0dp"
+            android:paddingBottom="0dp"
+            android:progressDrawable="@drawable/cometchat_audio_seek_track"
+            android:splitTrack="false"
+            android:thumb="@drawable/cometchat_audio_seek_thumb_bubble"
+            android:thumbOffset="0dp" />
+
+        <TextView
+            android:id="@+id/tv_audio_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/download_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp">
+
+        <ImageView
+            android:id="@+id/iv_download"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/cometchat_download"
+            android:src="@drawable/cometchat_download_icon" />
+
+        <ProgressBar
+            android:id="@+id/pb_download"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

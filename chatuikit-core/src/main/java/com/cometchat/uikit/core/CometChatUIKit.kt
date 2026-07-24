@@ -160,10 +160,15 @@ object CometChatUIKit {
 
         val uiKitSection = settingsJson.optJSONObject("uiKit")
         val subscribePresenceForAllUsers = uiKitSection?.optBoolean("subscribePresenceForAllUsers", true) ?: true
+        // Calling toggle for the file-based path (ENG-37369) — without this the
+        // settings door could never initialize the Calls SDK at all (UIKitSettings
+        // defaults enableCalling to false and the file was the only input here).
+        val enableCalling = uiKitSection?.optBoolean("enableCalling", false) ?: false
 
         val settingsBuilder = UIKitSettings.UIKitSettingsBuilder()
             .setAppId(appId)
             .setRegion(region)
+            .setEnableCalling(enableCalling)
 
         if (authKey.isNotEmpty()) {
             settingsBuilder.setAuthKey(authKey)
@@ -183,9 +188,12 @@ object CometChatUIKit {
                 override fun onSuccess(result: String) {
                     CometChat.setSource("uikit-v6", "android", "kotlin")
 
-                    // 4. Auto-initialize CometChatCalls if enableCalling is true
+                    // 4. Auto-initialize CometChatCalls if enableCalling is true.
+                    //    fromSettings = true routes the Calls SDK through its own
+                    //    telemetry-aware initFromSettings so integrationSource =
+                    //    "ai-agent" propagates past the Chat SDK (ENG-37369).
                     if (authenticationSettings?.enableCalling == true) {
-                        initCometChatCalls(context, callbackListener, result)
+                        initCometChatCalls(context, callbackListener, result, fromSettings = true)
                     } else {
                         callbackListener?.onSuccess(result)
                     }
@@ -205,32 +213,22 @@ object CometChatUIKit {
      * @param context The application context
      * @param callbackListener The callback listener to notify after Calls SDK initialization
      * @param chatInitResult The result from CometChat SDK initialization
+     * @param fromSettings true when the app entered through [initFromSettings] — routes the
+     * Calls SDK through its telemetry-aware CometChatCalls.initFromSettings (reads the same
+     * assets/cometchat-settings.json and persists integrationSource = "ai-agent", ENG-37369);
+     * false keeps the plain CometChatCalls.init (integrationSource = "manual"), preserving
+     * existing behavior for the [init] path.
      */
     private fun initCometChatCalls(
         context: Context,
         callbackListener: CometChat.CallbackListener<String>?,
-        chatInitResult: String
+        chatInitResult: String,
+        fromSettings: Boolean = false
     ) {
-        val appId = authenticationSettings?.appId
-        val region = authenticationSettings?.region
-        val clientHost = authenticationSettings?.overrideClientHost
-
-        if (appId.isNullOrEmpty() || region.isNullOrEmpty()) {
-            Log.e(TAG, "Cannot initialize CometChatCalls: missing appId or region")
-            callbackListener?.onSuccess(chatInitResult)
-            return
-        }
-
         // Store the custom sessionSettingsBuilder if provided
         storedSessionSettingsBuilder = authenticationSettings?.callSettingsBuilder as? CometChatCalls.SessionSettingsBuilder
 
-        val callAppSettings = CallAppSettings.CallAppSettingBuilder()
-            .setAppId(appId)
-            .setRegion(region)
-            .setHost(clientHost)
-            .build()
-
-        CometChatCalls.init(context, callAppSettings, object : CometChatCalls.CallbackListener<String>() {
+        val callsInitCallback = object : CometChatCalls.CallbackListener<String>() {
             override fun onSuccess(result: String?) {
                 Log.d(TAG, "CometChatCalls initialized successfully: $result")
                 isCallsSDKInitialized = true
@@ -243,7 +241,33 @@ object CometChatUIKit {
                 // Still report success for Chat SDK, but log the Calls SDK error
                 callbackListener?.onSuccess(chatInitResult)
             }
-        })
+        }
+
+        if (fromSettings) {
+            // The settings file is guaranteed present on this path — initFromSettings()
+            // already read it. The Calls SDK reads appId/region (+ optional callsSDK
+            // host overrides) from the file itself.
+            CometChatCalls.initFromSettings(context, callsInitCallback)
+            return
+        }
+
+        val appId = authenticationSettings?.appId
+        val region = authenticationSettings?.region
+        val clientHost = authenticationSettings?.overrideClientHost
+
+        if (appId.isNullOrEmpty() || region.isNullOrEmpty()) {
+            Log.e(TAG, "Cannot initialize CometChatCalls: missing appId or region")
+            callbackListener?.onSuccess(chatInitResult)
+            return
+        }
+
+        val callAppSettings = CallAppSettings.CallAppSettingBuilder()
+            .setAppId(appId)
+            .setRegion(region)
+            .setHost(clientHost)
+            .build()
+
+        CometChatCalls.init(context, callAppSettings, callsInitCallback)
     }
 
     /**

@@ -108,7 +108,7 @@ private fun CometChatAudioBubbleContent(
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     var progress by remember { mutableFloatStateOf(0f) }
-    val initialDisplayText = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / --:--"
+    val initialDisplayText = if (fileSize > 0) formatFileSize(fileSize) else "00:00 / 00:00"
     var durationText by remember { mutableStateOf(initialDisplayText) }
 
     val playbackState = remember(messageId) { AudioBubbleStateManager.getOrCreate(messageId, audioUrl, null) }
@@ -122,7 +122,12 @@ private fun CometChatAudioBubbleContent(
             isDownloaded = true
             playbackState.localPath = cachedFile.absolutePath
             waveformData = WaveformUtils.generateDeterministicWaveform(cachedFile.absolutePath, BAR_COUNT)
-            playbackState.initFromFile(cachedFile.absolutePath) {
+            playbackState.initFromFile(cachedFile.absolutePath, onError = {
+                // Corrupt cache entry — evict it and fall back to the download flow on next tap.
+                cachedFile.delete()
+                isDownloaded = false
+                durationText = initialDisplayText
+            }) {
                 durationText = "00:00 / ${formatDurationMs(playbackState.totalDuration)}"
             }
         } else if (audioUrl.isNotEmpty()) {
@@ -140,7 +145,7 @@ private fun CometChatAudioBubbleContent(
             playbackState.updatePosition()
             progress = playbackState.progress
             val pos = playbackState.currentPosition; val dur = playbackState.totalDuration
-            durationText = if (dur > 0) "${formatDurationMs(pos)} / ${formatDurationMs(dur)}" else "00:00 / --:--"
+            durationText = "${formatDurationMs(pos)} / ${formatDurationMs(dur)}"
             playState = playbackState.playState
             delay(POLL_INTERVAL_MS)
         }
@@ -164,7 +169,11 @@ private fun CometChatAudioBubbleContent(
                     isDownloaded = true; playbackState.localPath = localPath
                     waveformData = WaveformUtils.generateDeterministicWaveform(localPath, BAR_COUNT)
                     isInitializing = true
-                    playbackState.initFromFile(localPath) {
+                    playbackState.initFromFile(localPath, onError = {
+                        File(localPath).delete()
+                        isInitializing = false; isDownloaded = false
+                        durationText = initialDisplayText
+                    }) {
                         isInitializing = false
                         durationText = "00:00 / ${formatDurationMs(playbackState.totalDuration)}"
                         playbackState.play(); playState = PlayState.PLAYING
@@ -207,30 +216,34 @@ private fun AudioBubblePlayPauseButton(
     playState: PlayState, isDownloading: Boolean, downloadProgress: Float, isInitializing: Boolean,
     onClick: () -> Unit, iconColor: androidx.compose.ui.graphics.Color, backgroundColor: androidx.compose.ui.graphics.Color
 ) {
+    // 34dp circle with a 24dp glyph — matches the Views (kotlin) audio bubble button.
     Box(
-        modifier = Modifier.size(44.dp).clip(CircleShape).background(backgroundColor)
+        modifier = Modifier.size(34.dp).clip(CircleShape).background(backgroundColor)
             .then(if (!isDownloading && !isInitializing) Modifier.clickable(onClick = onClick) else Modifier)
             .semantics { contentDescription = when { isDownloading -> "Downloading"; isInitializing -> "Loading"; playState == PlayState.PLAYING -> "Pause"; else -> "Play" } },
         contentAlignment = Alignment.Center
     ) {
         when {
             isDownloading || isInitializing -> {
-                if (isDownloading && downloadProgress > 0f) CircularProgressIndicator(progress = { downloadProgress }, modifier = Modifier.size(44.dp), strokeWidth = 3.dp, color = iconColor)
-                else CircularProgressIndicator(modifier = Modifier.size(30.dp), strokeWidth = 3.dp, color = iconColor)
+                if (isDownloading && downloadProgress > 0f) CircularProgressIndicator(progress = { downloadProgress }, modifier = Modifier.size(34.dp), strokeWidth = 3.dp, color = iconColor)
+                else CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 3.dp, color = iconColor)
             }
-            playState == PlayState.PLAYING -> Icon(painter = painterResource(id = R.drawable.cometchat_ic_pause), contentDescription = null, tint = iconColor, modifier = Modifier.size(28.dp))
-            else -> Icon(painter = painterResource(id = R.drawable.cometchat_play_icon), contentDescription = null, tint = iconColor, modifier = Modifier.size(28.dp))
+            playState == PlayState.PLAYING -> Icon(painter = painterResource(id = R.drawable.cometchat_ic_pause), contentDescription = null, tint = iconColor, modifier = Modifier.size(24.dp))
+            else -> Icon(painter = painterResource(id = R.drawable.cometchat_play_icon), contentDescription = null, tint = iconColor, modifier = Modifier.size(24.dp))
         }
     }
 }
 
 private suspend fun downloadFile(url: String, targetFile: File, onProgress: (Float) -> Unit): String? = withContext(Dispatchers.IO) {
+    // Stream into a temp file and rename on completion — if the process dies mid-download, no
+    // truncated file survives to pass the cache check and feed MediaPlayer a corrupt source.
+    val tempFile = File(targetFile.parentFile, "${targetFile.name}.part")
     try {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.connectTimeout = 15_000; connection.readTimeout = 15_000; connection.connect()
         if (connection.responseCode !in 200..299) { connection.disconnect(); return@withContext null }
         val totalBytes = connection.contentLength.toLong(); var downloaded = 0L
-        connection.inputStream.use { input -> targetFile.outputStream().use { output ->
+        connection.inputStream.use { input -> tempFile.outputStream().use { output ->
             val buffer = ByteArray(8192); var bytesRead: Int
             while (input.read(buffer).also { bytesRead = it } != -1) {
                 output.write(buffer, 0, bytesRead); downloaded += bytesRead
@@ -238,8 +251,8 @@ private suspend fun downloadFile(url: String, targetFile: File, onProgress: (Flo
             }
         }}
         connection.disconnect()
-        if (targetFile.exists() && targetFile.length() > 0) targetFile.absolutePath else { targetFile.delete(); null }
-    } catch (e: Exception) { Log.e(TAG, "Download failed: ${e.message}"); targetFile.delete(); null }
+        if (tempFile.length() > 0 && tempFile.renameTo(targetFile)) targetFile.absolutePath else { tempFile.delete(); null }
+    } catch (e: Exception) { Log.e(TAG, "Download failed: ${e.message}"); tempFile.delete(); null }
 }
 
 fun formatDurationMs(ms: Long): String {

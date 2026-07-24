@@ -3,16 +3,19 @@ package com.cometchat.uikit.compose.presentation.messagecomposer.ui
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cometchat.uikit.compose.presentation.messagecomposer.style.CometChatMessageComposerStyle
 
@@ -69,101 +72,107 @@ fun MultilineButtonRow(
     sendButtonView: (@Composable (onClick: () -> Unit, isActive: Boolean, isAIGenerating: Boolean) -> Unit)? = null,
     attachmentButtonContent: (@Composable () -> Unit)? = null
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .semantics { contentDescription = "Composer action buttons" },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 1. Attachment button (⊕)
-        if (!hideAttachmentButton) {
-            if (attachmentButtonContent != null) {
-                attachmentButtonContent()
-            } else {
-                AnimatedAttachmentButton(
-                    isExpanded = isAttachmentPopupExpanded,
-                    style = style,
-                    onClick = onAttachmentClick
-                )
-            }
-        }
-
-        // 2. Voice Recording button (🎤)
-        if (!hideVoiceRecordingButton) {
-            IconButton(
-                onClick = onVoiceRecordClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .semantics { contentDescription = "Voice Recording" }
-            ) {
-                style.voiceRecordingIcon?.let { icon ->
-                    Icon(
-                        painter = icon,
-                        contentDescription = "Record voice message",
-                        tint = style.voiceRecordingIconTint,
-                        modifier = Modifier.size(24.dp)
+    // Match chatuikit-kotlin's Row 2: a 56dp row with 8dp side padding holding flush
+    // 40dp buttons. Material3's IconButton would otherwise inflate each button to the
+    // 48dp minimum touch target, spreading the icons apart and insetting the send button.
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 8.dp)
+                .semantics { contentDescription = "Composer action buttons" },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 1. Attachment button (⊕)
+            if (!hideAttachmentButton) {
+                if (attachmentButtonContent != null) {
+                    attachmentButtonContent()
+                } else {
+                    AnimatedAttachmentButton(
+                        isExpanded = isAttachmentPopupExpanded,
+                        style = style,
+                        onClick = onAttachmentClick
                     )
                 }
             }
-        }
 
-        // 3. Sticker button (😊)
-        if (!hideStickersButton) {
-            val visualState = resolveStickerVisualState(isStickerKeyboardOpen)
-            val stickerIcon = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIcon else style.stickerIcon
-            val stickerTint = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIconTint else style.stickerIconTint
-            IconButton(
-                onClick = onStickerClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .semantics { contentDescription = "Stickers" }
-            ) {
-                stickerIcon?.let { icon ->
-                    Icon(
-                        painter = icon,
-                        contentDescription = if (isStickerKeyboardOpen) "Close stickers" else "Open stickers",
-                        tint = stickerTint,
-                        modifier = Modifier.size(24.dp)
-                    )
+            // 2. Voice Recording button (🎤)
+            if (!hideVoiceRecordingButton) {
+                IconButton(
+                    onClick = onVoiceRecordClick,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .semantics { contentDescription = "Voice Recording" }
+                ) {
+                    style.voiceRecordingIcon?.let { icon ->
+                        Icon(
+                            painter = icon,
+                            contentDescription = "Record voice message",
+                            tint = style.voiceRecordingIconTint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
-        }
 
-        // 4. Aa formatting toggle button
-        if (showFormattingToggle) {
-            IconButton(
-                onClick = onFormattingToggleClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .semantics { contentDescription = "Format Text" }
-            ) {
-                style.richTextToggleIcon?.let { icon ->
-                    Icon(
-                        painter = icon,
-                        contentDescription = "Show formatting options",
-                        tint = style.richTextToggleIconTint,
-                        modifier = Modifier.size(24.dp)
-                    )
+            // 3. Sticker button (😊)
+            if (!hideStickersButton) {
+                val visualState = resolveStickerVisualState(isStickerKeyboardOpen)
+                val stickerIcon = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIcon else style.stickerIcon
+                val stickerTint = if (visualState == StickerButtonVisualState.ACTIVE) style.stickerActiveIconTint else style.stickerIconTint
+                IconButton(
+                    onClick = onStickerClick,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .semantics { contentDescription = "Stickers" }
+                ) {
+                    stickerIcon?.let { icon ->
+                        Icon(
+                            painter = icon,
+                            contentDescription = if (isStickerKeyboardOpen) "Close stickers" else "Open stickers",
+                            tint = stickerTint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
-        }
 
-        // Spacer pushes send button to the right
-        Spacer(modifier = Modifier.weight(1f))
+            // 4. Aa formatting toggle button
+            if (showFormattingToggle) {
+                IconButton(
+                    onClick = onFormattingToggleClick,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .semantics { contentDescription = "Format Text" }
+                ) {
+                    style.richTextToggleIcon?.let { icon ->
+                        Icon(
+                            painter = icon,
+                            contentDescription = "Show formatting options",
+                            tint = style.richTextToggleIconTint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
 
-        // 5. Send button (➤) — right aligned
-        if (!hideSendButton) {
-            if (sendButtonView != null) {
-                sendButtonView(onSendClick, isSendButtonActive, isAIGenerating)
-            } else {
-                DefaultSendButton(
-                    isActive = isSendButtonActive,
-                    isAIGenerating = isAIGenerating,
-                    isAgentChat = isAgentChat,
-                    style = style,
-                    onClick = onSendClick
-                )
+            // Spacer pushes send button to the right
+            Spacer(modifier = Modifier.weight(1f))
+
+            // 5. Send button (➤) — right aligned
+            if (!hideSendButton) {
+                if (sendButtonView != null) {
+                    sendButtonView(onSendClick, isSendButtonActive, isAIGenerating)
+                } else {
+                    DefaultSendButton(
+                        isActive = isSendButtonActive,
+                        isAIGenerating = isAIGenerating,
+                        isAgentChat = isAgentChat,
+                        style = style,
+                        onClick = onSendClick
+                    )
+                }
             }
         }
     }

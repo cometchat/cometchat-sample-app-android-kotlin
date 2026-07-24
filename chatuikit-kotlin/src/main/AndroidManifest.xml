@@ -60,6 +60,13 @@
             android:exported="false"
             android:theme="@style/UiKit.Internal.Theme.Transparent2" />
 
+        <!-- In-app (non full-screen) video player -->
+        <activity
+            android:name=".presentation.shared.mediaviewer.CometChatVideoViewerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@style/UiKit.Internal.Theme.Transparent2" />
+
         <!-- FileProvider for camera capture and file sharing -->
         <provider
             android:name="androidx.core.content.FileProvider"

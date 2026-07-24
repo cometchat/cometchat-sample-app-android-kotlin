@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bare exclamation glyph (bar + dot) for the round error badge on attachment tiles.
+     Tinted at usage; the fill is just a tintable default. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:viewportWidth="12"
+    android:viewportHeight="12">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,2.5C6.55,2.5 7,2.95 7,3.5V6.5C7,7.05 6.55,7.5 6,7.5C5.45,7.5 5,7.05 5,6.5V3.5C5,2.95 5.45,2.5 6,2.5Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,8C6.55,8 7,8.45 7,9C7,9.55 6.55,10 6,10C5.45,10 5,9.55 5,9C5,8.45 5.45,8 6,8Z" />
+</vector>

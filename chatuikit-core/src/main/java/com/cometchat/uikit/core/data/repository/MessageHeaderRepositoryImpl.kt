@@ -5,6 +5,7 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.data.datasource.MessageHeaderDataSource
 import com.cometchat.uikit.core.domain.repository.MessageHeaderRepository
+import kotlinx.coroutines.CancellationException
 
 /**
  * Repository implementation that coordinates data sources for message header.
@@ -34,6 +35,8 @@ class MessageHeaderRepositoryImpl(
         return try {
             val user = dataSource.getUser(uid)
             Result.success(user)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -54,6 +57,8 @@ class MessageHeaderRepositoryImpl(
         return try {
             val group = dataSource.getGroup(guid)
             Result.success(group)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: CometChatException) {
             Result.failure(e)
         } catch (e: Exception) {

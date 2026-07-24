@@ -11,6 +11,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.cometchat.uikit.core.viewmodel.InlineAudioRecorderStatus
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.sqrt
 
@@ -106,6 +110,8 @@ class InlineAudioRecorderManager(private val context: Context) {
         private const val TIMER_UPDATE_INTERVAL = 100L // ms for smooth timer updates
         private const val PLAYBACK_POSITION_INTERVAL = 100L // ms for playback position polling
         private const val MAX_AMPLITUDE = 32767f // MediaRecorder max amplitude
+        private const val FILE_FLUSH_POLL_INTERVAL_MS = 50L
+        private const val FILE_FLUSH_TIMEOUT_MS = 500L
     }
     
     // ==================== Recording State ====================
@@ -564,9 +570,12 @@ class InlineAudioRecorderManager(private val context: Context) {
     /**
      * Stops audio recording.
      * Transitions from RECORDING or PAUSED to COMPLETED state.
+     *
+     * Suspends (off the main thread) while the muxer flushes the file to disk, so callers on the
+     * UI thread are not blocked. Invoke from a coroutine.
      * @return the recorded File if successful, null otherwise
      */
-    fun stopRecording(): File? {
+    suspend fun stopRecording(): File? {
         if (currentStatus != InlineAudioRecorderStatus.RECORDING && 
             currentStatus != InlineAudioRecorderStatus.PAUSED) {
             Log.w(TAG, "Cannot stop recording: current status is $currentStatus")
@@ -586,25 +595,49 @@ class InlineAudioRecorderManager(private val context: Context) {
             mediaRecorder = null
             isRecording = false
             isPaused = false
-            
+
             // Stop updates
             timerHandler.removeCallbacks(timerRunnable)
             amplitudeHandler.removeCallbacks(amplitudeRunnable)
-            
+
+            // Release the recording focus now that capture is done. It was requested as
+            // AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE with USAGE_VOICE_COMMUNICATION, which holds the
+            // audio route exclusively; if we keep it, the playback MediaPlayer (USAGE_MEDIA) is
+            // starved and produces no audible output when the user taps play.
+            abandonRecordingAudioFocus()
+
             currentStatus = InlineAudioRecorderStatus.COMPLETED
             callback?.onStatusChange(InlineAudioRecorderStatus.COMPLETED)
             
             // Notify recording complete
             recordedFilePath?.let { path ->
                 val file = File(path)
-                if (file.exists()) {
+
+                // MediaRecorder.stop() returns before the muxer has necessarily flushed the
+                // file to disk, so a caller that reads it immediately can see a 0-byte file.
+                // Poll for up to FILE_FLUSH_TIMEOUT_MS before giving up. This runs off the main
+                // thread (delay + Dispatchers.IO) so it never blocks the UI while waiting.
+                if (!file.exists() || file.length() == 0L) {
+                    withContext(Dispatchers.IO) {
+                        var waitedMs = 0L
+                        while (waitedMs < FILE_FLUSH_TIMEOUT_MS && (!file.exists() || file.length() == 0L)) {
+                            delay(FILE_FLUSH_POLL_INTERVAL_MS)
+                            waitedMs += FILE_FLUSH_POLL_INTERVAL_MS
+                        }
+                    }
+                }
+
+                if (file.exists() && file.length() > 0) {
                     callback?.onRecordingComplete(file, recordingDurationMs, amplitudeHistory.toList())
                     Log.d(TAG, "Recording stopped: $path, duration: ${recordingDurationMs}ms, amplitudes: ${amplitudeHistory.size}")
                     return file
                 }
+                Log.e(TAG, "Recording file empty or missing after ${FILE_FLUSH_TIMEOUT_MS}ms: $path")
             }
-            
+
             return null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to stop recording: ${e.message}")
             callback?.onError("Failed to stop recording: ${e.message}")

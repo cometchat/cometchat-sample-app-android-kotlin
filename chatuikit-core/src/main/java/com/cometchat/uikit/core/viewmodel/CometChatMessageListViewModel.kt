@@ -2576,7 +2576,47 @@ open class CometChatMessageListViewModel(
     open fun updateMessage(message: BaseMessage) {
         updateItem(message) { it.id == message.id }
     }
-    
+
+    /**
+     * Applies a real-time moderation verdict to the matching message.
+     *
+     * On a successful swap the change is pushed through both [_messages] (drives
+     * Compose recomposition) and [_messageUpdated] (guarantees the RecyclerView
+     * adapter rebinds the row even though StateFlow conflation might otherwise
+     * suppress the emission).
+     *
+     * @param message The moderated [BaseMessage] delivered by
+     * [com.cometchat.chat.core.CometChat.MessageListener.onMessageModerated].
+     */
+    private fun updateModeratedMessage(message: BaseMessage) {
+        val matches: (BaseMessage) -> Boolean = { current ->
+            (!message.muid.isNullOrEmpty() && current.muid == message.muid) ||
+                (message.id > 0 && current.id == message.id)
+        }
+
+        val existing = _messages.value.firstOrNull(matches) ?: return
+
+        // Once blocked, stay blocked — don't let a later verdict re-enable the message.
+        if (isMessageDisapproved(existing)) return
+
+        if (updateItem(message, matches)) {
+            viewModelScope.launch { _messageUpdated.emit(message) }
+        }
+    }
+
+    /**
+     * Returns `true` when [message] carries a `DISAPPROVED` moderation status.
+     * Only [TextMessage] and [MediaMessage] can be moderated.
+     */
+    private fun isMessageDisapproved(message: BaseMessage): Boolean {
+        val statusName = when (message) {
+            is TextMessage -> message.moderationStatus?.name
+            is MediaMessage -> message.moderationStatus?.name
+            else -> null
+        }
+        return statusName?.lowercase() == UIKitConstants.ModerationConstants.DISAPPROVED
+    }
+
     /**
      * Removes a message from the list.
      *
@@ -4198,7 +4238,13 @@ open class CometChatMessageListViewModel(
                         android.util.Log.d("CometChatMsgListVM", "onMessageEdited: IGNORED (not for current chat) msgId=${message.id}")
                     }
                 }
-                
+
+                override fun onMessageModerated(message: BaseMessage) {
+                    if (isMessageForCurrentChat(message)) {
+                        updateModeratedMessage(message)
+                    }
+                }
+
                 override fun onMessageDeleted(message: BaseMessage) {
                     if (isMessageForCurrentChat(message)) {
                         if (hideDeleteMessage || isAgentChat) {

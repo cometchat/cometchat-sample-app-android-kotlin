@@ -95,7 +95,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                 }
                 override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
                 override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-                override suspend fun editMessage(message: TextMessage): BaseMessage = mock()
+                override suspend fun editMessage(message: BaseMessage): BaseMessage = mock()
             }
 
             val viewModel = buildViewModel(dataSource)
@@ -137,7 +137,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                 }
                 override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
                 override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-                override suspend fun editMessage(message: TextMessage): BaseMessage = mock()
+                override suspend fun editMessage(message: BaseMessage): BaseMessage = mock()
             }
 
             val viewModel = buildViewModel(dataSource)
@@ -180,7 +180,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                     println("    [DataSource] sendCustomMessage() called → returning sentMessage(id=303)")
                     return sentMessage
                 }
-                override suspend fun editMessage(message: TextMessage): BaseMessage = mock()
+                override suspend fun editMessage(message: BaseMessage): BaseMessage = mock()
             }
 
             val viewModel = buildViewModel(dataSource)
@@ -223,7 +223,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                 override suspend fun sendTextMessage(message: TextMessage): TextMessage = mock()
                 override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
                 override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-                override suspend fun editMessage(message: TextMessage): BaseMessage {
+                override suspend fun editMessage(message: BaseMessage): BaseMessage {
                     println("    [DataSource] editMessage() called → returning editedMessage(id=404)")
                     return editedMessage
                 }
@@ -273,7 +273,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                 override suspend fun sendTextMessage(message: TextMessage): TextMessage = mock()
                 override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
                 override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-                override suspend fun editMessage(message: TextMessage): BaseMessage {
+                override suspend fun editMessage(message: BaseMessage): BaseMessage {
                     println("    [DataSource] editMessage() called → THROWING CometChatException(ERR_PERMISSION)")
                     throw CometChatException("ERR_PERMISSION", "Cannot edit", "Cannot edit")
                 }
@@ -327,7 +327,7 @@ class MessageComposerFullChainIntegrationTest : FunSpec({
                 }
                 override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = mock()
                 override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = mock()
-                override suspend fun editMessage(message: TextMessage): BaseMessage = mock()
+                override suspend fun editMessage(message: BaseMessage): BaseMessage = mock()
             }
 
             val viewModel = buildViewModel(dataSource)

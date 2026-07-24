@@ -14,16 +14,19 @@ open class RefreshConversationListUseCase(
     private val repository: ConversationListRepository
 ) {
     /**
-     * Refreshes the conversation list by building a new request and fetching fresh data.
-     * This resets any pagination state and starts from the beginning.
-     * 
-     * @param requestBuilder The builder to create a fresh ConversationsRequest
+     * Refreshes the conversation list by fetching the first page of [request].
+     *
+     * The caller builds (and owns) the fresh request and keeps it after a successful
+     * refresh: its page pointer has then already consumed page 1, so subsequent
+     * pagination on the same request continues from page 2 instead of re-fetching
+     * page 1 and appending duplicates (ENG-37363).
+     *
+     * @param request A freshly built ConversationsRequest (pagination at the start)
      * @return Result containing list of conversations or error
      */
     open suspend operator fun invoke(
-        requestBuilder: ConversationsRequest.ConversationsRequestBuilder
+        request: ConversationsRequest
     ): Result<List<Conversation>> {
-        val request = requestBuilder.build()
         return repository.getConversations(request)
     }
 }

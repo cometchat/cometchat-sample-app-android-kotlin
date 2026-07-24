@@ -28,7 +28,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "6.0.1"
+        versionName = "6.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -85,7 +85,7 @@ dependencies {
     implementation(libs.calls.sdk.android)
 
     // CometChat Push Notifications SDK
-    implementation("com.cometchat:push-notifications-android:1.0.0-alpha.1")
+    implementation(libs.push.notifications.android)
 
     // Firebase Cloud Messaging
     implementation(platform(libs.firebase.bom))

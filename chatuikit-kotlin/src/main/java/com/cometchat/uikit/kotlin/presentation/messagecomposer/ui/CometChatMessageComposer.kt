@@ -21,6 +21,8 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -32,10 +34,14 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
+import android.net.Uri
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.models.AttachmentSource
+import com.cometchat.uikit.core.models.StagedAttachmentInput
+import com.cometchat.uikit.core.models.defaultAttachmentCategory
 import com.cometchat.uikit.core.utils.AgentChatDetector
+import com.cometchat.uikit.core.utils.extractMediaDurationMillis
 import com.cometchat.uikit.core.factory.CometChatMessageComposerViewModelFactory
-import com.cometchat.uikit.core.formatter.FormatCompatibility
 import com.cometchat.uikit.core.formatter.RichTextConfiguration
 import com.cometchat.uikit.core.formatter.RichTextEditorController
 import com.cometchat.uikit.core.formatter.RichTextFormat
@@ -61,8 +67,10 @@ import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.databinding.CometchatMessageComposerBinding
 import com.cometchat.uikit.kotlin.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.kotlin.presentation.messagecomposer.utils.MessageComposerViewHolderListener
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.presentation.polls.ui.CometChatCreatePoll
 import com.cometchat.uikit.kotlin.presentation.shared.mediarecorder.CometChatMediaRecorder
+import com.cometchat.uikit.kotlin.presentation.shared.snackbar.CometChatSnackBar
 import com.cometchat.uikit.kotlin.presentation.shared.mediarecorder.MediaRecorderCallback
 import com.cometchat.uikit.kotlin.presentation.shared.inlineaudiorecorder.CometChatInlineAudioRecorder
 import com.cometchat.uikit.kotlin.presentation.shared.inlineaudiorecorder.InlineAudioRecorderManager
@@ -87,6 +95,7 @@ import com.cometchat.uikit.kotlin.shared.resources.utils.AnimationUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.MediaUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.shared.resources.utils.itemclicklistener.OnItemClickListener
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -97,6 +106,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -139,6 +149,13 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
         /** Debounce window (ms) to ignore button clicks that arrive after an outside-touch dismiss */
         private const val DISMISS_DEBOUNCE_MS = 200L
+
+        /**
+         * Rich content the composer input accepts besides typed text: pasted/keyboard-inserted
+         * images & GIFs, and any media dropped or pasted as a content uri (video, audio,
+         * documents). Advertised to the IME via AppCompatEditText's receive-content integration.
+         */
+        private val RECEIVE_CONTENT_MIME_TYPES = arrayOf("image/*", "video/*", "audio/*", "application/*")
     }
 
     // View Binding
@@ -156,6 +173,15 @@ class CometChatMessageComposer @JvmOverloads constructor(
     // Data
     private var user: User? = null
     private var group: Group? = null
+
+    /**
+     * When true, no typing indicator events are sent while the user types.
+     */
+    var disableTypingEvents: Boolean = false
+        set(value) {
+            field = value
+            viewModel?.disableTypingEvents = value
+        }
 
     // Rich text formatting - using RichTextEditorController from chatuikit-core (same as Jetpack)
     private val richTextController = RichTextEditorController()
@@ -264,6 +290,16 @@ class CometChatMessageComposer @JvmOverloads constructor(
     // Visibility controls
     private var hideAttachmentButton: Boolean = false
     private var hideVoiceRecordingButton: Boolean = false
+
+    /**
+     * When `true` (default), picking attachments stages them in a horizontal tray and uploads them
+     * up front; the send button is gated until **all** staged attachments finish uploading, and a
+     * single multi-attachment message is sent on tap. When `false`, every attachment option reverts
+     * to the legacy single-pick, send-immediately behavior (no tray, no multi-upload).
+     */
+    private var enableMultipleAttachments: Boolean = true
+
+    private var attachmentTileAdapter: CometChatAttachmentTileAdapter? = null
     private var hideAIButton: Boolean = true
     private var hideStickerButton: Boolean = true
     private var hideEditPreview: Boolean = false
@@ -331,6 +367,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
         applyStyleAttributes(attrs, defStyleAttr)
         setupClickListeners()
         setupTextWatcher()
+        setupReceiveContent()
+        setupAttachmentTray()
         initViewModel()
         initRichTextFormatter()
         setupTextSelectionMenu()
@@ -339,6 +377,124 @@ class CometChatMessageComposer @JvmOverloads constructor(
         processMentionsFormatter()
         android.util.Log.d(TAG, "init: initialization complete, textFormatters.size=${textFormatters.size}")
     }
+
+    /**
+     * Enables or disables the multi-attachment staging flow. When disabled, attachment picks revert
+     * to the legacy single-pick, send-immediately behavior. Defaults to `true`.
+     */
+    fun setEnableMultipleAttachments(enable: Boolean) {
+        enableMultipleAttachments = enable
+        if (!enable) {
+            viewModel?.clearAttachments()
+            updateAttachmentTray(emptyList())
+        }
+    }
+
+    /**
+     * Gate A of the attachment count limit: when the tray already holds the maximum number of
+     * attachments, shows the limit toast and reports `false` so the caller skips opening the
+     * picker. Picks that exceed the remaining slots anyway (multi-select has no OS-level count
+     * cap on intent pickers) are trimmed by `stageAttachments` (Gate B).
+     */
+    private fun canOpenAttachmentPicker(): Boolean {
+        if (!enableMultipleAttachments) return true
+        val vm = viewModel ?: return true
+        val maxCount = vm.maxAttachmentCount
+        if (vm.attachmentTiles.value.size + pendingStagingCount < maxCount) return true
+        showAttachmentLimitToast(maxCount)
+        return false
+    }
+
+    private fun showAttachmentLimitToast(maxCount: Int) {
+        android.widget.Toast.makeText(
+            context,
+            context.getString(R.string.cometchat_attachment_count_exceeded, maxCount),
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    /**
+     * Surfaces why a rejected staged attachment couldn't be uploaded (shown when its tile is
+     * tapped), via a themed [CometChatSnackBar]. The reason is taken verbatim from the
+     * SDK-provided error — e.g. the size-limit rejection already carries the actual per-file
+     * limit — so the UIKit never recomputes or hardcodes the limit. Falls back to a generic
+     * message only when the SDK gives no reason.
+     */
+    private fun showAttachmentErrorSnackbar(tile: com.cometchat.uikit.core.models.AttachmentUploadTile) {
+        val message = tile.error?.message?.takeIf { it.isNotBlank() }
+            ?: context.getString(R.string.cometchat_attachment_upload_failed)
+        CometChatSnackBar.show(binding.root, message)
+    }
+
+    /**
+     * Wires up the horizontal attachment tray: a [CometChatAttachmentTileAdapter] whose per-tile
+     * intents forward to the shared ViewModel (cancel / remove / retry / preview).
+     */
+    private fun setupAttachmentTray() {
+        val adapter = CometChatAttachmentTileAdapter(
+            onCancel = { viewModel?.removeAttachment(it) },
+            onRemove = { viewModel?.removeAttachment(it) },
+            onRetry = { viewModel?.retryAttachment(it) },
+            onClick = { openStagedAttachmentPreview(it) },
+            onRejected = { showAttachmentErrorSnackbar(it) }
+        )
+        attachmentTileAdapter = adapter
+        binding.attachmentTrayRecyclerView.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.attachmentTrayRecyclerView.adapter = adapter
+    }
+
+    /**
+     * Opens a fullscreen preview for a successfully-uploaded tray tile: images in the in-app
+     * [CometChatImageViewerActivity], videos in an external player (the staged local copy via
+     * FileProvider, falling back to the uploaded URL). Audio plays inline on its tile's play
+     * button and file tiles have no preview, so both are ignored here.
+     */
+    private fun openStagedAttachmentPreview(tile: com.cometchat.uikit.core.models.AttachmentUploadTile) {
+        try {
+            when (tile.category) {
+                CometChatConstants.MESSAGE_TYPE_IMAGE -> {
+                    val model = tile.localUri ?: tile.attachment?.fileUrl ?: return
+                    context.startActivity(
+                        com.cometchat.uikit.kotlin.presentation.shared.mediaviewer.CometChatImageViewerActivity.createIntent(
+                            context, listOf(model), listOf(tile.mimeType), listOf(tile.name)
+                        )
+                    )
+                }
+
+                CometChatConstants.MESSAGE_TYPE_VIDEO -> {
+                    val localFile = tile.localUri?.takeIf { it.startsWith("/") }?.let(::File)
+                    if (localFile?.exists() == true) {
+                        MediaUtils.openFile(context, localFile)
+                    } else {
+                        MediaUtils.openMediaInPlayer(
+                            context,
+                            tile.localUri ?: tile.attachment?.fileUrl,
+                            tile.mimeType
+                        )
+                    }
+                }
+
+                else -> Unit
+            }
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Failed to open staged attachment preview: ${e.message}")
+        }
+    }
+
+    /** Reflects the staged-attachment list onto the tray and dependent button states. */
+    private fun updateAttachmentTray(tiles: List<com.cometchat.uikit.core.models.AttachmentUploadTile>) {
+        val show = enableMultipleAttachments && tiles.isNotEmpty()
+        binding.attachmentTrayRecyclerView.visibility = if (show) View.VISIBLE else View.GONE
+        attachmentTileAdapter?.submitList(tiles)
+        updateSendButtonState(binding.etMessageInput.text?.isNotBlank() ?: false)
+        updateButtonVisibility()
+        updateMultilineRow2Visibility()
+    }
+
+    /** True while ≥1 attachment is staged (and multi-attachment mode is on). */
+    private fun hasStagedAttachments(): Boolean =
+        enableMultipleAttachments && (viewModel?.attachmentTiles?.value?.isNotEmpty() == true)
 
     /**
      * Initializes the default mentions formatter.
@@ -847,9 +1003,10 @@ class CometChatMessageComposer @JvmOverloads constructor(
         binding.secondaryButtonLayout.visibility = if (hideAttachmentButton) View.GONE else View.VISIBLE
         binding.separatorView.visibility = if (hideAttachmentButton) View.GONE else View.VISIBLE
         
-        // Hide voice recording and sticker buttons when text is entered with animation
-        val shouldShowVoiceRecording = !hideVoiceRecordingButton && !hasText
-        val shouldShowSticker = !hideStickerButton && !hasText
+        // Hide voice recording and sticker buttons when text is entered or attachments are staged
+        val hasContent = hasText || hasStagedAttachments()
+        val shouldShowVoiceRecording = !hideVoiceRecordingButton && !hasContent
+        val shouldShowSticker = !hideStickerButton && !hasContent
         
         // Voice recording button animation - only animate if not already animating to the same state
         val voiceRecordingCurrentlyVisible = binding.ivVoiceRecording.visibility == View.VISIBLE
@@ -1080,7 +1237,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
         // Send button
         binding.ivSend.setOnClickListener {
             val text = binding.etMessageInput.text?.toString() ?: ""
-            if (text.isNotBlank()) {
+            // Staged attachments send without any text (the text, when present, becomes the
+            // caption) — the blank guard only applies to pure text sends.
+            if (text.isNotBlank() || hasStagedAttachments()) {
                 handleSendClick(text)
             }
         }
@@ -1115,7 +1274,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
         }
         binding.multilineSendButtonCard?.setOnClickListener {
             val text = binding.etMessageInput.text?.toString() ?: ""
-            if (text.isNotBlank()) {
+            // Staged attachments send without any text (the text, when present, becomes the
+            // caption) — the blank guard only applies to pure text sends.
+            if (text.isNotBlank() || hasStagedAttachments()) {
                 handleSendClick(text)
             }
         }
@@ -2652,11 +2813,59 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private var currentAttachmentAction: String = ""
 
     /**
+     * Picked files whose cache copy is still running (see [stageAsync]) — their tray tiles don't
+     * exist yet, so the count gates must reserve these slots or another picker can be opened past
+     * the attachment cap during the copy. Main-thread only ([viewScope] is a Main-dispatcher scope).
+     */
+    private var pendingStagingCount = 0
+
+    /**
      * Handles the activity result from camera or file pickers.
      * Extracts the file and sends it as a media message.
      */
     private fun handleActivityResult(result: androidx.activity.result.ActivityResult) {
         try {
+            // Multi-attachment mode: picker results (which may carry several uris via clipData) are
+            // staged into the tray and uploaded, rather than sent immediately. Camera is single-shot
+            // but is still staged so it joins the same batch.
+            if (enableMultipleAttachments) {
+                if (currentAttachmentAction == UIKitConstants.ComposerAction.CAMERA) {
+                    val cameraFile = handleCameraResult()
+                    if (cameraFile != null && cameraFile.exists()) {
+                        viewModel?.stageAttachments(
+                            listOf(stagedInputFromFile(cameraFile, "image/jpeg"))
+                        )
+                    }
+                } else {
+                    // The action fixes the category: file-picker picks stay `file` and
+                    // audio-picker picks stay `audio` regardless of MIME; the image/video pickers
+                    // derive it from the MIME type (null → per-item default).
+                    val category = when (currentAttachmentAction) {
+                        UIKitConstants.ComposerAction.DOCUMENT -> CometChatConstants.MESSAGE_TYPE_FILE
+                        UIKitConstants.ComposerAction.AUDIO -> CometChatConstants.MESSAGE_TYPE_AUDIO
+                        else -> null
+                    }
+                    // Pickers whose UI can't be capped (documents / audio / pre-13 galleries) are
+                    // limited on the result instead: over-selection shows the limit toast
+                    // immediately — before any file copying — and only the remaining slots are
+                    // staged. This is the documents-picker equivalent of the photo picker's
+                    // in-picker cap.
+                    val uris = collectResultUris(result)
+                    val remaining = remainingAttachmentSlots()
+                    if (uris.size > remaining) {
+                        showAttachmentLimitToast(viewModel?.maxAttachmentCount ?: 0)
+                    }
+                    val toStage = uris.take(remaining)
+                    // Copy the files + read their metadata off the main thread: each
+                    // stagedInputFromUri() copies the picked file to cache and runs a
+                    // MediaMetadataRetriever, so doing it inline for a multi-file selection would
+                    // freeze the UI (potential ANR). The count/size toast above already ran on the
+                    // main thread before any copying.
+                    stageAsync(toStage) { uri -> stagedInputFromUri(uri, category) }
+                }
+                return
+            }
+
             val file: File?
             val contentType: String
             
@@ -2695,6 +2904,54 @@ class CometChatMessageComposer @JvmOverloads constructor(
             currentAttachmentAction = ""
         }
     }
+
+    /** Collects all selected uris from a picker result (multi-select via clipData, else single). */
+    private fun collectResultUris(result: androidx.activity.result.ActivityResult): List<Uri> {
+        val data = result.data ?: return emptyList()
+        val clip = data.clipData
+        return if (clip != null) {
+            (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }
+        } else {
+            data.data?.let { listOf(it) } ?: emptyList()
+        }
+    }
+
+    /**
+     * Builds a [StagedAttachmentInput] from a picked content uri, copying it to a real file.
+     * [category] fixes the tile/send category regardless of MIME (file / audio pickers); null
+     * derives it from the MIME type (image / video pickers).
+     */
+    private fun stagedInputFromUri(uri: Uri, category: String? = null): StagedAttachmentInput? {
+        val file = MediaUtils.getRealPath(context, uri, false) ?: return null
+        if (!file.exists()) return null
+        val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
+        return StagedAttachmentInput(
+            file = file,
+            name = file.name,
+            size = file.length(),
+            mimeType = mime,
+            category = category ?: defaultAttachmentCategory(mime),
+            source = AttachmentSource.PICKER,
+            // Use the copied file path for the preview: the picker's content-uri read grant may not
+            // survive, whereas the cached file is always readable.
+            localUri = file.absolutePath,
+            // Duration label (video/audio) — read once at staging so the audio tile can show it
+            // and it can be stored in the sent message metadata.
+            durationMillis = extractMediaDurationMillis(file.absolutePath, mime)
+        )
+    }
+
+    /** Builds a [StagedAttachmentInput] from an on-disk file (e.g. a camera capture). */
+    private fun stagedInputFromFile(file: File, mimeType: String): StagedAttachmentInput =
+        StagedAttachmentInput(
+            file = file,
+            name = file.name,
+            size = file.length(),
+            mimeType = mimeType,
+            source = AttachmentSource.PICKER,
+            localUri = file.absolutePath,
+            durationMillis = extractMediaDurationMillis(file.absolutePath, mimeType)
+        )
     
     /**
      * Handles the result when the action was to open the camera.
@@ -2730,6 +2987,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Uses CometChatPermissionHandler for both permission requests and activity results.
      */
     private fun launchCameraWithMediaHelper() {
+        if (!canOpenAttachmentPicker()) return
         currentAttachmentAction = UIKitConstants.ComposerAction.CAMERA
         
         CometChatPermissionHandler.withContext(context)
@@ -2760,6 +3018,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Uses CometChatPermissionHandler for both permission requests and activity results.
      */
     private fun launchImagePickerWithMediaHelper() {
+        if (!canOpenAttachmentPicker()) return
         currentAttachmentAction = UIKitConstants.ComposerAction.IMAGE
         
         // On Android 13+, no storage permission needed for picker
@@ -2790,8 +3049,67 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     currentAttachmentAction = ""
                 }
             }
-            .withIntent(MediaUtils.openImagePicker())
+            .withIntent(
+                MediaUtils.openImagePicker(context, enableMultipleAttachments, remainingAttachmentSlots())
+            )
             .launch()
+    }
+
+    /**
+     * Tray slots still available for new attachments — the selection cap handed to the pickers.
+     * With 2 attachments already staged out of 10, only 8 more can be picked. Counts both the
+     * staged tiles and the picks still being copied ([pendingStagingCount]).
+     */
+    private fun remainingAttachmentSlots(): Int {
+        val vm = viewModel ?: return Int.MAX_VALUE
+        return (vm.maxAttachmentCount - vm.attachmentTiles.value.size - pendingStagingCount)
+            .coerceAtLeast(0)
+    }
+
+    /**
+     * Copies [uris] to cache + reads their metadata on IO, then stages the results into the tray.
+     * The slots are reserved via [pendingStagingCount] BEFORE the copy starts: tiles only appear
+     * once `stageAttachments` runs, and for a multi-file pick the copy takes long enough that an
+     * unreserved gap lets the user open another picker past the attachment cap.
+     */
+    private fun stageAsync(uris: List<Uri>, toInput: (Uri) -> StagedAttachmentInput?) {
+        val scope = viewScope
+        if (uris.isEmpty() || scope == null) return
+        pendingStagingCount += uris.size
+        scope.launch {
+            try {
+                val inputs = withContext(Dispatchers.IO) {
+                    uris.mapNotNull { uri -> toInput(uri) }
+                }
+                if (inputs.isNotEmpty()) viewModel?.stageAttachments(inputs)
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "Error staging attachments: ${e.message}")
+                onError?.invoke(CometChatException("MEDIA_SELECTION_ERROR", e.message ?: "Media selection failed"))
+            } finally {
+                // Release the reservation in the same main-thread hop that staged the tiles (or on
+                // failure/cancellation), so the count moves from pending to tiles without a gap.
+                pendingStagingCount -= uris.size
+            }
+        }
+    }
+
+    /**
+     * The documents / audio picker UI can't be capped like the photo picker, so the selection
+     * limit is surfaced as the picker opens instead: a toast with the remaining slot count renders
+     * on top of the opening picker. Shown only when part of the cap is already used — a fresh tray
+     * needs no warning. Over-selection is still trimmed (with the limit toast) on return.
+     */
+    private fun toastRemainingSlotsHint() {
+        if (!enableMultipleAttachments) return
+        val vm = viewModel ?: return
+        val remaining = remainingAttachmentSlots()
+        if (remaining in 1 until vm.maxAttachmentCount) {
+            android.widget.Toast.makeText(
+                context,
+                context.getString(R.string.cometchat_attachment_remaining_slots, remaining),
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     /**
@@ -2799,6 +3117,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Uses CometChatPermissionHandler for both permission requests and activity results.
      */
     private fun launchVideoPickerWithMediaHelper() {
+        if (!canOpenAttachmentPicker()) return
         currentAttachmentAction = UIKitConstants.ComposerAction.VIDEO
         
         // On Android 13+, no storage permission needed for picker
@@ -2829,7 +3148,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     currentAttachmentAction = ""
                 }
             }
-            .withIntent(MediaUtils.openVideoPicker())
+            .withIntent(
+                MediaUtils.openVideoPicker(context, enableMultipleAttachments, remainingAttachmentSlots())
+            )
             .launch()
     }
 
@@ -2838,6 +3159,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Uses CometChatPermissionHandler for both permission requests and activity results.
      */
     private fun launchAudioPickerWithMediaHelper() {
+        if (!canOpenAttachmentPicker()) return
+        toastRemainingSlotsHint()
         currentAttachmentAction = UIKitConstants.ComposerAction.AUDIO
         
         // On Android 13+, no storage permission needed for picker
@@ -2868,7 +3191,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     currentAttachmentAction = ""
                 }
             }
-            .withIntent(MediaUtils.openAudioPicker(context))
+            .withIntent(MediaUtils.openAudioPicker(context, enableMultipleAttachments))
             .launch()
     }
 
@@ -2877,6 +3200,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Uses CometChatPermissionHandler for both permission requests and activity results.
      */
     private fun launchFilePickerWithMediaHelper() {
+        if (!canOpenAttachmentPicker()) return
+        toastRemainingSlotsHint()
         currentAttachmentAction = UIKitConstants.ComposerAction.DOCUMENT
         
         // On Android 13+, no storage permission needed for document picker
@@ -2907,7 +3232,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     currentAttachmentAction = ""
                 }
             }
-            .withIntent(MediaUtils.openFilePicker())
+            .withIntent(MediaUtils.openFilePicker(enableMultipleAttachments))
             .launch()
     }
 
@@ -2941,7 +3266,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
                 setOnSubmitListener { file ->
                     // Send the audio file with correct CometChat message type
                     android.util.Log.d("CometChatMessageComposer", "onSubmitListener: received file = ${file.absolutePath}, exists = ${file.exists()}, size = ${file.length()}")
-                    viewModel?.sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_AUDIO)
+                    // Recorded voice note → mark it (DD / iOS metaData["audioType"] = "voice_note").
+                    viewModel?.sendMediaMessage(file, CometChatConstants.MESSAGE_TYPE_AUDIO, isVoiceNote = true)
                     hideInlineRecorder()
                 }
                 
@@ -3101,6 +3427,19 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.etMessageInput.text?.let { MentionCodeBlockHandler.extractConsumedMentionMetadata(it) }
         } else null
         
+        // ── Multi-attachment send (takes precedence) ───────────────────
+        // The staged attachments go out as a single media message with the current text as the
+        // caption (which may be blank). The send button is already gated on all-uploaded, but we
+        // guard again here defensively.
+        if (hasStagedAttachments()) {
+            if (viewModel?.attachmentsAllUploaded?.value == true) {
+                viewModel?.sendStagedAttachments(caption = markdownText.ifBlank { null })
+                onSendButtonClick?.invoke(markdownText)
+                resetComposerAfterSend()
+            }
+            return
+        }
+
         val editMsg = viewModel?.editMessage?.value
         when {
             // ── Edit mode ──────────────────────────────────────────────
@@ -3153,7 +3492,14 @@ class CometChatMessageComposer @JvmOverloads constructor(
             }
         }
         
-        // ── Shared cleanup ─────────────────────────────────────────────
+        resetComposerAfterSend()
+    }
+
+    /**
+     * Shared post-send cleanup: clears the input, resets the WYSIWYG span engine, formats,
+     * mentions, and formatter state. Used by both the text-send and staged-attachment send paths.
+     */
+    private fun resetComposerAfterSend() {
         // Clear input and reset span engine state
         binding.etMessageInput.setText("")
         if (richTextConfiguration.hasAnyEnabled()) {
@@ -3167,7 +3513,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         activeFormats = emptySet()
         disabledFormats = emptySet()
         updateToolbarButtonStates()
-        
+
         // Clear mention helper state
         mentionHelper?.clear()
         
@@ -3183,6 +3529,44 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * extension/pending formats, and ListContinuationHandler manages Enter key
      * behavior for lists and blockquotes.
      */
+    /**
+     * Accepts rich content in the composer input — an image pasted from another app, a GIF/
+     * sticker/image inserted from the keyboard, or media dragged onto the input — and stages it
+     * in the attachment tray exactly like a picker selection (category derived from the MIME
+     * type: image/video/audio/file). Text content is returned so the platform pastes it as
+     * usual. AppCompatEditText advertises [RECEIVE_CONTENT_MIME_TYPES] to the IME and handles
+     * the uri permission grants for all three sources.
+     */
+    private fun setupReceiveContent() {
+        androidx.core.view.ViewCompat.setOnReceiveContentListener(
+            binding.etMessageInput,
+            RECEIVE_CONTENT_MIME_TYPES
+        ) { _, payload ->
+            val split = payload.partition { item -> item.uri != null }
+            val uriContent = split.first
+            // Media staging needs the tray — in legacy single-attachment mode the uris are
+            // ignored (returning them would paste raw "content://…" text).
+            if (uriContent != null && enableMultipleAttachments) {
+                stageReceivedContent(uriContent)
+            }
+            split.second
+        }
+    }
+
+    /** Stages pasted/dropped content uris into the tray, honoring the attachment-count cap. */
+    private fun stageReceivedContent(content: androidx.core.view.ContentInfoCompat) {
+        val clip = content.clip
+        val uris = (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }
+        if (uris.isEmpty()) return
+        val remaining = remainingAttachmentSlots()
+        if (uris.size > remaining) {
+            showAttachmentLimitToast(viewModel?.maxAttachmentCount ?: 0)
+        }
+        // Copy + metadata off the main thread (see stagedInputFromUri) so pasting/dropping several
+        // files doesn't freeze the UI; stageAsync reserves the slots while the copy runs.
+        stageAsync(uris.take(remaining)) { uri -> stagedInputFromUri(uri, null) }
+    }
+
     private fun setupTextWatcher() {
         // Listen for cursor position changes to update mention suppression and toolbar state
         binding.etMessageInput.setOnSelectionChangedListener { selStart, selEnd ->
@@ -3929,6 +4313,11 @@ class CometChatMessageComposer @JvmOverloads constructor(
         val isAIGenerating = viewModel?.isAIGenerating?.value ?: false
         val secondaryBgColor = CometChatTheme.getSecondaryButtonBackgroundColor(context)
 
+        // With staged attachments the send button follows the all-or-nothing rule: it stays disabled
+        // until every staged attachment has finished uploading (text becomes an optional caption).
+        val hasStaged = hasStagedAttachments()
+        val active = if (hasStaged) (viewModel?.attachmentsAllUploaded?.value == true) else hasText
+
         when {
             isAIGenerating -> {
                 style.sendButtonStopIcon?.let { binding.ivSend.setImageDrawable(it) }
@@ -3949,7 +4338,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
                 binding.ivSend.isClickable = false
                 binding.ivSend.isEnabled = false
             }
-            hasText -> {
+            active -> {
                 style.sendButtonActiveIcon?.let { binding.ivSend.setImageDrawable(it) }
                     ?: binding.ivSend.setImageResource(R.drawable.cometchat_ic_send_active)
                 applySendButtonBackground(style.sendButtonActiveBackgroundColor)
@@ -3969,7 +4358,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         binding.ivSend.setColorFilter(style.sendButtonIconTint)
 
         // Also update multiline send button to stay in sync
-        updateMultilineSendButtonState(hasText, isAIGenerating)
+        updateMultilineSendButtonState(active, isAIGenerating)
     }
 
     /**
@@ -4036,9 +4425,22 @@ class CometChatMessageComposer @JvmOverloads constructor(
      */
     private fun initViewModel() {
         if (!isExternalViewModel) {
-            viewModel = CometChatMessageComposerViewModelFactory()
-                .create(CometChatMessageComposerViewModel::class.java)
+            // Scope the ViewModel to the host Activity's ViewModelStore so it is retained across
+            // configuration changes (e.g. theme switch) — otherwise a fresh, empty ViewModel is
+            // created on every view recreation and staged attachments are lost (ENG-37015). This
+            // mirrors the Compose composer, which acquires the same ViewModel via viewModel(...).
+            val storeOwner = Utils.getActivity(context) as? ViewModelStoreOwner
+            viewModel = if (storeOwner != null) {
+                ViewModelProvider(
+                    storeOwner,
+                    CometChatMessageComposerViewModelFactory()
+                )[CometChatMessageComposerViewModel::class.java]
+            } else {
+                CometChatMessageComposerViewModelFactory()
+                    .create(CometChatMessageComposerViewModel::class.java)
+            }
         }
+        viewModel?.disableTypingEvents = disableTypingEvents
         startCollectingFlows()
     }
 
@@ -4091,7 +4493,17 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
         viewScope?.launch {
             viewModel?.errorEvent?.collect { error ->
+                // Gate B backstop: picked files beyond the attachment cap were dropped — tell the user.
+                if (error.code == CometChatMessageComposerViewModel.ERROR_MAX_ATTACHMENTS_EXCEEDED) {
+                    showAttachmentLimitToast(viewModel?.maxAttachmentCount ?: 0)
+                }
                 onError?.invoke(error)
+            }
+        }
+
+        viewScope?.launch {
+            viewModel?.attachmentTiles?.collectLatest { tiles ->
+                updateAttachmentTray(tiles)
             }
         }
 
@@ -4121,9 +4533,14 @@ class CometChatMessageComposer @JvmOverloads constructor(
                 // Show sending state if needed
             }
             is MessageComposerUIState.Editing -> {
-                val textMessage = state.message as? TextMessage
-                textMessage?.let {
-                    val markdown = it.text ?: ""
+                val editedMessage = state.message
+                // Text messages edit their text; media messages edit their caption.
+                val markdown = when (editedMessage) {
+                    is TextMessage -> editedMessage.text ?: ""
+                    is MediaMessage -> editedMessage.caption ?: ""
+                    else -> null
+                }
+                markdown?.let {
                     if (richTextConfiguration.hasAnyEnabled() && markdown.isNotEmpty()) {
                         // Use MarkdownConverter to parse markdown into WYSIWYG spans
                         val spanEditable = MarkdownConverter.fromMarkdown(markdown, context)
@@ -4133,7 +4550,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
                         for (formatter in textFormatters) {
                             spannableBuilder = formatter.prepareMessageString(
                                 context,
-                                it,
+                                editedMessage,
                                 spannableBuilder,
                                 UIKitConstants.MessageBubbleAlignment.RIGHT,
                                 UIKitConstants.FormattingType.MESSAGE_COMPOSER
@@ -4151,7 +4568,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
                         for (formatter in textFormatters) {
                             spannableBuilder = formatter.prepareMessageString(
                                 context,
-                                it,
+                                editedMessage,
                                 spannableBuilder,
                                 UIKitConstants.MessageBubbleAlignment.RIGHT,
                                 UIKitConstants.FormattingType.MESSAGE_COMPOSER
@@ -4182,26 +4599,37 @@ class CometChatMessageComposer @JvmOverloads constructor(
      * Runs the formatter pipeline to resolve mention tokens (e.g., <@uid:userId>) 
      * to display names (e.g., @John) before displaying.
      */
-    private fun updateEditPreview(message: TextMessage?) {
+    private fun updateEditPreview(message: BaseMessage?) {
         if (message != null && !hideEditPreview) {
             binding.editPreviewCard.visibility = View.VISIBLE
-            
-            // Run formatter pipeline to resolve mention tokens
-            var spannableBuilder = SpannableStringBuilder(message.text ?: "")
-            for (formatter in textFormatters) {
-                spannableBuilder = formatter.prepareMessageString(
-                    context,
-                    message,
-                    spannableBuilder,
-                    UIKitConstants.MessageBubbleAlignment.RIGHT,
-                    UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                ) ?: spannableBuilder
+
+            val formattedText: CharSequence = when (message) {
+                // Media messages show the summarized attachment preview:
+                // "N Images · caption" / "N Images" / caption / file name —
+                // same rules as the quoted message preview.
+                is MediaMessage -> MultiAttachmentUtils.mediaPreviewSubtitle(context, message)
+
+                else -> {
+                    val rawText = (message as? TextMessage)?.text ?: ""
+                    // Run formatter pipeline to resolve mention tokens
+                    var spannableBuilder = SpannableStringBuilder(rawText)
+                    for (formatter in textFormatters) {
+                        spannableBuilder = formatter.prepareMessageString(
+                            context,
+                            message,
+                            spannableBuilder,
+                            UIKitConstants.MessageBubbleAlignment.RIGHT,
+                            UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                        ) ?: spannableBuilder
+                    }
+                    // Parse markdown into formatted spans (bold, italic, strikethrough,
+                    // underline, etc.) so the preview shows rendered text instead of raw
+                    // markdown markers
+                    com.cometchat.uikit.kotlin.presentation.conversations.utils.ConversationSubtitleRenderer.render(
+                        context, spannableBuilder.toString()
+                    )
+                }
             }
-            // Parse markdown into formatted spans (bold, italic, strikethrough, underline, etc.)
-            // so the preview shows rendered text instead of raw markdown markers
-            val formattedText = com.cometchat.uikit.kotlin.presentation.conversations.utils.ConversationSubtitleRenderer.render(
-                context, spannableBuilder.toString()
-            )
             binding.tvEditPreviewMessage.text = formattedText
         } else {
             binding.editPreviewCard.visibility = View.GONE
@@ -4248,12 +4676,16 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     }
                 }
                 is MediaMessage -> {
-                    message.attachment?.fileName ?: when (message.type) {
-                        "image" -> context.getString(R.string.cometchat_message_image)
-                        "video" -> context.getString(R.string.cometchat_message_video)
-                        "audio" -> context.getString(R.string.cometchat_message_audio)
-                        "file" -> context.getString(R.string.cometchat_message_document)
-                        else -> message.type ?: ""
+                    // Summarized attachment preview: "N Images · caption" / "N Images" /
+                    // caption / file name — same rules as the quoted message preview.
+                    MultiAttachmentUtils.mediaPreviewSubtitle(context, message).ifEmpty {
+                        when (message.type) {
+                            "image" -> context.getString(R.string.cometchat_message_image)
+                            "video" -> context.getString(R.string.cometchat_message_video)
+                            "audio" -> context.getString(R.string.cometchat_message_audio)
+                            "file" -> context.getString(R.string.cometchat_message_document)
+                            else -> message.type ?: ""
+                        }
                     }
                 }
                 is CustomMessage -> {
@@ -4784,6 +5216,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
             buttonsGroup.visibility = View.VISIBLE
             toolbarGroup.visibility = View.GONE
         }
+
+        binding.ivMultilineVoiceRecording?.visibility =
+            if (hideVoiceRecordingButton || hasStagedAttachments()) View.GONE else View.VISIBLE
     }
 
     /**
@@ -5701,6 +6136,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun setViewModel(viewModel: CometChatMessageComposerViewModel) {
         this.viewModel = viewModel
         isExternalViewModel = true
+        viewModel.disableTypingEvents = disableTypingEvents
         startCollectingFlows()
     }
 

@@ -150,7 +150,20 @@ fun CometChatInlineAudioRecorder(
             }
             
             override fun onStatusChange(newStatus: InlineAudioRecorderStatus) {
-                // Status changes are handled by the manager calling specific methods
+                // The manager is the source of truth for status. Mirror its own transitions
+                // — playback completion, a playback error, or the audio-focus-loss auto-pause —
+                // into the ViewModel so the controls always match what the engine is actually
+                // doing. Without this the button can show Pause while playback has already
+                // stopped, so the next tap appears to "do nothing".
+                //
+                // IDLE is intentionally excluded: the dismiss (send/delete) flow drives the
+                // ViewModel to IDLE itself after its slide-out animation, and mirroring IDLE here
+                // would collapse the recorder instantly, skipping that animation.
+                if (newStatus != InlineAudioRecorderStatus.IDLE &&
+                    viewModel.status != newStatus
+                ) {
+                    viewModel.setState(viewModel.state.value.copy(status = newStatus))
+                }
             }
             
             override fun onRecordingComplete(file: File, durationMs: Long, amplitudeList: List<Float>) {
@@ -181,12 +194,18 @@ fun CometChatInlineAudioRecorder(
     // Permission handling using CometChatPermissionHandler
     val permissions = remember { getPermissionsForType(PermissionType.MICROPHONE) }
     var pendingRecordingStart by remember { mutableStateOf(false) }
-    
+
+    // True from the moment send/delete is tapped until the slide-out animation completes.
+    // Both actions drive the ViewModel back to IDLE, which would otherwise re-trigger the
+    // auto-start effect below and begin a brand new recording as the recorder slides away.
+    var isDismissing by remember { mutableStateOf(false) }
+
     // Use rememberUpdatedState to ensure the callback always has the latest values
     val currentRecorderManager by rememberUpdatedState(recorderManager)
     val currentViewModel by rememberUpdatedState(viewModel)
     val currentOnError by rememberUpdatedState(onError)
     val currentPendingRecordingStart by rememberUpdatedState(pendingRecordingStart)
+    val currentIsDismissing by rememberUpdatedState(isDismissing)
     
     val permissionState = rememberMultiplePermissionsState(
         permissions = permissions,
@@ -196,8 +215,9 @@ fun CometChatInlineAudioRecorder(
                 // Always try to start recording when permission is granted
                 // The pendingRecordingStart flag may not be reliable due to recomposition
                 pendingRecordingStart = false
-                // Only start if we're still in IDLE state (not already recording)
-                if (currentViewModel.status == InlineAudioRecorderStatus.IDLE) {
+                // Only start if we're still in IDLE state (not already recording) and the user
+                // hasn't already dismissed the recorder while the permission dialog was up.
+                if (currentViewModel.status == InlineAudioRecorderStatus.IDLE && !currentIsDismissing) {
                     val started = currentRecorderManager.startRecording()
                     if (started) {
                         currentViewModel.startRecording()
@@ -223,10 +243,10 @@ fun CometChatInlineAudioRecorder(
         }
     }
     
-    // Auto-start recording when component is first shown (status is IDLE)
-    // This handles the case when the inline recorder is displayed
-    LaunchedEffect(status) {
-        if (status == InlineAudioRecorderStatus.IDLE) {
+    // Auto-start recording when the component is first shown, and again after a recovery from
+    // ERROR (both leave the ViewModel in IDLE). Never while dismissing — see [isDismissing].
+    LaunchedEffect(status, isDismissing) {
+        if (status == InlineAudioRecorderStatus.IDLE && !isDismissing) {
             startRecordingWithPermissionCheck()
         }
     }
@@ -263,6 +283,7 @@ fun CometChatInlineAudioRecorder(
     // Function to handle dismiss with slide animation
     val dismissWithSlide: (DismissDirection, () -> Unit) -> Unit = { direction, onComplete ->
         dismissDirection = direction
+        isDismissing = true
         coroutineScope.launch {
             // Calculate target offset based on direction (slide by screen width)
             val targetOffset = when (direction) {
@@ -366,9 +387,13 @@ fun CometChatInlineAudioRecorder(
                         DeleteButton(
                             style = style,
                             onClick = {
-                                // Slide left animation when delete is clicked
+                                // Release the mic and discard the file immediately — waiting for the
+                                // slide animation to finish would keep recording for another 250ms.
+                                recorderManager.deleteRecording()
+
+                                // Slide left animation when delete is clicked. The ViewModel stays
+                                // non-IDLE until the animation completes so the row remains visible.
                                 dismissWithSlide(DismissDirection.LEFT) {
-                                    recorderManager.deleteRecording()
                                     viewModel.deleteRecording()
                                     onCancel?.invoke()
                                 }
@@ -387,12 +412,16 @@ fun CometChatInlineAudioRecorder(
                             },
                             onPlayClick = {
                                 if (status == InlineAudioRecorderStatus.PAUSED) {
-                                    // Stop recording first to finalize the file, then start playback
-                                    recorderManager.stopRecording()
-                                    viewModel.stopRecording()
-                                    // Start playback after stopping
-                                    recorderManager.startPlayback()
-                                    viewModel.startPlayback()
+                                    // Stop recording first to finalize the file, then start playback.
+                                    // stopRecording() suspends while the file flushes, so run it in a
+                                    // coroutine to keep the flush-wait off the main thread.
+                                    coroutineScope.launch {
+                                        recorderManager.stopRecording()
+                                        viewModel.stopRecording()
+                                        // Start playback after stopping
+                                        recorderManager.startPlayback()
+                                        viewModel.startPlayback()
+                                    }
                                 } else if (status == InlineAudioRecorderStatus.COMPLETED) {
                                     recorderManager.startPlayback()
                                     viewModel.startPlayback()
@@ -481,25 +510,32 @@ fun CometChatInlineAudioRecorder(
                         SendButton(
                             style = style,
                             onClick = {
-                                // Stop recording BEFORE animation to ensure file is finalized
-                                // Capture the current status before any state changes
-                                val currentStatus = status
-                                if (currentStatus == InlineAudioRecorderStatus.RECORDING || 
-                                    currentStatus == InlineAudioRecorderStatus.PAUSED) {
-                                    recorderManager.stopRecording()
-                                    viewModel.stopRecording()
-                                }
-                                
-                                // Get the file AFTER stopping (file is now finalized)
-                                val recordedFile = recorderManager.getRecordedFile()
-                                
-                                // Slide right animation when send is clicked
-                                dismissWithSlide(DismissDirection.RIGHT) {
-                                    // Submit the file after animation
-                                    recordedFile?.let { file ->
-                                        if (file.exists() && file.length() > 0) {
-                                            onSubmit?.invoke(file)
-                                        }
+                                // Stop recording BEFORE the animation so the file is finalized and
+                                // flushed to disk by the time we hand it to the caller. stopRecording()
+                                // suspends while the muxer flushes, so run it in a coroutine to keep
+                                // the flush-wait off the main thread.
+                                coroutineScope.launch {
+                                    val recordedFile = if (status == InlineAudioRecorderStatus.RECORDING ||
+                                        status == InlineAudioRecorderStatus.PAUSED
+                                    ) {
+                                        recorderManager.stopRecording().also { viewModel.stopRecording() }
+                                    } else {
+                                        recorderManager.getRecordedFile()
+                                    }
+
+                                    if (recordedFile == null || !recordedFile.exists() || recordedFile.length() == 0L) {
+                                        onError?.invoke("Failed to save recording")
+                                        return@launch
+                                    }
+
+                                    // The submitted file outlives this composable — the caller uploads it
+                                    // asynchronously. Hand ownership over before onDispose runs release(),
+                                    // which would otherwise delete the file mid-upload.
+                                    recorderManager.markAsSubmitted()
+
+                                    // Slide right animation when send is clicked
+                                    dismissWithSlide(DismissDirection.RIGHT) {
+                                        onSubmit?.invoke(recordedFile)
                                     }
                                 }
                             }

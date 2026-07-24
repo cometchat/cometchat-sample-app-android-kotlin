@@ -25,6 +25,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.shared.resources.utils.MediaUtils
+import com.cometchat.uikit.kotlin.theme.CometChatTheme
 
 /**
  * Full-screen image viewer activity that displays images with pinch-to-zoom,
@@ -39,6 +40,7 @@ class CometChatImageViewerActivity : AppCompatActivity() {
         private const val ARGS_IMAGE_URLS = "ARGS_IMAGE_URLS"
         private const val ARGS_FILE_NAME = "ARGS_FILE_NAME"
         private const val MIME_TYPE_URL = "MIME_TYPE_URL"
+        private const val ARGS_START_INDEX = "ARGS_START_INDEX"
         private const val TAG = "CometChatImageViewerActivity"
 
         /**
@@ -48,18 +50,22 @@ class CometChatImageViewerActivity : AppCompatActivity() {
          * @param urls List of image URLs to display
          * @param mimeType List of MIME types for each image
          * @param filenames List of filenames for each image
+         * @param startIndex Index of the image to show first (multi-attachment grid preview)
          */
         @JvmStatic
+        @JvmOverloads
         fun createIntent(
             context: Context,
             urls: List<String>,
             mimeType: List<String>,
-            filenames: List<String>
+            filenames: List<String>,
+            startIndex: Int = 0
         ): Intent {
             return Intent(context, CometChatImageViewerActivity::class.java).apply {
                 putExtra(ARGS_IMAGE_URLS, java.io.Serializable::class.java.cast(urls))
                 putExtra(MIME_TYPE_URL, java.io.Serializable::class.java.cast(mimeType))
                 putExtra(ARGS_FILE_NAME, java.io.Serializable::class.java.cast(filenames))
+                putExtra(ARGS_START_INDEX, startIndex)
             }
         }
     }
@@ -67,11 +73,12 @@ class CometChatImageViewerActivity : AppCompatActivity() {
     private var urls: List<String>? = null
     private var mimeTypes: List<String>? = null
     private var filenames: List<String>? = null
-    private val initialPos = 0
+    private var initialPos = 0
     private var adapter: ImageAdapter? = null
     private lateinit var viewPager: ViewPager
     private lateinit var toolbar: Toolbar
     private lateinit var topBar: LinearLayout
+    private lateinit var downloadBtn: ImageView
     private lateinit var shareBtn: ImageView
     private lateinit var progressBar: View
 
@@ -83,6 +90,7 @@ class CometChatImageViewerActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewpager)
         toolbar = findViewById(R.id.toolbar)
         topBar = findViewById(R.id.top_bar_container)
+        downloadBtn = findViewById(R.id.button_download)
         shareBtn = findViewById(R.id.button_share)
         progressBar = findViewById(R.id.progress_bar)
 
@@ -92,6 +100,8 @@ class CometChatImageViewerActivity : AppCompatActivity() {
         mimeTypes = intent.getSerializableExtra(MIME_TYPE_URL) as? List<String>
         @Suppress("UNCHECKED_CAST")
         filenames = intent.getSerializableExtra(ARGS_FILE_NAME) as? List<String>
+        initialPos = intent.getIntExtra(ARGS_START_INDEX, 0)
+            .coerceIn(0, (urls?.lastIndex ?: 0).coerceAtLeast(0))
 
         initViews()
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -106,6 +116,7 @@ class CometChatImageViewerActivity : AppCompatActivity() {
         toggleProgressBarVisibility(View.VISIBLE)
         initToolbar()
         initViewPager()
+        downloadBtn.setOnClickListener { downloadMessage() }
         shareBtn.setOnClickListener { shareMessage() }
     }
 
@@ -119,9 +130,25 @@ class CometChatImageViewerActivity : AppCompatActivity() {
     }
 
     private fun initViewPager() {
-        adapter = ImageAdapter(this, urls ?: emptyList())
+        adapter = ImageAdapter(this, urls ?: emptyList(), mimeTypes ?: emptyList())
         viewPager.adapter = adapter
         viewPager.currentItem = initialPos
+    }
+
+    private fun downloadMessage() {
+        if (urls.isNullOrEmpty() || filenames.isNullOrEmpty()) {
+            Log.e(TAG, "Cannot download image, urls or filenames are null")
+            return
+        }
+        val currentPos = adapter?.currentPos ?: 0
+        // Save directly to the device (Downloads); no share sheet. The filename already carries
+        // its extension, so pass an empty extension to avoid duplicating it.
+        MediaUtils.downloadFile(
+            context = this,
+            url = urls!![currentPos],
+            fileName = filenames!![currentPos],
+            extension = ""
+        )
     }
 
     private fun shareMessage() {
@@ -173,7 +200,8 @@ class CometChatImageViewerActivity : AppCompatActivity() {
 
     inner class ImageAdapter(
         private val context: Context,
-        private val urls: List<String>
+        private val urls: List<String>,
+        private val mimeTypes: List<String> = emptyList()
     ) : PagerAdapter() {
 
         private val previewMap = HashMap<Int, CometChatImagePreview>()
@@ -184,12 +212,62 @@ class CometChatImageViewerActivity : AppCompatActivity() {
         override fun getCount(): Int = urls.size
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
+            // Non-image page (kind-mismatched attachment of a server-sent mixed payload) — show
+            // the Google Drive-style "No preview available" page with its own Download button.
+            // An EMPTY mime (legacy message) still tries the normal image preview.
+            val mime = mimeTypes.getOrElse(position) { "" }.lowercase()
+            if (mime.isNotEmpty() && !mime.startsWith("image/")) {
+                val view = createNoPreviewPage(position)
+                container.addView(view)
+                if (position == initialPos) {
+                    toggleProgressBarVisibility(View.GONE)
+                    startPostponedEnterTransition()
+                }
+                return view
+            }
+
             val view = View.inflate(context, R.layout.cometchat_item_image, null)
             val image: ImageView = view.findViewById(R.id.image)
             val frameLayout: FrameLayout = view.findViewById(R.id.container)
             container.addView(view)
             loadImage(image, frameLayout, position)
             views[position] = image
+            return view
+        }
+
+        /** Inflates + theme-binds the "No preview available" page for [position]. */
+        private fun createNoPreviewPage(position: Int): View {
+            val view = View.inflate(context, R.layout.cometchat_item_no_preview, null)
+            // Slightly translucent so the viewer's backdrop shows through the card.
+            view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.no_preview_card)
+                .setCardBackgroundColor(
+                    androidx.core.graphics.ColorUtils.setAlphaComponent(
+                        CometChatTheme.getBackgroundColor1(context), 217 // ~0.85 alpha
+                    )
+                )
+            view.findViewById<View>(R.id.no_preview_icon_container).background =
+                android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(CometChatTheme.getNeutralColor100(context))
+                }
+            view.findViewById<android.widget.TextView>(R.id.no_preview_title)
+                .setTextColor(CometChatTheme.getTextColorPrimary(context))
+            view.findViewById<android.widget.TextView>(R.id.no_preview_subtitle)
+                .setTextColor(CometChatTheme.getTextColorSecondary(context))
+            val white = CometChatTheme.getColorWhite(context)
+            view.findViewById<ImageView>(R.id.no_preview_download_icon).imageTintList =
+                android.content.res.ColorStateList.valueOf(white)
+            view.findViewById<android.widget.TextView>(R.id.no_preview_download_text).setTextColor(white)
+            view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.no_preview_download).apply {
+                setCardBackgroundColor(CometChatTheme.getPrimaryColor(context))
+                setOnClickListener {
+                    val url = urls.getOrElse(position) { "" }
+                    val name = filenames?.getOrElse(position) { "" }.orEmpty()
+                    if (url.isNotEmpty()) {
+                        MediaUtils.downloadFile(context = context, url = url, fileName = name, extension = "")
+                    }
+                }
+            }
             return view
         }
 

@@ -1,6 +1,7 @@
 package com.cometchat.uikit.core.utils
 
 import android.media.AudioAttributes
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.util.Log
 
@@ -31,7 +32,7 @@ class AudioBubblePlaybackState(
     val progress: Float
         get() = if (totalDuration > 0) (currentPosition.toFloat() / totalDuration).coerceIn(0f, 1f) else 0f
 
-    fun initFromFile(filePath: String, onReady: () -> Unit = {}) {
+    fun initFromFile(filePath: String, onError: () -> Unit = {}, onReady: () -> Unit = {}) {
         if (mediaPlayer != null && isPrepared) { onReady(); return }
         // Release any existing player first
         try { mediaPlayer?.release() } catch (_: Exception) {}
@@ -44,7 +45,11 @@ class AudioBubblePlaybackState(
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
                 setOnPreparedListener { mp ->
-                    totalDuration = mp.duration.toLong()
+                    // MediaPlayer reports -1/0 for containers without a duration header (VBR MP3
+                    // missing Xing, raw AAC/ADTS, AMR, some Opus voice notes) — fall back to the
+                    // retriever, which parses frames instead of trusting the header.
+                    totalDuration = mp.duration.toLong().takeIf { it > 0 }
+                        ?: extractDurationMs(filePath)
                     isPrepared = true
                     isInitializing = false
                     playState = PlayState.STOPPED
@@ -57,6 +62,8 @@ class AudioBubblePlaybackState(
                     Log.e(TAG, "[$id] error: what=$what, extra=$extra")
                     isInitializing = false
                     isPrepared = false
+                    playState = PlayState.INIT
+                    onError()
                     true
                 }
                 prepareAsync()
@@ -64,6 +71,22 @@ class AudioBubblePlaybackState(
         } catch (e: Exception) {
             Log.e(TAG, "[$id] initFromFile failed: ${e.message}")
             isInitializing = false; isPrepared = false; playState = PlayState.INIT
+            onError()
+        }
+    }
+
+    private fun extractDurationMs(filePath: String): Long {
+        return try {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(filePath)
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+            } finally {
+                runCatching { retriever.release() }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "[$id] duration fallback failed: ${e.message}")
+            0L
         }
     }
 

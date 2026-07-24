@@ -67,6 +67,7 @@ private object TestMessageOptionsUtils {
             MessageOptionConstants.REPLY_IN_THREAD,
             MessageOptionConstants.REPLY,
             MessageOptionConstants.SHARE,
+            MessageOptionConstants.EDIT,
             MessageOptionConstants.REPORT,
             MessageOptionConstants.DELETE,
             MessageOptionConstants.MESSAGE_PRIVATELY
@@ -77,6 +78,7 @@ private object TestMessageOptionsUtils {
             MessageOptionConstants.REPLY_IN_THREAD,
             MessageOptionConstants.REPLY,
             MessageOptionConstants.SHARE,
+            MessageOptionConstants.EDIT,
             MessageOptionConstants.REPORT,
             MessageOptionConstants.DELETE,
             MessageOptionConstants.MESSAGE_PRIVATELY
@@ -87,6 +89,7 @@ private object TestMessageOptionsUtils {
             MessageOptionConstants.REPLY_IN_THREAD,
             MessageOptionConstants.REPLY,
             MessageOptionConstants.SHARE,
+            MessageOptionConstants.EDIT,
             MessageOptionConstants.REPORT,
             MessageOptionConstants.DELETE,
             MessageOptionConstants.MESSAGE_PRIVATELY
@@ -97,6 +100,7 @@ private object TestMessageOptionsUtils {
             MessageOptionConstants.REPLY_IN_THREAD,
             MessageOptionConstants.REPLY,
             MessageOptionConstants.SHARE,
+            MessageOptionConstants.EDIT,
             MessageOptionConstants.REPORT,
             MessageOptionConstants.DELETE,
             MessageOptionConstants.MESSAGE_PRIVATELY
@@ -151,7 +155,8 @@ class MessageOptionsUtilsPropertyTest : FunSpec({
 
     /**
      * Expected options for media messages (image, video, audio, file).
-     * Order: MESSAGE_INFO, MARK_AS_UNREAD, REPLY_IN_THREAD, REPLY, SHARE, FLAG/REPORT, DELETE, MESSAGE_PRIVATELY
+     * Order: MESSAGE_INFO, MARK_AS_UNREAD, REPLY_IN_THREAD, REPLY, SHARE, EDIT, FLAG/REPORT, DELETE, MESSAGE_PRIVATELY
+     * EDIT is in the default map but only surfaces at runtime when the message has a caption.
      */
     val expectedMediaOptions = listOf(
         MessageOptionConstants.MESSAGE_INFORMATION,
@@ -159,6 +164,7 @@ class MessageOptionsUtilsPropertyTest : FunSpec({
         MessageOptionConstants.REPLY_IN_THREAD,
         MessageOptionConstants.REPLY,
         MessageOptionConstants.SHARE,
+        MessageOptionConstants.EDIT,
         MessageOptionConstants.REPORT,
         MessageOptionConstants.DELETE,
         MessageOptionConstants.MESSAGE_PRIVATELY
@@ -205,7 +211,7 @@ class MessageOptionsUtilsPropertyTest : FunSpec({
             }
         }
 
-        test("text message options contain EDIT option (unique to text)") {
+        test("text message options contain EDIT option") {
             checkAll(100, Arb.string(0..5)) { _ ->
                 val options = TestMessageOptionsUtils.getDefaultOptionIds("message", "text")
 
@@ -233,11 +239,11 @@ class MessageOptionsUtilsPropertyTest : FunSpec({
             }
         }
 
-        test("image message options do not contain EDIT option") {
+        test("image message options contain EDIT option (caption editing)") {
             checkAll(100, Arb.string(0..5)) { _ ->
                 val options = TestMessageOptionsUtils.getDefaultOptionIds("message", "image")
 
-                options.contains(MessageOptionConstants.EDIT) shouldBe false
+                options.contains(MessageOptionConstants.EDIT) shouldBe true
             }
         }
 
@@ -432,16 +438,17 @@ class MessageOptionsUtilsPropertyTest : FunSpec({
             }
         }
 
-        test("only text messages have COPY and EDIT options") {
+        test("only text messages have COPY option; all types have EDIT") {
             checkAll(100, messageTypeArb) { messageType ->
                 val options = TestMessageOptionsUtils.getDefaultOptionIds(messageType.category, messageType.type)
 
+                // EDIT is present for every type; for media it only surfaces when a caption exists
+                options.contains(MessageOptionConstants.EDIT) shouldBe true
+
                 if (messageType == MessageType.TEXT) {
                     options.contains(MessageOptionConstants.COPY) shouldBe true
-                    options.contains(MessageOptionConstants.EDIT) shouldBe true
                 } else {
                     options.contains(MessageOptionConstants.COPY) shouldBe false
-                    options.contains(MessageOptionConstants.EDIT) shouldBe false
                 }
             }
         }

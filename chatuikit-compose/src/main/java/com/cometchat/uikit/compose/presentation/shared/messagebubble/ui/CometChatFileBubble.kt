@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -252,11 +253,16 @@ private fun SingleFileItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(cornerRadius)
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick
+            // combinedClickable is skipped in inspection mode: the LayoutLib preview renderer's
+            // bundled Compose-Foundation can throw NoSuchMethodError on it. No-op for runtime.
+            .then(
+                if (LocalInspectionMode.current) Modifier
+                else Modifier.combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                )
             )
             .padding(start = 8.dp, top = 8.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -272,7 +278,7 @@ private fun SingleFileItem(
             Icon(
                 painter = painterResource(id = fileIcon),
                 contentDescription = "File type: ${fileType.name}",
-                modifier = Modifier.size(style.fileIconSize - 8.dp),
+                modifier = Modifier.size(style.fileIconSize - 14.dp),
                 tint = androidx.compose.ui.graphics.Color.Unspecified
             )
         }

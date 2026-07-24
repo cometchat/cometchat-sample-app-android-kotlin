@@ -15,7 +15,7 @@ configurations.all {
 }
 
 ext["publishDescription"] = "CometChat UI Kit Compose – Jetpack Compose chat UI components for Android"
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.3"
+val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.4"
 val cloudsmithRepo = System.getenv("CLOUDSMITH_REPO") ?: "cometchat/call-team"
 val libraryGroup = "com.cometchat"
 val libraryArtifact = "chatuikit-compose-android"
@@ -173,6 +173,7 @@ dependencies {
 
     // Image loading
     implementation(libs.coil.compose)
+    implementation(libs.coil.video)
 
     // Utilities
     implementation(libs.gson)

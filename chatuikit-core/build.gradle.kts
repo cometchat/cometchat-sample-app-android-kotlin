@@ -9,7 +9,7 @@ plugins {
 ext["publishArtifactId"] = "chatuikit-core-android"
 ext["publishDescription"] = "CometChat UI Kit Core – shared ViewModels, use cases, and repositories for Android"
 // Get version information from properties or environment
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.3"
+val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.4"
 val cloudsmithRepo = System.getenv("CLOUDSMITH_REPO") ?: "cometchat/call-team"
 val libraryGroup = "com.cometchat"
 val libraryArtifact = "chatuikit-core-android"
@@ -140,6 +140,9 @@ dependencies {
     testImplementation(libs.kotest.property)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    // Real org.json for unit tests — the android.jar stub returns nulls under
+    // returnDefaultValues, which breaks settings-file parsing tests.
+    testImplementation("org.json:json:20240303")
     testImplementation(kotlin("reflect"))
     testImplementation("org.objenesis:objenesis:3.3")
     testImplementation(libs.androidx.core.testing)

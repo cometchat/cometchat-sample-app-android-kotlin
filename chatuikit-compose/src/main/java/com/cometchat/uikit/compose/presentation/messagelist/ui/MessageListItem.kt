@@ -21,6 +21,9 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.BubbleFacto
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMessageBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatMessageBubble
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildFactoryKey
+import androidx.compose.runtime.CompositionLocalProvider
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.LocalEnableMultipleAttachments
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.LocalTimestampHidden
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.state.MessageAlignment
 
@@ -217,6 +220,10 @@ internal fun MessageListItem(
     outgoingMessageBubbleStyle: CometChatMessageBubbleStyle? = null,
     // NEW parameter for agent chat mode (Task 2.3)
     isAgentChat: Boolean = false,
+    // ENG-36737 batch grouping (computed from list adjacency on batchId by the caller).
+    isBatched: Boolean = false,
+    isFirstInBatch: Boolean = true,
+    isLastInBatch: Boolean = true,
     // NEW parameter for alignment propagation (Task 11.2)
     messageListAlignment: UIKitConstants.MessageListAlignment = UIKitConstants.MessageListAlignment.STANDARD,
     // Highlight parameters for jump-to-parent-message feature
@@ -297,6 +304,15 @@ internal fun MessageListItem(
         )
     }
 
+    // ENG-36737 batch grouping: for a multi-attachment batch (split into per-type messages sharing
+    // a batchId) show the avatar + sender name only above the first message and the status info
+    // (time + receipt) only under the last. First/last are computed from list adjacency by the
+    // caller (iOS contract); non-batched messages pass first == last == true.
+    val groupBatch = LocalEnableMultipleAttachments.current && isBatched
+    // Keep the avatar column on every batch message (so bubbles align) but only PAINT the avatar on
+    // the first — the rest draw it invisibly (iOS parity: alpha 0, width reserved).
+    val leadingAlphaForBatch = if (groupBatch && !isFirstInBatch) 0f else 1f
+
     // Convert provider callbacks to direct composable lambdas for CometChatMessageBubble.
     // When a provider is set, wrap it. When null, pass null so the factory handles it.
     //
@@ -310,6 +326,13 @@ internal fun MessageListItem(
     // Per-bubble-type styles are passed from CometChatMessageListStyle to CometChatMessageBubble
     // for internal rendering. When a style is non-null, it overrides the alignment-based default.
     // When null, CometChatMessageBubble uses incoming()/outgoing()/default() based on alignment.
+    //
+    // The default status row (time + receipt) is suppressed on non-last batch messages below —
+    // tell the per-type content bubbles via LocalTimestampHidden so they pad their bottom edge
+    // in its place (a user-provided statusInfoView renders on every bubble, so it counts as
+    // visible).
+    val timestampHidden = statusInfoView == null && groupBatch && !isLastInBatch
+    CompositionLocalProvider(LocalTimestampHidden provides timestampHidden) {
     CometChatMessageBubble(
         message = message,
         alignment = bubbleAlignment,
@@ -327,6 +350,7 @@ internal fun MessageListItem(
         style = style.messageBubbleStyle, // Pass messageBubbleStyle as base
         factory = factory,
         shouldShowDefaultAvatar = shouldShowDefaultAvatar,
+        leadingAlpha = leadingAlphaForBatch,
         timeStampAlignment = timeStampAlignment,
         hideModerationView = hideModerationView,
 
@@ -350,8 +374,12 @@ internal fun MessageListItem(
         leadingView = leadingView?.let { provider ->
             { provider(message, alignment) }
         },
-        headerView = headerView?.let { provider ->
-            { provider(message, alignment) }
+        headerView = when {
+            // User-provided header always wins.
+            headerView != null -> { { headerView.invoke(message, alignment) } }
+            // Suppress the default header (avatar-side name) on non-first batch messages.
+            groupBatch && !isFirstInBatch -> { {} }
+            else -> null
         },
         replyView = replyView?.let { provider ->
             { provider(message, alignment) }
@@ -362,8 +390,12 @@ internal fun MessageListItem(
         bottomView = bottomView?.let { provider ->
             { provider(message, alignment) }
         },
-        statusInfoView = statusInfoView?.let { provider ->
-            { provider(message, alignment) }
+        // Non-last batch messages hide the time/receipt entirely (shown once on the last). The
+        // per-type bubbles carry a small symmetric bottom inset so they don't look tight without it.
+        statusInfoView = when {
+            statusInfoView != null -> { { statusInfoView.invoke(message, alignment) } }
+            groupBatch && !isLastInBatch -> { {} }
+            else -> null
         },
         threadView = threadView?.let { provider ->
             { provider(message, alignment) }
@@ -395,4 +427,5 @@ internal fun MessageListItem(
         // Agent chat flag for slot suppression and transparent background
         isAgentChat = isAgentChat
     )
+    }
 }

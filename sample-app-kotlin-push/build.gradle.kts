@@ -27,7 +27,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "6.0.1"
+        versionName = "6.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -95,12 +95,12 @@ dependencies {
     testImplementation(libs.kotest.property)
     
     // JUnit Vintage engine to run JUnit 4 tests alongside JUnit 5
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testRuntimeOnly(libs.junit.vintage.engine)
 
     implementation(libs.calls.sdk.android)
 
     // CometChat Push Notifications SDK
-    implementation("com.cometchat:push-notifications-android:1.0.0-alpha.1")
+    implementation(libs.push.notifications.android)
 
     // Firebase Cloud Messaging
     implementation(platform(libs.firebase.bom))

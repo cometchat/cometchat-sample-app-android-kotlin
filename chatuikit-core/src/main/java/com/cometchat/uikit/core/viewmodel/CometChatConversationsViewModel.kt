@@ -168,7 +168,8 @@ open class CometChatConversationsViewModel(
                     .onSuccess { newConversations ->
                         // Only append if we got new conversations
                         if (newConversations.isNotEmpty()) {
-                            val updatedList = _conversations.value + newConversations
+                            val updatedList = (_conversations.value + newConversations)
+                                .distinctBy { it.conversationId }
                             _conversations.value = updatedList
                             _uiState.value = UIState.Content(updatedList)
                         } else {
@@ -218,11 +219,13 @@ open class CometChatConversationsViewModel(
             }
             
             // Use client's builder if provided, otherwise create default
-            val builder = conversationsRequestBuilder 
+            val builder = conversationsRequestBuilder
                 ?: ConversationsRequest.ConversationsRequestBuilder()
                     .setLimit(30)
-            
-            refreshConversationListUseCase(builder)
+
+            val freshRequest = builder.build()
+
+            refreshConversationListUseCase(freshRequest)
                 .onSuccess { conversations ->
                     _conversations.value = conversations
                     _uiState.value = if (conversations.isEmpty()) {
@@ -230,10 +233,9 @@ open class CometChatConversationsViewModel(
                     } else {
                         UIState.Content(conversations)
                     }
-                    
-                    // Create new request for pagination
-                    conversationsRequest = builder.build()
-                    
+
+                    conversationsRequest = freshRequest
+
                     // Emit scroll to top event after refresh (new conversation at top)
                     _scrollToTopEvent.emit(Unit)
                 }

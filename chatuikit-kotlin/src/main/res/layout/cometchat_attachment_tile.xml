@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One staged attachment in the composer tray. Contains all three tile shapes (a square media tile,
+  a document card and an audio card); the adapter toggles which is visible per item. A corner badge
+  straddles the top-end of the tile (✕). Upload state renders as a dark overlay on the tile's
+  leading visual — a white progress ring while uploading, a red retry / error badge on failure —
+  plus a red card border and a red state meta line. Colors are applied at bind time from the theme.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- Cards are inset by the badge overhang (6dp) so the corner badge, anchored at the root's
+         top-end, straddles the visible tile corner. -->
+
+    <!-- ===== Media tile (image / video) ===== -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/mediaCard"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:cardPreventCornerOverlap="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/ivMediaThumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop" />
+
+            <!-- Video play badge (successful video) -->
+            <FrameLayout
+                android:id="@+id/playBadge"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivPlayIcon"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/cometchat_play_icon" />
+            </FrameLayout>
+
+            <!-- Video duration chip (successful video) -->
+            <TextView
+                android:id="@+id/tvVideoDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="4dp"
+                android:maxLines="1"
+                android:paddingStart="4dp"
+                android:paddingTop="1dp"
+                android:paddingEnd="4dp"
+                android:paddingBottom="1dp"
+                android:textSize="8sp"
+                android:visibility="gone"
+                tools:text="0:12"
+                xmlns:tools="http://schemas.android.com/tools" />
+
+            <!-- Dark tint over the thumbnail while uploading / failed -->
+            <View
+                android:id="@+id/vMediaDim"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/mediaProgress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Round red retry / error badge (failed / rejected); the glyph drawables carry the
+                 badge's inner margin in their viewport, so the icon fills the badge. -->
+            <FrameLayout
+                android:id="@+id/mediaErrorBadge"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivMediaErrorIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null" />
+            </FrameLayout>
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ===== Document card (any non-media, non-audio file) ===== -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/fileCard"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <!-- Rounded container holding the file-type glyph; the state overlay dims it -->
+            <FrameLayout
+                android:id="@+id/fileIconContainer"
+                android:layout_width="40dp"
+                android:layout_height="40dp">
+
+                <ImageView
+                    android:id="@+id/ivFileIcon"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/cometchat_ic_file" />
+
+                <FrameLayout
+                    android:id="@+id/fileIconOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/fileProgress"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <FrameLayout
+                        android:id="@+id/fileErrorBadge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/ivFileErrorIcon"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvFileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="12sp"
+                    tools:text="document.pdf"
+                    xmlns:tools="http://schemas.android.com/tools" />
+
+                <TextView
+                    android:id="@+id/tvFileMeta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    tools:text="PDF · 2.4 MB"
+                    xmlns:tools="http://schemas.android.com/tools" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ===== Audio card (picker-selected audio file) ===== -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/audioCard"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <!-- Round play button; the state overlay dims it -->
+            <FrameLayout
+                android:id="@+id/audioPlayButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp">
+
+                <!-- Same glyphs and proportions as CometChatAudioBubble's play button -->
+                <ImageView
+                    android:id="@+id/ivAudioPlayIcon"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/cometchat_play_icon" />
+
+                <FrameLayout
+                    android:id="@+id/audioPlayOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/audioProgress"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <FrameLayout
+                        android:id="@+id/audioErrorBadge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/ivAudioErrorIcon"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvAudioName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="12sp"
+                    tools:text="Hello by Adele.mp3"
+                    xmlns:tools="http://schemas.android.com/tools" />
+
+                <!-- Flat seek bar; hidden on failed / rejected (the state text replaces it) -->
+                <SeekBar
+                    android:id="@+id/sbAudioSeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="0dp"
+                    android:maxHeight="6dp"
+                    android:minHeight="6dp"
+                    android:paddingStart="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="0dp"
+                    android:paddingBottom="0dp"
+                    android:progressDrawable="@drawable/cometchat_audio_seek_track"
+                    android:splitTrack="false"
+                    android:thumb="@drawable/cometchat_audio_seek_thumb" />
+
+                <TextView
+                    android:id="@+id/tvAudioTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    tools:text="00:00/00:32"
+                    xmlns:tools="http://schemas.android.com/tools" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ===== Corner badge (✕) ===== -->
+    <FrameLayout
+        android:id="@+id/cornerBadge"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="top|end">
+
+        <ImageView
+            android:id="@+id/ivBadgeIcon"
+            android:layout_width="11dp"
+            android:layout_height="11dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/cometchat_ic_close" />
+    </FrameLayout>
+</FrameLayout>

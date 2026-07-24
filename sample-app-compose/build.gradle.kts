@@ -14,7 +14,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "6.0"
+        versionName = "6.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -99,7 +99,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.androidx.uiautomator)
-    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.rules.v161)
     
     // Debug dependencies for Compose tooling
     debugImplementation(libs.androidx.ui.tooling)

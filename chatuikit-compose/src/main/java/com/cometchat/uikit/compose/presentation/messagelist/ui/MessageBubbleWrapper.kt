@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cometchat.uikit.core.constants.UIKitConstants
 
@@ -34,6 +35,8 @@ internal fun MessageBubbleWrapper(
     alignment: UIKitConstants.MessageBubbleAlignment,
     modifier: Modifier = Modifier,
     highlightColor: Color = Color.Transparent,
+    topPadding: Dp = 8.dp,
+    bottomPadding: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {
     when (alignment) {
@@ -42,7 +45,7 @@ internal fun MessageBubbleWrapper(
                 modifier = modifier
                     .fillMaxWidth()
                     .background(highlightColor)
-                    .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+                    .padding(start = 16.dp, top = topPadding, end = 16.dp, bottom = bottomPadding),
                 contentAlignment = Alignment.TopStart
             ) {
                 content()
@@ -53,7 +56,7 @@ internal fun MessageBubbleWrapper(
                 modifier = modifier
                     .fillMaxWidth()
                     .background(highlightColor)
-                    .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+                    .padding(start = 16.dp, top = topPadding, end = 16.dp, bottom = bottomPadding),
                 contentAlignment = Alignment.TopEnd
             ) {
                 Box(modifier = Modifier.padding(start = 50.dp)) {
@@ -66,7 +69,7 @@ internal fun MessageBubbleWrapper(
                 modifier = modifier
                     .fillMaxWidth()
                     .background(highlightColor)
-                    .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+                    .padding(start = 16.dp, top = topPadding, end = 16.dp, bottom = bottomPadding),
                 contentAlignment = Alignment.Center
             ) {
                 content()

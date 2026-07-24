@@ -337,6 +337,16 @@
                     </FrameLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/attachmentTrayRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/cometchat_padding_3"
+                    android:paddingVertical="@dimen/cometchat_padding_2"
+                    android:visibility="gone" />
+
                 <!-- Separator between input and toolbar -->
                 <View
                     android:id="@+id/toolbarInputSeparator"

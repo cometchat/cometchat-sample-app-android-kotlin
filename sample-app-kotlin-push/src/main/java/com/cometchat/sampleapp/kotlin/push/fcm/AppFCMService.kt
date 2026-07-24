@@ -3,6 +3,7 @@ package com.cometchat.sampleapp.kotlin.push.fcm
 import android.util.Log
 import com.cometchat.pushnotification.CometChatPushNotifications
 import com.cometchat.pushnotification.models.PushPlatform
+import com.cometchat.sampleapp.kotlin.push.shared.AppCredentials
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -15,7 +16,6 @@ class AppFCMService : FirebaseMessagingService() {
 
     companion object {
         private const val TAG = "AppFCMService"
-        const val PROVIDER_ID = "ashfaq-cometchat"
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -34,7 +34,7 @@ class AppFCMService : FirebaseMessagingService() {
         CometChatPushNotifications.handleTokenRefresh(
             PushPlatform.FCM_ANDROID,
             token,
-            PROVIDER_ID
+            AppCredentials.PROVIDER_ID
         )
     }
 

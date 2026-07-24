@@ -27,6 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.LocalEnableMultipleAttachments
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.batchId
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -427,6 +430,13 @@ fun CometChatMessageList(
     unreadMessageThreshold: Int = 30,
     disableSoundForMessages: Boolean = false,
     disableReceipt: Boolean = false,
+
+    /**
+     * When true (default), multi-attachment messages render as the new per-type bubbles
+     * (Images/Videos/Audios/VoiceNote/Files). When false, the deprecated single-attachment bubbles
+     * are used. See ENG-36737.
+     */
+    enableMultipleAttachments: Boolean = true,
     
     // Visibility controls
     hideLoadingState: Boolean = false,
@@ -1705,12 +1715,35 @@ fun CometChatMessageList(
                                     enabled = effectiveSwipeToReplyEnabled,
                                     onReply = { msg -> vm.onMessageReply(msg) }
                                 ) {
-                                    // MessageBubbleWrapper applies row-level spacing inside
+                                    // ENG-36737: group a multi-attachment batch by batchId list
+                                    // adjacency (iOS contract). Messages are chronological (older =
+                                    // index-1, above; newer = index+1, below). Avatar/name show on
+                                    // the first (oldest), time/receipt on the last (newest); tighten
+                                    // the gap between consecutive same-batch bubbles.
+                                    val curBatchId = message.batchId()
+                                    val isBatched = enableMultipleAttachments && curBatchId != null
+                                    val isFirstInBatch = !isBatched ||
+                                        messages.getOrNull(index - 1)?.batchId() != curBatchId
+                                    val isLastInBatch = !isBatched ||
+                                        messages.getOrNull(index + 1)?.batchId() != curBatchId
+                                    // Same-batch bubbles sit tight: the bubble's own Row already adds
+                                    // 4dp top+bottom (8dp between adjacent bubbles), so the wrapper
+                                    // adds 0 on shared batch edges. Distinct messages keep 8dp.
+                                    val batchTopPadding = if (isBatched && !isFirstInBatch) 0.dp else 8.dp
+                                    val batchBottomPadding = if (isBatched && !isLastInBatch) 0.dp else 8.dp
                                     MessageBubbleWrapper(
                                         alignment = bubbleAlignment,
-                                        highlightColor = messageHighlightColor
+                                        highlightColor = messageHighlightColor,
+                                        topPadding = batchTopPadding,
+                                        bottomPadding = batchBottomPadding
                                     ) {
+                                      CompositionLocalProvider(
+                                        LocalEnableMultipleAttachments provides enableMultipleAttachments
+                                      ) {
                                         MessageListItem(
+                                            isBatched = isBatched,
+                                            isFirstInBatch = isFirstInBatch,
+                                            isLastInBatch = isLastInBatch,
                                             message = message,
                                             loggedInUser = loggedInUser,
                                             style = style,
@@ -1762,6 +1795,7 @@ fun CometChatMessageList(
                                             highlightAlpha = 0f,
                                             textFormatters = effectiveTextFormatters
                                         )
+                                      }
                                     }
                                 }
                             }

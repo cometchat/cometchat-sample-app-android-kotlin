@@ -160,7 +160,7 @@ class PreviewRefreshUseCase(
     private val conversations: List<Conversation> = PreviewMockData.createSampleConversations()
 ) : RefreshConversationListUseCase(PreviewNoOpRepository()) {
     override suspend operator fun invoke(
-        requestBuilder: ConversationsRequest.ConversationsRequestBuilder
+        request: ConversationsRequest
     ): Result<List<Conversation>> {
         return Result.success(conversations)
     }
@@ -171,9 +171,9 @@ class PreviewRefreshUseCase(
  */
 class PreviewRefreshWithNewDataUseCase : RefreshConversationListUseCase(PreviewNoOpRepository()) {
     private var refreshCount = 0
-    
+
     override suspend operator fun invoke(
-        requestBuilder: ConversationsRequest.ConversationsRequestBuilder
+        request: ConversationsRequest
     ): Result<List<Conversation>> {
         refreshCount++
         // Return different data on each refresh to simulate real updates

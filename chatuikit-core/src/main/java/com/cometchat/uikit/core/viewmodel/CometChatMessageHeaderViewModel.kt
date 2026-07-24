@@ -16,6 +16,7 @@ import com.cometchat.uikit.core.events.CometChatEvents
 import com.cometchat.uikit.core.events.CometChatGroupEvent
 import com.cometchat.uikit.core.events.CometChatUserEvent
 import com.cometchat.uikit.core.state.MessageHeaderUIState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -136,7 +137,12 @@ open class CometChatMessageHeaderViewModel(
                     setUser(user)
                 }
                 .onFailure { e ->
-                    _errorEvent.emit(e as CometChatException)
+                    // Cancellation (e.g. navigating away mid-fetch) is not an error
+                    if (e is CancellationException) throw e
+                    _errorEvent.emit(
+                        e as? CometChatException
+                            ?: CometChatException("UNKNOWN_ERROR", e.message ?: "Unknown error occurred")
+                    )
                 }
         }
     }
@@ -154,7 +160,12 @@ open class CometChatMessageHeaderViewModel(
                     setGroup(group)
                 }
                 .onFailure { e ->
-                    _errorEvent.emit(e as CometChatException)
+                    // Cancellation (e.g. navigating away mid-fetch) is not an error
+                    if (e is CancellationException) throw e
+                    _errorEvent.emit(
+                        e as? CometChatException
+                            ?: CometChatException("UNKNOWN_ERROR", e.message ?: "Unknown error occurred")
+                    )
                 }
         }
     }

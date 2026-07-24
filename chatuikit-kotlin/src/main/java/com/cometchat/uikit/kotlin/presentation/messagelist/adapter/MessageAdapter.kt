@@ -224,6 +224,24 @@ class MessageAdapter @JvmOverloads constructor(
      */
     private var messages: MutableList<BaseMessage> = mutableListOf()
 
+    /**
+     * ENG-36737: when true, multi-attachment messages split into per-type bubbles that share a
+     * `batchId` are grouped in the list (avatar/name on the first, time/receipt on the last).
+     */
+    private var enableMultipleAttachments: Boolean = true
+
+    /** Sets the multi-attachment grouping flag and refreshes the list. */
+    fun setEnableMultipleAttachments(enabled: Boolean) {
+        if (enableMultipleAttachments != enabled) {
+            enableMultipleAttachments = enabled
+            notifyDataSetChanged()
+        }
+    }
+
+    /** The batchId a message belongs to (from metadata), or null when it is not part of a batch. */
+    private fun batchIdOf(message: BaseMessage?): String? =
+        message?.metadata?.optString(UIKitConstants.JSONKeys.BATCH_ID, null)?.takeIf { it.isNotEmpty() }
+
     // ========================================
     // BubbleFactory Management
     // ========================================
@@ -921,8 +939,53 @@ class MessageAdapter @JvmOverloads constructor(
                 messageBubble.setOnMessagePreviewClickListener(null)
             }
 
+            // ENG-36737: choose new per-type vs deprecated single content bubbles (before bindViews
+            // creates the content view).
+            messageBubble.setEnableMultipleAttachments(enableMultipleAttachments)
+
+            // ENG-36737 batch grouping (by batchId list adjacency; messages are chronological, so
+            // position-1 is older/above = first-of-batch boundary, position+1 is newer/below = last).
+            val curBatchId = batchIdOf(message)
+            val isBatched = enableMultipleAttachments && curBatchId != null
+            val isFirstInBatch = !isBatched || batchIdOf(messages.getOrNull(position - 1)) != curBatchId
+            val isLastInBatch = !isBatched || batchIdOf(messages.getOrNull(position + 1)) != curBatchId
+            val groupAvatar = alignment == UIKitConstants.MessageBubbleAlignment.LEFT &&
+                message.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP
+            // Avatar column is kept on every batch message (INVISIBLE reserves its width so bubbles
+            // align) but only painted on the first. Reset to VISIBLE otherwise (recycling-safe).
+            messageBubble.setAvatarVisibility(
+                if (isBatched && groupAvatar && !isFirstInBatch) View.INVISIBLE else View.VISIBLE
+            )
+
+            // ENG-36737: row edges match Compose, where the wrapper adds 8dp (0 on shared batch
+            // edges) and the bubble Row itself always adds 4dp vertical padding: 4dp on shared
+            // batch edges (8dp gap between batched bubbles), 12dp otherwise (24dp between
+            // separate messages). Rows recycle, so both branches always write the value back.
+            if (alignment != UIKitConstants.MessageBubbleAlignment.CENTER) {
+                val density = itemView.resources.displayMetrics.density
+                val defaultEdge = (12 * density).toInt()
+                val batchEdge = (4 * density).toInt()
+                itemView.setPadding(
+                    itemView.paddingLeft,
+                    if (isBatched && !isFirstInBatch) batchEdge else defaultEdge,
+                    itemView.paddingRight,
+                    if (isBatched && !isLastInBatch) batchEdge else defaultEdge
+                )
+            }
+
             // Bubble handles all slot binding internally based on alignment
             messageBubble.bindViews(message, alignment, this, position)
+
+            // bindViews resets header/status each pass, so apply the batch overrides after it:
+            // avatar + sender name only on the first, time/receipt only on the last of a batch.
+            if (isBatched) {
+                if (groupAvatar && !isFirstInBatch) {
+                    messageBubble.setHeaderViewVisibility(View.GONE)
+                }
+                if (!isLastInBatch) {
+                    messageBubble.setStatusInfoViewVisibility(View.GONE)
+                }
+            }
 
             // Bind reaction callbacks to the footer view after bindViews has created it
             if (!disableReactions) {
@@ -964,7 +1027,15 @@ class MessageAdapter @JvmOverloads constructor(
             if (alignment == UIKitConstants.MessageBubbleAlignment.LEFT) {
                 val shouldShowAvatarForMessage = shouldShowAvatarForMessage(message)
                 messageBubble.setAvatarVisibility(
-                    if (shouldShowAvatarForMessage) View.VISIBLE else View.GONE
+                    when {
+                        !shouldShowAvatarForMessage -> View.GONE
+                        // ENG-36737: within a batch the avatar paints only on the first message —
+                        // the slot stays INVISIBLE on the rest so all bubbles keep the same inset.
+                        // This is the LAST avatar write of the bind pass; without the batch case it
+                        // repaints the avatar on every batch bubble.
+                        isBatched && !isFirstInBatch -> View.INVISIBLE
+                        else -> View.VISIBLE
+                    }
                 )
             } else {
                 // Hide avatar for right-aligned and center-aligned messages
@@ -1069,7 +1140,7 @@ class MessageAdapter @JvmOverloads constructor(
      *
      * The row has:
      * - Gravity.START for left alignment
-     * - Padding: 4dp start, 8dp vertical, 16dp end (matching Java reference)
+     * - Padding: 4dp start, 12dp vertical, 16dp end (matching Compose wrapper 8dp + bubble Row 4dp)
      * - Message bubble with MATCH_PARENT width
      * - Configurable left bubble margins applied
      *
@@ -1078,7 +1149,7 @@ class MessageAdapter @JvmOverloads constructor(
      */
     private fun createLeftAlignedRow(context: Context): Pair<LinearLayout, CometChatMessageBubble> {
         val padding4 = context.resources.getDimensionPixelSize(R.dimen.cometchat_4dp)
-        val padding8 = context.resources.getDimensionPixelSize(R.dimen.cometchat_8dp)
+        val padding12 = context.resources.getDimensionPixelSize(R.dimen.cometchat_12dp)
         val padding16 = context.resources.getDimensionPixelSize(R.dimen.cometchat_16dp)
 
         val rowParent = LinearLayout(context).apply {
@@ -1088,7 +1159,7 @@ class MessageAdapter @JvmOverloads constructor(
                 RecyclerView.LayoutParams.WRAP_CONTENT
             )
             gravity = Gravity.START
-            setPadding(padding4, padding8, padding16, padding8)  // Match Java: 4dp, 8dp, 16dp, 8dp
+            setPadding(padding4, padding12, padding16, padding12)  // Match Compose: 4dp, 12dp, 16dp, 12dp
         }
 
         val messageBubble = CometChatMessageBubble(context).apply {
@@ -1110,7 +1181,7 @@ class MessageAdapter @JvmOverloads constructor(
      *
      * The row has:
      * - Gravity.END for right alignment
-     * - Padding: 4dp start, 8dp vertical, 4dp end (matching Java reference)
+     * - Padding: 4dp start, 12dp vertical, 4dp end (matching Compose wrapper 8dp + bubble Row 4dp)
      * - Message bubble with MATCH_PARENT width and 50dp marginStart
      * - Configurable right bubble margins applied
      *
@@ -1119,7 +1190,7 @@ class MessageAdapter @JvmOverloads constructor(
      */
     private fun createRightAlignedRow(context: Context): Pair<LinearLayout, CometChatMessageBubble> {
         val padding4 = context.resources.getDimensionPixelSize(R.dimen.cometchat_4dp)
-        val padding8 = context.resources.getDimensionPixelSize(R.dimen.cometchat_8dp)
+        val padding12 = context.resources.getDimensionPixelSize(R.dimen.cometchat_12dp)
         val margin50 = context.resources.getDimensionPixelSize(R.dimen.cometchat_50dp)
 
         val rowParent = LinearLayout(context).apply {
@@ -1129,7 +1200,7 @@ class MessageAdapter @JvmOverloads constructor(
                 RecyclerView.LayoutParams.WRAP_CONTENT
             )
             gravity = Gravity.END
-            setPadding(padding4, padding8, padding4, padding8)  // Match Java: 4dp, 8dp, 4dp, 8dp
+            setPadding(padding4, padding12, padding4, padding12)  // Match Compose: 4dp, 12dp, 4dp, 12dp
         }
 
         val messageBubble = CometChatMessageBubble(context).apply {
@@ -1211,7 +1282,7 @@ class MessageAdapter @JvmOverloads constructor(
         factory: BubbleFactory?
     ): Pair<LinearLayout, CometChatMessageBubble> {
         val padding4 = context.resources.getDimensionPixelSize(R.dimen.cometchat_4dp)
-        val padding8 = context.resources.getDimensionPixelSize(R.dimen.cometchat_8dp)
+        val padding12 = context.resources.getDimensionPixelSize(R.dimen.cometchat_12dp)
         val padding16 = context.resources.getDimensionPixelSize(R.dimen.cometchat_16dp)
         val margin50 = context.resources.getDimensionPixelSize(R.dimen.cometchat_50dp)
         val margin16 = context.resources.getDimensionPixelSize(R.dimen.cometchat_16dp)
@@ -1226,11 +1297,11 @@ class MessageAdapter @JvmOverloads constructor(
             when (alignment) {
                 UIKitConstants.MessageBubbleAlignment.LEFT -> {
                     gravity = Gravity.START
-                    setPadding(padding4, padding8, padding16, padding8)  // Match Java: 4dp, 8dp, 16dp, 8dp
+                    setPadding(padding4, padding12, padding16, padding12)  // Match Compose: 4dp, 12dp, 16dp, 12dp
                 }
                 UIKitConstants.MessageBubbleAlignment.RIGHT -> {
                     gravity = Gravity.END
-                    setPadding(padding4, padding8, padding4, padding8)   // Match Java: 4dp, 8dp, 4dp, 8dp
+                    setPadding(padding4, padding12, padding4, padding12)   // Match Compose: 4dp, 12dp, 4dp, 12dp
                 }
                 UIKitConstants.MessageBubbleAlignment.CENTER -> {
                     gravity = Gravity.CENTER
@@ -1268,6 +1339,10 @@ class MessageAdapter @JvmOverloads constructor(
             }
             // Set factory FIRST (before createViews) - this is the key fix!
             setBubbleFactory(factory)
+            // ENG-36737: the flag decides new-vs-deprecated content bubbles inside createViews,
+            // so it must be set before them too (bind-time is too late — the content view is
+            // cached per factory key).
+            setEnableMultipleAttachments(enableMultipleAttachments)
             // Set alignment (inflates layout)
             setMessageAlignment(alignment)
             // NOW create views - factory is available

@@ -21,7 +21,8 @@ import com.cometchat.uikit.core.domain.model.CometChatMessageOption
  * Business Rules:
  * - REPLY_IN_THREAD: Only if not already in a thread view and message has no parent
  * - MARK_AS_UNREAD: Only if not my message and not in thread view
- * - MESSAGE_INFORMATION, EDIT: Only if my message
+ * - MESSAGE_INFORMATION: Only if my message
+ * - EDIT: Only if my message; for media messages only when a caption is present
  * - DELETE: If my message OR group admin/moderator
  * - REPORT: Only if not my message
  * - MESSAGE_PRIVATELY: Only if in group and not my message
@@ -53,6 +54,7 @@ object MessageOptionsUtils {
             UIKitConstants.MessageOption.REPLY_IN_THREAD,
             UIKitConstants.MessageOption.REPLY,
             UIKitConstants.MessageOption.SHARE,
+            UIKitConstants.MessageOption.EDIT,
             UIKitConstants.MessageOption.REPORT,
             UIKitConstants.MessageOption.DELETE,
             UIKitConstants.MessageOption.MESSAGE_PRIVATELY
@@ -63,6 +65,7 @@ object MessageOptionsUtils {
             UIKitConstants.MessageOption.REPLY_IN_THREAD,
             UIKitConstants.MessageOption.REPLY,
             UIKitConstants.MessageOption.SHARE,
+            UIKitConstants.MessageOption.EDIT,
             UIKitConstants.MessageOption.REPORT,
             UIKitConstants.MessageOption.DELETE,
             UIKitConstants.MessageOption.MESSAGE_PRIVATELY
@@ -73,6 +76,7 @@ object MessageOptionsUtils {
             UIKitConstants.MessageOption.REPLY_IN_THREAD,
             UIKitConstants.MessageOption.REPLY,
             UIKitConstants.MessageOption.SHARE,
+            UIKitConstants.MessageOption.EDIT,
             UIKitConstants.MessageOption.REPORT,
             UIKitConstants.MessageOption.DELETE,
             UIKitConstants.MessageOption.MESSAGE_PRIVATELY
@@ -83,6 +87,7 @@ object MessageOptionsUtils {
             UIKitConstants.MessageOption.REPLY_IN_THREAD,
             UIKitConstants.MessageOption.REPLY,
             UIKitConstants.MessageOption.SHARE,
+            UIKitConstants.MessageOption.EDIT,
             UIKitConstants.MessageOption.REPORT,
             UIKitConstants.MessageOption.DELETE,
             UIKitConstants.MessageOption.MESSAGE_PRIVATELY
@@ -246,7 +251,12 @@ object MessageOptionsUtils {
                 else messageInfo(context)
             }
             UIKitConstants.MessageOption.EDIT -> {
-                if (!isMyMessage) null
+                // Media messages are only editable when there is caption text to edit.
+                val hasEditableContent = when (message) {
+                    is com.cometchat.chat.models.MediaMessage -> !message.caption.isNullOrEmpty()
+                    else -> true
+                }
+                if (!isMyMessage || !hasEditableContent) null
                 else edit(context)
             }
             UIKitConstants.MessageOption.DELETE -> {

@@ -28,7 +28,10 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.cometchat.chat.models.Attachment
 import com.cometchat.chat.models.MediaMessage
+import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.R
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
+import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.interfaces.OnClick
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -71,12 +74,21 @@ class CometChatImageBubble @JvmOverloads constructor(
     private lateinit var singleProgressBar: ProgressBar
     private lateinit var captionTextView: TextView
 
+    // Block-level caption sibling of [captionTextView]: markdown captions (fenced code blocks,
+    // blockquotes, lists) render as their own child views, as in the text bubble, instead of being
+    // flattened into one TextView. The legacy `setCaption(SpannableString?)` path keeps using
+    // [captionTextView]; only one of the two is ever visible.
+    private lateinit var captionBlockContainer: LinearLayout
+
     // Programmatic views for grid layout (not in XML)
     private lateinit var gridContainer: FrameLayout
     private lateinit var gridLayout: GridLayout
 
     // State
     private var mediaMessage: MediaMessage? = null
+
+    private var textFormatters: List<CometChatTextFormatter> = emptyList()
+    private var messageAlignment = UIKitConstants.MessageBubbleAlignment.LEFT
     private var attachments: List<Attachment> = emptyList()
     private var onClick: OnClick? = null
     private var onImageClick: ((Int, Attachment) -> Unit)? = null
@@ -109,7 +121,21 @@ class CometChatImageBubble @JvmOverloads constructor(
         singleImageView = findViewById(R.id.image)
         singleProgressBar = findViewById(R.id.loader_icon)
         captionTextView = findViewById(R.id.caption)
-        
+
+        // Sibling block-caption container, inserted right after the XML caption TextView so it
+        // occupies the same slot in the parent. Matches the caption's 8dp margin so switching
+        // between the flat and block paths does not shift layout.
+        captionBlockContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            val margin = Utils.convertDpToPx(context, 8)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(margin, margin, margin, margin) }
+        }
+        parentLayout.addView(captionBlockContainer, parentLayout.indexOfChild(captionTextView) + 1)
+
         // Create grid container for multiple images (programmatic, not in XML)
         gridContainer = FrameLayout(context).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -711,21 +737,54 @@ class CometChatImageBubble @JvmOverloads constructor(
     // ========================================
 
     /**
-     * Sets the caption text for the image bubble.
+     * Sets the caption text for the image bubble. Captions travel as markdown and carry mention
+     * tokens, so they go through the same formatter + markdown pipeline as a text message and render
+     * as block-level views (fenced code blocks, blockquotes, lists) into [captionBlockContainer] via
+     * [MultiAttachmentUtils.renderCaptionInto] rather than being flattened into one TextView.
      */
     fun setCaption(caption: String?) {
         if (!caption.isNullOrEmpty()) {
-            captionTextView.visibility = View.VISIBLE
-            captionTextView.text = caption
+            captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.VISIBLE
+            val appearance = style?.captionTextAppearance ?: 0
+            MultiAttachmentUtils.renderCaptionInto(
+                captionBlockContainer,
+                caption,
+                mediaMessage,
+                textFormatters,
+                messageAlignment,
+                captionTextColor = style?.captionTextColor ?: 0,
+                captionTextAppearance = appearance,
+                // The style's text appearance owns the size when one is set.
+                textSizeSp = if (appearance != 0) 0f else MultiAttachmentUtils.CAPTION_TEXT_SIZE_SP
+            )
         } else {
             captionTextView.visibility = View.GONE
+            captionBlockContainer.visibility = View.GONE
+            captionBlockContainer.removeAllViews()
         }
     }
 
     /**
-     * Sets the caption text using a SpannableString.
+     * Formatters applied to the caption, exactly as the text bubble applies them to its text (so a
+     * mention resolves to a display name instead of a raw `<@uid:...>` token). Call before
+     * [setCaption].
+     */
+    fun setTextFormatters(
+        formatters: List<CometChatTextFormatter>?,
+        alignment: UIKitConstants.MessageBubbleAlignment
+    ) {
+        textFormatters = formatters ?: emptyList()
+        messageAlignment = alignment
+    }
+
+    /**
+     * Sets the caption text using a SpannableString. This legacy path renders into the flat
+     * [captionTextView]; the block-caption container is hidden and cleared so the two never overlap.
      */
     fun setCaption(caption: SpannableString?) {
+        captionBlockContainer.visibility = View.GONE
+        captionBlockContainer.removeAllViews()
         if (caption != null) {
             captionTextView.visibility = View.VISIBLE
             captionTextView.text = caption

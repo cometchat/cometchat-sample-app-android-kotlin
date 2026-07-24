@@ -48,11 +48,12 @@ interface MessageComposerDataSource {
     suspend fun sendCustomMessage(message: CustomMessage): CustomMessage
     
     /**
-     * Edits an existing text message.
-     * 
-     * @param message The TextMessage object with updated text content and the original message ID
+     * Edits an existing message.
+     *
+     * @param message The message with updated content (text for TextMessage, caption for
+     *                MediaMessage) and the original message ID
      * @return The edited BaseMessage with updated metadata
      * @throws com.cometchat.chat.exceptions.CometChatException if editing fails
      */
-    suspend fun editMessage(message: TextMessage): BaseMessage
+    suspend fun editMessage(message: BaseMessage): BaseMessage
 }

@@ -69,6 +69,9 @@
     <string name="cometchat_updating" translatable="true">Updating</string>
     <string name="cometchat_chats" translatable="true">Chats</string>
     <string name="cometchat_downloading" translatable="true">Downloading</string>
+    <string name="cometchat_download" translatable="true">Download</string>
+    <string name="cometchat_no_preview_available" translatable="true">No preview available</string>
+    <string name="cometchat_no_preview_subtitle" translatable="true">This file type isn\'t supported for preview.</string>
     <string name="cometchat_today" translatable="true">Today</string>
     <string name="cometchat_replies" translatable="true">Replies</string>
     <string name="cometchat_new_message" translatable="true">new message</string>
@@ -270,6 +273,10 @@
     <string name="cometchat_audio" translatable="true">Audio</string>
     <string name="cometchat_documents" translatable="true">Documents</string>
     <string name="cometchat_links" translatable="true">Links</string>
+    <string name="cometchat_n_images" translatable="true">%1$d Images</string>
+    <string name="cometchat_n_videos" translatable="true">%1$d Videos</string>
+    <string name="cometchat_n_audio" translatable="true">%1$d Audio</string>
+    <string name="cometchat_n_files" translatable="true">%1$d Files</string>
     <string name="cometchat_details" translatable="true">Details</string>
     <string name="cometchat_search_in" translatable="true">Search in</string>
     <string name="cometchat_report">Report</string>
@@ -316,6 +323,13 @@
     <!-- Message Composer strings -->
     <string name="cometchat_type_a_message" translatable="true">Type your message…</string>
     <string name="cometchat_attachment" translatable="true">Attachment</string>
+    <string name="cometchat_attachment_upload_failed" translatable="true">Upload failed</string>
+    <string name="cometchat_attachment_tap_to_retry" translatable="true">Tap to retry</string>
+    <string name="cometchat_attachment_remaining_slots" translatable="true" formatted="true">You can select up to %1$d more files</string>
+    <string name="cometchat_attachment_count_exceeded" translatable="true" formatted="true">You can attach up to %1$d files</string>
+    <string name="cometchat_show_n_more" translatable="true" formatted="true">Show +%1$d more</string>
+    <string name="cometchat_n_more" translatable="true" formatted="true">+%1$d more</string>
+    <string name="cometchat_show_less" translatable="true">Show less</string>
     <string name="cometchat_voice_recording" translatable="true">Voice Recording</string>
     <string name="cometchat_sticker" translatable="true">Sticker</string>
     <string name="cometchat_ai" translatable="true">AI</string>

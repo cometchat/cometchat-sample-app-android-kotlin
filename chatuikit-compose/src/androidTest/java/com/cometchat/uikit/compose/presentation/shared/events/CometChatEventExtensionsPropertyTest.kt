@@ -51,6 +51,31 @@ class CometChatEventExtensionsPropertyTest {
     }
 
     /**
+     * Invokes [emit] repeatedly until [latch] reaches zero or the timeout elapses, returning true
+     * if the latch was fully counted down.
+     *
+     * ViewModel/LifecycleOwner subscriptions launch on [Dispatchers.Main.immediate] from the test
+     * thread, so the collector registers asynchronously on the main looper. Because the event
+     * SharedFlows use replay = 0, an event emitted before the collector has registered is silently
+     * dropped. A fixed pre-emit delay (or polling the global subscriptionCount, which is polluted by
+     * subscribers leaking across tests) is racy; re-emitting until the collector actually reports
+     * receipt is deterministic. Callers MUST make their countDown idempotent (e.g. guard with
+     * compareAndSet) because [emit] may fire more than once.
+     */
+    private fun emitUntilReceived(
+        latch: CountDownLatch,
+        timeoutMs: Long = 2000,
+        emit: () -> Unit
+    ): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (latch.count > 0L && System.currentTimeMillis() < deadline) {
+            emit()
+            latch.await(50, TimeUnit.MILLISECONDS)
+        }
+        return latch.count == 0L
+    }
+
+    /**
      * Property 5: LifecycleOwner Subscription Management
      *
      * For any LifecycleOwner using event extensions, reaching the start lifecycle event
@@ -367,20 +392,19 @@ class CometChatEventExtensionsPropertyTest {
         val eventReceived = AtomicBoolean(false)
         val latch = CountDownLatch(1)
 
-        // Subscribe to events via ViewModel
+        // Subscribe to events via ViewModel. Guard countDown with compareAndSet so re-emitting is
+        // idempotent (see emitUntilReceived).
         testViewModel.onMessageEvents { event ->
-            if (event is CometChatMessageEvent.LiveReaction) {
-                eventReceived.set(true)
+            if (event is CometChatMessageEvent.LiveReaction && eventReceived.compareAndSet(false, true)) {
                 latch.countDown()
             }
         }
 
-        runBlocking { delay(100) }
-
-        // Emit an event
-        CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(12345))
-
-        val received = latch.await(2, TimeUnit.SECONDS)
+        // Re-emit until the collector has registered and received (replay = 0 drops events
+        // delivered before subscription).
+        val received = emitUntilReceived(latch) {
+            CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(12345))
+        }
 
         assert(received && eventReceived.get()) {
             "ViewModel should receive events while active"
@@ -404,11 +428,14 @@ class CometChatEventExtensionsPropertyTest {
             }
         }
 
-        runBlocking { delay(100) }
-
-        // Emit first event
-        CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(1))
-        firstEventLatch.await(2, TimeUnit.SECONDS)
+        // Re-emit until the collector has registered and received (replay = 0 drops events
+        // delivered before subscription).
+        emitUntilReceived(firstEventLatch) {
+            CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(1))
+        }
+        // Let any buffered re-emits drain before snapshotting the count, so the post-cancel
+        // comparison is against a stable value.
+        runBlocking { delay(200) }
 
         val countAfterFirstEvent = eventsReceived.get()
         assert(countAfterFirstEvent >= 1) { "Should receive event while ViewModel is active" }
@@ -442,12 +469,11 @@ class CometChatEventExtensionsPropertyTest {
             latch.countDown()
         }
 
-        runBlocking { delay(100) }
-
-        // Emit an event
-        CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(999))
-
-        latch.await(2, TimeUnit.SECONDS)
+        // Re-emit until the collector has registered and received (replay = 0 drops events
+        // delivered before subscription).
+        emitUntilReceived(latch) {
+            CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(999))
+        }
 
         assert(isMainThread.get()) {
             "ViewModel callback should execute on main thread"
@@ -464,28 +490,26 @@ class CometChatEventExtensionsPropertyTest {
         val uiReceived = AtomicBoolean(false)
         val latch = CountDownLatch(2)
 
-        // Subscribe to multiple event types
+        // Subscribe to multiple event types. Guard countDown with compareAndSet so re-emitting is
+        // idempotent (see emitUntilReceived).
         testViewModel.onMessageEvents { event ->
-            if (event is CometChatMessageEvent.LiveReaction) {
-                messageReceived.set(true)
+            if (event is CometChatMessageEvent.LiveReaction && messageReceived.compareAndSet(false, true)) {
                 latch.countDown()
             }
         }
 
         testViewModel.onUIEvents { event ->
-            if (event is CometChatUIEvent.ComposeMessage) {
-                uiReceived.set(true)
+            if (event is CometChatUIEvent.ComposeMessage && uiReceived.compareAndSet(false, true)) {
                 latch.countDown()
             }
         }
 
-        runBlocking { delay(100) }
-
-        // Emit events
-        CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(1))
-        CometChatEvents.emitUIEvent(CometChatUIEvent.ComposeMessage("test", "text"))
-
-        latch.await(2, TimeUnit.SECONDS)
+        // Re-emit until both collectors have registered and received (replay = 0 drops events
+        // delivered before subscription).
+        emitUntilReceived(latch) {
+            CometChatEvents.emitMessageEvent(CometChatMessageEvent.LiveReaction(1))
+            CometChatEvents.emitUIEvent(CometChatUIEvent.ComposeMessage("test", "text"))
+        }
 
         assert(messageReceived.get()) { "Should receive message events" }
         assert(uiReceived.get()) { "Should receive UI events" }

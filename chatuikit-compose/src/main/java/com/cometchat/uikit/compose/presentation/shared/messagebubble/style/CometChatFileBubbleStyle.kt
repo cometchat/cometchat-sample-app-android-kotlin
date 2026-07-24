@@ -145,8 +145,9 @@ data class CometChatFileBubbleStyle(
             subtitleTextColor: Color = CometChatTheme.colorScheme.textColorSecondary,
             subtitleTextStyle: TextStyle = CometChatTheme.typography.caption2Regular,
             fileIconBackgroundColor: Color = Color.White,
-            fileIconCornerRadius: Dp = 4.dp,
-            fileIconSize: Dp = 32.dp,
+            // DS spec: 40dp white rounded (r12) plate with a ~26dp file-type glyph.
+            fileIconCornerRadius: Dp = 12.dp,
+            fileIconSize: Dp = 40.dp,
             downloadIconTint: Color = CometChatTheme.colorScheme.iconTintSecondary,
             downloadAllButtonBackgroundColor: Color = CometChatTheme.colorScheme.primary,
             downloadAllButtonTextColor: Color = CometChatTheme.colorScheme.textColorPrimary,

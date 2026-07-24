@@ -13,24 +13,27 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.cometchat.uikit.compose.presentation.imageviewer.style.CometChatImageViewerStyle
 
 /**
- * Toolbar overlay for the image viewer with back and share actions.
+ * Toolbar overlay for the image viewer with back, download and share actions.
  *
  * Animates in/out vertically based on [isVisible]. Renders a semi-transparent
- * row at the top of the screen with back navigation (left) and share (right) buttons.
+ * row at the top of the screen with back navigation (left) and download + share
+ * actions (right). The download button is shown by default and uses the download
+ * glyph unless overridden via [CometChatImageViewerStyle.downloadIcon].
  *
  * @param isVisible Whether the toolbar is visible (animates slide in/out)
- * @param style Style configuration for colors
+ * @param style Style configuration for colors and icons
  * @param onBackClick Callback when the back button is pressed
+ * @param onDownloadClick Callback when the download button is pressed
  * @param onShareClick Callback when the share button is pressed
  */
 @Composable
@@ -38,6 +41,7 @@ internal fun ToolbarOverlay(
     isVisible: Boolean,
     style: CometChatImageViewerStyle,
     onBackClick: () -> Unit,
+    onDownloadClick: () -> Unit,
     onShareClick: () -> Unit
 ) {
     AnimatedVisibility(
@@ -61,9 +65,16 @@ internal fun ToolbarOverlay(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onDownloadClick) {
+                Icon(
+                    painter = painterResource(style.downloadIcon),
+                    contentDescription = "Download",
+                    tint = style.iconTintColor
+                )
+            }
             IconButton(onClick = onShareClick) {
                 Icon(
-                    imageVector = Icons.Filled.Share,
+                    painter = painterResource(style.shareIcon),
                     contentDescription = "Share",
                     tint = style.iconTintColor
                 )

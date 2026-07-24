@@ -14,6 +14,8 @@ import android.os.Parcelable
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import com.cometchat.uikit.kotlin.R
 import java.io.File
@@ -87,8 +89,78 @@ object MediaUtils {
     }
     
     /**
+     * Creates a capped visual-media picker intent — the Views counterpart of the Compose UIKit's
+     * `MediaSelectionUtils` contract, built from the same AndroidX
+     * [ActivityResultContracts.PickMultipleVisualMedia] so both UIKits behave identically: the
+     * system photo picker physically limits the selection to [remaining] items, with AndroidX's
+     * own fallbacks on devices without the photo picker.
+     *
+     * The contract requires a cap > 1 and the picker rejects values above the system limit, so a
+     * remaining count of 1 still opens with limit 2 — the caller's staging guard trims the extra.
+     *
+     * @param context Context used to build the intent.
+     * @param mimeType `image/…` for the image picker, `video/…` for the video picker.
+     * @param remaining Selection cap — typically the tray's remaining attachment slots.
+     */
+    @JvmStatic
+    fun openVisualMediaPicker(context: Context, mimeType: String, remaining: Int): Intent {
+        val systemMax = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            MediaStore.getPickImagesMaxLimit()
+        } else {
+            Int.MAX_VALUE
+        }
+        val mediaType = if (mimeType.startsWith("video")) {
+            ActivityResultContracts.PickVisualMedia.VideoOnly
+        } else {
+            ActivityResultContracts.PickVisualMedia.ImageOnly
+        }
+        return ActivityResultContracts.PickMultipleVisualMedia(remaining.coerceIn(2, systemMax))
+            .createIntent(context, PickVisualMediaRequest(mediaType))
+    }
+
+    /**
+     * Image picker for the composer: multi-attachment mode opens the capped visual-media picker
+     * ([openVisualMediaPicker], selection limited to [maxSelection]); otherwise the legacy
+     * single-pick gallery intent.
+     */
+    @JvmStatic
+    fun openImagePicker(context: Context, allowMultiple: Boolean, maxSelection: Int): Intent =
+        if (allowMultiple) openVisualMediaPicker(context, "image/*", maxSelection)
+        else openImagePicker()
+
+    /**
+     * Video picker for the composer: multi-attachment mode opens the capped visual-media picker
+     * ([openVisualMediaPicker], selection limited to [maxSelection]); otherwise the legacy
+     * single-pick intent.
+     */
+    @JvmStatic
+    fun openVideoPicker(context: Context, allowMultiple: Boolean, maxSelection: Int): Intent =
+        if (allowMultiple) openVisualMediaPicker(context, "video/*", maxSelection)
+        else openVideoPicker()
+
+    /**
+     * Audio picker for the composer. The documents/audio picker UI can't be capped, so
+     * [allowMultiple] only toggles multi-select — the caller's staging guard trims any
+     * over-selection. The flag must ride the underlying ACTION_GET_CONTENT intent(s), not the
+     * chooser wrapper (the chooser ignores extras that aren't its own).
+     */
+    @JvmStatic
+    fun openAudioPicker(context: Context, allowMultiple: Boolean): Intent =
+        buildAudioPicker(context, allowMultiple)
+
+    /**
+     * File picker for the composer. The documents picker UI can't be capped, so [allowMultiple]
+     * only toggles multi-select — the caller's staging guard trims any over-selection.
+     */
+    @JvmStatic
+    fun openFilePicker(allowMultiple: Boolean): Intent =
+        openFilePicker().apply {
+            if (allowMultiple) putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+
+    /**
      * Creates an intent to open the image picker/gallery.
-     * 
+     *
      * @return Intent configured to pick images
      */
     @JvmStatic
@@ -119,14 +191,18 @@ object MediaUtils {
      * @return Intent configured to pick audio files
      */
     @JvmStatic
-    fun openAudioPicker(context: Context): Intent {
+    fun openAudioPicker(context: Context): Intent = buildAudioPicker(context, allowMultiple = false)
+
+    private fun buildAudioPicker(context: Context, allowMultiple: Boolean): Intent {
         val allIntents = mutableListOf<Intent>()
         val packageManager = context.packageManager
-        
+
+        // The per-app clones below copy this intent, so the multi-select extra rides along.
         val audioIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "audio/*"
+            if (allowMultiple) putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         }
-        
+
         val listGallery = packageManager.queryIntentActivities(audioIntent, 0)
         for (res in listGallery) {
             val intent = Intent(audioIntent).apply {

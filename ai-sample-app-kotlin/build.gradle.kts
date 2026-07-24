@@ -12,7 +12,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "6.0"
+        versionName = "6.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // DrawerLayout for the chat history drawer
-    implementation(libs.androidx.drawerlayout)
+    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
 
     // Gson for JSON serialization
     implementation(libs.gson)

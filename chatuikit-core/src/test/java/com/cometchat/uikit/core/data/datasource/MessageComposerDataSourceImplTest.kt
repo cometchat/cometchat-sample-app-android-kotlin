@@ -51,7 +51,7 @@ class MessageComposerDataSourceImplTest : FunSpec({
             return customMessageResult.getOrThrow()
         }
 
-        override suspend fun editMessage(message: TextMessage): BaseMessage {
+        override suspend fun editMessage(message: BaseMessage): BaseMessage {
             return editMessageResult.getOrThrow()
         }
     }

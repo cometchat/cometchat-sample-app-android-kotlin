@@ -252,6 +252,11 @@ class CometChatMessageList @JvmOverloads constructor(
     private var group: Group? = null
     private var parentMessageId: Long = -1
     private var goToMessageId: Long = 0
+
+    // True while a goToMessage window fetch is in flight. handleMessagesUpdate must
+    // not auto-scroll to the bottom for that list replacement — the posted
+    // scrollToLastItem would run after scrollToMessage() and override the anchor scroll.
+    private var isGoToMessagePending: Boolean = false
     private var messagesRequestBuilder: MessagesRequest.MessagesRequestBuilder? = null
     private var messagesTypes: List<String>? = null
     private var messagesCategories: List<String>? = null
@@ -1066,7 +1071,11 @@ class CometChatMessageList @JvmOverloads constructor(
                 showLoadedState()
             }
             is MessageListUIState.Empty -> showEmptyState()
-            is MessageListUIState.Error -> showErrorState(state.exception)
+            is MessageListUIState.Error -> {
+                // A failed goToMessage fetch must not leave auto-scroll suppressed
+                isGoToMessagePending = false
+                showErrorState(state.exception)
+            }
         }
     }
 
@@ -1090,7 +1099,16 @@ class CometChatMessageList @JvmOverloads constructor(
         }
         
         val newCount = messageAdapter.itemCount
-        
+
+        // A go-to-message navigation replaced the list — position on the anchor;
+        // auto-scrolling to the bottom here would post a scrollToLastItem that
+        // runs afterwards and overrides the anchor scroll.
+        val pendingScrollTarget = viewModel?.scrollToMessageId?.value
+        if (isGoToMessagePending || pendingScrollTarget != null) {
+            pendingScrollTarget?.let { scrollToMessage(it) }
+            return
+        }
+
         // Auto-scroll to bottom when new messages are added and user was at bottom
         if (newCount > previousCount && wasAtBottom) {
             if (scrollToBottomOnNewMessage) {
@@ -1609,6 +1627,7 @@ class CometChatMessageList @JvmOverloads constructor(
             if (parentMessageId != -1L) {
                 // Thread conversation — fetch messages normally
                 if (goToMessageId > 0) {
+                    isGoToMessagePending = true
                     viewModel?.goToMessage(goToMessageId)
                 } else {
                     viewModel?.fetchMessages()
@@ -1625,6 +1644,7 @@ class CometChatMessageList @JvmOverloads constructor(
         } else {
             if (autoFetch) {
                 if (goToMessageId > 0) {
+                    isGoToMessagePending = true
                     viewModel?.goToMessage(goToMessageId)
                 } else if (startFromUnreadMessages) {
                     viewModel?.fetchMessagesWithUnreadCount()
@@ -1671,6 +1691,7 @@ class CometChatMessageList @JvmOverloads constructor(
         
         if (autoFetch) {
             if (goToMessageId > 0) {
+                isGoToMessagePending = true
                 viewModel?.goToMessage(goToMessageId)
             } else if (startFromUnreadMessages) {
                 viewModel?.fetchMessagesWithUnreadCount()
@@ -3351,6 +3372,15 @@ class CometChatMessageList @JvmOverloads constructor(
         setAvatarVisibility(if (hide) View.GONE else View.VISIBLE)
     }
 
+    /**
+     * ENG-36737: when true (default), multi-attachment messages that were split into per-type
+     * bubbles sharing a `batchId` are grouped in the list — avatar + sender name only above the
+     * first bubble, time + receipt only under the last. When false, each bubble renders standalone.
+     */
+    fun setEnableMultipleAttachments(enable: Boolean) {
+        messageAdapter.setEnableMultipleAttachments(enable)
+    }
+
     fun setHideReceipts(hide: Boolean) {
         setReceiptsVisibility(if (hide) View.GONE else View.VISIBLE)
     }
@@ -4313,8 +4343,33 @@ class CometChatMessageList @JvmOverloads constructor(
      * @param messageId The ID of the message to scroll to
      */
     fun gotoMessage(messageId: Long) {
-        if (messageId != 0L) {
-            this.goToMessageId = messageId
+        if (messageId == 0L) return
+        this.goToMessageId = messageId
+        // Before setUser/setGroup the stored id is consumed during initialization.
+        // After initialization it would never be read again, so navigate immediately
+        // (e.g. tapping a search result belonging to the currently open conversation).
+        if (user != null || group != null) {
+            navigateToMessage(messageId)
+        }
+    }
+
+    /**
+     * Navigates to a message: scrolls and highlights directly when it is already
+     * loaded, otherwise asks the ViewModel to fetch a message window around it.
+     */
+    private fun navigateToMessage(messageId: Long) {
+        val position = messageAdapter.findMessagePosition(messageId)
+        if (position >= 0) {
+            recyclerViewMessageList?.stopScroll()
+            val centerOffset = recyclerViewMessageList?.height?.div(2) ?: 0
+            (recyclerViewMessageList?.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, centerOffset)
+            // Use postDelayed() to ensure highlight happens after scroll and layout are complete
+            recyclerViewMessageList?.postDelayed({
+                highlightMessageAtPosition(messageId, position)
+            }, 150)
+        } else {
+            isGoToMessagePending = true
+            viewModel?.goToMessage(messageId, highlight = true)
         }
     }
 
@@ -4331,6 +4386,7 @@ class CometChatMessageList @JvmOverloads constructor(
      */
     fun scrollToBottom() {
         newMessageCount = 0
+        isGoToMessagePending = false
         recyclerViewMessageList?.stopScroll()
         newMessageIndicator?.visibility = View.GONE
         
@@ -4351,6 +4407,7 @@ class CometChatMessageList @JvmOverloads constructor(
 
     private fun scrollToMessage(messageId: Long) {
         if (messageId == 0L) return
+        isGoToMessagePending = false
         val position = messageAdapter.findMessagePosition(messageId)
         if (position >= 0) {
             // Stop any ongoing scroll (matches Java: if (isScrolling) rvChatListView.stopScroll())
@@ -4389,25 +4446,7 @@ class CometChatMessageList @JvmOverloads constructor(
      * If not in the list, calls ViewModel to fetch and navigate to it.
      */
     private fun handleMessagePreviewClick(quotedMessage: BaseMessage) {
-        val messages = messageAdapter.getMessages()
-        val existingMessage = messages.find { it.id == quotedMessage.id }
-        
-        if (existingMessage != null) {
-            // Message is in current list - scroll to it directly
-            val position = messageAdapter.findMessagePosition(quotedMessage.id)
-            if (position >= 0) {
-                recyclerViewMessageList?.stopScroll()
-                val centerOffset = recyclerViewMessageList?.height?.div(2) ?: 0
-                (recyclerViewMessageList?.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, centerOffset)
-                // Use postDelayed() to ensure highlight happens after scroll and layout are complete
-                recyclerViewMessageList?.postDelayed({
-                    highlightMessageAtPosition(quotedMessage.id, position)
-                }, 150)
-            }
-        } else {
-            // Message not in list - fetch it via goToMessage
-            viewModel?.goToMessage(quotedMessage.id, highlight = true)
-        }
+        navigateToMessage(quotedMessage.id)
     }
     
     /**

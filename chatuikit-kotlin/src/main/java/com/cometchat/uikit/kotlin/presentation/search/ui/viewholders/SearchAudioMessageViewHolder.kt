@@ -13,6 +13,7 @@ import com.cometchat.uikit.kotlin.databinding.CometchatSearchMessageItemAudioBin
 import com.cometchat.uikit.kotlin.presentation.search.style.CometChatSearchStyle
 import com.cometchat.uikit.kotlin.presentation.search.utils.SearchMessagesViewHolderListener
 import com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.shared.interfaces.DateTimeFormatterCallback
 
 /**
@@ -45,6 +46,7 @@ class SearchAudioMessageViewHolder(
 
     override val titleTextView: TextView = binding.tvMessageTitle
     override val subtitleTextView: TextView = binding.tvSubtitleView
+    override val subtitleSuffixTextView: TextView = binding.tvSubtitleSuffix
     override val timestampDateView: CometChatDate? = binding.date
     override val threadIndicator: ImageView = binding.icThreadMessage
     override val parentLayout: View = binding.parentLayout
@@ -107,10 +109,15 @@ class SearchAudioMessageViewHolder(
         // Bind common data with uid/guid context
         bindCommonData(message, style, dateTimeFormatter, onClick, uid, guid)
 
-        // Set subtitle label — use file name with fallback (matching reference)
-        val fileName = message.attachment?.fileName
-        binding.tvSubtitleView.text = if (!fileName.isNullOrEmpty()) fileName else context.getString(R.string.cometchat_message_audio)
-
-        // Audio icon is set in the layout, no additional binding needed
+        // ENG-36737 media-row rules: sender-prefixed subtitle = caption if present (multi keeps
+        // its count as a non-truncating "· N Audio" suffix), else "N Audio" for multi, else the
+        // file name. The leading play-circle icon stays the same for single AND multi (per
+        // design mock — the stacked treatment is documents-only).
+        val attachments = MultiAttachmentUtils.resolveAttachments(message)
+        binding.tvSubtitleView.text = buildMediaSubtitle(
+            message, attachments.size, R.drawable.cometchat_ic_conversations_audio,
+            R.string.cometchat_message_audio, uid, guid
+        )
+        bindMediaCountSuffix(message, attachments.size)
     }
 }

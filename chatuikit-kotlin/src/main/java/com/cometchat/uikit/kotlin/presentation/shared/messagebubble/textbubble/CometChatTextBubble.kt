@@ -2,27 +2,13 @@ package com.cometchat.uikit.kotlin.presentation.shared.messagebubble.textbubble
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.text.SpannableString
-import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.method.LinkMovementMethod
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.StrikethroughSpan
-import android.text.style.StyleSpan
-import android.text.style.TypefaceSpan
-import android.text.style.UnderlineSpan
 import android.util.AttributeSet
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -30,20 +16,17 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
-import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import com.bumptech.glide.Glide
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.constants.UIKitConstants
-import com.cometchat.uikit.core.formatter.MarkdownRenderer
-import com.cometchat.uikit.core.formatter.RichTextFormat
 import com.cometchat.uikit.kotlin.R
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.markdown.MarkdownViewRenderer
 import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.formatters.FormatterUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.shared.spans.MentionMovementMethod
 import com.cometchat.uikit.kotlin.shared.spans.TagSpan
-import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.google.android.material.card.MaterialCardView
 
 /**
@@ -249,17 +232,10 @@ class CometChatTextBubble @JvmOverloads constructor(
                 textFormatters ?: emptyList()
             )
             
-            // Extract mention spans before markdown parsing
-            val mentionSpans = if (formattedText is SpannableStringBuilder) {
-                extractMentionSpans(formattedText)
-            } else {
-                emptyList()
-            }
-            
-            // Parse markdown and render segments with mention spans
-            val segments = MarkdownRenderer.parse(formattedText.toString())
-            renderMarkdownSegments(segments, formattedText.toString(), mentionSpans)
-            
+            // Formatters run first, markdown is parsed from their output — the mention spans they
+            // produced are re-overlaid per segment by the renderer.
+            renderMarkdown(formattedText.toString(), formattedText as? Spanned)
+
             linkPreviewContainer.visibility = GONE
             editedTextView.visibility = if (message.editedAt == 0L) View.GONE else View.VISIBLE
 
@@ -290,643 +266,28 @@ class CometChatTextBubble @JvmOverloads constructor(
     }
     
     /**
-     * Data class to hold extracted mention span information.
+     * Renders [markdown] as block-level views (paragraph / code block / list / blockquote) into the
+     * content container, delegating to the shared [MarkdownViewRenderer] that media-message captions
+     * use as well. [formatterSpans] is the text-formatter output the markdown was parsed from, so
+     * its mention spans can be re-overlaid on the marker-stripped text.
      */
-    private data class MentionSpanInfo(
-        val start: Int,
-        val end: Int,
-        val span: Any
-    )
-    
-    /**
-     * Extracts TagSpan (mention) spans from a SpannableStringBuilder.
-     * TagSpan is used for clickable mentions in message bubbles.
-     */
-    private fun extractMentionSpans(spannable: SpannableStringBuilder): List<MentionSpanInfo> {
-        val spans = spannable.getSpans(0, spannable.length, Any::class.java)
-        return spans.mapNotNull { span ->
-            // Check if it's a TagSpan (clickable mention span for bubbles)
-            if (span is TagSpan) {
-                val start = spannable.getSpanStart(span)
-                val end = spannable.getSpanEnd(span)
-                if (start >= 0 && end > start) {
-                    MentionSpanInfo(start, end, span)
-                } else null
-            } else null
-        }
-    }
-    
-    /**
-     * Finds mention spans that fall within a segment's text range.
-     * Returns spans with positions adjusted relative to the segment's plain text.
-     * 
-     * The mention spans are positioned in the formatted text (after formatter processing).
-     * We need to find which mentions fall within this segment and adjust their positions
-     * to account for markdown markers that will be stripped.
-     */
-    private fun findMentionSpansForSegment(
-        segmentText: String,
-        originalText: String,
-        originalOffset: Int,
-        mentionSpans: List<MentionSpanInfo>
-    ): List<MentionSpanInfo> {
-        if (mentionSpans.isEmpty() || segmentText.isEmpty()) return emptyList()
-        
-        // The segmentText is the raw text from the segment (may contain markdown markers)
-        // We need to find where this segment appears in the original formatted text
-        
-        // Find the segment in the original text starting from offset
-        var segmentStartInOriginal = -1
-        var searchStart = originalOffset
-        
-        // Try to find the segment text in the original
-        // Account for the fact that segment text might span multiple lines
-        val segmentLines = segmentText.split("\n")
-        if (segmentLines.isNotEmpty()) {
-            val firstLine = segmentLines[0]
-            if (firstLine.isNotEmpty()) {
-                segmentStartInOriginal = originalText.indexOf(firstLine, searchStart)
-            }
-        }
-        
-        if (segmentStartInOriginal < 0) {
-            // Fallback: use offset directly
-            segmentStartInOriginal = originalOffset
-        }
-        
-        val segmentEndInOriginal = segmentStartInOriginal + segmentText.length
-        
-        // Find mention spans that overlap with this segment
-        return mentionSpans.mapNotNull { mention ->
-            // Check if mention overlaps with segment range in original text
-            if (mention.end > segmentStartInOriginal && mention.start < segmentEndInOriginal) {
-                // Calculate position relative to segment start
-                val relativeStart = (mention.start - segmentStartInOriginal).coerceAtLeast(0)
-                val relativeEnd = (mention.end - segmentStartInOriginal).coerceAtMost(segmentText.length)
-                
-                if (relativeEnd > relativeStart) {
-                    MentionSpanInfo(relativeStart, relativeEnd, mention.span)
-                } else null
-            } else null
-        }
-    }
-    
-    /**
-     * Renders markdown segments into the content container.
-     */
-    private fun renderMarkdownSegments(
-        segments: List<MarkdownRenderer.RenderedSegment>,
-        originalText: String = "",
-        mentionSpans: List<MentionSpanInfo> = emptyList()
-    ) {
+    private fun renderMarkdown(markdown: String, formatterSpans: Spanned? = null) {
         markdownContentContainer.removeAllViews()
         markdownContentContainer.visibility = View.VISIBLE
         messageTextView.visibility = View.GONE
-        
+
         val currentStyle = style ?: return
-        val textColor = if (currentStyle.textColor != 0) currentStyle.textColor else CometChatTheme.getTextColorPrimary(context)
-        val linkColor = if (currentStyle.textLinkColor != 0) currentStyle.textLinkColor else CometChatTheme.getInfoColor(context)
-        val isSender = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
-        
-        // Track position in original text to map mention spans to segments
-        var originalOffset = 0
-        
-        // Group consecutive blockquote segments for continuous stripe rendering
-        var i = 0
-        while (i < segments.size) {
-            val segment = segments[i]
-            when (segment) {
-                is MarkdownRenderer.RenderedSegment.Text -> {
-                    val textView = createTextView()
-                    val segmentMentions = findMentionSpansForSegment(
-                        segment.text, originalText, originalOffset, mentionSpans
-                    )
-                    val styledText = buildStyledText(segment.text, segment.spans, textColor, linkColor, segmentMentions)
-                    textView.text = styledText
-                    markdownContentContainer.addView(textView)
-                    originalOffset += segment.text.length + 1
-                }
-                
-                is MarkdownRenderer.RenderedSegment.CodeBlock -> {
-                    val codeBlockView = createCodeBlockView(segment.code, segment.language, isSender)
-                    markdownContentContainer.addView(codeBlockView)
-                }
-                
-                is MarkdownRenderer.RenderedSegment.BulletItem -> {
-                    val bulletView = createBulletItemView(segment.text, segment.spans, textColor, linkColor)
-                    markdownContentContainer.addView(bulletView)
-                }
-                
-                is MarkdownRenderer.RenderedSegment.OrderedItem -> {
-                    val orderedView = createOrderedItemView(segment.number, segment.text, segment.spans, textColor, linkColor)
-                    markdownContentContainer.addView(orderedView)
-                }
-                
-                is MarkdownRenderer.RenderedSegment.Blockquote -> {
-                    // Collect consecutive blockquote segments into one group
-                    val blockquoteGroup = mutableListOf(segment)
-                    while (i + 1 < segments.size && segments[i + 1] is MarkdownRenderer.RenderedSegment.Blockquote) {
-                        i++
-                        blockquoteGroup.add(segments[i] as MarkdownRenderer.RenderedSegment.Blockquote)
-                    }
-                    val quoteView = createGroupedBlockquoteView(blockquoteGroup, textColor, linkColor, isSender)
-                    markdownContentContainer.addView(quoteView)
-                }
-            }
-            i++
-        }
-    }
-    
-    /**
-     * Creates a basic TextView for text segments.
-     * Sets MentionMovementMethod for handling mention click events.
-     */
-    private fun createTextView(): TextView {
-        val currentStyle = style
-        return TextView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+        MarkdownViewRenderer.render(
+            markdownContentContainer,
+            markdown,
+            formatterSpans,
+            MarkdownViewRenderer.Style(
+                textColor = currentStyle.textColor,
+                linkColor = currentStyle.textLinkColor,
+                textAppearance = currentStyle.textAppearance,
+                isOutgoing = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
             )
-            if (currentStyle?.textAppearance != 0) {
-                setTextAppearance(currentStyle?.textAppearance ?: 0)
-            }
-            if (currentStyle?.textColor != 0) {
-                setTextColor(currentStyle?.textColor ?: CometChatTheme.getTextColorPrimary(context))
-            }
-            if (currentStyle?.textLinkColor != 0) {
-                setLinkTextColor(currentStyle?.textLinkColor ?: CometChatTheme.getInfoColor(context))
-            }
-            // Set MentionMovementMethod for handling TagSpan clicks
-            movementMethod = MentionMovementMethod.getInstance()
-        }
-    }
-    
-    /**
-     * Creates a code block view with theme-aware colors matching V5.
-     * Sender: uses extended primary colors. Receiver: uses background2 + stroke default.
-     */
-    private fun createCodeBlockView(code: String, language: String, isSender: Boolean): View {
-        val bgColor = if (isSender) {
-            CometChatTheme.getExtendedPrimaryColor700(context)
-        } else {
-            CometChatTheme.getBackgroundColor2(context).takeIf { it != 0 } ?: 0xFFF5F5F5.toInt()
-        }
-        val borderColor = if (isSender) {
-            CometChatTheme.getExtendedPrimaryColor600(context)
-        } else {
-            CometChatTheme.getStrokeColorDefault(context).takeIf { it != 0 } ?: 0xFFDDDDDD.toInt()
-        }
-        val codeTextColor = if (isSender) {
-            CometChatTheme.getColorWhite(context)
-        } else {
-            CometChatTheme.getTextColorPrimary(context)
-        }
-
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = dpToPx(4)
-                bottomMargin = dpToPx(4)
-            }
-            background = GradientDrawable().apply {
-                setColor(bgColor)
-                cornerRadius = dpToPx(8).toFloat()
-                setStroke(1, borderColor)
-            }
-        }
-        
-        // Language label
-        if (language.isNotEmpty()) {
-            val languageLabel = TextView(context).apply {
-                text = language
-                setTextColor(adjustAlpha(codeTextColor, 0.5f))
-                typeface = Typeface.MONOSPACE
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
-                setPadding(dpToPx(12), dpToPx(8), dpToPx(12), 0)
-            }
-            container.addView(languageLabel)
-        }
-        
-        // Code text (wraps, no horizontal scroll — matches V5)
-        val codeTextView = TextView(context).apply {
-            text = code
-            setTextColor(codeTextColor)
-            typeface = Typeface.MONOSPACE
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setPadding(dpToPx(12), dpToPx(8), dpToPx(12), dpToPx(8))
-        }
-        
-        container.addView(codeTextView)
-        
-        return container
-    }
-    
-    /**
-     * Creates a bullet list item view.
-     */
-    private fun createBulletItemView(
-        itemText: String,
-        spans: List<MarkdownRenderer.InlineSpan>,
-        @ColorInt textColor: Int,
-        @ColorInt linkColor: Int
-    ): View {
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        
-        val bulletTextView = TextView(context).apply {
-            text = "•  "
-            setTextColor(textColor)
-            setTypeface(typeface, Typeface.BOLD)
-            if (style?.textAppearance != 0) {
-                setTextAppearance(style?.textAppearance ?: 0)
-            }
-        }
-        
-        val contentTextView = createTextView().apply {
-            val styledText = buildStyledText(itemText, spans, textColor, linkColor)
-            text = styledText
-        }
-        
-        container.addView(bulletTextView)
-        container.addView(contentTextView)
-        
-        return container
-    }
-    
-    /**
-     * Creates an ordered list item view.
-     */
-    private fun createOrderedItemView(
-        number: Int,
-        itemText: String,
-        spans: List<MarkdownRenderer.InlineSpan>,
-        @ColorInt textColor: Int,
-        @ColorInt linkColor: Int
-    ): View {
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        
-        val numberTextView = TextView(context).apply {
-            text = "$number. "
-            setTextColor(textColor)
-            setTypeface(typeface, Typeface.BOLD)
-            if (style?.textAppearance != 0) {
-                setTextAppearance(style?.textAppearance ?: 0)
-            }
-        }
-        
-        val contentTextView = createTextView().apply {
-            val styledText = buildStyledText(itemText, spans, textColor, linkColor)
-            text = styledText
-        }
-        
-        container.addView(numberTextView)
-        container.addView(contentTextView)
-        
-        return container
-    }
-    
-    /**
-     * Creates a blockquote view with vertical bar indicator.
-     */
-    private fun createBlockquoteView(
-        itemText: String,
-        spans: List<MarkdownRenderer.InlineSpan>,
-        @ColorInt textColor: Int,
-        @ColorInt linkColor: Int
-    ): View {
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        
-        val quoteBarTextView = TextView(context).apply {
-            text = "┃  "
-            setTextColor(linkColor)
-            setTypeface(typeface, Typeface.BOLD)
-            if (style?.textAppearance != 0) {
-                setTextAppearance(style?.textAppearance ?: 0)
-            }
-        }
-        
-        // Quote text is slightly dimmed
-        val quoteTextColor = adjustAlpha(textColor, 0.6f)
-        val contentTextView = createTextView().apply {
-            val styledText = buildStyledText(itemText, spans, quoteTextColor, linkColor)
-            text = styledText
-            setTextColor(quoteTextColor)
-        }
-        
-        container.addView(quoteBarTextView)
-        container.addView(contentTextView)
-        
-        return container
-    }
-
-    /**
-     * Creates a grouped blockquote view for consecutive blockquote segments.
-     * Renders a single continuous vertical stripe bar on the left with all
-     * blockquote lines joined on the right. Colors differ for sender vs receiver
-     * matching V5's BlockquoteFormatSpan behavior.
-     */
-    private fun createGroupedBlockquoteView(
-        segments: List<MarkdownRenderer.RenderedSegment.Blockquote>,
-        @ColorInt textColor: Int,
-        @ColorInt linkColor: Int,
-        isSender: Boolean
-    ): View {
-        // V5 colors: sender = white stripe + 20% white bg, receiver = highlight stripe + bg3
-        val stripeColor = if (isSender) {
-            CometChatTheme.getColorWhite(context)
-        } else {
-            CometChatTheme.getStrokeColorHighlight(context).takeIf { it != 0 }
-                ?: CometChatTheme.getStrokeColorDark(context)
-        }
-        val bgColor = if (isSender) {
-            0x33FFFFFF // white at 20% opacity
-        } else {
-            CometChatTheme.getBackgroundColor3(context)
-        }
-        val cornerRadius = context.resources.getDimension(R.dimen.cometchat_radius_2)
-
-        // Outer container — full width with rounded background, clips children to rounded shape
-        val outerContainer = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = dpToPx(4)
-                bottomMargin = dpToPx(4)
-            }
-            val bgDrawable = GradientDrawable().apply {
-                setColor(if (bgColor != 0) bgColor else android.graphics.Color.TRANSPARENT)
-                setCornerRadius(cornerRadius)
-            }
-            background = bgDrawable
-            // Clip children to the rounded background shape so the stripe
-            // gets its top-left and bottom-left edges cut by the corner radius
-            clipToOutline = true
-            outlineProvider = object : android.view.ViewOutlineProvider() {
-                override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
-                }
-            }
-            setPadding(0, 0, dpToPx(12), 0)
-        }
-
-        // Stripe — flush left, full height, no margins
-        val stripeView = View(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                dpToPx(4),
-                LinearLayout.LayoutParams.MATCH_PARENT
-            ).apply {
-                marginStart = 0
-                marginEnd = dpToPx(10)
-            }
-            background = GradientDrawable().apply {
-                setColor(stripeColor)
-            }
-        }
-
-        // Text content — join all blockquote lines, use same text color as bubble
-        val contentBuilder = SpannableStringBuilder()
-        for ((index, seg) in segments.withIndex()) {
-            if (index > 0) contentBuilder.append("\n")
-            val (plainText, inlineSpans) = MarkdownRenderer.parseInline(seg.text)
-            val segStart = contentBuilder.length
-            contentBuilder.append(plainText)
-            for (span in inlineSpans) {
-                val spanStart = segStart + span.start
-                val spanEnd = segStart + span.end
-                if (spanStart >= 0 && spanEnd <= contentBuilder.length && spanStart < spanEnd) {
-                    val androidSpan = when (span.format) {
-                        RichTextFormat.BOLD -> StyleSpan(Typeface.BOLD)
-                        RichTextFormat.ITALIC -> StyleSpan(Typeface.ITALIC)
-                        RichTextFormat.STRIKETHROUGH -> StrikethroughSpan()
-                        RichTextFormat.UNDERLINE -> UnderlineSpan()
-                        RichTextFormat.INLINE_CODE -> TypefaceSpan("monospace")
-                        else -> null
-                    }
-                    if (androidSpan != null) {
-                        contentBuilder.setSpan(androidSpan, spanStart, spanEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                    }
-                }
-            }
-        }
-
-        val contentTextView = createTextView().apply {
-            text = contentBuilder
-            setTextColor(textColor)
-            setPadding(0, dpToPx(8), 0, dpToPx(8))
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
-        }
-
-        outerContainer.addView(stripeView)
-        outerContainer.addView(contentTextView)
-
-        return outerContainer
-    }
-    
-    /**
-     * Builds styled text with inline formatting spans applied.
-     */
-    private fun buildStyledText(
-        text: String,
-        spans: List<MarkdownRenderer.InlineSpan>,
-        @ColorInt defaultColor: Int,
-        @ColorInt linkColor: Int,
-        mentionSpans: List<MentionSpanInfo> = emptyList()
-    ): SpannableString {
-        // First parse inline markdown to get clean text and spans
-        val (plainText, inlineSpans) = MarkdownRenderer.parseInline(text)
-        
-        val spannable = SpannableString(plainText)
-        
-        // Apply base color
-        spannable.setSpan(
-            ForegroundColorSpan(defaultColor),
-            0,
-            plainText.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-        
-        // Apply mention spans first (they take priority for styling)
-        // We need to map positions from original text to plain text
-        if (mentionSpans.isNotEmpty()) {
-            val positionMap = buildPositionMap(text, plainText)
-            for (mention in mentionSpans) {
-                val mappedStart = mapPosition(mention.start, positionMap, plainText.length)
-                val mappedEnd = mapPosition(mention.end, positionMap, plainText.length)
-                if (mappedStart >= 0 && mappedEnd > mappedStart && mappedEnd <= plainText.length) {
-                    spannable.setSpan(
-                        mention.span,
-                        mappedStart,
-                        mappedEnd,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-            }
-        }
-        
-        // Apply inline formatting spans
-        for (span in inlineSpans) {
-            val start = span.start.coerceAtMost(plainText.length)
-            val end = span.end.coerceAtMost(plainText.length)
-            if (start >= end) continue
-            
-            when (span.format) {
-                RichTextFormat.BOLD -> {
-                    spannable.setSpan(
-                        StyleSpan(Typeface.BOLD),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                RichTextFormat.ITALIC -> {
-                    spannable.setSpan(
-                        StyleSpan(Typeface.ITALIC),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                RichTextFormat.UNDERLINE -> {
-                    spannable.setSpan(
-                        UnderlineSpan(),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                RichTextFormat.STRIKETHROUGH -> {
-                    spannable.setSpan(
-                        StrikethroughSpan(),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                RichTextFormat.INLINE_CODE -> {
-                    spannable.setSpan(
-                        TypefaceSpan("monospace"),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    // Theme-aware inline code background: sender = white 20%, receiver = backgroundColor3
-                    val isSender = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
-                    val inlineCodeBg = if (isSender) {
-                        0x33FFFFFF // white at 20% opacity
-                    } else {
-                        CometChatTheme.getBackgroundColor3(context)
-                    }
-                    spannable.setSpan(
-                        BackgroundColorSpan(inlineCodeBg),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                RichTextFormat.LINK -> {
-                    // Add URLSpan to make the link clickable
-                    span.url?.let { url ->
-                        spannable.setSpan(
-                            android.text.style.URLSpan(url),
-                            start,
-                            end,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                    }
-                    spannable.setSpan(
-                        ForegroundColorSpan(linkColor),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        UnderlineSpan(),
-                        start,
-                        end,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                else -> { /* Line-level formats handled at segment level */ }
-            }
-        }
-        
-        return spannable
-    }
-    
-    /**
-     * Builds a position map from original text positions to plain text positions.
-     * This accounts for markdown markers that are stripped.
-     */
-    private fun buildPositionMap(original: String, plain: String): IntArray {
-        // Simple approach: for each position in original, find corresponding position in plain
-        // by matching characters
-        val map = IntArray(original.length + 1) { -1 }
-        var plainIdx = 0
-        var origIdx = 0
-        
-        while (origIdx < original.length && plainIdx < plain.length) {
-            if (original[origIdx] == plain[plainIdx]) {
-                map[origIdx] = plainIdx
-                plainIdx++
-            }
-            origIdx++
-        }
-        // Map end position
-        map[original.length] = plain.length
-        
-        return map
-    }
-    
-    /**
-     * Maps a position from original text to plain text using the position map.
-     */
-    private fun mapPosition(pos: Int, map: IntArray, plainLength: Int): Int {
-        if (pos < 0) return -1
-        if (pos >= map.size) return plainLength
-        
-        val mapped = map[pos]
-        if (mapped >= 0) return mapped
-        
-        // If exact position not mapped, find nearest mapped position
-        for (i in pos downTo 0) {
-            if (map[i] >= 0) return map[i]
-        }
-        return 0
-    }
-    
-    /**
-     * Adjusts the alpha of a color.
-     */
-    private fun adjustAlpha(@ColorInt color: Int, factor: Float): Int {
-        val alpha = (Color.alpha(color) * factor).toInt()
-        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
     }
 
     private data class LinkPreviewData(
@@ -991,9 +352,8 @@ class CometChatTextBubble @JvmOverloads constructor(
     }
 
     fun setText(text: String) {
-        // Parse markdown for plain string input
-        val segments = MarkdownRenderer.parse(text)
-        renderMarkdownSegments(segments)
+        // Plain string input carries no formatter spans — markdown only.
+        renderMarkdown(text)
     }
 
     fun setLinkPreview(

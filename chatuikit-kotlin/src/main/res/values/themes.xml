@@ -442,10 +442,14 @@
 
     <style name="CometChatIncomingImageMessageBubbleStyle">
         <item name="cometchatImageBubbleImageCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatImageBubbleCaptionTextColor">?attr/cometchatTextColorPrimary</item>
+        <item name="cometchatImageBubbleCaptionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
 
     <style name="CometChatOutgoingImageBubbleStyle">
         <item name="cometchatImageBubbleImageCornerRadius">@dimen/cometchat_radius_2</item>
+        <item name="cometchatImageBubbleCaptionTextColor">?attr/cometchatColorWhite</item>
+        <item name="cometchatImageBubbleCaptionTextAppearance">?attr/cometchatTextAppearanceBodyRegular</item>
     </style>
 
     <style name="CometChatIncomingVideoBubbleStyle">

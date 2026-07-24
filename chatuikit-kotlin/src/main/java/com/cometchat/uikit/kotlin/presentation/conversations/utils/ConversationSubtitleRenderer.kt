@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.style.CharacterStyle
 import android.text.style.LeadingMarginSpan
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
@@ -34,13 +35,30 @@ object ConversationSubtitleRenderer {
      *
      * @param context Android context (reserved for future theming)
      * @param markdown Raw markdown string from a TextMessage
+     * @param formatterSpans Output of the [CometChatTextFormatter] pass that [markdown] was taken
+     *   from (null when no formatters ran). Its spans — mentions above all — are re-applied on top
+     *   of the marker-stripped text, remapped to their new offsets. Formatters must run BEFORE
+     *   markdown parsing (as the text bubble does) for those offsets to line up.
      * @return SpannableString with Android text spans and no raw markdown markers
      */
-    fun render(context: Context, markdown: String): SpannableString {
+    @JvmOverloads
+    fun render(
+        context: Context,
+        markdown: String,
+        formatterSpans: Spanned? = null
+    ): SpannableString {
         if (markdown.isEmpty()) return SpannableString("")
 
         val segments = MarkdownRenderer.parse(markdown)
         val builder = SpannableStringBuilder()
+        // Segments are matched back to their slice of [markdown] in order, so a repeated line
+        // styles its own occurrence rather than the first one.
+        var searchFrom = 0
+        fun sourceStartOf(rawText: String): Int {
+            val start = markdown.indexOf(rawText, searchFrom)
+            if (start >= 0) searchFrom = start + rawText.length
+            return start
+        }
 
         for ((index, segment) in segments.withIndex()) {
             if (index > 0 && builder.isNotEmpty()) {
@@ -48,19 +66,19 @@ object ConversationSubtitleRenderer {
             }
             when (segment) {
                 is MarkdownRenderer.RenderedSegment.Text -> {
-                    appendText(builder, segment.text)
+                    appendText(builder, segment.text, formatterSpans, sourceStartOf(segment.text))
                 }
                 is MarkdownRenderer.RenderedSegment.CodeBlock -> {
                     appendCodeBlock(builder, segment.code)
                 }
                 is MarkdownRenderer.RenderedSegment.BulletItem -> {
-                    appendBulletItem(builder, segment.text)
+                    appendBulletItem(builder, segment.text, formatterSpans, sourceStartOf(segment.text))
                 }
                 is MarkdownRenderer.RenderedSegment.OrderedItem -> {
-                    appendOrderedItem(builder, segment.number, segment.text)
+                    appendOrderedItem(builder, segment.number, segment.text, formatterSpans, sourceStartOf(segment.text))
                 }
                 is MarkdownRenderer.RenderedSegment.Blockquote -> {
-                    appendBlockquote(builder, segment.text)
+                    appendBlockquote(builder, segment.text, formatterSpans, sourceStartOf(segment.text))
                 }
             }
         }
@@ -74,11 +92,17 @@ object ConversationSubtitleRenderer {
      * Appends a plain text segment, stripping inline markdown markers and
      * applying corresponding Android spans.
      */
-    private fun appendText(builder: SpannableStringBuilder, rawText: String) {
+    private fun appendText(
+        builder: SpannableStringBuilder,
+        rawText: String,
+        formatterSpans: Spanned? = null,
+        sourceStart: Int = -1
+    ) {
         val (stripped, spans) = MarkdownRenderer.parseInline(rawText)
         val start = builder.length
         builder.append(stripped)
         applyInlineSpans(builder, start, spans)
+        applyFormatterSpans(builder, start, rawText, stripped, formatterSpans, sourceStart)
     }
 
     /**
@@ -98,7 +122,12 @@ object ConversationSubtitleRenderer {
     /**
      * Appends a bullet list item with a bullet prefix character and inline spans.
      */
-    private fun appendBulletItem(builder: SpannableStringBuilder, rawText: String) {
+    private fun appendBulletItem(
+        builder: SpannableStringBuilder,
+        rawText: String,
+        formatterSpans: Spanned? = null,
+        sourceStart: Int = -1
+    ) {
         val (stripped, spans) = MarkdownRenderer.parseInline(rawText)
         val start = builder.length
         builder.append("• ")
@@ -111,6 +140,7 @@ object ConversationSubtitleRenderer {
         )
         // Inline spans offset by 2 for the "• " prefix
         applyInlineSpans(builder, start + 2, spans)
+        applyFormatterSpans(builder, start + 2, rawText, stripped, formatterSpans, sourceStart)
     }
 
     /**
@@ -119,7 +149,9 @@ object ConversationSubtitleRenderer {
     private fun appendOrderedItem(
         builder: SpannableStringBuilder,
         number: Int,
-        rawText: String
+        rawText: String,
+        formatterSpans: Spanned? = null,
+        sourceStart: Int = -1
     ) {
         val (stripped, spans) = MarkdownRenderer.parseInline(rawText)
         val prefix = "$number. "
@@ -133,12 +165,18 @@ object ConversationSubtitleRenderer {
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         applyInlineSpans(builder, start + prefix.length, spans)
+        applyFormatterSpans(builder, start + prefix.length, rawText, stripped, formatterSpans, sourceStart)
     }
 
     /**
      * Appends a blockquote segment with a "▎" vertical bar prefix and inline spans.
      */
-    private fun appendBlockquote(builder: SpannableStringBuilder, rawText: String) {
+    private fun appendBlockquote(
+        builder: SpannableStringBuilder,
+        rawText: String,
+        formatterSpans: Spanned? = null,
+        sourceStart: Int = -1
+    ) {
         val (stripped, spans) = MarkdownRenderer.parseInline(rawText)
         val start = builder.length
         builder.append("▎ ")
@@ -155,6 +193,74 @@ object ConversationSubtitleRenderer {
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         applyInlineSpans(builder, start + 2, spans)
+        applyFormatterSpans(builder, start + 2, rawText, stripped, formatterSpans, sourceStart)
+    }
+
+    // ── Formatter span overlay ──────────────────────────────────────────
+
+    /**
+     * Re-applies the spans a [CometChatTextFormatter] produced (mention spans, chiefly) on top of
+     * this segment's stripped text. [sourceStart] is where the segment's raw text begins in the
+     * formatter output — the offsets those spans are indexed against — and stripping the markdown
+     * markers shifts everything left of it, so each offset is remapped through [buildPositionMap].
+     */
+    private fun applyFormatterSpans(
+        builder: SpannableStringBuilder,
+        segmentStart: Int,
+        rawText: String,
+        stripped: String,
+        formatterSpans: Spanned?,
+        sourceStart: Int
+    ) {
+        if (formatterSpans == null || sourceStart < 0) return
+        val positionMap = buildPositionMap(rawText, stripped)
+        val sourceEnd = sourceStart + rawText.length
+
+        // CharacterStyle only — the formatter's SpannableStringBuilder also carries non-visual
+        // bookkeeping spans that must not be copied onto the caption.
+        for (span in formatterSpans.getSpans(sourceStart, sourceEnd, CharacterStyle::class.java)) {
+            val spanStart = formatterSpans.getSpanStart(span)
+            val spanEnd = formatterSpans.getSpanEnd(span)
+            if (spanStart >= sourceEnd || spanEnd <= sourceStart) continue
+
+            val relativeStart = (spanStart - sourceStart).coerceAtLeast(0)
+            val relativeEnd = (spanEnd - sourceStart).coerceAtMost(rawText.length)
+            val start = segmentStart + mapPosition(relativeStart, positionMap, stripped.length)
+            val end = segmentStart + mapPosition(relativeEnd, positionMap, stripped.length)
+            if (start in 0 until end && end <= builder.length) {
+                builder.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+    }
+
+    /**
+     * Maps each position in [original] to its position in [stripped] (same text minus the markdown
+     * markers), by walking both in step and only advancing the stripped cursor on a match.
+     */
+    private fun buildPositionMap(original: String, stripped: String): IntArray {
+        val map = IntArray(original.length + 1) { -1 }
+        var strippedIdx = 0
+        var origIdx = 0
+        while (origIdx < original.length && strippedIdx < stripped.length) {
+            if (original[origIdx] == stripped[strippedIdx]) {
+                map[origIdx] = strippedIdx
+                strippedIdx++
+            }
+            origIdx++
+        }
+        map[original.length] = stripped.length
+        return map
+    }
+
+    /** Maps one position through [buildPositionMap], falling back to the nearest mapped one. */
+    private fun mapPosition(pos: Int, map: IntArray, strippedLength: Int): Int {
+        if (pos < 0) return 0
+        if (pos >= map.size) return strippedLength
+        if (map[pos] >= 0) return map[pos]
+        for (i in pos downTo 0) {
+            if (map[i] >= 0) return map[i]
+        }
+        return 0
     }
 
     // ── Inline span application ─────────────────────────────────────────

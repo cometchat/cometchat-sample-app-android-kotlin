@@ -23,6 +23,7 @@ import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.databinding.CometchatMessagePreviewBinding
+import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -255,7 +256,7 @@ class CometChatMessagePreview @JvmOverloads constructor(
      *
      * @param text The subtitle text
      */
-    fun setMessagePreviewSubtitleText(text: String) {
+    fun setMessagePreviewSubtitleText(text: CharSequence) {
         binding.tvMessageLayoutSubtitle.text = text
     }
 
@@ -574,8 +575,7 @@ class CometChatMessagePreview @JvmOverloads constructor(
         }
 
         setMessagePreviewTitleText(sender)
-        val subtitle = message.attachment?.fileName ?: message.type ?: ""
-        setMessagePreviewSubtitleText(subtitle)
+        setMessagePreviewSubtitleText(MultiAttachmentUtils.mediaPreviewSubtitle(context, message))
 
         if (iconRes != null) {
             setMessageIcon(iconRes)

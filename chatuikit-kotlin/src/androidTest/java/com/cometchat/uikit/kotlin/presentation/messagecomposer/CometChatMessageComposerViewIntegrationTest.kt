@@ -72,7 +72,7 @@ class CometChatMessageComposerViewIntegrationTest {
             override suspend fun sendTextMessage(message: TextMessage): TextMessage = message
             override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = message
             override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = message
-            override suspend fun editMessage(message: TextMessage): BaseMessage = message
+            override suspend fun editMessage(message: BaseMessage): BaseMessage = message
         }
     }
 
@@ -289,7 +289,7 @@ open class MessageComposerHostFragment : Fragment() {
             override suspend fun sendTextMessage(message: TextMessage): TextMessage = message
             override suspend fun sendMediaMessage(message: MediaMessage): MediaMessage = message
             override suspend fun sendCustomMessage(message: CustomMessage): CustomMessage = message
-            override suspend fun editMessage(message: TextMessage): BaseMessage = message
+            override suspend fun editMessage(message: BaseMessage): BaseMessage = message
         }
         val repository = MessageComposerRepositoryImpl(dataSource)
         val sendTextMessageUseCase = SendTextMessageUseCase(repository)

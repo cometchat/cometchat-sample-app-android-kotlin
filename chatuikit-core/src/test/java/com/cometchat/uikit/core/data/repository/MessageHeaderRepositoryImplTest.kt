@@ -5,9 +5,11 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.data.datasource.MessageHeaderDataSource
 import com.cometchat.uikit.core.testutils.MockFactory
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -128,6 +130,28 @@ class MessageHeaderRepositoryImplTest : FunSpec({
             println("    → Result: isFailure=${result.isFailure}, exception type=${result.exceptionOrNull()?.javaClass?.simpleName}")
             result.isFailure shouldBe true
             result.exceptionOrNull().shouldBeInstanceOf<RuntimeException>()
+        }
+    }
+
+    // ==================== Cancellation (ENG-37016) ====================
+
+    test("getUser should rethrow CancellationException instead of wrapping in Result.failure") {
+        runTest {
+            whenever(dataSource.getUser("user-1")).thenAnswer { throw CancellationException("scope cancelled") }
+            println("    → DataSource configured to throw CancellationException")
+
+            shouldThrow<CancellationException> { repository.getUser("user-1") }
+            println("    → CancellationException propagated (not wrapped)")
+        }
+    }
+
+    test("getGroup should rethrow CancellationException instead of wrapping in Result.failure") {
+        runTest {
+            whenever(dataSource.getGroup("group-1")).thenAnswer { throw CancellationException("scope cancelled") }
+            println("    → DataSource configured to throw CancellationException")
+
+            shouldThrow<CancellationException> { repository.getGroup("group-1") }
+            println("    → CancellationException propagated (not wrapped)")
         }
     }
 
