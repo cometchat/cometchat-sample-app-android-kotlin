@@ -102,16 +102,26 @@ internal fun ConversationListContent(
 ) {
     val listState = rememberLazyListState()
     val context = LocalContext.current
+
+    // Guarantee unique LazyColumn keys. A duplicate conversationId reaching itemsIndexed throws
+    // IllegalArgumentException("Key ... was already used") and takes the whole app down, so the
+    // render boundary refuses to trust the list — the same defence CometChatMessageList applies.
+    // Deduplication and the key below must use the identical selector, or a list that survives
+    // distinctBy could still produce colliding keys (ENG-35566).
+    val uniqueConversations = remember(conversations) {
+        conversations.distinctBy(::conversationKey)
+    }
+
     // Detect when we need to load more items
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-            lastVisibleItem != null && lastVisibleItem.index >= conversations.size - 5
+            lastVisibleItem != null && lastVisibleItem.index >= uniqueConversations.size - 5
         }
     }
     
     LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore && conversations.isNotEmpty()) {
+        if (shouldLoadMore && uniqueConversations.isNotEmpty()) {
             onLoadMore()
         }
     }
@@ -133,17 +143,17 @@ internal fun ConversationListContent(
             .semantics { 
                 contentDescription = context.getString(
                     R.string.cometchat_conversation_list_description,
-                    conversations.size
+                    uniqueConversations.size
                 )
                 collectionInfo = CollectionInfo(
-                    rowCount = conversations.size,
+                    rowCount = uniqueConversations.size,
                     columnCount = 1
                 )
             }
     ) {
         itemsIndexed(
-            items = conversations,
-            key = { _, conversation -> conversation.conversationId }
+            items = uniqueConversations,
+            key = { _, conversation -> conversationKey(conversation) }
         ) { index, conversation ->
             val isSelected = selectedConversations.contains(conversation)
             val typingIndicator = getTypingIndicatorForConversation(conversation, typingIndicators)
@@ -227,7 +237,7 @@ internal fun ConversationListContent(
             }
             
             // Separator
-            if (!hideSeparator && index < conversations.size - 1) {
+            if (!hideSeparator && index < uniqueConversations.size - 1) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -329,3 +339,18 @@ private fun buildMenuItems(
     
     return menuItems
 }
+
+/**
+ * Stable, collision-free LazyColumn key for a conversation.
+ *
+ * `conversationId` is the natural key, but it is a platform type off the SDK and has been
+ * observed to repeat in the rendered list — a duplicate throws
+ * `IllegalArgumentException("Key ... was already used")` and crashes the app (ENG-35566).
+ * A blank or absent id falls back to the instance's identity hash, which is unique per object,
+ * so two unidentified conversations still get distinct keys instead of colliding on `null`.
+ *
+ * Used both to deduplicate the list and to key it; the two must never diverge.
+ */
+private fun conversationKey(conversation: Conversation): Any =
+    conversation.conversationId?.takeIf { it.isNotBlank() }
+        ?: System.identityHashCode(conversation)

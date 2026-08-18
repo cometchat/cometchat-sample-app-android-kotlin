@@ -1112,4 +1112,54 @@ class MessageListRepositoryImplTest : FunSpec({
             println("  ✅ getLatestMessageId=0 after setting zero")
         }
     }
+
+    // ==================== ENG-38259: effective filter accessors ====================
+
+    context("effective messages filter") {
+
+        test("a custom builder's categories and types win over the defaults") {
+            println("  → Testing effective filter comes from the caller's builder")
+
+            val customBuilder = MessagesRequest.MessagesRequestBuilder()
+                .setLimit(30)
+                .setCategories(listOf(CometChatConstants.CATEGORY_CUSTOM))
+                .setTypes(listOf("ban_notice"))
+
+            repository.configureForGroup(
+                group = MockFactory.createGroup(guid = "test-group"),
+                messagesTypes = listOf(CometChatConstants.MESSAGE_TYPE_TEXT),
+                messagesCategories = listOf(CometChatConstants.CATEGORY_MESSAGE),
+                parentMessageId = -1L,
+                messagesRequestBuilder = customBuilder
+            )
+
+            repository.getEffectiveMessagesCategories() shouldBe listOf(CometChatConstants.CATEGORY_CUSTOM)
+            repository.getEffectiveMessagesTypes() shouldBe listOf("ban_notice")
+            println("  ✅ builder's filter reported, defaults ignored")
+        }
+
+        test("without a custom builder the supplied defaults are reported") {
+            println("  → Testing effective filter falls back to the defaults")
+
+            repository.configureForUser(
+                user = MockFactory.createUser(uid = "alice"),
+                messagesTypes = listOf(CometChatConstants.MESSAGE_TYPE_TEXT),
+                messagesCategories = listOf(CometChatConstants.CATEGORY_MESSAGE),
+                parentMessageId = -1L,
+                messagesRequestBuilder = null
+            )
+
+            repository.getEffectiveMessagesCategories() shouldBe listOf(CometChatConstants.CATEGORY_MESSAGE)
+            repository.getEffectiveMessagesTypes() shouldBe listOf(CometChatConstants.MESSAGE_TYPE_TEXT)
+            println("  ✅ defaults reported when no builder is supplied")
+        }
+
+        test("an unconfigured repository reports no restriction") {
+            println("  → Testing effective filter before configuration")
+
+            repository.getEffectiveMessagesCategories() shouldBe emptyList()
+            repository.getEffectiveMessagesTypes() shouldBe emptyList()
+            println("  ✅ empty means no restriction")
+        }
+    }
 })

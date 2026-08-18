@@ -76,7 +76,21 @@ class MessageListRepositoryImpl(
         hasMore = true
     }
 
-    
+    /**
+     * The types the built [MessagesRequest] filters on. Read off the request rather than the
+     * builder because [MessagesRequest.MessagesRequestBuilder] exposes no getters, and because
+     * a caller-supplied builder overrides the defaults handed to configureFor*.
+     */
+    override fun getEffectiveMessagesTypes(): List<String> =
+        messagesRequest?.types.orEmpty()
+
+    /**
+     * The categories the built [MessagesRequest] filters on.
+     */
+    override fun getEffectiveMessagesCategories(): List<String> =
+        messagesRequest?.categories.orEmpty()
+
+
     override suspend fun fetchPreviousMessages(): Result<List<BaseMessage>> {
         val request = messagesRequest
             ?: return Result.failure(CometChatException("ERROR", "MessagesRequest not configured"))

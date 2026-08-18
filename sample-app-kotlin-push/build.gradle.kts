@@ -13,21 +13,13 @@ android {
     namespace = "com.cometchat.sampleapp.kotlin.push"
     compileSdk = 36
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("cometchat-release.keystore")
-            storePassword = "cometchat123"
-            keyAlias = "cometchat-debug"
-            keyPassword = "cometchat123"
-        }
-    }
 
     defaultConfig {
         applicationId = "com.cometchat.sampleapp.kotlin.push"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "6.0.4"
+        versionName = "6.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,7 +28,6 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -95,7 +86,7 @@ dependencies {
     testImplementation(libs.kotest.property)
     
     // JUnit Vintage engine to run JUnit 4 tests alongside JUnit 5
-    testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.vintage.engine.v582)
 
     implementation(libs.calls.sdk.android)
 

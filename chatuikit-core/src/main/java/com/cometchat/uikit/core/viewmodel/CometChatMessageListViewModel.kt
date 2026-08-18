@@ -1111,18 +1111,17 @@ open class CometChatMessageListViewModel(
         this.parentMessageId = parentMessageId
         this.gotoMessageId = gotoMessageId
         
-        // Always use defaults for types and categories
+        // Defaults are only a fallback — a caller-supplied builder wins, and the repository
+        // is the one that resolves which of the two is actually in effect.
         val effectiveTypes = getDefaultMessagesTypes()
         val effectiveCategories = getDefaultMessagesCategories()
-        
-        // Store types and categories for getter access
-        this.messagesTypes = effectiveTypes
-        this.messagesCategories = effectiveCategories
-        
+
         // Regenerate ID map after configuration change
         _idMap.value = generateIdMap()
-        
+
         repository.configureForUser(user, effectiveTypes, effectiveCategories, parentMessageId, messagesRequestBuilder)
+
+        adoptEffectiveFilter(effectiveTypes, effectiveCategories)
         
         // Always subscribe to UIKit local events (these don't depend on SDK)
         removeLocalEventListeners()
@@ -1190,18 +1189,17 @@ open class CometChatMessageListViewModel(
         aiStreamService = null
         CometChatAIStreamService.setInstance(null)
         
-        // Always use defaults for types and categories
+        // Defaults are only a fallback — a caller-supplied builder wins, and the repository
+        // is the one that resolves which of the two is actually in effect.
         val effectiveTypes = getDefaultMessagesTypes()
         val effectiveCategories = getDefaultMessagesCategories()
-        
-        // Store types and categories for getter access
-        this.messagesTypes = effectiveTypes
-        this.messagesCategories = effectiveCategories
-        
+
         // Regenerate ID map after configuration change
         _idMap.value = generateIdMap()
-        
+
         repository.configureForGroup(group, effectiveTypes, effectiveCategories, parentMessageId, messagesRequestBuilder)
+
+        adoptEffectiveFilter(effectiveTypes, effectiveCategories)
         
         // Always subscribe to UIKit local events (these don't depend on SDK)
         removeLocalEventListeners()
@@ -1215,7 +1213,44 @@ open class CometChatMessageListViewModel(
         }
         initializedId = group.guid
     }
-    
+
+    /**
+     * Adopts the type/category filter the repository actually configured.
+     *
+     * A caller-supplied [MessagesRequest.MessagesRequestBuilder] overrides the defaults, and
+     * before ENG-38259 the ViewModel kept the defaults regardless — so it had no idea what the
+     * integrator had asked for and could not apply that filter to real-time messages. Reading
+     * the resolved filter back keeps [getTypes]/[getCategories] honest and gives
+     * [handleIncomingMessage] something correct to gate on.
+     *
+     * Falls back to the supplied defaults when the repository reports nothing, which is the
+     * case for stubs and mocks that do not implement the accessors.
+     */
+    private fun adoptEffectiveFilter(defaultTypes: List<String>, defaultCategories: List<String>) {
+        messagesTypes = repository.getEffectiveMessagesTypes().ifEmpty { defaultTypes }
+        messagesCategories = repository.getEffectiveMessagesCategories().ifEmpty { defaultCategories }
+    }
+
+    /**
+     * Returns `true` when [message] passes the configured type/category filter.
+     *
+     * Applied to messages arriving over the WebSocket so that the real-time path enforces the
+     * same [MessagesRequest] filter as the fetch path. Without it, a message the integrator
+     * deliberately filtered out — a silent moderation or ban message, say — is hidden on load
+     * and then rendered the moment it arrives live (ENG-38259).
+     *
+     * An empty list means "no restriction", matching [MessagesRequest] semantics.
+     *
+     * Agent chats are exempt: their streaming lifecycle swaps placeholder messages in and out of
+     * the list and does not correspond to a fetch filter.
+     */
+    private fun matchesConfiguredFilter(message: BaseMessage): Boolean {
+        if (isAgentChat) return true
+        val categoryAllowed = messagesCategories.isEmpty() || messagesCategories.contains(message.category)
+        val typeAllowed = messagesTypes.isEmpty() || messagesTypes.contains(message.type)
+        return categoryAllowed && typeAllowed
+    }
+
     /**
      * Sets up the AI stream listener for agent chat streaming.
      *
@@ -2244,7 +2279,19 @@ open class CometChatMessageListViewModel(
                             // Step 6: Update pagination flags
                             _hasMorePreviousMessages.value = result.hasMorePrevious
                             _hasMoreNewMessages.value = result.hasMoreNext
-                            
+
+                            // When the server reports nothing newer to load, the tail of the list
+                            // IS the latest message, so realign latestMessageId with it. Without
+                            // this, latestMessageId keeps the value fetchMessagesWithUnreadCount
+                            // read off the conversation — which, under a MessagesRequest filter,
+                            // points at a message this list deliberately excludes. The
+                            // isAtLatestPosition guard in handleIncomingMessage would then read
+                            // as "user scrolled up" forever and silently drop every live message
+                            // into hasMoreNewMessages instead of the list (ENG-38259).
+                            if (!result.hasMoreNext) {
+                                combinedMessages.lastOrNull()?.let { latestMessageId = it.id }
+                            }
+
                             // Step 7: Emit scrollToMessageId
                             _scrollToMessageId.value = messageId
                             
@@ -4411,6 +4458,12 @@ open class CometChatMessageListViewModel(
      */
     private fun handleIncomingMessage(message: BaseMessage) {
         if (!isMessageForCurrentChat(message)) {
+            return
+        }
+
+        // Enforce the configured MessagesRequest filter on the real-time path too, so a message
+        // excluded from the fetch never appears just because it arrived over the socket.
+        if (!matchesConfiguredFilter(message)) {
             return
         }
 

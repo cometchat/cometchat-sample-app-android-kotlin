@@ -5,7 +5,8 @@ package com.cometchat.sampleapp.compose.push.shared
  * These are used as fallback values when no credentials are stored in SharedPreferences.
  */
 object AppCredentials {
-    const val APP_ID: String = ""
-    const val AUTH_KEY: String = ""
-    const val REGION: String = ""
+    const val APP_ID: String = "XXXXXXXXX"
+    const val AUTH_KEY: String = "XXXXXXXXX"
+    const val REGION: String = "XXXXXXXXX"
+    const val PROVIDER_ID: String = "XXXXXXXXX"
 }

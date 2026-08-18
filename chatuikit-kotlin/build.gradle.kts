@@ -1,18 +1,10 @@
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.roborazzi)
-    id("maven-publish")
 }
 
-ext["publishArtifactId"] = "chatuikit-kotlin-android"
-ext["publishDescription"] = "CometChat UI Kit Kotlin – Android Views/XML chat UI components"
-val libraryVersion = System.getenv("LIBRARY_VERSION") ?: "6.0.4"
-val cloudsmithRepo = System.getenv("CLOUDSMITH_REPO") ?: "cometchat/call-team"
-val libraryGroup = "com.cometchat"
-val libraryArtifact = "chatuikit-kotlin-android"
 android {
     namespace = "com.cometchat.uikit.kotlin"
     compileSdk = 36
@@ -81,66 +73,6 @@ roborazzi {
     outputDir.set(rootProject.file("screenshot-gallery"))
 }
 
-publishing {
-    repositories {
-
-        maven {
-            url = uri("$projectDir/distribution")
-        }
-
-        maven {
-            name = "cloudsmith"
-            url = uri("https://api-g.cloudsmith.io/maven/$cloudsmithRepo")
-
-            credentials {
-                val properties = Properties()
-                properties.load(project.rootProject.file("local.properties").inputStream())
-                username = properties.getProperty("cloudsmith.username")
-                password = properties.getProperty("cloudsmith.apikey")
-            }
-        }
-    }
-
-    publications {
-        register<MavenPublication>("chatuikitkotlin") {
-            groupId = libraryGroup
-            artifactId = libraryArtifact
-            version = libraryVersion
-
-            artifact("${layout.buildDirectory.get()}/outputs/aar/chatuikit-kotlin-release.aar")
-
-            pom {
-                name.set("CometChatUIKitKotlin")
-                description.set("CometChat virtual chat builder for Android")
-                url.set("https://www.cometchat.com")
-
-                licenses {
-                    license {
-                        name.set("CometChat License")
-                        url.set("https://www.cometchat.com/terms")
-                    }
-                }
-
-                withXml {
-                    val dependenciesNode = asNode().appendNode("dependencies")
-                    val compileDeps = project.configurations.getByName("implementation").allDependencies
-                        .filter { dep ->
-                            dep.group != null && dep.version != null &&
-                                dep.name != "unspecified" &&
-                                dep.javaClass.simpleName != "DefaultSelfResolvingDependency"
-                        }
-                    compileDeps.forEach { dep ->
-                        val depNode = dependenciesNode.appendNode("dependency")
-                        depNode.appendNode("groupId", dep.group)
-                        depNode.appendNode("artifactId", dep.name)
-                        depNode.appendNode("version", dep.version)
-                        depNode.appendNode("scope", "compile")
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 configurations.all {
@@ -149,8 +81,8 @@ configurations.all {
 
 dependencies {
     // Core module – shared ViewModels and business logic (published artifact)
-    // implementation(libs.chatuikit.core.android)
-    implementation(project(":chatuikit-core"))
+    implementation(libs.chatuikit.core.android)
+    // implementation(project(":chatuikit-core"))
     // CometChat SDK
     implementation(libs.chat.sdk.android)
     compileOnly(libs.calls.sdk.android)

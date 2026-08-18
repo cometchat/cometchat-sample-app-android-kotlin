@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 /**
@@ -226,7 +227,11 @@ open class CometChatConversationsViewModel(
             val freshRequest = builder.build()
 
             refreshConversationListUseCase(freshRequest)
-                .onSuccess { conversations ->
+                .onSuccess { fetched ->
+                    // Deduplicate before publishing — the list is keyed by conversationId in the
+                    // UI, and a repeat would crash Compose on a duplicate key (ENG-35566). The
+                    // paginated fetch in fetchConversations() already does the same.
+                    val conversations = fetched.distinctBy { it.conversationId }
                     _conversations.value = conversations
                     _uiState.value = if (conversations.isEmpty()) {
                         UIState.Empty
@@ -1385,81 +1390,82 @@ open class CometChatConversationsViewModel(
     private fun updateConversation(conversation: Conversation, isActionMessage: Boolean) {
         if (conversation.lastMessage == null) return
         
-        val currentList = _conversations.value
-        val existingIndex = currentList.indexOfFirst { it.conversationId == conversation.conversationId }
-        
-        if (existingIndex >= 0) {
-            val oldConversation = currentList[existingIndex]
-            val loggedInUser = getLoggedInUserSafe()
-            val lastMessage = conversation.lastMessage
-            val isSentByMe = loggedInUser != null && 
-                lastMessage?.sender?.uid?.equals(loggedInUser.uid, ignoreCase = true) == true
-            
-            // Clone the conversation to create a new reference for Compose recomposition
-            val updatedConversation = conversation.clone()
-            
-            // Preserve the conversationWith from old conversation (it has more complete data)
-            updatedConversation.conversationWith = oldConversation.conversationWith
-            
-            if (isActionMessage) {
-                // For action messages, preserve the unread count
-                updatedConversation.unreadMessageCount = oldConversation.unreadMessageCount
-            } else if (isSentByMe) {
-                // For messages sent by current user, preserve unread count
-                updatedConversation.unreadMessageCount = oldConversation.unreadMessageCount
-            } else {
-                // For messages from others, check if it's a new message
-                val isNewMessage = oldConversation.lastMessage?.id != lastMessage?.id
-                val isNotRead = lastMessage?.readAt == 0L
-                
-                if (isNewMessage && isNotRead) {
-                    // Increment unread count for new unread messages
-                    updatedConversation.unreadMessageCount = oldConversation.unreadMessageCount + 1
-                } else {
-                    updatedConversation.unreadMessageCount = oldConversation.unreadMessageCount
+        val loggedInUser = getLoggedInUserSafe()
+        val lastMessage = conversation.lastMessage
+        val isSentByMe = loggedInUser != null &&
+            lastMessage?.sender?.uid?.equals(loggedInUser.uid, ignoreCase = true) == true
+
+        var applied = false
+
+        // Atomic read-modify-write. The SDK invokes the message listeners straight off the
+        // WebSocket thread — these callbacks are NOT wrapped in viewModelScope.launch — so a
+        // plain `_conversations.value = ...` here can interleave with the fetch coroutine on
+        // Main and leave the same conversationId in the list twice, which crashes the
+        // LazyColumn with "Key ... was already used" (ENG-35566). updateAndGet re-runs this
+        // block on contention, so it must stay free of side effects; the UI state and
+        // scroll event are published afterwards.
+        val newList = _conversations.updateAndGet { currentList ->
+            val existingIndex = currentList.indexOfFirst {
+                it.conversationId == conversation.conversationId
+            }
+
+            when {
+                existingIndex >= 0 -> {
+                    val oldConversation = currentList[existingIndex]
+
+                    // Clone the conversation to create a new reference for Compose recomposition
+                    val updatedConversation = conversation.clone()
+
+                    // Preserve the conversationWith from old conversation (it has more complete data)
+                    updatedConversation.conversationWith = oldConversation.conversationWith
+
+                    updatedConversation.unreadMessageCount = when {
+                        // Action messages and our own messages never bump the unread count
+                        isActionMessage || isSentByMe -> oldConversation.unreadMessageCount
+                        // A genuinely new, unread message from someone else does
+                        oldConversation.lastMessage?.id != lastMessage?.id && lastMessage?.readAt == 0L ->
+                            oldConversation.unreadMessageCount + 1
+                        else -> oldConversation.unreadMessageCount
+                    }
+
+                    applied = true
+                    // Move updated conversation to top
+                    currentList.toMutableList().apply {
+                        removeAt(existingIndex)
+                        add(0, updatedConversation)
+                    }
+                }
+
+                // Conversation not in list, check if it should be added based on filter
+                isAddToConversationList(conversation) -> {
+                    val updatedConversation = conversation.clone()
+
+                    // Set unread count to 1 for new conversations from others (not action messages)
+                    if (!isSentByMe && !isActionMessage && lastMessage !is Action) {
+                        updatedConversation.unreadMessageCount = 1
+                    }
+
+                    applied = true
+                    buildList {
+                        add(updatedConversation)
+                        addAll(currentList)
+                    }
+                }
+
+                else -> {
+                    applied = false
+                    currentList
                 }
             }
-            
-            // Move updated conversation to top efficiently
-            val newList = currentList.toMutableList().apply {
-                removeAt(existingIndex)
-                add(0, updatedConversation)
-            }
-            
-            _conversations.value = newList
-            _uiState.value = UIState.Content(newList)
-            
-            // Emit scroll to top event when conversation moves to top
-            viewModelScope.launch {
-                _scrollToTopEvent.emit(Unit)
-            }
-        } else {
-            // Conversation not in list, check if it should be added based on filter
-            if (isAddToConversationList(conversation)) {
-                val updatedConversation = conversation.clone()
-                val loggedInUser = getLoggedInUserSafe()
-                val lastMessage = conversation.lastMessage
-                val isSentByMe = loggedInUser != null && 
-                    lastMessage?.sender?.uid?.equals(loggedInUser.uid, ignoreCase = true) == true
-                
-                // Set unread count to 1 for new conversations from others (not action messages)
-                if (!isSentByMe && !isActionMessage && lastMessage !is Action) {
-                    updatedConversation.unreadMessageCount = 1
-                }
-                
-                val newList = buildList {
-                    add(updatedConversation)
-                    addAll(currentList)
-                }
-                
-                _conversations.value = newList
-                _uiState.value = UIState.Content(newList)
-                
-                // Emit scroll to top event for new conversation added at top
-                viewModelScope.launch {
-                    _scrollToTopEvent.emit(Unit)
-                }
-            }
+        }
+
+        if (!applied) return
+
+        _uiState.value = UIState.Content(newList)
+
+        // Emit scroll to top event when a conversation reaches the top
+        viewModelScope.launch {
+            _scrollToTopEvent.emit(Unit)
         }
     }
     
@@ -1496,7 +1502,9 @@ open class CometChatConversationsViewModel(
      * @param item The conversation to add
      */
     override fun addItem(item: Conversation) {
-        listDelegate.addItem(item)
+        val accepted = rejectAlreadyPresent(listOf(item))
+        if (accepted.isEmpty()) return
+        listDelegate.addItem(accepted.first())
         updateUIStateFromList()
     }
     
@@ -1507,8 +1515,26 @@ open class CometChatConversationsViewModel(
      * @param items The conversations to add
      */
     override fun addItems(items: List<Conversation>) {
-        listDelegate.addItems(items)
+        val accepted = rejectAlreadyPresent(items)
+        if (accepted.isEmpty()) return
+        listDelegate.addItems(accepted)
         updateUIStateFromList()
+    }
+
+    /**
+     * Drops conversations already present in the list, and duplicates within [items] itself.
+     *
+     * The list is keyed by `conversationId` in the UI, so appending a conversation that is
+     * already rendered crashes Compose with
+     * `IllegalArgumentException("Key ... was already used")` (ENG-35566). Conversations without
+     * an id cannot be compared and are passed through — the render layer keys those by identity.
+     */
+    private fun rejectAlreadyPresent(items: List<Conversation>): List<Conversation> {
+        val present = _conversations.value.mapNotNull { it.conversationId }.toMutableSet()
+        return items.filter { conversation ->
+            val id = conversation.conversationId ?: return@filter true
+            present.add(id)
+        }
     }
     
     /**

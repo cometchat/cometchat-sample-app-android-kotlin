@@ -277,6 +277,30 @@ interface MessageListRepository {
     )
 
     /**
+     * Returns the message types the configured [MessagesRequest] actually filters on.
+     *
+     * When the caller supplies a custom [MessagesRequest.MessagesRequestBuilder] its types win
+     * over the defaults passed to [configureForUser]/[configureForGroup], so this is the only
+     * reliable source of the filter that is really in effect. Consumers use it to apply the
+     * same filter to messages arriving over the WebSocket, which would otherwise bypass it
+     * entirely (ENG-38259).
+     *
+     * An empty list means "no type restriction".
+     *
+     * @see getEffectiveMessagesCategories
+     */
+    fun getEffectiveMessagesTypes(): List<String> = emptyList()
+
+    /**
+     * Returns the message categories the configured [MessagesRequest] actually filters on.
+     *
+     * An empty list means "no category restriction".
+     *
+     * @see getEffectiveMessagesTypes
+     */
+    fun getEffectiveMessagesCategories(): List<String> = emptyList()
+
+    /**
      * Fetches messages surrounding a specific message ID.
      *
      * This method is used by the `goToMessage` functionality to fetch messages

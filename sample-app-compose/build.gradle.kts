@@ -14,7 +14,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "6.0.4"
+        versionName = "6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -92,7 +92,7 @@ dependencies {
     testImplementation(libs.kotest.property)
     
     // JUnit Vintage engine to run JUnit 4 tests alongside JUnit 5
-    testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.vintage.engine.v582)
     
     // Android instrumentation tests
     androidTestImplementation(platform(libs.androidx.compose.bom))

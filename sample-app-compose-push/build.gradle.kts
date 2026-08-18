@@ -14,21 +14,13 @@ android {
     namespace = "com.cometchat.sampleapp.compose.push"
     compileSdk = 36
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("cometchat-release.keystore")
-            storePassword = "cometchat123"
-            keyAlias = "cometchat-debug"
-            keyPassword = "cometchat123"
-        }
-    }
 
     defaultConfig {
         applicationId = "com.cometchat.sampleapp.compose.push"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "6.0.4"
+        versionName = "6.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -41,7 +33,6 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
