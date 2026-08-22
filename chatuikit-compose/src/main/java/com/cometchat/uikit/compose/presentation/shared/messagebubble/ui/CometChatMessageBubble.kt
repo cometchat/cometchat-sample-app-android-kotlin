@@ -555,7 +555,10 @@ fun CometChatMessageBubble(
                 showTime = showTimeInStatusInfo,
                 hideReceipts = hideReceipts,
                 timeFormat = timeFormat,
-                dateTimeFormatter = dateTimeFormatter
+                dateTimeFormatter = dateTimeFormatter,
+                // Per-bubble-type styles cannot carry messageReceiptStyle, so mergeWithBase
+                // drops it from effectiveStyle. Source it from the base style directly.
+                receiptStyle = baseStyle.messageReceiptStyle
             ) }
     }
 

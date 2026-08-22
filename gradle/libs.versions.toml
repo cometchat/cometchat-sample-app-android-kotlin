@@ -1,9 +1,9 @@
 [versions]
 agp = "8.9.1"
 cardsAndroid = "1.0.0"
-chatuikitComposeAndroid = "6.0.5"
-chatuikitCoreAndroid = "6.0.5"
-chatuikitKotlinAndroid = "6.0.5"
+chatuikitComposeAndroid = "6.0.6"
+chatuikitCoreAndroid = "6.0.6"
+chatuikitKotlinAndroid = "6.0.6"
 coreTesting = "2.2.0"
 espressoContrib = "3.7.0"
 junitVintageEngine = "6.1.1"
