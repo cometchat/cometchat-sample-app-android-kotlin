@@ -53,10 +53,9 @@ class CometChatNotificationFeedViewModelTest {
     @Test
     fun `groupByTimestamp groups today items under Today label`() {
         val viewModel = createViewModel()
-        val now = System.currentTimeMillis() / 1000
         val items = listOf(
-            createFeedItem("1", sentAt = now - 60),      // 1 minute ago
-            createFeedItem("2", sentAt = now - 3600)     // 1 hour ago
+            createFeedItem("1", sentAt = todayAt(hour = 12)),
+            createFeedItem("2", sentAt = todayAt(hour = 11))
         )
 
         val result = viewModel.groupByTimestamp(items)
@@ -87,10 +86,9 @@ class CometChatNotificationFeedViewModelTest {
     @Test
     fun `groupByTimestamp preserves item order within groups (newest first)`() {
         val viewModel = createViewModel()
-        val now = System.currentTimeMillis() / 1000
         val items = listOf(
-            createFeedItem("1", sentAt = now - 3600),    // older
-            createFeedItem("2", sentAt = now - 60)       // newer
+            createFeedItem("1", sentAt = todayAt(hour = 11)),   // older
+            createFeedItem("2", sentAt = todayAt(hour = 12))    // newer
         )
 
         val result = viewModel.groupByTimestamp(items)
@@ -203,3 +201,17 @@ class CometChatNotificationFeedViewModelTest {
 
     // endregion
 }
+
+/**
+ * A timestamp at a fixed hour of the current day, in seconds.
+ *
+ * Tests that need "earlier today" must anchor to the day rather than subtract from `now`:
+ * `now - 3600` lands on the previous day whenever the suite runs between midnight and 01:00,
+ * which turned several same-day assertions into after-midnight failures.
+ */
+private fun todayAt(hour: Int): Long = Calendar.getInstance().apply {
+    set(Calendar.HOUR_OF_DAY, hour)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
+}.timeInMillis / 1000

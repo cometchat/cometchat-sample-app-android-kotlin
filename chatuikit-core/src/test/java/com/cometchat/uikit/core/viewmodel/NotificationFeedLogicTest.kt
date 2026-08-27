@@ -34,10 +34,11 @@ class NotificationFeedLogicTest : FunSpec({
     }
 
     test("groupByTimestamp groups today items under Today label") {
-        val now = System.currentTimeMillis() / 1000
+        // Anchored to midday today, not `now - 3600`: an hour before 00:30 is yesterday,
+        // which split these into two groups for anyone running the suite just after midnight.
         val items = listOf(
-            createFeedItem("1", sentAt = now - 60),
-            createFeedItem("2", sentAt = now - 3600)
+            createFeedItem("1", sentAt = todayAt(hour = 12)),
+            createFeedItem("2", sentAt = todayAt(hour = 11))
         )
         val result = groupByTimestamp(items)
         result shouldHaveSize 1
@@ -58,10 +59,9 @@ class NotificationFeedLogicTest : FunSpec({
     }
 
     test("groupByTimestamp preserves item order within groups newest first") {
-        val now = System.currentTimeMillis() / 1000
         val items = listOf(
-            createFeedItem("1", sentAt = now - 3600),
-            createFeedItem("2", sentAt = now - 60)
+            createFeedItem("1", sentAt = todayAt(hour = 11)),
+            createFeedItem("2", sentAt = todayAt(hour = 12))
         )
         val result = groupByTimestamp(items)
         result shouldHaveSize 1
@@ -281,3 +281,17 @@ private fun createFeedItem(
 }
 
 // endregion
+
+/**
+ * A timestamp at a fixed hour of the current day, in seconds.
+ *
+ * Tests that need "earlier today" must anchor to the day rather than subtract from `now`:
+ * `now - 3600` lands on the previous day whenever the suite runs between midnight and 01:00,
+ * which turned several same-day assertions into after-midnight failures.
+ */
+private fun todayAt(hour: Int): Long = Calendar.getInstance().apply {
+    set(Calendar.HOUR_OF_DAY, hour)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
+}.timeInMillis / 1000

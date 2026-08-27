@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.cometchat</groupId>
   <artifactId>chatuikit-core-android</artifactId>
-  <version>6.0.6</version>
+  <version>6.0.7</version>
   <packaging>aar</packaging>
   <name>CometChatUIKitCore</name>
   <description>CometChat virtual chat builder for Android</description>

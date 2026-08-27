@@ -1,5 +1,6 @@
 package com.cometchat.uikit.compose.presentation.shared.baseelements.date
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +42,7 @@ import java.util.Locale
  * @param pattern The display pattern to use (TIME, DAY_DATE, or DAY_DATE_TIME)
  * @param datePattern SimpleDateFormat pattern for full dates (default: "dd MMM yyyy")
  * @param dayPattern SimpleDateFormat pattern for day names (default: "EEE")
- * @param timePattern SimpleDateFormat pattern for time (default: "h:mm a")
+ * @param timePattern SimpleDateFormat pattern for time (default: the device 12/24-hour setting)
  * @param customDateString Optional custom string to display instead of formatted timestamp
  * @param transparentBackground If true, background will be transparent with no border/padding
  * @param style Styling configuration for the date. Use DateStyle.default() for theme-based defaults
@@ -105,7 +107,7 @@ fun CometChatDate(
     pattern: Pattern? = null,
     datePattern: String = "dd MMM yyyy",
     dayPattern: String = "EEE",
-    timePattern: String = "h:mm a",
+    timePattern: String = defaultTimePattern(),
     customDateString: String? = null,
     transparentBackground: Boolean = true,
     style: DateStyle = DateStyle.default(),
@@ -316,7 +318,7 @@ private fun getDayDateTime(
  * @param pattern The display pattern to use (TIME, DAY_DATE, or DAY_DATE_TIME)
  * @param datePattern SimpleDateFormat pattern for full dates (default: "dd MMM yyyy")
  * @param dayPattern SimpleDateFormat pattern for day names (default: "EEE")
- * @param timePattern SimpleDateFormat pattern for time (default: "h:mm a")
+ * @param timePattern SimpleDateFormat pattern for time (default: the device 12/24-hour setting)
  * @param transparentBackground If true, background will be transparent with no border/padding
  * @param style Styling configuration for the date
  * @param dateTimeFormatterCallback Optional callback for custom date/time formatting
@@ -337,7 +339,7 @@ fun CometChatDate(
     pattern: Pattern? = null,
     datePattern: String = "dd MMM yyyy",
     dayPattern: String = "EEE",
-    timePattern: String = "h:mm a",
+    timePattern: String = defaultTimePattern(),
     transparentBackground: Boolean = true,
     style: DateStyle = DateStyle.default(),
     dateTimeFormatterCallback: DateTimeFormatterCallback? = null
@@ -355,3 +357,15 @@ fun CometChatDate(
         dateTimeFormatterCallback = dateTimeFormatterCallback
     )
 }
+
+/**
+ * The time pattern used when a caller does not supply one.
+ *
+ * Follows the device's 12/24-hour setting rather than assuming AM/PM, so a phone set to a
+ * 24-hour clock renders 17:21 instead of 5:21 PM. Callers that pass an explicit pattern or
+ * a [DateTimeFormatterCallback] still win.
+ */
+@Composable
+@ReadOnlyComposable
+internal fun defaultTimePattern(): String =
+    if (DateFormat.is24HourFormat(LocalContext.current)) "HH:mm" else "h:mm a"

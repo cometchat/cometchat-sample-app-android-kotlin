@@ -131,14 +131,16 @@ class MessageListUtilsTest {
 
     @Test
     fun `shouldShowDateSeparator returns false for same day messages`() {
-        val now = System.currentTimeMillis() / 1000
-        val oneHourAgo = now - 3600 // 1 hour ago
+        // Anchored to midday today, not `now - 3600`: an hour before 00:30 is yesterday,
+        // which made this fail for anyone running the suite just after midnight.
+        val middayToday = todayAt(hour = 12)
+        val anHourEarlierToday = todayAt(hour = 11)
 
         val currentMessage = mock(BaseMessage::class.java)
-        `when`(currentMessage.sentAt).thenReturn(now)
+        `when`(currentMessage.sentAt).thenReturn(middayToday)
 
         val previousMessage = mock(BaseMessage::class.java)
-        `when`(previousMessage.sentAt).thenReturn(oneHourAgo)
+        `when`(previousMessage.sentAt).thenReturn(anHourEarlierToday)
 
         val result = shouldShowDateSeparator(currentMessage, previousMessage)
 
@@ -218,3 +220,17 @@ class MessageListUtilsTest {
     }
 
 }
+
+/**
+ * A timestamp at a fixed hour of the current day, in seconds.
+ *
+ * Tests that need "earlier today" must anchor to the day rather than subtract from `now`:
+ * `now - 3600` lands on the previous day whenever the suite runs between midnight and 01:00,
+ * which turned several same-day assertions into after-midnight failures.
+ */
+private fun todayAt(hour: Int): Long = Calendar.getInstance().apply {
+    set(Calendar.HOUR_OF_DAY, hour)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
+}.timeInMillis / 1000

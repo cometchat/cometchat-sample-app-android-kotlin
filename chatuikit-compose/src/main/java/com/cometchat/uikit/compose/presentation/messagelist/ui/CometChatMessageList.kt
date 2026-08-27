@@ -74,8 +74,10 @@ import com.cometchat.uikit.compose.presentation.shared.aismartreplies.CometChatA
 import com.cometchat.uikit.compose.presentation.shared.dialog.CometChatConfirmDialog
 import com.cometchat.uikit.compose.presentation.shared.dialog.CometChatConfirmDialogStyle
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatMentionsFormatter
+import com.cometchat.uikit.compose.presentation.shared.baseelements.date.defaultTimePattern
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.formatters.FormatterUtils
+import com.cometchat.uikit.compose.presentation.shared.interfaces.DateTimeFormatterCallback
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.BubbleFactory
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.toFactoryMap
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatMessageBubble
@@ -103,6 +105,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * A composable that displays a list of messages in a chat interface.
@@ -323,6 +328,14 @@ import kotlinx.coroutines.launch
  *   Defaults to `false`.
  * @param hideStickyDate Whether to hide the sticky date header that appears at the top of
  *   the message list while scrolling. Defaults to `false`.
+ * @param timeFormat Pattern for the timestamp on each message bubble, e.g.
+ *   `SimpleDateFormat("HH:mm")`. Defaults to the device's 12/24-hour setting.
+ * @param dateFormat Pattern for date separators and the sticky date header, applied to dates
+ *   older than yesterday. "Today" and "Yesterday" come from string resources and are not
+ *   affected — use [dateTimeFormatter] to change those.
+ * @param dateTimeFormatter Callback for full control over both the bubble timestamps and the
+ *   date separators, per category. Takes precedence over [timeFormat] and [dateFormat]; every
+ *   method may return `null` to fall through to the default for that category.
  * @param timeStampAlignment Controls where the timestamp is displayed in message bubbles.
  *   - [UIKitConstants.TimeStampAlignment.TOP]: Timestamp in header view with sender name
  *   - [UIKitConstants.TimeStampAlignment.BOTTOM]: Timestamp in status info view (default)
@@ -551,6 +564,12 @@ fun CometChatMessageList(
     // Text formatters
     textFormatters: List<CometChatTextFormatter>? = null,
 
+    // Date/time formatting (parity with chatuikit-kotlin's setTimeFormat / setDateFormat /
+    // setDateTimeFormatter)
+    timeFormat: SimpleDateFormat? = null,
+    dateFormat: SimpleDateFormat? = null,
+    dateTimeFormatter: DateTimeFormatterCallback? = null,
+
     // BubbleFactory integration
     bubbleFactories: List<BubbleFactory> = emptyList(),
     
@@ -731,6 +750,24 @@ fun CometChatMessageList(
     val effectiveTextFormatters = textFormatters ?: remember(context) {
         listOf(CometChatMentionsFormatter(context))
     }
+
+    // Bubble timestamps: an explicit timeFormat wins over the device 12/24-hour default, and
+    // dateTimeFormatter.time() wins over both. The bubble renderers take a plain
+    // (sentAtSeconds) -> String, so adapt the callback here — it is handed milliseconds, as
+    // DateTimeFormatterCallback is everywhere else — and fall back per message when it
+    // declines to format one by returning null.
+    val effectiveTimePattern = timeFormat?.toPattern() ?: defaultTimePattern()
+    val bubbleDateTimeFormatter: ((Long) -> String)? =
+        remember(dateTimeFormatter, effectiveTimePattern) {
+            dateTimeFormatter?.let { callback ->
+                { sentAtSeconds: Long ->
+                    val millis = sentAtSeconds * 1000
+                    callback.time(millis)
+                        ?: SimpleDateFormat(effectiveTimePattern, Locale.getDefault())
+                            .format(Date(millis))
+                }
+            }
+        }
 
     // State for the long-pressed message and its computed options
     var longPressedMessage by remember { mutableStateOf<BaseMessage?>(null) }
@@ -1688,7 +1725,9 @@ fun CometChatMessageList(
                                         style = style,
                                         modifier = Modifier.graphicsLayer {
                                             alpha = if (isSeparatorHiddenByStickyHeader) 0f else 1f
-                                        }
+                                        },
+                                        dateFormat = dateFormat,
+                                        dateTimeFormatter = dateTimeFormatter
                                     )
                                 }
                                 
@@ -1793,7 +1832,9 @@ fun CometChatMessageList(
                                             // Pass -1 for highlightedMessageId since highlight is now at wrapper level
                                             highlightedMessageId = -1L,
                                             highlightAlpha = 0f,
-                                            textFormatters = effectiveTextFormatters
+                                            textFormatters = effectiveTextFormatters,
+                                            timeFormat = effectiveTimePattern,
+                                            dateTimeFormatter = bubbleDateTimeFormatter
                                         )
                                       }
                                     }
@@ -1832,7 +1873,9 @@ fun CometChatMessageList(
                         StickyDateHeader(
                             timestamp = topmostVisibleMessageTimestamp,
                             style = style,
-                            modifier = Modifier.align(Alignment.TopCenter)
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            dateFormat = dateFormat,
+                            dateTimeFormatter = dateTimeFormatter
                         )
                     }
                     
@@ -2112,6 +2155,8 @@ fun CometChatMessageList(
                     shouldShowDefaultAvatar = false,
                     timeStampAlignment = timeStampAlignment,
                     textFormatters = effectiveTextFormatters,
+                    timeFormat = effectiveTimePattern,
+                    dateTimeFormatter = bubbleDateTimeFormatter,
                     textBubbleStyle = style.textBubbleStyle,
                     imageBubbleStyle = style.imageBubbleStyle,
                     videoBubbleStyle = style.videoBubbleStyle,

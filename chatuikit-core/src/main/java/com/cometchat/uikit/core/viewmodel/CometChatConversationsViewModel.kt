@@ -1012,21 +1012,43 @@ open class CometChatConversationsViewModel(
     }
     
     /**
-     * Updates a conversation in the list without moving it to top.
-     * Used for updating conversation properties like unread count from external events.
-     * 
-     * @param conversation The conversation with updated properties
+     * Applies an externally supplied [Conversation] onto the matching entry in the list
+     * without moving it to the top.
+     *
+     * Merge semantics: every field the caller actually supplied is taken, and the rest of
+     * the existing entry is preserved. This is what lets an integrator refresh
+     * [Conversation.conversationWith] — a [com.cometchat.chat.models.Group] whose metadata
+     * changed server-side, say — for which the SDK emits no real-time event.
+     *
+     * The counters — [Conversation.unreadMessageCount], [Conversation.unreadMentionsCount],
+     * [Conversation.lastReadMessageId] and [Conversation.latestMessageId] — are always taken
+     * from [conversation]. An `Int`/`Long` has no "unset" value to tell apart from a deliberate
+     * zero (marking a conversation read), so the supplied object stays authoritative for them.
+     * A caller pushing an update for some other reason should source the conversation from the
+     * SDK rather than hand-building one, so the counters carry real values:
+     *
+     * ```kotlin
+     * CometChat.getConversation(guid, CometChatConstants.CONVERSATION_TYPE_GROUP,
+     *     object : CometChat.CallbackListener<Conversation>() {
+     *         override fun onSuccess(conversation: Conversation) {
+     *             CometChatEvents.emitConversationEvent(ConversationUpdated(conversation))
+     *         }
+     *         override fun onError(e: CometChatException) = Unit
+     *     })
+     * ```
+     *
+     * [CometChatHelper.getConversationFromMessage] avoids the network call but leaves every
+     * counter at zero, so anything built that way must carry the current values over first.
+     *
+     * Visibility is `internal` rather than `private` so unit tests can drive it directly;
+     * it is not part of the public API.
+     *
+     * @param conversation The conversation carrying the updated properties.
      */
-    private fun updateConversationInList(conversation: Conversation) {
-        _conversations.value = _conversations.value.map {
-            if (it.conversationId == conversation.conversationId) {
-                // Clone and update unread count (matching Java behavior)
-                it.clone().apply { 
-                    unreadMessageCount = conversation.unreadMessageCount 
-                }
-            } else {
-                it
-            }
+    internal fun updateConversationInList(conversation: Conversation) {
+        _conversations.value = _conversations.value.map { existing ->
+            if (existing.conversationId != conversation.conversationId) existing
+            else mergeConversationUpdate(existing, conversation)
         }
     }
     
@@ -1675,3 +1697,28 @@ open class CometChatConversationsViewModel(
         soundManager = null
     }
 }
+
+/**
+ * Merges an externally supplied conversation onto an existing list entry.
+ *
+ * See [CometChatConversationsViewModel.updateConversationInList] for the reasoning; this is
+ * the merge itself, kept free of the ViewModel so it can be exercised directly.
+ *
+ * @param existing The entry currently in the list.
+ * @param update The conversation carrying the updated properties.
+ */
+internal fun mergeConversationUpdate(existing: Conversation, update: Conversation): Conversation =
+    existing.clone().apply {
+        // Counters are taken unconditionally: an Int/Long has no "unset" value to tell apart
+        // from a deliberate zero, so the supplied object stays authoritative for them.
+        unreadMessageCount = update.unreadMessageCount
+        unreadMentionsCount = update.unreadMentionsCount
+        lastReadMessageId = update.lastReadMessageId
+        latestMessageId = update.latestMessageId
+        // Reference fields are taken only when supplied, so a caller refreshing one of them
+        // does not blank the others.
+        update.conversationWith?.let { conversationWith = it }
+        update.lastMessage?.let { lastMessage = it }
+        update.tags?.let { tags = it }
+        if (update.updatedAt > 0) updatedAt = update.updatedAt
+    }

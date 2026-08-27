@@ -87,6 +87,7 @@ import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.Comet
 import com.cometchat.uikit.compose.presentation.imageviewer.ui.CometChatImageViewerActivity
 import com.cometchat.uikit.compose.calls.CometChatCallActivity
 import com.cometchat.uikit.compose.presentation.shared.baseelements.date.CometChatDate
+import com.cometchat.uikit.compose.presentation.shared.baseelements.date.defaultTimePattern
 import com.cometchat.uikit.compose.presentation.shared.baseelements.date.DateStyle
 import com.cometchat.uikit.compose.presentation.shared.baseelements.date.Pattern
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMessageBubbleStyle
@@ -1769,7 +1770,7 @@ internal object InternalContentRenderer {
                 CometChatDate(
                     timestamp = message.sentAt,
                     pattern = Pattern.TIME,
-                    timePattern = timeFormat ?: "h:mm a",
+                    timePattern = timeFormat ?: defaultTimePattern(),
                     customDateString = customDateString,
                     modifier = if (shouldShowName) Modifier.padding(start = 5.dp) else Modifier
                 )
@@ -1863,7 +1864,7 @@ internal object InternalContentRenderer {
                 CometChatDate(
                     timestamp = message.sentAt,
                     pattern = Pattern.TIME,
-                    timePattern = timeFormat ?: "h:mm a",
+                    timePattern = timeFormat ?: defaultTimePattern(),
                     customDateString = customDateString,
                     style = DateStyle.default(
                         textColor = style.timestampTextColor,

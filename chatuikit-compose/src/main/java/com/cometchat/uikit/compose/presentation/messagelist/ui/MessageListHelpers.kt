@@ -40,6 +40,7 @@ import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagelist.style.CometChatMessageListStyle
+import com.cometchat.uikit.compose.presentation.shared.interfaces.DateTimeFormatterCallback
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -55,14 +56,18 @@ import java.util.Locale
  * @param timestamp The timestamp in seconds to display
  * @param style The message list style containing date separator styling
  * @param modifier Optional modifier for the composable
+ * @param dateFormat Optional pattern for dates older than yesterday
+ * @param dateTimeFormatter Optional callback taking precedence over [dateFormat]
  */
 @Composable
 internal fun DateSeparator(
     timestamp: Long,
     style: CometChatMessageListStyle,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dateFormat: SimpleDateFormat? = null,
+    dateTimeFormatter: DateTimeFormatterCallback? = null
 ) {
-    val formattedDate = remember(timestamp) { formatDateSeparator(timestamp) }
+    val formattedDate = rememberDateSeparatorText(timestamp, dateFormat, dateTimeFormatter)
     val accessibilityDescription = "Date separator: $formattedDate"
     
     Box(
@@ -413,14 +418,18 @@ internal fun DefaultNewMessageIndicator(
  * @param timestamp The timestamp in seconds of the topmost visible message
  * @param style The message list style containing date separator styling
  * @param modifier Optional modifier for the composable
+ * @param dateFormat Optional pattern for dates older than yesterday
+ * @param dateTimeFormatter Optional callback taking precedence over [dateFormat]
  */
 @Composable
 internal fun StickyDateHeader(
     timestamp: Long,
     style: CometChatMessageListStyle,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dateFormat: SimpleDateFormat? = null,
+    dateTimeFormatter: DateTimeFormatterCallback? = null
 ) {
-    val formattedDate = remember(timestamp) { formatDateSeparator(timestamp) }
+    val formattedDate = rememberDateSeparatorText(timestamp, dateFormat, dateTimeFormatter)
     val accessibilityDescription = "Current date: $formattedDate"
     
     Box(
@@ -519,25 +528,96 @@ internal fun NewMessagesSeparator(
  * @param timestamp The timestamp in seconds
  * @return The formatted date string
  */
-internal fun formatDateSeparator(timestamp: Long): String {
+/**
+ * Which bucket a date separator timestamp falls into.
+ *
+ * Split out so the localised, formatter-aware [rememberDateSeparatorText] and the plain
+ * [formatDateSeparator] fallback agree on where the day boundaries are.
+ */
+internal enum class DateSeparatorBucket { TODAY, YESTERDAY, OTHER }
+
+/**
+ * Buckets a timestamp relative to the current day.
+ *
+ * @param timestamp The timestamp in seconds
+ */
+internal fun dateSeparatorBucketOf(timestamp: Long): DateSeparatorBucket {
     val messageDate = Calendar.getInstance().apply {
         timeInMillis = timestamp * 1000
     }
-    
+
     val today = Calendar.getInstance()
     val yesterday = Calendar.getInstance().apply {
         add(Calendar.DAY_OF_YEAR, -1)
     }
-    
+
     return when {
-        isSameDay(messageDate, today) -> "Today"
-        isSameDay(messageDate, yesterday) -> "Yesterday"
-        else -> {
-            val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
-            dateFormat.format(Date(timestamp * 1000))
-        }
+        isSameDay(messageDate, today) -> DateSeparatorBucket.TODAY
+        isSameDay(messageDate, yesterday) -> DateSeparatorBucket.YESTERDAY
+        else -> DateSeparatorBucket.OTHER
     }
 }
+
+/**
+ * Resolves the text shown in a date separator or sticky date header.
+ *
+ * Precedence matches the XML UI Kit: [dateTimeFormatter] is asked first and a non-null
+ * answer wins; otherwise "today" and "yesterday" come from the localised string
+ * resources and older dates fall back to [dateFormat], then to [formatDateSeparator].
+ *
+ * Timestamps are handed to the callback in milliseconds, as they are everywhere else
+ * [DateTimeFormatterCallback] is used.
+ *
+ * @param timestamp The timestamp in seconds
+ * @param dateFormat Optional pattern for dates older than yesterday
+ * @param dateTimeFormatter Optional callback taking precedence over [dateFormat]
+ */
+@Composable
+internal fun rememberDateSeparatorText(
+    timestamp: Long,
+    dateFormat: SimpleDateFormat?,
+    dateTimeFormatter: DateTimeFormatterCallback?
+): String {
+    val todayText = stringResource(R.string.cometchat_today)
+    val yesterdayText = stringResource(R.string.cometchat_yesterday)
+    return remember(timestamp, dateFormat, dateTimeFormatter, todayText, yesterdayText) {
+        resolveDateSeparatorText(timestamp, dateFormat, dateTimeFormatter, todayText, yesterdayText)
+    }
+}
+
+/**
+ * The precedence itself, free of Compose so it can be exercised directly.
+ *
+ * @param timestamp The timestamp in seconds
+ * @param dateFormat Optional pattern for dates older than yesterday
+ * @param dateTimeFormatter Optional callback taking precedence over [dateFormat]
+ * @param todayText Localised text for today, used when the callback declines
+ * @param yesterdayText Localised text for yesterday, used when the callback declines
+ */
+internal fun resolveDateSeparatorText(
+    timestamp: Long,
+    dateFormat: SimpleDateFormat?,
+    dateTimeFormatter: DateTimeFormatterCallback?,
+    todayText: String,
+    yesterdayText: String
+): String {
+    val millis = timestamp * 1000
+    return when (dateSeparatorBucketOf(timestamp)) {
+        DateSeparatorBucket.TODAY -> dateTimeFormatter?.today(millis) ?: todayText
+        DateSeparatorBucket.YESTERDAY -> dateTimeFormatter?.yesterday(millis) ?: yesterdayText
+        DateSeparatorBucket.OTHER -> dateTimeFormatter?.otherDays(millis)
+            ?: dateFormat?.format(Date(millis))
+            ?: formatDateSeparator(timestamp)
+    }
+}
+
+internal fun formatDateSeparator(timestamp: Long): String =
+    when (dateSeparatorBucketOf(timestamp)) {
+        DateSeparatorBucket.TODAY -> "Today"
+        DateSeparatorBucket.YESTERDAY -> "Yesterday"
+        DateSeparatorBucket.OTHER ->
+            SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(timestamp * 1000))
+    }
 
 /**
  * Checks if two calendar instances represent the same day.
