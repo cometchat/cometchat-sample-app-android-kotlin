@@ -197,4 +197,36 @@ sealed class CometChatMessageEvent {
     data class InteractionGoalCompleted(
         val receipt: InteractionReceipt
     ) : CometChatMessageEvent()
+
+    /**
+     * Event emitted when a message is pinned (conversation-wide).
+     * @param message The pinned message (carries pinnedAt/pinnedBy)
+     */
+    data class MessagePinned(
+        val message: BaseMessage
+    ) : CometChatMessageEvent()
+
+    /**
+     * Event emitted when a message is unpinned.
+     * @param message The unpinned message (pin attributes cleared)
+     */
+    data class MessageUnpinned(
+        val message: BaseMessage
+    ) : CometChatMessageEvent()
+
+    /**
+     * Event emitted when a message is saved by the current user (private).
+     * @param message The saved message (carries savedAt)
+     */
+    data class MessageSaved(
+        val message: BaseMessage
+    ) : CometChatMessageEvent()
+
+    /**
+     * Event emitted when a message is unsaved by the current user.
+     * @param message The unsaved message (savedAt cleared)
+     */
+    data class MessageUnsaved(
+        val message: BaseMessage
+    ) : CometChatMessageEvent()
 }

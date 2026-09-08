@@ -1,5 +1,6 @@
 package com.cometchat.sampleapp.compose.ui.messages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,18 +13,24 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
@@ -88,6 +95,7 @@ fun MessagesScreen(
     onGroupDetailsClick: ((Group) -> Unit)? = null,
     onThreadClick: ((BaseMessage) -> Unit)? = null,
     onChatHistoryClick: ((User) -> Unit)? = null,
+    onPinnedMessagesClick: ((String?, String?) -> Unit)? = null,
     onNewChatClick: ((User) -> Unit)? = null
 ) {
     // State for user/group
@@ -150,6 +158,7 @@ fun MessagesScreen(
             onGroupDetailsClick = onGroupDetailsClick,
             onThreadClick = onThreadClick,
             onChatHistoryClick = onChatHistoryClick,
+            onPinnedMessagesClick = onPinnedMessagesClick,
             onNewChatClick = onNewChatClick
         )
     }
@@ -172,10 +181,21 @@ private fun MessagesContent(
     onGroupDetailsClick: ((Group) -> Unit)?,
     onThreadClick: ((BaseMessage) -> Unit)?,
     onChatHistoryClick: ((User) -> Unit)?,
+    onPinnedMessagesClick: ((String?, String?) -> Unit)?,
     onNewChatClick: ((User) -> Unit)?
 ) {
+    val viewModel: MessagesViewModel = viewModel()
+    val isBlockedByMe by viewModel.isBlockedByMe.collectAsState()
+    val isUnblocking by viewModel.isLoading.collectAsState()
+    val isGroupMember by viewModel.isGroupMember.collectAsState()
+
+    // Initialize the ViewModel with the loaded conversation entity
+    LaunchedEffect(user?.uid, group?.guid) {
+        viewModel.initialize(user, group)
+    }
+
     var showOverflowMenu by remember { mutableStateOf(false) }
-    
+
     val backgroundColor = CometChatTheme.colorScheme.backgroundColor1
     
     Scaffold(
@@ -232,6 +252,10 @@ private fun MessagesContent(
                                 showOverflowMenu = false
                                 user?.let { onUserDetailsClick?.invoke(it) }
                                 group?.let { onGroupDetailsClick?.invoke(it) }
+                            },
+                            onPinnedMessagesClick = {
+                                showOverflowMenu = false
+                                onPinnedMessagesClick?.invoke(user?.uid, group?.guid)
                             }
                         )
                     }
@@ -269,21 +293,66 @@ private fun MessagesContent(
                 }
             )
 
-            // Message Composer - for composing and sending messages
+            // Unblock notice (at bottom, replacing composer)
+            if (isBlockedByMe) {
+                BlockedUserBanner(
+                    isUnblocking = isUnblocking,
+                    onUnblockClick = { viewModel.unblockUser() },
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+
+            // Non-member notice (at bottom, replacing composer)
+            if (!isBlockedByMe && group != null && !isGroupMember) {
+                NonMemberBanner()
+            }
+
+            // Message Composer - for composing and sending messages (hidden when blocked or not a member)
             // Validates: Requirements 6.2, 6.6
-            CometChatMessageComposer(
-                modifier = Modifier.fillMaxWidth(),
-                user = user,
-                group = group,
-                layoutMode = ComposerLayoutMode.SINGLE_LINE,
-                enableRichTextFormatting = true,
-                // Set parent message ID for threaded conversations (from chat history)
-                parentMessageId = parentMessageId ?: -1,
-                onError = { exception ->
-                    // Error handling is done internally by the component
-                }
-            )
+            if (!isBlockedByMe && (group == null || isGroupMember)) {
+                CometChatMessageComposer(
+                    modifier = Modifier.fillMaxWidth(),
+                    user = user,
+                    group = group,
+                    layoutMode = ComposerLayoutMode.SINGLE_LINE,
+                    enableRichTextFormatting = true,
+                    // Set parent message ID for threaded conversations (from chat history)
+                    parentMessageId = parentMessageId ?: -1,
+                    onError = { exception ->
+                        // Error handling is done internally by the component
+                    }
+                )
+            }
         }
+    }
+}
+
+/**
+ * Notice shown in place of the composer when the user is no longer a member of the group.
+ * A top separator over centered body text.
+ */
+@Composable
+private fun NonMemberBanner() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(CometChatTheme.colorScheme.backgroundColor1)
+    ) {
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = CometChatTheme.colorScheme.strokeColorLight
+        )
+        Text(
+            // Qualified: the file-level `R` import is the UIKit's, not this app's.
+            text = stringResource(id = com.cometchat.sampleapp.compose.R.string.app_block_user_unable_to_send_message),
+            style = CometChatTheme.typography.bodyRegular,
+            color = CometChatTheme.colorScheme.textColorPrimary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 16.dp)
+                .padding(horizontal = 16.dp)
+        )
     }
 }
 
@@ -300,17 +369,31 @@ private fun MessagesContent(
 private fun MessagesOverflowMenu(
     showMenu: Boolean,
     onDismiss: () -> Unit,
-    onDetailsClick: () -> Unit
+    onDetailsClick: () -> Unit,
+    onPinnedMessagesClick: () -> Unit
 ) {
-    val menuItems = listOf(
-        MenuItem(
-            id = "details",
-            name = "Details",
-            startIcon = painterResource(id = R.drawable.cometchat_ic_info),
-            onClick = onDetailsClick
+    val menuItems = buildList {
+        // Pinned messages — gated on the SDK Pin Message feature flag.
+        if (com.cometchat.uikit.core.CometChatUIKit.isPinMessageEnabled()) {
+            add(
+                MenuItem(
+                    id = "pinned_messages",
+                    name = "Pinned messages",
+                    startIcon = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                    onClick = onPinnedMessagesClick
+                )
+            )
+        }
+        add(
+            MenuItem(
+                id = "details",
+                name = "Details",
+                startIcon = painterResource(id = R.drawable.cometchat_ic_info),
+                onClick = onDetailsClick
+            )
         )
-    )
-    
+    }
+
     CometChatPopupMenu(
         expanded = showMenu,
         onDismissRequest = onDismiss,

@@ -140,7 +140,8 @@ class CardMessageOptionsPropertyTest : FunSpec({
         println("    → card options: $cardOptions")
 
         // Card = Text - {EDIT, COPY, TRANSLATE, SHARE} (not meaningful for rich cards),
-        // preserving the text option ordering.
+        // preserving the text option ordering. Pin/save stay: they apply to every pinnable
+        // type — text, media, custom (sticker/poll/whiteboard) and cards alike.
         val excluded = setOf(
             UIKitConstants.MessageOption.EDIT,
             UIKitConstants.MessageOption.COPY,

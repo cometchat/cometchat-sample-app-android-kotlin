@@ -26,9 +26,18 @@ class MessagesViewModel : ViewModel() {
     private val _group = MutableStateFlow<Group?>(null)
     val group: StateFlow<Group?> = _group.asStateFlow()
     
+    /** Either direction of blocking — drives the call buttons, which neither side can use. */
     private val _isBlocked = MutableStateFlow(false)
     val isBlocked: StateFlow<Boolean> = _isBlocked.asStateFlow()
-    
+
+    /**
+     * Only "I blocked them" — drives the unblock banner and composer, since being blocked by the
+     * other user is not something this user can undo. Matches the Kotlin app, which keys the
+     * unblock layout off user.isBlockedByMe alone.
+     */
+    private val _isBlockedByMe = MutableStateFlow(false)
+    val isBlockedByMe: StateFlow<Boolean> = _isBlockedByMe.asStateFlow()
+
     private val _isGroupMember = MutableStateFlow(true)
     val isGroupMember: StateFlow<Boolean> = _isGroupMember.asStateFlow()
     
@@ -54,6 +63,7 @@ class MessagesViewModel : ViewModel() {
         
         user?.let {
             _isBlocked.value = it.isBlockedByMe || it.isHasBlockedMe
+            _isBlockedByMe.value = it.isBlockedByMe
             addUserListener()
 
             // Fetch fresh user data from server to get current blocked status
@@ -61,6 +71,7 @@ class MessagesViewModel : ViewModel() {
                 override fun onSuccess(freshUser: User) {
                     _user.value = freshUser
                     _isBlocked.value = freshUser.isBlockedByMe || freshUser.isHasBlockedMe
+                    _isBlockedByMe.value = freshUser.isBlockedByMe
                 }
 
                 override fun onError(e: CometChatException) {
@@ -90,7 +101,8 @@ class MessagesViewModel : ViewModel() {
                     _isLoading.value = false
                     currentUser.isBlockedByMe = false
                     CometChatEvents.emitUserEvent(CometChatUserEvent.UserUnblocked(currentUser))
-                    _isBlocked.value = false
+                    _isBlocked.value = currentUser.isHasBlockedMe
+                    _isBlockedByMe.value = false
                     Log.d(TAG, "User unblocked successfully")
                 }
                 
@@ -119,6 +131,7 @@ class MessagesViewModel : ViewModel() {
                     currentUser.isBlockedByMe = true
                     CometChatEvents.emitUserEvent(CometChatUserEvent.UserBlocked(currentUser))
                     _isBlocked.value = true
+                    _isBlockedByMe.value = true
                     Log.d(TAG, "User blocked successfully")
                 }
                 

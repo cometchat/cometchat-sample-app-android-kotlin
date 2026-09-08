@@ -627,6 +627,29 @@ class RichTextEditorController(
         return false
     }
 
+    // ==================== Programmatic Text Edits ====================
+
+    /**
+     * Insert [textToInsert] at the caret, replacing any active selection. The caret is moved to
+     * the end of the inserted text. Routed through [onTextChanged] so span and pending-format
+     * bookkeeping stays consistent (do not mutate [state] directly).
+     *
+     * Public entry point for custom trailing-toolbar buttons via [ComposerInputController].
+     */
+    fun insertAtCursor(textToInsert: String) {
+        val start = minOf(state.selectionStart, state.selectionEnd)
+        val end = maxOf(state.selectionStart, state.selectionEnd)
+        val newText = state.text.substring(0, start) + textToInsert + state.text.substring(end)
+        val caret = start + textToInsert.length
+        onTextChanged(newText, caret, caret)
+    }
+
+    /**
+     * Replace the current selection with [replacement]; degrades to [insertAtCursor] when the
+     * caret is collapsed.
+     */
+    fun replaceSelection(replacement: String) = insertAtCursor(replacement)
+
     // ==================== Format Toggle ====================
 
     /**

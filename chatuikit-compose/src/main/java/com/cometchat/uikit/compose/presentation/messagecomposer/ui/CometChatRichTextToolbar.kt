@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,6 +44,7 @@ import com.cometchat.uikit.core.formatter.RichTextFormat
  * @param onFormatClick Callback when a format button is clicked
  * @param onLinkClick Callback when the link button is clicked
  * @param onCloseClick Optional callback when the close button is clicked. When provided, a close (X) button is rendered at the start of the toolbar.
+ * @param trailingToolbarContent Optional consumer content rendered at the trailing end of the toolbar, after the built-in buttons and a UIKit-owned divider. Emitted inside the toolbar [RowScope]; guarded so the zero-content path is identical to today.
  */
 @Composable
 fun CometChatRichTextToolbar(
@@ -53,7 +55,8 @@ fun CometChatRichTextToolbar(
     enabledFormats: Set<RichTextFormat> = RichTextFormat.entries.toSet(),
     onFormatClick: (RichTextFormat) -> Unit = {},
     onLinkClick: () -> Unit = {},
-    onCloseClick: (() -> Unit)? = null
+    onCloseClick: (() -> Unit)? = null,
+    trailingToolbarContent: (@Composable RowScope.() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -254,6 +257,20 @@ fun CometChatRichTextToolbar(
                 activeBackgroundColor = style.richTextToolbarActiveIconBackgroundColor,
                 onClick = { onFormatClick(RichTextFormat.CODE_BLOCK) }
             )
+        }
+
+        // Trailing consumer content — rendered after a UIKit-owned divider (the same primitive
+        // as the built-in group separators). Guarded so an absent slot is byte-identical to today.
+        if (trailingToolbarContent != null) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(style.composeBoxStrokeColor)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            trailingToolbarContent()
         }
     }
 }

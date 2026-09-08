@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">művelet_elem</string>
     <string name="cometchat_try_again" translatable="true">Próbálja újra</string>
     <string name="cometchat_something_went_wrong" translatable="true">Hiba történt.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Nincs jogosultsága a művelet végrehajtásához.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Tulajdonjog átadása</string>
     <string name="cometchat_add_members" translatable="true">Tagok hozzáadása</string>
     <string name="cometchat_owner" translatable="true">Tulajdonos</string>
@@ -256,4 +257,53 @@ Kérjük, próbálja újra.</string>
     <string name="cometchat_notify_everyone_in_this_group">Mindenkit értesíteni ebben a csoportban</string>
     <string name="cometchat_notify_all" translatable="true">mindenkit</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Feliratkozás a szálra</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Leiratkozás a szálról</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Feliratkozva. Értesítést kap az új válaszokról ebben a szálban.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Feliratkozva. Értesítést kap az új válaszokról.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Leiratkozva. Az értesítések ki vannak kapcsolva, amíg nem válaszol vagy nem említik meg.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Leiratkozva. Az értesítések ki vannak kapcsolva, amíg nem válaszol vagy nem említik meg.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">A frissítés nem sikerült. Kérjük, próbálja újra.</string>
+    <string name="cometchat_thread_mute" translatable="true">Leiratkozás a szálról</string>
+    <string name="cometchat_thread_unmute" translatable="true">Feliratkozás a szálra</string>
+    <string name="cometchat_pin">Kitűzés</string>
+    <string name="cometchat_unpin">Kitűzés megszüntetése</string>
+    <string name="cometchat_unsave">Mentés visszavonása</string>
+    <string name="cometchat_pinned">Kitűzve</string>
+    <string name="cometchat_saved">Mentve</string>
+    <string name="cometchat_pin_message_confirm_title">Üzenet kitűzése</string>
+    <string name="cometchat_pin_message_confirm_body">Kitűzi ezt az üzenetet ebbe a beszélgetésbe?</string>
+    <string name="cometchat_unpin_message_confirm_title">Üzenet kitűzésének megszüntetése</string>
+    <string name="cometchat_unpin_message_confirm_body">Megszünteti az üzenet kitűzését?</string>
+    <string name="cometchat_save_message_confirm_title">Üzenet mentése</string>
+    <string name="cometchat_save_message_confirm_body">Menti ezt az üzenetet?</string>
+    <string name="cometchat_unsave_message_confirm_title">Üzenet mentésének visszavonása</string>
+    <string name="cometchat_unsave_message_confirm_body">Visszavonja az üzenet mentését?</string>
+    <string name="cometchat_pin_conversation">Beszélgetés kitűzése</string>
+    <string name="cometchat_unpin_conversation">Beszélgetés kitűzésének megszüntetése</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Beszélgetés kitűzésének megszüntetése</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Megszünteti a beszélgetés kitűzését?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Legfeljebb %1$d csevegést tűzhet ki. Szüntesse meg az egyik kitűzését, hogy másikat tűzhessen ki.</string>
+    <string name="cometchat_pin_limit_reached">Legfeljebb %1$d üzenetet tűzhet ki. Szüntesse meg az egyik kitűzését, hogy másikat tűzhessen ki.</string>
+    <string name="cometchat_save_limit_reached">Legfeljebb %1$d üzenetet menthet.</string>
+    <string name="cometchat_pin_save_generic_error">Hiba történt. Kérjük, próbálja újra.</string>
+    <string name="cometchat_message_pinned">Üzenet kitűzve</string>
+    <string name="cometchat_message_unpinned">Üzenet kitűzése megszüntetve</string>
+    <string name="cometchat_message_saved">Üzenet mentve</string>
+    <string name="cometchat_message_unsaved">Üzenet mentése visszavonva</string>
+    <string name="cometchat_no_pinned_messages">Még nincs kitűzött üzenet</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Tűzze ki a fontos üzeneteket, hogy könnyen megtalálja őket.</string>
+    <string name="cometchat_no_saved_messages">Még nincs mentett üzenet</string>
+    <string name="cometchat_no_saved_messages_subtitle">Mentsen üzeneteket, hogy bármikor kéznél legyenek.</string>
+    <string name="cometchat_pinned_messages">Kitűzött üzenetek</string>
+    <string name="cometchat_saved_messages">Mentett üzenetek</string>
+    <string name="cometchat_unpin_message">Üzenet kitűzésének megszüntetése</string>
+    <string name="cometchat_message_option_more">Több</string>
+    <string name="cometchat_message_option_back">Vissza</string>
+    <string name="cometchat_message_type_icon">Üzenettípus ikonja</string>
+    <string name="cometchat_pinned_messages_header">Kitűzött üzenetek</string>
+    <string name="cometchat_saved_messages_header">Mentett üzenetek</string>
+    <string name="cometchat_conversation_pinned">Beszélgetés kitűzve</string>
+    <string name="cometchat_conversation_unpinned">Beszélgetés kitűzése megszüntetve</string>
 </resources>

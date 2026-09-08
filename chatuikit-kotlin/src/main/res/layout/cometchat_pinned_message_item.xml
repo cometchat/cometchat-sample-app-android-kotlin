@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A single pinned-message row: the real message bubble (avatar + sender·date header + content +
+  pinned footer), rendered left-aligned so the sender/date shows for every pinned message regardless
+  of who sent it.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/cometchat_padding_2"
+    android:paddingTop="@dimen/cometchat_padding_2"
+    android:paddingEnd="@dimen/cometchat_padding_2"
+    android:paddingBottom="@dimen/cometchat_padding_2">
+
+    <com.cometchat.uikit.kotlin.presentation.shared.messagebubble.CometChatMessageBubble
+        android:id="@+id/pinned_item_bubble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</FrameLayout>

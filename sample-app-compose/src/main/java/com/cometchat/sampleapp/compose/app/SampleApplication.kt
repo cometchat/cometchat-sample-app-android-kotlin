@@ -151,6 +151,7 @@ class SampleApplication : Application() {
             .subscribePresenceForAllUsers()
             .setAutoEstablishSocketConnection(true)
             .setEnableCalling(true)
+            .setEnableThreadSubscription(true)
             .build()
 
         // Initialize the CometChat UIKit

@@ -40,11 +40,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/subtitle_text"
+            <!-- Time row: the timestamp keeps the start, the pin/save indicators sit at the END of
+                 the bubble, mirroring the footer other bubbles get from the shared status-info view
+                 (which the meet bubble hides because it draws its own timestamp). -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/cometchat_margin" />
+                android:layout_marginTop="@dimen/cometchat_margin"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/subtitle_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/meet_pin_indicator"
+                    android:layout_width="@dimen/cometchat_16dp"
+                    android:layout_height="@dimen/cometchat_16dp"
+                    android:layout_marginStart="@dimen/cometchat_margin_1"
+                    android:contentDescription="@string/cometchat_pinned"
+                    android:src="@drawable/cometchat_ic_pin_filled"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/meet_saved_indicator"
+                    android:layout_width="@dimen/cometchat_16dp"
+                    android:layout_height="@dimen/cometchat_16dp"
+                    android:layout_marginStart="@dimen/cometchat_margin_1"
+                    android:contentDescription="@string/cometchat_saved"
+                    android:src="@drawable/cometchat_ic_saved_filled"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

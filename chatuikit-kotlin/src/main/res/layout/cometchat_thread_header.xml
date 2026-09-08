@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
@@ -16,16 +17,34 @@
     <LinearLayout
         android:id="@+id/replies_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/tv_replies"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:paddingStart="@dimen/cometchat_padding_5"
             android:paddingTop="@dimen/cometchat_padding_1"
             android:paddingEnd="@dimen/cometchat_padding_5"
             android:paddingBottom="@dimen/cometchat_padding_1" />
+
+        <ImageView
+            android:id="@+id/iv_thread_subscription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="@dimen/cometchat_padding_2"
+            android:layout_marginEnd="@dimen/cometchat_margin_3"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/cometchat_thread_unmute"
+            android:src="@drawable/cometchat_ic_notifications_off"
+            android:visibility="gone"
+            app:tint="?attr/cometchatIconTintPrimary" />
 
     </LinearLayout>
 

@@ -159,6 +159,7 @@ class CometChatConversations @JvmOverloads constructor(
     private var backIconVisibility = GONE
     private var searchBoxVisibility = VISIBLE
     private var deleteConversationOptionVisibility = VISIBLE
+    private var pinConversationOptionVisibility = VISIBLE
     private var userStatusVisibility = VISIBLE
     private var groupTypeVisibility = VISIBLE
     private var receiptsVisibility = VISIBLE
@@ -698,6 +699,36 @@ class CometChatConversations @JvmOverloads constructor(
         if (options != null) {
             menuItems.addAll(options!!.invoke(context, conversation))
         } else {
+            // Pin / Unpin conversation (toggles on the conversation's current pin state), gated by
+            // the SDK feature flag. Backend RBAC is not applied to conversation pin.
+            // System-pinned conversations (pinned via the REST API, pinnedBy = "app_system") are not
+            // user-controllable, so neither pin nor unpin is offered for them.
+            if (pinConversationOptionVisibility == VISIBLE &&
+                com.cometchat.uikit.core.CometChatUIKit.isPinConversationEnabled() &&
+                !conversation.isSystemPinned
+            ) {
+                val isPinned = conversation.isPinned
+                menuItems.add(
+                    CometChatPopupMenu.MenuItem(
+                        if (isPinned) UIKitConstants.ConversationOption.UNPIN else UIKitConstants.ConversationOption.PIN,
+                        context.getString(if (isPinned) R.string.cometchat_unpin_conversation else R.string.cometchat_pin_conversation),
+                        ResourcesCompat.getDrawable(
+                            resources,
+                            if (isPinned) com.cometchat.uikit.core.R.drawable.cometchat_ic_pin_off else com.cometchat.uikit.core.R.drawable.cometchat_ic_pin,
+                            null
+                        ),
+                        null,
+                        // Neutral styling (0 = popup default) — pin is not a destructive action, so it
+                        // must NOT inherit the delete option's red tint/text color.
+                        0,
+                        0,
+                        0,
+                        0,
+                        null
+                    )
+                )
+            }
+
             // Add default delete option
             if (deleteConversationOptionVisibility == VISIBLE) {
                 menuItems.add(
@@ -743,8 +774,82 @@ class CometChatConversations @JvmOverloads constructor(
      * Handles default menu item clicks.
      */
     private fun handleDefaultMenuClick(item: CometChatPopupMenu.MenuItem, conversation: Conversation) {
-        if (item.id.equals(UIKitConstants.ConversationOption.DELETE, ignoreCase = true)) {
-            showDeleteConfirmationDialog(conversation)
+        when {
+            item.id.equals(UIKitConstants.ConversationOption.DELETE, ignoreCase = true) -> {
+                showDeleteConfirmationDialog(conversation)
+            }
+            item.id.equals(UIKitConstants.ConversationOption.PIN, ignoreCase = true) -> {
+                // Pinning is immediate — no confirmation dialog. (Unpin still confirms below.)
+                viewModel?.pinConversation(
+                    conversation,
+                    onSuccess = {
+                        android.widget.Toast.makeText(
+                            context,
+                            context.getString(R.string.cometchat_conversation_pinned),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    onError = { e ->
+                        android.widget.Toast.makeText(
+                            context,
+                            conversationPinErrorMessage(e),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
+            item.id.equals(UIKitConstants.ConversationOption.UNPIN, ignoreCase = true) -> {
+                showUnpinConfirmationDialog(conversation)
+            }
+        }
+    }
+
+    /** Controls whether the pin/unpin conversation option appears in the long-press menu. */
+    fun setPinConversationOptionVisibility(visibility: Int) {
+        pinConversationOptionVisibility = visibility
+    }
+
+    /**
+     * Shows the unpin confirmation dialog — the same dialog component as delete, but
+     * non-destructive: primary (purple) positive button, no icon. Only unpin confirms; pinning is
+     * immediate (see [handleDefaultMenuClick]).
+     */
+    /**
+     * User-facing message for a failed conversation PIN. When the pinned-conversation limit is hit,
+     * shows the cap (read from errorParams, never hard-coded); otherwise a generic error.
+     */
+    private fun conversationPinErrorMessage(e: com.cometchat.chat.exceptions.CometChatException?): String {
+        val limit = (e?.errorParams?.get("limit") as? Number)?.toInt()
+        return if (limit != null) {
+            context.getString(R.string.cometchat_pin_conversation_limit_reached, limit)
+        } else {
+            context.getString(R.string.cometchat_something_went_wrong)
+        }
+    }
+
+    private fun showUnpinConfirmationDialog(conversation: Conversation) {
+        val dialog = com.cometchat.uikit.kotlin.presentation.shared.dialog.CometChatConfirmDialog(
+            context, R.style.CometChatConfirmDialogStyle
+        )
+        dialog.apply {
+            hideDialogIcon(true)
+            setTitleText(context.getString(R.string.cometchat_unpin_conversation_confirm_title))
+            setSubtitleText(context.getString(R.string.cometchat_unpin_conversation_confirm_body))
+            setPositiveButtonText(context.getString(R.string.cometchat_unpin))
+            setNegativeButtonText(context.getString(R.string.cometchat_cancel))
+            setOnPositiveButtonClick {
+                dismiss()
+                viewModel?.unpinConversation(conversation) {
+                    android.widget.Toast.makeText(context, context.getString(R.string.cometchat_conversation_unpinned), android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            setOnNegativeButtonClick { dismiss() }
+            setConfirmDialogElevation(0)
+            setCancelable(false)
+            show()
+            // Override the destructive error-red positive button (reset by applyDefaultValues during
+            // show()) with the primary/purple color — must be after show().
+            setPositiveButtonBackgroundColor(com.cometchat.uikit.kotlin.theme.CometChatTheme.getPrimaryColor(context))
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -372,7 +373,7 @@ internal object InternalContentRenderer {
             }
             UIKitConstants.MessageCategory.AGENTIC -> renderAIAssistantMessage(message, alignment, styles)
             UIKitConstants.MessageCategory.STREAM -> renderAIAssistantMessage(message, alignment, styles)
-            UIKitConstants.MessageCategory.CARD -> renderCardMessage(message, alignment, styles, messageBubbleStyle)
+            UIKitConstants.MessageCategory.CARD -> renderCardMessage(message, alignment, styles, messageBubbleStyle, onLongClick)
             else -> {
                 logUnknownType(message)
                 false
@@ -903,7 +904,17 @@ internal object InternalContentRenderer {
                 if (LocalEnableMultipleAttachments.current) {
                     // Recorded voice notes get the dedicated bubble; picker audio gets the player cards.
                     if (mediaMessage.isVoiceNote()) {
-                        CometChatVoiceNoteBubble(message = mediaMessage, alignment = alignment, onLongClick = onLongClick)
+                        // Forward the effective style rather than letting the bubble fall back to
+                        // its alignment default. The pinned panel renders OWN messages LEFT-aligned
+                        // with the outgoing style passed via styles.audioBubbleStyle — dropping it
+                        // painted incoming-coloured waveform bars on the outgoing purple bubble,
+                        // i.e. an invisible waveform (ENG-38060).
+                        CometChatVoiceNoteBubble(
+                            message = mediaMessage,
+                            alignment = alignment,
+                            style = styles.audioBubbleStyle ?: getDefaultAudioBubbleStyle(alignment, messageBubbleStyle),
+                            onLongClick = onLongClick
+                        )
                     } else {
                         val context = LocalContext.current
                         val shouldShowDownload = remember(mediaMessage.id) { shouldShowDownloadIcon(mediaMessage) }
@@ -1540,13 +1551,15 @@ internal object InternalContentRenderer {
         message: BaseMessage,
         alignment: UIKitConstants.MessageBubbleAlignment,
         styles: BubbleStyles,
-        messageBubbleStyle: CometChatMessageBubbleStyle?
+        messageBubbleStyle: CometChatMessageBubbleStyle?,
+        onLongClick: (() -> Unit)? = null
     ): Boolean {
         val cardMessage = message as? com.cometchat.chat.models.CardMessage ?: return false
 
         com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometChatCardBubble(
             message = cardMessage,
-            alignment = alignment
+            alignment = alignment,
+            onLongClick = onLongClick
         )
         return true
     }
@@ -1851,6 +1864,40 @@ internal object InternalContentRenderer {
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Pinned / saved indicators lead the footer: [pin][saved] • [time][receipt]. Each shows
+            // when its attribute is present; the separator dot shows when either is. Tint follows the
+            // timestamp colour (white on outgoing, neutral on incoming). Deleted messages never show
+            // them — the tombstone bubble should not advertise a pin/save state.
+            val indicatorTint = style.timestampTextColor
+            val showPinSaveIndicators = message.deletedAt == 0L
+            if (showPinSaveIndicators && message.isPinned) {
+                Icon(
+                    painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin_filled),
+                    contentDescription = stringResource(id = R.string.cometchat_pinned),
+                    tint = indicatorTint,
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .size(16.dp)
+                )
+            }
+            if (showPinSaveIndicators && message.isSaved) {
+                Icon(
+                    painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_saved_filled),
+                    contentDescription = stringResource(id = R.string.cometchat_saved),
+                    tint = indicatorTint,
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .size(16.dp)
+                )
+            }
+            if (showPinSaveIndicators && (message.isPinned || message.isSaved)) {
+                Box(
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .size(4.dp)
+                        .background(color = indicatorTint, shape = CircleShape)
+                )
+            }
             if (showTime) {
                 // When dateTimeFormatter is provided, use it to format the timestamp
                 // When timeFormat is provided, use it as the time pattern
@@ -1873,12 +1920,26 @@ internal object InternalContentRenderer {
                 )
             }
             if (showReceipt && !shouldHideReceipt) {
+                val baseReceiptStyle = receiptStyle
+                    ?: style.messageReceiptStyle
+                    ?: CometChatReceiptsStyle.default()
+                // A sticker's outer bubble is transparent, so its timestamp uses the neutral
+                // colour even on an outgoing message. The sent/delivered ticks must follow it —
+                // the white outgoing tint is invisible against the light chip. Read keeps its own
+                // highlight colour, which carries meaning and stays legible.
+                val effectiveReceiptStyle = if (isSticker) {
+                    baseReceiptStyle.copy(
+                        waitIconTint = indicatorTint,
+                        sentIconTint = indicatorTint,
+                        deliveredIconTint = indicatorTint
+                    )
+                } else {
+                    baseReceiptStyle
+                }
                 CometChatReceipts(
                     receipt = receipt,
                     modifier = Modifier.padding(start = 4.dp),
-                    style = receiptStyle
-                        ?: style.messageReceiptStyle
-                        ?: CometChatReceiptsStyle.default()
+                    style = effectiveReceiptStyle
                 )
             }
         }
@@ -2185,24 +2246,28 @@ internal object InternalContentRenderer {
                 }
             }
 
-            // Add more reactions button
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 2.dp)
-                    .background(
-                        color = CometChatTheme.colorScheme.backgroundColor3,
-                        shape = RoundedCornerShape(12.dp)
+            // Add more reactions button — only when a handler is wired. Read-only surfaces (the
+            // pinned/saved lists) pass no callback, so their reactions render view-only with no
+            // add affordance; the message list always wires one.
+            if (onAddMoreReactionsClick != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 2.dp)
+                        .background(
+                            color = CometChatTheme.colorScheme.backgroundColor3,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable { onAddMoreReactionsClick.invoke(message) }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.cometchat_add_reaction),
+                        contentDescription = "Add reaction",
+                        tint = CometChatTheme.colorScheme.iconTintSecondary,
+                        modifier = Modifier.size(16.dp)
                     )
-                    .clickable { onAddMoreReactionsClick?.invoke(message) }
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.cometchat_add_reaction),
-                    contentDescription = "Add reaction",
-                    tint = CometChatTheme.colorScheme.iconTintSecondary,
-                    modifier = Modifier.size(16.dp)
-                )
+                }
             }
         }
     }

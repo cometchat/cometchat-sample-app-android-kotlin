@@ -1,0 +1,8 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- 4dp separator dot between the pin and the timestamp. Tinted at bind time. -->
+    <solid android:color="#FFFFFF" />
+    <size
+        android:width="4dp"
+        android:height="4dp" />
+</shape>

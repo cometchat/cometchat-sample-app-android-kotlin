@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.core.MessagesRequest
 import com.cometchat.chat.exceptions.CometChatException
@@ -95,6 +96,8 @@ import com.cometchat.uikit.core.state.MessageFlagState
 import com.cometchat.uikit.core.state.MessageListUIState
 import com.cometchat.uikit.core.state.SmartRepliesUIState
 import com.cometchat.uikit.core.utils.AgentChatDetector
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
+import com.cometchat.uikit.core.utils.PinSaveUtils
 import com.cometchat.uikit.core.utils.MessageOptionsUtils
 import com.cometchat.uikit.core.viewmodel.CometChatMessageListViewModel
 import com.cometchat.uikit.core.factory.CometChatMessageListViewModelFactory
@@ -261,7 +264,11 @@ import java.util.Locale
  * @param group The group for a group conversation. When set, avatars are shown for incoming
  *   messages by default. Takes precedence over [user] if both are provided.
  * @param parentMessageId Parent message ID for threaded conversations. Use -1 (default) for
- *   the main conversation thread.
+ *   the main conversation thread. Deprecated in favour of [parentMessage], and honoured only when
+ *   [parentMessage] is null.
+ * @param parentMessage The thread's root message in a thread view. Preferred over [parentMessageId]:
+ *   the parent is the authority for its thread's subscription state, which realtime replies — which
+ *   arrive with no flag — inherit. Re-pass it when the parent updates.
  * @param messagesRequestBuilder Optional custom builder for message requests. Allows
  *   customization of message fetching parameters.
  * @param scrollToBottomOnNewMessage Whether to automatically scroll to the bottom when new
@@ -432,7 +439,12 @@ fun CometChatMessageList(
     // Configuration
     user: User? = null,
     group: Group? = null,
+    // Deprecated: pass [parentMessage] instead — the list needs the whole parent to resolve
+    // thread-subscription state for realtime replies, which arrive with no flag. Kept working, and
+    // honoured only when [parentMessage] is null. (Kotlin cannot annotate a value parameter, so this
+    // deprecation lives in the KDoc above rather than in an @Deprecated tag.)
     parentMessageId: Long = -1,
+    parentMessage: BaseMessage? = null,
     messagesRequestBuilder: MessagesRequest.MessagesRequestBuilder? = null,
     
     // Behavior
@@ -462,6 +474,7 @@ fun CometChatMessageList(
     
     // Message option visibility
     hideReplyInThreadOption: Boolean = false,
+    hideThreadSubscriptionOption: Boolean = false,
     hideReplyOption: Boolean = false,
     hideCopyMessageOption: Boolean = false,
     hideEditMessageOption: Boolean = false,
@@ -677,6 +690,7 @@ fun CometChatMessageList(
     // Build option visibility map from hide* parameters (negated: !hide* → visible)
     val optionVisibilityMap = remember(
         hideReplyInThreadOption,
+        hideThreadSubscriptionOption,
         hideReplyOption,
         hideCopyMessageOption,
         hideEditMessageOption,
@@ -691,6 +705,7 @@ fun CometChatMessageList(
     ) {
         mapOf(
             UIKitConstants.MessageOption.REPLY_IN_THREAD to !hideReplyInThreadOption,
+            UIKitConstants.MessageOption.THREAD_SUBSCRIPTION to !hideThreadSubscriptionOption,
             UIKitConstants.MessageOption.REPLY to !hideReplyOption,
             UIKitConstants.MessageOption.REPLY_TO_MESSAGE to !hideReplyOption,
             UIKitConstants.MessageOption.COPY to !hideCopyMessageOption,
@@ -729,8 +744,13 @@ fun CometChatMessageList(
     // Swipe-to-reply is globally disabled in agent chat mode
     val effectiveSwipeToReplyEnabled = swipeToReplyEnabled && !isAgentChat
 
-    // Derive isThreadView from parentMessageId
-    val isThreadView = parentMessageId > 0
+    // The whole parent message wins over the deprecated id-only input; all existing scoping is
+    // unchanged, so callers still passing only an id keep working.
+    @Suppress("DEPRECATION")
+    val effectiveParentMessageId = parentMessage?.id ?: parentMessageId
+
+    // Derive isThreadView from the effective parent id
+    val isThreadView = effectiveParentMessageId > 0
 
     // Wire options/addOptions callbacks into the ViewModel
     LaunchedEffect(vm, options, addOptions) {
@@ -776,6 +796,8 @@ fun CometChatMessageList(
 
     // State for delete confirmation dialog
     var deleteConfirmationMessage by remember { mutableStateOf<BaseMessage?>(null) }
+    // State for the pin/save confirmation dialog: the option id (PIN/UNPIN/SAVE/UNSAVE) + its message.
+    var pinSaveConfirmation by remember { mutableStateOf<Pair<String, BaseMessage>?>(null) }
 
     // State for message information bottom sheet
     var showMessageInformation by remember { mutableStateOf(false) }
@@ -802,7 +824,12 @@ fun CometChatMessageList(
     val handleMessageLongClick: (BaseMessage) -> Unit = remember(
         optionVisibilityMap, user, group, isThreadView
     ) {
-        handleLongClick@{ message: BaseMessage ->
+        handleLongClick@{ boundMessage: BaseMessage ->
+            // Build the sheet from the list's current copy, not the one captured when the row was
+            // composed: a send stamps `threadSubscribed` on the send result and a subscription
+            // event writes it onto the list's objects, neither of which rewrites a captured
+            // instance — so a stale copy would render "Subscribe to thread" on a followed thread.
+            val message = vm.currentMessage(boundMessage)
             // Skip showing options for in-progress or deleted messages
             if (message.id == 0L || message.sentAt == 0L || message.deletedAt > 0) {
                 return@handleLongClick
@@ -855,14 +882,28 @@ fun CometChatMessageList(
             }
 
             // 1. Delegate to ViewModel for business-logic actions
-            val handled = if (optionId == UIKitConstants.MessageOption.DELETE) {
-                // Handle delete directly in the UI layer to avoid SharedFlow duplicate-collector issue.
-                // The popup menu Dialog creates a second composition scope, causing two LaunchedEffect
-                // collectors on the same SharedFlow, which results in double dialogs.
-                deleteConfirmationMessage = message
-                true
-            } else {
-                vm.handleMessageOptionClick(context, optionId, message, textFormatterCallback)
+            val handled = when (optionId) {
+                UIKitConstants.MessageOption.DELETE -> {
+                    // Handle delete directly in the UI layer to avoid SharedFlow duplicate-collector issue.
+                    // The popup menu Dialog creates a second composition scope, causing two LaunchedEffect
+                    // collectors on the same SharedFlow, which results in double dialogs.
+                    deleteConfirmationMessage = message
+                    true
+                }
+                UIKitConstants.MessageOption.PIN,
+                UIKitConstants.MessageOption.SAVE -> {
+                    // Pin and Save are immediate — no confirmation dialog. (Unpin/Unsave confirm below.)
+                    performPinSaveAction(context, optionId, message)
+                    true
+                }
+                UIKitConstants.MessageOption.UNPIN,
+                UIKitConstants.MessageOption.UNSAVE -> {
+                    // Confirm, then fire the SDK call. The bubble/panels refresh via the core VM's
+                    // realtime pin/save listeners → updateMessage → UIKit bus, so no manual flip here.
+                    pinSaveConfirmation = optionId to message
+                    true
+                }
+                else -> vm.handleMessageOptionClick(context, optionId, message, textFormatterCallback)
             }
 
             // 2. If ViewModel didn't handle it, handle locally (UI-context actions)
@@ -870,6 +911,34 @@ fun CometChatMessageList(
                 when (optionId) {
                     UIKitConstants.MessageOption.REPLY_IN_THREAD -> {
                         onThreadRepliesClick?.invoke(message)
+                    }
+                    UIKitConstants.MessageOption.THREAD_SUBSCRIPTION -> {
+                        // Case 1. A root targets its own thread, a reply its parent thread. The
+                        // controller owns the debounce, in-flight lock, optimistic publish and
+                        // revert-on-failure; the dismissed sheet only needs a toast.
+                        CometChatThreadSubscription.toggle(
+                            message,
+                            message.isThreadSubscribed()
+                        ) { result ->
+                            val toast = when (result) {
+                                is CometChatThreadSubscription.ToggleResult.Success -> {
+                                    // A reply already lives in a thread → "in this thread"; a root doesn't yet.
+                                    val inThread = message.parentMessageId != 0L
+                                    context.getString(
+                                        when {
+                                            !result.subscribed && inThread -> R.string.cometchat_thread_unsubscribed_toast
+                                            !result.subscribed -> R.string.cometchat_thread_unsubscribed_toast_no_replies
+                                            inThread -> R.string.cometchat_thread_subscribed_toast
+                                            else -> R.string.cometchat_thread_subscribed_toast_no_replies
+                                        }
+                                    )
+                                }
+
+                                is CometChatThreadSubscription.ToggleResult.Failure ->
+                                    context.getString(R.string.cometchat_thread_subscription_failed)
+                            }
+                            Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
+                        }
                     }
                     UIKitConstants.MessageOption.SHARE -> {
                         shareMessage(context, message, scope, textFormatters)
@@ -1086,6 +1155,14 @@ fun CometChatMessageList(
     // Effects (Task 40)
     // ========================================
 
+    // The authority a realtime reply is stamped from. Keyed on the parent object itself and kept
+    // outside the init effect below: that effect is keyed on user/group and early-returns on a
+    // duplicate compose, so putting this inside it would leave the ViewModel without a parent after
+    // a Navigation re-compose, and would ignore a refreshed parent carrying a newer fetched flag.
+    LaunchedEffect(vm, parentMessage) {
+        vm.setParentMessage(parentMessage)
+    }
+
     // User/Group initialization effect
     // Navigation Compose can compose the destination multiple times during transitions,
     // causing this effect to fire redundantly with the same keys.
@@ -1119,7 +1196,7 @@ fun CometChatMessageList(
 
                 vm.setUser(
                     user = user,
-                    parentMessageId = parentMessageId,
+                    parentMessageId = effectiveParentMessageId,
                     gotoMessageId = goToMessageId ?: 0,
                     messagesRequestBuilder = messagesRequestBuilder
                 )
@@ -1127,14 +1204,14 @@ fun CometChatMessageList(
             group != null -> {
                 vm.setGroup(
                     group = group,
-                    parentMessageId = parentMessageId,
+                    parentMessageId = effectiveParentMessageId,
                     gotoMessageId = goToMessageId ?: 0,
                     messagesRequestBuilder = messagesRequestBuilder
                 )
             }
         }
         
-        if (isAgentChat && parentMessageId <= 0) {
+        if (isAgentChat && effectiveParentMessageId <= 0) {
             // Main agent conversation
             if (loadLastAgentConversation) {
                 // Attempt to load the most recent agent conversation thread
@@ -1251,7 +1328,7 @@ fun CometChatMessageList(
                     // Fetch older messages when scrolled near the top
                     // With reverseLayout=false: firstVisibleIndex approaches 0 when scrolling up
                     // Skip for main agent conversations without loadLastAgentConversation — they don't paginate backwards
-                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages && !(isAgentChat && parentMessageId <= 0 && !loadLastAgentConversation)) {
+                    if (firstVisibleIndex <= 5 && hasMorePreviousMessages && !(isAgentChat && effectiveParentMessageId <= 0 && !loadLastAgentConversation)) {
                         vm.fetchMessages()
                     }
                     // Fetch newer messages when scrolled near the bottom
@@ -1294,10 +1371,16 @@ fun CometChatMessageList(
             newMessageCount += newMessagesCount
         }
         
-        // Reset count and mark conversation as read when user scrolls to bottom
+        // Reset the count and mark the newest message read once the user is at the bottom.
+        // v5 parity (CometChatMessageList.handleScroll → markLastMessageAsRead): the receipt is
+        // per-message, not per-conversation, so it fires once for a given message instead of on
+        // every recomposition that leaves the list at the bottom. Its own guards cover own
+        // messages, already-read, thread mismatch and disabled receipts. The unread count is
+        // cleared locally — the server receipt is markLastMessageAsRead's job.
         if (isAtBottom) {
             newMessageCount = 0
-            vm.markConversationRead()
+            vm.resetUnreadCount()
+            messagesFromVm.lastOrNull()?.let { vm.markLastMessageAsRead(it) }
         }
         
         // Update the last known message ID
@@ -1512,7 +1595,7 @@ fun CometChatMessageList(
             // Loading state — skip for main agent conversations without loadLastAgentConversation
             // (greeting view handles it). When loadLastAgentConversation is true, show loading.
             is MessageListUIState.Loading -> {
-                if (isAgentChat && parentMessageId <= 0 && !loadLastAgentConversation) {
+                if (isAgentChat && effectiveParentMessageId <= 0 && !loadLastAgentConversation) {
                     // Agent main conversation: skip loading shimmer, the Empty state
                     // will show the greeting view once the ViewModel settles.
                 } else if (!hideLoadingState) {
@@ -2040,7 +2123,52 @@ fun CometChatMessageList(
             }
         )
     }
-    
+
+    // Pin / save confirmation dialog. Non-destructive (no icon, primary positive button), matching
+    // the View module. On confirm it fires the SDK call and toasts the result.
+    pinSaveConfirmation?.let { (optionId, message) ->
+        val (titleRes, bodyRes, positiveRes) = when (optionId) {
+            UIKitConstants.MessageOption.PIN -> Triple(
+                R.string.cometchat_pin_message_confirm_title,
+                R.string.cometchat_pin_message_confirm_body,
+                R.string.cometchat_pin
+            )
+            UIKitConstants.MessageOption.UNPIN -> Triple(
+                R.string.cometchat_unpin_message_confirm_title,
+                R.string.cometchat_unpin_message_confirm_body,
+                R.string.cometchat_unpin
+            )
+            UIKitConstants.MessageOption.SAVE -> Triple(
+                R.string.cometchat_save_message_confirm_title,
+                R.string.cometchat_save_message_confirm_body,
+                R.string.cometchat_save
+            )
+            else -> Triple(
+                R.string.cometchat_unsave_message_confirm_title,
+                R.string.cometchat_unsave_message_confirm_body,
+                R.string.cometchat_unsave
+            )
+        }
+        CometChatConfirmDialog(
+            title = stringResource(titleRes),
+            subtitle = stringResource(bodyRes),
+            positiveButtonText = stringResource(positiveRes),
+            negativeButtonText = stringResource(R.string.cometchat_cancel),
+            hideIcon = true,
+            // Non-destructive: primary (purple) positive button, not the default red (View parity).
+            style = CometChatConfirmDialogStyle.default(
+                positiveButtonBackgroundColor = CometChatTheme.colorScheme.primary
+            ),
+            dismissOnClickOutside = false,
+            onPositiveClick = {
+                performPinSaveAction(context, optionId, message)
+                pinSaveConfirmation = null
+            },
+            onNegativeClick = { pinSaveConfirmation = null },
+            onDismiss = { pinSaveConfirmation = null }
+        )
+    }
+
     // Flag message dialog
     // Shown when the user selects the REPORT option
     if (showFlagDialog && flagDialogMessage != null) {
@@ -2296,6 +2424,62 @@ fun CometChatMessageList(
  * @param scope The coroutine scope for async operations.
  * @param textFormatters The list of text formatters to apply for text messages.
  */
+/**
+ * Fires the SDK pin/save/unpin/unsave call for [optionId] on [message] and toasts the result. The
+ * bubble and any pinned/saved panels refresh via the core VM's realtime listeners, so there is no
+ * manual optimistic flip here.
+ */
+private fun performPinSaveAction(
+    context: android.content.Context,
+    optionId: String,
+    message: BaseMessage
+) {
+    val listener = object : CometChat.CallbackListener<BaseMessage>() {
+        override fun onSuccess(result: BaseMessage?) {
+            val toastRes = when (optionId) {
+                UIKitConstants.MessageOption.PIN -> R.string.cometchat_message_pinned
+                UIKitConstants.MessageOption.UNPIN -> R.string.cometchat_message_unpinned
+                UIKitConstants.MessageOption.SAVE -> R.string.cometchat_message_saved
+                else -> R.string.cometchat_message_unsaved
+            }
+            Toast.makeText(context, context.getString(toastRes), Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onError(e: CometChatException?) {
+            Toast.makeText(context, pinSaveErrorMessage(context, e), Toast.LENGTH_SHORT).show()
+        }
+    }
+    when (optionId) {
+        UIKitConstants.MessageOption.PIN -> CometChat.pinMessage(message.id, listener)
+        UIKitConstants.MessageOption.UNPIN -> CometChat.unpinMessage(message.id, listener)
+        UIKitConstants.MessageOption.SAVE -> CometChat.saveMessage(message.id, listener)
+        UIKitConstants.MessageOption.UNSAVE -> CometChat.unsaveMessage(message.id, listener)
+    }
+}
+
+/**
+ * Builds a user-facing error message. A limit error is always reported as one — the cap comes from
+ * the error, else from app settings, else the number-less copy — so the user never sees "Something
+ * went wrong" for a cap they can act on. See [PinSaveUtils.classifyFailure].
+ */
+private fun pinSaveErrorMessage(
+    context: android.content.Context,
+    e: CometChatException?
+): String = when (val failure = PinSaveUtils.classifyFailure(e)) {
+    is PinSaveUtils.Failure.LimitReached -> when (failure.scope) {
+        PinSaveUtils.LimitScope.PINNED_MESSAGES ->
+            failure.limit?.let { context.getString(R.string.cometchat_pin_limit_reached, it) }
+                ?: context.getString(R.string.cometchat_pin_limit_reached_unknown)
+        PinSaveUtils.LimitScope.SAVED_MESSAGES ->
+            failure.limit?.let { context.getString(R.string.cometchat_save_limit_reached, it) }
+                ?: context.getString(R.string.cometchat_save_limit_reached_unknown)
+    }
+    PinSaveUtils.Failure.PermissionDenied ->
+        context.getString(R.string.cometchat_action_permission_denied)
+    is PinSaveUtils.Failure.Other ->
+        context.getString(R.string.cometchat_pin_save_generic_error)
+}
+
 private fun shareMessage(
     context: android.content.Context,
     message: BaseMessage,

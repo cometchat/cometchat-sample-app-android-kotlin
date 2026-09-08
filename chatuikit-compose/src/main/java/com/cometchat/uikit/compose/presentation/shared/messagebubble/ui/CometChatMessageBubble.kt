@@ -43,14 +43,18 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.Comet
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCallActionBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatCollaborativeBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatDeleteBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatAudiosBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFileBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatFilesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImageBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatImagesBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMeetCallBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatMessageBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatPollBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatStickerBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatTextBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideoBubbleStyle
+import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.CometChatVideosBubbleStyle
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.style.mergeWithBase
 import com.cometchat.uikit.compose.theme.CometChatTheme
 
@@ -265,6 +269,13 @@ fun CometChatMessageBubble(
     videoBubbleStyle: CometChatVideoBubbleStyle? = null,
     audioBubbleStyle: CometChatAudioBubbleStyle? = null,
     fileBubbleStyle: CometChatFileBubbleStyle? = null,
+    // Multi-attachment (ENG-36737) grid bubble styles. When null the renderer falls back to the
+    // alignment-based default, so callers that need an outgoing look on a LEFT-aligned bubble
+    // (e.g. the pinned-messages screen showing own messages) must pass these explicitly.
+    imagesBubbleStyle: CometChatImagesBubbleStyle? = null,
+    videosBubbleStyle: CometChatVideosBubbleStyle? = null,
+    audiosBubbleStyle: CometChatAudiosBubbleStyle? = null,
+    filesBubbleStyle: CometChatFilesBubbleStyle? = null,
     deleteBubbleStyle: CometChatDeleteBubbleStyle? = null,
     actionBubbleStyle: CometChatActionBubbleStyle? = null,
     callActionBubbleStyle: CometChatCallActionBubbleStyle? = null,
@@ -703,6 +714,10 @@ fun CometChatMessageBubble(
                                 videoBubbleStyle = videoBubbleStyle,
                                 audioBubbleStyle = audioBubbleStyle,
                                 fileBubbleStyle = fileBubbleStyle,
+                                imagesBubbleStyle = imagesBubbleStyle,
+                                videosBubbleStyle = videosBubbleStyle,
+                                audiosBubbleStyle = audiosBubbleStyle,
+                                filesBubbleStyle = filesBubbleStyle,
                                 deleteBubbleStyle = deleteBubbleStyle,
                                 actionBubbleStyle = actionBubbleStyle,
                                 callActionBubbleStyle = callActionBubbleStyle,

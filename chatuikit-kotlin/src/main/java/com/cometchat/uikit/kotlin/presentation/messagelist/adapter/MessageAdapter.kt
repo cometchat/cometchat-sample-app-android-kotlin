@@ -1068,7 +1068,9 @@ class MessageAdapter @JvmOverloads constructor(
                 rowRoot.setOnLongClickListener(null)
             } else {
                 // Normal mode: Set long click listener (only for non-deleted, non-action/call messages)
-                // ACTION and CALL category messages should not have long-click interactions
+                // ACTION and CALL category messages should not have long-click interactions.
+                // A meeting (custom/meeting) bubble is NOT in that group: it long-presses like any
+                // other custom message, as it did in v5.
                 val isActionOrCallMessage = message.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
                                             message.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)
 

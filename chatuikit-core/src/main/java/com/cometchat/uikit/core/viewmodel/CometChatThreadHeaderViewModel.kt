@@ -14,6 +14,7 @@ import com.cometchat.chat.models.TextMessage
 import com.cometchat.uikit.core.events.CometChatEvents
 import com.cometchat.uikit.core.events.CometChatMessageEvent
 import com.cometchat.uikit.core.events.MessageStatus
+import com.cometchat.uikit.core.utils.PinSaveUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -202,24 +203,54 @@ open class CometChatThreadHeaderViewModel(
      * @param baseMessage The updated message. If null, no action is taken.
      */
     fun updateParentMessageInList(baseMessage: BaseMessage?) {
-        if (baseMessage != null && _parentMessage != null) {
+        val parent = _parentMessage
+        if (baseMessage != null && parent != null) {
+            var emitted = baseMessage
             // Thread message update - refresh the parent message display
-            if (baseMessage.parentMessageId > 0 && baseMessage.parentMessageId == _parentMessage!!.id) {
+            if (baseMessage.parentMessageId > 0 && baseMessage.parentMessageId == parent.id) {
                 if (messageList.isNotEmpty()) {
-                    messageList[0] = _parentMessage!!
+                    messageList[0] = parent
                     _parentMessageListStateFlow.value = messageList.toList()
                 }
             }
-            // Parent message itself updated
-            if (baseMessage.id == _parentMessage!!.id) {
+            // Parent message itself updated. An edit/moderation payload carries the new content
+            // but not the viewer's pin/save state — carry it over from the copy this header holds,
+            // and adopt the result as the current parent so later carries start from the latest
+            // content rather than the one the screen was opened with.
+            if (baseMessage.id == parent.id) {
+                val reconciled = PinSaveUtils.carryPinSaveForward(parent, baseMessage)
+                _parentMessage = reconciled
+                emitted = reconciled
                 if (messageList.isNotEmpty()) {
-                    messageList[0] = baseMessage
+                    messageList[0] = reconciled
                     _parentMessageListStateFlow.value = messageList.toList()
                 }
             }
             viewModelScope.launch {
-                _receiveMessage.emit(baseMessage)
+                _receiveMessage.emit(emitted)
             }
+        }
+    }
+
+    /**
+     * Applies a pin/save change to the parent this header shows.
+     *
+     * The message list only reconciles the rows it has loaded, and the thread's parent is not one of
+     * them — it lives here. Without this, pinning/saving the parent from inside the thread (or from
+     * another device) left the header's indicator stale until the screen was reopened.
+     *
+     * Same contract as the message list's `applyPinSaveEcho`: the delivered [echo] may be partial,
+     * so only the pin/save attributes are taken from it and applied to a [BaseMessage.clone] of the
+     * held parent — never to the held instance, so the StateFlow sees a new value.
+     */
+    private fun applyParentPinSaveChange(echo: BaseMessage, applyTo: (BaseMessage) -> Unit) {
+        val parent = _parentMessage ?: return
+        if (echo.id != parent.id) return
+        val updated = parent.clone().apply(applyTo)
+        _parentMessage = updated
+        if (messageList.isNotEmpty()) {
+            messageList[0] = updated
+            _parentMessageListStateFlow.value = messageList.toList()
         }
     }
 
@@ -311,6 +342,35 @@ open class CometChatThreadHeaderViewModel(
             override fun onMessageReactionRemoved(reactionEvent: ReactionEvent) {
                 handleReactionRemoved(reactionEvent)
             }
+
+            // Pin/save state of the parent. On the acting device these arrive as the SDK's
+            // self-echo off the REST response; from another device as a realtime action. The
+            // event is the assertion — a "pinned"/"saved" echo without a timestamp still counts.
+            override fun onMessagePinned(message: BaseMessage) {
+                applyParentPinSaveChange(message) { updated ->
+                    updated.pinnedAt = if (message.pinnedAt > 0) message.pinnedAt
+                    else System.currentTimeMillis() / 1000
+                    message.pinnedBy?.let { updated.pinnedBy = it }
+                }
+            }
+
+            override fun onMessageUnpinned(message: BaseMessage) {
+                applyParentPinSaveChange(message) { updated ->
+                    updated.pinnedAt = 0
+                    updated.pinnedBy = null
+                }
+            }
+
+            override fun onMessageSaved(message: BaseMessage) {
+                applyParentPinSaveChange(message) { updated ->
+                    updated.savedAt = if (message.savedAt > 0) message.savedAt
+                    else System.currentTimeMillis() / 1000
+                }
+            }
+
+            override fun onMessageUnsaved(message: BaseMessage) {
+                applyParentPinSaveChange(message) { updated -> updated.savedAt = 0 }
+            }
         })
     }
 
@@ -392,6 +452,14 @@ open class CometChatThreadHeaderViewModel(
      * Handles message edited event.
      */
     private fun handleMessageEdited(message: BaseMessage) {
+        // An edit arrives flagless and would otherwise un-follow the thread this header is showing;
+        // an edit that leaves the user @-mentioned in a reply subscribes them. Reconcile either way
+        // before the edited copy is shown.
+        com.cometchat.uikit.core.utils.CometChatThreadSubscription.applyEditedMessageSubscription(
+            editedMessage = message,
+            heldMessage = _parentMessage?.takeIf { it.id == message.id },
+            parentMessage = _parentMessage
+        )
         _parentMessage?.let { parent ->
             if (message.id == parent.id) {
                 updateParentMessageInList(message)

@@ -158,6 +158,25 @@ data class ChatHistoryRoute(
 )
 
 /**
+ * Route for the pinned messages screen of a conversation.
+ *
+ * Either [userId] or [groupId] identifies the conversation.
+ * Opened from the messages-screen overflow menu and the user/group details screens.
+ */
+@Serializable
+data class PinnedMessagesRoute(
+    val userId: String? = null,
+    val groupId: String? = null
+)
+
+/**
+ * Route for the saved messages screen — the current user's saved messages across all
+ * conversations (user-level). Opened from the Chats tab user-avatar overflow menu.
+ */
+@Serializable
+object SavedMessagesRoute
+
+/**
  * Route for the new chat screen.
  *
  * Displays a tabbed interface with Users and Groups tabs for starting

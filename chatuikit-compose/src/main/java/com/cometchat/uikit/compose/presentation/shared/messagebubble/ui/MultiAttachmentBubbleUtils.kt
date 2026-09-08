@@ -70,7 +70,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Shared building blocks for the ENG-36737 per-type multi-attachment bubbles
+ * Shared building blocks for the per-type multi-attachment bubbles
  * (CometChatImagesBubble / VideosBubble / AudiosBubble / VoiceNoteBubble / FilesBubble).
  *
  * The bubble is picked by the message `type`; attachments are categorized by

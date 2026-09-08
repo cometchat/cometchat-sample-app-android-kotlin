@@ -127,9 +127,9 @@ class SingleLineModePreservationTest : FunSpec({
     /**
      * Simulates the voice recording and sticker button visibility logic.
      *
-     * OBSERVED on unfixed code: In single-line mode, voice recording and sticker
-     * buttons are hidden when text is present and shown when text is empty.
-     * Animations (slide in/out) are applied for smooth transitions.
+     * In single-line mode, the voice recording button is hidden when text is present
+     * and shown when text is empty (with slide in/out animations). The sticker button
+     * stays visible regardless of text, matching the Compose composer.
      */
     fun shouldShowVoiceRecordingButton(hasText: Boolean, hideVoiceRecording: Boolean, mode: String): Boolean {
         if (mode != SINGLE_LINE) return false
@@ -138,7 +138,7 @@ class SingleLineModePreservationTest : FunSpec({
 
     fun shouldShowStickerButton(hasText: Boolean, hideSticker: Boolean, mode: String): Boolean {
         if (mode != SINGLE_LINE) return false
-        return !hideSticker && !hasText
+        return !hideSticker
     }
 
     /**
@@ -368,26 +368,24 @@ class SingleLineModePreservationTest : FunSpec({
             }
         }
 
-        test("Sticker button visibility should depend on text presence and hide flag") {
+        test("Sticker button visibility should depend only on the hide flag") {
             checkAll(PropTestConfig(iterations = 10), Arb.boolean(), Arb.boolean()) { hasText, hideSticker ->
                 val shouldShow = shouldShowStickerButton(hasText, hideSticker, SINGLE_LINE)
-                shouldShow shouldBe (!hideSticker && !hasText)
+                shouldShow shouldBe !hideSticker
             }
         }
 
         /**
          * **Validates: Requirements 3.3**
          *
-         * Property: Voice recording and sticker buttons should be mutually consistent.
-         * Both follow the same pattern: visible when no text and not hidden.
+         * Property: The sticker button stays visible while typing (matching the Compose
+         * composer), while the voice recording button slides out when text is present.
          */
-        test("Voice recording and sticker button visibility should follow same pattern") {
-            checkAll(PropTestConfig(iterations = 10), Arb.boolean()) { hasText ->
-                val voiceVisible = shouldShowVoiceRecordingButton(hasText, hideVoiceRecording = false, SINGLE_LINE)
-                val stickerVisible = shouldShowStickerButton(hasText, hideSticker = false, SINGLE_LINE)
-                // Both should have same visibility when neither is hidden
-                voiceVisible shouldBe stickerVisible
-            }
+        test("Sticker button should remain visible when typing while voice recording hides") {
+            val voiceVisible = shouldShowVoiceRecordingButton(hasText = true, hideVoiceRecording = false, SINGLE_LINE)
+            val stickerVisible = shouldShowStickerButton(hasText = true, hideSticker = false, SINGLE_LINE)
+            voiceVisible shouldBe false
+            stickerVisible shouldBe true
         }
     }
 
@@ -628,7 +626,7 @@ class SingleLineModePreservationTest : FunSpec({
                 shouldShowVoiceRecordingButton(hasText, hideVoiceRecording, SINGLE_LINE) shouldBe
                     (!hideVoiceRecording && !hasText)
                 shouldShowStickerButton(hasText, hideSticker, SINGLE_LINE) shouldBe
-                    (!hideSticker && !hasText)
+                    !hideSticker
 
                 // Invariant 4: Send button state reflects text (Req 3.5)
                 val sendState = getSingleLineSendButtonState(hasText)

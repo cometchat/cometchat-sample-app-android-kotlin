@@ -13,6 +13,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.exceptions.CometChatException
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
@@ -24,8 +26,10 @@ import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 import com.cometchat.uikit.core.formatter.RichTextConfiguration
 import com.cometchat.uikit.kotlin.presentation.shared.popupmenu.CometChatPopupMenu
 import com.cometchat.sampleapp.kotlin.push.R
+import com.cometchat.sampleapp.kotlin.push.SplashActivity
 import com.cometchat.sampleapp.kotlin.push.appflow.viewmodels.MessagesViewModel
 import com.cometchat.sampleapp.kotlin.push.databinding.ActivityAppFlowMessagesBinding
+import com.cometchat.sampleapp.kotlin.push.shared.AppUIKitInitializer
 import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
@@ -52,17 +56,29 @@ class MessagesActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MessagesActivity"
+
+        /**
+         * Parent id of a tapped thread reply. Distinct from the `parent_message_id` extra, which
+         * puts this screen itself into thread mode — this one opens ThreadMessageActivity on top.
+         */
+        const val EXTRA_NOTIFICATION_PARENT_ID = "notification_parent_message_id"
+
+        /** Id of the tapped reply, highlighted once the thread opens. */
+        const val EXTRA_NOTIFICATION_REPLY_ID = "notification_reply_message_id"
     }
 
     private lateinit var binding: ActivityAppFlowMessagesBinding
     private lateinit var viewModel: MessagesViewModel
-    
+
     private var user: User? = null
     private var group: Group? = null
     private var goToMessage: BaseMessage? = null
     private var goToMessageIdFromSearch: Long = 0
     private var baseMessage: BaseMessage? = null
     private var parentMessageId: Long = -1
+    private var notificationParentMessageId: Long = 0
+    private var notificationReplyMessageId: Long = 0
+    private var isFreshLaunch: Boolean = true
 
     private val searchActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -79,6 +95,16 @@ class MessagesActivity : AppCompatActivity() {
         }
     }
 
+    // Pinned messages are always within the current conversation, so a tapped row jumps in place —
+    // same behaviour as a same-chat search result.
+    private val pinnedMessagesLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            handleSameChatNavigation(result.data!!)
+        }
+    }
+
     private fun handleDifferentChatNavigation(data: Intent) {
         val selectedUserJson = data.getStringExtra(getString(R.string.app_user))
         val selectedGroupJson = data.getStringExtra(getString(R.string.app_group))
@@ -90,6 +116,9 @@ class MessagesActivity : AppCompatActivity() {
                 putExtra("rawJson", parentMessageJson)
                 selectedUserJson?.let { putExtra(getString(R.string.app_user), it) }
                 selectedGroupJson?.let { putExtra(getString(R.string.app_group), it) }
+                if (goToMessageId > 0) {
+                    putExtra("goToMessageId", goToMessageId)
+                }
             }
             startActivity(intent)
             finish()
@@ -115,17 +144,87 @@ class MessagesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isFreshLaunch = savedInstanceState == null
+
+        // Parsing only touches SDK model helpers, so it is safe before init — and onResume() needs
+        // the conversation id even if the screen has not been built yet.
+        extractIntentData(intent)
+
+        // A notification tap opens this screen directly (KotlinApplication.setOnNotificationTapListener),
+        // so from a killed state it can be the app's first Activity, with no SDK behind it. The layout
+        // hosts UIKit views and every step below reads the kit's theme, so build only once it is up.
+        AppUIKitInitializer.initIfNeeded(
+            context = this,
+            onReady = { runOnUiThread { if (!isFinishing && !isDestroyed) buildMessagesScreen() } },
+            onError = { reason ->
+                Log.e(TAG, "Cannot open the conversation on a cold start: $reason")
+                runOnUiThread { if (!isFinishing) routeToOnboarding() }
+            }
+        )
+    }
+
+    /** Inflates and wires the screen. Runs immediately unless a cold start had to initialize first. */
+    private fun buildMessagesScreen() {
         binding = ActivityAppFlowMessagesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setUpTheme()
         adjustWindowSettings()
         applyWindowInsets()
-        extractIntentData(intent)
         initViewModel()
         addViews()
         initClickListeners()
         setUpMessageHeaderMenu()
+
+        // onResume() may have run before the screen was built — apply the suppression it skipped.
+        (user?.uid ?: group?.guid)?.let { CometChatPushNotifications.setCurrentOpenChatId(it) }
+
+        // Only on a real launch: a rotation must not reopen a thread the user has navigated away from.
+        if (isFreshLaunch) openThreadFromNotificationIfNeeded()
+    }
+
+    /**
+     * Opens the thread for a tapped notification whose message is a reply.
+     *
+     * The conversation is built first and the thread stacked on top of it, so Back lands on the
+     * conversation rather than leaving the app. The payload carries only the parent's id, so the
+     * parent message has to be fetched before the thread can open — same as [SearchActivity].
+     */
+    private fun openThreadFromNotificationIfNeeded() {
+        val parentId = notificationParentMessageId
+        if (parentId <= 0) return
+        notificationParentMessageId = 0
+
+        CometChat.getMessageDetails(parentId, object : CometChat.CallbackListener<BaseMessage>() {
+            override fun onSuccess(parentMessage: BaseMessage) {
+                if (isFinishing || isDestroyed) return
+                val intent = Intent(this@MessagesActivity, ThreadMessageActivity::class.java).apply {
+                    putExtra(ThreadMessageActivity.EXTRA_PARENT_MESSAGE, parentMessage)
+                    putExtra("rawJson", parentMessage.rawMessage.toString())
+                    user?.let { putExtra(getString(R.string.app_user), it.toJson().toString()) }
+                    group?.let { putExtra(getString(R.string.app_group), Gson().toJson(it)) }
+                    // The reply, not the parent — the thread scrolls to and highlights the tapped message.
+                    if (notificationReplyMessageId > 0) {
+                        putExtra("goToMessageId", notificationReplyMessageId)
+                    }
+                }
+                startActivity(intent)
+            }
+
+            override fun onError(e: CometChatException) {
+                // Leave the user on the conversation rather than dead-ending on a failed fetch.
+                Log.e(TAG, "Could not open thread for parent $parentId: ${e.message}")
+            }
+        })
+    }
+
+    /** Sends the user to the app entry point when a cold start cannot open the conversation. */
+    private fun routeToOnboarding() {
+        startActivity(
+            Intent(this, SplashActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+        finish()
     }
 
     override fun onResume() {
@@ -151,6 +250,10 @@ class MessagesActivity : AppCompatActivity() {
 
         // Extract parent message ID (from chat history navigation)
         parentMessageId = intent.getLongExtra("parent_message_id", -1)
+
+        // A tapped notification for a thread reply — routed to the thread once the screen is built.
+        notificationParentMessageId = intent.getLongExtra(EXTRA_NOTIFICATION_PARENT_ID, 0)
+        notificationReplyMessageId = intent.getLongExtra(EXTRA_NOTIFICATION_REPLY_ID, 0)
         try {
             // Extract goToMessage — support both Long ID extra and legacy JSON extra
             val goToMessageId = intent.getLongExtra("goToMessageId", 0)
@@ -227,6 +330,8 @@ class MessagesActivity : AppCompatActivity() {
             }
             intent.putExtra("isBlockedByMe", user?.isBlockedByMe)
             intent.putExtra("replyCount", parentMessage.replyCount)
+            // The live object (pin/save state included) — see ThreadMessageActivity.EXTRA_PARENT_MESSAGE.
+            intent.putExtra(ThreadMessageActivity.EXTRA_PARENT_MESSAGE, parentMessage)
             intent.putExtra("rawJson", parentMessage.rawMessage.toString())
             startActivity(intent)
         }
@@ -256,7 +361,23 @@ class MessagesActivity : AppCompatActivity() {
                 null
             ) { navigateToSearchActivity() }
         )
-        
+
+        // Pinned messages option — opens the conversation's pinned-messages list. Gated on the SDK
+        // Pin Message feature flag.
+        if (com.cometchat.uikit.core.CometChatUIKit.isPinMessageEnabled()) {
+            options.add(
+                CometChatPopupMenu.MenuItem(
+                    UIKitConstants.MessageHeaderMenuOptions.PINNED_MESSAGES,
+                    getString(com.cometchat.uikit.kotlin.R.string.cometchat_pinned_messages_header),
+                    AppCompatResources.getDrawable(this, com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                    null
+                ) { navigateToPinnedMessagesActivity() }
+            )
+        }
+
+        // Saved messages are reached from the Conversations screen (user menu), not from a specific
+        // conversation — so no saved-messages option here in the message header.
+
         // Details option
         options.add(
             CometChatPopupMenu.MenuItem(
@@ -281,6 +402,16 @@ class MessagesActivity : AppCompatActivity() {
             intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
         }
         searchActivityLauncher.launch(intent)
+    }
+
+    private fun navigateToPinnedMessagesActivity() {
+        val intent = Intent(this, PinnedMessagesActivity::class.java)
+        if (user != null) {
+            intent.putExtra(getString(R.string.app_user), user?.toJson().toString())
+        } else {
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+        }
+        pinnedMessagesLauncher.launch(intent)
     }
 
     /**
@@ -501,6 +632,8 @@ class MessagesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.removeListener()
+        // A cold start can be torn down while the SDK init is still in flight, before the screen
+        // (and its ViewModel) was ever built.
+        if (::viewModel.isInitialized) viewModel.removeListener()
     }
 }

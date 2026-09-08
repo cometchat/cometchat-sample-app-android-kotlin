@@ -117,7 +117,13 @@ class GroupDetailsActivity : AppCompatActivity() {
         
         // Click listeners
         binding.ivBack.setOnClickListener { finish() }
-        
+
+        binding.tvPinnedMessages.setOnClickListener {
+            val intent = android.content.Intent(this, PinnedMessagesActivity::class.java)
+            intent.putExtra(getString(R.string.app_group), Gson().toJson(group))
+            startActivity(intent)
+        }
+
         binding.tvDeleteChat.setOnClickListener {
             showAlertDialog(
                 title = getString(R.string.app_delete_chat_title),

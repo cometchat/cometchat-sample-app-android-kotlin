@@ -141,6 +141,45 @@ abstract class CometChatTextFormatter(
         spannable: SpannableStringBuilder
     ): SpannableStringBuilder? = spannable
 
+    /**
+     * Display span for the reply/edit PREVIEW panels — a read-only surface, distinct from the live
+     * composer input. Defaults to [prepareComposerSpan] (so existing formatters are unaffected), but
+     * a formatter whose composer span keeps a token intact for the input (e.g. a colour token) should
+     * override this to strip the token and apply its style, so the preview shows styled text rather
+     * than the raw token.
+     */
+    open fun preparePreviewSpan(
+        context: Context,
+        baseMessage: BaseMessage,
+        spannable: SpannableStringBuilder
+    ): SpannableStringBuilder? = prepareComposerSpan(context, baseMessage, spannable)
+
+    /**
+     * Reverse of the `prepare*Span` rendering: strip THIS formatter's display markup out of [text],
+     * returning the storable token form that goes on the wire (e.g. `"{color:#f00}hi{/color}"` from a
+     * coloured span). Default is identity — mentions/URLs already keep their token in the text, so they
+     * need no reverse step.
+     *
+     * A custom (Approach-2) formatter that renders its own inline style overrides this so its style
+     * survives send: the token stays in the message text and re-renders via `prepare*Span` on every
+     * surface. Call it when reading composer text whose display form differs from the stored token
+     * (e.g. before send, or when populating the composer to edit an existing message).
+     */
+    open fun getOriginalText(text: String): String = text
+
+    /**
+     * Optional live-composer rendering: style THIS formatter's tokens directly on the editable input
+     * (e.g. hide `{color:#…}`/`{/color}` markers with a zero-width span and colour the inner text).
+     * The composer calls this on every text change for each formatter, after its built-in rich-text
+     * and mention styling.
+     *
+     * Default is a no-op — the token then shows as plain source in the composer and only renders via
+     * `prepare*Span` once sent. Apply spans only (do NOT delete the marker characters), so the token
+     * stays in the [editable] and still goes on the wire. Implementations should remove their own
+     * previously-applied spans first so repeated calls are idempotent.
+     */
+    open fun applyComposerSpans(editable: android.text.Editable) {}
+
     open fun observeSelectionList(context: Context, selectedSuggestionItemList: List<SuggestionItem>) {}
 
     /**

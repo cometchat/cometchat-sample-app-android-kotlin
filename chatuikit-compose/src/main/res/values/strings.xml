@@ -27,6 +27,14 @@
     <string name="cometchat_edit" translatable="true">Edit</string>
     <string name="cometchat_delete" translatable="true">Delete</string>
     <string name="cometchat_share" translatable="true">Share</string>
+    <!-- Thread subscription (subscribe/unsubscribe — SDK vocabulary). Full localization is P5 -->
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Subscribed. You\'ll be notified about new replies in this thread.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Subscribed. You\'ll be notified about new replies.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Unsubscribed. Notifications are off until you reply or are mentioned.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Unsubscribed. Notifications are off until you reply or are mentioned.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Couldn\'t update. Please try again.</string>
+    <string name="cometchat_thread_mute" translatable="true">Unsubscribe from thread</string>
+    <string name="cometchat_thread_unmute" translatable="true">Subscribe to thread</string>
     <string name="cometchat_copy" translatable="true">Copy</string>
     <string name="cometchat_translate" translatable="true">Translate</string>
     <string name="cometchat_message_privately" translatable="true">Message Privately</string>
@@ -76,6 +84,7 @@
     <string name="cometchat_action_item" translatable="true">action_item</string>
     <string name="cometchat_try_again" translatable="true">Try again</string>
     <string name="cometchat_something_went_wrong" translatable="true">Something went wrong.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">You don\'t have permission to perform this action.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Transfer Ownership</string>
     <string name="cometchat_add_members" translatable="true">Add Members</string>
     <string name="cometchat_owner" translatable="true">Owner</string>
@@ -242,6 +251,8 @@
     <string name="cometchat_menu_search">Search</string>
     <string name="cometchat_menu_conversation_summary">Conversation Summary</string>
     <string name="cometchat_see_more">See More</string>
+    <string name="cometchat_message_option_more" translatable="true">More</string>
+    <string name="cometchat_message_option_back" translatable="true">Back</string>
     <string name="cometchat_show_n_more" translatable="true" formatted="true">Show +%1$d more</string>
     <string name="cometchat_n_more" translatable="true" formatted="true">+%1$d more</string>
     <string name="cometchat_show_less" translatable="true">Show less</string>
@@ -341,7 +352,7 @@
     <string name="cometchat_ai_assistant" translatable="true">AI Assistant</string>
     <string name="cometchat_ai_agent_message" translatable="true">AI agent message</string>
 
-    <!-- Multiple-attachment composer tray (ENG-36736) -->
+    <!-- Multiple-attachment composer tray -->
     <string name="cometchat_attachment_uploading" translatable="true">Uploading…</string>
     <string name="cometchat_attachment_upload_failed" translatable="true">Upload failed</string>
     <string name="cometchat_attachment_tap_to_retry" translatable="true">Tap to retry</string>
@@ -362,4 +373,46 @@
     <string name="cometchat_attachment_tile_description" translatable="true" formatted="true">%1$s, %2$s</string>
     <string name="cometchat_attachment_play" translatable="true">Play</string>
     <string name="cometchat_attachment_pause" translatable="true">Pause</string>
+    <!-- Thread subscription option titles  -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Subscribe to thread</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Unsubscribe from thread</string>
+
+    <!-- Pin & Save message -->
+    <string name="cometchat_pin_conversation" translatable="true">Pin conversation</string>
+    <string name="cometchat_unpin_conversation" translatable="true">Unpin conversation</string>
+    <string name="cometchat_unpin_conversation_confirm_title" translatable="true">Unpin Conversation</string>
+    <string name="cometchat_unpin_conversation_confirm_body" translatable="true">Do you want to unpin this conversation?</string>
+    <string name="cometchat_pinned" translatable="true">Pinned</string>
+    <string name="cometchat_saved" translatable="true">Saved</string>
+    <string name="cometchat_middot" translatable="false">•</string>
+    <string name="cometchat_message_type_icon" translatable="true">Message type icon</string>
+    <string name="cometchat_pin" translatable="true">Pin</string>
+    <string name="cometchat_unpin" translatable="true">Unpin</string>
+    <string name="cometchat_unpin_message" translatable="true">Unpin message</string>
+    <string name="cometchat_unsave" translatable="true">Unsave</string>
+    <string name="cometchat_pinned_messages" translatable="true">Pinned Messages</string>
+    <string name="cometchat_saved_messages" translatable="true">Saved Messages</string>
+    <string name="cometchat_no_pinned_messages" translatable="true">No pinned messages yet</string>
+    <string name="cometchat_no_pinned_messages_subtitle" translatable="true">Pin important messages to keep them easy to find.</string>
+    <string name="cometchat_no_saved_messages" translatable="true">No saved messages yet</string>
+    <string name="cometchat_no_saved_messages_subtitle" translatable="true">Save messages to keep them handy whenever you need them.</string>
+    <string name="cometchat_message_pinned" translatable="true">Message pinned</string>
+    <string name="cometchat_message_unpinned" translatable="true">Message unpinned</string>
+    <string name="cometchat_message_saved" translatable="true">Message saved</string>
+    <string name="cometchat_message_unsaved" translatable="true">Message unsaved</string>
+    <string name="cometchat_pin_limit_reached" translatable="true">You can only pin %1$d messages. Unpin one to pin another.</string>
+    <string name="cometchat_pin_conversation_limit_reached" translatable="true">You can only pin %1$d chats. Unpin one to pin another.</string>
+    <string name="cometchat_save_limit_reached" translatable="true">You can save up to %1$d messages.</string>
+    <!-- Cap hit but the number could not be resolved (not in the error, not in app settings). -->
+    <string name="cometchat_pin_limit_reached_unknown" translatable="true">Pinned message limit reached. Unpin one to pin another.</string>
+    <string name="cometchat_save_limit_reached_unknown" translatable="true">Saved message limit reached. Unsave one to save another.</string>
+    <string name="cometchat_pin_save_generic_error" translatable="true">Something went wrong. Please try again.</string>
+    <string name="cometchat_pin_message_confirm_title" translatable="true">Pin Message</string>
+    <string name="cometchat_pin_message_confirm_body" translatable="true">Do you want to pin this message to this conversation?</string>
+    <string name="cometchat_unpin_message_confirm_title" translatable="true">Unpin Message</string>
+    <string name="cometchat_unpin_message_confirm_body" translatable="true">Do you want to unpin this message?</string>
+    <string name="cometchat_save_message_confirm_title" translatable="true">Save Message</string>
+    <string name="cometchat_save_message_confirm_body" translatable="true">Do you want to save this message?</string>
+    <string name="cometchat_unsave_message_confirm_title" translatable="true">Unsave Message</string>
+    <string name="cometchat_unsave_message_confirm_body" translatable="true">Do you want to unsave this message?</string>
 </resources>

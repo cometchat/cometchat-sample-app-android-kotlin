@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
@@ -67,6 +68,8 @@ import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.databinding.CometchatMessageComposerBinding
 import com.cometchat.uikit.kotlin.presentation.messagecomposer.style.CometChatMessageComposerStyle
 import com.cometchat.uikit.kotlin.presentation.messagecomposer.utils.MessageComposerViewHolderListener
+import com.cometchat.uikit.kotlin.presentation.messagecomposer.utils.RichTextToolbarTrailingViewListener
+import com.cometchat.uikit.core.formatter.ComposerInputController
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.multiattachment.MultiAttachmentUtils
 import com.cometchat.uikit.kotlin.presentation.polls.ui.CometChatCreatePoll
 import com.cometchat.uikit.kotlin.presentation.shared.mediarecorder.CometChatMediaRecorder
@@ -95,6 +98,7 @@ import com.cometchat.uikit.kotlin.shared.resources.utils.AnimationUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.MediaUtils
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.shared.resources.utils.itemclicklistener.OnItemClickListener
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -280,6 +284,10 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private var secondaryButtonViewListener: MessageComposerViewHolderListener? = null
     private var sendButtonViewListener: MessageComposerViewHolderListener? = null
     private var auxiliaryButtonViewListener: MessageComposerViewHolderListener? = null
+    private var richTextToolbarTrailingViewListener: RichTextToolbarTrailingViewListener? = null
+    // Tracked so a re-apply (e.g. on listener change) removes the previously added views instead of stacking.
+    private var richTextToolbarTrailingSeparator: View? = null
+    private var richTextToolbarTrailingView: View? = null
 
     // Agent chat detection
     private var isAgentChat: Boolean = false
@@ -301,7 +309,8 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
     private var attachmentTileAdapter: CometChatAttachmentTileAdapter? = null
     private var hideAIButton: Boolean = true
-    private var hideStickerButton: Boolean = true
+    // Sticker button is shown by default, matching the Compose composer's hideStickersButton = false
+    private var hideStickerButton: Boolean = false
     private var hideEditPreview: Boolean = false
     private var hideMessagePreview: Boolean = false
 
@@ -904,17 +913,14 @@ class CometChatMessageComposer @JvmOverloads constructor(
         style.aiIcon?.let { binding.ivAI.setImageDrawable(it) }
         if (style.aiIconTint != 0) binding.ivAI.setColorFilter(style.aiIconTint)
         
-        // Sticker button styling
-        style.stickerIcon?.let { binding.ivSticker.setImageDrawable(it) }
-        if (style.stickerIconTint != 0) binding.ivSticker.setColorFilter(style.stickerIconTint)
+        // Sticker button styling — icon/tint depend on whether the sticker keyboard is open
+        updateStickerButtonVisualState()
         
         // Multiline Row 2 button styling — mirror single-line tints to multiline equivalents
         style.attachmentIcon?.let { binding.ivMultilineAttachment?.setImageDrawable(it) }
         if (style.attachmentIconTint != 0) binding.ivMultilineAttachment?.setColorFilter(style.attachmentIconTint)
         style.voiceRecordingIcon?.let { binding.ivMultilineVoiceRecording?.setImageDrawable(it) }
         if (style.voiceRecordingIconTint != 0) binding.ivMultilineVoiceRecording?.setColorFilter(style.voiceRecordingIconTint)
-        style.stickerIcon?.let { binding.ivMultilineSticker?.setImageDrawable(it) }
-        if (style.stickerIconTint != 0) binding.ivMultilineSticker?.setColorFilter(style.stickerIconTint)
         
         // Send button styling - applied via updateSendButtonState
         style.sendButtonInactiveIcon?.let { binding.ivSend.setImageDrawable(it) }
@@ -989,7 +995,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
     /**
      * Updates button visibility based on hide flags.
      * Rich text toolbar visibility is based on richTextToolbarVisibility setting.
-     * Sticker and voice recording buttons are hidden when text is entered.
+     * The voice recording button is hidden when text is entered; the sticker button stays visible.
      * Animations are applied for smooth transitions with proper tracking to prevent vibration during fast typing.
      */
     private fun updateButtonVisibility() {
@@ -1003,10 +1009,11 @@ class CometChatMessageComposer @JvmOverloads constructor(
         binding.secondaryButtonLayout.visibility = if (hideAttachmentButton) View.GONE else View.VISIBLE
         binding.separatorView.visibility = if (hideAttachmentButton) View.GONE else View.VISIBLE
         
-        // Hide voice recording and sticker buttons when text is entered or attachments are staged
+        // Hide the voice recording button when text is entered or attachments are staged.
+        // The sticker button stays visible regardless of content, matching the Compose composer.
         val hasContent = hasText || hasStagedAttachments()
         val shouldShowVoiceRecording = !hideVoiceRecordingButton && !hasContent
-        val shouldShowSticker = !hideStickerButton && !hasContent
+        val shouldShowSticker = !hideStickerButton
         
         // Voice recording button animation - only animate if not already animating to the same state
         val voiceRecordingCurrentlyVisible = binding.ivVoiceRecording.visibility == View.VISIBLE
@@ -2531,6 +2538,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
     private fun setupLinkClickDetection() {
         binding.etMessageInput.setOnTouchListener { v, event ->
             if (event.action == android.view.MotionEvent.ACTION_UP) {
+                // Tapping the input closes the sticker panel (the soft keyboard replaces it),
+                // matching the Compose composer behavior
+                if (isStickerKeyboardVisible) hideStickerKeyboard()
                 val editText = v as android.widget.EditText
                 val editable = editText.text ?: return@setOnTouchListener false
 
@@ -3688,12 +3698,37 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     updateActiveFormatsFromCursor()
                 }
 
+                // Apply custom formatter live-composer spans (e.g. a colour token). Runs regardless
+                // of rich-text config; span-only, so it never deletes the token text.
+                applyCustomComposerSpans(s)
+
                 // Record cursor position so onSelectionChanged can distinguish
                 // typing-induced moves from user-initiated moves
                 lastCursorAfterTextChange = binding.etMessageInput.selectionStart
                 isTextChanging = false
             }
         })
+    }
+
+    /**
+     * Lets each custom formatter style the live input (e.g. colour a `{color:#…}` token and hide its
+     * markers). Span-only — the token text is preserved so it still goes on the wire. Guarded so the
+     * span changes never re-enter the rich-text watcher.
+     */
+    private fun applyCustomComposerSpans(editable: android.text.Editable) {
+        if (textFormatters.isEmpty()) return
+        isApplyingRichTextStyling = true
+        try {
+            for (formatter in textFormatters) {
+                try {
+                    formatter.applyComposerSpans(editable)
+                } catch (e: Exception) {
+                    android.util.Log.w(TAG, "applyComposerSpans failed for ${formatter.javaClass.simpleName}", e)
+                }
+            }
+        } finally {
+            isApplyingRichTextStyling = false
+        }
     }
     
     /**
@@ -4611,22 +4646,21 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
                 else -> {
                     val rawText = (message as? TextMessage)?.text ?: ""
-                    // Run formatter pipeline to resolve mention tokens
+                    // Preview pipeline: resolve mentions + let a custom formatter strip its token and
+                    // apply its style (e.g. colour) via preparePreviewSpan.
                     var spannableBuilder = SpannableStringBuilder(rawText)
                     for (formatter in textFormatters) {
-                        spannableBuilder = formatter.prepareMessageString(
+                        spannableBuilder = formatter.preparePreviewSpan(
                             context,
                             message,
-                            spannableBuilder,
-                            UIKitConstants.MessageBubbleAlignment.RIGHT,
-                            UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                            spannableBuilder
                         ) ?: spannableBuilder
                     }
-                    // Parse markdown into formatted spans (bold, italic, strikethrough,
-                    // underline, etc.) so the preview shows rendered text instead of raw
-                    // markdown markers
+                    // Parse markdown into formatted spans (bold, italic, strikethrough, underline,
+                    // etc.) and re-overlay the formatter's character-style spans (e.g. colour) so the
+                    // preview shows rendered, styled text instead of raw markers/tokens.
                     com.cometchat.uikit.kotlin.presentation.conversations.utils.ConversationSubtitleRenderer.render(
-                        context, spannableBuilder.toString()
+                        context, spannableBuilder.toString(), spannableBuilder
                     )
                 }
             }
@@ -4661,15 +4695,15 @@ class CometChatMessageComposer @JvmOverloads constructor(
                     if (message.deletedAt > 0) {
                         context.getString(R.string.cometchat_this_message_deleted)
                     } else {
-                        // Run formatter pipeline to resolve mention tokens
+                        // Preview pipeline: resolve mentions + let a custom formatter strip its token
+                        // and apply its style (e.g. colour) via preparePreviewSpan. The spannable is
+                        // shown directly, so its colour spans render as-is.
                         var spannableBuilder = SpannableStringBuilder(message.text ?: "")
                         for (formatter in textFormatters) {
-                            spannableBuilder = formatter.prepareMessageString(
+                            spannableBuilder = formatter.preparePreviewSpan(
                                 context,
                                 message,
-                                spannableBuilder,
-                                UIKitConstants.MessageBubbleAlignment.RIGHT,
-                                UIKitConstants.FormattingType.MESSAGE_COMPOSER
+                                spannableBuilder
                             ) ?: spannableBuilder
                         }
                         spannableBuilder
@@ -5219,6 +5253,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
 
         binding.ivMultilineVoiceRecording?.visibility =
             if (hideVoiceRecordingButton || hasStagedAttachments()) View.GONE else View.VISIBLE
+        binding.ivMultilineSticker?.visibility = if (hideStickerButton) View.GONE else View.VISIBLE
     }
 
     /**
@@ -5627,6 +5662,52 @@ class CometChatMessageComposer @JvmOverloads constructor(
     fun setAuxiliaryButtonViewListener(listener: MessageComposerViewHolderListener) {
         auxiliaryButtonViewListener = listener
         invokeViewCallbacks()
+    }
+
+    /**
+     * Sets a listener that supplies a custom view appended to the trailing end of the rich-text
+     * formatting toolbar, after the built-in buttons and a UIKit-owned separator. The listener's
+     * view receives a live [ComposerInputController] to read and mutate the composer input.
+     *
+     * Only visible while the rich-text toolbar is shown; not shown in the multiline selection row.
+     */
+    fun setRichTextToolbarTrailingViewListener(listener: RichTextToolbarTrailingViewListener) {
+        richTextToolbarTrailingViewListener = listener
+        applyRichTextToolbarTrailingView()
+    }
+
+    /**
+     * Appends (or re-applies) the custom trailing view + a UIKit-owned separator to the rich-text
+     * toolbar. Removes any previously added trailing views first so re-applying never stacks them.
+     */
+    private fun applyRichTextToolbarTrailingView() {
+        val listener = richTextToolbarTrailingViewListener ?: return
+
+        richTextToolbarTrailingSeparator?.let { binding.richTextToolbarLayout.removeView(it) }
+        richTextToolbarTrailingView?.let { binding.richTextToolbarLayout.removeView(it) }
+
+        val input = ClassicComposerInputController(binding.etMessageInput, ::toggleFormat)
+
+        val density = resources.displayMetrics.density
+        val margin = resources.getDimensionPixelSize(R.dimen.cometchat_margin_3)
+        val separator = View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                (2 * density).toInt(),
+                (24 * density).toInt()
+            ).apply {
+                marginStart = margin
+                marginEnd = margin
+            }
+            if (style.separatorColor != 0) setBackgroundColor(style.separatorColor)
+        }
+
+        val trailingView = listener.createView(context, user, group, input)
+
+        binding.richTextToolbarLayout.addView(separator)
+        binding.richTextToolbarLayout.addView(trailingView)
+
+        richTextToolbarTrailingSeparator = separator
+        richTextToolbarTrailingView = trailingView
     }
 
     // ==================== Rich Text Configuration ====================
@@ -6170,6 +6251,30 @@ class CometChatMessageComposer @JvmOverloads constructor(
     // ==================== Sticker Keyboard ====================
 
     /**
+     * Swaps the sticker button between its outline (keyboard closed) and filled (keyboard open)
+     * icon/tint pair, mirroring the Compose composer's ACTIVE/INACTIVE sticker button states.
+     */
+    private fun updateStickerButtonVisualState() {
+        val active = isStickerKeyboardVisible
+        val icon = if (active) {
+            style.stickerActiveIcon ?: AppCompatResources.getDrawable(context, R.drawable.cometchat_ic_filled_sticker)
+        } else {
+            style.stickerIcon ?: AppCompatResources.getDrawable(context, R.drawable.cometchat_ic_sticker)
+        }
+        val tint = if (active) {
+            if (style.stickerActiveIconTint != 0) style.stickerActiveIconTint else CometChatTheme.getPrimaryColor(context)
+        } else {
+            if (style.stickerIconTint != 0) style.stickerIconTint else CometChatTheme.getIconTintSecondary(context)
+        }
+        icon?.let {
+            binding.ivSticker.setImageDrawable(it)
+            binding.ivMultilineSticker?.setImageDrawable(it)
+        }
+        binding.ivSticker.setColorFilter(tint)
+        binding.ivMultilineSticker?.setColorFilter(tint)
+    }
+
+    /**
      * Toggles the sticker keyboard visibility.
      * Shows the keyboard if hidden, hides it if visible.
      */
@@ -6221,6 +6326,7 @@ class CometChatMessageComposer @JvmOverloads constructor(
         // Animate visibility with smooth expand animation
         AnimationUtils.animateVisibilityVisible(binding.bottomPanelLayout)
         isStickerKeyboardVisible = true
+        updateStickerButtonVisualState()
     }
 
     /**
@@ -6238,8 +6344,9 @@ class CometChatMessageComposer @JvmOverloads constructor(
             binding.bottomPanelLayout.removeAllViews()
             stickerKeyboard = null
         }, 300)
-        
+
         isStickerKeyboardVisible = false
+        updateStickerButtonVisualState()
     }
 
     /**

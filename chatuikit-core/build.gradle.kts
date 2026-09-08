@@ -39,6 +39,17 @@ android {
         unitTests.isReturnDefaultValues = true
         unitTests.all {
             it.useJUnitPlatform()
+            // The forked test worker, NOT the Gradle daemon: `org.gradle.jvmargs` in
+            // gradle.properties sizes the daemon, so without this the worker runs on Gradle's
+            // 512 MB default. The suite mocks heavily — Kotest property tests build thousands of
+            // ByteBuddy-instrumented mocks — and CI died with "OutOfMemoryError: Java heap space"
+            // inside Mockito's MockMethodAdvice, then hung until the job timed out.
+            it.maxHeapSize = "2g"
+            // ByteBuddy generates a class per mocked type; metaspace grows alongside the heap.
+            it.jvmArgs("-XX:MaxMetaspaceSize=1g")
+            // Recycle the worker every 100 test classes so Mockito's inline-mock bookkeeping and
+            // ByteBuddy's generated classes cannot accumulate across the whole suite in one JVM.
+            it.forkEvery = 100
             it.testLogging {
                 events("passed", "failed", "skipped")
                 showStandardStreams = true

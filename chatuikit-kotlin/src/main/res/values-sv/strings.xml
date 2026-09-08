@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">åtgärdspost</string>
     <string name="cometchat_try_again" translatable="true">Försök igen</string>
     <string name="cometchat_something_went_wrong" translatable="true">Något gick fel.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Du har inte behörighet att utföra den här åtgärden.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Överför ägarskap</string>
     <string name="cometchat_add_members" translatable="true">Lägg till medlemmar</string>
     <string name="cometchat_owner" translatable="true">Ägare</string>
@@ -254,4 +255,53 @@ Vänligen försök igen.</string>
     <string name="cometchat_notify_everyone_in_this_group">Meddela alla i denna grupp</string>
     <string name="cometchat_notify_all" translatable="true">alla</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Prenumerera på tråden</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Avsluta prenumeration på tråden</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Prenumererar. Du får aviseringar om nya svar i den här tråden.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Prenumererar. Du får aviseringar om nya svar.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Prenumeration avslutad. Aviseringar är av tills du svarar eller blir omnämnd.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Prenumeration avslutad. Aviseringar är av tills du svarar eller blir omnämnd.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Det gick inte att uppdatera. Försök igen.</string>
+    <string name="cometchat_thread_mute" translatable="true">Avsluta prenumeration på tråden</string>
+    <string name="cometchat_thread_unmute" translatable="true">Prenumerera på tråden</string>
+    <string name="cometchat_pin">Fäst</string>
+    <string name="cometchat_unpin">Lossa</string>
+    <string name="cometchat_unsave">Ta bort från sparade</string>
+    <string name="cometchat_pinned">Fäst</string>
+    <string name="cometchat_saved">Sparad</string>
+    <string name="cometchat_pin_message_confirm_title">Fäst meddelande</string>
+    <string name="cometchat_pin_message_confirm_body">Vill du fästa det här meddelandet i den här konversationen?</string>
+    <string name="cometchat_unpin_message_confirm_title">Lossa meddelande</string>
+    <string name="cometchat_unpin_message_confirm_body">Vill du lossa det här meddelandet?</string>
+    <string name="cometchat_save_message_confirm_title">Spara meddelande</string>
+    <string name="cometchat_save_message_confirm_body">Vill du spara det här meddelandet?</string>
+    <string name="cometchat_unsave_message_confirm_title">Ta bort meddelande från sparade</string>
+    <string name="cometchat_unsave_message_confirm_body">Vill du ta bort det här meddelandet från sparade?</string>
+    <string name="cometchat_pin_conversation">Fäst konversation</string>
+    <string name="cometchat_unpin_conversation">Lossa konversation</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Lossa konversation</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Vill du lossa den här konversationen?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Du kan bara fästa %1$d chattar. Lossa en för att fästa en annan.</string>
+    <string name="cometchat_pin_limit_reached">Du kan bara fästa %1$d meddelanden. Lossa ett för att fästa ett annat.</string>
+    <string name="cometchat_save_limit_reached">Du kan spara upp till %1$d meddelanden.</string>
+    <string name="cometchat_pin_save_generic_error">Något gick fel. Försök igen.</string>
+    <string name="cometchat_message_pinned">Meddelande fäst</string>
+    <string name="cometchat_message_unpinned">Meddelande lossat</string>
+    <string name="cometchat_message_saved">Meddelande sparat</string>
+    <string name="cometchat_message_unsaved">Meddelande borttaget från sparade</string>
+    <string name="cometchat_no_pinned_messages">Inga fästa meddelanden ännu</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Fäst viktiga meddelanden så att de är lätta att hitta.</string>
+    <string name="cometchat_no_saved_messages">Inga sparade meddelanden ännu</string>
+    <string name="cometchat_no_saved_messages_subtitle">Spara meddelanden så att du har dem till hands när du behöver dem.</string>
+    <string name="cometchat_pinned_messages">Fästa meddelanden</string>
+    <string name="cometchat_saved_messages">Sparade meddelanden</string>
+    <string name="cometchat_unpin_message">Lossa meddelande</string>
+    <string name="cometchat_message_option_more">Mer</string>
+    <string name="cometchat_message_option_back">Tillbaka</string>
+    <string name="cometchat_message_type_icon">Ikon för meddelandetyp</string>
+    <string name="cometchat_pinned_messages_header">Fästa meddelanden</string>
+    <string name="cometchat_saved_messages_header">Sparade meddelanden</string>
+    <string name="cometchat_conversation_pinned">Konversation fäst</string>
+    <string name="cometchat_conversation_unpinned">Konversation lossad</string>
 </resources>

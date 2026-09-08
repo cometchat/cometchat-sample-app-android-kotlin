@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">actie_item</string>
     <string name="cometchat_try_again" translatable="true">Probeer het opnieuw</string>
     <string name="cometchat_something_went_wrong" translatable="true">Er is iets mis gegaan.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Je hebt geen toestemming om deze actie uit te voeren.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Overdracht van eigendom</string>
     <string name="cometchat_add_members" translatable="true">Leden toevoegen</string>
     <string name="cometchat_owner" translatable="true">Eigenaar</string>
@@ -249,4 +250,53 @@
     <string name="cometchat_notify_everyone_in_this_group">Iedereen in deze groep op de hoogte stellen</string>
     <string name="cometchat_notify_all" translatable="true">iedereen</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Abonneren op thread</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Abonnement op thread opzeggen</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Geabonneerd. Je ontvangt meldingen over nieuwe reacties in deze thread.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Geabonneerd. Je ontvangt meldingen over nieuwe reacties.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Afgemeld. Meldingen staan uit totdat je reageert of wordt genoemd.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Afgemeld. Meldingen staan uit totdat je reageert of wordt genoemd.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Bijwerken mislukt. Probeer het opnieuw.</string>
+    <string name="cometchat_thread_mute" translatable="true">Abonnement op thread opzeggen</string>
+    <string name="cometchat_thread_unmute" translatable="true">Abonneren op thread</string>
+    <string name="cometchat_pin">Vastzetten</string>
+    <string name="cometchat_unpin">Losmaken</string>
+    <string name="cometchat_unsave">Uit opgeslagen verwijderen</string>
+    <string name="cometchat_pinned">Vastgezet</string>
+    <string name="cometchat_saved">Opgeslagen</string>
+    <string name="cometchat_pin_message_confirm_title">Bericht vastzetten</string>
+    <string name="cometchat_pin_message_confirm_body">Wil je dit bericht in dit gesprek vastzetten?</string>
+    <string name="cometchat_unpin_message_confirm_title">Bericht losmaken</string>
+    <string name="cometchat_unpin_message_confirm_body">Wil je dit bericht losmaken?</string>
+    <string name="cometchat_save_message_confirm_title">Bericht opslaan</string>
+    <string name="cometchat_save_message_confirm_body">Wil je dit bericht opslaan?</string>
+    <string name="cometchat_unsave_message_confirm_title">Bericht uit opgeslagen verwijderen</string>
+    <string name="cometchat_unsave_message_confirm_body">Wil je dit bericht uit opgeslagen verwijderen?</string>
+    <string name="cometchat_pin_conversation">Gesprek vastzetten</string>
+    <string name="cometchat_unpin_conversation">Gesprek losmaken</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Gesprek losmaken</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Wil je dit gesprek losmaken?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Je kunt maar %1$d chats vastzetten. Maak er een los om een andere vast te zetten.</string>
+    <string name="cometchat_pin_limit_reached">Je kunt maar %1$d berichten vastzetten. Maak er een los om een ander vast te zetten.</string>
+    <string name="cometchat_save_limit_reached">Je kunt maximaal %1$d berichten opslaan.</string>
+    <string name="cometchat_pin_save_generic_error">Er is iets misgegaan. Probeer het opnieuw.</string>
+    <string name="cometchat_message_pinned">Bericht vastgezet</string>
+    <string name="cometchat_message_unpinned">Bericht losgemaakt</string>
+    <string name="cometchat_message_saved">Bericht opgeslagen</string>
+    <string name="cometchat_message_unsaved">Bericht uit opgeslagen verwijderd</string>
+    <string name="cometchat_no_pinned_messages">Nog geen vastgezette berichten</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Zet belangrijke berichten vast om ze snel terug te vinden.</string>
+    <string name="cometchat_no_saved_messages">Nog geen opgeslagen berichten</string>
+    <string name="cometchat_no_saved_messages_subtitle">Sla berichten op zodat je ze altijd bij de hand hebt.</string>
+    <string name="cometchat_pinned_messages">Vastgezette berichten</string>
+    <string name="cometchat_saved_messages">Opgeslagen berichten</string>
+    <string name="cometchat_unpin_message">Bericht losmaken</string>
+    <string name="cometchat_message_option_more">Meer</string>
+    <string name="cometchat_message_option_back">Terug</string>
+    <string name="cometchat_message_type_icon">Pictogram berichttype</string>
+    <string name="cometchat_pinned_messages_header">Vastgezette berichten</string>
+    <string name="cometchat_saved_messages_header">Opgeslagen berichten</string>
+    <string name="cometchat_conversation_pinned">Gesprek vastgezet</string>
+    <string name="cometchat_conversation_unpinned">Gesprek losgemaakt</string>
 </resources>

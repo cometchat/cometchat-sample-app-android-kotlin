@@ -26,7 +26,8 @@ class UIKitSettings private constructor(
     val overrideAdminHost: String?,
     val overrideClientHost: String?,
     val enableCalling: Boolean,
-    val callSettingsBuilder: Any?
+    val callSettingsBuilder: Any?,
+    val enableThreadSubscription: Boolean
 ) {
     companion object {
         private const val TAG = "UIKitSettings"
@@ -46,6 +47,7 @@ class UIKitSettings private constructor(
         private var overrideClientHost: String? = null
         private var enableCalling: Boolean = false
         private var callSettingsBuilder: Any? = null
+        private var enableThreadSubscription: Boolean = false
 
         /**
          * Sets the CometChat App ID.
@@ -181,6 +183,19 @@ class UIKitSettings private constructor(
         }
 
         /**
+         * Sets whether the thread-subscription (follow/unfollow) feature is enabled.
+         * When off (the default) neither the thread-header control nor the message
+         * action-sheet option renders, and no subscription request is ever made.
+         *
+         * @param enable True to enable thread subscription surfaces, false to disable (default is false)
+         * @return This builder instance
+         */
+        fun setEnableThreadSubscription(enable: Boolean): UIKitSettingsBuilder {
+            this.enableThreadSubscription = enable
+            return this
+        }
+
+        /**
          * Builds a new instance of [UIKitSettings] using the provided configuration.
          *
          * @return A new [UIKitSettings] instance
@@ -196,7 +211,8 @@ class UIKitSettings private constructor(
                 overrideAdminHost = overrideAdminHost,
                 overrideClientHost = overrideClientHost,
                 enableCalling = enableCalling,
-                callSettingsBuilder = callSettingsBuilder
+                callSettingsBuilder = callSettingsBuilder,
+                enableThreadSubscription = enableThreadSubscription
             )
         }
     }

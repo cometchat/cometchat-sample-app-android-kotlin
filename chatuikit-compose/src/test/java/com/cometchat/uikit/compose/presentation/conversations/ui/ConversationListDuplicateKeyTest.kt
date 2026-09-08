@@ -87,6 +87,7 @@ class ConversationListDuplicateKeyTest {
                     onItemClick = {},
                     onItemLongClick = {},
                     onDeleteConversation = {},
+                    onPinToggle = {},
                     onLoadMore = {},
                     scrollToTopEvent = null
                 )

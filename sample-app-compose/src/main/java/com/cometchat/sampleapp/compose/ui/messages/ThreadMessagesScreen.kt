@@ -29,6 +29,7 @@ import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
 import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
 import com.cometchat.uikit.compose.presentation.threadheader.ui.CometChatThreadHeader
+import com.cometchat.uikit.compose.presentation.threadheader.ui.ThreadSubscriptionBell
 
 /**
  * Thread messages screen composable for displaying thread replies.
@@ -131,6 +132,12 @@ fun ThreadMessagesScreen(
                         )
                     }
                 },
+                actions = {
+                    // Thread-subscription bell lives in the title bar (Figma / Flutter parity), not
+                    // beside the reply count. The bell hides itself outside a group and when the
+                    // feature is off, so it needs no gate here.
+                    ThreadSubscriptionBell(parentMessage = parentMessage!!)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -140,7 +147,9 @@ fun ThreadMessagesScreen(
             // Thread Header - shows parent message
             CometChatThreadHeader(
                 modifier = Modifier.fillMaxWidth(),
-                parentMessage = parentMessage!!
+                parentMessage = parentMessage!!,
+                // The bell lives in the title bar above, so hide the reply-bar bell (only one shows).
+                hideThreadSubscription = true
             )
 
             // Message List - displays thread replies
@@ -150,7 +159,8 @@ fun ThreadMessagesScreen(
                     .weight(1f),
                 user = user,
                 group = group,
-                parentMessageId = parentMessageId.toLong(),
+                // The whole parent, not just its id: the list stamps realtime replies from it.
+                parentMessage = parentMessage!!,
                 goToMessageId = goToMessageId,
                 // Enable real-time updates
                 scrollToBottomOnNewMessage = true,

@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">عنصر الإجراء</string>
     <string name="cometchat_try_again" translatable="true">حاول مرة أخرى</string>
     <string name="cometchat_something_went_wrong" translatable="true">حدث خطأ ما.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">ليست لديك صلاحية لتنفيذ هذا الإجراء.</string>
     <string name="cometchat_transfer_ownership" translatable="true">نقل الملكية</string>
     <string name="cometchat_add_members" translatable="true">أضف أعضاء</string>
     <string name="cometchat_owner" translatable="true">المالك</string>
@@ -247,4 +248,53 @@
     <string name="cometchat_notify_everyone_in_this_group">إخطار الجميع في هذه المجموعة</string>
     <string name="cometchat_notify_all" translatable="true">الجميع</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">الاشتراك في المحادثة</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">إلغاء الاشتراك في المحادثة</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">تم الاشتراك. سيتم إعلامك بالردود الجديدة في هذه المحادثة.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">تم الاشتراك. سيتم إعلامك بالردود الجديدة.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">تم إلغاء الاشتراك. الإشعارات متوقفة حتى ترد أو يتم ذكرك.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">تم إلغاء الاشتراك. الإشعارات متوقفة حتى ترد أو يتم ذكرك.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">تعذّر التحديث. يرجى المحاولة مرة أخرى.</string>
+    <string name="cometchat_thread_mute" translatable="true">إلغاء الاشتراك في المحادثة</string>
+    <string name="cometchat_thread_unmute" translatable="true">الاشتراك في المحادثة</string>
+    <string name="cometchat_pin">تثبيت</string>
+    <string name="cometchat_unpin">إلغاء التثبيت</string>
+    <string name="cometchat_unsave">إلغاء الحفظ</string>
+    <string name="cometchat_pinned">مثبّتة</string>
+    <string name="cometchat_saved">محفوظة</string>
+    <string name="cometchat_pin_message_confirm_title">تثبيت الرسالة</string>
+    <string name="cometchat_pin_message_confirm_body">هل تريد تثبيت هذه الرسالة في هذه المحادثة؟</string>
+    <string name="cometchat_unpin_message_confirm_title">إلغاء تثبيت الرسالة</string>
+    <string name="cometchat_unpin_message_confirm_body">هل تريد إلغاء تثبيت هذه الرسالة؟</string>
+    <string name="cometchat_save_message_confirm_title">حفظ الرسالة</string>
+    <string name="cometchat_save_message_confirm_body">هل تريد حفظ هذه الرسالة؟</string>
+    <string name="cometchat_unsave_message_confirm_title">إلغاء حفظ الرسالة</string>
+    <string name="cometchat_unsave_message_confirm_body">هل تريد إلغاء حفظ هذه الرسالة؟</string>
+    <string name="cometchat_pin_conversation">تثبيت المحادثة</string>
+    <string name="cometchat_unpin_conversation">إلغاء تثبيت المحادثة</string>
+    <string name="cometchat_unpin_conversation_confirm_title">إلغاء تثبيت المحادثة</string>
+    <string name="cometchat_unpin_conversation_confirm_body">هل تريد إلغاء تثبيت هذه المحادثة؟</string>
+    <string name="cometchat_pin_conversation_limit_reached">يمكنك تثبيت %1$d محادثات فقط. ألغِ تثبيت واحدة لتثبيت أخرى.</string>
+    <string name="cometchat_pin_limit_reached">يمكنك تثبيت %1$d رسائل فقط. ألغِ تثبيت واحدة لتثبيت أخرى.</string>
+    <string name="cometchat_save_limit_reached">يمكنك حفظ ما يصل إلى %1$d رسالة.</string>
+    <string name="cometchat_pin_save_generic_error">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
+    <string name="cometchat_message_pinned">تم تثبيت الرسالة</string>
+    <string name="cometchat_message_unpinned">تم إلغاء تثبيت الرسالة</string>
+    <string name="cometchat_message_saved">تم حفظ الرسالة</string>
+    <string name="cometchat_message_unsaved">تم إلغاء حفظ الرسالة</string>
+    <string name="cometchat_no_pinned_messages">لا توجد رسائل مثبّتة بعد</string>
+    <string name="cometchat_no_pinned_messages_subtitle">ثبّت الرسائل المهمة ليسهل العثور عليها.</string>
+    <string name="cometchat_no_saved_messages">لا توجد رسائل محفوظة بعد</string>
+    <string name="cometchat_no_saved_messages_subtitle">احفظ الرسائل لتكون في متناولك متى احتجت إليها.</string>
+    <string name="cometchat_pinned_messages">الرسائل المثبّتة</string>
+    <string name="cometchat_saved_messages">الرسائل المحفوظة</string>
+    <string name="cometchat_unpin_message">إلغاء تثبيت الرسالة</string>
+    <string name="cometchat_message_option_more">المزيد</string>
+    <string name="cometchat_message_option_back">رجوع</string>
+    <string name="cometchat_message_type_icon">أيقونة نوع الرسالة</string>
+    <string name="cometchat_pinned_messages_header">الرسائل المثبّتة</string>
+    <string name="cometchat_saved_messages_header">الرسائل المحفوظة</string>
+    <string name="cometchat_conversation_pinned">تم تثبيت المحادثة</string>
+    <string name="cometchat_conversation_unpinned">تم إلغاء تثبيت المحادثة</string>
 </resources>

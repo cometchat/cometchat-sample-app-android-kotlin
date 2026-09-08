@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">कार्य_आइटम</string>
     <string name="cometchat_try_again" translatable="true">फिर से कोशिश करें</string>
     <string name="cometchat_something_went_wrong" translatable="true">कुछ त्रुटि हुई।</string>
+    <string name="cometchat_action_permission_denied" translatable="true">आपको यह क्रिया करने की अनुमति नहीं है।</string>
     <string name="cometchat_transfer_ownership" translatable="true">स्वामित्व स्थानांतरण</string>
     <string name="cometchat_add_members" translatable="true">सदस्य जोड़ें</string>
     <string name="cometchat_owner" translatable="true">मालिक</string>
@@ -250,4 +251,49 @@
     <string name="cometchat_notify_everyone_in_this_group">इस समूह में सभी को सूचित करें</string>
     <string name="cometchat_notify_all" translatable="true">सभी</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">थ्रेड की सदस्यता लें</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">थ्रेड की सदस्यता समाप्त करें</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">सदस्यता ले ली गई। इस थ्रेड में नए जवाबों के बारे में आपको सूचित किया जाएगा।</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">सदस्यता ले ली गई। नए जवाबों के बारे में आपको सूचित किया जाएगा।</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">सदस्यता समाप्त कर दी गई। जब तक आप जवाब न दें या उल्लेख न किए जाएँ, सूचनाएँ बंद रहेंगी।</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">सदस्यता समाप्त कर दी गई। जब तक आप जवाब न दें या उल्लेख न किए जाएँ, सूचनाएँ बंद रहेंगी।</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">अपडेट नहीं हो सका। कृपया पुनः प्रयास करें।</string>
+    <string name="cometchat_thread_mute" translatable="true">थ्रेड की सदस्यता समाप्त करें</string>
+    <string name="cometchat_thread_unmute" translatable="true">थ्रेड की सदस्यता लें</string>
+    <string name="cometchat_pin">पिन करें</string>
+    <string name="cometchat_unpin">अनपिन करें</string>
+    <string name="cometchat_unsave">सहेजना हटाएं</string>
+    <string name="cometchat_pinned">पिन किया गया</string>
+    <string name="cometchat_saved">सहेजा गया</string>
+    <string name="cometchat_pin_message_confirm_title">संदेश पिन करें</string>
+    <string name="cometchat_pin_message_confirm_body">क्या आप इस संदेश को इस वार्ता में पिन करना चाहते हैं?</string>
+    <string name="cometchat_unpin_message_confirm_title">संदेश अनपिन करें</string>
+    <string name="cometchat_unpin_message_confirm_body">क्या आप इस संदेश को अनपिन करना चाहते हैं?</string>
+    <string name="cometchat_save_message_confirm_title">संदेश सहेजें</string>
+    <string name="cometchat_save_message_confirm_body">क्या आप इस संदेश को सहेजना चाहते हैं?</string>
+    <string name="cometchat_unsave_message_confirm_title">संदेश का सहेजना हटाएं</string>
+    <string name="cometchat_unsave_message_confirm_body">क्या आप इस संदेश का सहेजना हटाना चाहते हैं?</string>
+    <string name="cometchat_pin_conversation">वार्ता पिन करें</string>
+    <string name="cometchat_unpin_conversation">वार्ता अनपिन करें</string>
+    <string name="cometchat_unpin_conversation_confirm_title">वार्ता अनपिन करें</string>
+    <string name="cometchat_unpin_conversation_confirm_body">क्या आप इस वार्ता को अनपिन करना चाहते हैं?</string>
+    <string name="cometchat_pin_conversation_limit_reached">आप केवल %1$d चैट पिन कर सकते हैं। दूसरी पिन करने के लिए एक को अनपिन करें।</string>
+    <string name="cometchat_pin_limit_reached">आप केवल %1$d संदेश पिन कर सकते हैं। दूसरा पिन करने के लिए एक को अनपिन करें।</string>
+    <string name="cometchat_save_limit_reached">आप अधिकतम %1$d संदेश सहेज सकते हैं।</string>
+    <string name="cometchat_pin_save_generic_error">कुछ गलत हो गया। कृपया पुनः प्रयास करें।</string>
+    <string name="cometchat_message_pinned">संदेश पिन किया गया</string>
+    <string name="cometchat_message_unpinned">संदेश अनपिन किया गया</string>
+    <string name="cometchat_message_saved">संदेश सहेजा गया</string>
+    <string name="cometchat_message_unsaved">संदेश का सहेजना हटाया गया</string>
+    <string name="cometchat_no_pinned_messages">अभी तक कोई पिन किया गया संदेश नहीं</string>
+    <string name="cometchat_no_pinned_messages_subtitle">महत्वपूर्ण संदेशों को आसानी से ढूंढने के लिए पिन करें।</string>
+    <string name="cometchat_no_saved_messages">अभी तक कोई सहेजा गया संदेश नहीं</string>
+    <string name="cometchat_no_saved_messages_subtitle">संदेशों को सहेजें ताकि ज़रूरत पड़ने पर वे आपके पास हों।</string>
+    <string name="cometchat_pinned_messages">पिन किए गए संदेश</string>
+    <string name="cometchat_saved_messages">सहेजे गए संदेश</string>
+    <string name="cometchat_unpin_message">संदेश अनपिन करें</string>
+    <string name="cometchat_message_option_more">और</string>
+    <string name="cometchat_message_option_back">वापस</string>
+    <string name="cometchat_message_type_icon">संदेश प्रकार का आइकन</string>
 </resources>

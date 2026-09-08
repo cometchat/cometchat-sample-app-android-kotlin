@@ -166,7 +166,7 @@ data class CometChatConversationsStyle(
             // Delete option styling
             deleteOptionIcon: Painter? = painterResource(R.drawable.cometchat_ic_delete),
             deleteOptionIconTint: Color = CometChatTheme.colorScheme.errorColor,
-            deleteOptionTextColor: Color = CometChatTheme.colorScheme.textColorPrimary,
+            deleteOptionTextColor: Color = CometChatTheme.colorScheme.errorColor,
             deleteOptionTextStyle: TextStyle = CometChatTheme.typography.bodyRegular,
             
             // Item styling

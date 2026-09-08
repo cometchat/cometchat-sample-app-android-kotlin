@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Custom header for a pinned-message bubble: sender name • date (adjacent, not the default
+     name/…/time header). Bound by PinnedMessagesAdapter. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/cometchat_padding_1">
+
+    <TextView
+        android:id="@+id/pinned_header_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:maxWidth="200dp"
+        android:textAppearance="?attr/cometchatTextAppearanceCaption1Medium"
+        android:textColor="?attr/cometchatTextColorHighlight" />
+
+    <TextView
+        android:id="@+id/pinned_header_dot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/cometchat_margin_1"
+        android:layout_marginEnd="@dimen/cometchat_margin_1"
+        android:text="@string/cometchat_middot"
+        android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+        android:textColor="?attr/cometchatTextColorSecondary" />
+
+    <TextView
+        android:id="@+id/pinned_header_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/cometchatTextAppearanceCaption1Regular"
+        android:textColor="?attr/cometchatTextColorSecondary" />
+
+</LinearLayout>

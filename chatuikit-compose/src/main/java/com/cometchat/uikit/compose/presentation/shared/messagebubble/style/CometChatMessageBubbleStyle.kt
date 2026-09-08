@@ -235,10 +235,21 @@ open class CometChatMessageBubbleStyle(
         @Composable
         fun outgoing(
             messagePreviewStyle: CometChatMessagePreviewStyle? = null
-        ): CometChatMessageBubbleStyle = default(
-            backgroundColor = CometChatTheme.colorScheme.primary,
-            timestampTextColor = Color.White.copy(alpha = 0.8f),
-            messagePreviewStyle = messagePreviewStyle
-        )
+        ): CometChatMessageBubbleStyle {
+            val timestampColor = Color.White.copy(alpha = 0.8f)
+            return default(
+                backgroundColor = CometChatTheme.colorScheme.primary,
+                timestampTextColor = timestampColor,
+                // The neutral receipt ticks follow the timestamp so the footer reads as one unit;
+                // left at the default they inherit the neutral icon tint and sit grey on the
+                // primary-coloured bubble. Read/error keep their own colours, which carry meaning.
+                messageReceiptStyle = CometChatReceiptsStyle.default(
+                    waitIconTint = timestampColor,
+                    sentIconTint = timestampColor,
+                    deliveredIconTint = timestampColor
+                ),
+                messagePreviewStyle = messagePreviewStyle
+            )
+        }
     }
 }

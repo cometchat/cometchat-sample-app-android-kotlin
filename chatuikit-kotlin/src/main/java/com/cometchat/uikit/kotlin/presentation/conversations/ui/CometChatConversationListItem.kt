@@ -1028,6 +1028,16 @@ class CometChatConversationListItem @JvmOverloads constructor(
                 dateView?.visibility = GONE
             }
 
+            // Pinned indicator — shown for a pinned conversation, sitting just before the unread
+            // badge (or alone when there is no unread count). Tinted with the same color as the
+            // conversation timestamp (secondary text color) so it reads as list metadata.
+            tailBinding?.conversationPinIndicator?.let { pin ->
+                pin.visibility = if (conv.isPinned) VISIBLE else GONE
+                if (conv.isPinned) {
+                    pin.setColorFilter(CometChatTheme.getTextColorSecondary(context))
+                }
+            }
+
             // Unread badge (hide for agent chats since last message is also hidden)
             val user = conv.conversationWith as? User
             val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)

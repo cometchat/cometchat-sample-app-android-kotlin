@@ -1,6 +1,7 @@
 package com.cometchat.uikit.core.domain.usecase
 
 import com.cometchat.chat.models.TextMessage
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
 import com.cometchat.uikit.core.domain.repository.MessageComposerRepository
 
 /**
@@ -32,6 +33,13 @@ open class SendTextMessageUseCase(
      *         or error on failure
      */
     open suspend operator fun invoke(message: TextMessage): Result<TextMessage> {
-        return repository.sendTextMessage(message)
+        return repository.sendTextMessage(message).onSuccess { sentMessage ->
+            // The server subscribes the sender to the message's thread on every send, but
+            // stamps `threadSubscribed` only on FETCHED copies — the send result comes back
+            // flagless. Stamp it here so the message renders as followed straight away
+            // instead of only after the next fetch (ENG-38903): a reply also mirrors the flip
+            // onto its parent thread (Case 4), a root is stamped for its own thread (Case 2).
+            CometChatThreadSubscription.applyOwnMessageSent(sentMessage)
+        }
     }
 }

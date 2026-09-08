@@ -47,7 +47,7 @@ private const val COLLAPSED_FILE_COUNT = 3
 /**
  * Renders every non-media attachment of [message] as a vertical stack of file cards. When there are
  * more than [COLLAPSED_FILE_COUNT] files the extra cards collapse behind a "+N more" / "Show less"
- * toggle. Part of the ENG-36737 per-type multi-attachment bubbles.
+ * toggle. Part of the per-type multi-attachment bubbles.
  *
  * @param message The [MediaMessage] whose non-media attachments are rendered
  * @param alignment The bubble alignment (LEFT, RIGHT, or CENTER)

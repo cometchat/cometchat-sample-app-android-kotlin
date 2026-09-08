@@ -14,13 +14,31 @@
         android:textAlignment="viewEnd"
         tools:text="12:30 PM" />
 
-    <!-- Badge view for unread message count -->
-    <com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCount
-        android:id="@+id/badge_view"
+    <!-- Pin indicator + unread badge. The pin shows for a pinned conversation; it sits just before
+         the unread badge, and when there is no unread count only the pin is shown. -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/cometchat_margin_1"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/conversation_pin_indicator"
+            android:layout_width="@dimen/cometchat_20dp"
+            android:layout_height="@dimen/cometchat_20dp"
+            android:layout_marginEnd="@dimen/cometchat_margin_1"
+            android:contentDescription="@string/cometchat_pinned"
+            android:src="@drawable/cometchat_ic_pin_filled"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <com.cometchat.uikit.kotlin.presentation.shared.baseelements.badgecount.CometChatBadgeCount
+            android:id="@+id/badge_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
 
 </LinearLayout>

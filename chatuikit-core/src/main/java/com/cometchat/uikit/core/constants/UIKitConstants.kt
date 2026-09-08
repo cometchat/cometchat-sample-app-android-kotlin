@@ -53,6 +53,8 @@ object UIKitConstants {
         const val SEARCH = "search"
         const val CONVERSATION_SUMMARY = "conversation_summary"
         const val DETAILS = "details"
+        const val PINNED_MESSAGES = "pinned_messages"
+        const val SAVED_MESSAGES = "saved_messages"
     }
 
     /**
@@ -220,6 +222,16 @@ object UIKitConstants {
     object SharedPreferencesKeys {
         const val CALL = "initiated_call"
         const val CALL_MESSAGE = "call_message"
+    }
+
+    /**
+     * Prefixes for the tags ViewModels register their SDK listeners under. The full tag appends a
+     * per-instance suffix so two live instances of the same screen never collide, and so removal on
+     * teardown only detaches that instance's listener.
+     */
+    object ListenerTags {
+        const val PINNED_MESSAGES = "PinnedMessages"
+        const val SAVED_MESSAGES = "SavedMessages"
     }
 
     /**
@@ -419,6 +431,8 @@ object UIKitConstants {
      */
     object ConversationOption {
         const val DELETE = "delete"
+        const val PIN = "pin"
+        const val UNPIN = "unpin"
     }
 
     /**
@@ -556,6 +570,24 @@ object UIKitConstants {
         const val REPORT = "report"
         const val MARK_AS_UNREAD = "mark_as_unread"
         const val REACT = "react"
+        const val THREAD_SUBSCRIPTION = "thread_subscription"
+        const val PIN = "pin"
+        const val UNPIN = "unpin"
+        const val SAVE = "save"
+        const val UNSAVE = "unsave"
+    }
+
+    /**
+     * Error codes the server returns for a failed pin/save action. Read off
+     * `CometChatException.code`; the structured cap (when served) is in `errorParams["limit"]`.
+     */
+    object PinSaveErrorCodes {
+        const val PINNED_MESSAGES_LIMIT_EXCEEDED = "ERR_PINNED_MESSAGES_LIMIT_EXCEEDED"
+        const val SAVED_MESSAGES_LIMIT_EXCEEDED = "ERR_SAVED_MESSAGES_LIMIT_EXCEEDED"
+        const val PERMISSION_DENIED = "ERR_PERMISSION_DENIED"
+
+        /** `errorParams` key carrying the cap that was hit. */
+        const val PARAM_LIMIT = "limit"
     }
 
     /**

@@ -85,12 +85,15 @@ object NewChatRoute
  * @param parentMessageId The ID of the parent message of the thread
  * @param userId The user ID for one-on-one conversations (null for group chats)
  * @param groupId The group ID for group conversations (null for one-on-one chats)
+ * @param goToMessageId Optional reply to scroll to and highlight — a search hit or a tapped
+ *   notification for a reply, which lives in the thread rather than the main list
  */
 @Serializable
 data class ThreadMessageRoute(
     val parentMessageId: Long,
     val userId: String? = null,
-    val groupId: String? = null
+    val groupId: String? = null,
+    val goToMessageId: Long? = null
 )
 
 /**
@@ -125,3 +128,20 @@ data class AddMembersRoute(
 data class ChatHistoryRoute(
     val userId: String
 )
+
+/**
+ * Pinned messages screen for a conversation. Either userId or groupId identifies the conversation.
+ * Opened from the message-header overflow menu.
+ */
+@Serializable
+data class PinnedMessagesRoute(
+    val userId: String? = null,
+    val groupId: String? = null
+)
+
+/**
+ * Saved messages screen — the current user's saved messages across all conversations (user-level).
+ * Opened from the Chats tab user-avatar overflow menu.
+ */
+@Serializable
+object SavedMessagesRoute

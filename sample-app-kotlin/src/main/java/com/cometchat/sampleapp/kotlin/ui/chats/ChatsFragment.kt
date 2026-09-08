@@ -20,6 +20,7 @@ import com.cometchat.chat.models.User
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.FragmentChatsBinding
 import com.cometchat.sampleapp.kotlin.ui.messages.MessagesActivity
+import com.cometchat.sampleapp.kotlin.ui.messages.SavedMessagesActivity
 import com.cometchat.sampleapp.kotlin.ui.newchat.NewChatActivity
 import com.cometchat.sampleapp.kotlin.ui.splash.SplashActivity
 import com.cometchat.uikit.core.CometChatUIKit
@@ -65,6 +66,15 @@ class ChatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupConversationList()
+    }
+
+    /**
+     * Forces a conversations reload. Called by the host activity when the Chats tab is tapped
+     * (switching to it or re-tapping it) — the conversations ViewModel is retained and would
+     * otherwise show cached data.
+     */
+    fun reloadConversations() {
+        _binding?.conversationList?.refreshConversations()
     }
 
     /**
@@ -151,7 +161,13 @@ class ChatsFragment : Fragment() {
             val intent = Intent(requireContext(), NewChatActivity::class.java)
             startActivity(intent)
         }
-        
+
+        // Set up Saved Messages click
+        popupView.findViewById<TextView>(R.id.tv_saved_messages)?.setOnClickListener {
+            popupWindow.dismiss()
+            SavedMessagesActivity.start(requireContext())
+        }
+
         // Set up Logout click
         // Validates: Requirement 8.5 (Profile menu includes logout functionality)
         popupView.findViewById<TextView>(R.id.tv_logout)?.setOnClickListener {

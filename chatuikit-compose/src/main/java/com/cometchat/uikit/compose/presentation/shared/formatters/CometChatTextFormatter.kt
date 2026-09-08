@@ -3,6 +3,7 @@ package com.cometchat.uikit.compose.presentation.shared.formatters
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.VisualTransformation
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
@@ -85,6 +86,42 @@ abstract class CometChatTextFormatter(private val trackingCharacter: Char) : For
     open fun prepareRightMessageBubbleSpan(context: Context, baseMessage: BaseMessage, text: AnnotatedString): AnnotatedString = text
     open fun prepareComposerSpan(context: Context, baseMessage: BaseMessage, text: AnnotatedString): AnnotatedString = text
     open fun prepareConversationSpan(context: Context, baseMessage: BaseMessage, text: AnnotatedString): AnnotatedString = text
+
+    /**
+     * Display span for the reply/edit PREVIEW panels — a read-only surface, distinct from the live
+     * composer input. Defaults to [prepareComposerSpan] (so existing formatters are unaffected), but
+     * a formatter whose composer span keeps a token intact for the input (e.g. a colour token) should
+     * override this to strip the token and apply its style, so the preview shows styled text rather
+     * than the raw token.
+     */
+    open fun preparePreviewSpan(context: Context, baseMessage: BaseMessage, text: AnnotatedString): AnnotatedString =
+        prepareComposerSpan(context, baseMessage, text)
+
+    /**
+     * Reverse of the `prepare*Span` rendering: strip THIS formatter's display markup out of [text],
+     * returning the storable token form that goes on the wire (e.g. `"{color:#f00}hi{/color}"` from a
+     * coloured span). Default is identity — mentions/URLs already keep their token in the text, so they
+     * need no reverse step.
+     *
+     * A custom (Approach-2) formatter that renders its own inline style overrides this so its style
+     * survives send: the token stays in the message text and re-renders via `prepare*Span` on every
+     * surface. Call it when reading composer text whose display form differs from the stored token
+     * (e.g. before send, or when populating the composer to edit an existing message).
+     */
+    open fun getOriginalText(text: String): String = text
+
+    /**
+     * Optional live-composer rendering: return a [VisualTransformation] that styles THIS formatter's
+     * tokens directly in the editable field (e.g. render `{color:#…}…{/color}` as coloured text while
+     * hiding the markers). The composer folds every formatter's transformation into its own pipeline,
+     * alongside the built-in rich-text and mention transformations.
+     *
+     * Default is null — the token then simply shows as plain source in the composer and only renders
+     * via `prepare*Span` once sent. Override this to make a custom format WYSIWYG while typing. The
+     * transformation is display-only; the underlying text (with tokens) is unchanged, so the token
+     * still goes on the wire.
+     */
+    open fun composerVisualTransformation(): VisualTransformation? = null
 
     open fun observeSelectionList(context: Context, selectedSuggestionItemList: List<SuggestionItem>) { }
 

@@ -64,6 +64,16 @@
             android:theme="@style/Theme.KotlinUIKit" />
         
         <activity
+            android:name=".appflow.PinnedMessagesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KotlinUIKit" />
+
+        <activity
+            android:name=".appflow.SavedMessagesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KotlinUIKit" />
+
+        <activity
             android:name=".appflow.ThreadMessageActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"

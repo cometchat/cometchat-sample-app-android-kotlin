@@ -23,6 +23,7 @@ import com.cometchat.pushnotification.CometChatPushNotifications
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConversations
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
 import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.AvatarStyle
 import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatar
 import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupMenu
@@ -46,7 +47,9 @@ fun ChatsTab(
     onConversationClick: (User?, Group?, Long?) -> Unit,
     onNewChatClick: () -> Unit,
     onSearchClick: () -> Unit,
+    onSavedMessagesClick: () -> Unit,
     onLogout: () -> Unit,
+    conversationsViewModel: CometChatConversationsViewModel,
     contentPadding: PaddingValues
 ) {
     val loggedInUser = CometChat.getLoggedInUser()
@@ -60,6 +63,7 @@ fun ChatsTab(
     ) {
         CometChatConversations(
             modifier = Modifier.fillMaxSize(),
+            conversationListViewModel = conversationsViewModel,
             title = "Chats",
             hideBackIcon = true,
             overflowMenu = {
@@ -71,6 +75,10 @@ fun ChatsTab(
                     onNewChatClick = {
                         showOverflowMenu = false
                         onNewChatClick()
+                    },
+                    onSavedMessagesClick = {
+                        showOverflowMenu = false
+                        onSavedMessagesClick()
                     },
                     onLogoutClick = {
                         showOverflowMenu = false
@@ -127,6 +135,7 @@ private fun UserAvatarOverflowMenu(
     showMenu: Boolean,
     onMenuToggle: (Boolean) -> Unit,
     onNewChatClick: () -> Unit,
+    onSavedMessagesClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     // Create menu items with icons matching the reference app
@@ -139,6 +148,15 @@ private fun UserAvatarOverflowMenu(
             startIconTint = CometChatTheme.colorScheme.iconTintSecondary,
             textColor = CometChatTheme.colorScheme.textColorPrimary,
             onClick = onNewChatClick
+        ),
+        // Saved Messages - the current user's saved messages across all conversations
+        MenuItem(
+            id = "saved_messages",
+            name = "Saved messages",
+            startIcon = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_bookmark),
+            startIconTint = CometChatTheme.colorScheme.iconTintSecondary,
+            textColor = CometChatTheme.colorScheme.textColorPrimary,
+            onClick = onSavedMessagesClick
         ),
         // User Name - with icon, primary text color
         MenuItem(

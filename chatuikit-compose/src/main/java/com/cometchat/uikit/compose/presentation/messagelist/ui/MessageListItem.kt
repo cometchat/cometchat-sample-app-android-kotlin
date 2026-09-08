@@ -280,6 +280,8 @@ internal fun MessageListItem(
     // Determine if this is an action or call message that should not have long-click
     // ACTION and CALL category messages should not respond to long-press gestures
     // Bug fix for ENG-32209: Reply Option Available for Action/System Messages
+    // A meeting (custom/meeting) bubble is NOT in that group: it long-presses like any other
+    // custom message, as it did in v5.
     val isActionOrCallMessage = remember(message.id, message.category) {
         message.category.equals(CometChatConstants.CATEGORY_ACTION, ignoreCase = true) ||
         message.category.equals(CometChatConstants.CATEGORY_CALL, ignoreCase = true)
@@ -419,7 +421,8 @@ internal fun MessageListItem(
         bubbleStyles = bubbleStyles,
         incomingMessageBubbleStyle = incomingMessageBubbleStyle,
         outgoingMessageBubbleStyle = outgoingMessageBubbleStyle,
-        onLongClick = if (isAgentChat || isAgenticMessage) null else { { onMessageLongClick?.invoke(message) } },
+        onLongClick = if (isAgentChat || isAgenticMessage || isActionOrCallMessage) null
+            else { { onMessageLongClick?.invoke(message) } },
         
         // Highlight parameters for jump-to-parent-message feature
         highlightedMessageId = highlightedMessageId,

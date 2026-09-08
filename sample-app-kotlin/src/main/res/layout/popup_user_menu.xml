@@ -29,6 +29,20 @@
             app:drawableStartCompat="@drawable/ic_start_conversation"
             app:drawableTint="?attr/cometchatIconTintSecondary" />
 
+        <!-- Saved Messages -->
+        <TextView
+            android:id="@+id/tv_saved_messages"
+            style="?attr/cometchatTextAppearanceBodyRegular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/cometchat_padding_2"
+            android:gravity="center_vertical"
+            android:padding="@dimen/cometchat_padding_4"
+            android:text="@string/saved_messages"
+            android:textColor="?attr/cometchatTextColorPrimary"
+            app:drawableStartCompat="@drawable/cometchat_ic_bookmark"
+            app:drawableTint="?attr/cometchatIconTintSecondary" />
+
         <!-- Separator -->
         <View
             android:layout_width="match_parent"

@@ -222,15 +222,21 @@ class SearchActivity : AppCompatActivity() {
                 user?.let { putExtra(getString(R.string.app_user), it.toJson().toString()) }
                 group?.let { putExtra(getString(R.string.app_group), Gson().toJson(it)) }
                 putExtra(getString(R.string.app_base_message), parentMessage.rawMessage.toString())
+                if (goToMessageId > 0) {
+                    putExtra("goToMessageId", goToMessageId)
+                }
             }
             setResult(RESULT_OK, resultIntent)
         } else {
             val intent = Intent(this, ThreadMessageActivity::class.java).apply {
+                putExtra(ThreadMessageActivity.EXTRA_PARENT_MESSAGE, parentMessage)
                 putExtra("rawJson", parentMessage.rawMessage.toString())
                 user?.let { putExtra(getString(R.string.app_user), it.toJson().toString()) }
                 group?.let { putExtra(getString(R.string.app_group), Gson().toJson(it)) }
                 if (goToMessageId > 0) {
-                    putExtra(getString(R.string.app_go_to_message), parentMessage.rawMessage.toString())
+                    // Pass the tapped reply's id — not the parent message — so the
+                    // thread view scrolls to the actual search result
+                    putExtra("goToMessageId", goToMessageId)
                 }
             }
             startActivity(intent)

@@ -17,7 +17,15 @@ import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.constants.UIKitConstants.DialogState
+import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.events.CometChatThreadEvent
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
+import android.widget.Toast
 import com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.cometchat.sampleapp.kotlin.push.R
 import com.cometchat.sampleapp.kotlin.push.databinding.ActivityThreadMessageBinding
 import com.cometchat.sampleapp.kotlin.push.appflow.viewmodels.ThreadMessageViewModel
@@ -34,6 +42,16 @@ class ThreadMessageActivity : AppCompatActivity() {
         private const val TAG = "ThreadMessageActivity"
         const val EXTRA_RAW_JSON = "rawJson"
         const val EXTRA_REPLY_COUNT = "replyCount"
+
+        /**
+         * The parent as a [BaseMessage] Parcelable — the preferred way to hand it over. The SDK's
+         * pin/save and thread-subscription state lives on the parsed object, not in `rawMessage`
+         * (that JSON is the server payload as fetched and is never rewritten by realtime updates),
+         * so re-parsing [EXTRA_RAW_JSON] dropped a save/pin made moments earlier.
+         * Passing the live object mirrors the React kit, which hands the thread the message
+         * object itself. [EXTRA_RAW_JSON] remains as a fallback for callers that only hold JSON.
+         */
+        const val EXTRA_PARENT_MESSAGE = "parentMessage"
     }
     
     private lateinit var binding: ActivityThreadMessageBinding
@@ -42,6 +60,7 @@ class ThreadMessageActivity : AppCompatActivity() {
     private var user: User? = null
     private var group: Group? = null
     private var goToMessage: BaseMessage? = null
+    private var goToMessageId: Long = 0
     private var isBlockedByMe: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,11 +89,18 @@ class ThreadMessageActivity : AppCompatActivity() {
         try {
             isBlockedByMe = intent.getBooleanExtra("isBlockedByMe", false)
             
+            goToMessageId = intent.getLongExtra("goToMessageId", 0)
             if (goToMessageJson != null) {
                 goToMessage = BaseMessage.processMessage(JSONObject(goToMessageJson))
             }
             
-            if (rawMessage != null) {
+            val parcelledParent: BaseMessage? =
+                androidx.core.content.IntentCompat.getParcelableExtra(intent, EXTRA_PARENT_MESSAGE, BaseMessage::class.java)
+            if (parcelledParent != null) {
+                // Live object: carries pinnedAt/pinnedBy/savedAt exactly as the list showed them.
+                if (replyCount > 0) parcelledParent.replyCount = replyCount
+                viewModel.setParentMessage(parcelledParent)
+            } else if (rawMessage != null) {
                 val parentMessage = BaseMessage.processMessage(JSONObject(rawMessage))
                 parentMessage.replyCount = replyCount
                 viewModel.setParentMessage(parentMessage)
@@ -187,7 +213,9 @@ class ThreadMessageActivity : AppCompatActivity() {
         }
         
         // Navigate to message if provided
-        if (goToMessage != null) {
+        if (goToMessageId > 0) {
+            binding.messageList.gotoMessage(goToMessageId)
+        } else if (goToMessage != null) {
             binding.messageList.gotoMessage(goToMessage!!.id)
         }
         
@@ -202,9 +230,13 @@ class ThreadMessageActivity : AppCompatActivity() {
         // Configure ThreadHeader with parent message
         binding.threadHeader.setParentMessage(parentMessage)
         binding.threadHeader.setReactionVisibility(View.GONE)
-        
+        // Thread subscription bell lives in the title bar (Figma / Flutter parity); hide the kit
+        // header's own control so only one bell shows.
+        binding.threadHeader.setThreadSubscriptionVisibility(View.GONE)
+        setupThreadSubscriptionBell(parentMessage)
+
         // Configure MessageList and MessageComposer with parent message ID
-        binding.messageList.setParentMessageId(parentMessage.id)
+        binding.messageList.setParentMessage(parentMessage)
         binding.messageComposer.setParentMessageId(parentMessage.id)
         
         // Set user or group data to the message list and composer
@@ -251,5 +283,63 @@ class ThreadMessageActivity : AppCompatActivity() {
             }
             else -> {}
         }
+    }
+
+    /**
+     * Wires the thread-subscription (mute/unmute) bell in the title bar — the Figma / cross-platform
+     * (Flutter) placement. Renders only when the feature gate is on and the thread has a valid root.
+     * Optimistic flip on tap with a single in-flight guard; reverts with a snackbar on error; stays in
+     * sync with changes from any surface via the kit event bus.
+     */
+    private fun setupThreadSubscriptionBell(parentMessage: BaseMessage) {
+        val bell = binding.ivThreadSubscription
+        val rootId = parentMessage.id
+        if (!CometChatThreadSubscription.isAvailableForThread(parentMessage)) {
+            bell.visibility = View.GONE
+            return
+        }
+        bell.visibility = View.VISIBLE
+        // State is read off the parent message — the server's per-viewer flag — never from a cache.
+        renderThreadSubscriptionBell(parentMessage.isThreadSubscribed())
+
+        bell.setOnClickListener {
+            // The controller owns the debounce, in-flight lock, optimistic publish and revert; the
+            // optimistic flip reaches this bell through the bus collector below.
+            CometChatThreadSubscription.toggle(parentMessage, parentMessage.isThreadSubscribed()) { result ->
+                val toast = when (result) {
+                    is CometChatThreadSubscription.ToggleResult.Success -> getString(
+                        if (result.subscribed) com.cometchat.uikit.kotlin.R.string.cometchat_thread_subscribed_toast
+                        else com.cometchat.uikit.kotlin.R.string.cometchat_thread_unsubscribed_toast
+                    )
+
+                    is CometChatThreadSubscription.ToggleResult.Failure ->
+                        getString(com.cometchat.uikit.kotlin.R.string.cometchat_thread_subscription_failed)
+                }
+                Toast.makeText(this@ThreadMessageActivity, toast, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        lifecycleScope.launch {
+            CometChatEvents.threadEvents.collect { event ->
+                if (event is CometChatThreadEvent.SubscriptionChanged &&
+                    event.parentMessageId == rootId
+                ) {
+                    // Stamp the held parent too, so a direct read stays coherent.
+                    parentMessage.setThreadSubscribed(event.subscribed)
+                    renderThreadSubscriptionBell(event.subscribed)
+                }
+            }
+        }
+    }
+
+    private fun renderThreadSubscriptionBell(subscribed: Boolean) {
+        binding.ivThreadSubscription.setImageResource(
+            if (subscribed) com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications
+            else com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications_off
+        )
+        binding.ivThreadSubscription.contentDescription = getString(
+            if (subscribed) com.cometchat.uikit.kotlin.R.string.cometchat_thread_mute
+            else com.cometchat.uikit.kotlin.R.string.cometchat_thread_unmute
+        )
     }
 }

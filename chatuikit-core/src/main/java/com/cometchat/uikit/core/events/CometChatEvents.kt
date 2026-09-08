@@ -153,6 +153,25 @@ object CometChatEvents {
     val uiEvents: SharedFlow<CometChatUIEvent> = _uiEvents.asSharedFlow()
 
 
+    // ==================== Thread Events ====================
+
+    /**
+     * Internal mutable flow for thread-subscription events.
+     * Buffer capacity of 16 for low-frequency follow-state changes.
+     */
+    private val _threadEvents = MutableSharedFlow<CometChatThreadEvent>(
+        replay = 0,
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * Public read-only flow for thread-subscription events.
+     * Subscribe to this flow to keep follow-state UI in sync without re-fetching.
+     */
+    val threadEvents: SharedFlow<CometChatThreadEvent> = _threadEvents.asSharedFlow()
+
+
     // ==================== Emit Functions ====================
 
     /**
@@ -164,6 +183,18 @@ object CometChatEvents {
     fun emitMessageEvent(event: CometChatMessageEvent) {
         scope.launch {
             _messageEvents.emit(event)
+        }
+    }
+
+    /**
+     * Emits a thread-subscription event to all active subscribers.
+     * Thread-safe: can be called from any thread.
+     *
+     * @param event The thread event to emit
+     */
+    fun emitThreadEvent(event: CometChatThreadEvent) {
+        scope.launch {
+            _threadEvents.emit(event)
         }
     }
 

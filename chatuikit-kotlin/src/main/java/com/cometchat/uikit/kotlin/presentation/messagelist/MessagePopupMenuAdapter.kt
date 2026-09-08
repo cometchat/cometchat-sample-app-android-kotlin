@@ -44,6 +44,9 @@ internal class MessagePopupMenuAdapter(
 
     override fun getItemCount(): Int = items.size
 
+    /** Returns the stable id of the item at [position], or null if out of range. */
+    fun itemIdAt(position: Int): String? = items.getOrNull(position)?.id
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvTitle: TextView = itemView.findViewById(R.id.menu_item)
         private val ivStartIcon: ImageView = itemView.findViewById(R.id.start_icon)

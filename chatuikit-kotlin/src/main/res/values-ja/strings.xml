@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">アクションアイテム</string>
     <string name="cometchat_try_again" translatable="true">再試行</string>
     <string name="cometchat_something_went_wrong" translatable="true">問題が発生しました。</string>
+    <string name="cometchat_action_permission_denied" translatable="true">この操作を実行する権限がありません。</string>
     <string name="cometchat_transfer_ownership" translatable="true">所有権を移譲</string>
     <string name="cometchat_add_members" translatable="true">メンバーを追加</string>
     <string name="cometchat_owner" translatable="true">オーナー</string>
@@ -249,4 +250,53 @@
     <string name="cometchat_notify_everyone_in_this_group">このグループのすべての人に通知する</string>
     <string name="cometchat_notify_all" translatable="true">すべて</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">スレッドを購読</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">スレッドの購読を解除</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">購読しました。このスレッドの新しい返信が通知されます。</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">購読しました。新しい返信が通知されます。</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">購読を解除しました。返信するかメンションされるまで通知は届きません。</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">購読を解除しました。返信するかメンションされるまで通知は届きません。</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">更新できませんでした。もう一度お試しください。</string>
+    <string name="cometchat_thread_mute" translatable="true">スレッドの購読を解除</string>
+    <string name="cometchat_thread_unmute" translatable="true">スレッドを購読</string>
+    <string name="cometchat_pin">ピン留め</string>
+    <string name="cometchat_unpin">ピン留めを解除</string>
+    <string name="cometchat_unsave">保存を解除</string>
+    <string name="cometchat_pinned">ピン留め済み</string>
+    <string name="cometchat_saved">保存済み</string>
+    <string name="cometchat_pin_message_confirm_title">メッセージをピン留め</string>
+    <string name="cometchat_pin_message_confirm_body">このメッセージをこの会話にピン留めしますか？</string>
+    <string name="cometchat_unpin_message_confirm_title">ピン留めを解除</string>
+    <string name="cometchat_unpin_message_confirm_body">このメッセージのピン留めを解除しますか？</string>
+    <string name="cometchat_save_message_confirm_title">メッセージを保存</string>
+    <string name="cometchat_save_message_confirm_body">このメッセージを保存しますか？</string>
+    <string name="cometchat_unsave_message_confirm_title">メッセージの保存を解除</string>
+    <string name="cometchat_unsave_message_confirm_body">このメッセージの保存を解除しますか？</string>
+    <string name="cometchat_pin_conversation">会話をピン留め</string>
+    <string name="cometchat_unpin_conversation">会話のピン留めを解除</string>
+    <string name="cometchat_unpin_conversation_confirm_title">会話のピン留めを解除</string>
+    <string name="cometchat_unpin_conversation_confirm_body">この会話のピン留めを解除しますか？</string>
+    <string name="cometchat_pin_conversation_limit_reached">ピン留めできるチャットは%1$d件までです。他をピン留めするには1件解除してください。</string>
+    <string name="cometchat_pin_limit_reached">ピン留めできるメッセージは%1$d件までです。他をピン留めするには1件解除してください。</string>
+    <string name="cometchat_save_limit_reached">保存できるメッセージは%1$d件までです。</string>
+    <string name="cometchat_pin_save_generic_error">エラーが発生しました。もう一度お試しください。</string>
+    <string name="cometchat_message_pinned">メッセージをピン留めしました</string>
+    <string name="cometchat_message_unpinned">メッセージのピン留めを解除しました</string>
+    <string name="cometchat_message_saved">メッセージを保存しました</string>
+    <string name="cometchat_message_unsaved">メッセージの保存を解除しました</string>
+    <string name="cometchat_no_pinned_messages">ピン留めされたメッセージはまだありません</string>
+    <string name="cometchat_no_pinned_messages_subtitle">重要なメッセージをピン留めして、すぐに見つけられるようにしましょう。</string>
+    <string name="cometchat_no_saved_messages">保存されたメッセージはまだありません</string>
+    <string name="cometchat_no_saved_messages_subtitle">メッセージを保存して、必要なときにすぐ使えるようにしましょう。</string>
+    <string name="cometchat_pinned_messages">ピン留めされたメッセージ</string>
+    <string name="cometchat_saved_messages">保存されたメッセージ</string>
+    <string name="cometchat_unpin_message">ピン留めを解除</string>
+    <string name="cometchat_message_option_more">その他</string>
+    <string name="cometchat_message_option_back">戻る</string>
+    <string name="cometchat_message_type_icon">メッセージタイプのアイコン</string>
+    <string name="cometchat_pinned_messages_header">ピン留めされたメッセージ</string>
+    <string name="cometchat_saved_messages_header">保存されたメッセージ</string>
+    <string name="cometchat_conversation_pinned">会話をピン留めしました</string>
+    <string name="cometchat_conversation_unpinned">会話のピン留めを解除しました</string>
 </resources>

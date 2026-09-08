@@ -246,11 +246,28 @@
 
     </LinearLayout>
 
+    <!-- Pinned messages — above the separator that precedes the group actions -->
+    <TextView
+        android:id="@+id/tv_pinned_messages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/cometchat_margin_5"
+        android:drawablePadding="@dimen/cometchat_padding_3"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/cometchat_margin_4"
+        android:paddingTop="@dimen/cometchat_margin_3"
+        android:paddingEnd="@dimen/cometchat_margin_5"
+        android:paddingBottom="@dimen/cometchat_margin_3"
+        android:text="@string/pinned_messages"
+        android:textAppearance="?attr/cometchatTextAppearanceHeading4Regular"
+        android:textColor="?attr/cometchatTextColorPrimary"
+        app:drawableLeftCompat="@drawable/cometchat_ic_pin"
+        app:drawableTint="?attr/cometchatTextColorPrimary" />
+
     <View
         android:id="@+id/view_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cometchat_1dp"
-        android:layout_marginTop="@dimen/cometchat_margin_5"
         android:background="?attr/cometchatStrokeColorLight" />
 
     <LinearLayout

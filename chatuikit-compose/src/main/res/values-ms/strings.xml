@@ -73,6 +73,7 @@
     <string name="cometchat_action_item" translatable="true">item_tindakan</string>
     <string name="cometchat_try_again" translatable="true">Cuba lagi</string>
     <string name="cometchat_something_went_wrong" translatable="true">Ada sesuatu yang tidak kena.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Pindah Milik</string>
     <string name="cometchat_add_members" translatable="true">Tambah Ahli</string>
     <string name="cometchat_owner" translatable="true">Pemilik</string>
@@ -247,4 +248,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Beritahu semua orang dalam kumpulan ini</string>
     <string name="cometchat_notify_all" translatable="true">semua</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization  -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Langgan bebenang</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Nyahlanggan bebenang</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Dilanggan. Anda akan dimaklumkan tentang balasan baharu dalam bebenang ini.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Dilanggan. Anda akan dimaklumkan tentang balasan baharu.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Dinyahlanggan. Pemberitahuan dimatikan sehingga anda membalas atau disebut.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Dinyahlanggan. Pemberitahuan dimatikan sehingga anda membalas atau disebut.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Tidak dapat dikemas kini. Sila cuba lagi.</string>
+    <string name="cometchat_thread_mute" translatable="true">Nyahlanggan bebenang</string>
+    <string name="cometchat_thread_unmute" translatable="true">Langgan bebenang</string>
+    <string name="cometchat_pin">Semat</string>
+    <string name="cometchat_unpin">Nyahsemat</string>
+    <string name="cometchat_unsave">Nyahsimpan</string>
+    <string name="cometchat_pinned">Disemat</string>
+    <string name="cometchat_saved">Disimpan</string>
+    <string name="cometchat_pin_message_confirm_title">Semat Mesej</string>
+    <string name="cometchat_pin_message_confirm_body">Adakah anda mahu menyemat mesej ini dalam perbualan ini?</string>
+    <string name="cometchat_unpin_message_confirm_title">Nyahsemat Mesej</string>
+    <string name="cometchat_unpin_message_confirm_body">Adakah anda mahu menyahsemat mesej ini?</string>
+    <string name="cometchat_save_message_confirm_title">Simpan Mesej</string>
+    <string name="cometchat_save_message_confirm_body">Adakah anda mahu menyimpan mesej ini?</string>
+    <string name="cometchat_unsave_message_confirm_title">Nyahsimpan Mesej</string>
+    <string name="cometchat_unsave_message_confirm_body">Adakah anda mahu menyahsimpan mesej ini?</string>
+    <string name="cometchat_pin_conversation">Semat perbualan</string>
+    <string name="cometchat_unpin_conversation">Nyahsemat perbualan</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Nyahsemat Perbualan</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Adakah anda mahu menyahsemat perbualan ini?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Anda hanya boleh menyemat %1$d sembang. Nyahsemat satu untuk menyemat yang lain.</string>
+    <string name="cometchat_pin_limit_reached">Anda hanya boleh menyemat %1$d mesej. Nyahsemat satu untuk menyemat yang lain.</string>
+    <string name="cometchat_save_limit_reached">Anda boleh menyimpan sehingga %1$d mesej.</string>
+    <string name="cometchat_pin_save_generic_error">Sesuatu telah berlaku. Sila cuba lagi.</string>
+    <string name="cometchat_message_pinned">Mesej disemat</string>
+    <string name="cometchat_message_unpinned">Mesej dinyahsemat</string>
+    <string name="cometchat_message_saved">Mesej disimpan</string>
+    <string name="cometchat_message_unsaved">Mesej dinyahsimpan</string>
+    <string name="cometchat_no_pinned_messages">Belum ada mesej yang disemat</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Semat mesej penting supaya mudah dicari.</string>
+    <string name="cometchat_no_saved_messages">Belum ada mesej yang disimpan</string>
+    <string name="cometchat_no_saved_messages_subtitle">Simpan mesej supaya sentiasa mudah diakses apabila diperlukan.</string>
+    <string name="cometchat_pinned_messages">Mesej Disemat</string>
+    <string name="cometchat_saved_messages">Mesej Disimpan</string>
+    <string name="cometchat_unpin_message">Nyahsemat mesej</string>
+    <string name="cometchat_message_option_more">Lagi</string>
+    <string name="cometchat_message_option_back">Kembali</string>
+    <string name="cometchat_message_type_icon">Ikon jenis mesej</string>
 </resources>

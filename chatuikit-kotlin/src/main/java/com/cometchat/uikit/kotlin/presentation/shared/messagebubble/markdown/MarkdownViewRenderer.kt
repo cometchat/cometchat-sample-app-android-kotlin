@@ -9,6 +9,8 @@ import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
+import android.text.style.CharacterStyle
+import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
@@ -102,7 +104,7 @@ object MarkdownViewRenderer {
         formatterSpans: Spanned? = null,
         style: Style = Style()
     ): List<View> {
-        val mentionSpans = formatterSpans?.let { extractMentionSpans(it) } ?: emptyList()
+        val mentionSpans = formatterSpans?.let { extractFormatterSpans(it) } ?: emptyList()
         val segments = MarkdownRenderer.parse(markdown)
 
         val textColor = if (style.textColor != 0) style.textColor else CometChatTheme.getTextColorPrimary(context)
@@ -441,13 +443,26 @@ object MarkdownViewRenderer {
     /** A formatter-produced mention span with its offsets in the formatter output. */
     private data class MentionSpanInfo(val start: Int, val end: Int, val span: Any)
 
-    /** [TagSpan] is the clickable mention span the message-bubble formatters emit. */
-    private fun extractMentionSpans(spanned: Spanned): List<MentionSpanInfo> {
-        return spanned.getSpans(0, spanned.length, TagSpan::class.java).mapNotNull { span ->
+    /**
+     * Visual spans the formatters emit and the renderer must re-overlay onto the markdown-styled
+     * output: clickable mention [TagSpan]s, plus any other non-clickable [CharacterStyle] a custom
+     * formatter produced (e.g. a `{color:#…}` [ForegroundColorSpan]). ClickableSpans other than the
+     * mention TagSpan are skipped so a bubble doesn't gain unexpected tap targets.
+     */
+    private fun extractFormatterSpans(spanned: Spanned): List<MentionSpanInfo> {
+        val result = ArrayList<MentionSpanInfo>()
+        for (span in spanned.getSpans(0, spanned.length, TagSpan::class.java)) {
             val start = spanned.getSpanStart(span)
             val end = spanned.getSpanEnd(span)
-            if (start >= 0 && end > start) MentionSpanInfo(start, end, span) else null
+            if (start >= 0 && end > start) result.add(MentionSpanInfo(start, end, span))
         }
+        for (span in spanned.getSpans(0, spanned.length, CharacterStyle::class.java)) {
+            if (span is ClickableSpan) continue // mentions handled above; skip other tap targets
+            val start = spanned.getSpanStart(span)
+            val end = spanned.getSpanEnd(span)
+            if (start >= 0 && end > start) result.add(MentionSpanInfo(start, end, span))
+        }
+        return result
     }
 
     /**

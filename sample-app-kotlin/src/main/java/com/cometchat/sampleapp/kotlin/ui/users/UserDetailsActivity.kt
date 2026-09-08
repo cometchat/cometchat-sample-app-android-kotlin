@@ -18,6 +18,7 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.User
 import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityUserDetailsBinding
+import com.cometchat.sampleapp.kotlin.ui.messages.PinnedMessagesActivity
 import com.cometchat.uikit.kotlin.presentation.shared.dialog.CometChatConfirmDialog
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -152,6 +153,11 @@ class UserDetailsActivity : AppCompatActivity() {
      * Sets up click listeners for action buttons.
      */
     private fun setupClickListeners() {
+        // Pinned Messages option
+        binding.tvPinnedMessages.setOnClickListener {
+            user?.let { u -> PinnedMessagesActivity.start(this, u) }
+        }
+
         // Voice Call card
         binding.cardVoiceCall.setOnClickListener {
             startCall(CometChatConstants.CALL_TYPE_AUDIO)

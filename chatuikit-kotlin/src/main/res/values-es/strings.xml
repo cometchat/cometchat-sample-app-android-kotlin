@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">Elemento de acción</string>
     <string name="cometchat_try_again" translatable="true">Inténtalo de nuevo</string>
     <string name="cometchat_something_went_wrong" translatable="true">Ha ocurrido un error.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">No tienes permiso para realizar esta acción.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Transferir propiedad</string>
     <string name="cometchat_add_members" translatable="true">Agregar miembros</string>
     <string name="cometchat_owner" translatable="true">Propietario</string>
@@ -254,4 +255,53 @@ Por favor, inténtalo de nuevo.</string>
     <string name="cometchat_notify_everyone_in_this_group">Notificar a todos en este grupo</string>
     <string name="cometchat_notify_all" translatable="true">todos</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Suscribirse al hilo</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Cancelar la suscripción al hilo</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Suscrito. Se te notificará sobre nuevas respuestas en este hilo.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Suscrito. Se te notificará sobre nuevas respuestas.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Suscripción cancelada. Las notificaciones están desactivadas hasta que respondas o te mencionen.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Suscripción cancelada. Las notificaciones están desactivadas hasta que respondas o te mencionen.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">No se pudo actualizar. Inténtalo de nuevo.</string>
+    <string name="cometchat_thread_mute" translatable="true">Cancelar la suscripción al hilo</string>
+    <string name="cometchat_thread_unmute" translatable="true">Suscribirse al hilo</string>
+    <string name="cometchat_pin">Fijar</string>
+    <string name="cometchat_unpin">Dejar de fijar</string>
+    <string name="cometchat_unsave">Dejar de guardar</string>
+    <string name="cometchat_pinned">Fijado</string>
+    <string name="cometchat_saved">Guardado</string>
+    <string name="cometchat_pin_message_confirm_title">Fijar mensaje</string>
+    <string name="cometchat_pin_message_confirm_body">¿Quieres fijar este mensaje en esta conversación?</string>
+    <string name="cometchat_unpin_message_confirm_title">Dejar de fijar el mensaje</string>
+    <string name="cometchat_unpin_message_confirm_body">¿Quieres dejar de fijar este mensaje?</string>
+    <string name="cometchat_save_message_confirm_title">Guardar mensaje</string>
+    <string name="cometchat_save_message_confirm_body">¿Quieres guardar este mensaje?</string>
+    <string name="cometchat_unsave_message_confirm_title">Dejar de guardar el mensaje</string>
+    <string name="cometchat_unsave_message_confirm_body">¿Quieres dejar de guardar este mensaje?</string>
+    <string name="cometchat_pin_conversation">Fijar conversación</string>
+    <string name="cometchat_unpin_conversation">Dejar de fijar conversación</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Dejar de fijar la conversación</string>
+    <string name="cometchat_unpin_conversation_confirm_body">¿Quieres dejar de fijar esta conversación?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Solo puedes fijar %1$d chats. Deja de fijar uno para fijar otro.</string>
+    <string name="cometchat_pin_limit_reached">Solo puedes fijar %1$d mensajes. Deja de fijar uno para fijar otro.</string>
+    <string name="cometchat_save_limit_reached">Puedes guardar hasta %1$d mensajes.</string>
+    <string name="cometchat_pin_save_generic_error">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="cometchat_message_pinned">Mensaje fijado</string>
+    <string name="cometchat_message_unpinned">Se dejó de fijar el mensaje</string>
+    <string name="cometchat_message_saved">Mensaje guardado</string>
+    <string name="cometchat_message_unsaved">Se dejó de guardar el mensaje</string>
+    <string name="cometchat_no_pinned_messages">Aún no hay mensajes fijados</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Fija los mensajes importantes para encontrarlos fácilmente.</string>
+    <string name="cometchat_no_saved_messages">Aún no hay mensajes guardados</string>
+    <string name="cometchat_no_saved_messages_subtitle">Guarda mensajes para tenerlos a mano cuando los necesites.</string>
+    <string name="cometchat_pinned_messages">Mensajes fijados</string>
+    <string name="cometchat_saved_messages">Mensajes guardados</string>
+    <string name="cometchat_unpin_message">Dejar de fijar el mensaje</string>
+    <string name="cometchat_message_option_more">Más</string>
+    <string name="cometchat_message_option_back">Atrás</string>
+    <string name="cometchat_message_type_icon">Icono del tipo de mensaje</string>
+    <string name="cometchat_pinned_messages_header">Mensajes fijados</string>
+    <string name="cometchat_saved_messages_header">Mensajes guardados</string>
+    <string name="cometchat_conversation_pinned">Conversación fijada</string>
+    <string name="cometchat_conversation_unpinned">Se dejó de fijar la conversación</string>
 </resources>

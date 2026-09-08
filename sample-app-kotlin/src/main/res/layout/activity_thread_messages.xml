@@ -24,7 +24,26 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="@string/thread" />
+        app:title="@string/thread">
+
+        <!-- Thread subscription (mute/unmute) bell — hidden until the feature gate allows it -->
+        <ImageView
+            android:id="@+id/iv_thread_subscription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
+            android:padding="@dimen/cometchat_padding_2"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/cometchat_thread_unmute"
+            android:src="@drawable/cometchat_ic_notifications_off"
+            android:visibility="gone"
+            app:tint="?attr/cometchatIconTintPrimary" />
+
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- Thread Header - shows parent message -->
     <com.cometchat.uikit.kotlin.presentation.threadheader.ui.CometChatThreadHeader

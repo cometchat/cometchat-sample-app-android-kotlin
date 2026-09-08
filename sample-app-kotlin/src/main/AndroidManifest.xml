@@ -16,9 +16,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- Notification permission (Android 13+) -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <application
         android:name=".app.SampleApplication"
         android:allowBackup="true"
@@ -57,6 +54,18 @@
             android:name=".ui.messages.ThreadMessagesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.SampleApp" />
+
+        <!-- Pinned Messages Activity -->
+        <activity
+            android:name=".ui.messages.PinnedMessagesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SampleApp" />
+
+        <!-- Saved Messages Activity -->
+        <activity
+            android:name=".ui.messages.SavedMessagesActivity"
+            android:exported="false"
             android:theme="@style/Theme.SampleApp" />
 
         <!-- User Details Activity -->

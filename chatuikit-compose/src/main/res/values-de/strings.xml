@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">aktions_element</string>
     <string name="cometchat_try_again" translatable="true">Erneut versuchen</string>
     <string name="cometchat_something_went_wrong" translatable="true">Etwas ist schiefgelaufen.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Sie haben keine Berechtigung, diese Aktion auszuführen.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Besitz übertragen</string>
     <string name="cometchat_add_members" translatable="true">Mitglieder hinzufügen</string>
     <string name="cometchat_owner" translatable="true">Eigentümer</string>
@@ -249,4 +250,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Alle in dieser Gruppe benachrichtigen</string>
     <string name="cometchat_notify_all" translatable="true">alle</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Thread abonnieren</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Thread abbestellen</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Abonniert. Sie werden über neue Antworten in diesem Thread benachrichtigt.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Abonniert. Sie werden über neue Antworten benachrichtigt.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Abbestellt. Benachrichtigungen sind aus, bis Sie antworten oder erwähnt werden.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Abbestellt. Benachrichtigungen sind aus, bis Sie antworten oder erwähnt werden.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Aktualisierung fehlgeschlagen. Bitte erneut versuchen.</string>
+    <string name="cometchat_thread_mute" translatable="true">Thread abbestellen</string>
+    <string name="cometchat_thread_unmute" translatable="true">Thread abonnieren</string>
+    <string name="cometchat_pin">Anheften</string>
+    <string name="cometchat_unpin">Loslösen</string>
+    <string name="cometchat_unsave">Nicht mehr speichern</string>
+    <string name="cometchat_pinned">Angeheftet</string>
+    <string name="cometchat_saved">Gespeichert</string>
+    <string name="cometchat_pin_message_confirm_title">Nachricht anheften</string>
+    <string name="cometchat_pin_message_confirm_body">Möchten Sie diese Nachricht in dieser Unterhaltung anheften?</string>
+    <string name="cometchat_unpin_message_confirm_title">Nachricht loslösen</string>
+    <string name="cometchat_unpin_message_confirm_body">Möchten Sie diese Nachricht loslösen?</string>
+    <string name="cometchat_save_message_confirm_title">Nachricht speichern</string>
+    <string name="cometchat_save_message_confirm_body">Möchten Sie diese Nachricht speichern?</string>
+    <string name="cometchat_unsave_message_confirm_title">Nachricht nicht mehr speichern</string>
+    <string name="cometchat_unsave_message_confirm_body">Möchten Sie diese Nachricht nicht mehr speichern?</string>
+    <string name="cometchat_pin_conversation">Unterhaltung anheften</string>
+    <string name="cometchat_unpin_conversation">Unterhaltung loslösen</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Unterhaltung loslösen</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Möchten Sie diese Unterhaltung loslösen?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Sie können nur %1$d Chats anheften. Lösen Sie einen, um einen anderen anzuheften.</string>
+    <string name="cometchat_pin_limit_reached">Sie können nur %1$d Nachrichten anheften. Lösen Sie eine, um eine andere anzuheften.</string>
+    <string name="cometchat_save_limit_reached">Sie können bis zu %1$d Nachrichten speichern.</string>
+    <string name="cometchat_pin_save_generic_error">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</string>
+    <string name="cometchat_message_pinned">Nachricht angeheftet</string>
+    <string name="cometchat_message_unpinned">Nachricht losgelöst</string>
+    <string name="cometchat_message_saved">Nachricht gespeichert</string>
+    <string name="cometchat_message_unsaved">Nachricht nicht mehr gespeichert</string>
+    <string name="cometchat_no_pinned_messages">Noch keine angehefteten Nachrichten</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Heften Sie wichtige Nachrichten an, um sie leicht wiederzufinden.</string>
+    <string name="cometchat_no_saved_messages">Noch keine gespeicherten Nachrichten</string>
+    <string name="cometchat_no_saved_messages_subtitle">Speichern Sie Nachrichten, um sie jederzeit griffbereit zu haben.</string>
+    <string name="cometchat_pinned_messages">Angeheftete Nachrichten</string>
+    <string name="cometchat_saved_messages">Gespeicherte Nachrichten</string>
+    <string name="cometchat_unpin_message">Nachricht loslösen</string>
+    <string name="cometchat_message_option_more">Mehr</string>
+    <string name="cometchat_message_option_back">Zurück</string>
+    <string name="cometchat_message_type_icon">Symbol für Nachrichtentyp</string>
 </resources>

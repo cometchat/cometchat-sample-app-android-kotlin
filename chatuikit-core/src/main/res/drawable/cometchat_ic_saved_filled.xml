@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Filled bookmark used as the saved-state indicator in the bubble footer. Tinted at bind time
+         (white on outgoing, N600 on incoming) — mirrors the filled pin indicator. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M8.00033 11.641L5.35416 12.7769C4.95249 12.9487 4.57088 12.9158 4.20933 12.6782C3.84777 12.4407 3.66699 12.1065 3.66699 11.6757V3.53854C3.66699 3.20176 3.78366 2.91671 4.01699 2.68337C4.25033 2.45004 4.53538 2.33337 4.87216 2.33337H11.1285C11.4653 2.33337 11.7503 2.45004 11.9837 2.68337C12.217 2.91671 12.3337 3.20176 12.3337 3.53854V11.6757C12.3337 12.1065 12.1529 12.4407 11.7913 12.6782C11.4298 12.9158 11.0482 12.9487 10.6465 12.7769L8.00033 11.641Z" />
+</vector>

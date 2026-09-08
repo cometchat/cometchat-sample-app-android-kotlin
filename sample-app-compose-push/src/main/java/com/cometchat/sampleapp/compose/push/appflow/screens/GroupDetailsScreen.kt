@@ -69,7 +69,8 @@ fun GroupDetailsScreen(
     onGroupLeft: () -> Unit = {},
     onGroupDeleted: () -> Unit = {},
     onChatDeleted: () -> Unit = {},
-    onNavigateToAddMembers: (String) -> Unit = {}
+    onNavigateToAddMembers: (String) -> Unit = {},
+    onNavigateToPinnedMessages: () -> Unit = {}
 ) {
     val viewModel: GroupDetailsViewModel = viewModel()
     val currentGroup by viewModel.group.collectAsState()
@@ -225,13 +226,37 @@ fun GroupDetailsScreen(
             
             // Separator - 20dp top margin (cometchat_margin_5)
             Spacer(modifier = Modifier.height(20.dp))
-            
+
+            // Pinned messages row — sits above the separator that precedes the group actions.
+            // Inlined (not ActionButtonWithIcon) because that helper forces Color.Unspecified for
+            // its pre-colored app icons; the core pin vector needs an explicit theme tint.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToPinnedMessages() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                    contentDescription = null,
+                    tint = textColorPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Pinned Messages",
+                    style = CometChatTheme.typography.heading4Regular,
+                    color = textColorPrimary
+                )
+            }
+
             HorizontalDivider(
                 modifier = Modifier.fillMaxWidth(),
                 thickness = 1.dp,
                 color = strokeColorLight
             )
-            
+
             // Leave Group (non-owner members)
             if (isMember && !isOwner) {
                 ActionButtonWithIcon(

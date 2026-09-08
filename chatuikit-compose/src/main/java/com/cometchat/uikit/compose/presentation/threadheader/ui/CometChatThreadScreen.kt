@@ -27,6 +27,7 @@ import com.cometchat.uikit.compose.presentation.shared.toolbar.CometChatToolbarS
 import com.cometchat.uikit.compose.presentation.threadheader.style.CometChatThreadHeaderStyle
 import com.cometchat.uikit.compose.presentation.threadheader.viewmodel.ThreadHeaderViewModel
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
 import com.cometchat.uikit.core.constants.UIKitConstants
 import java.text.SimpleDateFormat
 
@@ -135,6 +136,11 @@ fun CometChatThreadScreen(
     hideReceipts: Boolean = false,
     hideReplyCount: Boolean = false,
     hideReplyCountBar: Boolean = false,
+    // Thread subscription (follow/unfollow) control in the thread header
+    hideThreadSubscription: Boolean = false,
+    isSubscribed: Boolean? = null,
+    onSubscriptionToggle: ((Boolean) -> Unit)? = null,
+    threadSubscriptionView: (@Composable () -> Unit)? = null,
     // Alignment and formatters
     alignment: UIKitConstants.MessageListAlignment = UIKitConstants.MessageListAlignment.STANDARD,
     textFormatters: List<CometChatTextFormatter>? = null,
@@ -172,7 +178,29 @@ fun CometChatThreadScreen(
                 title = toolbarTitle,
                 style = toolbarStyle,
                 onNavigationClick = onBackPress,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                // Bell lives in the title bar (Figma / Flutter parity). An integrator slot fully
+                // replaces the default bell; otherwise it renders when not hidden and the gate is on.
+                actions = when {
+                    // The gate wins over the integrator slot: a replacement control must not appear
+                    // on an unsent root, when the caller hid it, or when the feature is off.
+                    hideThreadSubscription ||
+                        !CometChatThreadSubscription.isAvailableForThread(parentMessage) -> null
+
+                    threadSubscriptionView != null -> {
+                        { threadSubscriptionView() }
+                    }
+
+                    else -> {
+                        {
+                            ThreadSubscriptionBell(
+                                parentMessage = parentMessage,
+                                isSubscribed = isSubscribed,
+                                onSubscriptionToggle = onSubscriptionToggle
+                            )
+                        }
+                    }
+                }
             )
         }
         
@@ -192,6 +220,13 @@ fun CometChatThreadScreen(
                 hideReceipts = hideReceipts,
                 hideReplyCount = hideReplyCount,
                 hideReplyCountBar = hideReplyCountBar,
+                // The thread screen shows the bell in the title bar, so the header's own control is
+                // hidden — but only while that title bar exists. With the toolbar hidden the header
+                // carries the bell instead, so the control is never lost entirely.
+                hideThreadSubscription = !hideToolbar || hideThreadSubscription,
+                isSubscribed = isSubscribed,
+                onSubscriptionToggle = onSubscriptionToggle,
+                threadSubscriptionView = threadSubscriptionView,
                 maxHeight = maxThreadHeaderHeight,
                 alignment = alignment,
                 textFormatters = textFormatters,
@@ -209,7 +244,9 @@ fun CometChatThreadScreen(
                     .weight(1f),
                 user = user,
                 group = group,
-                parentMessageId = parentMessageId,
+                // The whole parent, not just its id: the list stamps realtime replies from it,
+                // since a socket-delivered reply carries no threadSubscribed flag.
+                parentMessage = parentMessage,
                 style = messageListStyle,
                 hideAvatar = hideAvatar,
                 hideReceipts = hideReceipts,

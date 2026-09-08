@@ -38,6 +38,8 @@ import com.cometchat.sampleapp.compose.ui.conversations.ConversationsScreen
 import com.cometchat.sampleapp.compose.ui.groups.GroupsScreen
 import com.cometchat.sampleapp.compose.ui.users.UsersScreen
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.core.factory.CometChatConversationsViewModelFactory
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
 
 /**
  * Data class representing a bottom navigation item.
@@ -108,10 +110,16 @@ fun HomeScreen(
     onUserClick: (User) -> Unit,
     onGroupClick: (Group) -> Unit,
     onNewChatClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onSearchClick: () -> Unit = {},
+    onSavedMessagesClick: () -> Unit = {}
 ) {
     val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Persisted conversations VM (survives tab switches), reloaded on each Chats tab tap below.
+    val conversationsViewModel: CometChatConversationsViewModel = viewModel(
+        factory = CometChatConversationsViewModelFactory()
+    )
 
     // Handle back press to close the app (matching sample-app-kotlin behavior)
     // When on HomeScreen, pressing back should finish the activity
@@ -173,7 +181,12 @@ fun HomeScreen(
                                 }
                             } else null,
                             selected = isSelected,
-                            onClick = { viewModel.selectTab(item.tab) },
+                            onClick = {
+                                // Reload conversations only when the Chats tab is actually tapped
+                                // (switching to it or re-tapping), not on resume.
+                                if (item.tab == HomeTab.CHATS) conversationsViewModel.refreshList()
+                                viewModel.selectTab(item.tab)
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CometChatTheme.colorScheme.iconTintHighlight,
                                 selectedTextColor = CometChatTheme.colorScheme.iconTintHighlight,
@@ -212,7 +225,9 @@ fun HomeScreen(
                     onConversationClick = onConversationClick,
                     onLogout = onLogout,
                     onNewChatClick = onNewChatClick,
-                    onSearchClick = onSearchClick
+                    onSearchClick = onSearchClick,
+                    onSavedMessagesClick = onSavedMessagesClick,
+                    conversationsViewModel = conversationsViewModel
                 )
             }
             

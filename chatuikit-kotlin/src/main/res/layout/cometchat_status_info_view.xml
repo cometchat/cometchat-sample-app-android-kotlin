@@ -23,11 +23,36 @@
             android:paddingEnd="@dimen/cometchat_padding_1"
             android:paddingBottom="@dimen/cometchat_padding">
 
+            <ImageView
+                android:id="@+id/status_pin_indicator"
+                android:layout_width="@dimen/cometchat_16dp"
+                android:layout_height="@dimen/cometchat_16dp"
+                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                android:contentDescription="@string/cometchat_pinned"
+                android:src="@drawable/cometchat_ic_pin_filled"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/status_saved_indicator"
+                android:layout_width="@dimen/cometchat_16dp"
+                android:layout_height="@dimen/cometchat_16dp"
+                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                android:contentDescription="@string/cometchat_saved"
+                android:src="@drawable/cometchat_ic_saved_filled"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/status_pin_dot"
+                android:layout_width="4dp"
+                android:layout_height="4dp"
+                android:layout_marginEnd="@dimen/cometchat_margin_1"
+                android:src="@drawable/cometchat_pin_dot"
+                android:visibility="gone" />
+
             <com.cometchat.uikit.kotlin.presentation.shared.baseelements.date.CometChatDate
                 android:id="@+id/date_time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <com.cometchat.uikit.kotlin.presentation.shared.receipts.CometChatReceipt
                 android:id="@+id/receipt"

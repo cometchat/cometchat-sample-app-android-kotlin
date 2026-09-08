@@ -139,11 +139,19 @@ class HomeActivity : AppCompatActivity() {
         binding.bottomNavigationView.itemTextColor = colorStateList
 
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
-            if (currentFragment == item.itemId) {
-                return@setOnItemSelectedListener true // No action needed if the fragment is already selected
+            val alreadySelected = currentFragment == item.itemId
+            if (!alreadySelected) {
+                currentFragment = item.itemId
+                loadFragment(getFragment(currentFragment))
             }
-            currentFragment = item.itemId
-            loadFragment(getFragment(currentFragment))
+            // Reload conversations whenever the Chats tab is TAPPED (switching to it or re-tapping),
+            // not on lifecycle resume. executePendingTransactions ensures a just-created ChatsFragment
+            // is attached before we call into it.
+            if (item.itemId == R.id.nav_chats) {
+                supportFragmentManager.executePendingTransactions()
+                (supportFragmentManager.findFragmentById(R.id.fragment_container) as? ChatsFragment)
+                    ?.reloadConversations()
+            }
             true
         }
     }

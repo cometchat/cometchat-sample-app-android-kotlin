@@ -33,6 +33,7 @@ import com.cometchat.uikit.core.events.CometChatConversationEvent
 import com.cometchat.uikit.core.events.CometChatEvents
 import com.cometchat.uikit.core.events.CometChatGroupEvent
 import com.cometchat.uikit.core.events.CometChatMessageEvent
+import com.cometchat.uikit.core.events.CometChatThreadEvent
 import com.cometchat.uikit.core.events.CometChatUIEvent
 import com.cometchat.uikit.core.events.MessageStatus
 import com.cometchat.chat.helpers.CometChatHelper
@@ -47,8 +48,11 @@ import com.cometchat.uikit.core.state.ConversationStarterUIState
 import com.cometchat.uikit.core.state.ConversationSummaryUIState
 import com.cometchat.uikit.core.state.SmartRepliesUIState
 import com.cometchat.uikit.core.utils.AgentChatDetector
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
+import com.cometchat.uikit.core.utils.PinSaveUtils
 import com.cometchat.uikit.core.utils.getDefaultMessagesCategories
 import com.cometchat.uikit.core.utils.getDefaultMessagesTypes
+import java.util.Collections
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -550,6 +554,15 @@ open class CometChatMessageListViewModel(
     
     /** Job for UIKit message events subscription. */
     private var messageEventsJob: Job? = null
+
+    /**
+     * Job for the UIKit thread-events subscription started by [addListeners].
+     *
+     * Held so [removeListeners] can cancel it: setUser/setGroup re-run addListeners on the same
+     * ViewModel, and without this every conversation switch would leave another live collector
+     * behind for the ViewModel's whole life.
+     */
+    private var threadEventsJob: Job? = null
     
     /** Job for UIKit group events subscription. */
     private var groupEventsJob: Job? = null
@@ -643,6 +656,16 @@ open class CometChatMessageListViewModel(
     private var parentMessageId: Long = -1
 
     /**
+     * The thread's root message in a thread view, when the View layer can supply it.
+     *
+     * Held as a whole message rather than an id because it is the authority for its thread's
+     * subscription state: a realtime reply arrives with no `threadSubscribed` flag and is stamped
+     * from here. Null in the main conversation, and null in a thread view whose caller only passed
+     * an id — in which case realtime replies are simply left un-stamped.
+     */
+    private var parentMessage: BaseMessage? = null
+
+    /**
      * When `true`, the message list will attempt to load the most recent agent
      * conversation thread instead of showing the empty/greeting state.
      *
@@ -678,6 +701,13 @@ open class CometChatMessageListViewModel(
     
     /** Unique tag for CometChat listeners, used for cleanup. */
     private var listenersTag: String? = null
+
+    /**
+     * Ids of the replies already folded into a parent's local [BaseMessage.replyCount], so a
+     * redelivered reply cannot be counted twice. See [updateReplyCount]. Reset whenever the
+     * conversation changes, since the counts are re-read from the server on the next fetch.
+     */
+    private val countedReplyIds: MutableSet<Long> = Collections.synchronizedSet(mutableSetOf())
     
     /** Sound manager for playing message sounds. */
     private var soundManager: CometChatSoundManager? = null
@@ -828,6 +858,21 @@ open class CometChatMessageListViewModel(
      * @param defaultOptions The default options (already filtered by visibility settings).
      * @return The final list of options to display.
      */
+    /**
+     * The list's own copy of [message], matched by id — the instance whose fields are current.
+     *
+     * A row's long-press listener closes over the [BaseMessage] that was bound to it, and a bound
+     * instance can be older than the one the list now holds: sending stamps `threadSubscribed` on
+     * the send result, and a subscription event writes the flag onto the objects in [messages].
+     * Neither rewrites an instance a ViewHolder captured earlier, so an action sheet built from the
+     * captured object could render a stale "Subscribe to thread" on a message that IS followed
+     *
+     * Falls back to [message] when the list has no match — a thread parent, or a row whose message
+     * is no longer loaded.
+     */
+    fun currentMessage(message: BaseMessage): BaseMessage =
+        _messages.value.firstOrNull { it.id != 0L && it.id == message.id } ?: message
+
     fun resolveMessageOptions(
         message: BaseMessage,
         defaultOptions: List<CometChatMessageOption>
@@ -1110,7 +1155,8 @@ open class CometChatMessageListViewModel(
         this.group = null
         this.parentMessageId = parentMessageId
         this.gotoMessageId = gotoMessageId
-        
+        countedReplyIds.clear()
+
         // Defaults are only a fallback — a caller-supplied builder wins, and the repository
         // is the one that resolves which of the two is actually in effect.
         val effectiveTypes = getDefaultMessagesTypes()
@@ -1178,6 +1224,7 @@ open class CometChatMessageListViewModel(
         this.user = null
         this.parentMessageId = parentMessageId
         this.gotoMessageId = gotoMessageId
+        countedReplyIds.clear()
 
         // Groups are never agent chats — reset agent chat state
         isAgentChat = false
@@ -1471,6 +1518,20 @@ open class CometChatMessageListViewModel(
      * @return The parent message ID, or `-1` for main conversation.
      */
     fun getParentMessageId(): Long = parentMessageId
+
+    /**
+     * Supplies the thread's root message, the authority for its thread's subscription state.
+     *
+     * Re-supply it whenever the parent updates; a fetched flag on a fresh parent object overrides any
+     * locally mirrored value.
+     */
+    fun setParentMessage(message: BaseMessage?) {
+        parentMessage = message
+        if (message != null) parentMessageId = message.id
+    }
+
+    /** The thread's root message, when one was supplied via [setParentMessage]. */
+    fun getParentMessage(): BaseMessage? = parentMessage
     
     /**
      * Sets whether to disable playing sounds for incoming messages.
@@ -2057,7 +2118,7 @@ open class CometChatMessageListViewModel(
                     val existingIds = _messages.value.map { it.id }.toSet()
                     val uniqueNewMessages = newMessages.filter { it.id !in existingIds }
                     _messages.value = uniqueNewMessages + _messages.value
-                    
+
                     // For agent chats with parentMessageId, fetch and prepend the parent message
                     // so the user's original question appears at the top of the thread
                     if (firstFetch && isAgentChat && parentMessageId > 0 
@@ -2068,10 +2129,10 @@ open class CometChatMessageListViewModel(
                                     parentMessageId,
                                     object : CometChat.CallbackListener<BaseMessage>() {
                                         override fun onSuccess(message: BaseMessage) {
-                                            cont.resume(message, null)
+                                            if (cont.isActive) cont.resume(message)
                                         }
                                         override fun onError(e: CometChatException) {
-                                            cont.resume(null, null)
+                                            if (cont.isActive) cont.resume(null)
                                         }
                                     }
                                 )
@@ -2614,6 +2675,11 @@ open class CometChatMessageListViewModel(
      * - Reactions are added or removed
      * - Read/delivery receipts are received
      *
+     * None of those payloads is authoritative for the viewer's pin/save state (an edit frame omits
+     * `savedAt`, for instance), so the loaded message's pin/save attributes are carried onto the
+     * replacement first — see [PinSaveUtils.carryPinSaveForward]. Pin/save events themselves go
+     * through [replaceMessageAuthoritative], where a cleared state must win.
+     *
      * @param message The updated [BaseMessage] with the same ID as the original.
      *
      * @see updateItem
@@ -2621,7 +2687,65 @@ open class CometChatMessageListViewModel(
      * @see removeMessage
      */
     open fun updateMessage(message: BaseMessage) {
-        updateItem(message) { it.id == message.id }
+        val reconciled = reconcilePinSaveOnReplace(message)
+        updateItem(reconciled) { it.id == reconciled.id }
+    }
+
+    /**
+     * Replaces the loaded message with [message] as-is — no pin/save carry-over. Only for pin/save
+     * events (REST echo or realtime action), whose payload IS the pin/save truth: an unpin/unsave
+     * must be able to clear the indicator.
+     */
+    private fun replaceMessageAuthoritative(message: BaseMessage) {
+        val existing = _messages.value.firstOrNull { it.id == message.id }
+        val reconciled =
+            if (existing != null) carryThreadSubscriptionForward(existing, message) else message
+        updateItem(reconciled) { it.id == reconciled.id }
+    }
+
+    /**
+     * Carries the loaded message's pin/save attributes onto [message] when [message] lacks them.
+     * Returns [message] itself when there is nothing to carry (or nothing loaded to carry from).
+     */
+    protected fun reconcilePinSaveOnReplace(message: BaseMessage): BaseMessage {
+        val existing = _messages.value.firstOrNull { it.id == message.id } ?: return message
+        return carryThreadSubscriptionForward(
+            existing,
+            PinSaveUtils.carryPinSaveForward(existing, message)
+        )
+    }
+
+    /**
+     * Carries the loaded message's `threadSubscribed` onto [incoming] when [incoming] lacks it.
+     *
+     * The flag is served ONLY on fetched copies, so **every** realtime payload that replaces a
+     * loaded message — the socket echo of a send, an edit, a moderation verdict, a pin/save action
+     * — arrives flagless. Swapping one in un-follows a thread the list already knows is followed,
+     * which is what made a just-sent message offer "Subscribe to thread" a couple of seconds after
+     * it was stamped: the moderation verdict for that send landed and wiped it (ENG-38903).
+     *
+     * Every replace path must go through here, not just the one that first showed the symptom.
+     * An intentional unsubscribe never travels on these payloads — it travels on the thread-event
+     * path, which writes the flag onto the loaded objects directly and is unaffected by this.
+     *
+     * Returns [incoming] untouched when there is nothing to carry; clones before stamping so a
+     * caller's own object (and the SDK's) is never mutated behind its back.
+     */
+    private fun carryThreadSubscriptionForward(
+        existing: BaseMessage,
+        incoming: BaseMessage
+    ): BaseMessage {
+        if (!existing.isThreadSubscribed() || incoming.isThreadSubscribed()) return incoming
+        return incoming.clone().apply { setThreadSubscribed(true) }
+    }
+
+    /** Whether [action] is a pinned/unpinned/saved/unsaved action message. */
+    private fun isPinSaveAction(action: Action): Boolean = when (action.action) {
+        CometChatConstants.ActionKeys.ACTION_MESSAGE_PINNED,
+        CometChatConstants.ActionKeys.ACTION_MESSAGE_UNPINNED,
+        CometChatConstants.ActionKeys.ACTION_MESSAGE_SAVED,
+        CometChatConstants.ActionKeys.ACTION_MESSAGE_UNSAVED -> true
+        else -> false
     }
 
     /**
@@ -2646,8 +2770,14 @@ open class CometChatMessageListViewModel(
         // Once blocked, stay blocked — don't let a later verdict re-enable the message.
         if (isMessageDisapproved(existing)) return
 
-        if (updateItem(message, matches)) {
-            viewModelScope.launch { _messageUpdated.emit(message) }
+        // A moderation verdict describes content, not the viewer's pin/save or thread-subscription
+        // state — both are carried forward from the loaded copy, which the verdict omits.
+        val moderated = carryThreadSubscriptionForward(
+            existing,
+            PinSaveUtils.carryPinSaveForward(existing, message)
+        )
+        if (updateItem(moderated, matches)) {
+            viewModelScope.launch { _messageUpdated.emit(moderated) }
         }
     }
 
@@ -2700,16 +2830,38 @@ open class CometChatMessageListViewModel(
      * Note: This method only updates the local state. The server-side reply
      * count is updated automatically when the reply is sent.
      *
+     * ### Why [replyMessageId] matters
+     *
+     * The count is derived by incrementing, so it is only correct if each reply is counted
+     * exactly once — and the SDK does not guarantee single delivery: the same realtime reply
+     * can arrive several times over the life of a socket (observed 3x for one reply id after a
+     * reconnect), and every duplicate would inflate the count permanently, with nothing to
+     * correct it short of leaving and re-entering the conversation. Passing the reply's own id
+     * makes this idempotent. Callers that genuinely have no reply id (id `0`) fall back to the
+     * unguarded increment.
+     *
      * @param parentMessageId The ID of the parent message to update.
+     * @param replyMessageId The ID of the reply that caused this increment; `0` when unknown.
      *
      * @see handleMessageSentEvent
      */
-    open fun updateReplyCount(parentMessageId: Long) {
+    @JvmOverloads
+    open fun updateReplyCount(parentMessageId: Long, replyMessageId: Long = 0L) {
+        // Same reply delivered twice — the count already includes it.
+        if (replyMessageId > 0L && !countedReplyIds.add(replyMessageId)) {
+            Log.d(
+                "CometChatMsgListVM",
+                "updateReplyCount: dropped duplicate delivery of reply $replyMessageId " +
+                    "for parent $parentMessageId"
+            )
+            return
+        }
+
         val parentMessage = _messages.value.find { it.id == parentMessageId }
         if (parentMessage == null) {
             return
         }
-        
+
         val oldCount = parentMessage.replyCount
         parentMessage.replyCount = oldCount + 1
         
@@ -2735,6 +2887,7 @@ open class CometChatMessageListViewModel(
      */
     open fun clear() {
         clearItems()
+        countedReplyIds.clear()
         repository.resetRequest()
         _hasMorePreviousMessages.value = true
         _hasMoreNewMessages.value = false
@@ -3035,7 +3188,9 @@ open class CometChatMessageListViewModel(
     private fun updateMessageReadAt(messageId: Long, timestamp: Long) {
         _messages.value = _messages.value.map { message ->
             if (message.id == messageId) {
-                message.apply { readAt = timestamp }
+                // Clone, don't stamp in place — see setDeliveryReceipts for why an in-place
+                // mutation makes the StateFlow drop this update.
+                message.clone().apply { readAt = timestamp }
             } else {
                 message
             }
@@ -3287,7 +3442,48 @@ open class CometChatMessageListViewModel(
     // ========================================
     // Helper Methods
     // ========================================
-    
+
+    /**
+     * Applies a pin/save echo onto the copy of the message already held by this list.
+     *
+     * The echoed [BaseMessage] comes from the pin/save REST response (the SDK's self-echo on the
+     * acting device) or from a realtime action, and is NOT guaranteed to be a complete message —
+     * `receiverType` / `receiverUid` in particular may be absent, which would make
+     * [isMessageForCurrentChat] reject it and silently leave the bubble stale.
+     *
+     * Matching by id against the loaded list avoids that entirely: an id match is proof the message
+     * belongs to this chat (it is already in it), it needs no routing fields, and carrying the
+     * pin/save change onto the loaded message keeps every other field intact instead of swapping in
+     * a thinner object. The routing gate is only used as a fallback for a message this list hasn't
+     * loaded, where there is nothing to match against.
+     *
+     * The update is applied to a [BaseMessage.clone], never to the loaded instance itself:
+     * `_messages` is a StateFlow and `BaseMessage.equals` is a content comparison, so mutating in
+     * place would make the new list `equals()` the old one and the emission would be dropped —
+     * leaving the bubble stale for exactly the case this method exists to fix.
+     *
+     * @param echo The message as delivered by the pin/save callback.
+     * @param applyTo Copies the pin/save attributes from [echo] onto the clone of the loaded message.
+     * @param event Builds the UIKit bus event from whichever message ends up being authoritative.
+     */
+    private fun applyPinSaveEcho(
+        echo: BaseMessage,
+        applyTo: (BaseMessage) -> Unit,
+        event: (BaseMessage) -> com.cometchat.uikit.core.events.CometChatMessageEvent
+    ) {
+        val loaded = _messages.value.firstOrNull { it.id == echo.id }
+        val authoritative = if (loaded != null) {
+            loaded.clone().apply(applyTo)
+        } else {
+            if (!isMessageForCurrentChat(echo)) return
+            echo
+        }
+        // Authoritative on purpose: `updateMessage` would carry the loaded pin/save state forward
+        // and undo an unpin/unsave.
+        replaceMessageAuthoritative(authoritative)
+        com.cometchat.uikit.core.events.CometChatEvents.emitMessageEvent(event(authoritative))
+    }
+
     /**
      * Checks if a message belongs to the current conversation.
      *
@@ -3674,8 +3870,10 @@ open class CometChatMessageListViewModel(
                         // Extract the actionOn property which contains the updated message data
                         val actionOn = actionMessage.actionOn
                         if (actionOn is BaseMessage) {
-                            // Update the corresponding message in the list
-                            updateMessage(actionOn)
+                            // A missed pin/save action is the pin/save truth (an unpin must clear);
+                            // every other action (edit, delete) only describes content.
+                            if (isPinSaveAction(actionMessage)) replaceMessageAuthoritative(actionOn)
+                            else updateMessage(actionOn)
                         }
                     }
                 }
@@ -3815,11 +4013,11 @@ open class CometChatMessageListViewModel(
         // Check if this is a thread reply in main conversation
         // In this case, we only update the reply count, not add the message
         val isThreadReplyInMainConversation = parentMessageId == -1L && message.parentMessageId > 0
-        
+
         if (isThreadReplyInMainConversation) {
             // Thread reply sent from main conversation - only update reply count on SUCCESS
             if (event.status == MessageStatus.SUCCESS) {
-                updateReplyCount(message.parentMessageId)
+                updateReplyCount(message.parentMessageId, message.id)
             }
             return
         }
@@ -3837,9 +4035,10 @@ open class CometChatMessageListViewModel(
             MessageStatus.SUCCESS -> {
                 // Update the optimistic message with server response
                 updateMessageOnSuccess(message)
-                
+
                 // Update latestMessageId for real-time message guards
                 latestMessageId = message.id
+
 
                 // Agent chat: set parentMessageId on first successful send
                 if (isAgentChat && !agentChatParentMessageIdSet && parentMessageId == -1L) {
@@ -3976,7 +4175,9 @@ open class CometChatMessageListViewModel(
         
         // Check if message belongs to current conversation
         if (!isMessageForCurrentChat(message)) return
-        
+
+        reconcileEditedMessageSubscription(message)
+
         // Update the message in the list
         updateMessage(message)
     }
@@ -4245,7 +4446,25 @@ open class CometChatMessageListViewModel(
      */
     private fun addListeners() {
         listenersTag = "MessageList_${System.currentTimeMillis()}"
-        
+
+        // A subscription change made on any surface (the header bell, another list's action sheet, a
+        // Case 3/4 mirror) arrives here. Surfaces do not share message instances, so write the flag
+        // onto every object this list holds for that thread — the parent and any of its messages —
+        // keeping direct reads coherent. Nothing on screen renders subscription state directly, so
+        // no re-emit is needed: the action sheet is rebuilt from these objects on each long-press.
+        threadEventsJob?.cancel()
+        threadEventsJob = viewModelScope.launch {
+            CometChatEvents.threadEvents.collect { event ->
+                if (event !is CometChatThreadEvent.SubscriptionChanged) return@collect
+                parentMessage
+                    ?.takeIf { it.id == event.parentMessageId }
+                    ?.setThreadSubscribed(event.subscribed)
+                _messages.value
+                    .filter { CometChatThreadSubscription.threadRootId(it) == event.parentMessageId }
+                    .forEach { it.setThreadSubscribed(event.subscribed) }
+            }
+        }
+
         listenersTag?.let { tag ->
             // Message listener
             CometChat.addMessageListener(tag, object : CometChat.MessageListener() {
@@ -4273,13 +4492,17 @@ open class CometChatMessageListViewModel(
                 
                 override fun onMessageEdited(message: BaseMessage) {
                     if (isMessageForCurrentChat(message)) {
-                        android.util.Log.d("CometChatMsgListVM", "━━━ onMessageEdited ━━━ msgId=${message.id}, type=${message.type}, moderationStatus=${(message as? com.cometchat.chat.models.TextMessage)?.moderationStatus?.name ?: (message as? com.cometchat.chat.models.MediaMessage)?.moderationStatus?.name ?: "N/A"}")
-                        updateMessage(message)
+                        reconcileEditedMessageSubscription(message)
+                        // The edit frame carries the new content but not the viewer's pin/save
+                        // state; carry it over from the loaded copy so the rebind keeps the
+                        // indicator (the list swap and the rebind emission must agree).
+                        val edited = reconcilePinSaveOnReplace(message)
+                        updateMessage(edited)
                         // Emit via SharedFlow to bypass StateFlow conflation
                         // This ensures moderation status changes trigger UI rebind in real-time
                         viewModelScope.launch {
                             android.util.Log.d("CometChatMsgListVM", "onMessageEdited: emitting _messageUpdated for msgId=${message.id}")
-                            _messageUpdated.emit(message)
+                            _messageUpdated.emit(edited)
                         }
                     } else {
                         android.util.Log.d("CometChatMsgListVM", "onMessageEdited: IGNORED (not for current chat) msgId=${message.id}")
@@ -4301,7 +4524,61 @@ open class CometChatMessageListViewModel(
                         }
                     }
                 }
-                
+
+                // Pin/Save realtime → rebind the in-list bubble (indicator) and fan the event out on
+                // the UIKit bus so the Pinned/Saved panels + other consumers stay in sync. On the
+                // acting device these arrive via the SDK's self-echo off the REST response; from
+                // another device they arrive as a realtime action. Either way the delivered message
+                // may be partial, so applyPinSaveEcho merges onto the loaded copy — see its KDoc.
+                override fun onMessagePinned(message: BaseMessage) {
+                    applyPinSaveEcho(
+                        echo = message,
+                        applyTo = { updated ->
+                            // "Pinned" is the assertion; pinnedAt is only its representation
+                            // (isPinned() == pinnedAt > 0). If the echo omits the timestamp, stamp
+                            // one so the indicator shows — the next fetch supplies the real value.
+                            updated.pinnedAt = if (message.pinnedAt > 0) message.pinnedAt
+                            else System.currentTimeMillis() / 1000
+                            // Only copy pinnedBy when the echo carries it: it drives isSystemPinned(),
+                            // and inventing an identity here would misreport who pinned the message.
+                            message.pinnedBy?.let { updated.pinnedBy = it }
+                        },
+                        event = { com.cometchat.uikit.core.events.CometChatMessageEvent.MessagePinned(it) }
+                    )
+                }
+
+                override fun onMessageUnpinned(message: BaseMessage) {
+                    applyPinSaveEcho(
+                        echo = message,
+                        // Clear outright rather than copying: the event itself is the assertion, so
+                        // this holds even if the echo omits the pin fields entirely.
+                        applyTo = { updated ->
+                            updated.pinnedAt = 0
+                            updated.pinnedBy = null
+                        },
+                        event = { com.cometchat.uikit.core.events.CometChatMessageEvent.MessageUnpinned(it) }
+                    )
+                }
+
+                override fun onMessageSaved(message: BaseMessage) {
+                    applyPinSaveEcho(
+                        echo = message,
+                        applyTo = { updated ->
+                            updated.savedAt = if (message.savedAt > 0) message.savedAt
+                            else System.currentTimeMillis() / 1000
+                        },
+                        event = { com.cometchat.uikit.core.events.CometChatMessageEvent.MessageSaved(it) }
+                    )
+                }
+
+                override fun onMessageUnsaved(message: BaseMessage) {
+                    applyPinSaveEcho(
+                        echo = message,
+                        applyTo = { updated -> updated.savedAt = 0 },
+                        event = { com.cometchat.uikit.core.events.CometChatMessageEvent.MessageUnsaved(it) }
+                    )
+                }
+
                 override fun onMessagesDelivered(messageReceipt: MessageReceipt) {
                     handleMessageReceipt(messageReceipt)
                 }
@@ -4429,6 +4706,8 @@ open class CometChatMessageListViewModel(
      * Removes all CometChat listeners.
      */
     private fun removeListeners() {
+        threadEventsJob?.cancel()
+        threadEventsJob = null
         listenersTag?.let { tag ->
             CometChat.removeMessageListener(tag)
             CometChat.removeGroupListener(tag)
@@ -4437,6 +4716,23 @@ open class CometChatMessageListViewModel(
         }
     }
     
+    /**
+     * Reconciles the thread-subscription state of an edited message before it replaces the copy this
+     * list holds.
+     *
+     * An edit is delivered flagless, so swapping it in blind would silently un-follow a thread the
+     * user is subscribed to; and an edit that leaves the user @-mentioned in a reply subscribes them
+     * server-side, which nothing else here would notice. See
+     * [CometChatThreadSubscription.applyEditedMessageSubscription].
+     */
+    private fun reconcileEditedMessageSubscription(message: BaseMessage) {
+        CometChatThreadSubscription.applyEditedMessageSubscription(
+            editedMessage = message,
+            heldMessage = _messages.value.firstOrNull { it.id == message.id },
+            parentMessage = parentMessage
+        )
+    }
+
     /**
      * Handles an incoming real-time message.
      *
@@ -4460,6 +4756,14 @@ open class CometChatMessageListViewModel(
         if (!isMessageForCurrentChat(message)) {
             return
         }
+
+        // A socket-delivered message carries no threadSubscribed flag (the server stamps it only on
+        // fetched copies), so it would render un-followed even where the server has subscribed me.
+        // Reconcile it before it reaches the list: my own echoed messages and replies that @-mention
+        // me are stamped subscribed and mirrored; any other reply inherits the parent's state.
+        // Runs before the filter guard — the server subscribed me regardless of whether this
+        // surface displays the message, so the mirrors must fire even for filtered messages.
+        CometChatThreadSubscription.applyIncomingMessageSubscription(message, parentMessage)
 
         // Enforce the configured MessagesRequest filter on the real-time path too, so a message
         // excluded from the fetch never appears just because it arrived over the socket.
@@ -4521,7 +4825,7 @@ open class CometChatMessageListViewModel(
             if (loggedInUser != null && message.sender?.uid == loggedInUser.uid) {
                 return
             }
-            updateReplyCount(message.parentMessageId)
+            updateReplyCount(message.parentMessageId, message.id)
             return
         }
 
@@ -4607,19 +4911,26 @@ open class CometChatMessageListViewModel(
      */
     private fun setDeliveryReceipts(receipt: MessageReceipt) {
         var isDelivered = false
+        var changed = false
         val updatedMessages = _messages.value.toMutableList()
-        
+
         for (i in updatedMessages.indices.reversed()) {
             val message = updatedMessages[i]
             if (message.deliveredAt == 0L || message.id == receipt.messageId) {
                 isDelivered = true
-                message.deliveredAt = receipt.deliveredAt
+                // Swap in a clone instead of stamping the loaded instance: `messages` is a
+                // StateFlow and BaseMessage.equals is a content comparison, so mutating in place
+                // leaves the "new" list equal to the old one and the emission is dropped — the
+                // sender's ticks would never update until something else rebound the row.
+                // Same rule as applyPinSaveEcho.
+                updatedMessages[i] = message.clone().apply { deliveredAt = receipt.deliveredAt }
+                changed = true
             } else if (isDelivered) {
                 break
             }
         }
-        
-        _messages.value = updatedMessages
+
+        if (changed) _messages.value = updatedMessages
     }
     
     /**
@@ -4628,19 +4939,23 @@ open class CometChatMessageListViewModel(
      */
     private fun setReadReceipts(receipt: MessageReceipt) {
         var isRead = false
+        var changed = false
         val updatedMessages = _messages.value.toMutableList()
-        
+
         for (i in updatedMessages.indices.reversed()) {
             val message = updatedMessages[i]
             if (message.readAt == 0L || message.id == receipt.messageId) {
                 isRead = true
-                message.readAt = receipt.readAt
+                // Clone, don't stamp in place — see setDeliveryReceipts. Without this the read
+                // tick never turns blue in realtime.
+                updatedMessages[i] = message.clone().apply { readAt = receipt.readAt }
+                changed = true
             } else if (isRead) {
                 break
             }
         }
-        
-        _messages.value = updatedMessages
+
+        if (changed) _messages.value = updatedMessages
     }
     
     private fun handleTypingStarted(typingIndicator: TypingIndicator) {

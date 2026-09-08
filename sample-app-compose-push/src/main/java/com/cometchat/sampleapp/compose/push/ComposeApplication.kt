@@ -215,6 +215,7 @@ class ComposeApplication : Application() {
             .setAuthKey(authKey)
             .subscribePresenceForAllUsers()
             .setEnableCalling(true)
+            .setEnableThreadSubscription(true)
             .build()
         CometChatUIKit.init(this, settings, object : CometChat.CallbackListener<String>() {
             override fun onSuccess(result: String?) {
@@ -286,14 +287,23 @@ class ComposeApplication : Application() {
                 group: Group?,
                 message: BaseMessage?
             ) {
-                // Launch the host Activity with the tapped conversation id; MainActivity routes via
-                // the NavHost. (Deep routing to the exact conversation can be refined in MainActivity.)
+                // Launch the host Activity with the tapped conversation; MainActivity hands the
+                // deep link to the NavHost, which opens the conversation — or the thread, when the
+                // tapped message is a reply and so does not live in the main list.
                 val intent = Intent(context, MainActivity::class.java).apply {
                     putExtra(
                         AppConstants.FCMConstants.NOTIFICATION_TYPE,
                         AppConstants.FCMConstants.NOTIFICATION_TYPE_MESSAGE
                     )
-                    (user?.uid ?: group?.guid)?.let { putExtra(AppConstants.FCMConstants.KEY_UID, it) }
+                    user?.uid?.let { putExtra(AppConstants.FCMConstants.KEY_UID, it) }
+                    group?.guid?.let { putExtra(AppConstants.FCMConstants.KEY_GUID, it) }
+                    message?.let { tapped ->
+                        putExtra(AppConstants.FCMConstants.KEY_MESSAGE_ID, tapped.id.toLong())
+                        putExtra(
+                            AppConstants.FCMConstants.KEY_PARENT_MESSAGE_ID,
+                            tapped.parentMessageId.toLong()
+                        )
+                    }
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 }
                 context.startActivity(intent)

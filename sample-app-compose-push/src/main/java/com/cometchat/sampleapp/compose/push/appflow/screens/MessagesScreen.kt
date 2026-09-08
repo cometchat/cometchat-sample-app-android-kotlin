@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,6 +49,7 @@ import com.cometchat.uikit.compose.presentation.shared.popupmenu.CometChatPopupM
 import com.cometchat.uikit.compose.shared.views.popupmenu.MenuItem
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
+import com.cometchat.sampleapp.compose.push.appflow.components.BlockedUserBanner
 import com.cometchat.sampleapp.compose.push.appflow.viewmodels.MessagesViewModel
 
 /**
@@ -75,11 +79,14 @@ fun MessagesScreen(
     onNavigateToThread: (Long, String?, String?) -> Unit,
     onNavigateToSearch: (String?, String?) -> Unit,
     onNavigateToChatHistory: ((String) -> Unit)? = null,
+    onNavigateToPinnedMessages: ((String?, String?) -> Unit)? = null,
     onNewChat: ((String) -> Unit)? = null
 ) {
     val viewModel: MessagesViewModel = viewModel()
     val isBlocked by viewModel.isBlocked.collectAsState()
     val isGroupMember by viewModel.isGroupMember.collectAsState()
+    val isBlockedByMe by viewModel.isBlockedByMe.collectAsState()
+    val isUnblocking by viewModel.isLoading.collectAsState()
     val lastMessage by viewModel.lastMessage.collectAsState()
     
     var showOverflowMenu by remember { mutableStateOf(false) }
@@ -151,17 +158,16 @@ fun MessagesScreen(
                                 showOverflowMenu = false
                                 user?.let { onNavigateToUserDetails(it.uid, effectiveLastMessageId) }
                                 group?.let { onNavigateToGroupDetails(it.guid, effectiveLastMessageId) }
+                            },
+                            onPinnedMessagesClick = {
+                                showOverflowMenu = false
+                                onNavigateToPinnedMessages?.invoke(user?.uid, group?.guid)
                             }
                         )
                     }
                 }
             )
-            
-            // Non-member banner for groups
-            if (group != null && !isGroupMember) {
-                NonMemberBanner()
-            }
-            
+
             // Message List
             CometChatMessageList(
                 modifier = Modifier
@@ -177,15 +183,22 @@ fun MessagesScreen(
                 }
             )
             
-            // Blocked user banner (at bottom, replacing composer)
-            if (isBlocked) {
+            // Unblock notice (at bottom, replacing composer)
+            if (isBlockedByMe) {
                 BlockedUserBanner(
-                    onUnblockClick = { viewModel.unblockUser() }
+                    isUnblocking = isUnblocking,
+                    onUnblockClick = { viewModel.unblockUser() },
+                    modifier = Modifier.padding(12.dp)
                 )
             }
-            
+
+            // Non-member notice (at bottom, replacing composer)
+            if (!isBlockedByMe && group != null && !isGroupMember) {
+                NonMemberBanner()
+            }
+
             // Message Composer (hidden when blocked or not a member)
-            if (!isBlocked && (group == null || isGroupMember)) {
+            if (!isBlockedByMe && (group == null || isGroupMember)) {
                 CometChatMessageComposer(
                     modifier = Modifier.fillMaxWidth(),
                     user = user,
@@ -223,23 +236,39 @@ private fun MessagesOverflowMenu(
     showMenu: Boolean,
     onDismiss: () -> Unit,
     onSearchClick: () -> Unit,
-    onDetailsClick: () -> Unit
+    onDetailsClick: () -> Unit,
+    onPinnedMessagesClick: () -> Unit
 ) {
-    val menuItems = listOf(
-        MenuItem(
-            id = "search",
-            name = "Search",
-            startIcon = painterResource(id = R.drawable.cometchat_ic_search),
-            onClick = onSearchClick
-        ),
-        MenuItem(
-            id = "details",
-            name = "Details",
-            startIcon = painterResource(id = R.drawable.cometchat_ic_info),
-            onClick = onDetailsClick
+    val menuItems = buildList {
+        add(
+            MenuItem(
+                id = "search",
+                name = "Search",
+                startIcon = painterResource(id = R.drawable.cometchat_ic_search),
+                onClick = onSearchClick
+            )
         )
-    )
-    
+        // Pinned messages — gated on the SDK Pin Message feature flag.
+        if (com.cometchat.uikit.core.CometChatUIKit.isPinMessageEnabled()) {
+            add(
+                MenuItem(
+                    id = "pinned_messages",
+                    name = "Pinned messages",
+                    startIcon = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                    onClick = onPinnedMessagesClick
+                )
+            )
+        }
+        add(
+            MenuItem(
+                id = "details",
+                name = "Details",
+                startIcon = painterResource(id = R.drawable.cometchat_ic_info),
+                onClick = onDetailsClick
+            )
+        )
+    }
+
     CometChatPopupMenu(
         expanded = showMenu,
         onDismissRequest = onDismiss,
@@ -254,70 +283,31 @@ private fun MessagesOverflowMenu(
 }
 
 /**
- * Banner shown when user is blocked.
- */
-@Composable
-private fun BlockedUserBanner(
-    onUnblockClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "You have blocked this user",
-            style = CometChatTheme.typography.bodyRegular,
-            color = CometChatTheme.colorScheme.textColorSecondary
-        )
-
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(8.dp))
-
-        androidx.compose.material3.OutlinedButton(
-            onClick = onUnblockClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-            colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
-                containerColor = CometChatTheme.colorScheme.backgroundColor4
-            ),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                CometChatTheme.colorScheme.strokeColorDark
-            )
-        ) {
-            Text(
-                text = "Unblock User",
-                style = CometChatTheme.typography.bodyMedium,
-                color = CometChatTheme.colorScheme.textColorPrimary
-            )
-        }
-    }
-}
-
-/**
- * Banner shown when user is not a member of the group.
+ * Notice shown in place of the composer when the user is no longer a member of the group.
+ * Mirrors the Kotlin app's info_layout in activity_app_flow_messages.xml: a top separator over
+ * centered body text, so both UIKits present the non-member state identically.
  */
 @Composable
 private fun NonMemberBanner() {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(CometChatTheme.colorScheme.infoColor.copy(alpha = 0.2f))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(CometChatTheme.colorScheme.backgroundColor1)
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.cometchat_ic_info),
-            contentDescription = null,
-            tint = CometChatTheme.colorScheme.infoColor,
-            modifier = Modifier.size(20.dp)
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = CometChatTheme.colorScheme.strokeColorLight
         )
         Text(
-            text = "You are not a member of this group",
+            // Qualified: the file-level `R` import is the UIKit's, not this app's.
+            text = stringResource(id = com.cometchat.sampleapp.compose.push.R.string.app_block_user_unable_to_send_message),
             style = CometChatTheme.typography.bodyRegular,
-            color = CometChatTheme.colorScheme.textColorPrimary
+            color = CometChatTheme.colorScheme.textColorPrimary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 16.dp)
+                .padding(horizontal = 16.dp)
         )
     }
 }

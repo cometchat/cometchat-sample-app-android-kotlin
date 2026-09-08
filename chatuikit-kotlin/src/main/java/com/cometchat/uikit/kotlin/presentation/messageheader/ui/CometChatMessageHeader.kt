@@ -119,6 +119,8 @@ class CometChatMessageHeader @JvmOverloads constructor(
     private var userStatusVisibility = View.VISIBLE
     private var groupStatusVisibility = View.VISIBLE
     private var menuIconVisibility = View.GONE
+    private var showPinnedMessagesOption = false
+    private var onPinnedMessagesClick: (() -> Unit)? = null
     // Call button visibility defaults to GONE if calling is not enabled
     private var videoCallButtonVisibility = if (CallsUtils.isCallingEnabled()) View.VISIBLE else View.GONE
     private var voiceCallButtonVisibility = if (CallsUtils.isCallingEnabled()) View.VISIBLE else View.GONE
@@ -555,12 +557,42 @@ class CometChatMessageHeader @JvmOverloads constructor(
      * Shows the popup menu.
      */
     private fun showPopupMenu() {
-        menuOptions?.let { options ->
-            if (options.isNotEmpty()) {
-                popupMenu.setMenuItems(options)
-                popupMenu.showAsDropDown(binding.messageHeaderMenuIcon)
-            }
+        val items = mutableListOf<CometChatPopupMenu.MenuItem>()
+        // Built-in "Pinned Messages" entry — opens the conversation's pinned-messages list.
+        if (showPinnedMessagesOption && com.cometchat.uikit.core.CometChatUIKit.isPinMessageEnabled()) {
+            items.add(
+                CometChatPopupMenu.MenuItem(
+                    id = "pinned_messages",
+                    name = context.getString(R.string.cometchat_pinned_messages_header),
+                    startIcon = androidx.core.content.res.ResourcesCompat.getDrawable(
+                        resources, com.cometchat.uikit.core.R.drawable.cometchat_ic_pin, null
+                    ),
+                    onClick = { onPinnedMessagesClick?.invoke() }
+                )
+            )
         }
+        menuOptions?.let { items.addAll(it) }
+        if (items.isNotEmpty()) {
+            popupMenu.setMenuItems(items)
+            popupMenu.showAsDropDown(binding.messageHeaderMenuIcon)
+        }
+    }
+
+    /**
+     * Enables the built-in "Pinned Messages" option in the header ⋮ menu (opens the conversation's
+     * pinned-messages list via [setOnPinnedMessagesClickListener]). Enabling it shows the menu icon.
+     */
+    fun setShowPinnedMessagesOption(show: Boolean) {
+        showPinnedMessagesOption = show
+        if (show) {
+            menuIconVisibility = View.VISIBLE
+            binding.messageHeaderMenuIcon.visibility = View.VISIBLE
+        }
+    }
+
+    /** Sets the callback invoked when the built-in "Pinned Messages" header option is tapped. */
+    fun setOnPinnedMessagesClickListener(listener: () -> Unit) {
+        onPinnedMessagesClick = listener
     }
 
     /**

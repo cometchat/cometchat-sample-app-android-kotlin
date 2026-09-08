@@ -97,6 +97,7 @@ internal fun ConversationListContent(
     onItemClick: (Conversation) -> Unit,
     onItemLongClick: (Conversation) -> Unit,
     onDeleteConversation: (Conversation) -> Unit,
+    onPinToggle: (Conversation) -> Unit,
     onLoadMore: () -> Unit,
     scrollToTopEvent: SharedFlow<Unit>? = null
 ) {
@@ -169,7 +170,8 @@ internal fun ConversationListContent(
                 hideDeleteOption = hideDeleteOption,
                 options = options,
                 addOptions = addOptions,
-                onDelete = { onDeleteConversation(conversation) }
+                onDelete = { onDeleteConversation(conversation) },
+                onPinToggle = { onPinToggle(conversation) }
             )
             
             Box(
@@ -308,15 +310,39 @@ private fun buildMenuItems(
     hideDeleteOption: Boolean,
     options: ((Context, Conversation) -> List<MenuItem>)?,
     addOptions: ((Context, Conversation) -> List<MenuItem>)?,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onPinToggle: () -> Unit
 ): List<MenuItem> {
     // If custom options are provided, use them exclusively
     if (options != null) {
         return options(context, conversation)
     }
-    
+
     val menuItems = mutableListOf<MenuItem>()
-    
+
+    // Pin / Unpin conversation (toggles on the conversation's current pin state), gated by the SDK
+    // Pin Conversation feature flag. Non-destructive — keeps default (neutral) styling.
+    // System-pinned conversations (pinned via the REST API, pinnedBy = "app_system") are not
+    // user-controllable, so neither pin nor unpin is offered for them.
+    if (com.cometchat.uikit.core.CometChatUIKit.isPinConversationEnabled() && !conversation.isSystemPinned) {
+        val isPinned = conversation.isPinned
+        menuItems.add(
+            MenuItem(
+                id = if (isPinned) UIKitConstants.ConversationOption.UNPIN
+                else UIKitConstants.ConversationOption.PIN,
+                name = context.getString(
+                    if (isPinned) R.string.cometchat_unpin_conversation
+                    else R.string.cometchat_pin_conversation
+                ),
+                startIcon = painterResource(
+                    if (isPinned) com.cometchat.uikit.core.R.drawable.cometchat_ic_pin_off
+                    else com.cometchat.uikit.core.R.drawable.cometchat_ic_pin
+                ),
+                onClick = onPinToggle
+            )
+        )
+    }
+
     // Add default delete option if not hidden
     if (!hideDeleteOption) {
         menuItems.add(

@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">action_item</string>
     <string name="cometchat_try_again" translatable="true">Réessayer</string>
     <string name="cometchat_something_went_wrong" translatable="true">Un problème est survenu.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Vous n\'avez pas l\'autorisation d\'effectuer cette action.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Transférer la propriété</string>
     <string name="cometchat_add_members" translatable="true">Ajouter des membres</string>
     <string name="cometchat_owner" translatable="true">Propriétaire</string>
@@ -249,4 +250,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Notifier tout le monde dans ce groupe</string>
     <string name="cometchat_notify_all" translatable="true">tous</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">S\'abonner au fil</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Se désabonner du fil</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Abonné. Vous serez averti des nouvelles réponses dans ce fil.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Abonné. Vous serez averti des nouvelles réponses.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Désabonné. Les notifications sont désactivées jusqu\'à ce que vous répondiez ou soyez mentionné.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Désabonné. Les notifications sont désactivées jusqu\'à ce que vous répondiez ou soyez mentionné.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Échec de la mise à jour. Veuillez réessayer.</string>
+    <string name="cometchat_thread_mute" translatable="true">Se désabonner du fil</string>
+    <string name="cometchat_thread_unmute" translatable="true">S\'abonner au fil</string>
+    <string name="cometchat_pin">Épingler</string>
+    <string name="cometchat_unpin">Désépingler</string>
+    <string name="cometchat_unsave">Ne plus enregistrer</string>
+    <string name="cometchat_pinned">Épinglé</string>
+    <string name="cometchat_saved">Enregistré</string>
+    <string name="cometchat_pin_message_confirm_title">Épingler le message</string>
+    <string name="cometchat_pin_message_confirm_body">Voulez-vous épingler ce message dans cette conversation ?</string>
+    <string name="cometchat_unpin_message_confirm_title">Désépingler le message</string>
+    <string name="cometchat_unpin_message_confirm_body">Voulez-vous désépingler ce message ?</string>
+    <string name="cometchat_save_message_confirm_title">Enregistrer le message</string>
+    <string name="cometchat_save_message_confirm_body">Voulez-vous enregistrer ce message ?</string>
+    <string name="cometchat_unsave_message_confirm_title">Ne plus enregistrer le message</string>
+    <string name="cometchat_unsave_message_confirm_body">Voulez-vous ne plus enregistrer ce message ?</string>
+    <string name="cometchat_pin_conversation">Épingler la conversation</string>
+    <string name="cometchat_unpin_conversation">Désépingler la conversation</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Désépingler la conversation</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Voulez-vous désépingler cette conversation ?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Vous ne pouvez épingler que %1$d discussions. Désépinglez-en une pour en épingler une autre.</string>
+    <string name="cometchat_pin_limit_reached">Vous ne pouvez épingler que %1$d messages. Désépinglez-en un pour en épingler un autre.</string>
+    <string name="cometchat_save_limit_reached">Vous pouvez enregistrer jusqu\'à %1$d messages.</string>
+    <string name="cometchat_pin_save_generic_error">Une erreur s\'est produite. Veuillez réessayer.</string>
+    <string name="cometchat_message_pinned">Message épinglé</string>
+    <string name="cometchat_message_unpinned">Message désépinglé</string>
+    <string name="cometchat_message_saved">Message enregistré</string>
+    <string name="cometchat_message_unsaved">Message retiré des enregistrés</string>
+    <string name="cometchat_no_pinned_messages">Aucun message épinglé pour le moment</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Épinglez les messages importants pour les retrouver facilement.</string>
+    <string name="cometchat_no_saved_messages">Aucun message enregistré pour le moment</string>
+    <string name="cometchat_no_saved_messages_subtitle">Enregistrez des messages pour les avoir sous la main quand vous en avez besoin.</string>
+    <string name="cometchat_pinned_messages">Messages épinglés</string>
+    <string name="cometchat_saved_messages">Messages enregistrés</string>
+    <string name="cometchat_unpin_message">Désépingler le message</string>
+    <string name="cometchat_message_option_more">Plus</string>
+    <string name="cometchat_message_option_back">Retour</string>
+    <string name="cometchat_message_type_icon">Icône du type de message</string>
 </resources>

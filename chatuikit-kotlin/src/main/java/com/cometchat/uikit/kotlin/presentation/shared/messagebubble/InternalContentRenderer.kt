@@ -923,14 +923,60 @@ internal object InternalContentRenderer {
         val dateTimeContainer = view.findViewById<MaterialCardView>(R.id.date_time_container)
         val cometchatDate = view.findViewById<CometChatDate>(R.id.date_time)
 
+        // Pin/Save indicators in the bubble footer: [pin][saved] • [time] [receipt]. Each shows when
+        // its attribute is present (presence is the boolean); the separator dot shows when either is
+        // present. Covers every bubble type since the status-info view is shared. Tint follows the
+        // timestamp color: white on outgoing bubbles, N600 on incoming. Deleted messages never show
+        // them — the tombstone bubble should not advertise a pin/save state.
+        val showPin = message.isPinned && message.deletedAt == 0L
+        val showSaved = message.isSaved && message.deletedAt == 0L
+        val pinIndicator = view.findViewById<android.widget.ImageView>(R.id.status_pin_indicator)
+        val savedIndicator = view.findViewById<android.widget.ImageView>(R.id.status_saved_indicator)
+        val pinDot = view.findViewById<android.widget.ImageView>(R.id.status_pin_dot)
+        pinIndicator?.visibility = if (showPin) View.VISIBLE else View.GONE
+        savedIndicator?.visibility = if (showSaved) View.VISIBLE else View.GONE
+        pinDot?.visibility = if (showPin || showSaved) View.VISIBLE else View.GONE
+
         Utils.initMaterialCard(dateTimeContainer)
 
         // Apply dateStyle from bubble style
         val dateStyle = style.dateStyle ?: CometChatDateStyle.default(view.context)
         cometchatDate.setStyle(dateStyle)
 
+        // A sticker's outer bubble is transparent, so its footer sits on the chat background and
+        // the timestamp falls back to the neutral (dark) date colour even on an outgoing message.
+        // Everything else in that footer must follow the timestamp rather than the alignment,
+        // otherwise the white outgoing tint leaves the pin/save glyph and the sent/delivered ticks
+        // invisible against the light chip.
+        val isSticker = message.category == CometChatConstants.CATEGORY_CUSTOM &&
+            message.type == EXTENSION_STICKER
+        val timestampTint = dateStyle.textColor.takeIf { it != 0 }
+            ?: CometChatTheme.getTextColorSecondary(view.context)
+
+        if (showPin || showSaved) {
+            val indicatorTint = when {
+                isSticker -> timestampTint
+                alignment == UIKitConstants.MessageBubbleAlignment.RIGHT -> android.graphics.Color.WHITE
+                else -> androidx.core.content.ContextCompat.getColor(view.context, R.color.cometchat_color_neutral_600)
+            }
+            pinIndicator?.setColorFilter(indicatorTint)
+            savedIndicator?.setColorFilter(indicatorTint)
+            pinDot?.setColorFilter(indicatorTint)
+        }
+
         // Apply receiptStyle from bubble style
-        val receiptStyle = style.messageReceiptStyle ?: CometChatReceiptStyle.default(view.context)
+        val baseReceiptStyle = style.messageReceiptStyle ?: CometChatReceiptStyle.default(view.context)
+        // Read stays its own highlight colour (it carries meaning); the neutral states follow the
+        // timestamp so they stay legible on the sticker's transparent bubble.
+        val receiptStyle = if (isSticker) {
+            baseReceiptStyle.copy(
+                waitIconTint = timestampTint,
+                sentIconTint = timestampTint,
+                deliveredIconTint = timestampTint
+            )
+        } else {
+            baseReceiptStyle
+        }
         receipt.setStyle(receiptStyle)
 
         // Set receipt status

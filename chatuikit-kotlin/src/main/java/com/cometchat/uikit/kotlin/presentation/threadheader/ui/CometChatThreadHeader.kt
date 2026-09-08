@@ -13,7 +13,12 @@ import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.uikit.core.constants.UIKitConstants.MessageListAlignment
 import com.cometchat.uikit.core.viewmodel.CometChatThreadHeaderViewModel
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.events.CometChatThreadEvent
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
 import com.cometchat.uikit.kotlin.R
+import android.widget.Toast
 import com.cometchat.uikit.kotlin.databinding.CometchatThreadHeaderBinding
 import com.cometchat.uikit.kotlin.presentation.messagelist.adapter.MessageAdapter
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.BubbleFactory
@@ -98,6 +103,13 @@ class CometChatThreadHeader @JvmOverloads constructor(
     private var receiptsVisibility: Int = View.VISIBLE
     private var replyCountVisibility: Int = View.VISIBLE
     private var replyCountBarVisibility: Int = View.VISIBLE
+    private var threadSubscriptionVisibility: Int = View.VISIBLE
+
+    // ==================== Thread Subscription ====================
+
+    /** The displayed follow state, seeded from the parent message's own flag and synced via the kit bus. */
+    private var threadSubscribed: Boolean = false
+    private var onThreadSubscriptionChange: ((Boolean) -> Unit)? = null
 
     // ==================== Alignment ====================
 
@@ -127,6 +139,8 @@ class CometChatThreadHeader @JvmOverloads constructor(
     init {
         // Inflate the layout binding
         binding = CometchatThreadHeaderBinding.inflate(LayoutInflater.from(context), this, true)
+
+        binding.ivThreadSubscription.setOnClickListener { toggleThreadSubscription() }
 
         // Initialize MaterialCard properties (no elevation, no stroke)
         Utils.initMaterialCard(this)
@@ -215,6 +229,9 @@ class CometChatThreadHeader @JvmOverloads constructor(
         val styleResId = typedArray.getResourceId(
             R.styleable.CometChatThreadHeader_cometchatThreadHeaderStyle, 0
         )
+        threadSubscriptionVisibility = typedArray.getInt(
+            R.styleable.CometChatThreadHeader_cometchatThreadSubscriptionVisibility, View.VISIBLE
+        )
         typedArray.recycle()
 
         typedArray = context.theme.obtainStyledAttributes(
@@ -298,6 +315,22 @@ class CometChatThreadHeader @JvmOverloads constructor(
                 updateReplyCount(count)
             }
         }
+
+        // Keep the follow control in sync with changes made on any other surface, via the kit bus.
+        // Also stamp the held parent message, so a direct read (and any re-attach) sees the new value.
+        viewScope?.launch {
+            CometChatEvents.threadEvents.collect { event ->
+                if (event is CometChatThreadEvent.SubscriptionChanged &&
+                    event.parentMessageId == parentMessage?.id
+                ) {
+                    parentMessage?.setThreadSubscribed(event.subscribed)
+                    if (event.subscribed != threadSubscribed) {
+                        threadSubscribed = event.subscribed
+                        applyThreadSubscriptionIcon()
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -354,12 +387,99 @@ class CometChatThreadHeader @JvmOverloads constructor(
     fun setParentMessage(message: BaseMessage) {
         this.parentMessage = message
         viewModel?.setParentMessage(message)
-        
+
         // Process and apply text formatters to the adapter
         processFormatters()
-        
+
         // Determine alignment based on sender and apply to adapter
         determineAndApplyAlignment(message)
+
+        // Reflect this thread's follow state on the subscription control.
+        refreshThreadSubscriptionControl()
+    }
+
+    // ==================== Thread Subscription ====================
+
+    /**
+     * Shows or hides the subscription bell and syncs its icon to the thread's current follow state.
+     * The control renders only when the `enableThreadSubscription` UIKit setting is on, the control is
+     * set visible, and a parent message is present. UNKNOWN state renders as un-followed (bell-off),
+     * enabled — never a spinner or disabled control.
+     */
+    private fun refreshThreadSubscriptionControl() {
+        val root = parentMessage
+        // Offered wherever threading is — 1-1 and group. Hides only on an unsent
+        // root, when the caller hid the control, or when the feature is unsupported.
+        val shouldShow = CometChatThreadSubscription.isAvailableForThread(root) &&
+            threadSubscriptionVisibility == View.VISIBLE
+        if (!shouldShow) {
+            binding.ivThreadSubscription.visibility = View.GONE
+            return
+        }
+        // The parent message is the authority for its whole thread; a fetched flag here overrides
+        // any local mirror, which is why this re-seeds every time the parent is (re-)supplied.
+        threadSubscribed = root!!.isThreadSubscribed()
+        binding.ivThreadSubscription.visibility = View.VISIBLE
+        applyThreadSubscriptionIcon()
+    }
+
+    /** Bell = notifications on (subscribed, tap mutes); bell-off = muted (tap unmutes). */
+    private fun applyThreadSubscriptionIcon() {
+        binding.ivThreadSubscription.setImageResource(
+            if (threadSubscribed) com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications
+            else com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications_off
+        )
+        binding.ivThreadSubscription.contentDescription = context.getString(
+            if (threadSubscribed) R.string.cometchat_thread_mute
+            else R.string.cometchat_thread_unmute
+        )
+    }
+
+    /**
+     * Case 1 — the manual toggle. [CometChatThreadSubscription.toggle] owns the debounce, the
+     * in-flight lock, the optimistic publish and the revert-on-failure; this control only renders the
+     * outcome. The optimistic flip reaches the icon through the bus collector above, so there is no
+     * separate local flip here.
+     */
+    private fun toggleThreadSubscription() {
+        val root = parentMessage ?: return
+        CometChatThreadSubscription.toggle(root, threadSubscribed) { result ->
+            when (result) {
+                is CometChatThreadSubscription.ToggleResult.Success -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(
+                            if (result.subscribed) R.string.cometchat_thread_subscribed_toast
+                            else R.string.cometchat_thread_unsubscribed_toast
+                        ),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onThreadSubscriptionChange?.invoke(result.subscribed)
+                }
+
+                is CometChatThreadSubscription.ToggleResult.Failure -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.cometchat_thread_subscription_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the visibility of the thread-subscription control. Also globally gated by the
+     * `enableThreadSubscription` UIKit setting; when that gate is off this has no effect.
+     */
+    fun setThreadSubscriptionVisibility(visibility: Int) {
+        threadSubscriptionVisibility = visibility
+        refreshThreadSubscriptionControl()
+    }
+
+    /** Registers a callback invoked after a successful follow-state change from this control. */
+    fun setOnThreadSubscriptionChange(listener: ((Boolean) -> Unit)?) {
+        onThreadSubscriptionChange = listener
     }
     
     /**

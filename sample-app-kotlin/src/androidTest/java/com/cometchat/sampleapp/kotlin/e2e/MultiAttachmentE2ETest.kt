@@ -21,17 +21,17 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
 /**
- * E2E tests for the multi-attachment composer/bubble feature (ENG-36737) and the
- * QA-reported regressions under ENG-37004.
+ * E2E tests for the multi-attachment composer/bubble feature and the
+ * QA-reported regressions under.
  *
- * Test IDs (mapped to the manual pass in ENG-36974 and the ENG-37004 sub-bugs):
+ * Test IDs (mapped to the manual pass):
  * - MA-E2E-01 test01: multiple picks stage as tray tiles and send as ONE grouped message
- *              (MA-02/03; guards ENG-37010 — no error tile on a fully valid batch)
+ *              (MA-02/03; guards  — no error tile on a fully valid batch)
  * - MA-E2E-02 test02: an oversized (>100 MB) file flips its tile to the error state and
- *              tapping it surfaces the rejection reason (ENG-37011, MA-21/30)
+ *              tapping it surfaces the rejection reason
  * - MA-E2E-03 test03: a received multi-audio message collapses with a "Show +N more"
- *              toggle that expands to "Show less" (ENG-37014, MA-63)
- * - MA-E2E-04 test04: staged attachments survive a dark/light theme change (ENG-37015)
+ *              toggle that expands to "Show less"
+ * - MA-E2E-04 test04: staged attachments survive a dark/light theme change
  *
  * Prerequisites: same as the rest of the E2E suite (credentials via instrumentation args,
  * a reachable partner uid). Test files are created on-device automatically.
@@ -254,11 +254,11 @@ class MultiAttachmentE2ETest : RealtimeTestBase() {
             poll(15_000) { trayTileCount() >= 2 }
         )
 
-        // ENG-37010 regression: a fully valid batch must show NO error badge on any tile
+        // Aa fully valid batch must show NO error badge on any tile
         // (QA saw the LAST tile flip to an error every time)
         assertTrue("Uploads did not settle in time", waitForUploadsToSettle())
         assertTrue(
-            "A valid staged file shows an error badge (ENG-37010 regression)",
+            "A valid staged file shows an error badge",
             !trayHasErrorBadge()
         )
 
@@ -291,10 +291,10 @@ class MultiAttachmentE2ETest : RealtimeTestBase() {
 
         stageDocument("e2e_oversize")
 
-        // ENG-37011: the >100 MB file must visibly fail. Two acceptable surfaces:
+        // The >100 MB file must visibly fail. Two acceptable surfaces:
         //  (a) the tray tile flips to the error state (server-side rejection), or
         //  (b) the file is dropped before upload with an immediate error message
-        //      (client-side size guard — MA-32 in the ENG-36974 test plan).
+        //      (client-side size guard — MA-32 in the test plan).
         // The regression was NEITHER appearing.
         val errorTextVisible = {
             device.findObjects(By.textContains("exceed")).isNotEmpty() ||
@@ -304,7 +304,7 @@ class MultiAttachmentE2ETest : RealtimeTestBase() {
         }
         assertTrue(
             "Oversized file produced NO visible error — no rejected tile and no error " +
-                "message (ENG-37011 regression: QA saw no error at all for >=100 MB files)",
+                "message (Regression: QA saw no error at all for >=100 MB files)",
             poll(90_000) { trayHasErrorBadge() || errorTextVisible() }
         )
 
@@ -341,10 +341,10 @@ class MultiAttachmentE2ETest : RealtimeTestBase() {
             mimeType = "audio/mpeg"
         )
 
-        // ENG-37014: the collapsed bubble must read exactly "Show +2 more" (5 audios, 3 shown)
+        // The collapsed bubble must read exactly "Show +2 more" (5 audios, 3 shown)
         assertTrue(
             "Overflow toggle 'Show +2 more' not found on the received multi-audio bubble " +
-                "(ENG-37014 regression rendered a garbled label)",
+                "( regression rendered a garbled label)",
             pollForMessageInChat("Show +2 more", 60_000)
         )
 
@@ -386,13 +386,13 @@ class MultiAttachmentE2ETest : RealtimeTestBase() {
         )
 
         // Dark-mode switch recreates the activity — the composer must re-attach to the SAME
-        // activity-scoped ViewModel and keep the staged tray (ENG-37015)
+        // activity-scoped ViewModel and keep the staged tray
         device.executeShellCommand("cmd uimode night yes")
         Thread.sleep(5000)
         device.waitForIdle()
 
         assertTrue(
-            "Staged attachments were cleared by the theme change (ENG-37015 regression)",
+            "Staged attachments were cleared by the theme change",
             poll(20_000) { trayTileCount() >= 1 }
         )
     }

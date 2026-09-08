@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
@@ -21,6 +22,7 @@ import com.cometchat.sampleapp.kotlin.R
 import com.cometchat.sampleapp.kotlin.databinding.ActivityMessagesBinding
 import com.cometchat.sampleapp.kotlin.ui.groups.GroupDetailsActivity
 import com.cometchat.sampleapp.kotlin.ui.users.UserDetailsActivity
+import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.domain.model.ComposerLayoutMode
 import com.cometchat.uikit.kotlin.presentation.shared.popupmenu.CometChatPopupMenu
@@ -124,6 +126,19 @@ class MessagesActivity : AppCompatActivity() {
     private var group: Group? = null
     private var goToMessageId: Long = 0
     private var parentMessageId: Long = 0
+
+    // Pinned messages are always within the current conversation, so a tapped row jumps
+    // in place — same behaviour as goto-message navigation from search.
+    private val pinnedMessagesLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val messageId = result.data!!.getLongExtra(PinnedMessagesActivity.EXTRA_GO_TO_MESSAGE_ID, 0)
+            if (messageId > 0) {
+                binding.messageList.gotoMessage(messageId)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -369,7 +384,25 @@ class MessagesActivity : AppCompatActivity() {
      */
     private fun getHeaderMenuOptions(): List<CometChatPopupMenu.MenuItem> {
         val options = mutableListOf<CometChatPopupMenu.MenuItem>()
-        
+
+        // Pinned messages option — opens the conversation's pinned-messages list. Gated on the
+        // SDK Pin Message feature flag.
+        if (CometChatUIKit.isPinMessageEnabled()) {
+            options.add(
+                CometChatPopupMenu.MenuItem(
+                    UIKitConstants.MessageHeaderMenuOptions.PINNED_MESSAGES,
+                    getString(com.cometchat.uikit.kotlin.R.string.cometchat_pinned_messages_header),
+                    AppCompatResources.getDrawable(this, com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                    null
+                ) {
+                    navigateToPinnedMessages()
+                }
+            )
+        }
+
+        // Saved messages are reached from the Conversations screen (user menu), not from a
+        // specific conversation — so no saved-messages option here in the message header.
+
         // Add Details option for navigating to user/group details
         options.add(
             CometChatPopupMenu.MenuItem(
@@ -385,6 +418,19 @@ class MessagesActivity : AppCompatActivity() {
         return options
     }
     
+    /**
+     * Opens the pinned-messages screen for the current conversation. A tapped row returns the
+     * message id as a result so the conversation can jump to it in place.
+     */
+    private fun navigateToPinnedMessages() {
+        val intent = when {
+            user != null -> PinnedMessagesActivity.newIntent(this, user!!)
+            group != null -> PinnedMessagesActivity.newIntent(this, group!!)
+            else -> return
+        }
+        pinnedMessagesLauncher.launch(intent)
+    }
+
     /**
      * Opens the detail screen for the selected user or group.
      * Validates: Requirements 7.3, 10.8

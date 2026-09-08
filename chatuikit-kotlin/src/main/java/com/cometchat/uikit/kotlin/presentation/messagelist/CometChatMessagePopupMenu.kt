@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cometchat.chat.models.BaseMessage
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
+import com.cometchat.uikit.core.utils.MessageOptionsPaginator
 import com.cometchat.uikit.kotlin.R
 import com.cometchat.uikit.kotlin.presentation.shared.messagebubble.CometChatMessageBubble
 import com.cometchat.uikit.kotlin.presentation.shared.popupmenu.CometChatPopupMenu
@@ -34,6 +35,7 @@ import com.cometchat.uikit.kotlin.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.kotlin.shared.resources.utils.Utils
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
 import com.google.android.material.card.MaterialCardView
+import kotlin.math.ceil
 
 /**
  * Type alias reusing the existing MenuItem from CometChatPopupMenu.
@@ -270,17 +272,12 @@ class CometChatMessagePopupMenu(
         menuParent.strokeColor = strokeColor
         menuParent.strokeWidth = strokeWidth
 
-        // 7. Set up RecyclerView with adapter
+        // 7. Set up RecyclerView with a paginated adapter.
+        // When options exceed the visible cap, page one shows the first MAX_VISIBLE_OPTIONS plus a
+        // "More" row; tapping it swipes to the remaining options plus a "Back" row. "More"/"Back"
+        // are navigation rows only — they never invoke a menu-item click or dismiss.
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val adapter = MessagePopupMenuAdapter(context, menuItems) { id, name ->
-            menuItems.find { it.id == id }?.onClick?.invoke()
-            onMenuItemClickListener?.onMenuItemClick(id, name)
-        }
-        adapter.setTextColor(textColor)
-        adapter.setTextAppearance(textAppearance)
-        adapter.setStartIconTint(startIconTint)
-        adapter.setEndIconTint(endIconTint)
-        recyclerView.adapter = adapter
+        setupPaginatedOptions(recyclerView)
 
         // 8. Create PopupWindow
         popupWindow = PopupWindow(
@@ -324,6 +321,172 @@ class CometChatMessagePopupMenu(
             dismiss()
             true
         }
+    }
+
+    /**
+     * Binds the resolved [menuItems] into [recyclerView], paginating them when they exceed
+     * [MessageOptionsPaginator.MAX_VISIBLE_OPTIONS]: page one shows the first five options plus
+     * a "More" row, and tapping it swipes to the remaining options plus a "Back" row. The
+     * synthetic "More"/"Back" rows only drive page navigation — they never invoke the menu-item
+     * click callback and never dismiss the popup.
+     */
+    private fun setupPaginatedOptions(recyclerView: RecyclerView) {
+        val pages = MessageOptionsPaginator.paginate(menuItems.size)
+
+        val moreDrawable = ResourcesCompat.getDrawable(
+            context.resources, R.drawable.cometchat_ic_arrow_forward, context.theme
+        )
+        val backDrawable = ResourcesCompat.getDrawable(
+            context.resources, R.drawable.cometchat_ic_back, context.theme
+        )
+        val moreLabel = context.getString(R.string.cometchat_message_option_more)
+        val backLabel = context.getString(R.string.cometchat_message_option_back)
+
+        val moreItem = MenuItem(
+            id = MessageOptionsPaginator.MORE_ID,
+            name = moreLabel,
+            startIcon = moreDrawable,
+            startIconTint = startIconTint
+        )
+        val backItem = MenuItem(
+            id = MessageOptionsPaginator.BACK_ID,
+            name = backLabel,
+            startIcon = backDrawable,
+            startIconTint = startIconTint
+        )
+
+        fun buildPageItems(pageIndex: Int): List<MenuItem> =
+            pages[pageIndex].map { slot ->
+                when (slot) {
+                    is MessageOptionsPaginator.Slot.Item -> menuItems[slot.index]
+                    MessageOptionsPaginator.Slot.More -> moreItem
+                    MessageOptionsPaginator.Slot.Back -> backItem
+                }
+            }
+
+        // Pin the RecyclerView to the widest row across the full option set so the popup width
+        // stays constant between pages instead of shrinking to each page's own content.
+        val allItems = if (pages.size > 1) menuItems + moreItem + backItem else menuItems
+        recyclerView.layoutParams = recyclerView.layoutParams.apply {
+            width = measureWidestRowWidth(allItems)
+        }
+
+        // Draw a divider above the "More" row to separate it from the real options.
+        addMoreDividerDecoration(recyclerView)
+
+        fun bindPage(pageIndex: Int, forward: Boolean, animate: Boolean) {
+            val pageItems = buildPageItems(pageIndex)
+            val adapter = MessagePopupMenuAdapter(context, pageItems) { id, name ->
+                when (id) {
+                    MessageOptionsPaginator.MORE_ID ->
+                        bindPage(pageIndex + 1, forward = true, animate = true)
+
+                    MessageOptionsPaginator.BACK_ID ->
+                        bindPage(pageIndex - 1, forward = false, animate = true)
+
+                    else -> {
+                        pageItems.find { it.id == id }?.onClick?.invoke()
+                        onMenuItemClickListener?.onMenuItemClick(id, name)
+                    }
+                }
+            }
+            adapter.setTextColor(textColor)
+            adapter.setTextAppearance(textAppearance)
+            adapter.setStartIconTint(startIconTint)
+            adapter.setEndIconTint(endIconTint)
+            recyclerView.adapter = adapter
+
+            // Swipe the new page into view (skipped on the initial bind).
+            if (animate) {
+                recyclerView.post {
+                    val width = recyclerView.width.toFloat()
+                    if (width <= 0f) return@post
+                    recyclerView.translationX = if (forward) width else -width
+                    recyclerView.animate()
+                        .translationX(0f)
+                        .setDuration(200L)
+                        .start()
+                }
+            }
+        }
+
+        bindPage(0, forward = true, animate = false)
+    }
+
+    /**
+     * Adds a [RecyclerView.ItemDecoration] that reserves space and draws a divider line directly
+     * above the "More" row, separating it from the real options. The decoration re-evaluates the
+     * current adapter each frame, so it correctly hides itself on pages without a "More" row.
+     */
+    private fun addMoreDividerDecoration(recyclerView: RecyclerView) {
+        val dividerHeight = maxOf(strokeWidth, Utils.convertDpToPx(context, 1))
+        val dividerPaint = android.graphics.Paint().apply {
+            color = strokeColor
+            style = android.graphics.Paint.Style.FILL
+        }
+
+        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(
+                outRect: android.graphics.Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
+                val adapter = parent.adapter as? MessagePopupMenuAdapter ?: return
+                val position = parent.getChildAdapterPosition(view)
+                if (position != RecyclerView.NO_POSITION
+                    && adapter.itemIdAt(position) == MessageOptionsPaginator.MORE_ID
+                ) {
+                    outRect.top = dividerHeight
+                }
+            }
+
+            override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+                val adapter = parent.adapter as? MessagePopupMenuAdapter ?: return
+                for (i in 0 until parent.childCount) {
+                    val child = parent.getChildAt(i)
+                    val position = parent.getChildAdapterPosition(child)
+                    if (position != RecyclerView.NO_POSITION
+                        && adapter.itemIdAt(position) == MessageOptionsPaginator.MORE_ID
+                    ) {
+                        val bottom = child.top.toFloat()
+                        val top = bottom - dividerHeight
+                        c.drawRect(
+                            child.left.toFloat(), top, child.right.toFloat(), bottom, dividerPaint
+                        )
+                    }
+                }
+            }
+        })
+    }
+
+    /**
+     * Measures the widest option row (icon + label + padding) across [items] so every page can be
+     * pinned to a single width. Uses the styled title paint to match the rendered rows; never
+     * returns less than the row's minimum width.
+     */
+    private fun measureWidestRowWidth(items: List<MenuItem>): Int {
+        val res = context.resources
+        val minWidth = res.getDimensionPixelSize(R.dimen.cometchat_128dp)
+        if (items.isEmpty()) return minWidth
+
+        val rowView = LayoutInflater.from(context)
+            .inflate(R.layout.cometchat_popup_menu_row, null)
+        val title = rowView.findViewById<TextView>(R.id.menu_item)
+        if (textAppearance != 0) title.setTextAppearance(textAppearance)
+
+        val iconSize = res.getDimensionPixelSize(R.dimen.cometchat_24dp)
+        val iconMargin = res.getDimensionPixelSize(R.dimen.cometchat_margin_2)
+        val horizontalPadding = res.getDimensionPixelSize(R.dimen.cometchat_padding_4) * 2
+
+        var maxWidth = minWidth
+        for (item in items) {
+            var rowWidth = horizontalPadding + ceil(title.paint.measureText(item.name)).toInt()
+            if (item.startIcon != null) rowWidth += iconSize + iconMargin
+            if (item.endIcon != null) rowWidth += iconSize + iconMargin
+            if (rowWidth > maxWidth) maxWidth = rowWidth
+        }
+        return maxWidth
     }
 
     /**

@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">動作項目</string>
     <string name="cometchat_try_again" translatable="true">重試</string>
     <string name="cometchat_something_went_wrong" translatable="true">發生了一些問題。</string>
+    <string name="cometchat_action_permission_denied" translatable="true">您沒有執行此操作的權限。</string>
     <string name="cometchat_transfer_ownership" translatable="true">轉移所有權</string>
     <string name="cometchat_add_members" translatable="true">新增成員</string>
     <string name="cometchat_owner" translatable="true">擁有者</string>
@@ -249,4 +250,49 @@
     <string name="cometchat_notify_everyone_in_this_group">通知該群組中的每個人</string>
     <string name="cometchat_notify_all" translatable="true">所有</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">訂閱討論串</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">取消訂閱討論串</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">已訂閱。此討論串有新回覆時將通知你。</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">已訂閱。有新回覆時將通知你。</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">已取消訂閱。在你回覆或被提及之前，通知將關閉。</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">已取消訂閱。在你回覆或被提及之前，通知將關閉。</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">更新失敗，請重試。</string>
+    <string name="cometchat_thread_mute" translatable="true">取消訂閱討論串</string>
+    <string name="cometchat_thread_unmute" translatable="true">訂閱討論串</string>
+    <string name="cometchat_pin">釘選</string>
+    <string name="cometchat_unpin">取消釘選</string>
+    <string name="cometchat_unsave">取消儲存</string>
+    <string name="cometchat_pinned">已釘選</string>
+    <string name="cometchat_saved">已儲存</string>
+    <string name="cometchat_pin_message_confirm_title">釘選訊息</string>
+    <string name="cometchat_pin_message_confirm_body">要在此對話中釘選此訊息嗎？</string>
+    <string name="cometchat_unpin_message_confirm_title">取消釘選訊息</string>
+    <string name="cometchat_unpin_message_confirm_body">要取消釘選此訊息嗎？</string>
+    <string name="cometchat_save_message_confirm_title">儲存訊息</string>
+    <string name="cometchat_save_message_confirm_body">要儲存此訊息嗎？</string>
+    <string name="cometchat_unsave_message_confirm_title">取消儲存訊息</string>
+    <string name="cometchat_unsave_message_confirm_body">要取消儲存此訊息嗎？</string>
+    <string name="cometchat_pin_conversation">釘選對話</string>
+    <string name="cometchat_unpin_conversation">取消釘選對話</string>
+    <string name="cometchat_unpin_conversation_confirm_title">取消釘選對話</string>
+    <string name="cometchat_unpin_conversation_confirm_body">要取消釘選此對話嗎？</string>
+    <string name="cometchat_pin_conversation_limit_reached">最多只能釘選 %1$d 個對話。請先取消釘選一個再釘選其他對話。</string>
+    <string name="cometchat_pin_limit_reached">最多只能釘選 %1$d 則訊息。請先取消釘選一則再釘選其他訊息。</string>
+    <string name="cometchat_save_limit_reached">最多可儲存 %1$d 則訊息。</string>
+    <string name="cometchat_pin_save_generic_error">發生錯誤，請重試。</string>
+    <string name="cometchat_message_pinned">訊息已釘選</string>
+    <string name="cometchat_message_unpinned">訊息已取消釘選</string>
+    <string name="cometchat_message_saved">訊息已儲存</string>
+    <string name="cometchat_message_unsaved">訊息已取消儲存</string>
+    <string name="cometchat_no_pinned_messages">尚無釘選訊息</string>
+    <string name="cometchat_no_pinned_messages_subtitle">釘選重要訊息，方便尋找。</string>
+    <string name="cometchat_no_saved_messages">尚無儲存的訊息</string>
+    <string name="cometchat_no_saved_messages_subtitle">儲存訊息，隨時取用。</string>
+    <string name="cometchat_pinned_messages">釘選訊息</string>
+    <string name="cometchat_saved_messages">儲存的訊息</string>
+    <string name="cometchat_unpin_message">取消釘選訊息</string>
+    <string name="cometchat_message_option_more">更多</string>
+    <string name="cometchat_message_option_back">返回</string>
+    <string name="cometchat_message_type_icon">訊息類型圖示</string>
 </resources>

@@ -207,6 +207,12 @@ object MockFactory {
         whenever(message.parentMessageId).thenReturn(parentMessageId)
         whenever(message.type).thenReturn(CometChatConstants.MESSAGE_TYPE_TEXT)
         whenever(message.category).thenReturn(CometChatConstants.CATEGORY_MESSAGE)
+        // Production code clones a message before stamping receipt/pin-save fields (so the
+        // StateFlow sees a genuinely new list). A Mockito mock returns null from clone(), which
+        // would NPE those paths, so hand back the mock itself: callers then observe the same
+        // in-place semantics these mock-based tests already assert. Tests that exercise the
+        // clone ITSELF use real SDK models instead.
+        whenever(message.clone()).thenReturn(message)
         return message
     }
 
@@ -256,6 +262,12 @@ object MockFactory {
         whenever(message.id).thenReturn(id)
         whenever(message.type).thenReturn(type)
         whenever(message.category).thenReturn(CometChatConstants.CATEGORY_MESSAGE)
+        // Production code clones a message before stamping receipt/pin-save fields (so the
+        // StateFlow sees a genuinely new list). A Mockito mock returns null from clone(), which
+        // would NPE those paths, so hand back the mock itself: callers then observe the same
+        // in-place semantics these mock-based tests already assert. Tests that exercise the
+        // clone ITSELF use real SDK models instead.
+        whenever(message.clone()).thenReturn(message)
         whenever(message.sender).thenReturn(sender)
         whenever(message.receiverUid).thenReturn(receiverId)
         whenever(message.receiverType).thenReturn(receiverType)
@@ -265,6 +277,7 @@ object MockFactory {
         whenever(message.deletedAt).thenReturn(0L)
         whenever(message.editedAt).thenReturn(0L)
         whenever(message.parentMessageId).thenReturn(0L)
+        whenever(message.clone()).thenReturn(message)
         return message
     }
 
@@ -300,6 +313,7 @@ object MockFactory {
         whenever(message.deletedAt).thenReturn(0L)
         whenever(message.editedAt).thenReturn(0L)
         whenever(message.parentMessageId).thenReturn(0L)
+        whenever(message.clone()).thenReturn(message)
         return message
     }
 
@@ -336,6 +350,7 @@ object MockFactory {
         whenever(message.deliveredAt).thenReturn(0L)
         whenever(message.deletedAt).thenReturn(0L)
         whenever(message.parentMessageId).thenReturn(0L)
+        whenever(message.clone()).thenReturn(message)
         return message
     }
 
@@ -665,6 +680,7 @@ object MockFactory {
         whenever(message.deletedAt).thenReturn(deletedAt)
         whenever(message.editedAt).thenReturn(0L)
         whenever(message.parentMessageId).thenReturn(0L)
+        whenever(message.clone()).thenReturn(message)
         return message
     }
 

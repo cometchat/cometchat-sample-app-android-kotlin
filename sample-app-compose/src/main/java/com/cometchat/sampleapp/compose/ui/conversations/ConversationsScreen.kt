@@ -40,6 +40,7 @@ import com.cometchat.uikit.compose.presentation.conversations.ui.CometChatConver
 import com.cometchat.uikit.compose.presentation.shared.baseelements.avatar.CometChatAvatar
 import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
 
 /**
  * Conversations screen composable for the Chats tab.
@@ -79,24 +80,29 @@ fun ConversationsScreen(
     onConversationClick: (Conversation) -> Unit,
     onLogout: () -> Unit = {},
     onNewChatClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onSearchClick: () -> Unit = {},
+    onSavedMessagesClick: () -> Unit = {},
+    conversationsViewModel: CometChatConversationsViewModel? = null
 ) {
     // Get logged in user for avatar
     val loggedInUser = remember { CometChatUIKit.getLoggedInUser() }
-    
+
     // Overflow menu with user avatar (matching sample-app-kotlin)
     val overflowMenu: @Composable () -> Unit = {
         if (loggedInUser != null) {
             UserAvatarMenu(
                 user = loggedInUser,
                 onLogout = onLogout,
-                onNewChatClick = onNewChatClick
+                onNewChatClick = onNewChatClick,
+                onSavedMessagesClick = onSavedMessagesClick
             )
         }
     }
 
     CometChatConversations(
         modifier = Modifier.fillMaxSize(),
+        // Persisted list VM from the tab host, so the list can be reloaded on Chats tab taps
+        conversationListViewModel = conversationsViewModel,
         // Show toolbar with title (matching sample-app-kotlin)
         hideToolbar = false,
         // Set overflow menu with user avatar
@@ -129,7 +135,8 @@ fun ConversationsScreen(
 private fun UserAvatarMenu(
     user: User,
     onLogout: () -> Unit,
-    onNewChatClick: () -> Unit
+    onNewChatClick: () -> Unit,
+    onSavedMessagesClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -182,6 +189,36 @@ private fun UserAvatarMenu(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.app_create_conversation),
+                            style = CometChatTheme.typography.bodyRegular,
+                            color = CometChatTheme.colorScheme.textColorPrimary
+                        )
+                    }
+
+                    HorizontalDivider(
+                        color = CometChatTheme.colorScheme.strokeColorLight,
+                        thickness = 1.dp
+                    )
+
+                    // Saved Messages option - the current user's saved messages across all conversations
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                expanded = false
+                                onSavedMessagesClick()
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_bookmark),
+                            contentDescription = null,
+                            tint = CometChatTheme.colorScheme.iconTintSecondary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.app_saved_messages),
                             style = CometChatTheme.typography.bodyRegular,
                             color = CometChatTheme.colorScheme.textColorPrimary
                         )

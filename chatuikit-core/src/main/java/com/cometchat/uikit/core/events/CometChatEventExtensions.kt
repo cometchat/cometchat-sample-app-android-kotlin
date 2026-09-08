@@ -313,6 +313,62 @@ fun LifecycleOwner.onMessageDeleted(
 }
 
 /**
+ * Subscribes to message pinned events with lifecycle awareness.
+ *
+ * @param onEvent Callback invoked when a message is pinned
+ * @return Job that can be cancelled to stop subscription early
+ */
+fun LifecycleOwner.onMessagePinned(
+    onEvent: (BaseMessage) -> Unit
+): Job = onMessageEvents { event ->
+    if (event is CometChatMessageEvent.MessagePinned) {
+        onEvent(event.message)
+    }
+}
+
+/**
+ * Subscribes to message unpinned events with lifecycle awareness.
+ *
+ * @param onEvent Callback invoked when a message is unpinned
+ * @return Job that can be cancelled to stop subscription early
+ */
+fun LifecycleOwner.onMessageUnpinned(
+    onEvent: (BaseMessage) -> Unit
+): Job = onMessageEvents { event ->
+    if (event is CometChatMessageEvent.MessageUnpinned) {
+        onEvent(event.message)
+    }
+}
+
+/**
+ * Subscribes to message saved events with lifecycle awareness.
+ *
+ * @param onEvent Callback invoked when a message is saved
+ * @return Job that can be cancelled to stop subscription early
+ */
+fun LifecycleOwner.onMessageSaved(
+    onEvent: (BaseMessage) -> Unit
+): Job = onMessageEvents { event ->
+    if (event is CometChatMessageEvent.MessageSaved) {
+        onEvent(event.message)
+    }
+}
+
+/**
+ * Subscribes to message unsaved events with lifecycle awareness.
+ *
+ * @param onEvent Callback invoked when a message is unsaved
+ * @return Job that can be cancelled to stop subscription early
+ */
+fun LifecycleOwner.onMessageUnsaved(
+    onEvent: (BaseMessage) -> Unit
+): Job = onMessageEvents { event ->
+    if (event is CometChatMessageEvent.MessageUnsaved) {
+        onEvent(event.message)
+    }
+}
+
+/**
  * Subscribes to message read events with lifecycle awareness.
  *
  * @param onEvent Callback invoked when a message is read

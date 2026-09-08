@@ -29,6 +29,7 @@ import com.cometchat.sampleapp.kotlin.databinding.ActivityGroupDetailsBinding
 import com.cometchat.sampleapp.kotlin.databinding.DialogAddMembersBinding
 import com.cometchat.sampleapp.kotlin.databinding.DialogBannedMembersBinding
 import com.cometchat.sampleapp.kotlin.databinding.DialogGroupMembersBinding
+import com.cometchat.sampleapp.kotlin.ui.messages.PinnedMessagesActivity
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.kotlin.presentation.shared.dialog.CometChatConfirmDialog
 import com.cometchat.uikit.kotlin.theme.CometChatTheme
@@ -181,6 +182,11 @@ class GroupDetailsActivity : AppCompatActivity() {
      * Sets up click listeners for action cards and options.
      */
     private fun setupClickListeners() {
+        // Pinned Messages option
+        binding.tvPinnedMessages.setOnClickListener {
+            group?.let { g -> PinnedMessagesActivity.start(this, g) }
+        }
+
         // View Members card
         binding.viewMembersCard.setOnClickListener {
             showGroupMembersDialog()

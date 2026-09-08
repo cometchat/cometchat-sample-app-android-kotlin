@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cometchat_color_background1"
+    android:orientation="vertical">
+
+    <com.cometchat.uikit.kotlin.presentation.shared.toolbar.CometChatToolbar
+        android:id="@+id/pinned_messages_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cometchatToolbarTitle="@string/cometchat_pinned_messages"
+        app:cometchatToolbarBackIconVisibility="visible"
+        app:cometchatToolbarShowSeparator="true" />
+
+    <LinearLayout
+        android:id="@+id/pinned_messages_empty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/cometchat_padding_5"
+        android:paddingEnd="@dimen/cometchat_padding_5"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/cometchat_120dp"
+            android:layout_height="@dimen/cometchat_120dp"
+            android:contentDescription="@string/cometchat_pinned"
+            android:src="@drawable/cometchat_ic_pin_empty" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_4"
+            android:text="@string/cometchat_no_pinned_messages"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Bold"
+            android:textColor="@color/cometchat_color_text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_2"
+            android:gravity="center"
+            android:text="@string/cometchat_no_pinned_messages_subtitle"
+            android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
+            android:textColor="@color/cometchat_color_text_secondary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pinned_messages_error"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/cometchat_padding_5"
+        android:paddingEnd="@dimen/cometchat_padding_5"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/cometchat_162dp"
+            android:layout_height="@dimen/cometchat_121dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/cometchat_ic_error" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_4"
+            android:text="@string/cometchat_error_conversations_title"
+            android:textAppearance="?attr/cometchatTextAppearanceHeading4Bold"
+            android:textColor="@color/cometchat_color_text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cometchat_margin_2"
+            android:gravity="center"
+            android:text="@string/cometchat_something_went_wrong_please_try_again"
+            android:textAppearance="?attr/cometchatTextAppearanceBodyRegular"
+            android:textColor="@color/cometchat_color_text_secondary" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pinned_messages_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

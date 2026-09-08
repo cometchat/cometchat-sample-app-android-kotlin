@@ -41,6 +41,7 @@
     <color name="cometchat_color_icon_primary">@color/cometchat_color_neutral_900</color>
     <color name="cometchat_color_icon_secondary">@color/cometchat_color_neutral_500</color>
     <color name="cometchat_color_icon_tertiary">@color/cometchat_color_neutral_400</color>
+    <color name="cometchat_color_icon_quaternary">@color/cometchat_color_neutral_300</color>
     <color name="cometchat_color_icon_white">@color/cometchat_color_neutral_50</color>
     <color name="cometchat_color_icon_highlight">@color/cometchat_color_primary</color>
     <!-- Color: Buttons -->

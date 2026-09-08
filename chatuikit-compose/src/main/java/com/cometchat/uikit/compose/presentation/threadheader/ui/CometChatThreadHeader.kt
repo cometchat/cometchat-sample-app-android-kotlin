@@ -22,6 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import android.widget.Toast
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.uikit.core.CometChatUIKit
+import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.events.CometChatThreadEvent
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,6 +50,7 @@ import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.CometCha
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildFactoryKey
 import com.cometchat.uikit.compose.presentation.threadheader.style.CometChatThreadHeaderStyle
 import com.cometchat.uikit.compose.presentation.threadheader.viewmodel.ThreadHeaderViewModel
+import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.constants.UIKitConstants
 import java.text.SimpleDateFormat
 
@@ -133,6 +148,11 @@ fun CometChatThreadHeader(
     hideReceipts: Boolean = false,
     hideReplyCount: Boolean = false,
     hideReplyCountBar: Boolean = false,
+    // Thread subscription (follow/unfollow) control — a trailing action on the reply-count bar
+    hideThreadSubscription: Boolean = false,
+    isSubscribed: Boolean? = null,
+    onSubscriptionToggle: ((Boolean) -> Unit)? = null,
+    threadSubscriptionView: (@Composable () -> Unit)? = null,
     // Customization parameters
     maxHeight: Dp = Dp.Unspecified,
     alignment: UIKitConstants.MessageListAlignment = UIKitConstants.MessageListAlignment.STANDARD,
@@ -163,6 +183,20 @@ fun CometChatThreadHeader(
     // Set parent message on ViewModel when it changes
     LaunchedEffect(parentMessage) {
         viewModel.setParentMessage(parentMessage)
+    }
+
+    // Keep the held parent's flag current regardless of whether the bell renders. The bell has its
+    // own collector for its local icon state, but it is absent when the control is hidden or
+    // replaced by an integrator slot — and the parent must still be stamped, since the message list
+    // and the action-sheet option read their state off this same object.
+    LaunchedEffect(parentMessage) {
+        CometChatEvents.threadEvents.collect { event ->
+            if (event is CometChatThreadEvent.SubscriptionChanged &&
+                event.parentMessageId == parentMessage.id
+            ) {
+                parentMessage.setThreadSubscribed(event.subscribed)
+            }
+        }
     }
 
     // Set hideReaction flag on ViewModel
@@ -248,7 +282,12 @@ fun CometChatThreadHeader(
                 replyCount = replyCount,
                 hideReplyCount = hideReplyCount,
                 style = style,
-                replyCountView = replyCountView
+                replyCountView = replyCountView,
+                parentMessage = parentMessage,
+                hideThreadSubscription = hideThreadSubscription,
+                isSubscribed = isSubscribed,
+                onSubscriptionToggle = onSubscriptionToggle,
+                threadSubscriptionView = threadSubscriptionView
             )
         }
     }
@@ -333,33 +372,143 @@ private fun ReplyCountBar(
     replyCount: Int,
     hideReplyCount: Boolean,
     style: CometChatThreadHeaderStyle,
-    replyCountView: (@Composable (Int) -> Unit)?
+    replyCountView: (@Composable (Int) -> Unit)?,
+    parentMessage: BaseMessage,
+    hideThreadSubscription: Boolean,
+    isSubscribed: Boolean?,
+    onSubscriptionToggle: ((Boolean) -> Unit)?,
+    threadSubscriptionView: (@Composable () -> Unit)?
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(style.replyCountBackgroundColor)
+            .background(style.replyCountBackgroundColor),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (!hideReplyCount) {
-            if (replyCountView != null) {
-                // Use custom reply count view
-                replyCountView(replyCount)
-            } else {
-                // Default reply count text
-                val replyText = formatReplyCount(replyCount)
-                Text(
-                    text = replyText,
-                    color = style.replyCountTextColor,
-                    style = style.replyCountTextStyle,
-                    modifier = Modifier.padding(
-                        start = 20.dp,
-                        top = 4.dp,
-                        end = 20.dp,
-                        bottom = 4.dp
+        Box(modifier = Modifier.weight(1f)) {
+            if (!hideReplyCount) {
+                if (replyCountView != null) {
+                    // Use custom reply count view
+                    replyCountView(replyCount)
+                } else {
+                    // Default reply count text
+                    val replyText = formatReplyCount(replyCount)
+                    Text(
+                        text = replyText,
+                        color = style.replyCountTextColor,
+                        style = style.replyCountTextStyle,
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            top = 4.dp,
+                            end = 20.dp,
+                            bottom = 4.dp
+                        )
                     )
+                }
+            }
+        }
+
+        // Thread subscription control — a trailing action at the end of the reply-count bar (like a
+        // menu), coexisting with the reply count. An integrator slot fully replaces the default bell.
+        when {
+            // The gate wins over the integrator slot: a replacement control must not appear on an
+            // unsent root, when the caller hid it, or when the feature is switched off.
+            hideThreadSubscription ||
+                !CometChatThreadSubscription.isAvailableForThread(parentMessage) -> Unit
+
+            threadSubscriptionView != null -> threadSubscriptionView()
+
+            else -> {
+                ThreadSubscriptionBell(
+                    parentMessage = parentMessage,
+                    isSubscribed = isSubscribed,
+                    onSubscriptionToggle = onSubscriptionToggle
                 )
             }
         }
+    }
+}
+
+/**
+ * The thread-header follow control. Bell = notifications on (subscribed, tap mutes); bell-off =
+ * muted (tap unmutes). Tapping flips optimistically, guarded by a >=400 ms debounce and a
+ * one-in-flight lock (§7.6); the flip is reverted with a failure toast on error. UNKNOWN state
+ * renders as un-followed (bell-off), enabled.
+ */
+@Composable
+fun ThreadSubscriptionBell(
+    parentMessage: BaseMessage,
+    isSubscribed: Boolean? = null,
+    onSubscriptionToggle: ((Boolean) -> Unit)? = null
+) {
+    // Offered wherever threading is — 1-1 and group alike. Hides itself only on an
+    // unsent root and when the feature is unsupported.
+    if (!CometChatThreadSubscription.isAvailableForThread(parentMessage)) return
+
+    val context = LocalContext.current
+    val rootId = parentMessage.id
+    // Seeds from the caller's [isSubscribed] when provided, else from the parent message's own flag —
+    // the authority for its whole thread. Re-seeds when the backing message object changes, so a
+    // fetched flag always overrides a local mirror.
+    var subscribed by remember(parentMessage, isSubscribed) {
+        mutableStateOf(isSubscribed ?: parentMessage.isThreadSubscribed())
+    }
+
+    // Keep in sync with changes made on any other surface, via the kit event bus, and stamp the held
+    // parent so a direct read (or a remount) sees the same value.
+    LaunchedEffect(rootId) {
+        CometChatEvents.threadEvents.collect { event ->
+            if (event is CometChatThreadEvent.SubscriptionChanged && event.parentMessageId == rootId) {
+                parentMessage.setThreadSubscribed(event.subscribed)
+                subscribed = event.subscribed
+            }
+        }
+    }
+
+    IconButton(
+        onClick = {
+            // Case 1. The controller owns the debounce, in-flight lock, optimistic publish and
+            // revert-on-failure; the optimistic flip reaches this bell through the bus collector.
+            CometChatThreadSubscription.toggle(parentMessage, subscribed) { result ->
+                when (result) {
+                    is CometChatThreadSubscription.ToggleResult.Success -> {
+                        Toast.makeText(
+                            context,
+                            context.getString(
+                                if (result.subscribed) R.string.cometchat_thread_subscribed_toast
+                                else R.string.cometchat_thread_unsubscribed_toast
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onSubscriptionToggle?.invoke(result.subscribed)
+                    }
+
+                    is CometChatThreadSubscription.ToggleResult.Failure -> {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.cometchat_thread_subscription_failed),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        },
+        modifier = Modifier.padding(end = 12.dp)
+    ) {
+        Icon(
+            painter = painterResource(
+                id = if (subscribed) com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications
+                else com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications_off
+            ),
+            contentDescription = stringResource(
+                if (subscribed) R.string.cometchat_thread_mute
+                else R.string.cometchat_thread_unmute
+            ),
+            // Theme-aware tint so the bell keeps AA contrast in dark theme; the drawables carry a
+            // hardcoded dark fillColor, so an untinted (Color.Unspecified) icon is near-invisible on
+            // a dark toolbar (P5.2 — AA contrast in both themes).
+            tint = CometChatTheme.colorScheme.iconTintPrimary
+        )
     }
 }
 

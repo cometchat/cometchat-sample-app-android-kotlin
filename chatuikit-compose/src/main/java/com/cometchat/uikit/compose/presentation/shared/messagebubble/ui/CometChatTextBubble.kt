@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.pointerInput
@@ -204,7 +205,13 @@ fun CometChatTextBubble(
                 contentDescription = "Text message: ${message.text}"
             }
     ) {
-        val isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT
+        // Code spans/blocks/blockquotes pick a light-on-dark ("outgoing") vs dark-on-light
+        // ("incoming") palette. Derive it from the resolved TEXT colour rather than alignment alone:
+        // the pinned-messages screen renders the user's own messages with the outgoing (white-text)
+        // style but LEFT alignment, so keying off alignment would put white text on a light code
+        // background (invisible). Light text ⇒ dark bubble ⇒ outgoing palette.
+        val isOutgoing = alignment == UIKitConstants.MessageBubbleAlignment.RIGHT ||
+            style.textColor.isLight()
 
         // Markdown is parsed from the formatter-transformed text so span offsets align. The block
         // rendering (code blocks, quotes, lists) is shared with media captions — see MarkdownSegments.
@@ -927,3 +934,12 @@ internal fun BlockquoteBubble(
         )
     }
 }
+
+/**
+ * Whether this colour reads as "light" — used to infer a dark bubble behind light text.
+ *
+ * [Color.Unspecified] and fully transparent colours are not light: they carry no usable signal, so
+ * the caller falls back to alignment.
+ */
+private fun Color.isLight(): Boolean =
+    this != Color.Unspecified && alpha > 0f && luminance() > 0.5f

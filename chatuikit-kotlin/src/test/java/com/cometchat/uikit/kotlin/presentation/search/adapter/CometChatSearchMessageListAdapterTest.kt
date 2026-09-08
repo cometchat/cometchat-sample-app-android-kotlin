@@ -17,6 +17,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.arbitrary
 import io.kotest.property.arbitrary.boolean
 import io.kotest.property.arbitrary.element
+import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
@@ -67,7 +68,9 @@ class CometChatSearchMessageListAdapterTest : FunSpec({
      */
     val textMessageArb = arbitrary {
         val id = Arb.long(1, 100000).bind()
-        val text = Arb.string(1, 200).bind()
+        // A plain-text message must not look like a link — a random printable string can contain
+        // "http", which the view-type logic classifies as VIEW_TYPE_LINK (rare flake).
+        val text = Arb.string(1, 200).filter { !it.contains("http") }.bind()
         val sentAt = Arb.long(1000000000L, 2000000000L).bind()
         val updatedAt = Arb.long(1000000000L, 2000000000L).bind()
         val deletedAt = Arb.long(0, 0).bind()

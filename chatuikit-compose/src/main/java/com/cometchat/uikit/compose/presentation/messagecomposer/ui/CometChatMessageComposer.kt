@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -138,6 +139,7 @@ import com.cometchat.uikit.core.formatter.RichTextFormat
 import com.cometchat.uikit.core.formatter.RichTextFormatterManager
 import com.cometchat.uikit.core.mentions.SelectedMention
 import com.cometchat.uikit.core.formatter.RichTextSpan
+import com.cometchat.uikit.core.formatter.ComposerInputController
 import com.cometchat.uikit.core.formatter.ComposerSegment
 import com.cometchat.uikit.core.formatter.SegmentComposerController
 import com.cometchat.uikit.core.constants.UIKitConstants
@@ -427,7 +429,15 @@ fun CometChatMessageComposer(
     /**
      * Callback invoked when a mention is clicked in the suggestion list.
      */
-    onMentionClick: ((SuggestionItem) -> Unit)? = null
+    onMentionClick: ((SuggestionItem) -> Unit)? = null,
+    /**
+     * Optional consumer content appended at the trailing end of the rich-text formatting toolbar,
+     * after the built-in buttons and a UIKit-owned divider. Emitted inside the toolbar [RowScope]
+     * (wrap multiple buttons in a [Row]). The lambda receives a live [ComposerInputController] so the
+     * button can read and mutate the composer input. Only rendered while the rich-text toolbar is
+     * shown; not shown in the multiline selection toolbar.
+     */
+    trailingToolbarContent: (@Composable RowScope.(input: ComposerInputController) -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -632,6 +642,12 @@ fun CometChatMessageComposer(
     var segmentVersion by remember { mutableStateOf(0) }
     // Trigger toolbar recomposition when formats change (toggleFormat doesn't fire onSegmentsChanged)
     var formatVersion by remember { mutableStateOf(0) }
+    // Facade handed to a custom trailing-toolbar button (Approach 2). Delegates to the focused
+    // segment's controller; bumping formatVersion after a mutation resyncs the segment's
+    // TextFieldValue — the same path the built-in format buttons use.
+    val trailingInputController = remember(mentionInsertionState) {
+        ComposeComposerInputController(segmentController, mentionInsertionState) { formatVersion++ }
+    }
     DisposableEffect(Unit) {
         segmentController.setListener(object : SegmentComposerController.Listener {
             override fun onSegmentsChanged() {
@@ -1835,6 +1851,9 @@ fun CometChatMessageComposer(
                                     showLinkDialog = true
                                 }
                             }
+                        },
+                        trailingToolbarContent = trailingToolbarContent?.let { content ->
+                            { content(trailingInputController) }
                         }
                     )
                 }
@@ -2310,9 +2329,14 @@ private fun NormalSegmentTextField(
         )
     }
 
-    val combinedTransformation = remember(segment.id) {
+    // Live styling contributed by custom formatters (e.g. a colour token → coloured text). Each
+    // formatter that overrides composerVisualTransformation() renders WYSIWYG in the field.
+    val formatterTransformations = remember(segment.id, effectiveTextFormatters) {
+        effectiveTextFormatters.mapNotNull { it.composerVisualTransformation() }
+    }
+    val combinedTransformation = remember(segment.id, formatterTransformations) {
         CombinedVisualTransformation(
-            listOf(spanTransformation, mentionTransformation)
+            listOf(spanTransformation, mentionTransformation) + formatterTransformations
         )
     }
 

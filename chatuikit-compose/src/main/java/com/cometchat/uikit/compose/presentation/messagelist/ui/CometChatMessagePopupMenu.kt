@@ -7,10 +7,16 @@ import android.graphics.Shader
 import android.os.Build
 import android.view.View
 import android.widget.ImageView
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,13 +39,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,14 +53,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -71,6 +81,7 @@ import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.constants.UIKitConstants
 import com.cometchat.uikit.core.domain.model.CometChatMessageOption
+import com.cometchat.uikit.core.utils.MessageOptionsPaginator
 
 /**
  * Default quick reaction emojis displayed in the reactions bar.
@@ -489,7 +500,13 @@ private fun QuickReactionsCard(
 }
 
 /**
- * Card containing the scrollable option list.
+ * Card containing the option list.
+ *
+ * When the resolved options exceed [MessageOptionsPaginator.MAX_VISIBLE_OPTIONS], the list is
+ * paginated: page one shows the first [MessageOptionsPaginator.MAX_VISIBLE_OPTIONS] options plus a
+ * "More" row, and tapping it swipes to the next page holding the remaining options plus a "Back"
+ * row. "More"/"Back" are navigation rows only — they never reach [onOptionClick] and never dismiss
+ * the popup.
  */
 @Composable
 private fun OptionListCard(
@@ -498,6 +515,32 @@ private fun OptionListCard(
     style: CometChatMessagePopupMenuStyle
 ) {
     val shape = RoundedCornerShape(style.cornerRadius)
+
+    // Split the resolved options into pages (reset whenever the option set changes).
+    val pages = remember(menuItems) { MessageOptionsPaginator.paginate(menuItems.size) }
+    var pageIndex by remember(menuItems) { mutableIntStateOf(0) }
+    // Tracks navigation direction so the swipe animates the correct way.
+    var forward by remember(menuItems) { mutableStateOf(true) }
+
+    val moreTitle = stringResource(R.string.cometchat_message_option_more)
+    val backTitle = stringResource(R.string.cometchat_message_option_back)
+
+    val moreOption = CometChatMessageOption(
+        id = MessageOptionsPaginator.MORE_ID,
+        title = moreTitle,
+        icon = R.drawable.cometchat_ic_arrow_forward
+    )
+    val backOption = CometChatMessageOption(
+        id = MessageOptionsPaginator.BACK_ID,
+        title = backTitle,
+        icon = R.drawable.cometchat_ic_back
+    )
+
+    // Rows used only to fix the card width to the full option set, so pages never shrink the
+    // width. The visible pages are then pinned to this measured width.
+    val anchorOptions = if (pages.size > 1) menuItems + moreOption + backOption else menuItems
+    var anchorWidthPx by remember(menuItems) { mutableIntStateOf(0) }
+    val density = LocalDensity.current
 
     Surface(
         modifier = Modifier
@@ -513,17 +556,82 @@ private fun OptionListCard(
         shadowElevation = style.elevation,
         tonalElevation = 0.dp
     ) {
-        Column(
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            menuItems.forEach { option ->
-                OptionRow(
-                    option = option,
-                    onClick = { onOptionClick(option) },
-                    style = style
-                )
+        Column {
+            // Invisible width anchor: measures the widest row across all options (+ More/Back)
+            // and contributes zero height, so height still fits the current page.
+            Box(
+                modifier = Modifier
+                    .height(0.dp)
+                    .clipToBounds()
+                    .onSizeChanged { anchorWidthPx = it.width }
+            ) {
+                Column {
+                    anchorOptions.forEach { option ->
+                        OptionRow(option = option, onClick = {}, style = style)
+                    }
+                }
+            }
+
+            val pageWidthModifier = if (anchorWidthPx > 0) {
+                Modifier.width(with(density) { anchorWidthPx.toDp() })
+            } else {
+                Modifier
+            }
+
+            AnimatedContent(
+                targetState = pageIndex.coerceIn(0, pages.lastIndex),
+                modifier = pageWidthModifier,
+                transitionSpec = {
+                    val direction = if (forward) 1 else -1
+                    (slideInHorizontally { width -> direction * width } + fadeIn()) togetherWith
+                        (slideOutHorizontally { width -> -direction * width } + fadeOut())
+                },
+                label = "cometchat_message_options_page"
+            ) { page ->
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    pages[page].forEach { slot ->
+                        when (slot) {
+                            is MessageOptionsPaginator.Slot.Item -> {
+                                val option = menuItems[slot.index]
+                                OptionRow(
+                                    option = option,
+                                    onClick = { onOptionClick(option) },
+                                    style = style,
+                                    fillWidth = true
+                                )
+                            }
+
+                            MessageOptionsPaginator.Slot.More -> {
+                                // Divider separating the real options from the "More" row.
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(style.strokeWidth.coerceAtLeast(1.dp))
+                                        .background(style.strokeColor)
+                                )
+                                OptionRow(
+                                    option = moreOption,
+                                    onClick = {
+                                        forward = true
+                                        pageIndex++
+                                    },
+                                    style = style,
+                                    fillWidth = true
+                                )
+                            }
+
+                            MessageOptionsPaginator.Slot.Back -> OptionRow(
+                                option = backOption,
+                                onClick = {
+                                    forward = false
+                                    pageIndex--
+                                },
+                                style = style,
+                                fillWidth = true
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -536,13 +644,17 @@ private fun OptionListCard(
 private fun OptionRow(
     option: CometChatMessageOption,
     onClick: () -> Unit,
-    style: CometChatMessagePopupMenuStyle
+    style: CometChatMessagePopupMenuStyle,
+    fillWidth: Boolean = false
 ) {
     val textColor = if (option.titleColor != 0) Color(option.titleColor) else style.textColor
     val iconTint = if (option.iconTintColor != 0) Color(option.iconTintColor) else style.startIconTint
 
     Row(
         modifier = Modifier
+            // Fill the card width so the whole row is the tap target, not just the text.
+            // The invisible width anchor keeps this false so it can measure intrinsic width.
+            .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .semantics { contentDescription = option.title },

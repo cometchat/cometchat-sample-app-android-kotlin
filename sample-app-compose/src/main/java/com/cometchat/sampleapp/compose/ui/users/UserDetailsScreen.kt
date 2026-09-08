@@ -80,6 +80,7 @@ fun UserDetailsScreen(
     lastMessage: BaseMessage? = null,
     onBackPress: () -> Unit,
     onChatDeleted: () -> Unit = {},
+    onNavigateToPinnedMessages: () -> Unit = {},
     onMessageClick: (User) -> Unit
 ) {
     val context = LocalContext.current
@@ -375,6 +376,15 @@ fun UserDetailsScreen(
 
                 // Separator - 20dp top margin
                 Spacer(modifier = Modifier.height(20.dp))
+
+                // Pinned messages row — sits above the separator that precedes Block/Delete.
+                ActionButtonWithIcon(
+                    text = "Pinned Messages",
+                    icon = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin,
+                    iconTint = colorScheme.textColorPrimary,
+                    textColor = colorScheme.textColorPrimary,
+                    onClick = onNavigateToPinnedMessages
+                )
 
                 HorizontalDivider(
                     thickness = 1.dp,

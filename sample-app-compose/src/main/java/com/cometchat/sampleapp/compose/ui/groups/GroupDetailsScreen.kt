@@ -77,7 +77,8 @@ fun GroupDetailsScreen(
     onMemberClick: ((GroupMember) -> Unit)? = null,
     onNavigateToAddMembers: (String) -> Unit = {},
     onNavigateToMembers: (String) -> Unit = {},
-    onNavigateToBannedMembers: (String) -> Unit = {}
+    onNavigateToBannedMembers: (String) -> Unit = {},
+    onNavigateToPinnedMessages: () -> Unit = {}
 ) {
     val colorScheme = CometChatTheme.colorScheme
     val typography = CometChatTheme.typography
@@ -379,6 +380,30 @@ fun GroupDetailsScreen(
 
                 // Separator - 20dp top margin
                 Spacer(modifier = Modifier.height(20.dp))
+
+                // Pinned messages row — sits above the separator that precedes the group actions.
+                // Inlined (not ActionButtonWithIcon) because that helper forces Color.Unspecified
+                // for its pre-colored app icons; the core pin vector needs an explicit theme tint.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToPinnedMessages() }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin),
+                        contentDescription = null,
+                        tint = colorScheme.textColorPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Pinned Messages",
+                        style = typography.heading4Regular,
+                        color = colorScheme.textColorPrimary
+                    )
+                }
 
                 HorizontalDivider(
                     thickness = 1.dp,

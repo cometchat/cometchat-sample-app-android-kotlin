@@ -36,6 +36,7 @@
         <attr name="cometchatMessageComposerStickerIconTint" format="color" />
         <attr name="cometchatMessageComposerInactiveStickerIcon" format="reference" />
         <attr name="cometchatMessageComposerActiveStickerIcon" format="reference" />
+        <attr name="cometchatMessageComposerActiveStickerIconTint" format="color" />
 
         <!-- Send button styling -->
         <attr name="cometchatMessageComposerSendButtonActiveIcon" format="reference" />

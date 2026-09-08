@@ -61,6 +61,8 @@ class CometChatMeetCallBubble @JvmOverloads constructor(
     private lateinit var callIconImageView: ImageView
     private lateinit var titleTextView: TextView
     private lateinit var subtitleTextView: TextView
+    private lateinit var pinIndicator: ImageView
+    private lateinit var savedIndicator: ImageView
     private lateinit var separatorView: View
     private lateinit var joinCallContainer: LinearLayout
     private lateinit var joinCallText: TextView
@@ -93,6 +95,8 @@ class CometChatMeetCallBubble @JvmOverloads constructor(
         callIconImageView = findViewById(R.id.call_icon)
         titleTextView = findViewById(R.id.title_text)
         subtitleTextView = findViewById(R.id.subtitle_text)
+        pinIndicator = findViewById(R.id.meet_pin_indicator)
+        savedIndicator = findViewById(R.id.meet_saved_indicator)
         separatorView = findViewById(R.id.separator)
         joinCallContainer = findViewById(R.id.join_call)
         joinCallText = findViewById(R.id.tv_join_call)
@@ -237,11 +241,14 @@ class CometChatMeetCallBubble @JvmOverloads constructor(
             val subtitle = formatTimestamp(message.sentAt)
             setSubtitle(subtitle)
 
+            setPinSaveIndicators(message)
+
             // Update icon
             updateCallIcon()
         } catch (e: Exception) {
             setTitle(context.getString(R.string.cometchat_audio_call))
             setSubtitle("")
+            setPinSaveIndicators(message)
             currentCallType = MeetCallType.VOICE_OUTGOING
             updateCallIcon()
         }
@@ -316,6 +323,31 @@ class CometChatMeetCallBubble @JvmOverloads constructor(
     }
 
     fun getSubtitle(): String = subtitleTextView.text.toString()
+
+    /**
+     * Shows the pin/save indicators at the END of the time row.
+     *
+     * The meet bubble draws its own timestamp and therefore hides the shared status-info view, so
+     * it would otherwise be the one bubble that never shows a pin or save state. These mirror that
+     * footer: same glyphs, same 16dp size, tinted with the timestamp (subtitle) colour. A deleted
+     * message shows neither — the tombstone must not advertise a pin/save state.
+     *
+     * Called from [setMessage]; a rebind after a pin/save toggle refreshes them.
+     */
+    private fun setPinSaveIndicators(message: CustomMessage) {
+        val notDeleted = message.deletedAt == 0L
+        val showPin = message.isPinned && notDeleted
+        val showSaved = message.isSaved && notDeleted
+
+        pinIndicator.visibility = if (showPin) View.VISIBLE else View.GONE
+        savedIndicator.visibility = if (showSaved) View.VISIBLE else View.GONE
+
+        if (showPin || showSaved) {
+            val tint = subtitleTextView.currentTextColor
+            pinIndicator.setColorFilter(tint)
+            savedIndicator.setColorFilter(tint)
+        }
+    }
 
     /**
      * Sets the subtitle text of the call bubble.
@@ -601,6 +633,10 @@ class CometChatMeetCallBubble @JvmOverloads constructor(
 
     private fun applySubtitleTextColor(@ColorInt color: Int) {
         subtitleTextView.setTextColor(color)
+        // The indicators follow the timestamp colour, and the style can be applied after the
+        // message is bound — re-tint here so they never keep the previous alignment's colour.
+        pinIndicator.setColorFilter(color)
+        savedIndicator.setColorFilter(color)
     }
 
     private fun applySubtitleTextAppearance(@StyleRes appearance: Int) {

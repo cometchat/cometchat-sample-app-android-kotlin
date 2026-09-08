@@ -23,6 +23,7 @@ import com.cometchat.sampleapp.kotlin.push.LoginActivity
 import com.cometchat.sampleapp.kotlin.push.R
 import com.cometchat.sampleapp.kotlin.push.appflow.MessagesActivity
 import com.cometchat.sampleapp.kotlin.push.appflow.NewChatActivity
+import com.cometchat.sampleapp.kotlin.push.appflow.SavedMessagesActivity
 import com.cometchat.sampleapp.kotlin.push.appflow.SearchActivity
 import com.cometchat.sampleapp.kotlin.push.databinding.FragmentChatsBinding
 import com.cometchat.pushnotification.CometChatPushNotifications
@@ -46,6 +47,15 @@ class ChatsFragment : Fragment() {
     ): View {
         _binding = FragmentChatsBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    /**
+     * Forces a conversations reload. Called by the host activity when the Chats tab is tapped
+     * (switching to it or re-tapping it) — the conversations ViewModel is retained and would
+     * otherwise show cached data.
+     */
+    fun reloadConversations() {
+        _binding?.cometchatConversations?.refreshConversations()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -123,7 +133,14 @@ class ChatsFragment : Fragment() {
             val intent = Intent(requireContext(), NewChatActivity::class.java)
             startActivity(intent)
         }
-        
+
+        // Set up Saved Messages click
+        popupView.findViewById<TextView>(R.id.tv_saved_messages)?.setOnClickListener {
+            popupWindow.dismiss()
+            val intent = Intent(requireContext(), SavedMessagesActivity::class.java)
+            startActivity(intent)
+        }
+
         // Set up Logout click - uses error color from XML
         popupView.findViewById<TextView>(R.id.tv_logout)?.setOnClickListener {
             popupWindow.dismiss()

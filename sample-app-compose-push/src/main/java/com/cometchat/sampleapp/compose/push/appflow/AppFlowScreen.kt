@@ -23,10 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cometchat.calls.model.CallLog
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.uikit.core.factory.CometChatConversationsViewModelFactory
+import com.cometchat.uikit.core.viewmodel.CometChatConversationsViewModel
 import com.cometchat.sampleapp.compose.push.MainActivity
 import com.cometchat.sampleapp.compose.push.R
 import com.cometchat.sampleapp.compose.push.appflow.navigation.AppFlowTab
@@ -52,17 +55,23 @@ fun AppFlowScreen(
     onNavigateToCallDetails: (CallLog) -> Unit,
     onNavigateToNewChat: () -> Unit,
     onNavigateToSearch: () -> Unit,
+    onNavigateToSavedMessages: () -> Unit,
     onLogout: () -> Unit
 ) {
     // Read the notification flag during remember initializer so all composable instances
     // (including those created during NavHost transitions) start on the Notifications tab.
     // The flag is consumed after a delay to ensure transition-period instances all read it.
-    var selectedTab by remember { 
+    var selectedTab by remember {
         mutableStateOf(
             if (MainActivity.shouldNavigateToNotifications) AppFlowTab.Notifications else AppFlowTab.Chats
         )
     }
-    
+
+    // Persisted conversations VM (survives tab switches), reloaded on each Chats tab tap below.
+    val conversationsViewModel: CometChatConversationsViewModel = viewModel(
+        factory = CometChatConversationsViewModelFactory()
+    )
+
     val currentTrigger = MainActivity.notificationDeepLinkTrigger
     
     // Consume the flag after a short delay to ensure navigation transition is complete
@@ -86,7 +95,11 @@ fun AppFlowScreen(
         bottomBar = {
             AppFlowBottomNavigation(
                 selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
+                onTabSelected = { tab ->
+                    // Reload conversations only when the Chats tab is actually tapped (not on resume).
+                    if (tab == AppFlowTab.Chats) conversationsViewModel.refreshList()
+                    selectedTab = tab
+                },
                 separatorColor = separatorColor
             )
         }
@@ -102,7 +115,9 @@ fun AppFlowScreen(
                     },
                     onNewChatClick = onNavigateToNewChat,
                     onSearchClick = onNavigateToSearch,
+                    onSavedMessagesClick = onNavigateToSavedMessages,
                     onLogout = onLogout,
+                    conversationsViewModel = conversationsViewModel,
                     contentPadding = paddingValues
                 )
                 AppFlowTab.Calls -> CallsTab(

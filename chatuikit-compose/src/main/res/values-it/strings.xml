@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">elemento_azione</string>
     <string name="cometchat_try_again" translatable="true">Riprova</string>
     <string name="cometchat_something_went_wrong" translatable="true">Qualcosa è andato storto.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Non hai il permesso di eseguire questa azione.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Trasferisci proprietà</string>
     <string name="cometchat_add_members" translatable="true">Aggiungi membri</string>
     <string name="cometchat_owner" translatable="true">Proprietario</string>
@@ -248,4 +249,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Avvisa tutti in questo gruppo</string>
     <string name="cometchat_notify_all" translatable="true">tutti</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization  -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Iscriviti al thread</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Annulla l\'iscrizione al thread</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Iscritto. Riceverai una notifica per le nuove risposte in questo thread.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Iscritto. Riceverai una notifica per le nuove risposte.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Iscrizione annullata. Le notifiche sono disattivate finché non rispondi o vieni menzionato.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Iscrizione annullata. Le notifiche sono disattivate finché non rispondi o vieni menzionato.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Aggiornamento non riuscito. Riprova.</string>
+    <string name="cometchat_thread_mute" translatable="true">Annulla l\'iscrizione al thread</string>
+    <string name="cometchat_thread_unmute" translatable="true">Iscriviti al thread</string>
+    <string name="cometchat_pin">Fissa</string>
+    <string name="cometchat_unpin">Non fissare</string>
+    <string name="cometchat_unsave">Rimuovi dai salvati</string>
+    <string name="cometchat_pinned">Fissato</string>
+    <string name="cometchat_saved">Salvato</string>
+    <string name="cometchat_pin_message_confirm_title">Fissa messaggio</string>
+    <string name="cometchat_pin_message_confirm_body">Vuoi fissare questo messaggio in questa conversazione?</string>
+    <string name="cometchat_unpin_message_confirm_title">Non fissare il messaggio</string>
+    <string name="cometchat_unpin_message_confirm_body">Vuoi rimuovere questo messaggio dai fissati?</string>
+    <string name="cometchat_save_message_confirm_title">Salva messaggio</string>
+    <string name="cometchat_save_message_confirm_body">Vuoi salvare questo messaggio?</string>
+    <string name="cometchat_unsave_message_confirm_title">Rimuovi messaggio dai salvati</string>
+    <string name="cometchat_unsave_message_confirm_body">Vuoi rimuovere questo messaggio dai salvati?</string>
+    <string name="cometchat_pin_conversation">Fissa conversazione</string>
+    <string name="cometchat_unpin_conversation">Non fissare la conversazione</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Non fissare la conversazione</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Vuoi rimuovere questa conversazione dai fissati?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Puoi fissare solo %1$d chat. Rimuovine una per fissarne un\'altra.</string>
+    <string name="cometchat_pin_limit_reached">Puoi fissare solo %1$d messaggi. Rimuovine uno per fissarne un altro.</string>
+    <string name="cometchat_save_limit_reached">Puoi salvare fino a %1$d messaggi.</string>
+    <string name="cometchat_pin_save_generic_error">Qualcosa è andato storto. Riprova.</string>
+    <string name="cometchat_message_pinned">Messaggio fissato</string>
+    <string name="cometchat_message_unpinned">Messaggio non più fissato</string>
+    <string name="cometchat_message_saved">Messaggio salvato</string>
+    <string name="cometchat_message_unsaved">Messaggio rimosso dai salvati</string>
+    <string name="cometchat_no_pinned_messages">Ancora nessun messaggio fissato</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Fissa i messaggi importanti per trovarli facilmente.</string>
+    <string name="cometchat_no_saved_messages">Ancora nessun messaggio salvato</string>
+    <string name="cometchat_no_saved_messages_subtitle">Salva i messaggi per averli a portata di mano quando ti servono.</string>
+    <string name="cometchat_pinned_messages">Messaggi fissati</string>
+    <string name="cometchat_saved_messages">Messaggi salvati</string>
+    <string name="cometchat_unpin_message">Non fissare il messaggio</string>
+    <string name="cometchat_message_option_more">Altro</string>
+    <string name="cometchat_message_option_back">Indietro</string>
+    <string name="cometchat_message_type_icon">Icona del tipo di messaggio</string>
 </resources>

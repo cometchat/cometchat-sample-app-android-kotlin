@@ -75,7 +75,7 @@ private val audioDurationCache = ConcurrentHashMap<String, Long>()
  * name, flat seek bar with elapsed/total time, and a trailing download icon. More than
  * [COLLAPSED_AUDIO_COUNT] audios collapse behind a "Show N more" / "Show less" toggle. Picker audio
  * only — recorded voice notes render via [CometChatVoiceNoteBubble] (unchanged waveform UI). Part
- * of the ENG-36737 per-type multi-attachment bubbles.
+ * of the per-type multi-attachment bubbles.
  *
  * Cards are a translucent overlay on the message bubble (white-tint on the tinted outgoing bubble,
  * subtle dark-tint on incoming), matching [CometChatFilesBubble].

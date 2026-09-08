@@ -67,6 +67,7 @@
     
     <!-- App Flow UI -->
     <string name="app_create_conversation" translatable="true">Create conversation</string>
+    <string name="app_saved_messages" translatable="true">Saved messages</string>
     <string name="app_logout" translatable="true">Logout</string>
     <string name="app_join_group" translatable="true">Join Group</string>
     <string name="app_password" translatable="true">Password</string>
@@ -92,6 +93,7 @@
     <string name="app_block" translatable="true">Block</string>
     <string name="app_unblock" translatable="true">Unblock</string>
     <string name="app_delete" translatable="true">Delete Chat</string>
+    <string name="app_pinned_messages" translatable="true">Pinned Messages</string>
     <string name="app_delete_chat_title" translatable="true">Delete this chat?</string>
     <string name="app_delete_chat_subtitle" translatable="true">Are you sure you want to delete this chat? This action cannot be undone.</string>
     <string name="app_delete_chat_positive_button" translatable="true">Delete</string>

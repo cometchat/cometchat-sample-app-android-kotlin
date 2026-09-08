@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -60,6 +61,7 @@ import com.cometchat.uikit.compose.presentation.shared.interfaces.DateTimeFormat
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.buildPreviewAnnotatedString
 import com.cometchat.uikit.compose.presentation.shared.messagebubble.ui.FormattedPreviewText
 import com.cometchat.uikit.compose.presentation.shared.receipts.CometChatReceipts
+import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.compose.presentation.shared.receipts.MessageReceiptUtils
 import com.cometchat.uikit.compose.presentation.shared.receipts.Receipt
 import com.cometchat.uikit.compose.presentation.shared.statusindicator.CometChatStatusIndicator
@@ -376,16 +378,34 @@ internal fun DefaultTrailingView(
             )
         }
         
-        // Unread badge (only show if count > 0 and not an agent chat)
+        // Pin indicator + unread badge. The pin (filled, secondary tint) sits before the badge —
+        // shown whenever the conversation is pinned; the badge only when there's an unread count.
         val user = conversation.conversationWith as? User
         val isAgentChat = user != null && AgentChatDetector.isAgentChat(user)
         val unreadCount = conversation.unreadMessageCount
-        if (unreadCount > 0 && !isAgentChat) {
+        val showPin = conversation.isPinned
+        val showBadge = unreadCount > 0 && !isAgentChat
+        if (showPin || showBadge) {
             Spacer(modifier = Modifier.size(4.dp))
-            CometChatBadgeCount(
-                count = unreadCount,
-                style = style.badgeStyle
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showPin) {
+                    Icon(
+                        painter = painterResource(com.cometchat.uikit.core.R.drawable.cometchat_ic_pin_filled),
+                        contentDescription = stringResource(R.string.cometchat_pinned),
+                        tint = CometChatTheme.colorScheme.textColorSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                if (showPin && showBadge) {
+                    Spacer(modifier = Modifier.size(4.dp))
+                }
+                if (showBadge) {
+                    CometChatBadgeCount(
+                        count = unreadCount,
+                        style = style.badgeStyle
+                    )
+                }
+            }
         }
     }
 }

@@ -78,7 +78,15 @@ class UserDetailsActivity : AppCompatActivity() {
     
     private fun initClickListeners() {
         binding.ivBack.setOnClickListener { finish() }
-        
+
+        binding.tvPinnedMessages.setOnClickListener {
+            viewModel.user.value?.let { user ->
+                val intent = android.content.Intent(this, PinnedMessagesActivity::class.java)
+                intent.putExtra(getString(R.string.app_user), user.toJson().toString())
+                startActivity(intent)
+            }
+        }
+
         binding.tvBlock.setOnClickListener {
             if (binding.tvBlock.text.toString() == getString(R.string.app_block)) {
                 blockUser()

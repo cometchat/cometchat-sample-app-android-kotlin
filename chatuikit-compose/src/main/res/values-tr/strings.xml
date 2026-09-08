@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">aksiyon_ögesi</string>
     <string name="cometchat_try_again" translatable="true">Tekrar deneyin</string>
     <string name="cometchat_something_went_wrong" translatable="true">Bir şeyler yanlış gitti.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Bu işlemi gerçekleştirme izniniz yok.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Sahipliği Devret</string>
     <string name="cometchat_add_members" translatable="true">Üye Ekle</string>
     <string name="cometchat_owner" translatable="true">Sahip</string>
@@ -248,4 +249,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Bu gruptaki herkesi bilgilendir</string>
     <string name="cometchat_notify_all" translatable="true">hepsi</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Konuya abone ol</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Konu aboneliğinden çık</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Abone olundu. Bu konudaki yeni yanıtlar size bildirilecek.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Abone olundu. Yeni yanıtlar size bildirilecek.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Abonelik iptal edildi. Siz yanıtlayana veya bahsedilene kadar bildirimler kapalıdır.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Abonelik iptal edildi. Siz yanıtlayana veya bahsedilene kadar bildirimler kapalıdır.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Güncellenemedi. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_thread_mute" translatable="true">Konu aboneliğinden çık</string>
+    <string name="cometchat_thread_unmute" translatable="true">Konuya abone ol</string>
+    <string name="cometchat_pin">Sabitle</string>
+    <string name="cometchat_unpin">Sabitlemeyi kaldır</string>
+    <string name="cometchat_unsave">Kaydı kaldır</string>
+    <string name="cometchat_pinned">Sabitlendi</string>
+    <string name="cometchat_saved">Kaydedildi</string>
+    <string name="cometchat_pin_message_confirm_title">Mesajı Sabitle</string>
+    <string name="cometchat_pin_message_confirm_body">Bu mesajı bu sohbette sabitlemek istiyor musunuz?</string>
+    <string name="cometchat_unpin_message_confirm_title">Mesajın Sabitlemesini Kaldır</string>
+    <string name="cometchat_unpin_message_confirm_body">Bu mesajın sabitlemesini kaldırmak istiyor musunuz?</string>
+    <string name="cometchat_save_message_confirm_title">Mesajı Kaydet</string>
+    <string name="cometchat_save_message_confirm_body">Bu mesajı kaydetmek istiyor musunuz?</string>
+    <string name="cometchat_unsave_message_confirm_title">Mesajın Kaydını Kaldır</string>
+    <string name="cometchat_unsave_message_confirm_body">Bu mesajın kaydını kaldırmak istiyor musunuz?</string>
+    <string name="cometchat_pin_conversation">Sohbeti sabitle</string>
+    <string name="cometchat_unpin_conversation">Sohbetin sabitlemesini kaldır</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Sohbetin Sabitlemesini Kaldır</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Bu sohbetin sabitlemesini kaldırmak istiyor musunuz?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Yalnızca %1$d sohbeti sabitleyebilirsiniz. Başka birini sabitlemek için birinin sabitlemesini kaldırın.</string>
+    <string name="cometchat_pin_limit_reached">Yalnızca %1$d mesajı sabitleyebilirsiniz. Başka birini sabitlemek için birinin sabitlemesini kaldırın.</string>
+    <string name="cometchat_save_limit_reached">En fazla %1$d mesaj kaydedebilirsiniz.</string>
+    <string name="cometchat_pin_save_generic_error">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
+    <string name="cometchat_message_pinned">Mesaj sabitlendi</string>
+    <string name="cometchat_message_unpinned">Mesajın sabitlemesi kaldırıldı</string>
+    <string name="cometchat_message_saved">Mesaj kaydedildi</string>
+    <string name="cometchat_message_unsaved">Mesajın kaydı kaldırıldı</string>
+    <string name="cometchat_no_pinned_messages">Henüz sabitlenmiş mesaj yok</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Önemli mesajları kolayca bulmak için sabitleyin.</string>
+    <string name="cometchat_no_saved_messages">Henüz kaydedilmiş mesaj yok</string>
+    <string name="cometchat_no_saved_messages_subtitle">Mesajları kaydedin, ihtiyacınız olduğunda elinizin altında olsun.</string>
+    <string name="cometchat_pinned_messages">Sabitlenmiş Mesajlar</string>
+    <string name="cometchat_saved_messages">Kaydedilmiş Mesajlar</string>
+    <string name="cometchat_unpin_message">Mesajın sabitlemesini kaldır</string>
+    <string name="cometchat_message_option_more">Daha fazla</string>
+    <string name="cometchat_message_option_back">Geri</string>
+    <string name="cometchat_message_type_icon">Mesaj türü simgesi</string>
 </resources>

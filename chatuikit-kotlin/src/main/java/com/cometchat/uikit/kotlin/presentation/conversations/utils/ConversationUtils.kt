@@ -197,23 +197,22 @@ object ConversationUtils {
                 val resolvedPlainText = spannableBuilder.toString()
                 val markdownRendered = ConversationSubtitleRenderer.render(context, resolvedPlainText)
 
-                // Merge mention styling (ForegroundColorSpan, BackgroundColorSpan, NonEditableSpan)
-                // from the formatter result onto the markdown-rendered result
+                // Merge every visible character-style span from the formatter result onto the
+                // markdown-rendered result — mention foreground/background color as before, plus any
+                // custom formatter styling (e.g. a {color:#…} foreground span). ClickableSpan is
+                // skipped: the subtitle is non-interactive, so the mention's clickable NonEditableSpan
+                // (a ClickableSpan) must not be carried over — only its visual color spans are, exactly
+                // as the previous foreground/background-only merge did.
                 val merged = android.text.SpannableStringBuilder(markdownRendered)
-                val fgSpans = spannableBuilder.getSpans(0, spannableBuilder.length, android.text.style.ForegroundColorSpan::class.java)
-                for (span in fgSpans) {
+                val characterStyleSpans = spannableBuilder.getSpans(
+                    0, spannableBuilder.length, android.text.style.CharacterStyle::class.java
+                )
+                for (span in characterStyleSpans) {
+                    if (span is android.text.style.ClickableSpan) continue
                     val start = spannableBuilder.getSpanStart(span)
                     val end = spannableBuilder.getSpanEnd(span)
-                    if (start >= 0 && end <= merged.length) {
-                        merged.setSpan(android.text.style.ForegroundColorSpan(span.foregroundColor), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                    }
-                }
-                val bgSpans = spannableBuilder.getSpans(0, spannableBuilder.length, android.text.style.BackgroundColorSpan::class.java)
-                for (span in bgSpans) {
-                    val start = spannableBuilder.getSpanStart(span)
-                    val end = spannableBuilder.getSpanEnd(span)
-                    if (start >= 0 && end <= merged.length) {
-                        merged.setSpan(android.text.style.BackgroundColorSpan(span.backgroundColor), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    if (start in 0 until end && end <= merged.length) {
+                        merged.setSpan(span, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                     }
                 }
                 return merged

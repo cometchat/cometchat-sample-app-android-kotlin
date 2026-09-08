@@ -73,6 +73,7 @@
     <string name="cometchat_action_item" translatable="true">veiksmo_elementas</string>
     <string name="cometchat_try_again" translatable="true">Bandykite dar kartą</string>
     <string name="cometchat_something_went_wrong" translatable="true">Įvyko klaida.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">Neturite leidimo atlikti šį veiksmą.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Perduoti nuosavybę</string>
     <string name="cometchat_add_members" translatable="true">Pridėti narius</string>
     <string name="cometchat_owner" translatable="true">Savininkas</string>
@@ -254,4 +255,49 @@ Pabandykite dar kartą.</string>
     <string name="cometchat_notify_everyone_in_this_group">Pranešti visiems šioje grupėje</string>
     <string name="cometchat_notify_all" translatable="true">visi</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Prenumeruoti giją</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Atšaukti gijos prenumeratą</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Užsiprenumeruota. Būsite informuoti apie naujus atsakymus šioje gijoje.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Užsiprenumeruota. Būsite informuoti apie naujus atsakymus.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Prenumerata atšaukta. Pranešimai išjungti, kol neatsakysite arba nebūsite paminėti.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Prenumerata atšaukta. Pranešimai išjungti, kol neatsakysite arba nebūsite paminėti.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Nepavyko atnaujinti. Bandykite dar kartą.</string>
+    <string name="cometchat_thread_mute" translatable="true">Atšaukti gijos prenumeratą</string>
+    <string name="cometchat_thread_unmute" translatable="true">Prenumeruoti giją</string>
+    <string name="cometchat_pin">Prisegti</string>
+    <string name="cometchat_unpin">Atsegti</string>
+    <string name="cometchat_unsave">Pašalinti iš išsaugotų</string>
+    <string name="cometchat_pinned">Prisegta</string>
+    <string name="cometchat_saved">Išsaugota</string>
+    <string name="cometchat_pin_message_confirm_title">Prisegti žinutę</string>
+    <string name="cometchat_pin_message_confirm_body">Ar norite prisegti šią žinutę šiame pokalbyje?</string>
+    <string name="cometchat_unpin_message_confirm_title">Atsegti žinutę</string>
+    <string name="cometchat_unpin_message_confirm_body">Ar norite atsegti šią žinutę?</string>
+    <string name="cometchat_save_message_confirm_title">Išsaugoti žinutę</string>
+    <string name="cometchat_save_message_confirm_body">Ar norite išsaugoti šią žinutę?</string>
+    <string name="cometchat_unsave_message_confirm_title">Pašalinti žinutę iš išsaugotų</string>
+    <string name="cometchat_unsave_message_confirm_body">Ar norite pašalinti šią žinutę iš išsaugotų?</string>
+    <string name="cometchat_pin_conversation">Prisegti pokalbį</string>
+    <string name="cometchat_unpin_conversation">Atsegti pokalbį</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Atsegti pokalbį</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Ar norite atsegti šį pokalbį?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Galite prisegti tik %1$d pokalbius. Atsekite vieną, kad prisegtumėte kitą.</string>
+    <string name="cometchat_pin_limit_reached">Galite prisegti tik %1$d žinutes. Atsekite vieną, kad prisegtumėte kitą.</string>
+    <string name="cometchat_save_limit_reached">Galite išsaugoti iki %1$d žinučių.</string>
+    <string name="cometchat_pin_save_generic_error">Įvyko klaida. Bandykite dar kartą.</string>
+    <string name="cometchat_message_pinned">Žinutė prisegta</string>
+    <string name="cometchat_message_unpinned">Žinutė atsegta</string>
+    <string name="cometchat_message_saved">Žinutė išsaugota</string>
+    <string name="cometchat_message_unsaved">Žinutė pašalinta iš išsaugotų</string>
+    <string name="cometchat_no_pinned_messages">Kol kas nėra prisegtų žinučių</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Prisekite svarbias žinutes, kad jas būtų lengva rasti.</string>
+    <string name="cometchat_no_saved_messages">Kol kas nėra išsaugotų žinučių</string>
+    <string name="cometchat_no_saved_messages_subtitle">Išsaugokite žinutes, kad jos visada būtų po ranka.</string>
+    <string name="cometchat_pinned_messages">Prisegtos žinutės</string>
+    <string name="cometchat_saved_messages">Išsaugotos žinutės</string>
+    <string name="cometchat_unpin_message">Atsegti žinutę</string>
+    <string name="cometchat_message_option_more">Daugiau</string>
+    <string name="cometchat_message_option_back">Atgal</string>
+    <string name="cometchat_message_type_icon">Žinutės tipo piktograma</string>
 </resources>

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cometchat.chat.models.BaseMessage
@@ -82,28 +83,31 @@ fun DefaultReplyPreview(
                     if (rawText.isEmpty()) {
                         AnnotatedString(rawText)
                     } else {
-                        // Step 1: Run formatter pipeline to resolve mention tokens
-                        val formattedText = if (textFormatters.isEmpty()) {
-                            rawText
-                        } else {
-                            var result: AnnotatedString = AnnotatedString(rawText)
-                            for (formatter in textFormatters) {
-                                result = formatter.prepareMessageString(
-                                    context,
-                                    message,
-                                    result,
-                                    UIKitConstants.MessageBubbleAlignment.LEFT,
-                                    UIKitConstants.FormattingType.MESSAGE_COMPOSER
-                                )
-                            }
-                            result.text
+                        // Step 1: Run the preview formatter pipeline (resolves mentions; a custom
+                        // formatter's preview span strips its token and applies its style — e.g. colour).
+                        var result: AnnotatedString = AnnotatedString(rawText)
+                        for (formatter in textFormatters) {
+                            result = formatter.preparePreviewSpan(context, message, result)
                         }
                         // Step 2: Parse markdown, keep bold/italic/underline/strikethrough, plain text for code/blockquote
-                        val segments = MarkdownRenderer.parse(formattedText.toString())
-                        buildReplyPreviewAnnotatedString(
+                        val segments = MarkdownRenderer.parse(result.text)
+                        val markdownStyled = buildReplyPreviewAnnotatedString(
                             segments = segments,
                             textColor = style.messagePreviewSubtitleTextColor
                         )
+                        // Step 3: overlay the formatter's spans (e.g. colour) onto the rendered preview
+                        if (result.spanStyles.isEmpty()) {
+                            markdownStyled
+                        } else {
+                            buildAnnotatedString {
+                                append(markdownStyled)
+                                result.spanStyles.forEach { s ->
+                                    val st = s.start.coerceIn(0, length)
+                                    val en = s.end.coerceIn(st, length)
+                                    if (st < en) addStyle(s.item, st, en)
+                                }
+                            }
+                        }
                     }
                 }
             }

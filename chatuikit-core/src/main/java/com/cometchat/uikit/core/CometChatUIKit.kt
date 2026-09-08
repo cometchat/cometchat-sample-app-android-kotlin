@@ -13,6 +13,7 @@ import com.cometchat.chat.models.MediaMessage
 import com.cometchat.chat.models.TextMessage
 import com.cometchat.chat.models.User
 import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
 import com.cometchat.uikit.core.events.CometChatMessageEvent
 import com.cometchat.uikit.core.events.MessageStatus
 import org.json.JSONObject
@@ -164,11 +165,13 @@ object CometChatUIKit {
         // settings door could never initialize the Calls SDK at all (UIKitSettings
         // defaults enableCalling to false and the file was the only input here).
         val enableCalling = uiKitSection?.optBoolean("enableCalling", false) ?: false
+        val enableThreadSubscription = uiKitSection?.optBoolean("enableThreadSubscription", false) ?: false
 
         val settingsBuilder = UIKitSettings.UIKitSettingsBuilder()
             .setAppId(appId)
             .setRegion(region)
             .setEnableCalling(enableCalling)
+            .setEnableThreadSubscription(enableThreadSubscription)
 
         if (authKey.isNotEmpty()) {
             settingsBuilder.setAuthKey(authKey)
@@ -323,6 +326,36 @@ object CometChatUIKit {
      * @return True if the Calls SDK is initialized, false otherwise
      */
     fun isCallsSDKInitialized(): Boolean = isCallsSDKInitialized
+
+    /**
+     * Checks whether the thread-subscription (follow/unfollow) feature is enabled.
+     * Returns true only if [UIKitSettings.enableThreadSubscription] was set to true.
+     * The thread-subscription UI surfaces are gated on this; when false, neither the
+     * thread-header control nor the message action-sheet option renders.
+     *
+     * @return True if thread subscription is enabled, false otherwise
+     */
+    fun isThreadSubscriptionEnabled(): Boolean = authenticationSettings?.enableThreadSubscription == true
+
+    /**
+     * Whether the Pin Message feature is enabled for this app. Delegates to the SDK feature flag
+     * ([CometChat.isPinMessageEnabled]), which treats an absent flag as enabled. The pin/unpin
+     * action-sheet options and the Pinned Messages panel are gated on this.
+     */
+    fun isPinMessageEnabled(): Boolean = CometChat.isPinMessageEnabled()
+
+    /**
+     * Whether the Save Message feature is enabled for this app. Delegates to the SDK feature flag
+     * ([CometChat.isSaveMessageEnabled]). The save/unsave action-sheet options and the Saved
+     * Messages view are gated on this.
+     */
+    fun isSaveMessageEnabled(): Boolean = CometChat.isSaveMessageEnabled()
+
+    /**
+     * Whether the Pin Conversation feature is enabled for this app. Delegates to the SDK feature
+     * flag ([CometChat.isPinConversationEnabled]). The pin/unpin conversation option is gated on this.
+     */
+    fun isPinConversationEnabled(): Boolean = CometChat.isPinConversationEnabled()
 
     /**
      * Gets the custom SessionSettingsBuilder if one was provided during initialization,
@@ -505,6 +538,11 @@ object CometChatUIKit {
             textMessage,
             object : CometChat.CallbackListener<TextMessage>() {
                 override fun onSuccess(message: TextMessage) {
+                    // The server subscribes the sender on every send but stamps the flag only on
+                    // fetched copies — the resolved send result arrives flagless. Stamp it here:
+                    // a reply also mirrors the flip onto its parent thread (Case 4), a root is
+                    // stamped for its own future thread (Case 2).
+                    CometChatThreadSubscription.applyOwnMessageSent(message)
                     // Emit SUCCESS event
                     CometChatEvents.emitMessageEvent(
                         CometChatMessageEvent.MessageSent(message, MessageStatus.SUCCESS)
@@ -558,10 +596,11 @@ object CometChatUIKit {
             mediaMessage,
             object : CometChat.CallbackListener<MediaMessage>() {
                 override fun onSuccess(message: MediaMessage) {
-                    android.util.Log.d(
-                        "CometChatUIKit",
-                        "sendMediaMessage SUCCESS: id=${message.id}, attachment=${message.attachment}, attachmentFileSize=${message.attachment?.fileSize}"
-                    )
+                    // The server subscribes the sender on every send but stamps the flag only on
+                    // fetched copies — the resolved send result arrives flagless. Stamp it here:
+                    // a reply also mirrors the flip onto its parent thread (Case 4), a root is
+                    // stamped for its own future thread (Case 2).
+                    CometChatThreadSubscription.applyOwnMessageSent(message)
                     // Emit SUCCESS event
                     CometChatEvents.emitMessageEvent(
                         CometChatMessageEvent.MessageSent(message, MessageStatus.SUCCESS)
@@ -612,6 +651,11 @@ object CometChatUIKit {
             customMessage,
             object : CometChat.CallbackListener<CustomMessage>() {
                 override fun onSuccess(message: CustomMessage) {
+                    // The server subscribes the sender on every send but stamps the flag only on
+                    // fetched copies — the resolved send result arrives flagless. Stamp it here:
+                    // a reply also mirrors the flip onto its parent thread (Case 4), a root is
+                    // stamped for its own future thread (Case 2).
+                    CometChatThreadSubscription.applyOwnMessageSent(message)
                     // Emit SUCCESS event
                     CometChatEvents.emitMessageEvent(
                         CometChatMessageEvent.MessageSent(message, MessageStatus.SUCCESS)

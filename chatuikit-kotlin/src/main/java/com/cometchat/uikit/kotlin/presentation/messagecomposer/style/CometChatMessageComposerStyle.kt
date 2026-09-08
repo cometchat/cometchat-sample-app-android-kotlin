@@ -48,6 +48,10 @@ data class CometChatMessageComposerStyle(
     val stickerIcon: Drawable? = null,
     @ColorInt val stickerIconTint: Int = 0,
 
+    // Sticker active state styling (filled icon + tint while the sticker keyboard is open)
+    val stickerActiveIcon: Drawable? = null,
+    @ColorInt val stickerActiveIconTint: Int = 0,
+
     // Send button styling
     val sendButtonActiveIcon: Drawable? = null,
     val sendButtonInactiveIcon: Drawable? = null,
@@ -235,6 +239,15 @@ data class CometChatMessageComposerStyle(
                     R.styleable.CometChatMessageComposer_cometchatMessageComposerStickerIconTint,
                     CometChatTheme.getIconTintSecondary(context)
                 ) ?: CometChatTheme.getIconTintSecondary(context),
+
+                // Sticker active state styling
+                stickerActiveIcon = typedArray?.getDrawable(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveStickerIcon
+                ),
+                stickerActiveIconTint = typedArray?.getColor(
+                    R.styleable.CometChatMessageComposer_cometchatMessageComposerActiveStickerIconTint,
+                    CometChatTheme.getPrimaryColor(context)
+                ) ?: CometChatTheme.getPrimaryColor(context),
 
                 // Send button styling
                 sendButtonActiveIcon = typedArray?.getDrawable(

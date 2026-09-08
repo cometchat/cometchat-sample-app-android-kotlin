@@ -72,6 +72,7 @@
     <string name="cometchat_action_item" translatable="true">操作项目</string>
     <string name="cometchat_try_again" translatable="true">重试</string>
     <string name="cometchat_something_went_wrong" translatable="true">出现了一些问题。</string>
+    <string name="cometchat_action_permission_denied" translatable="true">您没有执行此操作的权限。</string>
     <string name="cometchat_transfer_ownership" translatable="true">转移所有权</string>
     <string name="cometchat_add_members" translatable="true">添加成员</string>
     <string name="cometchat_owner" translatable="true">所有者</string>
@@ -250,4 +251,53 @@
     <string name="cometchat_notify_everyone_in_this_group">通知该群组中的每个人</string>
     <string name="cometchat_notify_all" translatable="true">所有</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization  -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">订阅讨论串</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">取消订阅讨论串</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">已订阅。此讨论串有新回复时将通知你。</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">已订阅。有新回复时将通知你。</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">已取消订阅。在你回复或被提及之前，通知将关闭。</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">已取消订阅。在你回复或被提及之前，通知将关闭。</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">更新失败，请重试。</string>
+    <string name="cometchat_thread_mute" translatable="true">取消订阅讨论串</string>
+    <string name="cometchat_thread_unmute" translatable="true">订阅讨论串</string>
+    <string name="cometchat_pin">置顶</string>
+    <string name="cometchat_unpin">取消置顶</string>
+    <string name="cometchat_unsave">取消保存</string>
+    <string name="cometchat_pinned">已置顶</string>
+    <string name="cometchat_saved">已保存</string>
+    <string name="cometchat_pin_message_confirm_title">置顶消息</string>
+    <string name="cometchat_pin_message_confirm_body">要将此消息置顶到此对话吗？</string>
+    <string name="cometchat_unpin_message_confirm_title">取消置顶消息</string>
+    <string name="cometchat_unpin_message_confirm_body">要取消置顶此消息吗？</string>
+    <string name="cometchat_save_message_confirm_title">保存消息</string>
+    <string name="cometchat_save_message_confirm_body">要保存此消息吗？</string>
+    <string name="cometchat_unsave_message_confirm_title">取消保存消息</string>
+    <string name="cometchat_unsave_message_confirm_body">要取消保存此消息吗？</string>
+    <string name="cometchat_pin_conversation">置顶对话</string>
+    <string name="cometchat_unpin_conversation">取消置顶对话</string>
+    <string name="cometchat_unpin_conversation_confirm_title">取消置顶对话</string>
+    <string name="cometchat_unpin_conversation_confirm_body">要取消置顶此对话吗？</string>
+    <string name="cometchat_pin_conversation_limit_reached">最多只能置顶 %1$d 个对话。请先取消置顶一个再置顶其他对话。</string>
+    <string name="cometchat_pin_limit_reached">最多只能置顶 %1$d 条消息。请先取消置顶一条再置顶其他消息。</string>
+    <string name="cometchat_save_limit_reached">最多可保存 %1$d 条消息。</string>
+    <string name="cometchat_pin_save_generic_error">出错了，请重试。</string>
+    <string name="cometchat_message_pinned">消息已置顶</string>
+    <string name="cometchat_message_unpinned">消息已取消置顶</string>
+    <string name="cometchat_message_saved">消息已保存</string>
+    <string name="cometchat_message_unsaved">消息已取消保存</string>
+    <string name="cometchat_no_pinned_messages">暂无置顶消息</string>
+    <string name="cometchat_no_pinned_messages_subtitle">置顶重要消息，方便查找。</string>
+    <string name="cometchat_no_saved_messages">暂无保存的消息</string>
+    <string name="cometchat_no_saved_messages_subtitle">保存消息，随时取用。</string>
+    <string name="cometchat_pinned_messages">置顶消息</string>
+    <string name="cometchat_saved_messages">保存的消息</string>
+    <string name="cometchat_unpin_message">取消置顶消息</string>
+    <string name="cometchat_message_option_more">更多</string>
+    <string name="cometchat_message_option_back">返回</string>
+    <string name="cometchat_message_type_icon">消息类型图标</string>
+    <string name="cometchat_pinned_messages_header">置顶消息</string>
+    <string name="cometchat_saved_messages_header">保存的消息</string>
+    <string name="cometchat_conversation_pinned">对话已置顶</string>
+    <string name="cometchat_conversation_unpinned">对话已取消置顶</string>
 </resources>

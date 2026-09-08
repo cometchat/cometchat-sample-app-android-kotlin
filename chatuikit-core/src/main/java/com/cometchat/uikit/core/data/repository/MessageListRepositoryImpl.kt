@@ -7,6 +7,7 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Conversation
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
+import com.cometchat.uikit.core.CometChatUIKit
 import com.cometchat.uikit.core.data.datasource.MessageListDataSource
 import com.cometchat.uikit.core.data.datasource.MessageListDataSourceImpl
 import com.cometchat.uikit.core.domain.model.SurroundingMessagesResult
@@ -40,13 +41,21 @@ class MessageListRepositoryImpl(
         userId = user.uid
         groupId = null
         
-        this.messagesRequestBuilder = messagesRequestBuilder ?: MessagesRequest.MessagesRequestBuilder()
+        this.messagesRequestBuilder = (messagesRequestBuilder ?: MessagesRequest.MessagesRequestBuilder()
             .setTypes(messagesTypes)
             .setCategories(messagesCategories)
             .setLimit(30)
             .hideReplies(true)
             .apply {
                 if (parentMessageId > -1) setParentMessageId(parentMessageId)
+            })
+            .apply {
+                // Opt in on EVERY fetch — main conversation and thread replies alike. The server
+                // stamps threadSubscribed on every message in a thread, not just the root, so each
+                // fetched bubble carries its own authoritative answer to "does the viewer follow this
+                // message's thread". This is the only authoritative source: a socket-delivered message
+                // never carries the flag.
+                if (CometChatUIKit.isThreadSubscriptionEnabled()) withThreadSubscribed(true)
             }
         
         messagesRequest = this.messagesRequestBuilder?.setUID(user.uid)?.build()
@@ -63,13 +72,21 @@ class MessageListRepositoryImpl(
         groupId = group.guid
         userId = null
         
-        this.messagesRequestBuilder = messagesRequestBuilder ?: MessagesRequest.MessagesRequestBuilder()
+        this.messagesRequestBuilder = (messagesRequestBuilder ?: MessagesRequest.MessagesRequestBuilder()
             .setTypes(messagesTypes)
             .setCategories(messagesCategories)
             .setLimit(30)
             .hideReplies(true)
             .apply {
                 if (parentMessageId > -1) setParentMessageId(parentMessageId)
+            })
+            .apply {
+                // Opt in on EVERY fetch — main conversation and thread replies alike. The server
+                // stamps threadSubscribed on every message in a thread, not just the root, so each
+                // fetched bubble carries its own authoritative answer to "does the viewer follow this
+                // message's thread". This is the only authoritative source: a socket-delivered message
+                // never carries the flag.
+                if (CometChatUIKit.isThreadSubscriptionEnabled()) withThreadSubscribed(true)
             }
         
         messagesRequest = this.messagesRequestBuilder?.setGUID(group.guid)?.build()

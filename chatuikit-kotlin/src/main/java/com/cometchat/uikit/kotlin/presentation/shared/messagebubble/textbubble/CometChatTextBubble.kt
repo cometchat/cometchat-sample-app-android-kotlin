@@ -16,6 +16,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
+import androidx.core.graphics.ColorUtils
 import androidx.core.widget.TextViewCompat
 import com.bumptech.glide.Glide
 import com.cometchat.chat.models.TextMessage
@@ -238,6 +239,7 @@ class CometChatTextBubble @JvmOverloads constructor(
 
             linkPreviewContainer.visibility = GONE
             editedTextView.visibility = if (message.editedAt == 0L) View.GONE else View.VISIBLE
+            // Pin & Save indicators live in the shared bubble footer (status info view), not here.
 
             val linkPreview = extractLinkPreview(message)
             if (linkPreview != null) {
@@ -277,6 +279,13 @@ class CometChatTextBubble @JvmOverloads constructor(
         messageTextView.visibility = View.GONE
 
         val currentStyle = style ?: return
+        // Code spans/blocks/blockquotes pick a light-on-dark ("outgoing") vs dark-on-light
+        // ("incoming") palette. Derive it from the resolved TEXT color rather than the alignment:
+        // the pinned-messages screen renders the user's own messages with the outgoing (white-text)
+        // style but LEFT alignment, so keying off alignment would put white text on a light code
+        // background (invisible). Light text ⇒ dark bubble ⇒ outgoing palette.
+        val outgoingLook = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT ||
+            isLightColor(currentStyle.textColor)
         MarkdownViewRenderer.render(
             markdownContentContainer,
             markdown,
@@ -285,10 +294,17 @@ class CometChatTextBubble @JvmOverloads constructor(
                 textColor = currentStyle.textColor,
                 linkColor = currentStyle.textLinkColor,
                 textAppearance = currentStyle.textAppearance,
-                isOutgoing = currentAlignment == UIKitConstants.MessageBubbleAlignment.RIGHT
+                isOutgoing = outgoingLook
             )
         )
     }
+
+    /**
+     * Whether [color] is visually light (so code/quote backgrounds should use the light-on-dark
+     * "outgoing" palette to stay readable). Returns false for the unset sentinel (0).
+     */
+    private fun isLightColor(@ColorInt color: Int): Boolean =
+        color != 0 && ColorUtils.calculateLuminance(color) > 0.5
 
     private data class LinkPreviewData(
         val title: String,

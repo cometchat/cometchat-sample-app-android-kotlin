@@ -206,6 +206,7 @@ class KotlinApplication : Application() {
             .setAuthKey(authKey)
             .subscribePresenceForAllUsers()
             .setEnableCalling(true)
+            .setEnableThreadSubscription(true)
             .build()
         CometChatUIKit.init(this, settings, object : CometChat.CallbackListener<String>() {
             override fun onSuccess(result: String?) {
@@ -282,7 +283,17 @@ class KotlinApplication : Application() {
                 val intent = Intent(context, MessagesActivity::class.java).apply {
                     user?.let { putExtra(getString(R.string.app_user), it.toJson().toString()) }
                     group?.let { putExtra(getString(R.string.app_group), Gson().toJson(it)) }
-                    message?.let { putExtra(getString(R.string.app_go_to_message), it.id.toString()) }
+                    message?.let { tapped ->
+                        val parentId = tapped.parentMessageId.toLong()
+                        if (parentId > 0) {
+                            // A thread reply does not live in the main list — MessagesActivity opens
+                            // the conversation, then stacks the thread and highlights the reply there.
+                            putExtra(MessagesActivity.EXTRA_NOTIFICATION_PARENT_ID, parentId)
+                            putExtra(MessagesActivity.EXTRA_NOTIFICATION_REPLY_ID, tapped.id.toLong())
+                        } else {
+                            putExtra("goToMessageId", tapped.id.toLong())
+                        }
+                    }
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)

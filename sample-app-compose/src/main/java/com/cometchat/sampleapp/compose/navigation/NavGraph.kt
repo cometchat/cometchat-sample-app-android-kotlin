@@ -1,11 +1,26 @@
 package com.cometchat.sampleapp.compose.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.cometchat.chat.constants.CometChatConstants
+import com.cometchat.chat.core.CometChat
+import com.cometchat.chat.exceptions.CometChatException
+import com.cometchat.chat.models.Group
+import com.cometchat.chat.models.User
 import com.cometchat.sampleapp.compose.ui.calls.CallDetailsScreen
 import com.cometchat.sampleapp.compose.ui.calls.toJson
 import com.cometchat.sampleapp.compose.ui.conversations.getGroup
@@ -24,6 +39,9 @@ import com.cometchat.sampleapp.compose.ui.newchat.NewChatScreen
 import com.cometchat.sampleapp.compose.ui.search.SearchScreen
 import com.cometchat.sampleapp.compose.ui.splash.SplashScreen
 import com.cometchat.sampleapp.compose.ui.users.UserDetailsScreen
+import com.cometchat.uikit.compose.presentation.pinnedmessages.ui.CometChatPinnedMessages
+import com.cometchat.uikit.compose.presentation.savedmessages.ui.CometChatSavedMessages
+import com.cometchat.uikit.compose.theme.CometChatTheme
 
 /**
  * Main navigation graph for the CometChat Sample App.
@@ -177,6 +195,10 @@ fun AppNavGraph(
                 onSearchClick = {
                     // Navigate to SearchScreen for global search
                     navController.navigate(SearchRoute(userId = null, groupId = null))
+                },
+                onSavedMessagesClick = {
+                    // Navigate to the user-level saved messages screen
+                    navController.navigate(SavedMessagesRoute)
                 }
             )
         }
@@ -203,6 +225,9 @@ fun AppNavGraph(
                 onChatHistoryClick = { user ->
                     navController.navigate(ChatHistoryRoute(userId = user.uid))
                 },
+                onPinnedMessagesClick = { userId, groupId ->
+                    navController.navigate(PinnedMessagesRoute(userId = userId, groupId = groupId))
+                },
                 onNewChatClick = { user ->
                     // Fresh AI conversation — navigate to Messages with no parentMessageId
                     navController.navigate(MessagesRoute(userId = user.uid, groupId = null)) {
@@ -222,6 +247,9 @@ fun AppNavGraph(
                 onMessageClick = { user ->
                     // Navigate to messages with this user
                     navController.navigate(MessagesRoute(userId = user.uid, groupId = null))
+                },
+                onNavigateToPinnedMessages = {
+                    navController.navigate(PinnedMessagesRoute(userId = route.userId))
                 }
             )
         }
@@ -252,8 +280,97 @@ fun AppNavGraph(
                 onNavigateToBannedMembers = { groupId ->
                     // Navigate to BannedMembersScreen (full-screen)
                     navController.navigate(BannedMembersRoute(groupId = groupId))
+                },
+                onNavigateToPinnedMessages = {
+                    navController.navigate(PinnedMessagesRoute(groupId = route.groupId))
                 }
             )
+        }
+
+        // Pinned Messages Screen - a conversation's pinned messages
+        composable<PinnedMessagesRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<PinnedMessagesRoute>()
+            var user by remember { mutableStateOf<User?>(null) }
+            var group by remember { mutableStateOf<Group?>(null) }
+
+            // This app passes ids between destinations, so fetch the entity here.
+            LaunchedEffect(route.userId, route.groupId) {
+                route.userId?.let { userId ->
+                    CometChat.getUser(userId, object : CometChat.CallbackListener<User>() {
+                        override fun onSuccess(fetchedUser: User) {
+                            user = fetchedUser
+                        }
+
+                        override fun onError(e: CometChatException) {}
+                    })
+                }
+                route.groupId?.let { groupId ->
+                    CometChat.getGroup(groupId, object : CometChat.CallbackListener<Group>() {
+                        override fun onSuccess(fetchedGroup: Group) {
+                            group = fetchedGroup
+                        }
+
+                        override fun onError(e: CometChatException) {}
+                    })
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CometChatTheme.colorScheme.backgroundColor1)
+            ) {
+                CometChatPinnedMessages(
+                    modifier = Modifier.statusBarsPadding(),
+                    user = user,
+                    group = group,
+                    onBackClick = { navController.popBackStack() },
+                    onMessageClick = { message ->
+                        // Open the conversation scrolled to the tapped message, replacing the
+                        // messages entry when opened from a conversation.
+                        navController.navigate(
+                            MessagesRoute(
+                                userId = user?.uid,
+                                groupId = group?.guid,
+                                messageId = message.id.toLong()
+                            )
+                        ) {
+                            popUpTo<MessagesRoute> { inclusive = true }
+                        }
+                    }
+                )
+            }
+        }
+
+        // Saved Messages Screen - the current user's saved messages across all conversations
+        composable<SavedMessagesRoute> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CometChatTheme.colorScheme.backgroundColor1)
+            ) {
+                CometChatSavedMessages(
+                    modifier = Modifier.statusBarsPadding(),
+                    onBackClick = { navController.popBackStack() },
+                    onMessageClick = { message ->
+                        // Open the conversation the saved message belongs to, scrolled to it.
+                        if (message.receiverType == CometChatConstants.RECEIVER_TYPE_GROUP) {
+                            val group = message.receiver as? Group
+                            navController.navigate(
+                                MessagesRoute(groupId = group?.guid, messageId = message.id.toLong())
+                            )
+                        } else {
+                            // 1-1: the peer is the other party — the receiver if I sent it, else the sender.
+                            val myUid = CometChat.getLoggedInUser()?.uid
+                            val peer =
+                                if (message.sender?.uid == myUid) message.receiver as? User else message.sender
+                            navController.navigate(
+                                MessagesRoute(userId = peer?.uid, messageId = message.id.toLong())
+                            )
+                        }
+                    }
+                )
+            }
         }
 
         // Add Members Screen - Add members to a group

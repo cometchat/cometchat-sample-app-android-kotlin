@@ -1,6 +1,7 @@
 package com.cometchat.uikit.compose.presentation.conversations.ui
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -40,6 +41,8 @@ import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatEm
 import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatErrorState
 import com.cometchat.uikit.compose.presentation.shared.defaultstates.CometChatLoadingState
 import com.cometchat.uikit.compose.presentation.shared.dialog.CometChatDialog
+import com.cometchat.uikit.compose.presentation.shared.dialog.CometChatDialogStyle
+import com.cometchat.uikit.compose.theme.CometChatTheme
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatMentionsFormatter
 import com.cometchat.uikit.compose.presentation.shared.formatters.CometChatTextFormatter
 import com.cometchat.uikit.compose.presentation.shared.interfaces.DateTimeFormatterCallback
@@ -213,6 +216,10 @@ fun CometChatConversations(
     // Local state for delete dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var conversationToDelete by remember { mutableStateOf<Conversation?>(null) }
+
+    // Local state for the unpin-conversation confirmation (only unpin confirms; pin is immediate).
+    var showUnpinDialog by remember { mutableStateOf(false) }
+    var conversationToUnpin by remember { mutableStateOf<Conversation?>(null) }
     
     // Handle state callbacks
     LaunchedEffect(uiState) {
@@ -362,6 +369,24 @@ fun CometChatConversations(
                             conversationToDelete = conversation
                             showDeleteDialog = true
                         },
+                        onPinToggle = { conversation ->
+                            if (conversation.isPinned) {
+                                // Only unpin confirms; pin is immediate.
+                                conversationToUnpin = conversation
+                                showUnpinDialog = true
+                            } else {
+                                viewModel.pinConversation(
+                                    conversation,
+                                    onError = { e ->
+                                        Toast.makeText(
+                                            context,
+                                            conversationPinErrorMessage(context, e),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                )
+                            }
+                        },
                         onLoadMore = { viewModel.fetchConversations() },
                         scrollToTopEvent = viewModel.scrollToTopEvent
                     )
@@ -389,6 +414,43 @@ fun CometChatConversations(
                 conversationToDelete = null
             }
         )
+    }
+
+    // Unpin confirmation dialog — only unpin confirms (pin is immediate). Non-destructive:
+    // primary (purple) positive button, no icon.
+    if (showUnpinDialog && conversationToUnpin != null) {
+        CometChatDialog(
+            title = context.getString(R.string.cometchat_unpin_conversation_confirm_title),
+            message = context.getString(R.string.cometchat_unpin_conversation_confirm_body),
+            positiveButtonText = context.getString(R.string.cometchat_unpin),
+            negativeButtonText = context.getString(R.string.cometchat_cancel),
+            hideIcon = true,
+            style = CometChatDialogStyle.default(
+                positiveButtonBackgroundColor = CometChatTheme.colorScheme.primary
+            ),
+            onPositiveClick = {
+                viewModel.unpinConversation(conversationToUnpin!!)
+                showUnpinDialog = false
+                conversationToUnpin = null
+            },
+            onNegativeClick = {
+                showUnpinDialog = false
+                conversationToUnpin = null
+            }
+        )
+    }
+}
+
+/**
+ * User-facing message for a failed conversation PIN. When the pinned-conversation limit is hit,
+ * shows the cap (read from errorParams, never hard-coded); otherwise a generic error.
+ */
+private fun conversationPinErrorMessage(context: Context, e: CometChatException?): String {
+    val limit = (e?.errorParams?.get("limit") as? Number)?.toInt()
+    return if (limit != null) {
+        context.getString(R.string.cometchat_pin_conversation_limit_reached, limit)
+    } else {
+        context.getString(R.string.cometchat_something_went_wrong)
     }
 }
 

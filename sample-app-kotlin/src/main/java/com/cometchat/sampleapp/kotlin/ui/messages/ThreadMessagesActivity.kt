@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.cometchat.chat.constants.CometChatConstants
 import com.cometchat.chat.core.CometChat
 import com.cometchat.chat.exceptions.CometChatException
@@ -15,6 +17,10 @@ import com.cometchat.chat.models.BaseMessage
 import com.cometchat.chat.models.Group
 import com.cometchat.chat.models.User
 import com.cometchat.sampleapp.kotlin.databinding.ActivityThreadMessagesBinding
+import com.cometchat.uikit.core.events.CometChatEvents
+import com.cometchat.uikit.core.events.CometChatThreadEvent
+import com.cometchat.uikit.core.utils.CometChatThreadSubscription
+import kotlinx.coroutines.launch
 
 /**
  * Activity for displaying thread replies to a message.
@@ -190,6 +196,7 @@ class ThreadMessagesActivity : AppCompatActivity() {
         setupThreadHeader()
         setupMessageList()
         setupMessageComposer()
+        parentMessage?.let { setupThreadSubscriptionBell(it) }
     }
 
     /**
@@ -198,6 +205,9 @@ class ThreadMessagesActivity : AppCompatActivity() {
     private fun setupThreadHeader() {
         binding.threadHeader.apply {
             parentMessage?.let { setParentMessage(it) }
+            // Thread subscription bell lives in the title bar (Figma / Flutter parity); hide the
+            // kit header's own control so only one bell shows.
+            setThreadSubscriptionVisibility(View.GONE)
         }
     }
 
@@ -206,8 +216,8 @@ class ThreadMessagesActivity : AppCompatActivity() {
      */
     private fun setupMessageList() {
         binding.messageList.apply {
-            // Set parent message ID for thread context (must be before setUser/setGroup)
-            setParentMessageId(parentMessageId)
+            // Set the full parent message for thread context (must be before setUser/setGroup)
+            parentMessage?.let { setParentMessage(it) }
 
             // Navigate to specific message if provided (e.g., from search)
             if (goToMessageId > 0) {
@@ -239,5 +249,63 @@ class ThreadMessagesActivity : AppCompatActivity() {
             setHideAttachmentButton(false)
             setHideVoiceRecordingButton(false)
         }
+    }
+
+    /**
+     * Wires the thread-subscription (mute/unmute) bell in the title bar — the Figma /
+     * cross-platform (Flutter) placement. Renders only when the feature gate is on and the
+     * thread has a valid root. Optimistic flip on tap with a single in-flight guard; reverts
+     * with a toast on error; stays in sync with changes from any surface via the kit event bus.
+     */
+    private fun setupThreadSubscriptionBell(parentMessage: BaseMessage) {
+        val bell = binding.ivThreadSubscription
+        val rootId = parentMessage.id
+        if (!CometChatThreadSubscription.isAvailableForThread(parentMessage)) {
+            bell.visibility = View.GONE
+            return
+        }
+        bell.visibility = View.VISIBLE
+        // State is read off the parent message — the server's per-viewer flag — never from a cache.
+        renderThreadSubscriptionBell(parentMessage.isThreadSubscribed())
+
+        bell.setOnClickListener {
+            // The controller owns the debounce, in-flight lock, optimistic publish and revert;
+            // the optimistic flip reaches this bell through the bus collector below.
+            CometChatThreadSubscription.toggle(parentMessage, parentMessage.isThreadSubscribed()) { result ->
+                val toast = when (result) {
+                    is CometChatThreadSubscription.ToggleResult.Success -> getString(
+                        if (result.subscribed) com.cometchat.uikit.kotlin.R.string.cometchat_thread_subscribed_toast
+                        else com.cometchat.uikit.kotlin.R.string.cometchat_thread_unsubscribed_toast
+                    )
+
+                    is CometChatThreadSubscription.ToggleResult.Failure ->
+                        getString(com.cometchat.uikit.kotlin.R.string.cometchat_thread_subscription_failed)
+                }
+                Toast.makeText(this@ThreadMessagesActivity, toast, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        lifecycleScope.launch {
+            CometChatEvents.threadEvents.collect { event ->
+                if (event is CometChatThreadEvent.SubscriptionChanged &&
+                    event.parentMessageId == rootId
+                ) {
+                    // Stamp the held parent too, so a direct read stays coherent.
+                    parentMessage.setThreadSubscribed(event.subscribed)
+                    renderThreadSubscriptionBell(event.subscribed)
+                }
+            }
+        }
+    }
+
+    private fun renderThreadSubscriptionBell(subscribed: Boolean) {
+        binding.ivThreadSubscription.setImageResource(
+            if (subscribed) com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications
+            else com.cometchat.uikit.core.R.drawable.cometchat_ic_notifications_off
+        )
+        binding.ivThreadSubscription.contentDescription = getString(
+            if (subscribed) com.cometchat.uikit.kotlin.R.string.cometchat_thread_mute
+            else com.cometchat.uikit.kotlin.R.string.cometchat_thread_unmute
+        )
     }
 }

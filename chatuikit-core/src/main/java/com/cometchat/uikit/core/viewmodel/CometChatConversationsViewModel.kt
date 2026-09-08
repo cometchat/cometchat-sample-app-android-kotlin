@@ -229,7 +229,7 @@ open class CometChatConversationsViewModel(
             refreshConversationListUseCase(freshRequest)
                 .onSuccess { fetched ->
                     // Deduplicate before publishing — the list is keyed by conversationId in the
-                    // UI, and a repeat would crash Compose on a duplicate key (ENG-35566). The
+                    // UI, and a repeat would crash Compose on a duplicate key . The
                     // paginated fetch in fetchConversations() already does the same.
                     val conversations = fetched.distinctBy { it.conversationId }
                     _conversations.value = conversations
@@ -266,6 +266,114 @@ open class CometChatConversationsViewModel(
      * Deletes a conversation.
      * Updates delete state throughout the operation.
      */
+    /**
+     * Pins a conversation for the current user. On success the returned conversation (carrying
+     * pinnedAt/pinnedBy) is moved to the top of the list, matching the backend ordering.
+     */
+    fun pinConversation(
+        conversation: Conversation,
+        onSuccess: (() -> Unit)? = null,
+        onError: ((com.cometchat.chat.exceptions.CometChatException?) -> Unit)? = null
+    ) {
+        val with = conversationWith(conversation) ?: return
+        com.cometchat.chat.core.CometChat.pinConversation(
+            with,
+            conversation.conversationType,
+            object : com.cometchat.chat.core.CometChat.CallbackListener<Conversation>() {
+                override fun onSuccess(updated: Conversation) {
+                    applyConversationPinned(updated)
+                    onSuccess?.invoke()
+                }
+
+                override fun onError(e: com.cometchat.chat.exceptions.CometChatException?) {
+                    onError?.invoke(e)
+                }
+            }
+        )
+    }
+
+    /**
+     * Unpins a conversation for the current user. On success the conversation moves to the top of
+     * the unpinned section — leaving it in place could strand an unpinned conversation inside the
+     * pinned block at the head of the list.
+     */
+    fun unpinConversation(conversation: Conversation, onSuccess: (() -> Unit)? = null) {
+        val with = conversationWith(conversation) ?: return
+        com.cometchat.chat.core.CometChat.unpinConversation(
+            with,
+            conversation.conversationType,
+            object : com.cometchat.chat.core.CometChat.CallbackListener<Conversation>() {
+                override fun onSuccess(updated: Conversation) {
+                    applyConversationUnpinned(updated)
+                    onSuccess?.invoke()
+                }
+
+                override fun onError(e: com.cometchat.chat.exceptions.CometChatException?) {}
+            }
+        )
+    }
+
+    /**
+     * Applies a pin to the list: the conversation moves to the top, carrying the pin state from
+     * [updated] onto the loaded instance (see [withPinState] for why the response object is not
+     * swapped in wholesale). A conversation this list hasn't loaded is inserted as delivered —
+     * a pin elsewhere must surface it at the top here.
+     *
+     * Shared by the REST success path and the SDK [ConversationListener] events, so the acting
+     * device (which receives both — the SDK self-echoes conversation pin with no suppression
+     * registry) applies them idempotently: remove-by-id + insert lands in the same position with
+     * the same state the second time.
+     */
+    private fun applyConversationPinned(updated: Conversation) {
+        val list = _conversations.value.toMutableList()
+        val idx = list.indexOfFirst { it.conversationId == updated.conversationId }
+        val pinned = if (idx >= 0) withPinState(list.removeAt(idx), updated) else updated
+        list.add(0, pinned)
+        _conversations.value = list
+    }
+
+    /**
+     * Applies an unpin to the list: the conversation moves to the top of the unpinned section
+     * (leaving it in place would strand it inside the pinned block). Unknown conversations are
+     * ignored — there is nothing to reposition. Shares [applyConversationPinned]'s idempotency
+     * contract.
+     */
+    private fun applyConversationUnpinned(updated: Conversation) {
+        val list = _conversations.value.toMutableList()
+        val idx = list.indexOfFirst { it.conversationId == updated.conversationId }
+        if (idx >= 0) {
+            val unpinned = withPinState(list.removeAt(idx), updated)
+            list.add(firstUnpinnedIndex(list), unpinned)
+            _conversations.value = list
+        }
+    }
+
+    /**
+     * Copies the pin attributes from a pin/unpin API response onto the conversation already in the
+     * list, returning a fresh instance so the list emits an identity change.
+     *
+     * The SDK builds the response conversation with Conversation.fromJSON() over that endpoint's
+     * payload alone, so every field the endpoint omits comes back at its default rather than at the
+     * value the fetched conversation carried. Swapping the response object into the list therefore
+     * silently drops state — most visibly Group.hasJoined, which defaults to false and makes an
+     * unpinned group open with the composer replaced by the "no longer a member" notice.
+     */
+    private fun withPinState(existing: Conversation, response: Conversation): Conversation {
+        return existing.clone().apply {
+            pinnedAt = response.pinnedAt
+            pinnedBy = response.pinnedBy
+        }
+    }
+
+    /** The peer uid (1-1) or group guid (group) that identifies the conversation on the pin API. */
+    private fun conversationWith(conversation: Conversation): String? {
+        return when (val entity = conversation.conversationWith) {
+            is com.cometchat.chat.models.User -> entity.uid
+            is com.cometchat.chat.models.Group -> entity.guid
+            else -> null
+        }
+    }
+
     fun deleteConversation(conversation: Conversation) {
         viewModelScope.launch {
             _deleteState.value = DeleteState.InProgress
@@ -479,6 +587,20 @@ open class CometChatConversationsViewModel(
         listenersTag = "ConversationList_${System.currentTimeMillis()}"
         
         listenersTag?.let { tag ->
+            // Conversation pin/unpin — from this device (SDK self-echo on REST success), and from
+            // a second device / another surface once the backend emits the realtime frame. Routed
+            // through the same apply helpers as this VM's own pin/unpin calls, which are
+            // idempotent, so the acting device receiving both is harmless.
+            CometChat.addConversationListener(tag, object : CometChat.ConversationListener() {
+                override fun onConversationPinned(conversation: Conversation) {
+                    applyConversationPinned(conversation)
+                }
+
+                override fun onConversationUnpinned(conversation: Conversation) {
+                    applyConversationUnpinned(conversation)
+                }
+            })
+
             // Message listener for real-time message updates
             CometChat.addMessageListener(tag, object : CometChat.MessageListener() {
                 override fun onTextMessageReceived(message: TextMessage) {
@@ -837,6 +959,7 @@ open class CometChatConversationsViewModel(
      */
     private fun removeListeners() {
         listenersTag?.let { tag ->
+            CometChat.removeConversationListener(tag)
             CometChat.removeMessageListener(tag)
             CometChat.removeUserListener(tag)
             CometChat.removeGroupListener(tag)
@@ -1403,9 +1526,19 @@ open class CometChatConversationsViewModel(
     }
     
     /**
+     * Insertion point for a conversation surfacing on new activity: the first index past the
+     * pinned block at the head of the list. Pinned conversations always stay above realtime
+     * reordering, matching the backend's pinned-first fetch ordering.
+     */
+    private fun firstUnpinnedIndex(list: List<Conversation>): Int {
+        val index = list.indexOfFirst { !it.isPinned }
+        return if (index >= 0) index else list.size
+    }
+
+    /**
      * Updates a conversation in the list with proper handling of last message and unread count.
      * Matches the Java implementation's update() method logic.
-     * 
+     *
      * @param conversation The conversation to update
      * @param isActionMessage Whether this is an action message (group action)
      */
@@ -1418,6 +1551,7 @@ open class CometChatConversationsViewModel(
             lastMessage?.sender?.uid?.equals(loggedInUser.uid, ignoreCase = true) == true
 
         var applied = false
+        var scrollToTop = false
 
         // Atomic read-modify-write. The SDK invokes the message listeners straight off the
         // WebSocket thread — these callbacks are NOT wrapped in viewModelScope.launch — so a
@@ -1441,6 +1575,11 @@ open class CometChatConversationsViewModel(
                     // Preserve the conversationWith from old conversation (it has more complete data)
                     updatedConversation.conversationWith = oldConversation.conversationWith
 
+                    // CometChatHelper.getConversationFromMessage() never carries per-user pin state,
+                    // so keep it from the copy already in the list or the pin would be lost on update.
+                    updatedConversation.pinnedAt = oldConversation.pinnedAt
+                    updatedConversation.pinnedBy = oldConversation.pinnedBy
+
                     updatedConversation.unreadMessageCount = when {
                         // Action messages and our own messages never bump the unread count
                         isActionMessage || isSentByMe -> oldConversation.unreadMessageCount
@@ -1451,10 +1590,18 @@ open class CometChatConversationsViewModel(
                     }
 
                     applied = true
-                    // Move updated conversation to top
+                    // A pinned conversation updating in place shouldn't yank the list back to
+                    // the top, so only unpinned updates request a scroll.
+                    scrollToTop = !updatedConversation.isPinned
+
+                    // Pinned conversations keep their slot (the pinned block mirrors the
+                    // backend's pinnedAt ordering); unpinned ones surface at the top of the
+                    // unpinned section so new activity never displaces the pinned block.
                     currentList.toMutableList().apply {
                         removeAt(existingIndex)
-                        add(0, updatedConversation)
+                        val targetIndex =
+                            if (updatedConversation.isPinned) existingIndex else firstUnpinnedIndex(this)
+                        add(targetIndex, updatedConversation)
                     }
                 }
 
@@ -1468,9 +1615,11 @@ open class CometChatConversationsViewModel(
                     }
 
                     applied = true
-                    buildList {
-                        add(updatedConversation)
-                        addAll(currentList)
+                    scrollToTop = true
+
+                    // New conversations enter below any pinned block, at the top of the unpinned section.
+                    currentList.toMutableList().apply {
+                        add(firstUnpinnedIndex(this), updatedConversation)
                     }
                 }
 
@@ -1485,9 +1634,11 @@ open class CometChatConversationsViewModel(
 
         _uiState.value = UIState.Content(newList)
 
-        // Emit scroll to top event when a conversation reaches the top
-        viewModelScope.launch {
-            _scrollToTopEvent.emit(Unit)
+        // Emit scroll to top event only when the conversation actually surfaced
+        if (scrollToTop) {
+            viewModelScope.launch {
+                _scrollToTopEvent.emit(Unit)
+            }
         }
     }
     

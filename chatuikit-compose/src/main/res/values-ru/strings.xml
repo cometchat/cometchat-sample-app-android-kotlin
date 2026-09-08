@@ -74,6 +74,7 @@
     <string name="cometchat_action_item" translatable="true">элемент_действия</string>
     <string name="cometchat_try_again" translatable="true">Повторить попытку</string>
     <string name="cometchat_something_went_wrong" translatable="true">Что-то пошло не так.</string>
+    <string name="cometchat_action_permission_denied" translatable="true">У вас нет прав для выполнения этого действия.</string>
     <string name="cometchat_transfer_ownership" translatable="true">Передать права владения</string>
     <string name="cometchat_add_members" translatable="true">Добавить участников</string>
     <string name="cometchat_owner" translatable="true">Владелец</string>
@@ -255,4 +256,49 @@
     <string name="cometchat_notify_everyone_in_this_group">Уведомить всех в этой группе</string>
     <string name="cometchat_notify_all" translatable="true">все</string>
 
+    <!-- Thread subscription (follow/unfollow) — P5 localization  -->
+    <string name="cometchat_thread_subscription_subscribe" translatable="true">Подписаться на тему</string>
+    <string name="cometchat_thread_subscription_unsubscribe" translatable="true">Отписаться от темы</string>
+    <string name="cometchat_thread_subscribed_toast" translatable="true">Вы подписались. Вы будете получать уведомления о новых ответах в этой теме.</string>
+    <string name="cometchat_thread_subscribed_toast_no_replies" translatable="true">Вы подписались. Вы будете получать уведомления о новых ответах.</string>
+    <string name="cometchat_thread_unsubscribed_toast" translatable="true">Вы отписались. Уведомления отключены, пока вы не ответите или вас не упомянут.</string>
+    <string name="cometchat_thread_unsubscribed_toast_no_replies" translatable="true">Вы отписались. Уведомления отключены, пока вы не ответите или вас не упомянут.</string>
+    <string name="cometchat_thread_subscription_failed" translatable="true">Не удалось обновить. Повторите попытку.</string>
+    <string name="cometchat_thread_mute" translatable="true">Отписаться от темы</string>
+    <string name="cometchat_thread_unmute" translatable="true">Подписаться на тему</string>
+    <string name="cometchat_pin">Закрепить</string>
+    <string name="cometchat_unpin">Открепить</string>
+    <string name="cometchat_unsave">Убрать из сохранённого</string>
+    <string name="cometchat_pinned">Закреплено</string>
+    <string name="cometchat_saved">Сохранено</string>
+    <string name="cometchat_pin_message_confirm_title">Закрепить сообщение</string>
+    <string name="cometchat_pin_message_confirm_body">Закрепить это сообщение в этой беседе?</string>
+    <string name="cometchat_unpin_message_confirm_title">Открепить сообщение</string>
+    <string name="cometchat_unpin_message_confirm_body">Открепить это сообщение?</string>
+    <string name="cometchat_save_message_confirm_title">Сохранить сообщение</string>
+    <string name="cometchat_save_message_confirm_body">Сохранить это сообщение?</string>
+    <string name="cometchat_unsave_message_confirm_title">Убрать сообщение из сохранённого</string>
+    <string name="cometchat_unsave_message_confirm_body">Убрать это сообщение из сохранённого?</string>
+    <string name="cometchat_pin_conversation">Закрепить беседу</string>
+    <string name="cometchat_unpin_conversation">Открепить беседу</string>
+    <string name="cometchat_unpin_conversation_confirm_title">Открепить беседу</string>
+    <string name="cometchat_unpin_conversation_confirm_body">Открепить эту беседу?</string>
+    <string name="cometchat_pin_conversation_limit_reached">Можно закрепить не более %1$d чатов. Открепите один, чтобы закрепить другой.</string>
+    <string name="cometchat_pin_limit_reached">Можно закрепить не более %1$d сообщений. Открепите одно, чтобы закрепить другое.</string>
+    <string name="cometchat_save_limit_reached">Можно сохранить не более %1$d сообщений.</string>
+    <string name="cometchat_pin_save_generic_error">Что-то пошло не так. Повторите попытку.</string>
+    <string name="cometchat_message_pinned">Сообщение закреплено</string>
+    <string name="cometchat_message_unpinned">Сообщение откреплено</string>
+    <string name="cometchat_message_saved">Сообщение сохранено</string>
+    <string name="cometchat_message_unsaved">Сообщение убрано из сохранённого</string>
+    <string name="cometchat_no_pinned_messages">Пока нет закреплённых сообщений</string>
+    <string name="cometchat_no_pinned_messages_subtitle">Закрепляйте важные сообщения, чтобы их было легко найти.</string>
+    <string name="cometchat_no_saved_messages">Пока нет сохранённых сообщений</string>
+    <string name="cometchat_no_saved_messages_subtitle">Сохраняйте сообщения, чтобы они всегда были под рукой.</string>
+    <string name="cometchat_pinned_messages">Закреплённые сообщения</string>
+    <string name="cometchat_saved_messages">Сохранённые сообщения</string>
+    <string name="cometchat_unpin_message">Открепить сообщение</string>
+    <string name="cometchat_message_option_more">Ещё</string>
+    <string name="cometchat_message_option_back">Назад</string>
+    <string name="cometchat_message_type_icon">Значок типа сообщения</string>
 </resources>

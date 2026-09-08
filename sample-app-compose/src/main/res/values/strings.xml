@@ -49,6 +49,7 @@
     
     <!-- User Menu -->
     <string name="app_create_conversation">Create conversation</string>
+    <string name="app_saved_messages">Saved messages</string>
     <string name="app_logout">Logout</string>
     
     <!-- Home Screen -->
@@ -69,8 +70,8 @@
     <!-- Messages Screen -->
     <string name="thread">Thread</string>
     <string name="messages">Messages</string>
-    <string name="app_block_user_unable_to_send_message" translatable="true">You can\'t send message to this group because you\'re no longer a member.</string>
-    <string name="unblock_message" translatable="true">Can\'t send a message as the user is blocked</string>
+    <string name="app_block_user_unable_to_send_message" translatable="true">You are no longer a member of this group</string>
+    <string name="unblock_message" translatable="true">You have blocked this user</string>
     <string name="app_unblock_user" translatable="true">Unblock User</string>
     
     <!-- Group Details -->

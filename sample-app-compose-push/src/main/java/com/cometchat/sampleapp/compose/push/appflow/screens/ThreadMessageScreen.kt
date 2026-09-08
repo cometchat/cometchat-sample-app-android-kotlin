@@ -41,7 +41,9 @@ import com.cometchat.uikit.compose.R
 import com.cometchat.uikit.compose.presentation.messagecomposer.ui.CometChatMessageComposer
 import com.cometchat.uikit.compose.presentation.messagelist.ui.CometChatMessageList
 import com.cometchat.uikit.compose.presentation.threadheader.ui.CometChatThreadHeader
+import com.cometchat.uikit.compose.presentation.threadheader.ui.ThreadSubscriptionBell
 import com.cometchat.uikit.compose.theme.CometChatTheme
+import com.cometchat.sampleapp.compose.push.appflow.components.BlockedUserBanner
 import com.cometchat.sampleapp.compose.push.appflow.viewmodels.ThreadMessageViewModel
 
 /**
@@ -50,6 +52,7 @@ import com.cometchat.sampleapp.compose.push.appflow.viewmodels.ThreadMessageView
  * @param parentMessage The parent message of the thread
  * @param user The user for one-on-one conversations
  * @param group The group for group conversations
+ * @param goToMessageId Optional reply to scroll to and highlight on open
  * @param onBackPress Callback when back is pressed
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,10 +61,12 @@ fun ThreadMessageScreen(
     parentMessage: BaseMessage,
     user: User? = null,
     group: Group? = null,
+    goToMessageId: Long? = null,
     onBackPress: () -> Unit
 ) {
     val viewModel: ThreadMessageViewModel = viewModel()
     val isBlocked by viewModel.isBlocked.collectAsState()
+    val isUnblocking by viewModel.isLoading.collectAsState()
     
     // Initialize ViewModel
     LaunchedEffect(user) {
@@ -105,6 +110,12 @@ fun ThreadMessageScreen(
                         )
                     }
                 },
+                actions = {
+                    // Thread-subscription bell lives in the title bar (Figma / Flutter parity), not
+                    // beside the reply count. The bell hides itself outside a group and when the
+                    // feature is off, so it needs no gate here.
+                    ThreadSubscriptionBell(parentMessage = parentMessage)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backgroundColor
                 )
@@ -126,22 +137,17 @@ fun ThreadMessageScreen(
                 .navigationBarsPadding()
                 .imePadding()
         ) {
-            // Blocked user banner
-            if (isBlocked) {
-                BlockedUserBanner(
-                    onUnblockClick = { viewModel.unblockUser() }
-                )
-            }
-            
             // Thread Header - displays parent message with reply count
             CometChatThreadHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = maxThreadHeaderHeight),
                 parentMessage = parentMessage,
+                // The bell lives in the title bar above, so hide the reply-bar bell (only one shows).
+                hideThreadSubscription = true,
                 maxHeight = maxThreadHeaderHeight
             )
-            
+
             // Thread Message List
             CometChatMessageList(
                 modifier = Modifier
@@ -149,9 +155,20 @@ fun ThreadMessageScreen(
                     .weight(1f),
                 user = user,
                 group = group,
-                parentMessageId = parentMessage.id
+                // The whole parent, not just its id: the list stamps realtime replies from it.
+                parentMessage = parentMessage,
+                goToMessageId = goToMessageId
             )
-            
+
+            // Unblock notice (at bottom, replacing composer)
+            if (isBlocked) {
+                BlockedUserBanner(
+                    isUnblocking = isUnblocking,
+                    onUnblockClick = { viewModel.unblockUser() },
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
             // Message Composer (hidden when blocked)
             if (!isBlocked) {
                 CometChatMessageComposer(
@@ -179,46 +196,5 @@ fun ThreadMessageScreen(
                 )
             }
         }
-    }
-}
-
-/**
- * Banner shown when user is blocked.
- */
-@Composable
-private fun BlockedUserBanner(
-    onUnblockClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(CometChatTheme.colorScheme.warningColor.copy(alpha = 0.2f))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.cometchat_ic_info),
-                contentDescription = null,
-                tint = CometChatTheme.colorScheme.warningColor,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = "You have blocked this user",
-                style = CometChatTheme.typography.bodyRegular,
-                color = CometChatTheme.colorScheme.textColorPrimary
-            )
-        }
-        
-        Text(
-            text = "Unblock",
-            style = CometChatTheme.typography.bodyMedium,
-            color = CometChatTheme.colorScheme.primary,
-            modifier = Modifier.clickable { onUnblockClick() }
-        )
     }
 }

@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Empty-state saved (bookmark) art. Uses its own light-gray fill; not tinted. -->
+    <path
+        android:fillColor="#D5D7DA"
+        android:pathData="M60 87.3075L40.1538 95.8262C37.1413 97.1146 34.2792 96.8679 31.5675 95.0863C28.8558 93.3046 27.5 90.7983 27.5 87.5675V26.5387C27.5 24.0129 28.375 21.875 30.125 20.125C31.875 18.375 34.0129 17.5 36.5387 17.5H83.4613C85.9871 17.5 88.125 18.375 89.875 20.125C91.625 21.875 92.5 24.0129 92.5 26.5387V87.5675C92.5 90.7983 91.1442 93.3046 88.4325 95.0863C85.7208 96.8679 82.8588 97.1146 79.8463 95.8262L60 87.3075Z" />
+</vector>

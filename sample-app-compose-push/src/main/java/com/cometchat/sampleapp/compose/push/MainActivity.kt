@@ -74,8 +74,40 @@ class MainActivity : ComponentActivity() {
             _shouldNavigateToNotifications.value = true
             _notificationDeepLinkTrigger.value++
         }
+
+        /** A tapped chat notification, waiting for the NavHost to be ready to route it. */
+        private val _pendingChatDeepLink =
+            androidx.compose.runtime.mutableStateOf<ChatDeepLink?>(null)
+        val pendingChatDeepLink: ChatDeepLink? get() = _pendingChatDeepLink.value
+
+        /** Compose-observable trigger: incremented each time a chat deep link arrives. */
+        private val _chatDeepLinkTrigger = androidx.compose.runtime.mutableStateOf(0)
+        val chatDeepLinkTrigger: Int get() = _chatDeepLinkTrigger.value
+
+        /** Returns the pending link and clears it, so it is routed exactly once. */
+        fun consumeChatDeepLink(): ChatDeepLink? {
+            val link = _pendingChatDeepLink.value
+            _pendingChatDeepLink.value = null
+            return link
+        }
+
+        internal fun triggerChatDeepLink(link: ChatDeepLink) {
+            _pendingChatDeepLink.value = link
+            _chatDeepLinkTrigger.value++
+        }
     }
-        
+
+    /**
+     * A tapped chat notification. [parentMessageId] is greater than zero when the tapped message is
+     * a thread reply, in which case the thread opens instead of the main conversation.
+     */
+    data class ChatDeepLink(
+        val userId: String?,
+        val groupId: String?,
+        val messageId: Long,
+        val parentMessageId: Long
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -95,6 +127,26 @@ class MainActivity : ComponentActivity() {
     
     private fun handleNotificationIntent(intent: Intent?) {
         val notificationType = intent?.getStringExtra(com.cometchat.sampleapp.compose.push.utils.AppConstants.FCMConstants.NOTIFICATION_TYPE)
+        if (notificationType == com.cometchat.sampleapp.compose.push.utils.AppConstants.FCMConstants.NOTIFICATION_TYPE_MESSAGE) {
+            val keys = com.cometchat.sampleapp.compose.push.utils.AppConstants.FCMConstants
+            val userId = intent.getStringExtra(keys.KEY_UID)
+            val groupId = intent.getStringExtra(keys.KEY_GUID)
+            if (userId == null && groupId == null) {
+                Log.w(TAG, "Chat notification tapped without a conversation id — ignoring")
+                return
+            }
+            // Parked rather than navigated: the NavHost may still be on Splash, and on a cold start
+            // the SDK is not initialized yet. AppNavigation routes it once it can.
+            triggerChatDeepLink(
+                ChatDeepLink(
+                    userId = userId,
+                    groupId = groupId,
+                    messageId = intent.getLongExtra(keys.KEY_MESSAGE_ID, 0L),
+                    parentMessageId = intent.getLongExtra(keys.KEY_PARENT_MESSAGE_ID, 0L)
+                )
+            )
+            return
+        }
         if (notificationType == "business_messaging") {
             val feedItemId = intent.getStringExtra("notification_feed_item_id")
             val pushNotificationId = intent.getStringExtra("push_notification_id")
@@ -114,9 +166,45 @@ class MainActivity : ComponentActivity() {
             
             // Navigate to Notifications tab when app opens
             triggerNotificationNavigation()
+            return
         }
+        parkDeepLinkFromPushPayload(intent)
     }
-    
+
+    /**
+     * Routes a tap on a chat notification that Firebase displayed itself.
+     *
+     * The push carries a `notification` block, so when the app is backgrounded FCM posts the
+     * notification directly: [com.cometchat.sampleapp.compose.push.fcm.AppFCMService.onMessageReceived]
+     * never runs, `CometChatPushNotifications.handlePushNotification` never runs, and the tap
+     * listener in [ComposeApplication] that would have set our own extras never fires. What the
+     * launcher Intent does carry is the raw push data, so the conversation and thread are read from
+     * those keys.
+     */
+    private fun parkDeepLinkFromPushPayload(intent: Intent?) {
+        if (intent?.getStringExtra("type") != "chat") return
+
+        val isGroup = intent.getStringExtra("receiverType") == "group"
+        val sender = intent.getStringExtra("sender")
+        val receiver = intent.getStringExtra("receiver")
+        // In a 1-1 push the receiver is the logged-in user, so the conversation is the sender.
+        val userId = if (isGroup) null else sender
+        val groupId = if (isGroup) receiver else null
+        if (userId == null && groupId == null) {
+            Log.w(TAG, "Chat push tapped without a conversation id — ignoring")
+            return
+        }
+
+        triggerChatDeepLink(
+            ChatDeepLink(
+                userId = userId,
+                groupId = groupId,
+                messageId = intent.getStringExtra("tag")?.toLongOrNull() ?: 0L,
+                // Present only for a thread reply — routes to the thread instead of the conversation.
+                parentMessageId = intent.getStringExtra("parentId")?.toLongOrNull() ?: 0L
+            )
+        )
+    }
 }
 
 /**

@@ -12,5 +12,10 @@
         <attr name="cometchatThreadHeaderReplyCountTextColor" format="color" />
         <attr name="cometchatThreadHeaderReplyCountTextAppearance" format="reference" />
         <attr name="cometchatThreadHeaderStyle" format="reference" />
+        <attr name="cometchatThreadSubscriptionVisibility">
+            <enum name="visible" value="0" />
+            <enum name="invisible" value="4" />
+            <enum name="gone" value="8" />
+        </attr>
     </declare-styleable>
 </resources>

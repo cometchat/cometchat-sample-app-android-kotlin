@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,6 +94,10 @@ fun CometChatMeetCallBubble(
         extractMeetCallData(message)
     }
 
+    // Read outside the remember above: pin/save flip without the id changing, so caching them
+    // with the extracted call data would freeze the indicators at their first-composition state.
+    val notDeleted = message.deletedAt == 0L
+
     CometChatMeetCallBubble(
         title = meetCallData.title,
         subtitle = meetCallData.subtitle,
@@ -101,7 +106,9 @@ fun CometChatMeetCallBubble(
         modifier = modifier,
         style = style,
         onJoinClick = onJoinClick,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        isPinned = message.isPinned && notDeleted,
+        isSaved = message.isSaved && notDeleted
     )
 }
 
@@ -125,7 +132,9 @@ fun CometChatMeetCallBubble(
     modifier: Modifier = Modifier,
     style: CometChatMeetCallBubbleStyle = CometChatMeetCallBubbleStyle.default(),
     onJoinClick: ((String) -> Unit)? = null,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    isPinned: Boolean = false,
+    isSaved: Boolean = false
 ) {
     MeetCallBubbleContent(
         title = title,
@@ -135,7 +144,9 @@ fun CometChatMeetCallBubble(
         modifier = modifier,
         style = style,
         onJoinClick = onJoinClick,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        isPinned = isPinned,
+        isSaved = isSaved
     )
 }
 
@@ -149,7 +160,9 @@ private fun MeetCallBubbleContent(
     modifier: Modifier,
     style: CometChatMeetCallBubbleStyle,
     onJoinClick: ((String) -> Unit)?,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    isPinned: Boolean = false,
+    isSaved: Boolean = false
 ) {
     val context = LocalContext.current
     val shape = RoundedCornerShape(style.cornerRadius)
@@ -226,6 +239,38 @@ private fun MeetCallBubbleContent(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                }
+            }
+
+            // Pin/save indicators sit at the END of the bubble, on the timestamp's line. The meet
+            // bubble draws its own timestamp and hides the shared status-info footer, so without
+            // these it would be the one bubble that never shows a pin or save state. Same glyphs
+            // and 16dp size as that footer, tinted with the timestamp (subtitle) colour.
+            if (isPinned || isSaved) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
+                        .padding(start = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isPinned) {
+                        Icon(
+                            painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_pin_filled),
+                            contentDescription = stringResource(id = R.string.cometchat_pinned),
+                            tint = style.subtitleTextColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    if (isSaved) {
+                        Icon(
+                            painter = painterResource(id = com.cometchat.uikit.core.R.drawable.cometchat_ic_saved_filled),
+                            contentDescription = stringResource(id = R.string.cometchat_saved),
+                            tint = style.subtitleTextColor,
+                            modifier = Modifier
+                                .padding(start = if (isPinned) 4.dp else 0.dp)
+                                .size(16.dp)
+                        )
+                    }
                 }
             }
         }

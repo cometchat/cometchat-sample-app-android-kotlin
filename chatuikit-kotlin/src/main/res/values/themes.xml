@@ -372,7 +372,13 @@
     </style>
 
     <style name="CometChatOutgoingMessageBubbleReceiptStyle" parent="CometChatMessageReceiptStyle">
-
+        <!-- The outgoing bubble's timestamp is white (CometChatOutgoingMessageDateStyle), so the
+             neutral receipt ticks follow it and the footer reads as one unit. Without these the
+             ticks inherit the default neutral tint and sit grey on the purple bubble. Read keeps
+             its own highlight colour, which carries meaning. -->
+        <item name="cometchatMessageReceiptWaitIconTint">?attr/cometchatColorWhite</item>
+        <item name="cometchatMessageReceiptSentIconTint">?attr/cometchatColorWhite</item>
+        <item name="cometchatMessageReceiptDeliveredIconTint">?attr/cometchatColorWhite</item>
     </style>
 
     <style name="CometChatIncomingMessageAvatarStyle" parent="CometChatAvatarStyle">
